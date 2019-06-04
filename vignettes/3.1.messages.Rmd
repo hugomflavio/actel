@@ -1,10 +1,10 @@
 ---
-title: "Errors and messages"
+title: "3.1) Errors and messages"
 author: "Hugo Flávio"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Errors and messages}
+  %\VignetteIndexEntry{3.1) Errors and messages}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
