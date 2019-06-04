@@ -1,0 +1,173 @@
+#' Split detections by tag
+#'
+#' Splits the detections' table by tags and selects only detections from target tags
+#' 
+#' @inheritParams actel
+#' @inheritParams assembleEfficiency
+#' @inheritParams assembleOutput
+#' @param detections A dataframe with all the detections. Supplied by loadDetections.
+#' 
+#' @return A list of detections for each tag.
+#' 
+#' @keywords internal
+#' 
+splitDetections <- function(detections, bio, spatial, exclude.tags, silent = FALSE) {
+  appendTo("debug", "Starting splitDetections.")
+  my.list <- split(detections, detections$Transmitter)
+  my.list <- excludeTags(input = my.list, exclude.tags = exclude.tags, silent = silent)
+  
+  tags <- noDetectionsCheck(input = my.list, bio = bio)
+  dupSignalsCheck(input = my.list, bio = bio, tag.list = tags$list)
+  
+  appendTo("debug", "Debug: Creating 'trimmed.list'.")
+  bio$Transmitter <- names(my.list)[tags[["link"]]]
+  trimmed.list <- my.list[tags[["link"]]]
+  non.empty <- unlist(lapply(trimmed.list, function(x) length(x) != 0))
+  trimmed.list <- trimmed.list[non.empty]
+  if (!silent){
+    collectStrays(input = my.list[-na.exclude(tags[["link"]])])
+    storeStrays()
+  }
+
+  for (i in names(trimmed.list)) {
+    trimmed.list[[i]] <- assignArrays(input = trimmed.list[[i]], spatial = spatial)
+  }
+
+  appendTo("debug", "Terminating splitDetections.")
+  return(list(trimmed.list = trimmed.list, bio = bio))
+}
+
+#' Collect summary information on the tags detected but that are not part of the study.
+#'
+#' @param input list of detections for the tags to be excluded.
+#' 
+#' @keywords internal
+#' 
+collectStrays <- function(input, restart = FALSE){
+  appendTo("debug", "Starting collectStrays.")
+  if (restart && file.exists("temp_strays.csv")) {
+    file.remove("temp_strays.csv")
+  }
+  if (length(input) > 0) {
+    recipient <- data.frame(Transmitter = names(input), 
+      N.detections = unlist(lapply(input,nrow)), 
+      First.detection = unlist(lapply(input, function(x) as.character(head(x$Timestamp,1)))),
+      Last.detection = unlist(lapply(input, function(x) as.character(tail(x$Timestamp,1)))),
+      Receivers = unlist(lapply(input, function(x) paste(unique(x$Receiver), collapse = ", ")))
+      )
+    write.table(recipient, file = "temp_strays.csv", sep = ",", append = file.exists("temp_strays.csv"), row.names = FALSE, col.names = !file.exists("temp_strays.csv"))
+  }
+  appendTo("debug", "Terminating collectStrays.")
+}
+
+#' Store summary information on the stray tags detected in a permanent file.
+#'
+#' @keywords internal
+#'
+storeStrays <- function(){
+  appendTo("debug", "Starting storeStrays.")
+  if (file.exists("temp_strays.csv")) {
+    if (file.exists(newname <- "stray_tags.csv")) {
+      continue <- TRUE
+      index <- 1
+      while (continue) {
+        if (file.exists(newname <- paste("stray_tags", index, "csv", sep = "."))) {
+          index <- index + 1
+        } else {
+          continue <- FALSE
+        }
+      }
+    }
+    file.rename("temp_strays.csv", newname)
+  }
+  appendTo("debug", "Terminating storeStrays.")
+
+}
+
+#' Collect summary information on the tags detected but that are not part of the study.
+#'
+#' @param input list of detections
+#' @inheritParams actel
+#'
+#' @keywords internal
+#' 
+excludeTags <- function(input, exclude.tags, silent){
+  appendTo("debug", "Starting excludeTags.")  
+  if (length(exclude.tags) != 0) {
+    link <- match(exclude.tags, names(input))
+    if (!silent){
+      appendTo(c("Screen", "Report", "Warning"), paste("M: Excluding tag(s) ", paste(exclude.tags, collapse = ", "), " from the analysis per used command (detections removed: ", paste(unlist(lapply(input[link], nrow)), collapse = ", "), ", respectively).", sep = ""))
+      collectStrays(input = input[link], restart = TRUE)
+    }
+    appendTo("debug", "Terminating excludeTags.")  
+    return(input[-link])
+  }
+  appendTo("debug", "Terminating excludeTags.")  
+  return(input)
+}
+
+#' Check if there are detections matching the target tags.
+#'
+#' @param input list of detections
+#' @inheritParams assembleOutput
+#' 
+#' @keywords internal
+#' 
+noDetectionsCheck <- function(input, bio){
+  tag.list <- vector()
+  for (i in seq_len(length(input))) tag.list[i] <- tail(unlist(strsplit(names(input)[i], "-")), 1)
+  link <- match(bio$Signal, tag.list)
+  appendTo("debug", "Starting noDetectionsCheck.")  
+  if (all(is.na(link))) {
+    appendTo(c("Screen", "Report"), "M: No detections were found in the input data which matched the target signals.")
+    emergencyBreak()
+    stop("Stopping analysis due to absence of valid detections.\n")
+  }
+  appendTo("debug", "Terminating noDetectionsCheck.")  
+  return(list(list = tag.list,link = link))
+}
+
+#' Check if there are duplicated signals in the detected tags.
+#'
+#' @param input list of detections
+#' @inheritParams assembleOutput
+#' 
+#' @keywords internal
+#' 
+dupSignalsCheck <- function(input, bio, tag.list){
+  appendTo("debug", "Starting dupSignalsCheck.")  
+  failsafe <- match(tag.list, bio$Signal)
+  if (any(table(failsafe) > 1)) {
+    appendTo(c("Screen", "Report"), "Error: One or more signals match more than one tag in the detections! Showing relevant signals/tags.")
+    t1 <- cbind(names(input), bio$Signal[failsafe])
+    t2 <- t1[complete.cases(t1), ]
+    t3 <- table(t2[, 1], t2[, 2])
+    rm(t1, t2)
+    dupsig <- data.frame(Signal = colnames(t3)[apply(t3, 2, sum) > 1], Tags = NA, stringsAsFactors = FALSE)
+    for (i in seq_len(nrow(dupsig))) dupsig$Tags[i] <- paste(row.names(t3)[t3[, dupsig$Signal[i]] == 1], collapse = ", ")
+    rm(t3)
+    for (i in seq_len(nrow(dupsig))) appendTo(c("Screen", "Report"), paste("   Signal ", dupsig$Signal[i], " was found on tags ", dupsig$Tags[i], ".", sep = ""))
+    emergencyBreak()
+    stop("Fatal exception found. Stopping analysis.\n")
+  }
+  appendTo("debug", "Terminating dupSignalsCheck.")  
+}
+
+#' Match the detection's receiver to its respective array.
+#'
+#' @param input list of detections
+#' @inheritParams assembleEfficiency
+#' 
+#' @keywords internal
+#' 
+assignArrays <- function(input, spatial){
+  appendTo("debug", "Starting assignArrays.")  
+  to.combine <- list()
+  for (j in spatial$receiver.columns) {
+    to.combine[[length(to.combine) + 1]] <- match(input$Receiver, spatial$stations[, j])
+  }
+  rm(j)
+  input$Array <- spatial$stations$Array[combine(to.combine)]
+  appendTo("debug", "Terminating assignArrays.")  
+  return(input)
+}

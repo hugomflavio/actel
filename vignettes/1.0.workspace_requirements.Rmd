@@ -1,0 +1,118 @@
+---
+title: "1) Preparing your data"
+author: "Hugo Flávio"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{1) Preparing your data}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+## Index
+
+1. [**Preparing your data**](1.0.workspace_requirements.html)
+    1. [Structuring the study area](1.1.study_area.html)
+1. [Running actel](2.0.running_analysis.html)
+    <!-- 1. [Installing a TeX distribution](2.1.installing_tex.html) -->
+1. [What is actel doing?](3.0.the_sorting_process.html)
+    1. [Errors and messages](3.1.messages.html)
+1. [Inspecting the results](4.inspecting_results.html)
+1. [Refining the results](5.refining_results.html)
+
+## Preparing your data
+
+Actel requires that you organise your input files in a specific fashion. Critically, you should have a file named **biometrics.csv** and one named **spatial.csv** (We will look into the file contents in detail soon). Finally, you also need a **detections** directory, containing all your detection files in *.csv*  format. To create a blank workspace ready to be used, simply run `createWorkspace()`, and a template will be generated automatically in your current work directory.
+
+## Biometrics file
+
+Your biometrics file should look similar to this:
+
+```{r, echo=FALSE, results='asis'}
+biometrics <- data.frame(Release.date=c("2018-02-01 10:05:00","2018-02-01 10:10:00","2018-02-01 10:15:00")
+    ,Serial.nr=c("12340001","A12-3456-1001","19340301")
+    ,Signal=c(1,1001,301)
+    ,Length.mm=c(150,160,170)
+    ,Weight.g=c(40,60,50)
+    ,Group=c("Wild","Hatchery","Wild")
+    ,Release.site=c("Site A","Site A","Site B")
+    ,...=c("...","...","...")
+    )
+knitr::kable(biometrics)
+```
+
+Although the column order is not important, it is essential that this table contains two columns:
+
+Release.date
+  :  Corresponds to the date and time when the fish was released, and **must** be typed in **yyyy-mm-dd hh:mm:ss** format
+
+Signal 
+  : Corresponds to the code emitted by the tag that was implanted on the fish. If you are unsure as to what exactly is the signal being emitted by your tag, you can ask the tag manufacturer more about the differences between code spaces and signals.
+
+The *Group* and *Release.site* columns are also important but, if you only have one group or one release site, actel can generate these columns for you. If this happens, you will receive a message:
+
+```
+M: No Release site has been indicated in the biometrics file. Creating a 'Release.site' column to avoid script failure. Filling with 'unspecified'.
+M: No 'Group' column found in the biometrics file. Assigning all fish to group 'All'.
+```
+
+You can then append to this biometrics table as many columns with information relevant to your study as you want. Importantly, if the biometrics table has columns with keywords such as *length*, *weight* or *mass*, graphics showing the distribution of these parameters per fish group will be drawn for you.
+
+## Spatial file
+
+Your spatial file should look similar to this:
+
+```{r, echo=FALSE, results='asis'}
+  spatial <- data.frame(Station.Name=c("River East","River West","Estuary","Site A","Site B")
+    ,Receiver=c("123001","123002","331",NA,NA)
+    ,Latitude=c(8.411,8.521,8.402,8.442,8.442)
+    ,Longitude=c(40.411,40.521,40.402,40.442,40.442)
+    ,Array=c("River1","River1","River2","River1","River2")
+    ,Type=c("Hydrophone","Hydrophone","Hydrophone","Release","Release")
+    )
+knitr::kable(spatial)
+```
+
+In this file you should include both your acoustic receivers (i.e. hydrophones) and your release sites. It is essential that this table has the following columns:
+
+Receiver
+  : The serial number of the hydrophone placed at this position. If you had more than one hydrophone at the same position (e.g. because the first one was lost), simply create a new *Receiver* column and add the serial number of the new hydrophone there. Add as many *Receiver* columns as you need to fit in all the hydrophones you used at a given station.
+
+Array
+  : If you are listing a hydrophone: The array to which the hydrophone belongs. Arrays from a given study section must differ only in number. I.e. arrays **must** have this format: *section#*.
+  : If you are listing a release site: The first array that the fish is expected to cross after being released.
+
+Type
+  : The nature of the item you are listing. You **must** choose between "Hydrophone" or "Release".
+
+**Note:**
+  
+  1. The release sites must have **exactly** the same names in the biometrics table and in the spatial table. If there is a mismatch, actel will stop so you may correct this.
+  
+  1. If the spatial table contains release site information, but the biometrics table does not, release site information will be discarded and the following warning is issued:
+    
+```
+W: At least one release site has been indicated in the spatial file, but no release sites were specified in the biometrics file.
+   Discarding release site information to avoid script failure. Please doublecheck your data.
+```
+
+**[Click here to learn more about how to organise your study area in an actel-friendly way.](1.1.study_area.html)**
+
+## Detections
+
+Including your detections is the easiest part. Copy the *.csv* files offloaded from your hydrophones to the *detections* folder that was created by the *createWorkspace()* function and actel will know they are to be imported. Right now actel can upload files generated from VEMCO and THELMA manufactured hydrophones. If you have an hydrophone from a different manufacturer, or if you are using one of the supported manufacturers and get the warning displayed below, please to contact us so we can solve the issue.
+
+```
+W: File 'filename' does not match to any of the supported hydrophone file formats! If your file corresponds to a hydrophone log and actel did not recognize it, please contact the developer team: teamcontact
+```
+
+Now that you know how to organise your workspace, [let's get the analysis going!](2.0.running_analysis.html)
+
+[Back to top.](#)

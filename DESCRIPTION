@@ -1,0 +1,29 @@
+Package: actel
+Title: Acoustic Telemetry Data Sorting
+Version: 0.0.0.9000
+Authors@R: person("Hugo", "Flávio", role = c("aut", "cre"), email = "hdmfla@aqua.dtu.dk")
+Description: Designed for studies where fish tagged with acoustic tags are expected
+    to migrate linearly through a pre-defined set of receiver arrays. Actel combines the
+    advantages of automatic sorting for tags that follow an expected behaviour with the
+    possibility for user intervention on tags that deviate from that behaviour. Actel allows
+    you to run your analysis in a systematic way, and makes it easy to compare results
+    from different studies.
+License: GPL-3
+Encoding: UTF-8
+LazyData: true
+RoxygenNote: 6.1.1
+Imports: 
+    readr,
+    ggplot2,
+    reshape2,
+    xtable,
+    fs,
+    knitr,
+    rmarkdown
+Suggests: 
+    raster,
+    gdistance,
+    sp,
+    tools,
+    rgdal
+VignetteBuilder: knitr
