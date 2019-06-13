@@ -10,7 +10,7 @@
 #' 
 #' @keywords internal
 #' 
-groupMovements <- function(detections.list, bio, spatial, speed.method, maximum.time, dist.mat, invalid.dist) {
+groupMovements <- function(detections.list, bio, spatial, speed.method, maximum.time, tz.study.area, dist.mat, invalid.dist) {
   appendTo("debug", "Starting groupMovements.")
   movements <- list()
   round.points <- roundDown(seq(from = length(detections.list)/10, to = length(detections.list), length.out = 10), to = 1)
@@ -68,6 +68,8 @@ groupMovements <- function(detections.list, bio, spatial, speed.method, maximum.
       
       upstreamCheck(i = i, recipient = recipient, bio = bio, spatial = spatial)
       
+      recipient[, "First time"] <- as.POSIXct(recipient[, "First time"], tz = tz.study.area)
+      recipient[, "Last time"] <- as.POSIXct(recipient[, "Last time"], tz = tz.study.area)
       if (nrow(recipient) >= 1) {
         if (!invalid.dist)
           movements[[length(movements) + 1]] <- movementSpeeds(movements = recipient, 
@@ -134,7 +136,14 @@ upstreamCheck <- function(i, recipient, bio, spatial) {
         appendTo("UD", decision)
         unknown.input = FALSE
         check = TRUE
+        reprint = FALSE
         while (check) {
+          if (reprint) {
+            cat(paste("\n   Movement table for fish ", i, ":\n", sep =""))
+            rownames(recipient) <- 1:nrow(recipient)
+            print(recipient)
+            cat("\n")
+          }
           row.line <- suppressWarnings(as.numeric(readline("Which movement event would you like to remove? ")))
           appendTo("UD", row.line)
           if (is.na(row.line)) {
@@ -150,14 +159,16 @@ upstreamCheck <- function(i, recipient, bio, spatial) {
               appendTo("Screen", paste("Invalid row, please choose a number between 1 and ",nrow(recipient),", or leave blank to abort.", sep = ""))
             } else {
               recipient <- recipient[-row.line, ]
-              if (nrow(recipient) > 1){
+              if (nrow(recipient) >= 1){
                 decision <- readline("Do you want to remove more movement events?(y/N) ")
+                appendTo("UD", decision)
               } else {
                 appendTo(c("Screen","Report"), paste("M: All movement events for fish ",i," were deleted by user command. Excluding it from further analysis.", sep = ""))
                 decision <- "N"
               }
               if (decision == "Y" | decision == "y") {
                 check = TRUE
+                reprint = TRUE
               } else {
                 check = FALSE
               }
@@ -177,9 +188,9 @@ upstreamCheck <- function(i, recipient, bio, spatial) {
 
 #' Removes discarded events
 #' 
-#' Refine the movement events based on the actel results. 
+#' Simplify the movement events based on the actel results. 
 #'
-#' @param fish The transmitter to be refined
+#' @param fish The transmitter to be refined. If left empty, all fish present in the movements will be simplified.
 #' @inheritParams actel
 #' @inheritParams assembleOutput
 #' 
@@ -187,18 +198,28 @@ upstreamCheck <- function(i, recipient, bio, spatial) {
 #' 
 #' @export
 #' 
-refineMovements <- function(fish, sections, status.df, movements){
-  the.row <- match(fish,status.df$Transmitter)
-  for (i in sections) {
-    section.start <- status.df[the.row, paste("Arrived", i, sep = ".")]
-    section.end <- status.df[the.row, paste("Left", i, sep = ".")]
-    move.rows <- grep(i,movements$Array)
-    if (is.na(section.start)){
-      movements <- movements[-move.rows,]
-    } else {
-      if (any(check <- movements[move.rows,"First time"] < section.start | movements[move.rows, "Last time"] > section.end)) {
-        movements <- movements[-move.rows[check],]
+simplifyMovements <- function(fish = NULL, movements, status.df, sections){
+  if (is.null(fish))
+    fish <- names(movements)
+  for (i in fish) {
+    the.row <- grep(i, status.df$Transmitter)
+    for (j in sections) {
+      the.arrival <- grep(paste("Arrived", j, sep = "."), colnames(status.df))
+      the.departure <- grep(paste("Left", j, sep = "."), colnames(status.df))
+      if (is.na(status.df[the.row, the.arrival] && any(grepl(j, movements[[i]][, "Array"]))))
+        movements[[i]] <- movements[[i]][-grep(j, movements[[i]][, "Array"]),]
+      else {
+        link <- grepl(j, movements[[i]][,"Array"]) & ( movements[[i]][,"First time"] < status.df[the.row,the.arrival] | movements[[i]][,"Last time"] > status.df[the.row,the.departure])
+        if (any(link)) {
+          actel:::appendTo("debug", paste("Removing", sum(link), j, "movement event(s) from fish", i, "."))
+          movements[[i]] <- movements[[i]][!link,]
+        }
+        rm(link)
       }
+    }
+    if (nrow(movements[[i]]) == 0) {
+      movements <- movements[!grepl(i, names(movements))]
+      actel:::appendTo("debug", paste("All movement events were removed for fish", i, ". Removing fish from simple movements", sep = ""))
     }
   }
   return(movements)

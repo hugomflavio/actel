@@ -7,7 +7,7 @@
 printBiometrics(bio)
 }
 \value{
-LaTeX string to be included in .printLatex
+string to be included in printRmd
 }
 \description{
 Searches for columns containing biometric data and prints graphics per fish group

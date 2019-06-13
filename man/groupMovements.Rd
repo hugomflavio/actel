@@ -5,7 +5,7 @@
 \title{Group movements}
 \usage{
 groupMovements(detections.list, bio, spatial, speed.method, maximum.time,
-  dist.mat, invalid.dist)
+  tz.study.area, dist.mat, invalid.dist)
 }
 \arguments{
 \item{detections.list}{A list of the detections split by each target tag, created by splitDetections.}
@@ -15,6 +15,8 @@ groupMovements(detections.list, bio, spatial, speed.method, maximum.time,
 \item{spatial}{A list of the spatial objects, created by assembleSpatial.}
 
 \item{maximum.time}{The number of minutes that must pass between detections for a new event to be created.}
+
+\item{tz.study.area}{The timezone of the study area. Necessary to conver the ALS time data, which is in UTC.}
 
 \item{dist.mat}{A matrix of the distances between the deployed ALS.}
 

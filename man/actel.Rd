@@ -11,7 +11,7 @@ actel(path = NULL, sections, success.arrays, minimum.detections = 2,
   "first to first"), if.last.skip.section = TRUE, tz.study.area,
   start.timestamp = NULL, end.timestamp = NULL, report = TRUE,
   redraw = TRUE, override = NULL, exclude.tags = NULL,
-  debug = FALSE, cautious.assignment = TRUE)
+  debug = FALSE, cautious.assignment = TRUE, replicate = NULL)
 }
 \arguments{
 \item{path}{Path to the folder containing the data. If the R session is already running in the target folder, path may be left as NA}
@@ -43,6 +43,8 @@ actel(path = NULL, sections, success.arrays, minimum.detections = 2,
 \item{debug}{If TRUE, temporary files are not deleted at the end of the analysis. Defaults to FALSE.}
 
 \item{cautious.assignment}{If TRUE, actel avoids assigning events with one detection as first and/or last events of a section.}
+
+\item{replicate}{The Standard.Name of the stations to use as a replicate of the last array to estimate last detection efficiency.}
 }
 \value{
 A list containing 1) the detections used during the analysis, 2) the movement events, 3) the status dataframe, 4) the survival overview per group, 5) the progression through the study area, 6) the ALS array/sections' efficiency, 7) the list of spatial objects used during the analysis.

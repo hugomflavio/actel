@@ -8,7 +8,7 @@ speedReleaseToFirst(fish, status.df, movements, dist.mat,
   invalid.dist = FALSE, silent = TRUE)
 }
 \arguments{
-\item{fish}{The transmitter to be refined}
+\item{fish}{The transmitter to be refined. If left empty, all fish present in the movements will be simplified.}
 
 \item{movements}{A list of movements for each target tag, created by groupMovements.}
 

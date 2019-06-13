@@ -2,14 +2,14 @@
 % Please edit documentation in R/printFunctions.R
 \name{printEfficiency}
 \alias{printEfficiency}
-\title{Print efficiency tables}
+\title{Print efficiency fragment}
 \usage{
 printEfficiency(efficiency)
 }
 \arguments{
-\item{efficiency}{A list containing the intersection and interarray efficiency. Supplied by assembleEfficiency.}
+\item{efficiency}{A list containing the efficiency. Supplied by assembleEfficiency.}
 }
 \description{
-Prints the ALS intersection and interarray efficiency in LaTeX format for inclusion in printLaTeX.
+Prints the ALS inter-array efficiency for inclusion in printRmd.
 }
 \keyword{internal}

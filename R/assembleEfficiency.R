@@ -11,242 +11,264 @@
 #' 
 #' @keywords internal
 #' 
-assembleEfficiency <- function(sections, spatial, detections.list, movements, minimum.detections) {
-  appendTo("debug", "Calculating efficiency.")
-  if( length(sections) > 1) {
-    intersection <- interSection(sections = sections, movements = movements, minimum.detections = minimum.detections)
-  } else {
-    appendTo("Screen","M: Skipping inter-section efficiency calculations as there are is only one section.")
-    intersection <- "Skipped"    
+assembleEfficiency <- function(sections, spatial, detections.list, movements, status.df, minimum.detections, replicate) {
+  appendTo("debug", "Starting assembleEfficiency.")
+  temp <- efficiencyMatrix(spatial = spatial, movements = movements, minimum.detections = minimum.detections)
+  mymatrix <- includeMissing(x = temp, status.df = status.df)
+  link <- sapply(status.df$Signal, grep, rownames(mymatrix))
+  mymatrix <- mymatrix[link, ]  
+
+  recipient <- split(mymatrix, status.df$Release.site)
+  if (length(unique(spatial$release.sites$Array)) > 1) {
+    for(i in names(recipient)){
+      the.col <- which(grepl(spatial$release.sites$Array[spatial$release.sites$Station.Name == i], colnames(recipient[[i]])))
+      recipient[[i]] <- recipient[[i]][,c(1, the.col:ncol(recipient[[i]]))]
+    }
   }
-  if (length(unique(spatial$stations$Array)) > 1) {
-    interarray <- interArray(spatial = spatial, movements = movements, minimum.detections = minimum.detections)
+
+# I was here, about to get the CJS to run for every element of recipient
+  if (!is.null(replicate)) {
+    get.estimate = TRUE
+    last.array <- tryCatch(lastMatrix(spatial = spatial, detections.list = detections.list, replicate = replicate),
+      error=function(e) {cat("Error in lastMatrix(): "); message(e); cat("\nRunning CJS without last array efficiency estimate.\n"); get.estimate <<- FALSE})
+    if (get.estimate) {
+      last.array.efficiency <- dualArray(input = last.array, silent = FALSE)
+      last.array.results <- list(results = last.array.efficiency, matrix = last.array)
+    } else {
+      last.array.results <- list(results = "No last array replicates were indicated.")
+    }
   } else {
-    appendTo("Screen","M: Skipping inter-array efficiency calculations as there are is only one array.")
-    interarray <- "Skipped"    
+    last.array.results <- list(results = "No last array replicates were indicated.")
   }
-  if (any(table(spatial$stations$Array) > 1)) {
-    intraarray <- intraArray(spatial = spatial, detections.list = detections.list)
-  } else {
-    appendTo("Screen","M: Skipping intra-array efficiency calculations as there are no arrays with more than one receiver.")
-    intraarray <- "Skipped"
+
+  output <- list()
+  for (i in names(recipient)) {
+    if (exists("last.array.efficiency")){
+      inter.array <- simpleCJS(recipient[[i]], estimate = last.array.efficiency$combined.efficiency, silent = FALSE)
+      output[[length(output) + 1]] <- list(results = inter.array, matrix = recipient[[i]])
+    } else {
+      inter.array <- simpleCJS(recipient[[i]], silent = FALSE)
+      appendTo("debug", "Terminating assembleEfficiency.")
+      output[[length(output) + 1]] <- list(results = inter.array, matrix = recipient[[i]])
+    }
   }
-  appendTo("debug", "Done")
-  return(list(Section = intersection, Inter.Array = interarray, Intra.Array = intraarray))
+  names(output) <- names(recipient)
+  appendTo("debug", "Terminating assembleEfficiency.")
+  return(list(inter.array = output, last.array = last.array.results))
 }
 
-#' Calculate intra-array efficiency
-#'
-#' @inheritParams assembleEfficiency
-#' 
-#' @return a table of intra-array efficiency estimates.
-#' 
-#' @keywords internal
-#' 
-intraArray <- function(spatial, detections.list) {
-  appendTo("debug", "Calculating intraArray efficiency.")
-  recipientA <- matrix(ncol = length(spatial$stations$Standard.Name), nrow = length(detections.list))
-  colnames(recipientA) <- spatial$stations$Standard.Name
-  rownames(recipientA) <- names(detections.list)
-  recipientA <- recipientA[, !grepl("Ukn", colnames(recipientA))]
-  for (i in names(detections.list)) {
-    recipientA[i, ] <- matchl(colnames(recipientA), detections.list[[i]]$Standard.Name)
-  }
-  rm(i)
-  
-  efficiency <- list()
-  for (i in unique(spatial$stations$Array[!grepl("Unknown", spatial$stations$Array)])) {
-    array.stations <- spatial$stations$Standard.Name[spatial$stations$Array == i]
-    recipientB <- as.data.frame(matrix(ncol = length(array.stations), nrow = 3))
-    colnames(recipientB) <- array.stations
-    rownames(recipientB) <- c("detected", "missed", "efficiency")
-    for (j in colnames(recipientB)) {
-      recipientB[1, j] <- sum(recipientA[, j])
-    }
-    rm(j)
-    recipientB[2, ] <- 0
-    for (j in rownames(recipientA)) {
-      for (k in array.stations) {
-        if (!recipientA[j, k] & any(recipientA[j, array.stations])) 
-          recipientB[2, k] <- recipientB[2, k] + 1
-      }
-    }
-    rm(j, k, array.stations)
-    for (j in seq_len(ncol(recipientB))) {
-      if (recipientB[1, j] == 0 & recipientB[2, j] == 0) {
-        recipientB[3, j] <- "-"
-      } else {
-        recipientB[3, j] <- paste(round(recipientB[1, j]/sum(recipientB[1:2, j]) * 100, 1), "%", sep = "")
-      }
-    }
-    rm(j)
-    efficiency[[i]] <- recipientB
-    rm(recipientB)
-  }
-  appendTo("debug", "Done.")
-  return(efficiency)
-}
-
-#' Calculate inter-array efficiency
+#' Compile inter-array detection matrix
 #'
 #' @inheritParams actel
 #' @inheritParams assembleEfficiency
 #' 
-#' @return a table of inter-array efficiency estimates.
+#' @return a matrix of detection histories per fish.
 #' 
 #' @keywords internal
 #' 
-interArray <- function(spatial, movements, minimum.detections) {
-  appendTo("debug", "Calculating interarray efficiency.")
-  efficiency <- as.data.frame(matrix(ncol = length(unlist(spatial$array.order)), nrow = 3))
+efficiencyMatrix <- function(spatial, movements, minimum.detections) {
+  appendTo("debug", "Starting efficiencyMatrix.")
+  efficiency <- as.data.frame(matrix(ncol = length(unlist(spatial$array.order)), nrow = length(movements)))
   colnames(efficiency) <- unlist(spatial$array.order)
-  rownames(efficiency) <- c("events", "missed", "efficiency")
-  efficiency[1:2, ] = 0
-  for (i in names(movements)) {
+  rownames(efficiency) <- names(movements)
+  efficiency[is.na(efficiency)] = 0
+  for (i in 1:length(movements)) {
     submoves <- movements[[i]][!grepl("Unknown", movements[[i]][, "Array"]), ]
     if (nrow(submoves) >= 1) {
-      # appendTo('debug',i)
-      already.checked <- rep(FALSE, length(unlist(spatial$array.order)) - 1)
-      if ((nrow(submoves) == 1 & submoves[1, "Detections"] >= minimum.detections) | nrow(submoves) > 1) {
-        destination <- match(submoves[1, "Array"], unlist(spatial$array.order))
-        # appendTo('debug',paste('R ->',destination))
-        if (destination != 1) {
-          cols.to.edit <- seq(from = 1, to = destination - 1)
-          for (j in cols.to.edit) {
-          if (!already.checked[j]) {
-            already.checked[j] = TRUE
-            efficiency[1, j] <- efficiency[1, j] + 1
-            efficiency[2, j] <- efficiency[2, j] + 1
-            # appendTo('debug',paste('+1E +1M for',paste(cols.to.edit,collapse=', ')))
-          }
-          }
-          rm(j, cols.to.edit)
+      A <- match(submoves[,"Array"],unlist(spatial$array.order))
+      B1 <- unique(A)
+      B2 <- order(A)[!duplicated(sort(A))] 
+      if (is.unsorted(B2)) {
+        temp <- matrix(ncol = length(B1), nrow = length(B1))
+        for (j in 1:length(B1)) {
+            temp[j,] <- c(rep(FALSE, j - 1), B1[j] > B1[j:length(B1)])
         }
+        B1 <- B1[!apply(temp,2,any)]
       }
-      if (nrow(submoves) > 1) {
-        for (j in 1:(nrow(submoves) - 1)) {
-          # appendTo('debug',j)
-          starting.point <- match(submoves[j, "Array"], unlist(spatial$array.order))
-          destination <- match(submoves[j + 1, "Array"], unlist(spatial$array.order))
-          # appendTo('debug',paste(starting.point,'->',destination))
-          if (starting.point < destination) {
-          if (!already.checked[starting.point]) {
-            already.checked[starting.point] = TRUE
-            efficiency[1, starting.point] <- efficiency[1, starting.point] + 1
-            # appendTo('debug',paste('+1E for',starting.point))
-          }
-          if (destination - starting.point != 1) {
-            cols.to.edit <- seq(from = starting.point + 1, to = destination - 1)
-            for (j in cols.to.edit) {
-            if (!already.checked[j]) {
-              already.checked[j] = TRUE
-              efficiency[1, j] <- efficiency[1, j] + 1
-              efficiency[2, j] <- efficiency[2, j] + 1
-              # appendTo('debug',paste('+1E +1M for',paste(cols.to.edit,collapse=', ')))
-            }
-            }
-            rm(cols.to.edit)
-          }
-          }
-          rm(starting.point, destination)
-          if (all(already.checked)) {
-          # appendTo('debug','All arrays checked, skipping to next fish.')
-          (break)()
-          }
-        }
-      }
+      efficiency[i, B1] <- 1
     }
   }
-  for (i in seq_len(ncol(efficiency) - 1)) {
-    if (efficiency[1, i] == 0 & efficiency[2, i] == 0) {
-      efficiency[3, i] <- "-"
-    } else {
-      efficiency[3, i] <- paste(round((efficiency[1, i] - efficiency[2, i])/efficiency[1, i] * 100, 1), "%", sep = "")
-    }
-  }
-  efficiency[is.na(efficiency)] <- "-"
-  appendTo("debug", "Done.")
-  return(efficiency)
+  efficiency$Release <- 1
+  appendTo("debug", "Terminating efficiencyMatrix.")
+  return(efficiency[,c(ncol(efficiency), 1:(ncol(efficiency)-1))])
 }
 
-#' Calculate inter-section efficiency
+#' Include fish that were never detected
+#' 
+#' @param x an efficiency matrix
+#' @inheritParams assembleOverview
+#' 
+#' @return a matrix of detection histories per fish, including fish that were never detected.
+#' 
+#' @keywords internal
+#' 
+includeMissing <- function(x, status.df){
+  appendTo("debug", "Starting includeMissing")
+  include <- as.character(status.df[-match(rownames(x), status.df$Transmitter),"Signal"])
+  x[include, ] = 0
+  x[include, 1] = 1
+  appendTo("debug", "Terminating includeMissing")
+  return(x)
+}
+
+#' Compile detection matrix for last array
 #'
 #' @inheritParams actel
 #' @inheritParams assembleEfficiency
 #' 
-#' @return a table of inter-section efficiency estimates.
+#' @return a matrix of detection histories per fish for the last array.
 #' 
 #' @keywords internal
 #' 
-interSection <- function(sections, movements, minimum.detections) {
-  appendTo("debug", "Calculating inter-section efficiency.")
-  efficiency <- as.data.frame(matrix(ncol = length(sections), nrow = 3))
-  colnames(efficiency) <- sections
-  rownames(efficiency) <- c("events", "missed", "efficiency")
-  efficiency[1:2, ] = 0
-  for (i in names(movements)) {
-    submoves <- movements[[i]][!grepl("Unknown", movements[[i]][, "Array"]), ]
-    if (nrow(submoves) >= 1) {
-      # appendTo('debug',i)
-      already.checked <- rep(FALSE, length(sections) - 1)
-      if ((nrow(submoves) == 1 & submoves[1, "Detections"] >= minimum.detections) | nrow(submoves) > 1) {
-        destination <- which(pmatch(sections, submoves[1, "Array"]) == 1)
-        # appendTo('debug',paste('R ->',destination))
-        if (destination != 1) {
-          cols.to.edit <- seq(from = 1, to = destination - 1)
-          for (j in cols.to.edit) {
-          if (!already.checked[j]) {
-            already.checked[j] = TRUE
-            efficiency[1, j] <- efficiency[1, j] + 1
-            efficiency[2, j] <- efficiency[2, j] + 1
-            # appendTo('debug',paste('+1E +1M for',paste(cols.to.edit,collapse=', ')))
-          }
-          }
-          rm(j, cols.to.edit)
-        }
-      }
-      if (nrow(submoves) > 1) {
-        for (j in 1:(nrow(submoves) - 1)) {
-          # appendTo('debug',j)
-          starting.point <- which(pmatch(sections, submoves[j, "Array"]) == 1)
-          destination <- which(pmatch(sections, submoves[j + 1, "Array"]) == 1)
-          # appendTo('debug',paste(starting.point,'->',destination))
-          if (starting.point < destination) {
-          if (!already.checked[starting.point]) {
-            already.checked[starting.point] = TRUE
-            efficiency[1, starting.point] <- efficiency[1, starting.point] + 1
-            # appendTo('debug',paste('+1E for',starting.point))
-          }
-          if (destination - starting.point != 1) {
-            cols.to.edit <- seq(from = starting.point + 1, to = destination - 1)
-            for (j in cols.to.edit) {
-            if (!already.checked[j]) {
-              already.checked[j] = TRUE
-              efficiency[1, j] <- efficiency[1, j] + 1
-              efficiency[2, j] <- efficiency[2, j] + 1
-              # appendTo('debug',paste('+1E +1M for',paste(cols.to.edit,collapse=', ')))
-            }
-            }
-            rm(cols.to.edit)
-          }
-          }
-          rm(starting.point, destination)
-          if (all(already.checked)) {
-          # appendTo('debug','All arrays checked, skipping to next fish.')
-          (break)()
-          }
-        }
-      }
-    }
+lastMatrix <- function(spatial, detections.list, replicate){
+  appendTo("debug", "Starting lastMatrix.")
+  all.stations <- spatial$stations$Standard.Name[spatial$stations$Array == tail(unlist(spatial$array.order), 1)]
+  if (any(link <- !replicate %in% all.stations)) {
+    if (sum(link) > 1)
+      stop(paste("Stations ", paste(replicate[link], collapse = ", "), " are not part of ", tail(unlist(spatial$array.order), 1), " (available stations: ", paste(all.stations, collapse = ", "), ").\n", sep = ""))
+    else
+      stop(paste("Station ", paste(replicate[link], collapse = ", "), " is not part of ", tail(unlist(spatial$array.order), 1), " (available stations: ", paste(all.stations, collapse = ", "), ").\n", sep = ""))      
   }
-  for (i in seq_len(ncol(efficiency) - 1)) {
-    if (efficiency[1, i] == 0 & efficiency[2, i] == 0) {
-      efficiency[3, i] <- "-"
-    } else {
-      efficiency[3, i] <- paste(round((efficiency[1, i] - efficiency[2, i])/efficiency[1, i] * 100, 1), "%", sep = "")
-    }
+  original <- all.stations[!all.stations %in% replicate]
+  efficiency <- as.data.frame(matrix(ncol = 2, nrow = length(detections.list)))
+  colnames(efficiency) <- c("original","replicate")
+  rownames(efficiency) <- names(detections.list)
+  for (i in 1:length(detections.list)) {
+    efficiency[i, "original"] <- any(!is.na(match(original,detections.list[[i]][,"Standard.Name"])))
+    efficiency[i, "replicate"] <- any(!is.na(match(replicate,detections.list[[i]][,"Standard.Name"])))
   }
-  efficiency[is.na(efficiency)] <- "-"
-  appendTo("debug", "Done.")
+  appendTo("debug", "Terminating lastMatrix.")
   return(efficiency)
+}
+
+#' Compute simple CJS model
+#'
+#' The calculations are based on 'Using mark-recapture models to estimate survival from telemetry data' by Perry et al. 2012
+#'
+#' @param input a detection matrix
+#' @param estimate an estimate of the last array's efficiency
+#' 
+#' @return A summary of the CJS results
+#' 
+#' @export
+#' 
+simpleCJS <- function(input, estimate = NULL, silent = TRUE){
+  if (!silent) appendTo("debug", "Starting simpleCJS.")
+  if (!is.null(estimate) && (estimate < 0 | estimate > 1))
+    stop("estimate must be between 0 and 1.\n")
+  if (any(input != 0 & input != 1))
+    stop("input must be a matrix containing only 0's and 1's\n")
+  S <- rep(NA, ncol(input)-1)
+  r <- z <- p <- m <- M <- rep(NA, ncol(input))
+  for(i in 1:(ncol(input)-1)){
+    # number of tags detected at i and downstream (r)
+    tr <- input[input[, i] == 1, (i + 1) : ncol(input)]
+    if (is.data.frame(tr))
+      r[i] = sum(apply(tr, 1, function(f) any(f == 1)))
+    if (is.vector(tr))
+      r[i] = sum(tr)
+    # number of tags NOT detected at i but detected downstream (z)
+    tz <- input[input[, i] == 0, (i + 1) : ncol(input)]
+    if (is.data.frame(tz))
+      z[i] = sum(apply(tz, 1, function(f) any(f == 1)))
+    if (is.vector(tz))
+      z[i] = sum(tz)
+    # probability of detection (p)
+    p[i] <- r[i] / (r[i] + z[i])
+    # number of detected tags at i (m)
+    m[i] = sum(input[, i])
+    # number of fish estimated alive at i (M)
+    M[i] = round(m[i] / p[i], 0)
+    if (i == 1 && M[i] > nrow(input))
+      M[i] = nrow(input)
+    if (i > 1 && M[i] > M[i - 1])
+      M[i] = M[i - 1]
+    # survival probability from i-1 to i (S)
+    if (i > 1)
+      S[i - 1] <- M[i] / M[i - 1]
+    # lambda (last S * last P) 
+    if (i == (ncol(input)-1))
+      l <- r[i] / m[i]
+  }
+  m[ncol(input)] <- sum(input[, ncol(input)])
+  if (!is.null(estimate)) {
+    S[ncol(input)-1] <- l / estimate
+    if (S[ncol(input)-1] > 1)
+      S[ncol(input)-1] = 1
+    M[ncol(input)] <- round(m[ncol(input)] / estimate,0)
+    if (M[ncol(input)] > M[ncol(input) - 1])
+      M[ncol(input)] = M[ncol(input) - 1]
+  }
+
+  absolutes <- matrix(c(m, r, z, M), ncol = ncol(input), byrow = TRUE)
+  rownames(absolutes) <- c("detected", "here plus downstream", "not here but downstream", "estimated")
+  colnames(absolutes) <- colnames(input)
+  names(p) <- colnames(input)
+  survival <- matrix(S, nrow = length(S))
+  
+  the.rows <- c()
+  for(i in 2:ncol(input)){
+    maxcharA <- max(nchar(colnames(input)[-ncol(input)]))
+    maxcharB <- max(nchar(colnames(input)[-1]))
+    if(nchar(colnames(input)[i - 1] != maxcharA))
+      centeringA <- paste(rep(" ", maxcharA - nchar(colnames(input)[i - 1])), collapse = "")
+    else
+      centeringA <- ""
+    if(nchar(colnames(input)[i] != maxcharB))
+      centeringB <- paste(rep(" ", maxcharB - nchar(colnames(input)[i])), collapse = "")
+    else
+      centeringB <- ""
+    the.rows[i - 1] <- paste(centeringA, colnames(input)[i - 1], " -> ", colnames(input)[i], centeringB, " =", sep = "")
+  }
+  rownames(survival) <- the.rows
+  colnames(survival) <- ""
+  if (!silent) appendTo("debug", "Terminating simpleCJS.")
+  if (is.null(estimate))
+    return(list(absolutes = absolutes, efficiency = p, survival = survival, lambda = l))
+  else
+    return(list(absolutes = absolutes, efficiency = p, survival = survival, lambda = l, estimate = estimate))
+}
+
+#' Calculate estimated last-array efficiency
+#'
+#' The calculations are based on 'Using mark-recapture models to estimate survival from telemetry data' by Perry et al. 2012
+#' 
+#' @inheritParams simpleCJS
+#' 
+#' @return A summary of the CJS results
+#' 
+#' @export
+#' 
+dualArray <- function(input, silent = TRUE){
+  if(!silent) appendTo("debug", "Starting dualArray.")
+  r <- z <- p <- m <- M <- rep(NA, ncol(input))
+  for(i in 1:(ncol(input))){
+    # number of tags detected at i and elsewhere (r)
+    tr <- input[input[, i] == 1, -i]
+    if (is.data.frame(tr))
+      r[i] = sum(apply(tr, 1, function(f) any(f == 1)))
+    if (is.vector(tr))
+      r[i] = sum(tr)
+    # number of tags NOT detected at i but detected elsewhere (z)
+    tz <- input[input[, i] == 0, -i]
+    if (is.data.frame(tz))
+      z[i] = sum(apply(tz, 1, function(f) any(f == 1)))
+    if (is.vector(tz))
+      z[i] = sum(tz)
+    # probability of detection (p)
+    p[i] <- r[i] / (r[i] + z[i])
+    # number of detected tags at i (m)
+    m[i] = sum(input[, i])
+    # number of fish estimated alive at i (M)
+    M[i] = m[i] / p[i]
+    if (M[i] > nrow(input))
+      M[i] = nrow(input)
+  }
+  combined.p <- 1 - prod(1 - p)
+  absolutes <- matrix(c(apply(input, 2, sum), r[1]), nrow = 3)
+  colnames(absolutes) <- ""
+  rownames(absolutes) <- c("detected at original:", "detected at replicate:", "detected at both:")
+  names(p) <- c("original", "replicate")
+  if(!silent) appendTo("debug", "Terminating dualArray.")
+  return(list(absolutes = absolutes, single.efficiency = p, combined.efficiency = combined.p))
 }

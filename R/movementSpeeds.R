@@ -84,7 +84,7 @@ movementTimes <- function(movements, silent = TRUE){
 
 #' Calculate time and speed since release.
 #' 
-#' @inheritParams refineMovements
+#' @inheritParams simplifyMovements
 #' @inheritParams actel
 #' @inheritParams assembleOutput
 #' 

@@ -16,7 +16,7 @@ printIndividuals(redraw, detections.list, status.df, tz.study.area)
 \item{tz.study.area}{The timezone of the study area. Necessary to conver the ALS time data, which is in UTC.}
 }
 \value{
-LaTeX string to be included in .printLatex
+String to be included in printRmd
 }
 \description{
 Prints the individual detections for each fish, overlaying the points in time considered crucial during the analysis.

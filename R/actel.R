@@ -44,6 +44,7 @@ NULL
 #' @param exclude.tags A list of tags that should be excluded from the detection data before any analyses are performed. Intended to be used if stray tags from a different code space but with the same signal as a target tag are detected in the study area.
 #' @param debug If TRUE, temporary files are not deleted at the end of the analysis. Defaults to FALSE.
 #' @param cautious.assignment If TRUE, actel avoids assigning events with one detection as first and/or last events of a section.
+#' @param replicate The Standard.Name of the stations to use as a replicate of the last array to estimate last detection efficiency.
 #' 
 #' @return A list containing 1) the detections used during the analysis, 2) the movement events, 3) the status dataframe, 4) the survival overview per group, 5) the progression through the study area, 6) the ALS array/sections' efficiency, 7) the list of spatial objects used during the analysis.
 #' 
@@ -53,7 +54,7 @@ actel <- function(path = NULL, sections, success.arrays, minimum.detections = 2,
     maximum.time = 60, speed.method = c("last to first", "first to first"), 
     if.last.skip.section = TRUE, tz.study.area, start.timestamp = NULL, 
     end.timestamp = NULL, report = TRUE, redraw = TRUE, override = NULL, 
-    exclude.tags = NULL, debug = FALSE, cautious.assignment = TRUE) {
+    exclude.tags = NULL, debug = FALSE, cautious.assignment = TRUE, replicate = NULL) {
   
   my.home <- getwd()
   
@@ -77,7 +78,7 @@ actel <- function(path = NULL, sections, success.arrays, minimum.detections = 2,
     ".", sep = ""))
   appendTo(c("Screen"), "M: Moving to selected work directory")
   
-  report <- latexCheck(report = report, redraw = redraw)
+  report <- folderCheck(report = report, redraw = redraw)
  
   appendTo(c("Screen", "Report"), "M: Importing data. This process may take a while.")
   
@@ -149,7 +150,7 @@ actel <- function(path = NULL, sections, success.arrays, minimum.detections = 2,
   bio <- recipient[[2]]
   rm(recipient)
   if (debug)
-    save(detections.list,file="debug_detections.list.RData")
+    save(detections.list, file = "debug_detections.list.RData")
 
   recipient <- unknownReceiversCheckB(detections.list = detections.list, spatial = spatial)
   spatial <- recipient[[1]]
@@ -161,13 +162,13 @@ actel <- function(path = NULL, sections, success.arrays, minimum.detections = 2,
   }
   rm(recipient)
   if (debug)
-    save(detections.list,file="debug_detections.list.RData")
+    save(detections.list, file = "debug_detections.list.RData")
 
   appendTo(c("Screen", "Report"), "M: Data successfully imported!\nM: Creating movement records for the valid tags.")
   movements <- groupMovements(detections.list = detections.list, bio = bio, spatial = spatial,
-    speed.method = speed.method, maximum.time = maximum.time, dist.mat = dist.mat, invalid.dist = invalid.dist)
+    speed.method = speed.method, maximum.time = maximum.time, tz.study.area = tz.study.area, dist.mat = dist.mat, invalid.dist = invalid.dist)
   if (debug)
-    save(movements,file="debug_movements.RData")
+    save(movements, file = "debug_movements.RData")
   
   timetable <- assembleTimetable(movements = movements, sections = sections, spatial = spatial, 
     minimum.detections = minimum.detections, dist.mat = dist.mat, invalid.dist = invalid.dist, 
@@ -175,20 +176,23 @@ actel <- function(path = NULL, sections, success.arrays, minimum.detections = 2,
     override = override, cautious.assignment = cautious.assignment)
   appendTo(c("Screen", "Report"), "M: Timetable successfully filled. Fitting in the remaining variables.")
   if (debug)
-    save(timetable,file="debug_timetable.RData")
+    save(timetable, file = "debug_timetable.RData")
   
   status.df <- assembleOutput(timetable = timetable, bio = bio, movements = movements, spatial = spatial, 
     sections = sections, dist.mat = dist.mat, invalid.dist = invalid.dist, tz.study.area = tz.study.area)
   if (debug)
-    save(status.df,file="debug_status.df.RData")
+    save(status.df, file = "debug_status.df.RData")
   
   for(fish in names(movements)){
     movements[[fish]] <- speedReleaseToFirst(fish = fish, status.df = status.df, movements = movements[[fish]],
      dist.mat = dist.mat, invalid.dist = invalid.dist, silent = FALSE)
   }
   if (debug)
-    save(movements,file="debug_movements.RData")
+    save(movements, file = "debug_movements.RData")
 
+  simple.movements <- simplifyMovements(movements = movements, status.df = status.df, sections = sections)
+  if (debug)
+    save(simple.movements, file = "debug_simple.movements.RData")
   appendTo(c("Screen", "Report"), "M: Getting summary information tables.")
   
   group.overview <- assembleOverview(status.df = status.df, sections = sections, 
@@ -196,7 +200,8 @@ actel <- function(path = NULL, sections, success.arrays, minimum.detections = 2,
   progression <- assembleProgression(status.df = status.df, spatial = spatial)
   efficiency <- assembleEfficiency(sections = sections, 
     spatial = spatial, detections.list = detections.list,
-    movements = movements, minimum.detections = minimum.detections)
+    movements = simple.movements, status.df = status.df,
+    minimum.detections = minimum.detections, replicate = replicate)
   
   if (!is.null(override)) {
     header.fragment <- paste('<span style="color:red">Manual mode has been triggered for **', length(override),'** fish.</span>\n', sep = "")
@@ -226,16 +231,13 @@ actel <- function(path = NULL, sections, success.arrays, minimum.detections = 2,
     progression, efficiency, spatial, file = resultsname)
   if (report) {
     biometric.fragment <- printBiometrics(bio = bio)
-    # printStations(spatial = spatial)
+    efficiency.fragment <- printEfficiency(efficiency = efficiency)
     printDotplots(status.df = status.df, invalid.dist = invalid.dist)
-    # printSurvivalTable(group.overview = group.overview)
     printSurvivalGraphic(group.overview = group.overview)
     printProgression(progression = progression, success.arrays = success.arrays, spatial = spatial)
-    # printEfficiency(efficiency = efficiency)
-    LaTeX.individual.plots <- printIndividuals(redraw = redraw, detections.list = detections.list, 
+    individual.plots <- printIndividuals(redraw = redraw, detections.list = detections.list, 
         status.df = status.df, tz.study.area = tz.study.area)
     if (nrow(group.overview) > 3) 
-      # survival.graph.size <- "width=0.95" else survival.graph.size <- "height=0.6"
       survival.graph.size <- "width=90%" else survival.graph.size <- "height=4in"
   }
   
@@ -246,12 +248,9 @@ actel <- function(path = NULL, sections, success.arrays, minimum.detections = 2,
     appendTo("Report", paste("User inverventions:\n-------------------\n", gsub("\r", "", readr::read_file("temp_UD.txt")), "-------------------", sep = ""))
   
   if (report) {
-    # printLaTeX(name.fragment = name.fragment, header.fragment = header.fragment, 
-    #     biometric.fragment = biometric.fragment, survival.graph.size = survival.graph.size,
-    #     LaTeX.individual.plots = LaTeX.individual.plots)
     rmarkdown::render(reportname <- printRmd(name.fragment = name.fragment, header.fragment = header.fragment, 
         biometric.fragment = biometric.fragment, survival.graph.size = survival.graph.size,
-        LaTeX.individual.plots = LaTeX.individual.plots, spatial = spatial), quiet = TRUE)
+        individual.plots = individual.plots, spatial = spatial, efficiency.fragment = efficiency.fragment), quiet = TRUE)
     fs::file_move(sub("Rmd", "html", reportname), sub("Report/", "", sub("Rmd", "html", reportname)))
     if(file.exists("Report/toc_menu.html"))
       file.remove("Report/toc_menu.html")

@@ -4,7 +4,7 @@
 #'
 #' @return A TRUE/FALSE decision
 #' 
-latexCheck <- function(report, redraw){
+folderCheck <- function(report, redraw){
   if (report) {
     appendTo("Report", "M: 'report' option has been activated.")
     if (length(setdiff(c("ggplot2", "reshape2"), rownames(installed.packages()))) > 0) {
@@ -35,16 +35,14 @@ latexCheck <- function(report, redraw){
 #' 
 #' @inheritParams actel
 #' 
-#' @return LaTeX string to be included in .printLatex
+#' @return string to be included in printRmd
 #'  
 #' @keywords internal
 #' 
 printBiometrics <- function(bio) {
   if (any(C <- grepl("Length", colnames(bio)) | grepl("Weight", colnames(bio)) | grepl("Mass", colnames(bio)) | grepl("Size", colnames(bio)))) {
-    # biometric.fragment <- paste("\\gap\n\n\\noindent\\begin{minipage}{\\textwidth}\n\\Csection{Biometrics}\n\n\\gap\n\n")
     biometric.fragment <- ""
     if (sum(C) > 1) {
-      # graphic.width <- 0.99/sum(C)
       graphic.width <- paste(90 / sum(C), "%", sep = "")
     } else {
       graphic.width <- 0.45
@@ -59,12 +57,9 @@ printBiometrics <- function(bio) {
       p <- p + ggplot2::geom_boxplot(na.rm = T)
       p <- p + ggplot2::theme_bw()
       p <- p + ggplot2::theme(panel.grid.minor.x = ggplot2::element_blank(), panel.grid.major.x = ggplot2::element_blank())
-      # p <- p + ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 45, vjust = 1, hjust=1))
       p <- p + ggplot2::labs(x = "", y = i)
-      # ggplot2::ggsave(paste("Report/", gsub("[.]", "_", i), "_boxplot.pdf", sep = ""), width = 3, height = 4)
       ggplot2::ggsave(paste("Report/", gsub("[.]", "_", i), "_boxplot.png", sep = ""), width = 3, height = 4)
       rm(p)
-      # biometric.fragment <- paste(biometric.fragment, "\\centering\\includegraphics[width=", graphic.width, "\\linewidth]{", gsub("[.]", "_", i), "_boxplot.pdf}\n", sep = "")
       if (counter %% 2 == 0)
         biometric.fragment <- paste(biometric.fragment, "![](", gsub("[.]", "_", i), "_boxplot.png){ width=", graphic.width, " }\n", sep = "")
       else
@@ -72,29 +67,9 @@ printBiometrics <- function(bio) {
     }
   }
   rm(C, graphic.width)
-  # if (exists("biometric.fragment")) 
-    # biometric.fragment <- paste(biometric.fragment, "\\end{minipage}\n\n", sep = "") 
-  # else 
-    # biometric.fragment <- ""
   if (!exists("biometric.fragment"))
     biometric.fragment <- ""
   return(biometric.fragment)
-}
-
-#' Print stations table
-#'
-#' Prints the spatial object in LaTeX format for inclusion in .printLaTeX.
-#' 
-#' @inheritParams assembleEfficiency
-#' 
-#' @keywords internal
-#' 
-printStations <- function(spatial) {
-  if (exists("DEBUG")) 
-    cat(paste("Debug: Creating LaTeX table 'stations.tex'.\n", sep = ""))
-  flush.console()
-  write(print(xtable::xtable(spatial$stations, digits = 5), include.rownames = F, include.colnames = T, hline.after = c(0, nrow(spatial$stations)), floating = F, only.contents = F, print.results = F), 
-    paste("Report/stations.tex", sep = ""))
 }
 
 #' Print dotplots
@@ -170,31 +145,11 @@ printDotplots <- function(status.df, invalid.dist) {
   ggplot2::ggsave(paste("Report/dotplots.png", sep = ""), width = 6, height = 10)
 }
 
-#' Print survival table
-#'
-#' Prints the group.overview object in LaTeX format for inclusion in printLaTeX.
-#' 
-#' @param group.overview A dataframe containing the survival per group of fish present in the biometrics. Supplied by assembleOverview.
-#' 
-#' @keywords internal
-#' 
-printSurvivalTable <- function(group.overview) {
-  if (exists("DEBUG")) 
-    cat(paste("Debug: Creating LaTeX table 'survival.tex' and graphic 'survival.pdf'.\n", sep = ""))
-  flush.console()
-  sink(paste("Report/survival.tex", sep = ""))
-  cat("\\begin{raggedright}\\renewcommand\\baselinestretch{2}\n")
-  cat(paste("\\zcolumn{\\\\ \\hline ", paste(row.names(group.overview), collapse = "\\\\ "), "\\\\ \\hline}\n"))
-  for (i in seq_len(ncol(group.overview))) cat(paste("\\zcolumn{", colnames(group.overview)[i], "\\\\ \\hline ", paste(group.overview[, i], collapse = "\\\\ "), "\\\\ \\hline}\n"))
-  cat("\\unpenalty\n\\end{raggedright}\n")
-  sink()
-}
-
 #' Print survival graphic
 #'
 #' Prints survival graphics per fish group.
 #' 
-#' @inheritParams printSurvivalTable
+#' @param group.overview A dataframe containing the survival per group of fish present in the biometrics. Supplied by assembleOverview.
 #' 
 #' @keywords internal
 #' 
@@ -296,30 +251,62 @@ printProgression <- function(progression, success.arrays, spatial) {
   rm(PlotData, labels, p, finish.line)
 }
 
-#' Print efficiency tables
+#' Print efficiency fragment
 #'
-#' Prints the ALS intersection and interarray efficiency in LaTeX format for inclusion in printLaTeX.
+#' Prints the ALS inter-array efficiency for inclusion in printRmd.
 #' 
-#' @param efficiency A list containing the intersection and interarray efficiency. Supplied by assembleEfficiency.
+#' @param efficiency A list containing the efficiency. Supplied by assembleEfficiency.
 #' 
 #' @keywords internal
 #' 
-printEfficiency <- function(efficiency) {
-  appendTo("Debug","Debug: Creating LaTeX tables 'section_efficiency.tex' and 'array_efficiency.tex'.")
-  if (length(efficiency$Section) == 1 && efficiency$Section == "Skipped") {
-    write("Inter-section efficiency calculations were skipped as there are is only one section.","Report/section_efficiency.tex")
-  } else {
-    write(print(xtable::xtable(efficiency$Section, digits = 0), include.rownames = T, include.colnames = T, hline.after = c(0, nrow(efficiency$Section)), floating = F, only.contents = F, print.results = F), 
-      "Report/section_efficiency.tex")
-  }
-  if (length(efficiency$Inter.Array) == 1 && efficiency$Inter.Array == "Skipped") {
-    write("Inter-array efficiency calculations were skipped as there are is only one array.","Report/array_efficiency.tex")    
-  } else {
-    write(print(xtable::xtable(efficiency$Inter.Array, digits = 0), include.rownames = T, include.colnames = T, hline.after = c(0, nrow(efficiency$Inter.Array)), floating = F, only.contents = F, 
-      print.results = F), "Report/array_efficiency.tex")
-  }
-}
+printEfficiency <- function(efficiency){
+  efficiency.fragment <- ""
+  n <- 10
+  for (i in names(efficiency$inter.array)) {
+    efficiency.fragment <- paste(efficiency.fragment, '
+#### Fish released at ', i, '
 
+**Individuals detected and estimated**
+
+```{r efficiency', n + 1, ', echo = FALSE}
+knitr::kable(efficiency$inter.array$', i, '$results$absolutes)
+```
+
+**Array efficiency**
+
+```{r efficiency', n + 2, ', echo = FALSE}
+to.print <- t(paste(round(efficiency$inter.array$', i, '$results$efficiency * 100, 1), "%", sep = ""))
+to.print[, ncol(to.print)] = "-"
+colnames(to.print) <- names(efficiency$inter.array$', i, '$results$efficiency)
+rownames(to.print) <- "efficiency"
+knitr::kable(to.print)
+```
+
+**Lambda:** `r I(efficiency$inter.array$', i, '$results$lambda)`
+
+', sep = "")
+    n = n + 10
+  }
+
+  if (length(efficiency$last.array$results) == 1){
+    efficiency.fragment <- paste(efficiency.fragment, '
+#### Last array efficiency estimate
+
+```{r efficiency', n, ', echo = FALSE,  comment = NA}
+cat(efficiency$last.array$results)
+```', sep = "")
+  } else {
+    efficiency.fragment <- paste(efficiency.fragment, '
+#### Last array efficiency estimate
+
+```{r efficiency', n, ', echo = FALSE,  comment = NA}
+knitr::kable(efficiency$last.array$results$absolutes)
+```
+
+**Last array estimated efficiency: **', round(efficiency$last.array$results$combined.efficiency * 100, 2), "%", sep = "")
+  }
+  return(efficiency.fragment)
+}
 #' Print individual graphics
 #'
 #' Prints the individual detections for each fish, overlaying the points in time considered crucial during the analysis.
@@ -328,7 +315,7 @@ printEfficiency <- function(efficiency) {
 #' @inheritParams assembleEfficiency
 #' @inheritParams assembleOverview
 #' 
-#' @return LaTeX string to be included in .printLatex
+#' @return String to be included in printRmd
 #' 
 #' @keywords internal
 #' 
@@ -342,7 +329,7 @@ printIndividuals <- function(redraw, detections.list, status.df, tz.study.area) 
   }
   if (!exists("DEBUG")) 
     pb <- txtProgressBar(min = 0, max = length(detections.list), style = 3, width = 60)
-  LaTeX.individual.plots <- paste("")
+  individual.plots <- paste("")
   for (i in 1:length(detections.list)) {
     fish <- names(detections.list)[i]
     if (!(exists("redraw") && redraw == FALSE && file.exists(paste("Report/", fish, ".png", sep = "")))) {
@@ -359,21 +346,21 @@ printIndividuals <- function(redraw, detections.list, status.df, tz.study.area) 
       default.cols <- TRUE
       if (status.df$P.type[the.row] == "Overridden") {
         p <- p + ggplot2::theme(
-          panel.background = element_rect(fill = "white"),
-          panel.border = element_rect(fill = NA, colour = "#ef3b32" , size = 2),
-          panel.grid.major = element_line(size = 0.5, linetype = 'solid', colour = "#ffd8d6"), 
-          panel.grid.minor = element_line(size = 0.25, linetype = 'solid', colour = "#ffd8d6"),
-          legend.key = element_rect(fill = "white", colour = "white"),
+          panel.background = ggplot2::element_rect(fill = "white"),
+          panel.border = ggplot2::element_rect(fill = NA, colour = "#ef3b32" , size = 2),
+          panel.grid.major = ggplot2::element_line(size = 0.5, linetype = 'solid', colour = "#ffd8d6"), 
+          panel.grid.minor = ggplot2::element_line(size = 0.25, linetype = 'solid', colour = "#ffd8d6"),
+          legend.key = ggplot2::element_rect(fill = "white", colour = "white"),
           )
         default.cols <- FALSE
       } 
       if (status.df$P.type[the.row] == "Manual") {
          p <- p + ggplot2::theme(
-          panel.background = element_rect(fill = "white"),
-          panel.border = element_rect(fill = NA, colour = "#ffd016" , size = 2),
-          panel.grid.major = element_line(size = 0.5, linetype = 'solid', colour = "#f2e4b8"), 
-          panel.grid.minor = element_line(size = 0.25, linetype = 'solid', colour = "#f2e4b8"),
-          legend.key = element_rect(fill = "white", colour = "white"),
+          panel.background = ggplot2::element_rect(fill = "white"),
+          panel.border = ggplot2::element_rect(fill = NA, colour = "#ffd016" , size = 2),
+          panel.grid.major = ggplot2::element_line(size = 0.5, linetype = 'solid', colour = "#f2e4b8"), 
+          panel.grid.minor = ggplot2::element_line(size = 0.25, linetype = 'solid', colour = "#f2e4b8"),
+          legend.key = ggplot2::element_rect(fill = "white", colour = "white"),
           )
         default.cols <- FALSE
       } 
@@ -400,11 +387,9 @@ printIndividuals <- function(redraw, detections.list, status.df, tz.study.area) 
       rm(PlotData, start.line, last.time, relevant.line, first.time)
     }
     if (i%%2 == 0) {
-      # LaTeX.individual.plots <- paste(LaTeX.individual.plots, "\\centering\\includegraphics[width=0.4\\linewidth]{", fish, ".png}\n", sep = "")
-      LaTeX.individual.plots <- paste(LaTeX.individual.plots, "![](", fish, ".png){ width=50% }\n", sep = "")
+      individual.plots <- paste(individual.plots, "![](", fish, ".png){ width=50% }\n", sep = "")
     } else {
-      # LaTeX.individual.plots <- paste(LaTeX.individual.plots, "\\gap\n\n\\centering\\includegraphics[width=0.4\\linewidth]{", fish, ".png}\n", sep = "")
-      LaTeX.individual.plots <- paste(LaTeX.individual.plots, "![](", fish, ".png){ width=50% }", sep = "")
+      individual.plots <- paste(individual.plots, "![](", fish, ".png){ width=50% }", sep = "")
     }
     if (!exists("DEBUG")) 
       setTxtProgressBar(pb, i)
@@ -415,281 +400,24 @@ printIndividuals <- function(redraw, detections.list, status.df, tz.study.area) 
     close(pb)
     rm(pb)
   }
-  return(LaTeX.individual.plots)
-}
-
-#' Print LaTeX report
-#'
-#' Creates the file 'LaTeX_report.tex', from which it is possible to create a pdf report.
-#' 
-#' @param name.fragment LaTeX string specifying the type of report for the title.
-#' @param header.fragment LaTeX string specifying the type of report for the header.
-#' @param biometric.fragment LaTeX string specifying the biometric graphics drawn.
-#' @param survival.graph.size LaTeX string specifying the type size of the survival graphics.
-#' @param LaTeX.individual.plots LaTeX string specifying the name of the individual plots.
-#' 
-#' @keywords internal
-#' 
-printLaTeX <- function(name.fragment, header.fragment, biometric.fragment, survival.graph.size, LaTeX.individual.plots) {
-  appendTo("Screen", "M: Producing PDF report.")
-  if (file.exists("temp_comments.txt")) {
-    latex.comments <- paste("\\gap\n\n\\noindent\\begin{minipage}{\\textwidth}\n\\Csection{User comments}\n\n\\begin{lstlisting}\n", gsub("\r", "", readr::read_file("temp_comments.txt")), 
-      "\\end{lstlisting}\n\\end{minipage}\n\n", sep = "")
-  } else {
-    latex.comments <- ""
-  }
-  if (file.exists("temp_warnings.txt")) {
-    warningmessages <- gsub("\r", "", readr::read_file("temp_warnings.txt"))
-  } else {
-    warningmessages <- ""
-  }
-  if (file.exists("temp_log.txt")) {
-    report <- gsub("\r", "", readr::read_file("temp_log.txt"))
-  } else {
-    report <- ""
-  }
-  if (file.exists(reportname <- paste("Report/actel_report", name.fragment, ".tex", sep = ""))) {
-    continue <- TRUE
-    index <- 1
-    while (continue) {
-      if(file.exists(reportname <- paste("Report/actel_report", name.fragment, ".", index, ".tex", sep = ""))) {
-        index <- index + 1
-      } else {
-        continue <- FALSE
-      }
-    }
-    appendTo("Screen",paste("M: An actel report is already present in the present directory, saving new report as 'actel_report", name.fragment, ".", index, ".pdf'.", sep = ""))
-    rm(continue,index)
-  } else {
-    appendTo("Screen",paste("M: Saving actel report as 'actel_report", name.fragment, ".pdf'.", sep = ""))
-  }
-  sink(reportname)
-  cat(paste("\\documentclass[10pt, twoside, a4paper]{article}
-\\usepackage[english]{babel}
-\\usepackage[usenames, dvipsnames, table]{xcolor}
-\\usepackage{fancyhdr, lastpage, changepage} % changepage is for if-else statements
-\\usepackage{geometry}
-\\usepackage{graphicx}
-\\usepackage[pdfborder={0 0 0}]{hyperref}
-\\usepackage[utf8]{inputenc}
-\\usepackage{setspace}   % gaps
-\\usepackage{marginnote} % margin notes
-\\usepackage{enumitem}   % fancy enumerates
-\\usepackage{tabularx, longtable, ragged2e}
-\\usepackage{listings}   % fancy listings
-\\usepackage{placeins}
-
-%%%%%%%%% Page margins %%%%%%%%%
-\\geometry{outer= 2cm, inner=2cm, top=3cm, bottom=2cm}
-
-\\newlength{\\Letterheight}
-\\AtBeginDocument{\\settoheight{\\Letterheight}{S}}
-%%%%%% Header and footer %%%%%%%
-\\pagestyle{fancy}
-\\fancypagestyle{plain}
-{\\renewcommand{\\headrulewidth}{0pt}} %clean default header
-\\fancyhead{}\t%clean the predefined header
-\\fancyhead[LO, RE]{", 
-    header.fragment, "}
-\\fancyhead[RO, LE]{Actel - Development version}\t%define header text and position
-\\fancyfoot{}\t%clean the predefined footer
-\\fancyfoot[RO]{Acoustics - \\thepage/\\pageref{LastPage}}\t%define footer text and position
-\\fancyfoot[LE]{\\thepage/\\pageref{LastPage} - Acoustics}\t\t%define footer text and position
-\\fancyfoot[RE]{}\t\t%define footer text and position
-\\renewcommand{\\headrulewidth}{0pt}\t%define header line width
-\\renewcommand{\\footrulewidth}{0pt}\t%define footer line width
-
-%%%%% word hiphenation %%%%%%%
-\\makeatletter
-\\renewcommand\\@biblabel[1]{}
-\\makeatother
-
-%%%%%%%%% line spacing %%%%%%%%%
-\\setstretch{1.2}
-
-%%%%%%%%% table spacing %%%%%%%%%
-\\renewcommand{\\arraystretch}{1.5}
-
-%%%%%%%%% list changes %%%%%%%%%%
-\\setlist[itemize,1]{label=\\color{MyAnnotationColor}$\\cdot$}
-\\setlist[itemize,2]{label=\\color{MyAnnotationColor}$\\cdot$}
-\\setlist[itemize,3]{label=\\color{MyAnnotationColor}$\\cdot$}
-\\setlist[itemize]{itemsep=0pt,topsep=0pt}
-
-\\raggedbottom
-
-%%% Hyperlink customisations %%%
-\\hypersetup{colorlinks=False}
-
-\\def\\gap{\\vspace{0.5cm}}
-\\def\\hl#1{\\textbf{\\textcolor{MyAnnotationColor}{#1}}}
-
-\\def\\Csection#1{%
-\\FloatBarrier
-\\begin{center}
-  \\textbf{#1}
-\\end{center}
-\\vspace{-\\baselineskip}\\noindent\\textcolor[RGB]{200,200,200}{\\rule{\\linewidth}{0.2pt}}}
-
-\\def\\mymarginnote#1{\\marginnote{%
-\\scriptsize
-\\strictpagecheck
-\\checkoddpage
-\\ifoddpage
-\\begin{tabularx}{\\marginparwidth}{|R}
-  #1 \\\\
-  \\hline
-\\end{tabularx}
-\\else
-\\begin{tabularx}{\\marginparwidth}{L|}
-  #1 \\\\
-  \\hline
-\\end{tabularx}
-\\fi  
-}}
-\\def\\nb{\\\\-----\\\\}
-\\definecolor{codegreen}{rgb}{0,0.6,0}
-\\definecolor{backcolour}{rgb}{0.95,0.95,0.95}
-\\definecolor{cobalt}{rgb}{0.0, 0.28, 0.67}
-\\definecolor{amber(sae/ece)}{rgb}{1.0, 0.49, 0.0}
-\\definecolor{MyAnnotationColor}{rgb}{0.16, 0.32, 0.75}
-
-\\lstdefinestyle{mystyle}{
-  backgroundcolor=\\color{backcolour},   
-  commentstyle=\\color{codegreen}\\textit,
-  keywordstyle=\\color{amber(sae/ece)}\\textbf,
-  numberstyle=\\tiny\\color{cobalt},
-  stringstyle=\\color{cobalt}\\textit,
-  basicstyle=\\footnotesize,
-  breakatwhitespace=true,     
-  breaklines=true,         
-  captionpos=b,          
-  keepspaces=true,         
-  numbers=left,          
-  numbersep=5pt,          
-  showspaces=false,        
-  showstringspaces=false,
-  showtabs=false,          
-  tabsize=2
-}
- 
-\\lstset{style=mystyle}
-
-\\newcolumntype{R}{>{\\RaggedRight\\arraybackslash}X}
-\\newcolumntype{L}{>{\\RaggedLeft\\arraybackslash}X}
-\\newcommand\\zcolumn[1]{%
-\\begin{tabular}[b]{c}#1\\end{tabular}\\linebreak[0]\\ignorespaces}
-
-\\begin{document}
-
-\\Csection{Acoustic}
-
-\\Csection{Stations}
-
-\\begin{center}
-\\input{stations.tex}
-\\end{center}
-
-\\gap
-
-\\noindent\\begin{minipage}{\\textwidth}
-\\Csection{Section forward efficiency}
-
-\\begin{center}
-\\input{section_efficiency.tex}
-\\end{center}
-
-\\end{minipage}
-
-\\gap
-
-\\noindent\\begin{minipage}{\\textwidth}
-\\Csection{Array forward efficiency}
-
-\\begin{center}
-\\input{array_efficiency.tex}
-\\end{center}
-
-\\vspace{\\parskip}
-\\end{minipage}
-
-\\gap
-
-\\noindent\\begin{minipage}{\\textwidth}
-\\Csection{Warning messages:}
-
-\\begin{lstlisting}
-", warningmessages, "
-\\end{lstlisting}
-\\end{minipage}
-
-", latex.comments, biometric.fragment, "
-
-\\gap
-
-\\clearpage
-\\Csection{Survival}
-
-\\begin{center}
-\\input{survival.tex}
-\\end{center}
-
-\\gap
-
-\\centering\\includegraphics[", survival.graph.size, "\\linewidth]{survival.pdf}
-
-\\noindent\\begin{minipage}{\\textwidth}
-\\Csection{Progression}
-
-\\gap
-\\centering\\includegraphics[width=0.65\\linewidth]{progression.pdf} 
-\\end{minipage}
-
-\\clearpage
-
-\\Csection{Fish comparisons}
-
-\\gap
-
-\\centering\\includegraphics[height=0.92\\textheight]{dotplots.pdf}
-
-\\clearpage
-
-\\Csection{Job log}
-
-\\begin{lstlisting}
-", report, "
-\\end{lstlisting}
-
-\\clearpage
-
-\\Csection{Graphics of detected tags (fate between brackets)}
-
-", LaTeX.individual.plots, "
-
-\\end{document}
-", sep = ""), fill = TRUE)
-  sink()
-  tryCatch(tools::texi2dvi(reportname, pdf = TRUE, clean = TRUE), 
-    error = function(e) cat(paste("Something went wrong when compiling the PDF report. Please find the individual graphics in the folder 'Report'.\nIf you do not have LaTeX installed, check out how to quickly get it by running helpLatex() .\nIf you do have LaTeX installed, you can manually compile the file '", reportname, "', which has been stored in the folder 'Report'.\n",sep = "")), 
-    warning = function(w) cat(paste("Something went wrong when compiling the PDF report. Please find the individual graphics in the folder 'Report'.\nIf you do not have LaTeX installed, check out how to quickly get by running helpLatex() .\nIf you do have LaTeX installed, you can manually compile the file '", reportname, "', which has been stored in the folder 'Report'.\n",sep = ""))
-    )
+  return(individual.plots)
 }
 
 #' Print Rmd report
 #'
 #' Creates a Rmd report and converts it to hmtl.
 #' 
-#' @param name.fragment LaTeX string specifying the type of report for the title.
-#' @param header.fragment LaTeX string specifying the type of report for the header.
-#' @param biometric.fragment LaTeX string specifying the biometric graphics drawn.
-#' @param survival.graph.size LaTeX string specifying the type size of the survival graphics.
-#' @param LaTeX.individual.plots LaTeX string specifying the name of the individual plots.
+#' @param name.fragment Rmarkdown string specifying the type of report for the title.
+#' @param header.fragment Rmarkdown string specifying the type of report for the header.
+#' @param biometric.fragment Rmarkdown string specifying the biometric graphics drawn.
+#' @param efficiency.fragment Rmarkdown string specifying the biometric graphics drawn.
+#' @param survival.graph.size Rmarkdown string specifying the type size of the survival graphics.
+#' @param individual.plots Rmarkdown string specifying the name of the individual plots.
 #' 
 #' @keywords internal
 #' 
-printRmd <- function(name.fragment, header.fragment, biometric.fragment,
-  survival.graph.size, LaTeX.individual.plots, spatial){
+printRmd <- function(name.fragment, header.fragment, biometric.fragment, efficiency.fragment,
+  survival.graph.size, individual.plots, spatial){
   appendTo("Screen", "M: Producing final report.")
   if (file.exists(reportname <- paste("Report/actel_report", name.fragment, ".Rmd", sep = ""))) {
     continue <- TRUE
@@ -754,13 +482,12 @@ knitr::kable(spatial$stations)
 knitr::kable(spatial$release.sites)
 ```
 
-***
 ### Array forward efficiency
 
-```{r efficiency, echo = FALSE}
-knitr::kable(efficiency$Inter.Array)
-```
+Note:
+  : Efficiency estimates were calculated separatly for different release sites.
 
+', efficiency.fragment,'
 
 ### Warning messages
 
@@ -822,7 +549,7 @@ Note:
   : Manually **overridden** fish are highlighted with **red** graphic borders.
 
 <center>
-', LaTeX.individual.plots,'
+', individual.plots,'
 </center>
 
 
@@ -835,6 +562,11 @@ sink("Report/toc_menu.html")
 cat(
 '<style>
 h3 {
+  padding-top: 25px;
+  padding-bottom: 15px;
+}
+
+h4 {
   padding-top: 25px;
   padding-bottom: 15px;
 }
@@ -884,6 +616,10 @@ h3 {
   padding: 0px 10px;
 }
 
+.level4 {
+  margin-left: 0px; /* Same as the width of the sidebar */
+  padding: 0px 0px;
+}
 
 /* On smaller screens, where height is less than 450px, change the style of the sidebar (less padding and a smaller font size) */
 @media screen and (max-height: 450px) {
@@ -897,7 +633,7 @@ h3 {
   <a href="#summary">Summary</a>
   <a href="#list-of-stations">Stations</a>
   <a href="#list-of-release-sites">Releases</a>
-  <a href="#array-forward-efficiency">Eficiency</a>
+  <a href="#array-forward-efficiency">Efficiency</a>
   <a href="#warning-messages">Warnings</a>
   <a href="#user-comments">Comments</a>
   <a href="#biometric-graphics">Biometrics</a>

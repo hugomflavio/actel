@@ -5,7 +5,7 @@
 \title{Efficiency calculation wrapper}
 \usage{
 assembleEfficiency(sections, spatial, detections.list, movements,
-  minimum.detections)
+  status.df, minimum.detections, replicate)
 }
 \arguments{
 \item{sections}{The sections in which the study was divided. Must be coincident with the names given to the ALS arrays. (i.e. if an array is 'River1', then the respective section is 'River')}
@@ -17,6 +17,8 @@ assembleEfficiency(sections, spatial, detections.list, movements,
 \item{movements}{A list of movements for each target tag, created by groupMovements.}
 
 \item{minimum.detections}{The mininum number of times a tag must have been recorded during the study period for it to be considered a true tag and not random noise.}
+
+\item{replicate}{The Standard.Name of the stations to use as a replicate of the last array to estimate last detection efficiency.}
 }
 \value{
 A list containing 1) the intersection efficiency, 2) the inter-array efficiency and 3) the the intra-array efficiency.
