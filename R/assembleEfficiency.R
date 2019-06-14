@@ -48,7 +48,6 @@ assembleEfficiency <- function(sections, spatial, detections.list, movements, st
       output[[length(output) + 1]] <- list(results = inter.array, matrix = recipient[[i]])
     } else {
       inter.array <- simpleCJS(recipient[[i]], silent = FALSE)
-      appendTo("debug", "Terminating assembleEfficiency.")
       output[[length(output) + 1]] <- list(results = inter.array, matrix = recipient[[i]])
     }
   }
@@ -70,7 +69,7 @@ efficiencyMatrix <- function(spatial, movements, minimum.detections) {
   appendTo("debug", "Starting efficiencyMatrix.")
   efficiency <- as.data.frame(matrix(ncol = length(unlist(spatial$array.order)), nrow = length(movements)))
   colnames(efficiency) <- unlist(spatial$array.order)
-  rownames(efficiency) <- names(movements)
+  rownames(efficiency) <- stripCodeSpaces(names(movements))
   efficiency[is.na(efficiency)] = 0
   for (i in 1:length(movements)) {
     submoves <- movements[[i]][!grepl("Unknown", movements[[i]][, "Array"]), ]
@@ -104,7 +103,7 @@ efficiencyMatrix <- function(spatial, movements, minimum.detections) {
 #' 
 includeMissing <- function(x, status.df){
   appendTo("debug", "Starting includeMissing")
-  include <- as.character(status.df[-match(rownames(x), status.df$Transmitter),"Signal"])
+  include <- as.character(status.df[-match(rownames(x), status.df$Signal),"Signal"])
   x[include, ] = 0
   x[include, 1] = 1
   appendTo("debug", "Terminating includeMissing")
@@ -271,4 +270,203 @@ dualArray <- function(input, silent = TRUE){
   names(p) <- c("original", "replicate")
   if(!silent) appendTo("debug", "Terminating dualArray.")
   return(list(absolutes = absolutes, single.efficiency = p, combined.efficiency = combined.p))
+}
+
+#' Split CJS matrix and calculate separate CJS
+#' 
+#' @param input The CJS matrix to be split
+#' @param by a grouping vector with the same length has the number of rows in input
+#' @inheritParams simpleCJS
+#' 
+#' @return the split CJS
+#' 
+#' @export
+#' 
+splitCJS <- function(input, by, estimate = NULL){
+  if (!is.matrix(input))
+    stop("'input' must be a matrix object\n")
+  if (!is.vector(by))
+    stop("'by' must be a vector\n")
+  if (nrow(input) != length(by))
+    stop("Length of 'by' is not equal to the number of rows in 'input'.\n")
+
+  recipient <- split(input, by = by)
+
+  output <- list()
+  for (i in names(recipient)) {
+    results <- simpleCJS(recipient[[i]], estimate = estimate)
+    output[[length(output) + 1]] <- list(results = results, matrix = recipient[[i]])
+  }
+  names(output) <- names(recipient)
+  return(output)
+}
+
+#' Split CJS matrix and calculate separate CJS
+#' 
+#' @param ... The CJS matrixes to be joined
+#' @inheritParams simpleCJS
+#' 
+#' @return the combined CJS
+#' 
+#' @export
+#' 
+combineCJS <- function(..., estimate = NULL){
+  input <- list(...)
+
+  the.last <- unlist(lapply(input, function(x) tail(colnames(x),1)))
+  if (length(unique(the.last)) > 1)
+    stop("The last array is not the same in all input matrixes\n")
+
+  ncols <- unlist(lapply(input, ncol))
+  groups <- rev(sort(unique(ncols)))
+
+  combinedmatrixes <- list()
+  for (i in 1:length(groups)) {
+    to.join <- which(ncols == groups[i])
+    if (length(unique(table(unlist(lapply(input[to.join], colnames))))) != 1)
+      stop(paste("Matrixes", paste(to.join, collapse = ", "), "both contain", groups[i], "columns but the column names differ.\n"))
+    output <- input[[to.join[1]]]
+    if (length(to.join) > 1) {
+      for (j in 2:length(to.join))
+        output <- rbind(output, input[[to.join[i]]])
+    }
+    combinedmatrixes[[i]] <- output
+  }
+
+  if(length(combinedmatrixes) == 1)
+    return(simpleCJS(combinedmatrixes[[1]]))
+
+  the.CJSs <- list()
+  for (i in combinedmatrixes) {
+    the.CJSs[[length(the.CJSs) + 1]] <- simpleCJS(i, estimate = estimate)
+  }
+
+  return(recalculateCJS(input = the.CJSs, estimate = estimate))
+}
+
+#' Combine CJS model results
+#' 
+#' @param input A list of CJS results to be combined
+#' @inheritParams simpleCJS
+#' 
+#' @return the combined CJS
+#' 
+#' @keywords internal
+#' 
+recalculateCJS <- function(input, estimate = NULL){
+  # The first CJS starts the party
+  absolutes <- input[[1]]$absolutes
+  # Determine how many fish enter and where on the remaining CJSs
+  exN <- c()
+  for (i in input[-1]){
+    exN[length(exN) + 1] <- to.add[1, 1]
+    names(exN)[length(exN)] <- colnames(absolutes)[the.cols[1]]
+  }
+  # Extract variables from input, for easier handling below
+  m <- absolutes[1,]
+  r <- absolutes[2,]
+  z <- absolutes[3,]
+  p <- M <- rep(NA, ncol(absolutes))
+  S <- c()
+  counter <- 1
+  for(i in 1:(ncol(absolutes)-1)){
+    # probability of detection (p)
+    p[i] <- r[i] / (r[i] + z[i])
+    # number of fish estimated alive at i (M)
+    M[i] = round(m[i] / p[i], 0)
+
+    # Initial estimated number is the number of released fish
+    if (i == 1 && M[i] > absolutes[1, 1])
+      M[i] = absolutes[1, 1]
+
+    if (i > 1 && M[i] > M[i - 1]){
+      # If new fish entered the CJS in the last round, account for that
+      if (grepl(colnames(absolutes)[i - 1], names(exN))){
+        if (M[i] > M[i - 1] + input[[counter]]$absolutes[4, 2])
+          M[i] = M[i - 1] + input[[counter]]$absolutes[4, 2]
+      } else {
+        M[i] = M[i - 1]
+      }
+    }
+    # survival probability from i-1 to i (S)
+    if (i > 1) {
+      # If new fish entered the CJS in the last round, account for that
+      if(grepl(colnames(absolutes)[i - 1], names(exN)))
+        S[length(S) + 1] <- M[i] / (M[i - 1] + exN[colnames(absolutes)[i - 1]])
+      else
+        S[length(S) + 1] <- M[i] / M[i - 1]
+    } 
+    # NEW CJS ENTRY POINT
+    if (grepl(colnames(absolutes)[i], names(exN))) {
+      counter <- counter + 1
+      # Calculate survival from above release to release
+      tempS <- input[[counter]]$survival[1]
+      S[length(S)] <- tail(S,1)/tempS
+      if (S[length(S)] > 1)
+        S[length(S)] <- 1
+      S[length(S) + 1] <- tempS
+      # update absolutes with new CJS numbers
+      to.add <- input[[counter]]$absolutes
+      the.cols <- match(colnames(to.add), colnames(absolutes))[-1]
+      absolutes[, the.cols] <- absolutes[, the.cols] + to.add[, -1]
+      m <- absolutes[1,]
+      r <- absolutes[2,]
+      z <- absolutes[3,]
+      # update M to include the estimated from the new CJS
+      M[i] = M[i] + input[[counter]]$absolutes[4, 2]
+    }
+  }
+
+  # Calculate last S and last M if estimate is present
+  if (!is.null(estimate)) {
+    S[length(S) + 1] <- l / estimate
+    if (tail(S, 1) > 1)
+      S[length(S)] = 1
+    M[ncol(absolutes)] <- round(m[ncol(absolutes)] / estimate,0)
+    if (M[ncol(absolutes)] > M[ncol(absolutes) - 1])
+      M[ncol(absolutes)] = M[ncol(absolutes) - 1]
+  } else {
+    S[length(S) + 1] <- NA
+  }
+
+  # Exchange initial absolutes by final absolutes
+  absolutes[1,] <- m
+  absolutes[2,] <- r
+  absolutes[3,] <- z
+  absolutes[4,] <- M
+
+  # Give names to the efficiency estimates
+  names(p) <- colnames(absolutes)
+
+  # Compile final survival matrix
+  survival <- matrix(S, nrow = length(S))
+
+  the.strings <- colnames(absolutes)
+  the.strings[1] <- "RS1"
+  for (i in 1:length(exN)) {
+    pos <- match(names(exN)[i], the.strings)
+    the.strings <- c(the.strings[1:3], paste0("RS", j + 1), the.strings[4:length(the.strings)])
+  }
+  maxcharA <- max(nchar(the.strings[-length(the.strings)]))
+  maxcharB <- max(nchar(the.strings[-1]))
+
+  the.rows <- c()
+  for (i in 2:length(the.strings)) {
+    if(nchar(the.strings[i - 1] != maxcharA))
+      centeringA <- paste(rep(" ", maxcharA - nchar(the.strings[i - 1])), collapse = "")
+    else
+      centeringA <- ""
+    if(nchar(the.strings[i] != maxcharB))
+      centeringB <- paste(rep(" ", maxcharB - nchar(the.strings[i])), collapse = "")
+    else
+      centeringB <- ""
+    the.rows[i - 1] <- paste(centeringA, the.strings[i - 1], " -> ", the.strings[i], centeringB, " =", sep = "")
+  }
+  rownames(survival) <- the.rows
+  colnames(survival) <- ""  
+
+  if (is.null(estimate))
+    return(list(absolutes = absolutes, efficiency = p, survival = survival, lambda = l))
+  else
+    return(list(absolutes = absolutes, efficiency = p, survival = survival, lambda = l, estimate = estimate))  
 }
