@@ -2,6 +2,7 @@
 
 export(actel)
 export(clearWorkspace)
+export(combineCJS)
 export(createWorkspace)
 export(distanceMatrix)
 export(dualArray)
@@ -11,4 +12,5 @@ export(movementTimes)
 export(simpleCJS)
 export(simplifyMovements)
 export(speedReleaseToFirst)
+export(splitCJS)
 export(transitionLayer)
