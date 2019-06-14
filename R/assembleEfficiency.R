@@ -358,7 +358,8 @@ recalculateCJS <- function(input, estimate = NULL){
   # Determine how many fish enter and where on the remaining CJSs
   exN <- c()
   for (i in input[-1]){
-    exN[length(exN) + 1] <- to.add[1, 1]
+    the.cols <- match(colnames(i$absolutes), colnames(absolutes))[-1]
+    exN[length(exN) + 1] <- i$absolutes[1, 1]
     names(exN)[length(exN)] <- colnames(absolutes)[the.cols[1]]
   }
   # Extract variables from input, for easier handling below
@@ -368,7 +369,7 @@ recalculateCJS <- function(input, estimate = NULL){
   p <- M <- rep(NA, ncol(absolutes))
   S <- c()
   counter <- 1
-  for(i in 1:(ncol(absolutes)-1)){
+  for(i in 1:(ncol(absolutes) - 1)){
     # probability of detection (p)
     p[i] <- r[i] / (r[i] + z[i])
     # number of fish estimated alive at i (M)
@@ -414,6 +415,9 @@ recalculateCJS <- function(input, estimate = NULL){
       # update M to include the estimated from the new CJS
       M[i] = M[i] + input[[counter]]$absolutes[4, 2]
     }
+    # lambda (last S * last P) 
+    if (i == (ncol(absolutes) - 1))
+      l <- r[[i]] / m[[i]]
   }
 
   # Calculate last S and last M if estimate is present
@@ -444,7 +448,7 @@ recalculateCJS <- function(input, estimate = NULL){
   the.strings[1] <- "RS1"
   for (i in 1:length(exN)) {
     pos <- match(names(exN)[i], the.strings)
-    the.strings <- c(the.strings[1:3], paste0("RS", j + 1), the.strings[4:length(the.strings)])
+    the.strings <- c(the.strings[1:3], paste0("RS", i + 1), the.strings[4:length(the.strings)])
   }
   maxcharA <- max(nchar(the.strings[-length(the.strings)]))
   maxcharB <- max(nchar(the.strings[-1]))
