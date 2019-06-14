@@ -95,7 +95,7 @@ distanceMatrix <- function(t.layer, starters, targets = starters, EPSGcode,
 	}
 	#### Process the "from" coordinates (this would be the starters ".csv" file)
 	sp::coordinates(starters) <- ~ longitude + latitude # converts the file to a spatialPoints object
-	raster::crs(starters) <- raster::crs(data.crs) # sets the crs to degrees
+	raster::crs(starters) <- raster::crs(data.crs) # sets the crs to metres
 	#### Process the "to" coordinates (this would be the targets ".csv" file)
 	sp::coordinates(targets) <- ~ longitude + latitude # converts the file to a spatialPoints object
 	raster::crs(targets) <- raster::crs(data.crs)
