@@ -252,6 +252,7 @@ actel <- function(path = NULL, sections, success.arrays, minimum.detections = 2,
         biometric.fragment = biometric.fragment, survival.graph.size = survival.graph.size,
         individual.plots = individual.plots, spatial = spatial, efficiency.fragment = efficiency.fragment), quiet = TRUE)
     fs::file_move(sub("Rmd", "html", reportname), sub("Report/", "", sub("Rmd", "html", reportname)))
+    hide <- system(paste0('open "', sub("Report/", "", sub("Rmd", "html", reportname)), '"'), show.output.on.console = FALSE)
     if(file.exists("Report/toc_menu.html"))
       file.remove("Report/toc_menu.html")
   }
