@@ -114,9 +114,7 @@ excludeTags <- function(input, exclude.tags, silent){
 #' @keywords internal
 #' 
 noDetectionsCheck <- function(input, bio){
-  tag.list <- vector()
-  for (i in seq_len(length(input))) tag.list[i] <- tail(unlist(strsplit(names(input)[i], "-")), 1)
-  link <- match(bio$Signal, tag.list)
+  tag.list <- stripCodeSpaces(names(input))
   appendTo("debug", "Starting noDetectionsCheck.")  
   if (all(is.na(link))) {
     appendTo(c("Screen", "Report"), "M: No detections were found in the input data which matched the target signals.")
@@ -125,6 +123,18 @@ noDetectionsCheck <- function(input, bio){
   }
   appendTo("debug", "Terminating noDetectionsCheck.")  
   return(list(list = tag.list,link = link))
+}
+
+#' Remove Code Spaces from transmitter names
+#' 
+#' @param input A vector of transmitter names
+#' 
+#' @keywords internal
+#' 
+stripCodeSpaces <- function(input) {
+  output <- vector()
+  for (i in seq_len(length(input))) output[i] <- tail(unlist(strsplit(input[i], "-")), 1)
+  return(output)
 }
 
 #' Check if there are duplicated signals in the detected tags.
