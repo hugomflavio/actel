@@ -26,7 +26,6 @@ assembleEfficiency <- function(sections, spatial, detections.list, movements, st
     }
   }
 
-# I was here, about to get the CJS to run for every element of recipient
   if (!is.null(replicate)) {
     get.estimate = TRUE
     last.array <- tryCatch(lastMatrix(spatial = spatial, detections.list = detections.list, replicate = replicate),
