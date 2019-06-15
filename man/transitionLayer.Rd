@@ -4,16 +4,23 @@
 \alias{transitionLayer}
 \title{Calculate distance matrix}
 \usage{
-transitionLayer(shape, x.res, y.res, EPSGcode, directions = c(16, 8, 4))
+transitionLayer(shape, size, EPSGcode, directions = c(16, 8, 4),
+  force = FALSE)
 }
 \arguments{
 \item{shape}{A shape file from which to create the transition layer.}
 
-\item{x.res, y.res}{If map is a shapefile, sets the resolution for the creation of the transition layer. Ignored if map is a pre-rendered transition layer.}
+\item{size}{The pixel size, in metres.}
 
-\item{directions}{If map is a shapefile,the number of directions considered for every single movement situation during cost calculation. Ignored if map is a pre-rendered transition layer.}
+\item{EPSGcode}{The EPSG code corresponding to the coordinate system of the input data. All inputs must be in the same metric system. DO NOT use degree-based coordinates.}
+
+\item{directions}{The number of directions considered for every movement situation during cost calculation.}
+
+\item{force}{logical: if TRUE, allows producing transition layers with more than 2000 pixels on one or both axes.}
 }
 \description{
 Adapted from Grant Adams' script "distance to closest mpa". (grant.adams@eagles.usm.edu)
+}
+\details{
 https://cran.r-project.org/web/packages/gdistance/vignettes/gdistance1.pdf
 }

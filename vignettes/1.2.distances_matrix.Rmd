@@ -1,0 +1,176 @@
+---
+title: "1.2) Creating a distances matrix"
+author: "Hugo Flávio"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{1.2) Creating a distances matrix}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+## Index
+
+1. [Preparing your data](1.0.workspace_requirements.html)
+    1. [Structuring the study area](1.1.study_area.html)
+    1. [**Creating a distances matrix**](1.2.distances_matrix.html)
+1. [Running actel](2.0.running_analysis.html)
+1. [What is actel doing?](3.0.the_sorting_process.html)
+    1. [Errors and messages](3.1.messages.html)
+1. [Inspecting the results](4.inspecting_results.html)
+1. [Refining the results](5.refining_results.html)
+
+## What is the distances matrix?
+
+A distances matrix is a table that contains information on  the distance (in metres) between every pair of spatial elements in your study area (i.e. your receivers and your release sites). It looks like the table below:
+
+|        |     St.1|     St.2|     St.3|     St.4|       St.5|       St.6|   Release|
+|:-------|--------:|--------:|--------:|--------:|----------:|----------:|---------:|
+|St.1    |    0.000| 1366.153| 3417.379| 6912.118|  8863.6829|  9272.5684|  2229.759|
+|St.2    | 1366.153|    0.000| 2051.225| 5545.964|  7497.5297|  7906.4151|  3569.994|
+|St.3    | 3417.379| 2051.225|    0.000| 3528.232|  5479.7976|  5888.6830|  5621.219|
+|St.4    | 6912.118| 5545.964| 3528.232|    0.000|  1963.4126|  2372.2981|  9115.958|
+|St.5    | 8863.683| 7497.530| 5479.798| 1963.413|     0.0000|   408.8854| 11067.524|
+|St.6    | 9272.568| 7906.415| 5888.683| 2372.298|   408.8854|     0.0000| 11476.409|
+|Release | 2229.759| 3569.994| 5621.219| 9115.958| 11067.5236| 11476.4090|     0.000|
+
+Note:
+  : The matrix is simetric (i.e. the entries of the matrix are symmetric with respect to the main diagonal).
+  : The diagonal line is composed of 0's as it represents the distance between an element and itself.
+
+## Creating your distances matrix
+
+There are two ways to create a distance matrix for actel: manually, or automatically. While the manual way is more prone to errors and can be tedious, the automatic way can take some time and requires some GIS knowledge. It is up to you to decide which way to use:
+
+### The manual way
+
+The manual way is simple. In your R session, move to the folder where you have your spatial file, and run the command `emptyMatrix()`. This will read your spatial data and create a matrix that is in acoordance with it. It is important that you create your template this way, as the column and row names of the distance matrix are essential for actel to recognise the data. Below is an example of a distances matrix created by `emptyMatrix()`.
+
+|        | St.1| St.2| St.3| St.4| St.5| St.6| Release|
+|:-------|----:|----:|----:|----:|----:|----:|-------:|
+|St.1    |    0|     |     |     |     |     |        |
+|St.2    |     |    0|     |     |     |     |        |
+|St.3    |     |     |    0|     |     |     |        |
+|St.4    |     |     |     |    0|     |     |        |
+|St.5    |     |     |     |     |    0|     |        |
+|St.6    |     |     |     |     |     |    0|        |
+|Release |     |     |     |     |     |     |       0|
+
+The correspondence between the standard names (e.g. "St.1", "St.2") and your receivers can be found in your 'spatials.csv' file, under the column "Standard.Name".
+
+Now, you can fill in the matrix directly by opening it with a spreadsheet editor. To simplify the task, you can fill in the upper diagonal-half of the matrix, save the file, and then run `completeMatrix()`.
+
+Here is how it works:
+
+1. Fill in the top part of the matrix:
+
+|        | St.1| St.2| St.3| St.4|  St.5| St.6| Release|
+|:-------|----:|----:|----:|----:|-----:|----:|-------:|
+|St.1    |    0| 1366| 3417| 6912|  8864| 9273|    2230|
+|St.2    |     |    0| 2051| 5546|  7498| 7906|    3570|
+|St.3    |     |     |    0| 3528|  5480| 5889|    5621|
+|St.4    |     |     |     |    0|  1963| 2372|    9116|
+|St.5    |     |     |     |     |     0|  409|   11068|
+|St.6    |     |     |     |     |      |    0|   11476|
+|Release |     |     |     |     |      |     |       0|
+
+
+1. Save the file as 'distances.csv'
+
+1. Run `completeMatrix()` in the same working directory and the matrix will be completed for you:
+
+|        | St.1| St.2| St.3| St.4|  St.5|  St.6| Release|
+|:-------|----:|----:|----:|----:|-----:|-----:|-------:|
+|St.1    |    0| 1366| 3417| 6912|  8864|  9273|    2230|
+|St.2    | 1366|    0| 2051| 5546|  7498|  7906|    3570|
+|St.3    | 3417| 2051|    0| 3528|  5480|  5889|    5621|
+|St.4    | 6912| 5546| 3528|    0|  1963|  2372|    9116|
+|St.5    | 8864| 7498| 5480| 1963|     0|   409|   11068|
+|St.6    | 9273| 7906| 5889| 2372|   409|     0|   11476|
+|Release | 2230| 3570| 5621| 9116| 11068| 11476|       0|
+
+Note:
+  : The distance values **must** be in metres!
+
+### The automatic way
+
+As your studies start having more and more receivers, it might get complicated to find and write down the distances between every single combination of receivers and release sites. To avoid doing this manually, you can get R to do it for your. To get R to compute the distances for you, you will need:
+
+1. A shapefile with a land polygon of your study area, in a metric system
+1. The coordinates of your receivers and release sites in **the same** metric system
+
+If you are not familiar with shapefiles and GIS, it might be a good idea to ask the help of some colleague.
+
+#### Preparing the shapefile
+
+To begin, you need to create a shapefile that extends over all your receivers and release sites. This shapefile is expected to contain polygons of the land masses, which means that your rivers, lakes, fjords and any water bodies must be "empty space". The width of your water channels is important, as the shapefile will be converted into a raster later on (i.e. a image made of pixels). If your pixels represent squares of 30 by 30 metres, and your channel width originally was of five metres, then the river path will be lost during the conversion process.
+
+Note:
+  : The shapefile extent **must** be rounded (e.g. 20100 by 7500 metres instead of 20089 by 7499 metres). You will find out why later on.
+  : You **must** save the shapefile in a metric coordinate system, or otherwise the distance calculation will return wrong measurements.
+
+Below is an example of the study area in the left, and the respective shapefile in the right:
+
+<img src="distances_shape_1.png" alt="drawing" width="330"/> <img src="distances_shape_2.png" alt="drawing" width="330"/>
+
+Once you have your shapefile ready, copy the the shapefile and respective auxiliary files to the folder where you have your 'spatial.csv'. Later on you will need to know the **EPSG code** of the coordinate system being used (e.g. 29902).
+
+##### Preparing the spatial.csv file
+
+In your spatial file, you must include two columns with the coordinates for your receivers and release sites. These coordinates **must** be in the same metric system as the shapefile you just created before. Later on, you will need to know the *column names* of the columns that contain the X and Y coordinates.
+
+Note that you **must** have at least one release site, and that the name of the release sites must be identical in your 'spatial.csv' and your 'biometrics.csv'. 
+
+#### Creating a transition layer
+
+Now that both your shapefile and your spatial.csv file are ready, lets get back to R. The first thing you need to do is create a transition layer, which will convert your shapefile into an object that R can use to track distances. The function you will need to run is:
+
+```r
+transitionLayer(shape, size, EPSGcode, directions)
+```
+
+1. The `shape` is the name of your shapefile, including the ".shp" extension. 
+1. The `size` determines the size of the transition layer's pixels. 
+  
+    For example, if `size = 20`, then each pixel will have 20 by 20 meters. 
+
+    Keep in mind that your pixel size must allow R to still capture the presence of your river channels. If the river channels are too slim, you can go back to your shapefile and artificially enlarge the river channel.
+    
+    Note that the chosen `size` **must** allow for an integer number of pixels to cover your shapefile (i.e., `size` must be a divisor of your shapefile's resolution).
+
+1. The `EPSGcode` is the code of the coordinate system that the shapefile was saved in.
+1. The `directions` determine the complexity of R's distance tracking techniques. It can take one of four values: four, eight or sixteen, defaulting to the latter.
+
+    * If `directions = 4`, the fish can only in the direction of the cardinal winds (North, South, East and West). 
+    * If `directions = 8`, the fish can also move in a intercardinal wind direction (Northeast, Nortwest, Southeast and Southwest). 
+    * If `directions = 16`, then the fish can also move in the eight half-winds' directions.
+
+    Increasing the `directions` improves the distance estimation fidelity, but also increases computation time.
+
+Transition layers can take a long time to compute. To avoid waiting a long time and finding out something went wrong, we recommend that you start with a larger pixel `size`. For example, if your shapefile has 20000 by 7000 metres, you can start with `size = 20` (i.e. 1000 by 350 pixels), and then move on to `size = 10` if you feel you could gain more detail from it.
+
+This function will save the generated transition layer to 'transition.layer.RData' in your working directory. The hard part is done.
+
+#### Creating the distances matrix
+
+Once you have your transition layer, you can use it to calculate multiple distances matrixes, as long as the target objects fall within the extent of the original shapefile. To create your distances matrix, you must run this function in the same working directory as your transition layer and your 'spatial.csv' file:
+
+```r
+distancesMatrix(coord.x, coord.y, EPSGcode)
+```
+
+Fill in the column names of the X and Y coordinates of your 'spatial.csv' file in `coord.x` and `coord.y`. Like before, the EPSGcode is the code of the coordinate system of the points (the same as the shapefile's). When you run this command, a file 'distances.csv' will be created in your working directory. 
+
+Actel will automatically recognise this file and activate speed calculations in your next analysis!
+
+Note:
+  : It is important that you check the results of this process by inspecting your distances matrix. If the distances do not look correct, you may have accidentally done something wrong in the steps above.
+
+[Back to top.](#)

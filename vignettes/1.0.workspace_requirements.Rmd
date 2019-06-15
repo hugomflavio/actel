@@ -20,8 +20,8 @@ knitr::opts_chunk$set(
 
 1. [**Preparing your data**](1.0.workspace_requirements.html)
     1. [Structuring the study area](1.1.study_area.html)
+    1. [Creating a distances matrix](1.2.distances_matrix.html)
 1. [Running actel](2.0.running_analysis.html)
-    <!-- 1. [Installing a TeX distribution](2.1.installing_tex.html) -->
 1. [What is actel doing?](3.0.the_sorting_process.html)
     1. [Errors and messages](3.1.messages.html)
 1. [Inspecting the results](4.inspecting_results.html)
