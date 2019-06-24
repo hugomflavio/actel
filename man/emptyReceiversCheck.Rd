@@ -14,3 +14,4 @@ emptyReceiversCheck(spatial, detections)
 \description{
 Check for unknown receivers in the raw detections
 }
+\keyword{internal}

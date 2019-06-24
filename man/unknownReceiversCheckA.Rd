@@ -14,3 +14,4 @@ unknownReceiversCheckA(detections, spatial)
 \description{
 Check for unknown receivers in the raw detections
 }
+\keyword{internal}

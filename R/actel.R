@@ -1,32 +1,7 @@
 #' Actel: Acoustic telemetry data sorting
 #' 
-#' The actel package provides a systematic way of analysing fish migration data.
-#' 
-#' @section exampleWorkspace
-#' 
-#' The exampleWorkspace() function creates a directory containing real data. You can
-#' then run the analysis on that data to get an overview of the process. When you run
-#' exampleWorkspace() the code required to analyse the data will be automatically
-#' provided.
-#' 
-#' @section createWorkspace
-#' 
-#' The createWorkspace() function is similar to the one above, but it creates template 
-#' files instead, which you can use to quickly transform your data to the required formats.
-#' 
-#' @section actel
-#' 
-#' The actel() function runs your analysis. This function has many variables and
-#' although you do not need to work with all of them right away, we recommend
-#' that you read the actel vignettes before running this function.
-#' 
-#' @docType package
-#' @name actel
-NULL
-
-#' Runs the analyses
-#'
-#' Collects the input present in the target folder and analyses the telemetry data.
+#' The actel package provides a systematic way of analysing fish migration data. Its main function, actel, collects the input present in the target folder and analyses the telemetry data.
+#' It is recommended to read the package's vignettes before running this function. You can find the vignettes by running browseVignettes('actel')
 #' 
 #' @param path Path to the folder containing the data. If the R session is already running in the target folder, path may be left as NA
 #' @param sections The sections in which the study was divided. Must be coincident with the names given to the ALS arrays. (i.e. if an array is 'River1', then the respective section is 'River') 

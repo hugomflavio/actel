@@ -3,6 +3,8 @@
 #' @inheritParams splitDetections
 #' @inheritParams loadDetections
 #' 
+#' @keywords internal
+#' 
 unknownReceiversCheckA <- function(detections, spatial){
   appendTo("debug", "Starting unknownReceiversCheckA.")  
   if (any(trigger <- is.na(match(unique(detections$Receiver), spatial$receivers.serial)))) {
@@ -57,6 +59,8 @@ unknownReceiversCheckB <- function(detections.list, spatial) {
 #' @inheritParams splitDetections
 #' @inheritParams loadDetections
 #' 
+#' @keywords internal
+
 emptyReceiversCheck <- function(spatial, detections){
   appendTo("debug", "Starting emptyReceiversCheck.")
   empty.receivers <- sum(is.na(match(spatial$receivers.serial, unique(detections$Receiver))))

@@ -12,3 +12,4 @@ A TRUE/FALSE decision
 \description{
 Creates a "Report" folder if necessary and silently activates ggplot2 and reshape2 to avoid startup messages
 }
+\keyword{internal}

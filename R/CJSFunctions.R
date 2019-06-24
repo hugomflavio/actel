@@ -48,7 +48,7 @@ getEstimate <- function(spatial, detections.list, replicate){
     last.array <- tryCatch(lastMatrix(spatial = spatial, detections.list = detections.list, replicate = replicate),
       error = function(e) {cat("Error in lastMatrix(): "); message(e); cat("\nRunning CJS without last array efficiency estimate.\n"); get.estimate <<- FALSE})
     if (get.estimate) {
-      last.array.efficiency <- dualArray(input = last.array, silent = FALSE)
+      last.array.efficiency <- dualArrayCJS(input = last.array, silent = FALSE)
       last.array.results <- list(results = last.array.efficiency, matrix = last.array)
     } else {
       last.array.results <- "Replicates could not be used for last array estimation."
@@ -395,7 +395,7 @@ lastMatrix <- function(spatial, detections.list, replicate){
 #' 
 #' @export
 #' 
-dualArray <- function(input, silent = TRUE){
+dualArrayCJS <- function(input, silent = TRUE){
   if(!silent) appendTo("debug", "Starting dualArray.")
   r <- z <- p <- m <- M <- rep(NA, ncol(input))
   for(i in 1:(ncol(input))){

@@ -4,6 +4,8 @@
 #'
 #' @return A TRUE/FALSE decision
 #' 
+#' @keywords internal
+#' 
 folderCheck <- function(report, redraw){
   if (report) {
     appendTo("Report", "M: 'report' option has been activated.")
