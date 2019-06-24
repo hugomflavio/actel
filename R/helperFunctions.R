@@ -207,7 +207,7 @@ emergencyBreak <- function() {
 #' 
 #' @keywords internal
 #' 
-pathCheck <- function(my.home,path) {
+pathCheck <- function(my.home, path) {
   appendTo("debug", "Starting pathCheck.")
   if (!is.null(path)) {
     if (dir.exists(path)) {
@@ -285,18 +285,6 @@ commentCheck <- function(line, tag) {
   return(decision)
 }
 
-#' LaTeX instructions
-#'  
-helpLatex <- function(){
-cat("Quick instructions to get LaTeX running:
-
-  1) Get MiKTeX here: https://miktex.org/download
-  2) Activate the installation of packages 'on the fly' when installing MiKTeX.
-  3) Try running actel again.
-
-For more details, read our vignette on the subject. Use browseVignettes('actel') to find it.\n")
-}
-
 #' Delete previous analysis files from the current workspace. Input files are not deleted.
 #' 
 #' @export
@@ -320,4 +308,22 @@ clearWorkspace <- function(skip = NA){
   } else {
     cat("Workspace already clean.\n")
   }
+}
+
+#' Check internet connection
+#'
+#' For an unknown reason, R will crash if it attemps to open the html report in a pc with no internet connection.
+#' The report opens, but the progress freezes and R eventually crashes. Can be removed once figured out why this
+#' is happening.
+#' 
+#' @keywords internal
+#' 
+havingIP <- function() {
+  if (.Platform$OS.type == "windows") {
+    ipmessage <- system("ipconfig", intern = TRUE)
+  } else {
+    ipmessage <- system("ifconfig", intern = TRUE)
+  }
+  validIP <- "((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)[.]){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)"
+  any(grep(validIP, ipmessage))
 }

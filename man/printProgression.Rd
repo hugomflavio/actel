@@ -4,14 +4,16 @@
 \alias{printProgression}
 \title{Print progression graphic}
 \usage{
-printProgression(progression, success.arrays, spatial)
+printProgression(status.df, overall.CJS, split.CJS, group.CJS)
 }
 \arguments{
-\item{progression}{A dataframe containing the number of fish that crossed each ALS array. Supplied by assembleProgression.}
+\item{status.df}{A dataframe with all the final data for each fish, created by assembleOutput.}
 
-\item{success.arrays}{The ALS arrays that mark the end of the study area. If a fish crosses one of these arrays, it is considered to have successfully migrated through the area.}
+\item{overall.CJS}{a single CJS with all the groups and release sites merged}
 
-\item{spatial}{A list of the spatial objects, created by assembleSpatial.}
+\item{split.CJS}{a list of CJS's for each group.release combination}
+
+\item{group.CJS}{a list of CJS's for each group, with release sites merged}
 }
 \description{
 Prints progression graphics per fish group and release site.

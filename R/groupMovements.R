@@ -2,15 +2,19 @@
 #'
 #' Crawls trough the detections of each fish and groups them based on ALS arrays and time requirements.
 #' 
+#' @param detections.list A list of the detections split by each target tag, created by splitDetections.
+#' @param dist.mat A matrix of the distances between the deployed ALS.
+#' @param invalid.dist Wether or not the distance matrix suplied is valid for the study area.
 #' @inheritParams actel
-#' @inheritParams assembleEfficiency
-#' @inheritParams assembleOutput
+#' @inheritParams splitDetections
+#' @inheritParams loadDetections
 #' 
 #' @return A list of movement events for each fish.
 #' 
 #' @keywords internal
 #' 
-groupMovements <- function(detections.list, bio, spatial, speed.method, maximum.time, tz.study.area, dist.mat, invalid.dist) {
+groupMovements <- function(detections.list, bio, spatial, speed.method, maximum.time, 
+  tz.study.area, dist.mat, invalid.dist) {
   appendTo("debug", "Starting groupMovements.")
   movements <- list()
   round.points <- roundDown(seq(from = length(detections.list)/10, to = length(detections.list), length.out = 10), to = 1)
@@ -91,8 +95,8 @@ groupMovements <- function(detections.list, bio, spatial, speed.method, maximum.
 
 #' Check for movements upstream fo the release site.
 #'
-#' @inheritParams assembleEfficiency
-#' @inheritParams assembleOutput
+#' @inheritParams splitDetections
+#' @inheritParams loadDetections
 #' @param i The tag being analysed.
 #' @param recipient The movement events table for the tag.
 #' 
@@ -192,7 +196,8 @@ upstreamCheck <- function(i, recipient, bio, spatial) {
 #'
 #' @param fish The transmitter to be refined. If left empty, all fish present in the movements will be simplified.
 #' @inheritParams actel
-#' @inheritParams assembleOutput
+#' @param status.df A dataframe with all the final data for each fish, created by assembleOutput.
+#' @param movements A list of movements for each target tag, created by groupMovements.
 #' 
 #' @return The movement dataframe containing only valid events
 #' 

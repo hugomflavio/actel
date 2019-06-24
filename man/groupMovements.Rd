@@ -14,6 +14,8 @@ groupMovements(detections.list, bio, spatial, speed.method, maximum.time,
 
 \item{spatial}{A list of the spatial objects, created by assembleSpatial.}
 
+\item{speed.method}{One of 'last to first' or 'first to first'. In the former, the last detection on a given array/section is matched to the first detection on the next array/section (default). If changed to 'first to first', the first detection on two consecutive arrays/sections are used to perform the calculations.}
+
 \item{maximum.time}{The number of minutes that must pass between detections for a new event to be created.}
 
 \item{tz.study.area}{The timezone of the study area. Necessary to conver the ALS time data, which is in UTC.}

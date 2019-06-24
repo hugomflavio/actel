@@ -3,7 +3,8 @@
 #' Triggers movementTimes and also calculates the speed between events.
 #'
 #' @inheritParams actel
-#' @inheritParams assembleOutput
+#' @inheritParams simplifyMovements
+#' @inheritParams groupMovements
 #' @param silent logical: If TRUE, debug messages are issued (only works within actel)
 #' 
 #' @return The movement dataframe with time and speed calculations
@@ -40,7 +41,7 @@ movementSpeeds <- function(movements, speed.method, dist.mat, silent = TRUE) {
 #' 
 #' Determines the duration of an event and the time from an event to the next. 
 #'
-#' @inheritParams assembleOutput
+#' @inheritParams simplifyMovements
 #' @inheritParams movementSpeeds
 #' 
 #' @return The movement dataframe with time and speed calculations
@@ -86,7 +87,8 @@ movementTimes <- function(movements, silent = TRUE){
 #' 
 #' @inheritParams simplifyMovements
 #' @inheritParams actel
-#' @inheritParams assembleOutput
+#' @inheritParams groupMovements
+#' @inheritParams movementSpeeds
 #' 
 #' @return The movement dataframe containing the missing information.
 #' 

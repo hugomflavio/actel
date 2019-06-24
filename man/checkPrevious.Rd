@@ -9,7 +9,7 @@ checkPrevious(last.events, j)
 \arguments{
 \item{last.events}{A vector of the movement numbers corresponding to each last event. Is supplied by the function findLastEvents.}
 
-\item{j}{The current section index}
+\item{j}{the row being analysed}
 }
 \value{
 The previous valid last event index

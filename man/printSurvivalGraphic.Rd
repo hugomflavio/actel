@@ -4,10 +4,10 @@
 \alias{printSurvivalGraphic}
 \title{Print survival graphic}
 \usage{
-printSurvivalGraphic(group.overview)
+printSurvivalGraphic(section.overview)
 }
 \arguments{
-\item{group.overview}{A dataframe containing the survival per group of fish present in the biometrics. Supplied by assembleOverview.}
+\item{section.overview}{A dataframe containing the survival per group of fish present in the biometrics. Supplied by assembleOverview.}
 }
 \description{
 Prints survival graphics per fish group.

@@ -2,7 +2,7 @@
 % Please edit documentation in R/printFunctions.R
 \name{folderCheck}
 \alias{folderCheck}
-\title{Check latex compatibility}
+\title{Check report compatibility}
 \usage{
 folderCheck(report, redraw)
 }
@@ -10,5 +10,5 @@ folderCheck(report, redraw)
 A TRUE/FALSE decision
 }
 \description{
-Looks for the installed packages
+Creates a "Report" folder if necessary and silently activates ggplot2 and reshape2 to avoid startup messages
 }

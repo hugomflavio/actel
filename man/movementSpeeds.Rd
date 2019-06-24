@@ -9,6 +9,8 @@ movementSpeeds(movements, speed.method, dist.mat, silent = TRUE)
 \arguments{
 \item{movements}{A list of movements for each target tag, created by groupMovements.}
 
+\item{speed.method}{One of 'last to first' or 'first to first'. In the former, the last detection on a given array/section is matched to the first detection on the next array/section (default). If changed to 'first to first', the first detection on two consecutive arrays/sections are used to perform the calculations.}
+
 \item{dist.mat}{A matrix of the distances between the deployed ALS.}
 
 \item{silent}{logical: If TRUE, debug messages are issued (only works within actel)}

@@ -6,6 +6,9 @@
 \usage{
 printBiometrics(bio)
 }
+\arguments{
+\item{bio}{A table with the tags and biometrics of the studied fish.}
+}
 \value{
 string to be included in printRmd
 }

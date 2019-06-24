@@ -173,4 +173,7 @@ Actel will automatically recognise this file and activate speed calculations in 
 Note:
   : It is important that you check the results of this process by inspecting your distances matrix. If the distances do not look correct, you may have accidentally done something wrong in the steps above.
 
+**<a href="javascript:history.back()">Return to previous page</a>**
+
 [Back to top.](#)
+

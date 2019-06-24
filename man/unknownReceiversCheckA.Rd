@@ -7,6 +7,8 @@
 unknownReceiversCheckA(detections, spatial)
 }
 \arguments{
+\item{detections}{A dataframe with all the detections. Supplied by loadDetections.}
+
 \item{spatial}{A list of the spatial objects, created by assembleSpatial.}
 }
 \description{

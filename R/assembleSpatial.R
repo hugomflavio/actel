@@ -2,7 +2,7 @@
 #' 
 #' Creates a list containing multiple spatial elements required throughout the analyses
 #' 
-#' @inheritParams assembleOutput
+#' @inheritParams splitDetections
 #' @inheritParams actel
 #' 
 #' @return A list of 1) stations, 2) release sites, 3) ALS columns in the spatial file, 4) the Number of ASL, 5) The ALS serial numbers and 6) the array order.
@@ -78,6 +78,10 @@ assembleSpatial <- function(bio, sections) {
       stop("Stopping analysis per user command.\n")
     }
   }
+  # Order release sites by entry point.
+  if(!is.ordered(match(release.sites$Array, unlist(array.order))))
+    release.sites <- release.sites[order(match(release.sites$Array, unlist(array.order))),]
+  # join everything
   output <- list(stations = stations, 
                  release.sites = release.sites, 
                  receiver.columns = receiver.columns, 

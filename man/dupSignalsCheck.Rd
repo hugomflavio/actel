@@ -10,6 +10,8 @@ dupSignalsCheck(input, bio, tag.list)
 \item{input}{list of detections}
 
 \item{bio}{A table with the tags and biometrics of the studied fish.}
+
+\item{tag.list}{list of the target signals}
 }
 \description{
 Check if there are duplicated signals in the detected tags.

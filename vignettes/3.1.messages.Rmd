@@ -310,4 +310,6 @@ In this page you can find additional help if you run into trouble using actel. E
 
 	If you activated the `report` option, actel will attempt to compile a PDF report based on a TeX file. If you do not have TeX installed, you can [find out how to install TeX here](2.1.installing_tex.html). IF you have a TeX distribution installed and the problem persists, please contact the development team.
 
+**<a href="javascript:history.back()">Return to previous page</a>**
+
 [Back to top.](#)

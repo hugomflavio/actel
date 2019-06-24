@@ -113,6 +113,22 @@ Including your detections is the easiest part. Copy the *.csv* files offloaded f
 W: File 'filename' does not match to any of the supported hydrophone file formats! If your file corresponds to a hydrophone log and actel did not recognize it, please contact the developer team: teamcontact
 ```
 
+## Optional: Distances matrix
+
+A distances matrix is a table that contains information on  the distance (in metres) between every pair of spatial elements in your study area (i.e. your receivers and your release sites). It looks like the table below:
+
+|        |     St.1|     St.2|     St.3|     St.4|       St.5|       St.6|   Release|
+|:-------|--------:|--------:|--------:|--------:|----------:|----------:|---------:|
+|St.1    |    0.000| 1366.153| 3417.379| 6912.118|  8863.6829|  9272.5684|  2229.759|
+|St.2    | 1366.153|    0.000| 2051.225| 5545.964|  7497.5297|  7906.4151|  3569.994|
+|St.3    | 3417.379| 2051.225|    0.000| 3528.232|  5479.7976|  5888.6830|  5621.219|
+|St.4    | 6912.118| 5545.964| 3528.232|    0.000|  1963.4126|  2372.2981|  9115.958|
+|St.5    | 8863.683| 7497.530| 5479.798| 1963.413|     0.0000|   408.8854| 11067.524|
+|St.6    | 9272.568| 7906.415| 5888.683| 2372.298|   408.8854|     0.0000| 11476.409|
+|Release | 2229.759| 3569.994| 5621.219| 9115.958| 11067.5236| 11476.4090|     0.000|
+
+**[You can learn more about creating distances matrices in this page.](1.2.distances_matrix.html)**
+
 Now that you know how to organise your workspace, [let's get the analysis going!](2.0.running_analysis.html)
 
 [Back to top.](#)

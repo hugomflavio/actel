@@ -121,7 +121,7 @@ loadBio <- function(){
 #' Finds the detections' files and processes them.
 #' 
 #' @inheritParams actel
-#' @inheritParams assembleEfficiency
+#' @param spatial A list of the spatial objects, created by assembleSpatial.
 #' 
 #' @return A dataframe with all the detections
 #' 
@@ -373,7 +373,7 @@ convertTimes <- function(input, start.timestamp, end.timestamp, tz.study.area) {
 #' Matches the ALS serial number to the stations in the study area, standardizing the ALS station names.
 #' 
 #' @inheritParams convertCodes
-#' @inheritParams assembleEfficiency
+#' @inheritParams loadDetections
 #'
 #' @return A dataframe with standardized station names.
 #'

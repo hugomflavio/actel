@@ -73,4 +73,6 @@ Here is an example:
 
 Now you know how to organise your study area in a way that actel will understand!
 
+**<a href="javascript:history.back()">Return to previous page</a>**
+
 [Back to top.](#)

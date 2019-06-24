@@ -11,6 +11,8 @@ simplifyMovements(fish = NULL, movements, status.df, sections)
 
 \item{movements}{A list of movements for each target tag, created by groupMovements.}
 
+\item{status.df}{A dataframe with all the final data for each fish, created by assembleOutput.}
+
 \item{sections}{The sections in which the study was divided. Must be coincident with the names given to the ALS arrays. (i.e. if an array is 'River1', then the respective section is 'River')}
 }
 \value{

@@ -24,6 +24,8 @@ actel(path = NULL, sections, success.arrays, minimum.detections = 2,
 
 \item{maximum.time}{The number of minutes that must pass between detections for a new event to be created.}
 
+\item{speed.method}{One of 'last to first' or 'first to first'. In the former, the last detection on a given array/section is matched to the first detection on the next array/section (default). If changed to 'first to first', the first detection on two consecutive arrays/sections are used to perform the calculations.}
+
 \item{if.last.skip.section}{Indicates wether a fish detected at the last array of a given section should be considered to have disappeared in the next section. Defaults to TRUE. I.e.: In a study with sections 'River' and 'Fjord', where 'River3' is the last river array, a fish last detected at River3 will be considered as 'disapeared in the Fjord'.}
 
 \item{tz.study.area}{The timezone of the study area. Necessary to conver the ALS time data, which is in UTC.}

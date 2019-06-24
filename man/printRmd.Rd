@@ -5,7 +5,8 @@
 \title{Print Rmd report}
 \usage{
 printRmd(name.fragment, header.fragment, biometric.fragment,
-  efficiency.fragment, survival.graph.size, individual.plots, spatial)
+  efficiency.fragment, array.overview.fragment, survival.graph.size,
+  individual.plots, spatial)
 }
 \arguments{
 \item{name.fragment}{Rmarkdown string specifying the type of report for the title.}
@@ -14,11 +15,15 @@ printRmd(name.fragment, header.fragment, biometric.fragment,
 
 \item{biometric.fragment}{Rmarkdown string specifying the biometric graphics drawn.}
 
-\item{efficiency.fragment}{Rmarkdown string specifying the biometric graphics drawn.}
+\item{efficiency.fragment}{Rmarkdown string specifying the efficiency results.}
+
+\item{array.overview.fragment}{Rmarkdown string specifying the array overview results.}
 
 \item{survival.graph.size}{Rmarkdown string specifying the type size of the survival graphics.}
 
 \item{individual.plots}{Rmarkdown string specifying the name of the individual plots.}
+
+\item{spatial}{A list of the spatial objects, created by assembleSpatial.}
 }
 \description{
 Creates a Rmd report and converts it to hmtl.

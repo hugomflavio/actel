@@ -9,8 +9,6 @@ eventOrderCheck(i, last.events, sections, movements, processing.type)
 \arguments{
 \item{i}{The tag number currently under scrutiny. Only used for messaging purposes.}
 
-\item{last.events}{A vector of the movement numbers corresponding to each last event. Is supplied by the function findLastEvents.}
-
 \item{sections}{The sections in which the study was divided. Must be coincident with the names given to the ALS arrays. (i.e. if an array is 'River1', then the respective section is 'River')}
 
 \item{movements}{A list of movements for each target tag, created by groupMovements.}
