@@ -48,5 +48,5 @@ Here are some examples:
 
 **Summary information**
 
-<img src="vignettes/example_progression.svg" alt="drawing" width="458"/> <img src="vignettes/LaTeX_example_survival.svg" alt="drawing" width="402"/>
+<img src="vignettes/LaTeX_example_survival.svg" alt="drawing" width="400"/> <img src="vignettes/example_progression.svg" alt="drawing" width="445"/>
 
