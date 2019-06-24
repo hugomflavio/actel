@@ -5,7 +5,7 @@ By bringing together the study area configuration and the recorded detections, a
 
 <img src="vignettes/study_area.png" alt="drawing" width="870"/>
 
-### Functions:
+### Main functions:
 
 **1. exampleWorkspace()**
 
