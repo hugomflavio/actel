@@ -20,8 +20,8 @@ knitr::opts_chunk$set(
 
 1. [Preparing your data](1.0.workspace_requirements.html)
     1. [**Structuring the study area**](1.1.study_area.html)
+    1. [Creating a distances matrix](1.2.distances_matrix.html)
 1. [Running actel](2.0.running_analysis.html)
-    <!-- 1. [Installing a TeX distribution](2.1.installing_tex.html) -->
 1. [What is actel doing?](3.0.the_sorting_process.html)
     1. [Errors and messages](3.1.messages.html)
 1. [Inspecting the results](4.inspecting_results.html)
@@ -72,5 +72,7 @@ Here is an example:
 <img src="parallel_channels_good.svg" alt="drawing" width="330"/> <img src="parallel_channels_bad.svg" alt="drawing" width="330"/>
 
 Now you know how to organise your study area in a way that actel will understand!
+
+**<a href="javascript:history.back()">Return to previous page</a>**
 
 [Back to top.](#)

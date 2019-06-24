@@ -3,8 +3,9 @@
 #' Crawls trough the movement events of each fish to find when it entered and left each section of the study area.
 #' 
 #' @inheritParams actel
-#' @inheritParams assembleEfficiency
-#' @inheritParams assembleOutput
+#' @inheritParams simplifyMovements
+#' @inheritParams loadDetections
+#' @inheritParams groupMovements
 #' 
 #' @return A table of the entering and leaving points for each section per target tag
 #' 
@@ -86,7 +87,7 @@ assembleTimetable <- function(movements, sections, spatial, minimum.detections,
 #' If the user has called for an override for a specific tag, this funtion will allow for a fully manual choice of events.
 #' 
 #' @inheritParams actel
-#' @inheritParams assembleEfficiency
+#' @inheritParams simplifyMovements
 #' @param i The tag number currently under scrutiny. Only used for messaging purposes.
 #' 
 #' @return The first and last events for each section for the target fish.
@@ -159,8 +160,8 @@ overrideDefaults <- function(i, movements, sections) {
 
 #' Find previous valid last event index
 #' 
-#' @inheritParams eventOrderCheck
-#' @inheritParams overrideEventCheck
+#' @param last.events A vector of the movement numbers corresponding to each last event. Is supplied by the function findLastEvents.
+#' @param j the row being analysed
 #' 
 #' @return The previous valid last event index
 #' 
@@ -182,8 +183,8 @@ checkPrevious <- function(last.events, j){
 #' Check event validity during manual mode
 #' 
 #' @inheritParams actel
-#' @inheritParams assembleEfficiency
-#' @inheritParams eventOrderCheck
+#' @inheritParams simplifyMovements
+#' @inheritParams checkPrevious
 #' @param type The type of event being checked, only affects message display
 #' @param the.event The event being evaluated (chosen by the user during overrideDefaults)
 #' @param up.boundary The last event for the target section
@@ -218,7 +219,7 @@ overrideEventCheck <- function(type, the.event, up.boundary, t, last.events, j, 
 #' Finds the last event for each section in the study area.
 #' 
 #' @inheritParams actel
-#' @inheritParams assembleEfficiency
+#' @inheritParams simplifyMovements
 #' @inheritParams overrideDefaults
 #' @param processing.type the current processing type for the fish. Is supplied by the function assembleTimetable.
 #' 
@@ -307,10 +308,9 @@ findLastEvents <- function(i, movements, sections, minimum.detections, processin
 #' Looks for evidence of backwards movements.
 #' 
 #' @inheritParams actel
-#' @inheritParams assembleEfficiency
+#' @inheritParams simplifyMovements
 #' @inheritParams overrideDefaults
 #' @inheritParams findLastEvents
-#' @param last.events A vector of the movement numbers corresponding to each last event. Is supplied by the function findLastEvents.
 #' 
 #' @return A vector of the movement numbers corresponding to each last event.
 #' 
@@ -407,8 +407,8 @@ eventOrderCheck <- function(i, last.events, sections, movements, processing.type
 #' Finds the row from which the function findFirstEvents should start looking for the first event.
 #' 
 #' @inheritParams actel
-#' @inheritParams assembleEfficiency
-#' @inheritParams eventOrderCheck
+#' @inheritParams simplifyMovements
+#' @inheritParams checkPrevious
 #' @param l The section currently being analysed. Supplied by findFirstEvents
 #' 
 #' @return The row number
@@ -445,9 +445,9 @@ findFirstRow <- function(l, last.events, movements, sections) {
 #' Finds the first event for each section in the study area that has a last event.
 #' 
 #' @inheritParams actel
-#' @inheritParams assembleEfficiency
+#' @inheritParams simplifyMovements
 #' @inheritParams overrideDefaults
-#' @inheritParams eventOrderCheck
+#' @inheritParams checkPrevious
 #' @inheritParams findLastEvents
 #' 
 #' @return A list containing both the first and last events.
@@ -521,11 +521,12 @@ findFirstEvents <- function(i, last.events, movements, sections, processing.type
 #'
 #' Compiles the information supplied and deploys it into the correct timetable row.
 #' 
-#' @inheritParams assembleOutput
+#' @param timetable A table of the entering and leaving points for each section per target tag, created by assembleTimetable.
 #' @inheritParams actel
-#' @inheritParams assembleEfficiency
+#' @inheritParams simplifyMovements
 #' @inheritParams overrideDefaults
-#' @inheritParams eventOrderCheck
+#' @inheritParams loadDetections
+#' @inheritParams groupMovements
 #' @inheritParams findLastEvents
 #' @param events A list containing both the first and last events. Supplied by findFirstEvents.
 #' 
@@ -619,7 +620,8 @@ deployValues <- function(i, timetable, movements, events, sections, spatial,
 
 #' Count backwards movements
 #' 
-#' @inheritParams assembleEfficiency
+#' @inheritParams simplifyMovements
+#' @inheritParams loadDetections
 #' 
 #' @keywords internal
 #' 

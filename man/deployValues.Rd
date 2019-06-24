@@ -30,6 +30,8 @@ deployValues(i, timetable, movements, events, sections, spatial, dist.mat,
 \item{success.arrays}{The ALS arrays that mark the end of the study area. If a fish crosses one of these arrays, it is considered to have successfully migrated through the area.}
 
 \item{processing.type}{the current processing type for the fish. Is supplied by the function assembleTimetable.}
+
+\item{speed.method}{One of 'last to first' or 'first to first'. In the former, the last detection on a given array/section is matched to the first detection on the next array/section (default). If changed to 'first to first', the first detection on two consecutive arrays/sections are used to perform the calculations.}
 }
 \value{
 A list containing both the first and last events.

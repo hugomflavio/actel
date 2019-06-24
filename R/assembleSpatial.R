@@ -2,7 +2,7 @@
 #' 
 #' Creates a list containing multiple spatial elements required throughout the analyses
 #' 
-#' @inheritParams assembleOutput
+#' @inheritParams splitDetections
 #' @inheritParams actel
 #' 
 #' @return A list of 1) stations, 2) release sites, 3) ALS columns in the spatial file, 4) the Number of ASL, 5) The ALS serial numbers and 6) the array order.
@@ -13,10 +13,7 @@ assembleSpatial <- function(bio, sections) {
   appendTo("debug", "Starting assembleSpatial.")
   input <- loadSpatial()
   # Create standard names
-  input$Standard.Name <- as.character(input$Station.Name)
-  link <- input$Type == "Hydrophone"
-  input$Standard.Name[link] <- paste("St.", seq_len(sum(input$Type == "Hydrophone")), sep = "")
-  write.csv(input, "spatial.csv", row.names = F)
+  input <- setSpatialStandards(input = input)
   # Break the stations away
   appendTo("debug", "Creating 'stations'.")
   stations <- input[input$Type == "Hydrophone", -match("Type", colnames(input))]
@@ -81,6 +78,10 @@ assembleSpatial <- function(bio, sections) {
       stop("Stopping analysis per user command.\n")
     }
   }
+  # Order release sites by entry point.
+  if(!is.ordered(match(release.sites$Array, unlist(array.order))))
+    release.sites <- release.sites[order(match(release.sites$Array, unlist(array.order))),]
+  # join everything
   output <- list(stations = stations, 
                  release.sites = release.sites, 
                  receiver.columns = receiver.columns, 
@@ -89,4 +90,22 @@ assembleSpatial <- function(bio, sections) {
                  array.order = array.order)
   appendTo("debug", "Done.")
   return(output)
+}
+
+#' Create Standard Names for spatial elements
+#' 
+#' Includes standard names and also reprints 'spatial.csv' 
+#' 
+#' @param input A dataframe with spatial information.
+#'  
+#' @return A dataframe with the same information as the input plus the Standard names.
+#' 
+#' @keywords internal
+#' 
+setSpatialStandards <- function(input){
+  input$Standard.Name <- as.character(input$Station.Name)
+  link <- input$Type == "Hydrophone"
+  input$Standard.Name[link] <- paste("St.", seq_len(sum(input$Type == "Hydrophone")), sep = "")
+  write.csv(input, "spatial.csv", row.names = F)
+  return(input)
 }

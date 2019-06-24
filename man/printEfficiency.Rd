@@ -2,14 +2,16 @@
 % Please edit documentation in R/printFunctions.R
 \name{printEfficiency}
 \alias{printEfficiency}
-\title{Print efficiency tables}
+\title{Print efficiency fragment}
 \usage{
-printEfficiency(efficiency)
+printEfficiency(overall.CJS, last.array.results)
 }
 \arguments{
-\item{efficiency}{A list containing the intersection and interarray efficiency. Supplied by assembleEfficiency.}
+\item{overall.CJS}{a single CJS with all the groups and release sites merged}
+
+\item{last.array.results}{The output of the getEstimate calculations.}
 }
 \description{
-Prints the ALS intersection and interarray efficiency in LaTeX format for inclusion in printLaTeX.
+Prints the ALS inter-array efficiency for inclusion in printRmd.
 }
 \keyword{internal}

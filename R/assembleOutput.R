@@ -3,11 +3,11 @@
 #' Combines the timetable and the original biometrics.
 #' 
 #' @inheritParams actel
-#' @inheritParams assembleEfficiency
-#' @param timetable A table of the entering and leaving points for each section per target tag, created by assembleTimetable.
-#' @param bio A table with the tags and biometrics of the studied fish.
-#' @param dist.mat A matrix of the distances between the deployed ALS.
-#' @param invalid.dist Wether or not the distance matrix suplied is valid for the study area.
+#' @inheritParams deployValues
+#' @inheritParams splitDetections
+#' @inheritParams simplifyMovements
+#' @inheritParams loadDetections
+#' @inheritParams groupMovements
 #' 
 #' @return A dataframe containing all the final data for each fish.
 #' 
@@ -50,7 +50,7 @@ assembleOutput <- function(timetable, bio, movements, spatial, sections, dist.ma
           status.df[i, df.to.col] <- dist.mat[dist.row, dist.col]/status.df[i, df.from.col]
         }
       } else {
-        appendTo(c("Screen", "Report"), paste("Error: Fish ", status.df$Transmitter[i], " was detected before being released!", sep = ""))
+        appendTo(c("Screen", "Warnings", "Report"), paste("Error: Fish ", status.df$Transmitter[i], " was detected before being released!", sep = ""))
         appendTo("Screen", paste("  Release time: ", status.df[i, "Release.date"], sep = ""))
         appendTo("Screen", paste("  First valid detection: ", status.df[i, paste("Arrived", first.section, sep = ".")], " (", first.section, ").", sep = ""))
         cat("  Movement table for fish", status.df$Transmitter[i], "\n")

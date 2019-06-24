@@ -31,12 +31,12 @@ loadSpatial <- function(){
     stop("The spatial file must contain at least one 'Receiver' column.\n")
   }
   if (!any(grepl("Type", colnames(input)))) {
-    appendTo("Screen", "M: No 'Type' column found in the stations file. Assigning all rows as hydrophones.")
+    appendTo("Screen", "M: No 'Type' column found in 'spatial.csv'. Assigning all rows as hydrophones.")
     input$Type <- "Hydrophone"
   } else {
     if (any(is.na(match(unique(input$Type), c("Hydrophone","Release"))))){
       emergencyBreak()
-      stop("Could not recognise the data in the 'Type' column is only one of 'Hydrophone' or 'Release'. Please doublecheck the spatial file.\n")
+      stop("Could not recognise the data in the 'Type' column as only one of 'Hydrophone' or 'Release'. Please doublecheck the spatial file.\n")
     }
   }
   appendTo("debug","Terminating loadSpatial.")
@@ -121,7 +121,7 @@ loadBio <- function(){
 #' Finds the detections' files and processes them.
 #' 
 #' @inheritParams actel
-#' @inheritParams assembleEfficiency
+#' @param spatial A list of the spatial objects, created by assembleSpatial.
 #' 
 #' @return A dataframe with all the detections
 #' 
@@ -373,7 +373,7 @@ convertTimes <- function(input, start.timestamp, end.timestamp, tz.study.area) {
 #' Matches the ALS serial number to the stations in the study area, standardizing the ALS station names.
 #' 
 #' @inheritParams convertCodes
-#' @inheritParams assembleEfficiency
+#' @inheritParams loadDetections
 #'
 #' @return A dataframe with standardized station names.
 #'

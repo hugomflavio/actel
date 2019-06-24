@@ -8,7 +8,10 @@ emptyReceiversCheck(spatial, detections)
 }
 \arguments{
 \item{spatial}{A list of the spatial objects, created by assembleSpatial.}
+
+\item{detections}{A dataframe with all the detections. Supplied by loadDetections.}
 }
 \description{
 Check for unknown receivers in the raw detections
 }
+\keyword{internal}

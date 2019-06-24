@@ -3,9 +3,10 @@
 #' Splits the detections' table by tags and selects only detections from target tags
 #' 
 #' @inheritParams actel
-#' @inheritParams assembleEfficiency
-#' @inheritParams assembleOutput
+#' @inheritParams loadDetections
+#' @param bio A table with the tags and biometrics of the studied fish.
 #' @param detections A dataframe with all the detections. Supplied by loadDetections.
+#' @param silent logical: if TRUE, suppress messages.
 #' 
 #' @return A list of detections for each tag.
 #' 
@@ -40,6 +41,7 @@ splitDetections <- function(detections, bio, spatial, exclude.tags, silent = FAL
 #' Collect summary information on the tags detected but that are not part of the study.
 #'
 #' @param input list of detections for the tags to be excluded.
+#' @param restart logical: if TRUE, remove file 'temp_strays.csv' from the working directory.
 #' 
 #' @keywords internal
 #' 
@@ -88,6 +90,7 @@ storeStrays <- function(){
 #'
 #' @param input list of detections
 #' @inheritParams actel
+#' @inheritParams splitDetections
 #'
 #' @keywords internal
 #' 
@@ -109,15 +112,14 @@ excludeTags <- function(input, exclude.tags, silent){
 #' Check if there are detections matching the target tags.
 #'
 #' @param input list of detections
-#' @inheritParams assembleOutput
+#' @inheritParams splitDetections
 #' 
 #' @keywords internal
 #' 
 noDetectionsCheck <- function(input, bio){
-  tag.list <- vector()
-  for (i in seq_len(length(input))) tag.list[i] <- tail(unlist(strsplit(names(input)[i], "-")), 1)
-  link <- match(bio$Signal, tag.list)
   appendTo("debug", "Starting noDetectionsCheck.")  
+  tag.list <- stripCodeSpaces(names(input))
+  link <- match(bio$Signal, tag.list)
   if (all(is.na(link))) {
     appendTo(c("Screen", "Report"), "M: No detections were found in the input data which matched the target signals.")
     emergencyBreak()
@@ -127,10 +129,23 @@ noDetectionsCheck <- function(input, bio){
   return(list(list = tag.list,link = link))
 }
 
+#' Remove Code Spaces from transmitter names
+#' 
+#' @param input A vector of transmitter names
+#' 
+#' @keywords internal
+#' 
+stripCodeSpaces <- function(input) {
+  output <- vector()
+  for (i in seq_len(length(input))) output[i] <- tail(unlist(strsplit(input[i], "-")), 1)
+  return(output)
+}
+
 #' Check if there are duplicated signals in the detected tags.
 #'
 #' @param input list of detections
-#' @inheritParams assembleOutput
+#' @inheritParams splitDetections
+#' @param tag.list list of the target signals
 #' 
 #' @keywords internal
 #' 
@@ -156,7 +171,7 @@ dupSignalsCheck <- function(input, bio, tag.list){
 #' Match the detection's receiver to its respective array.
 #'
 #' @param input list of detections
-#' @inheritParams assembleEfficiency
+#' @inheritParams loadDetections
 #' 
 #' @keywords internal
 #' 

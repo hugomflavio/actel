@@ -19,6 +19,6 @@ exampleWorkspace <- function() {
 \tresults <- actel(path = 'exampleWorkspace', sections = c('River','Fjord','Sea'), success.arrays = 'Sea1',
 \t\tminimum.detections = 2, maximum.time = 60, speed.method = 'last to first', if.last.skip.section = TRUE,
 \t\ttz.study.area = 'Europe/Copenhagen', start.timestamp = NULL, end.timestamp = NULL, report = TRUE, redraw = TRUE, 
-\t\toverride = NULL, exclude.tags = NULL, debug = FALSE, cautious.assignment = TRUE)\n
+\t\toverride = NULL, exclude.tags = NULL, debug = FALSE, cautious.assignment = TRUE, replicate = NULL)\n
 And follow the instructions as they come. Once finished, explore the object 'results' for the output.\n")
 }

@@ -1,7 +1,9 @@
 #' Check for unknown receivers in the raw detections
 #' 
-#' @inheritParams assembleEfficiency
+#' @inheritParams splitDetections
 #' @inheritParams loadDetections
+#' 
+#' @keywords internal
 #' 
 unknownReceiversCheckA <- function(detections, spatial){
   appendTo("debug", "Starting unknownReceiversCheckA.")  
@@ -14,7 +16,8 @@ unknownReceiversCheckA <- function(detections, spatial){
 
 #' Check for target data in the unknown receivers
 #' 
-#' @inheritParams assembleEfficiency
+#' @inheritParams groupMovements
+#' @inheritParams loadDetections
 #' 
 #' @return A list containing an updated spatial list and a TRUE/FALSE object indicating whether or not Standard station names must be reprocessed.
 #' 
@@ -53,9 +56,11 @@ unknownReceiversCheckB <- function(detections.list, spatial) {
 
 #' Check for unknown receivers in the raw detections
 #' 
-#' @inheritParams assembleEfficiency
+#' @inheritParams splitDetections
 #' @inheritParams loadDetections
 #' 
+#' @keywords internal
+
 emptyReceiversCheck <- function(spatial, detections){
   appendTo("debug", "Starting emptyReceiversCheck.")
   empty.receivers <- sum(is.na(match(spatial$receivers.serial, unique(detections$Receiver))))
@@ -70,7 +75,7 @@ emptyReceiversCheck <- function(spatial, detections){
 #' Temporarily include missing receivers in the spatial object
 #' 
 #' @param unknown.receivers serial number of the receivers to be inlucded
-#' @inheritParams assembleEfficiency
+#' @inheritParams loadDetections
 #' 
 #' @keywords internal
 #' 

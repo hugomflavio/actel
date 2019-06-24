@@ -1,39 +1,15 @@
 #' Actel: Acoustic telemetry data sorting
 #' 
 #' The actel package provides a systematic way of analysing fish migration data.
-#' 
-#' @section exampleWorkspace
-#' 
-#' The exampleWorkspace() function creates a directory containing real data. You can
-#' then run the analysis on that data to get an overview of the process. When you run
-#' exampleWorkspace() the code required to analyse the data will be automatically
-#' provided.
-#' 
-#' @section createWorkspace
-#' 
-#' The createWorkspace() function is similar to the one above, but it creates template 
-#' files instead, which you can use to quickly transform your data to the required formats.
-#' 
-#' @section actel
-#' 
-#' The actel() function runs your analysis. This function has many variables and
-#' although you do not need to work with all of them right away, we recommend
-#' that you read the actel vignettes before running this function.
-#' 
-#' @docType package
-#' @name actel
-NULL
-
-#' Runs the analyses
-#'
-#' Collects the input present in the target folder and analyses the telemetry data.
+#' Its main function, actel, collects the input present in the target folder and analyses the telemetry data.
+#' It is strongly recommended to read the package vignettes before attempting to run the analyses. You can find the vignettes by running browseVignettes('actel') .
 #' 
 #' @param path Path to the folder containing the data. If the R session is already running in the target folder, path may be left as NA
 #' @param sections The sections in which the study was divided. Must be coincident with the names given to the ALS arrays. (i.e. if an array is 'River1', then the respective section is 'River') 
 #' @param success.arrays The ALS arrays that mark the end of the study area. If a fish crosses one of these arrays, it is considered to have successfully migrated through the area.
 #' @param minimum.detections The mininum number of times a tag must have been recorded during the study period for it to be considered a true tag and not random noise.
 #' @param maximum.time The number of minutes that must pass between detections for a new event to be created.
-# @param speed.method One of 'last to first' or 'first to first'. In the former, the last detection on a given array/section is matched to the first detection on the next array/section (default). If changed to 'first to first', the first detection on two consecutive arrays/sections are used to perform the calculations.
+#' @param speed.method One of 'last to first' or 'first to first'. In the former, the last detection on a given array/section is matched to the first detection on the next array/section (default). If changed to 'first to first', the first detection on two consecutive arrays/sections are used to perform the calculations.
 #' @param if.last.skip.section Indicates wether a fish detected at the last array of a given section should be considered to have disappeared in the next section. Defaults to TRUE. I.e.: In a study with sections 'River' and 'Fjord', where 'River3' is the last river array, a fish last detected at River3 will be considered as 'disapeared in the Fjord'.
 #' @param tz.study.area The timezone of the study area. Necessary to conver the ALS time data, which is in UTC.
 #' @param start.timestamp Detection data prior to this date is not analysed. Improves processing time when loading large amounts of detection data.
@@ -53,17 +29,18 @@ actel <- function(path = NULL, sections, success.arrays, minimum.detections = 2,
     maximum.time = 60, speed.method = c("last to first", "first to first"), 
     if.last.skip.section = TRUE, tz.study.area, start.timestamp = NULL, 
     end.timestamp = NULL, report = TRUE, redraw = TRUE, override = NULL, 
-    exclude.tags = NULL, debug = FALSE, cautious.assignment = TRUE) {
+    exclude.tags = NULL, debug = FALSE, cautious.assignment = TRUE, replicate = NULL) {
   
   my.home <- getwd()
   
   if (!debug)
-    on.exit(deleteHelpers(), add=TRUE)
+    on.exit(deleteHelpers(), add = TRUE)
   
-  on.exit(setwd(my.home), add=TRUE)
+  on.exit(setwd(my.home), add = TRUE)
+  on.exit(tryCatch(sink(), warning = function(w) {hide <- NA}), add = TRUE)
   
   if (!debug)
-    on.exit(deleteHelpers(), add=TRUE)
+    on.exit(deleteHelpers(), add = TRUE)
   
   speed.method <- match.arg(speed.method)
   
@@ -77,7 +54,7 @@ actel <- function(path = NULL, sections, success.arrays, minimum.detections = 2,
     ".", sep = ""))
   appendTo(c("Screen"), "M: Moving to selected work directory")
   
-  report <- latexCheck(report = report, redraw = redraw)
+  report <- folderCheck(report = report, redraw = redraw)
  
   appendTo(c("Screen", "Report"), "M: Importing data. This process may take a while.")
   
@@ -142,14 +119,14 @@ actel <- function(path = NULL, sections, success.arrays, minimum.detections = 2,
   if (debug)
     save(path, sections, success.arrays, minimum.detections, maximum.time, speed.method, if.last.skip.section, 
     tz.study.area, start.timestamp, end.timestamp, report, redraw, override, exclude.tags, debug, 
-    cautious.assignment, bio, spatial, detections, dist.mat, invalid.dist, file="debug_start.RData")
+    cautious.assignment, bio, spatial, detections, dist.mat, invalid.dist, replicate, file="debug_start.RData")
 
   recipient <- splitDetections(detections = detections, bio = bio, spatial = spatial, exclude.tags = exclude.tags)
   detections.list <- recipient[[1]]
   bio <- recipient[[2]]
   rm(recipient)
   if (debug)
-    save(detections.list,file="debug_detections.list.RData")
+    save(detections.list, file = "debug_detections.list.RData")
 
   recipient <- unknownReceiversCheckB(detections.list = detections.list, spatial = spatial)
   spatial <- recipient[[1]]
@@ -161,13 +138,13 @@ actel <- function(path = NULL, sections, success.arrays, minimum.detections = 2,
   }
   rm(recipient)
   if (debug)
-    save(detections.list,file="debug_detections.list.RData")
+    save(detections.list, file = "debug_detections.list.RData")
 
   appendTo(c("Screen", "Report"), "M: Data successfully imported!\nM: Creating movement records for the valid tags.")
   movements <- groupMovements(detections.list = detections.list, bio = bio, spatial = spatial,
-    speed.method = speed.method, maximum.time = maximum.time, dist.mat = dist.mat, invalid.dist = invalid.dist)
+    speed.method = speed.method, maximum.time = maximum.time, tz.study.area = tz.study.area, dist.mat = dist.mat, invalid.dist = invalid.dist)
   if (debug)
-    save(movements,file="debug_movements.RData")
+    save(movements, file = "debug_movements.RData")
   
   timetable <- assembleTimetable(movements = movements, sections = sections, spatial = spatial, 
     minimum.detections = minimum.detections, dist.mat = dist.mat, invalid.dist = invalid.dist, 
@@ -175,28 +152,45 @@ actel <- function(path = NULL, sections, success.arrays, minimum.detections = 2,
     override = override, cautious.assignment = cautious.assignment)
   appendTo(c("Screen", "Report"), "M: Timetable successfully filled. Fitting in the remaining variables.")
   if (debug)
-    save(timetable,file="debug_timetable.RData")
+    save(timetable, file = "debug_timetable.RData")
   
   status.df <- assembleOutput(timetable = timetable, bio = bio, movements = movements, spatial = spatial, 
     sections = sections, dist.mat = dist.mat, invalid.dist = invalid.dist, tz.study.area = tz.study.area)
   if (debug)
-    save(status.df,file="debug_status.df.RData")
+    save(status.df, file = "debug_status.df.RData")
   
   for(fish in names(movements)){
     movements[[fish]] <- speedReleaseToFirst(fish = fish, status.df = status.df, movements = movements[[fish]],
      dist.mat = dist.mat, invalid.dist = invalid.dist, silent = FALSE)
   }
   if (debug)
-    save(movements,file="debug_movements.RData")
+    save(movements, file = "debug_movements.RData")
 
+  simple.movements <- simplifyMovements(movements = movements, status.df = status.df, sections = sections)
+  if (debug)
+    save(simple.movements, file = "debug_simple.movements.RData")
   appendTo(c("Screen", "Report"), "M: Getting summary information tables.")
   
-  group.overview <- assembleOverview(status.df = status.df, sections = sections, 
-    dist.mat = dist.mat, invalid.dist = invalid.dist)
-  progression <- assembleProgression(status.df = status.df, spatial = spatial)
-  efficiency <- assembleEfficiency(sections = sections, 
-    spatial = spatial, detections.list = detections.list,
-    movements = movements, minimum.detections = minimum.detections)
+  the.matrices <- assembleMatrices(spatial = spatial, movements = simple.movements, minimum.detections = minimum.detections, status.df = status.df)
+  last.array.results <- getEstimate(spatial = spatial, detections.list = detections.list, replicate = replicate)
+  if (is.list(last.array.results)) 
+    estimate <- last.array.results$combined.p
+  else
+    estimate <- NULL
+  if (length(the.matrices) == 1)
+    overall.CJS <- simpleCJS(the.matrices[[1]], estimate = estimate)
+  else
+    overall.CJS <- combineCJS(the.matrices, estimate = estimate)
+  split.CJS <- getSplitCJS(the.matrices, fixed.efficiency = overall.CJS$efficiency)
+  group.CJS <- getGroupCJS(the.matrices, status.df, fixed.efficiency = overall.CJS$efficiency)
+  if (debug)
+    save(the.matrices, last.array.results, overall.CJS, split.CJS, group.CJS, file = "debug_CJS.RData")
+
+  array.overview <- assembleArrayOverview(group.CJS = group.CJS)
+  section.overview <- assembleSectionOverview(status.df = status.df, sections = sections)
+
+  if (debug)
+    save(array.overview, section.overview, file = "debug_summary.RData")
   
   if (!is.null(override)) {
     header.fragment <- paste('<span style="color:red">Manual mode has been triggered for **', length(override),'** fish.</span>\n', sep = "")
@@ -215,27 +209,32 @@ actel <- function(path = NULL, sections, success.arrays, minimum.detections = 2,
         continue <- FALSE
       }
     }
-    appendTo("Screen",paste("M: An actel results file is already present in the present directory, saving new results as '", resultsname,"'.", sep = ""))
+    appendTo("Screen", paste("M: An actel results file is already present in the present directory, saving new results as '", resultsname,"'.", sep = ""))
     rm(continue,index)
   } else {
     appendTo(c("Screen", "Report"), paste("M: Saving results to '", resultsname, "'.", sep = ""))
   }
 
   detections <- detections.list
-  save(detections, movements, status.df, group.overview, 
-    progression, efficiency, spatial, file = resultsname)
+  if (invalid.dist)
+    save(detections, movements, simple.movements, status.df, 
+      section.overview, array.overview, the.matrices, overall.CJS, 
+      last.array.results, spatial, file = resultsname)
+  else
+    save(detections, movements, simple.movements, status.df, 
+      section.overview, array.overview, the.matrices, overall.CJS,
+      last.array.results, spatial, dist.mat, file = resultsname)
+
   if (report) {
     biometric.fragment <- printBiometrics(bio = bio)
-    # printStations(spatial = spatial)
+    efficiency.fragment <- printEfficiency(overall.CJS = overall.CJS, last.array.results = last.array.results)
     printDotplots(status.df = status.df, invalid.dist = invalid.dist)
-    # printSurvivalTable(group.overview = group.overview)
-    printSurvivalGraphic(group.overview = group.overview)
-    printProgression(progression = progression, success.arrays = success.arrays, spatial = spatial)
-    # printEfficiency(efficiency = efficiency)
-    LaTeX.individual.plots <- printIndividuals(redraw = redraw, detections.list = detections.list, 
+    printSurvivalGraphic(section.overview = section.overview)
+    printProgression(status.df = status.df, overall.CJS = overall.CJS, split.CJS = split.CJS, group.CJS = group.CJS)
+    individual.plots <- printIndividuals(redraw = redraw, detections.list = detections.list, 
         status.df = status.df, tz.study.area = tz.study.area)
-    if (nrow(group.overview) > 3) 
-      # survival.graph.size <- "width=0.95" else survival.graph.size <- "height=0.6"
+    array.overview.fragment <- printArrayOverview(array.overview)
+    if (nrow(section.overview) > 3) 
       survival.graph.size <- "width=90%" else survival.graph.size <- "height=4in"
   }
   
@@ -246,13 +245,18 @@ actel <- function(path = NULL, sections, success.arrays, minimum.detections = 2,
     appendTo("Report", paste("User inverventions:\n-------------------\n", gsub("\r", "", readr::read_file("temp_UD.txt")), "-------------------", sep = ""))
   
   if (report) {
-    # printLaTeX(name.fragment = name.fragment, header.fragment = header.fragment, 
-    #     biometric.fragment = biometric.fragment, survival.graph.size = survival.graph.size,
-    #     LaTeX.individual.plots = LaTeX.individual.plots)
+    appendTo("debug", "debug: Printing report")
     rmarkdown::render(reportname <- printRmd(name.fragment = name.fragment, header.fragment = header.fragment, 
         biometric.fragment = biometric.fragment, survival.graph.size = survival.graph.size,
-        LaTeX.individual.plots = LaTeX.individual.plots, spatial = spatial), quiet = TRUE)
+        individual.plots = individual.plots, spatial = spatial, efficiency.fragment = efficiency.fragment, array.overview.fragment = array.overview.fragment), quiet = TRUE)
+    appendTo("debug", "debug: Moving report")
     fs::file_move(sub("Rmd", "html", reportname), sub("Report/", "", sub("Rmd", "html", reportname)))
+    appendTo("debug", "debug: Opening report if the pc has internet.")
+    if (havingIP())
+      hide <- system(paste0('open "', sub("Report/", "", sub("Rmd", "html", reportname)), '"'), show.output.on.console = FALSE)
+    else
+      appendTo("Screen", "M: Skipping auto-opening of the report as R has been crashing when opening the html without an internet connection.")
+    appendTo("debug", "debug: Removing toc_menu.html")
     if(file.exists("Report/toc_menu.html"))
       file.remove("Report/toc_menu.html")
   }
@@ -265,11 +269,14 @@ actel <- function(path = NULL, sections, success.arrays, minimum.detections = 2,
     deleteHelpers()
 
   if (invalid.dist)
-    return(list(detections = detections, movements = movements, status.df = status.df, 
-      group.overview = group.overview, progression = progression, efficiency = efficiency, spatial = spatial))
+    return(list(detections = detections, movements = movements, simple.movements = simple.movements,
+      status.df = status.df, section.overview = section.overview, array.overview = array.overview,
+      matrices = the.matrices, efficiency = overall.CJS, 
+      last.array.results = last.array.results, spatial = spatial))
   else
-    return(list(detections = detections, movements = movements, status.df = status.df, 
-      group.overview = group.overview, progression = progression, efficiency = efficiency,
-      spatial = spatial, dist.mat = dist.mat))
+    return(list(detections = detections, movements = movements, simple.movements = simple.movements,
+      status.df = status.df, section.overview = section.overview, array.overview = array.overview,
+      matrices = the.matrices, efficiency = overall.CJS, 
+      last.array.results = last.array.results, spatial = spatial, dist.mat = dist.mat))
 }
 

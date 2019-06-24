@@ -6,8 +6,11 @@
 \usage{
 printBiometrics(bio)
 }
+\arguments{
+\item{bio}{A table with the tags and biometrics of the studied fish.}
+}
 \value{
-LaTeX string to be included in .printLatex
+string to be included in printRmd
 }
 \description{
 Searches for columns containing biometric data and prints graphics per fish group

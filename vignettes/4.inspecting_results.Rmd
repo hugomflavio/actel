@@ -20,8 +20,8 @@ knitr::opts_chunk$set(
 
 1. [Preparing your data](1.0.workspace_requirements.html)
     1. [Structuring the study area](1.1.study_area.html)
+    1. [Creating a distances matrix](1.2.distances_matrix.html)
 1. [Running actel](2.0.running_analysis.html)
-    <!-- 1. [Installing a TeX distribution](2.1.installing_tex.html) -->
 1. [What is actel doing?](3.0.the_sorting_process.html)
     1. [Errors and messages](3.1.messages.html)
 1. [**Inspecting the results**](4.inspecting_results.html)
@@ -58,11 +58,15 @@ The `movements` object is a list of the movement events created during [the sort
 |Bay1   |         52|St.16         |St.17        |2018-04-20 05:33:51 |2018-04-20 06:12:20 |25:51           |0:38          |
 |Bay1   |         69|St.17         |St.16        |2018-04-20 12:00:31 |2018-04-20 13:00:36 |5:48            |1:00          |
 
+### simple.movements
+
+The `simple.movements` represents a simplified version of the `movements` object, where all movements deemed invalid during the sorting process were removed. Note: While the `simple.movements` will not contain any backwards inter-section events, intra-section backwards movements may still be present.
+
 ### status.df
 
 The `status.df` is a dataframe that combines both the [timetable data and your biometrics](3.0.the_sorting_process.html#combining-the-time-data-with-the-biometrics) into a single, organised table. If you have stored any comments during the analysis process, they will show up in a reserved column in this table. The `status.df` also contains the recorded fate for each fish (i.e. died somewhere or succeeded at crossing the study area), and summary information on the number and length of the recorded upstream movements. This table can be quite big, so we did not include an example here.
 
-### group.overview
+### section.overview
 
 This small table is automatically generated with data extracted from the `status.df`. For each fish group, it details the number of fish that disappeared on any section and those that passed to the next. It is very helpful to get a quick overview of the results, and is incorporated in the [actel report](#actel_report.pdf-if-report-true). Here is an example:
 
@@ -71,22 +75,18 @@ This small table is automatically generated with data extracted from the `status
 |Hatchery |    40|              30|              10|             3|         7|
 |Wild     |    40|              24|              16|             2|        14|
 
-### progression
+### array.overview
 
-The progression is also automatically generated. For each group and release site, you can see detailed information of how many fish were last seen on each receiver array (i.e. rows 1 and 3), and how many fish reached the next one (i.e. rows 2 and 4). Here is an example:
+The `array.overview` shows you the number of known and estimated fish, per group, to have passed each of your arrays.
 
-|                        | Total| Release| River1| River2| River3| River4| Sea1| Sea2|
-|:-----------------------|-----:|-------:|------:|------:|------:|------:|----:|----:|
-|Hatchery-RS1.last.array |     0|      15|      5|      3|      5|      2|    3|    7|
-|Hatchery-RS1.remaining  |    40|      25|     20|     17|     12|     10|    7|    0|
-|Wild-RS1.last.array     |     0|      10|      4|      2|      6|      2|    2|   14|
-|Wild-RS1.remaining      |    40|      30|     26|     24|     18|     16|   14|    0|
+Note:
+  : These only take into account forward movements. I.e., if the fish moved backwards, the results displayed in array.overview will no longer match the known survival. When looking for survival estimates, you should always refer back to the `section.overview` object for confirmation of the number of fish that entered/left each section.
 
-The interpretation of the table above can be a bit tricky, especially if there are many groups of fish and/or release sites. For this reason, if you activated the [report](2.0.running_analysis.html#report) option, this table is then converted into a graphic, which can be found in the actel report.
+If you activated the [report option](2.0.running_analysis.html#report), this table is then converted into a graphic, which can be found in the actel report, under the section "Progression".
 
-### efficiency
+### overall.CJS
 
-Actel calculates three levels of efficiency: inter-section, inter-array and intra-array. As the fish detected in the section/array downstream of the current section/array are used as a base for efficiency calculations, efficiency cannot be calculated for the last section/array. This does not apply for intra-array efficiency, where the detections in the receivers that make up an array are matched against each other.
+Actel calculates array efficiency through CJS modelling, based in the equations provided by [Perry et al. (2012)](https://www.researchgate.net/publication/256443823_Using_mark-recapture_models_to_estimate_survival_from_telemetry_data). The results of these calculations, as well as the matrix used for the calculations, is provided in the object `overall.CJS`. 
 
 To improve the accuracy of the efficiency measurements, actel calculates forward efficiency only. This means that, for each fish, only the first forward movement is considered. Let's have a look at these examples:
 
@@ -94,11 +94,22 @@ To improve the accuracy of the efficiency measurements, actel calculates forward
 
 In example **A**, the fish moved out to sea, and was detected at the array River1 and Fjord2, but not at Fjord1. This is considered a missed event for Fjord1. Even if the fish then moved backwards and ended up being detected at Fjord1 at a later time (example **B**), since the first expected detection was missed, this fish will still be considered as missed by Fjord1, in what concerns efficiency calculations.
 
-These efficiency calculations are dependant on the way how you organise your hydrophones. To learn more about how to organise your study area in an actel-friendly way, have a look at [this manual page.](1.1.study_area.html)
+These efficiency calculations are dependant on the way how you organise your hydrophones. To learn more about how to organise your study area in an actel-friendly way, have a look at [this manual page.](1.1.study_area.html).
+
+### last.array.results
+
+If you provided [estimators](#2.0.running_analysis.html), actel will estimate the efficiency of the last array. These results are stored in the object `last.array.results`, and the combined efficiency estimate is used when calculating the overall CJS.
 
 ### spatial
 
 The `spatial` object is a list containing the stations, release sites and some more summary information. This object may come in handy if you have to go back to your results some time after you completed the analysis, so you can verify the study area design and match the stations names to their locations.
+
+### the.matrices
+
+In this object you will find the matrix/matrices that were used for efficiency estimations during CJS modelling.
+
+Note:
+  : These matrices only represent the forward movements. You can read more about it in the description of the `overall.CJS`.
 
 ## Results in your working directory
 
@@ -130,7 +141,7 @@ This is the main non-R output. If you activated the `report` option, actel will 
 
 1. **Array forward efficiency**
 
-	Here you can see how efficient your receivers were at detecting the fish that moved past them. This is simply a visual representation of the tables displayed in the [efficiency object](#efficiency), which is in your results in R.
+	Here you can see how efficient your receiver arrays were at detecting the fish that moved past them. These results can also be found in the `overall.CJS` object, which is in your results in R. If you supplied replicates, the results of the estimation of the last array efficiency will also show up here.
 
 1. **Warning messages**
 
@@ -146,11 +157,15 @@ This is the main non-R output. If you activated the `report` option, actel will 
 
 1. **Survival**
 
-	The survival is displayed both as a table and a figure, both of which use the content of the [group.overview object](#group.overview), which is in your results in R.
+	The survival is displayed both as a table and a figure, both of which use the content of the `section.overview` object, which is in your results in R.
 
 1. **Progression**
 
-	The progression plot is a visual representation of the [progression object](#progression), which is in your results in R. As an added bonus, the progression plot has a dashed black line representing the point after which the fish were considered to have succeeded. This plot will be divided by fish groups and release sites. Note, if some of your fish were released half-way through the study area, the arrays behind the release site should appear empty in the progression plot (unless there were backwards movements).
+	The progression plot is a visual representation of the `array.overview` object, which is in your results in R. The progression plot also has a red dashed line which shows you the total number of fish released. This is particularly relevant if more fish were released half-way through. As an added bonus, the bars are painted acoording to release sites, so that you can know how many fish from each release site reached the arrays. This plot will be divided by fish groups and release sites.
+
+	Note that the first "Release" bar only corresponds to the fish that were released before the very first array, and other releases are only visible through changes in the red dashed line.
+
+	You can also examine the detailed values in the tables supplied for each fish group.
 
 1. **Fish comparisons (Dotplots)**
 

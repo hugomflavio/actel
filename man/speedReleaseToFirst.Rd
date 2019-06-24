@@ -8,13 +8,17 @@ speedReleaseToFirst(fish, status.df, movements, dist.mat,
   invalid.dist = FALSE, silent = TRUE)
 }
 \arguments{
-\item{fish}{The transmitter to be refined}
+\item{fish}{The transmitter to be refined. If left empty, all fish present in the movements will be simplified.}
+
+\item{status.df}{A dataframe with all the final data for each fish, created by assembleOutput.}
 
 \item{movements}{A list of movements for each target tag, created by groupMovements.}
 
 \item{dist.mat}{A matrix of the distances between the deployed ALS.}
 
 \item{invalid.dist}{Wether or not the distance matrix suplied is valid for the study area.}
+
+\item{silent}{logical: If TRUE, debug messages are issued (only works within actel)}
 }
 \value{
 The movement dataframe containing the missing information.

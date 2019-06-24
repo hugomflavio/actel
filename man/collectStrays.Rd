@@ -8,6 +8,8 @@ collectStrays(input, restart = FALSE)
 }
 \arguments{
 \item{input}{list of detections for the tags to be excluded.}
+
+\item{restart}{logical: if TRUE, remove file 'temp_strays.csv' from the working directory.}
 }
 \description{
 Collect summary information on the tags detected but that are not part of the study.
