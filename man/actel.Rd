@@ -43,13 +43,12 @@ actel(path = NULL, sections, success.arrays, minimum.detections = 2,
 \item{debug}{If TRUE, temporary files are not deleted at the end of the analysis. Defaults to FALSE.}
 
 \item{cautious.assignment}{If TRUE, actel avoids assigning events with one detection as first and/or last events of a section.}
-
-\item{replicate}{The Standard.Name of the stations to use as a replicate of the last array to estimate last detection efficiency.}
 }
 \value{
 A list containing 1) the detections used during the analysis, 2) the movement events, 3) the status dataframe, 4) the survival overview per group, 5) the progression through the study area, 6) the ALS array/sections' efficiency, 7) the list of spatial objects used during the analysis.
 }
 \description{
-The actel package provides a systematic way of analysing fish migration data. Its main function, actel, collects the input present in the target folder and analyses the telemetry data.
-It is recommended to read the package's vignettes before running this function. You can find the vignettes by running browseVignettes('actel')
+The actel package provides a systematic way of analysing fish migration data.
+Its main function, actel, collects the input present in the target folder and analyses the telemetry data.
+It is strongly recommended to read the package vignettes before attempting to run the analyses. You can find the vignettes by running browseVignettes('actel') .
 }

@@ -10,8 +10,6 @@ getEstimate(spatial, detections.list, replicate)
 \item{spatial}{A list of the spatial objects, created by assembleSpatial.}
 
 \item{detections.list}{A list of the detections split by each target tag, created by splitDetections.}
-
-\item{replicate}{The Standard.Name of the stations to use as a replicate of the last array to estimate last detection efficiency.}
 }
 \value{
 the modified CJS model for the last array
