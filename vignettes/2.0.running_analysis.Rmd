@@ -44,7 +44,7 @@ actel(path = NULL, sections, success.arrays, minimum.detections = 2,
     maximum.time = 60, speed.method = c("last to first", "first to first"), 
     if.last.skip.section = TRUE, tz.study.area, start.timestamp = NULL, 
     end.timestamp = NULL, report = TRUE, redraw = TRUE, override = NULL, 
-    exclude.tags = NULL, cautious.assignment = TRUE)
+    exclude.tags = NULL, cautious.assignment = TRUE, replicate = NULL)
 ```
 
 ## Function parameters:
@@ -158,7 +158,7 @@ You can also inspect each graphic individually in the *Report* subdirectory.
 
 Here are some examples:
 
-<img src="LaTeX_example_survival.svg" alt="drawing" width="330"/> <img src="LaTeX_example_progression.svg" alt="drawing" width="330"/>
+<img src="LaTeX_example_survival.svg" alt="drawing" width="330"/> <img src="example_progression.svg" alt="drawing" width="330"/>
 
 <img src="LaTeX_example_fish1.png" alt="drawing" width="330"/> <img src="LaTeX_example_fish2.png" alt="drawing" width="330"/>
 
@@ -200,5 +200,19 @@ Isolated detections lead to movement events with only one detection. These movem
 If you set `cautious.assignment` to `FALSE`, actel will consider all movement events as equally reliable for assignment. This may be helpful if you believe your arrays have a short range or if your fish are swimming very fast, and thus low detection numbers are expected.
 
 Now that you know how to start the process, you can learn more about [what is going on](3.0.the_sorting_process.html).
+
+### replicate
+
+One of the main drawbacks of array efficiency calculations is that it can be tricky to estimate efficiency for your very last array. However, if your last array is composed of two lines of hydrophones, one line can be used as a replicate of the other, which in turn allows for the estimation of the last array efficiency. If this is your case, then you can write in the *Standard.Name* of the stations composing your replicate in the `replicate` argument.
+
+Note:
+  : Array replication is only applicable for the **very last** array reported in the spatial.csv file.
+  : Array replication should only be performed if the replicate stations cover the same extent of the migration route section as the original array, and only if the two lines of receivers are close to each other (i.e. one can assume 0% mortality between them). Have a look at the figures below for some examples.
+
+<img src="replicates_A.svg" alt="drawing" width="330"/> <img src="replicates_B.svg" alt="drawing" width="330"/>
+
+<img src="replicates_C.svg" alt="drawing" width="330"/> <img src="replicates_D.svg" alt="drawing" width="330"/>
+
+Also note that you **must** use the stations standard names (i.e. St.10, St.12) when referring to them in actel. If you are not sure what your spatial standard name is, and the column *Standard.Name* does not yet exist in your spatial.csv file, you can run `emptyMatrix()` and that column will be generated for you in the spatial.csv file.
 
 [Back to top.](#)
