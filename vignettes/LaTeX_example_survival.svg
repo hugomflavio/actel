@@ -16,10 +16,13 @@
    height="350.68539"
    viewBox="0 0 369.53107 350.68539"
    sodipodi:docname="LaTeX_example_survival.svg"
-   inkscape:version="0.92.4 (5da689c313, 2019-01-14)"><metadata
+   inkscape:version="0.92.4 (5da689c313, 2019-01-14)"
+   inkscape:export-filename="C:\Users\hdmfla\Desktop\example_survival.png"
+   inkscape:export-xdpi="100.89"
+   inkscape:export-ydpi="100.89"><metadata
      id="metadata8"><rdf:RDF><cc:Work
          rdf:about=""><dc:format>image/svg+xml</dc:format><dc:type
-           rdf:resource="http://purl.org/dc/dcmitype/StillImage" /><dc:title></dc:title></cc:Work></rdf:RDF></metadata><defs
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" /><dc:title /></cc:Work></rdf:RDF></metadata><defs
      id="defs6"><clipPath
        clipPathUnits="userSpaceOnUse"
        id="clipPath42"><path
@@ -84,17 +87,17 @@
      guidetolerance="10"
      inkscape:pageopacity="0"
      inkscape:pageshadow="2"
-     inkscape:window-width="958"
-     inkscape:window-height="1111"
+     inkscape:window-width="1920"
+     inkscape:window-height="1001"
      id="namedview4"
      showgrid="false"
      inkscape:zoom="1.2291667"
-     inkscape:cx="191.37506"
-     inkscape:cy="148.87444"
-     inkscape:window-x="1912"
-     inkscape:window-y="0"
-     inkscape:window-maximized="0"
-     inkscape:current-layer="g38"
+     inkscape:cx="-7.3937712"
+     inkscape:cy="191.49639"
+     inkscape:window-x="-9"
+     inkscape:window-y="-9"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="g10"
      fit-margin-top="0"
      fit-margin-left="0"
      fit-margin-right="0"
@@ -288,12 +291,16 @@
    style="fill:#d9d9d9;fill-opacity:1;fill-rule:nonzero;stroke:#333333;stroke-width:1.07000005;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1"
    id="path160"
    inkscape:connector-curvature="0" /><text
-   transform="matrix(1,0,0,-1,97.16,270.35)"
+   transform="scale(1,-1)"
    style="font-variant:normal;font-weight:normal;font-size:9px;font-family:Helvetica;-inkscape-font-specification:Helvetica;writing-mode:lr-tb;fill:#1a1a1a;fill-opacity:1;fill-rule:nonzero;stroke:none"
-   id="text164"><tspan
-     x="0"
-     y="0"
-     id="tspan162">A</tspan></text>
+   id="text164"
+   x="106.1893"
+   y="-270.35001"><tspan
+     x="100.16"
+     y="-270.35001"
+     id="tspan162"
+     style="text-align:center;text-anchor:middle">Wild</tspan></text>
+
 
 </g></g><g
        id="g166"><g
@@ -313,12 +320,16 @@
    style="fill:#d9d9d9;fill-opacity:1;fill-rule:nonzero;stroke:#333333;stroke-width:1.07000005;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1"
    id="path200"
    inkscape:connector-curvature="0" /><text
-   transform="matrix(1,0,0,-1,220.56,270.35)"
+   transform="scale(1,-1)"
    style="font-variant:normal;font-weight:normal;font-size:9px;font-family:Helvetica;-inkscape-font-specification:Helvetica;writing-mode:lr-tb;fill:#1a1a1a;fill-opacity:1;fill-rule:nonzero;stroke:none"
-   id="text204"><tspan
-     x="0"
-     y="0"
-     id="tspan202">B</tspan></text>
+   id="text204"
+   x="225.99237"
+   y="-270.35001"><tspan
+     x="223.56"
+     y="-270.35001"
+     id="tspan202"
+     style="text-align:center;text-anchor:middle">Hatchery</tspan></text>
+
 
 </g></g><g
        id="g206"><g
@@ -363,6 +374,7 @@
      sodipodi:role="line"
      id="tspan254">River</tspan></text>
 
+
 <text
    transform="matrix(1,0,0,-1,75.87,21.4)"
    style="font-variant:normal;font-weight:normal;font-size:9px;font-family:Helvetica;-inkscape-font-specification:Helvetica;writing-mode:lr-tb;fill:#4d4d4d;fill-opacity:1;fill-rule:nonzero;stroke:none"
@@ -371,6 +383,7 @@
      y="0"
      sodipodi:role="line"
      id="tspan258">Fjord</tspan></text>
+
 
 <text
    transform="matrix(1,0,0,-1,106.19,21.4)"
@@ -381,6 +394,7 @@
      sodipodi:role="line"
      id="tspan262">Sea</tspan></text>
 
+
 <text
    transform="matrix(1,0,0,-1,128.18,21.4)"
    style="font-variant:normal;font-weight:normal;font-size:9px;font-family:Helvetica;-inkscape-font-specification:Helvetica;writing-mode:lr-tb;fill:#4d4d4d;fill-opacity:1;fill-rule:nonzero;stroke:none"
@@ -389,6 +403,7 @@
      y="0"
      sodipodi:role="line"
      id="tspan266">Overall</tspan></text>
+
 
 </g><g
        id="g270" /><g
@@ -425,6 +440,7 @@
      sodipodi:role="line"
      id="tspan298">River</tspan></text>
 
+
 <text
    transform="matrix(1,0,0,-1,199.27,21.4)"
    style="font-variant:normal;font-weight:normal;font-size:9px;font-family:Helvetica;-inkscape-font-specification:Helvetica;writing-mode:lr-tb;fill:#4d4d4d;fill-opacity:1;fill-rule:nonzero;stroke:none"
@@ -433,6 +449,7 @@
      y="0"
      sodipodi:role="line"
      id="tspan302">Fjord</tspan></text>
+
 
 <text
    transform="matrix(1,0,0,-1,229.59,21.4)"
@@ -443,6 +460,7 @@
      sodipodi:role="line"
      id="tspan306">Sea</tspan></text>
 
+
 <text
    transform="matrix(1,0,0,-1,251.58,21.4)"
    style="font-variant:normal;font-weight:normal;font-size:9px;font-family:Helvetica;-inkscape-font-specification:Helvetica;writing-mode:lr-tb;fill:#4d4d4d;fill-opacity:1;fill-rule:nonzero;stroke:none"
@@ -451,6 +469,7 @@
      y="0"
      sodipodi:role="line"
      id="tspan310">Overall</tspan></text>
+
 
 </g><g
        id="g314" /><g
@@ -469,6 +488,7 @@
      sodipodi:role="line"
      id="tspan330">0.00</tspan></text>
 
+
 <text
    transform="matrix(1,0,0,-1,18.76,92.79)"
    style="font-variant:normal;font-weight:normal;font-size:9px;font-family:Helvetica;-inkscape-font-specification:Helvetica;writing-mode:lr-tb;fill:#4d4d4d;fill-opacity:1;fill-rule:nonzero;stroke:none"
@@ -477,6 +497,7 @@
      y="0"
      sodipodi:role="line"
      id="tspan334">0.25</tspan></text>
+
 
 <text
    transform="matrix(1,0,0,-1,18.76,145.49)"
@@ -487,6 +508,7 @@
      sodipodi:role="line"
      id="tspan338">0.50</tspan></text>
 
+
 <text
    transform="matrix(1,0,0,-1,18.76,198.19)"
    style="font-variant:normal;font-weight:normal;font-size:9px;font-family:Helvetica;-inkscape-font-specification:Helvetica;writing-mode:lr-tb;fill:#4d4d4d;fill-opacity:1;fill-rule:nonzero;stroke:none"
@@ -496,6 +518,7 @@
      sodipodi:role="line"
      id="tspan342">0.75</tspan></text>
 
+
 <text
    transform="matrix(1,0,0,-1,18.76,250.88)"
    style="font-variant:normal;font-weight:normal;font-size:9px;font-family:Helvetica;-inkscape-font-specification:Helvetica;writing-mode:lr-tb;fill:#4d4d4d;fill-opacity:1;fill-rule:nonzero;stroke:none"
@@ -504,6 +527,7 @@
      y="0"
      sodipodi:role="line"
      id="tspan346">1.00</tspan></text>
+
 
 </g><g
        id="g350" /><g
@@ -545,6 +569,7 @@
      y="0"
      sodipodi:role="line"
      id="tspan384">Survival</tspan></text>
+
 
 </g><g
        id="g388" /><g
