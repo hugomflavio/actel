@@ -174,7 +174,7 @@ actel <- function(path = NULL, sections, success.arrays, minimum.detections = 2,
   the.matrices <- assembleMatrices(spatial = spatial, movements = simple.movements, minimum.detections = minimum.detections, status.df = status.df)
   last.array.results <- getEstimate(spatial = spatial, detections.list = detections.list, replicate = replicate)
   if (is.list(last.array.results)) 
-    estimate <- last.array.results$combined.p
+    estimate <- last.array.results$results$combined.efficiency
   else
     estimate <- NULL
   if (length(the.matrices) == 1)

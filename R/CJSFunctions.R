@@ -423,7 +423,7 @@ dualArrayCJS <- function(input, silent = TRUE){
   combined.p <- 1 - prod(1 - p)
   absolutes <- matrix(c(apply(input, 2, sum), r[1]), nrow = 3)
   colnames(absolutes) <- ""
-  rownames(absolutes) <- c("detected at original:", "detected at replicate:", "detected at both:")
+  rownames(absolutes) <- c("detected at original:", "detected at replicate: ", "detected at both:")
   names(p) <- c("original", "replicate")
   if(!silent) appendTo("debug", "Terminating dualArray.")
   return(list(absolutes = absolutes, single.efficiency = p, combined.efficiency = combined.p))
