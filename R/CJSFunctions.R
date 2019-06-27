@@ -367,9 +367,9 @@ lastMatrix <- function(spatial, detections.list, replicate){
   all.stations <- spatial$stations$Standard.Name[spatial$stations$Array == tail(unlist(spatial$array.order), 1)]
   if (any(link <- !replicate %in% all.stations)) {
     if (sum(link) > 1)
-      stop(paste("Stations ", paste(replicate[link], collapse = ", "), " are not part of ", tail(unlist(spatial$array.order), 1), " (available stations: ", paste(all.stations, collapse = ", "), ").\n", sep = ""))
+      stop(paste("Stations ", paste(replicate[link], collapse = ", "), " are not part of ", tail(unlist(spatial$array.order), 1), " (available stations: ", paste(all.stations, collapse = ", "), ").", sep = ""))
     else
-      stop(paste("Station ", paste(replicate[link], collapse = ", "), " is not part of ", tail(unlist(spatial$array.order), 1), " (available stations: ", paste(all.stations, collapse = ", "), ").\n", sep = ""))      
+      stop(paste("Station ", paste(replicate[link], collapse = ", "), " is not part of ", tail(unlist(spatial$array.order), 1), " (available stations: ", paste(all.stations, collapse = ", "), ").", sep = ""))      
   }
   original <- all.stations[!all.stations %in% replicate]
   efficiency <- as.data.frame(matrix(ncol = 2, nrow = length(detections.list)))
