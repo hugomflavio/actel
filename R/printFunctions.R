@@ -457,7 +457,7 @@ knitr::kable(overall.CJS$absolutes)
 
 ```{r efficiency2, echo = FALSE}
 to.print <- t(paste(round(overall.CJS$efficiency * 100, 1), "%", sep = ""))
-if (is.na(to.print[, ncol(to.print)]))
+if (grepl("NA", to.print[, ncol(to.print)]))
  to.print[, ncol(to.print)] = "-"
 colnames(to.print) <- names(overall.CJS$efficiency)
 rownames(to.print) <- "efficiency"
