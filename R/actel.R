@@ -71,8 +71,9 @@ actel <- function(path = NULL, sections, success.arrays, minimum.detections = 2,
     decision <- readline("   Reuse processed detections?(Y/n) ")
     appendTo("UD",decision)
     if (decision != "N" & decision != "n"){
-      detections <- standardizeStations(input = actel.detections$detections, spatial = spatial)
       appendTo(c("Screen","Report"), paste("M: Using detections previously compiled on ", actel.detections$timestamp, ".", sep = ""))
+      detections <- standardizeStations(input = actel.detections$detections, spatial = spatial)
+      detections <- convertTimes (input = detections, start.timestamp = start.timestamp, end.timestamp = end.timestamp, tz.study.area = tz.study.area)
       appendTo(c("Screen","Report"), paste("Data time range: ", as.character(head(detections$Timestamp, 1)), " to ", as.character(tail(detections$Timestamp, 1)), " (", tz.study.area, ").", sep = ""))
       recompile <- FALSE
     } else {

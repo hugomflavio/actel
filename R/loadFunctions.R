@@ -351,7 +351,7 @@ convertCodes <- function(input) {
 #' 
 convertTimes <- function(input, start.timestamp, end.timestamp, tz.study.area) {
   appendTo("debug", "Starting convertTimes.")
-  input$Timestamp <- as.POSIXct(input$Timestamp, tz = "GMT", format = stampformat)
+  input$Timestamp <- as.POSIXct(input$Timestamp, tz = "GMT")
   attributes(input$Timestamp)$tzone <- tz.study.area
   input <- input[order(input$Timestamp), ]
   if (!is.null(start.timestamp)){
