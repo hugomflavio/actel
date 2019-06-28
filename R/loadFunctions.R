@@ -64,6 +64,11 @@ loadBio <- function(){
     stop("The biometrics file must contain an 'Release.date' column.\n")
   }
 
+  if (any(!grepl("^[1-2][0-9][0-9][0-9]-[0-1][0-9]-[0-3][0-9] [0-2][0-9]:[0-5][0-9]", bio$Release.date))) {
+    emergencyBreak()
+    stop("Not all values in the 'Release.date' column appear to be in a 'yyyy-mm-dd hh:mm' format (seconds are optional). Please doublecheck the biometrics file\n")
+  }
+  
   if (inherits(try(as.POSIXct(bio$Release.date), silent = TRUE),"try-error")){
     emergencyBreak()
     stop("Could not recognise the data in the 'Release.date' column as POSIX-compatible timestamps. Please doublecheck the biometrics file.\n")
