@@ -51,7 +51,8 @@ knitr::kable(biometrics)
 Although the column order is not important, it is essential that this table contains two columns:
 
 Release.date
-  :  Corresponds to the date and time when the fish was released, and **must** be typed in **yyyy-mm-dd hh:mm:ss** format
+  : Corresponds to the date and time when the fish was released, and **must** be typed in **yyyy-mm-dd hh:mm:ss** format. 
+  : **Note:** These timestamps **must** be in the same time zone as the study area, which you will later list in the `tz.study.area` variable, when you run actel.
 
 Signal 
   : Corresponds to the code emitted by the tag that was implanted on the fish. If you are unsure as to what exactly is the signal being emitted by your tag, you can ask the tag manufacturer more about the differences between code spaces and signals.

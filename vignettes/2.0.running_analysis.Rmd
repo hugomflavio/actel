@@ -127,7 +127,10 @@ However, on study area **B**, if a fish was last detected at River2, it most lik
 
 Hydrophones usually work in Coordinated Universal Time (UTC). Although this is nice to integrate data from multiple hydrophones, depending on where you are working, it may mean that the hydrophones' time is actually displaced from the daytime in your study area. To correct for this, you must include your time zone in this field. For example, when we have study areas in Denmark, we must use `tz.study.area = "Europe/Copenhagen"`.
 
-Time zones can be complicated business, so to help you out, you can search <a href="https://en.wikipedia.org/wiki/List_of_tz_database_time_zones" target="_blank">this wiki page</a> for which time zone code you should use. 
+Time zones can be complicated business, so to help you out, you can search <a href="https://en.wikipedia.org/wiki/List_of_tz_database_time_zones" target="_blank">this wiki page</a> for which time zone code you should use.
+
+Note:
+  : This time zone **must** match the time zone of the release times listed in the [biometrics file](1.0.workspace_requirements.html#biometrics-file).
 
 
 ### start.timestamp and end.timestamp
