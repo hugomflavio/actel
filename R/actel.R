@@ -217,13 +217,14 @@ actel <- function(path = NULL, sections, success.arrays, minimum.detections = 2,
   }
 
   detections <- detections.list
+  efficiency <- overall.CJS
   if (invalid.dist)
     save(detections, movements, simple.movements, status.df, 
-      section.overview, array.overview, the.matrices, overall.CJS, 
+      section.overview, array.overview, the.matrices, efficiency, 
       last.array.results, spatial, file = resultsname)
   else
     save(detections, movements, simple.movements, status.df, 
-      section.overview, array.overview, the.matrices, overall.CJS,
+      section.overview, array.overview, the.matrices, efficiency,
       last.array.results, spatial, dist.mat, file = resultsname)
 
   if (report) {
