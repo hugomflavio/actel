@@ -43,8 +43,8 @@ folderCheck <- function(report, redraw){
 #' 
 printBiometrics <- function(bio) {
   appendTo("debug", "Starting printBiometrics.")
+  biometric.fragment <- ""
   if (any(C <- grepl("Length", colnames(bio)) | grepl("Weight", colnames(bio)) | grepl("Mass", colnames(bio)) | grepl("Size", colnames(bio)))) {
-    biometric.fragment <- ""
     if (sum(C) > 1) {
       graphic.width <- paste(90 / sum(C), "%", sep = "")
     } else {
@@ -69,8 +69,6 @@ printBiometrics <- function(bio) {
     }
   }
   rm(C, graphic.width)
-  if (!exists("biometric.fragment"))
-    biometric.fragment <- ""
   appendTo("debug", "Terminating printBiometrics.")
   return(biometric.fragment)
 }
@@ -499,16 +497,15 @@ cat(last.array.results)
 #' 
 #' @keywords internal
 #' 
-printIndividuals <- function(redraw, detections.list, status.df, tz.study.area) {
+printIndividuals <- function(redraw, detections.list, status.df, tz.study.area.) {
   cbPalette <- c("#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7", "#999999")
   names(cbPalette) <- c("Orange", "Blue", "Green", "Yellow", "Darkblue", "Darkorange", "Pink", "Grey")
   appendTo(c("Screen", "Report"), "M: Drawing individual graphics for the report.")
   if (exists("redraw") && redraw == FALSE) {
     appendTo(c("Screen", "Report"), "M: 'redraw' is set to FALSE, only drawing new graphics.")
   }
-  if (!exists("DEBUG")) 
-    pb <- txtProgressBar(min = 0, max = length(detections.list), style = 3, width = 60)
-  individual.plots <- paste("")
+  pb <- txtProgressBar(min = 0, max = length(detections.list), style = 3, width = 60)
+  individual.plots <- ""
   for (i in 1:length(detections.list)) {
     fish <- names(detections.list)[i]
     if (!(exists("redraw") && redraw == FALSE && file.exists(paste("Report/", fish, ".png", sep = "")))) {
@@ -570,14 +567,12 @@ printIndividuals <- function(redraw, detections.list, status.df, tz.study.area) 
     } else {
       individual.plots <- paste(individual.plots, "![](", fish, ".png){ width=50% }", sep = "")
     }
-    if (!exists("DEBUG")) 
-      setTxtProgressBar(pb, i)
+    setTxtProgressBar(pb, i)
     flush.console()
   }
   rm(i, fish)
-  if (!exists("DEBUG")) {
-    close(pb)
-    rm(pb)
+  close(pb)
+  rm(pb)
   }
   return(individual.plots)
 }
