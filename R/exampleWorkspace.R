@@ -15,7 +15,7 @@ exampleWorkspace <- function() {
   for (i in names(my.list)) {
     write.csv(my.list[[i]], paste("exampleWorkspace/detections/", i, ".csv", sep = ""), row.names = FALSE)
   }
-  cat("The example worskpace is now ready. To run the analysis on the example data, run:\n
+  cat("The example workspace is now ready. To run the analysis on the example data, run:\n
 \tresults <- actel(path = 'exampleWorkspace', sections = c('River','Fjord','Sea'), success.arrays = 'Sea1',
 \t\tminimum.detections = 2, maximum.time = 60, speed.method = 'last to first', if.last.skip.section = TRUE,
 \t\ttz.study.area = 'Europe/Copenhagen', start.timestamp = NULL, end.timestamp = NULL, report = TRUE, redraw = TRUE, 

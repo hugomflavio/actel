@@ -4,7 +4,7 @@
 #' 
 #' @param detections.list A list of the detections split by each target tag, created by splitDetections.
 #' @param dist.mat A matrix of the distances between the deployed ALS.
-#' @param invalid.dist Wether or not the distance matrix suplied is valid for the study area.
+#' @param invalid.dist Whether or not the distance matrix supplied is valid for the study area.
 #' @inheritParams actel
 #' @inheritParams splitDetections
 #' @inheritParams loadDetections
@@ -93,7 +93,7 @@ groupMovements <- function(detections.list, bio, spatial, speed.method, maximum.
   return(movements)
 }
 
-#' Check for movements upstream fo the release site.
+#' Check for movements upstream of the release site.
 #'
 #' @inheritParams splitDetections
 #' @inheritParams loadDetections

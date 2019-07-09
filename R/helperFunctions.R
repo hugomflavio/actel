@@ -261,7 +261,7 @@ moveHelpers <- function(my.home) {
 
 #' Write in comments
 #' 
-#' Checks if the user has invoqued the comment command for a specific fish, and stores the comment.
+#' Checks if the user has invoked the comment command for a specific fish, and stores the comment.
 #' 
 #' @param line The text of the interaction in which the user may or may not request a comment
 #' @param tag The tag number currently being analysed
@@ -312,7 +312,7 @@ clearWorkspace <- function(skip = NA){
 
 #' Check internet connection
 #'
-#' For an unknown reason, R will crash if it attemps to open the html report in a pc with no internet connection.
+#' For an unknown reason, R will crash if it attempts to open the html report in a pc with no internet connection.
 #' The report opens, but the progress freezes and R eventually crashes. Can be removed once figured out why this
 #' is happening.
 #' 

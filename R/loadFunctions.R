@@ -162,7 +162,7 @@ loadDetections <- function(path, spatial, start.timestamp, end.timestamp, tz.stu
       }
       rm(unknown.file)
     } else {
-      appendTo("debug", paste("File '", i, "' is empty, skypping processing.", sep = ""))
+      appendTo("debug", paste("File '", i, "' is empty, skipping processing.", sep = ""))
     }
   }
   rm(i)
@@ -177,7 +177,7 @@ loadDetections <- function(path, spatial, start.timestamp, end.timestamp, tz.stu
   output <- bindDetections(data.files = data.files, file.list = file.list)
   # Convert codespaces
   output <- convertCodes(input = output)
-  # Convert timezones
+  # Convert time-zones
   output <- convertTimes(input = output, start.timestamp = start.timestamp, 
     end.timestamp = end.timestamp, tz.study.area = tz.study.area)
   # Standardize the station names

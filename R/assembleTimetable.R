@@ -84,7 +84,7 @@ assembleTimetable <- function(movements, sections, spatial, minimum.detections,
 
 #' Override automated logics
 #'
-#' If the user has called for an override for a specific tag, this funtion will allow for a fully manual choice of events.
+#' If the user has called for an override for a specific tag, this function will allow for a fully manual choice of events.
 #' 
 #' @inheritParams actel
 #' @inheritParams simplifyMovements

@@ -74,7 +74,7 @@ emptyReceiversCheck <- function(spatial, detections){
 
 #' Temporarily include missing receivers in the spatial object
 #' 
-#' @param unknown.receivers serial number of the receivers to be inlucded
+#' @param unknown.receivers serial number of the receivers to be included
 #' @inheritParams loadDetections
 #' 
 #' @keywords internal
