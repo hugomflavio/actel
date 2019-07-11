@@ -497,7 +497,7 @@ cat(last.array.results)
 #' 
 #' @keywords internal
 #' 
-printIndividuals <- function(redraw, detections.list, status.df, tz.study.area) {
+printIndividuals <- function(redraw, detections.list, status.df, tz.study.area, movements, simple.movements) {
   cbPalette <- c("#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7", "#999999")
   names(cbPalette) <- c("Orange", "Blue", "Green", "Yellow", "Darkblue", "Darkorange", "Pink", "Grey")
   appendTo(c("Screen", "Report"), "M: Drawing individual graphics for the report.")
@@ -508,9 +508,25 @@ printIndividuals <- function(redraw, detections.list, status.df, tz.study.area) 
   individual.plots <- ""
   for (i in 1:length(detections.list)) {
     fish <- names(detections.list)[i]
+    PlotData <- detections.list[[fish]]
     if (!(exists("redraw") && redraw == FALSE && file.exists(paste("Report/", fish, ".png", sep = "")))) {
-      appendTo("debug",paste("Debug: Printing graphic for fish", fish, ".", sep = ""))
-      PlotData <- detections.list[[fish]]
+      all.moves.line <- data.frame(
+          Station = as.vector(t(movements[[fish]][, c("First station", "Last station")])),
+          Timestamp = as.vector(t(movements[[fish]][, c("First time", "Last time")]))
+        )
+      all.moves.line$Station <- factor(all.moves.line$Station, levels = levels(PlotData$Standard.Name))
+      all.moves.line$Timestamp <- as.POSIXct(all.moves.line$Timestamp, tz = tz.study.area)
+      add.simple.movements <- FALSE
+      if (!is.null(simple.movements[[fish]])) {
+        add.simple.movements <- TRUE
+        simple.moves.line <- data.frame(
+          Station = as.vector(t(simple.movements[[fish]][, c("First station", "Last station")])),
+          Timestamp = as.vector(t(simple.movements[[fish]][, c("First time", "Last time")]))
+          )
+        simple.moves.line$Station <- factor(simple.moves.line$Station, levels = levels(PlotData$Standard.Name))
+        simple.moves.line$Timestamp <- as.POSIXct(simple.moves.line$Timestamp, tz = tz.study.area)
+      }
+      appendTo("debug", paste("Debug: Printing graphic for fish", fish, ".", sep = ""))
       colnames(PlotData)[1] <- "Timestamp"
       the.row <- status.df$Signal == tail(strsplit(fish, "-")[[1]], 1)
       start.line <- as.POSIXct(status.df$Release.date[the.row], tz = tz.study.area)
@@ -518,7 +534,9 @@ printIndividuals <- function(redraw, detections.list, status.df, tz.study.area) 
       attributes(first.time)$tzone <- tz.study.area
       last.time <- as.POSIXct(tail(PlotData$Timestamp, 1), tz = tz.study.area)
       relevant.line <- status.df[the.row, (grepl("Arrived", colnames(status.df)) | grepl("Left", colnames(status.df)))]
+      # Start plot
       p <- ggplot2::ggplot(PlotData, ggplot2::aes(x = Timestamp, y = Standard.Name, colour = Array))
+      # Choose background
       default.cols <- TRUE
       if (status.df$P.type[the.row] == "Overridden") {
         p <- p + ggplot2::theme(
@@ -543,20 +561,33 @@ printIndividuals <- function(redraw, detections.list, status.df, tz.study.area) 
       if (default.cols) {
         p <- p + ggplot2::theme_bw()
       }
+      # Plot movements
+      p <- p + ggplot2::geom_path(data = all.moves.line, ggplot2::aes(x = Timestamp, y = Station, group = 1), col = "grey40", linetype = "dashed")
+      if (add.simple.movements) {
+        p <- p + ggplot2::geom_path(data = simple.moves.line, ggplot2::aes(x = Timestamp, y = Station, group = 1), col = "grey40")
+      }
+      # Plot starting line
       p <- p + ggplot2::geom_vline(xintercept = start.line, linetype = "dashed")
+      # Plot entry/exit lines
       for (l in 1:length(relevant.line)) {
         if (!is.na(relevant.line[l])) {
           p <- p + ggplot2::geom_vline(xintercept = as.POSIXct(relevant.line[[l]], tz = tz.study.area), linetype = "dashed", color = "grey")
         }
       }
       rm(l)
+      # Trim graphic
       p <- p + ggplot2::xlim(first.time, last.time)
+      # Paint
       if (length(levels(PlotData$Array)) <= 8) {
         p <- p + ggplot2::scale_color_manual(values = as.vector(cbPalette)[1:length(levels(PlotData$Array))], drop = FALSE)
       } else {
         p <- p + ggplot2::scale_color_discrete(drop = FALSE)
       }
+      # Plot points
       p <- p + ggplot2::geom_point()
+      # Fixate Y axis
+      p <- p + ggplot2::scale_y_discrete(drop = FALSE)
+      # Caption and title
       p <- p + ggplot2::guides(colour = ggplot2::guide_legend(reverse = T))
       p <- p + ggplot2::labs(title = paste(fish, " (", status.df[status.df$Transmitter == fish, "Status"], ")", sep = ""), x = paste("tz: ", tz.study.area, sep = ""), y = "Station Standard Name")
       ggplot2::ggsave(paste("Report/", fish, ".png", sep = ""), width = 5, height = 4)  # better to save in png to avoid point overlapping issues
@@ -568,7 +599,6 @@ printIndividuals <- function(redraw, detections.list, status.df, tz.study.area) 
       individual.plots <- paste(individual.plots, "![](", fish, ".png){ width=50% }", sep = "")
     }
     setTxtProgressBar(pb, i)
-    flush.console()
   }
   close(pb)
   return(individual.plots)

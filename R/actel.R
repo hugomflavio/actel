@@ -234,7 +234,7 @@ actel <- function(path = NULL, sections, success.arrays, minimum.detections = 2,
     printSurvivalGraphic(section.overview = section.overview)
     printProgression(status.df = status.df, overall.CJS = overall.CJS, split.CJS = split.CJS, group.CJS = group.CJS)
     individual.plots <- printIndividuals(redraw = redraw, detections.list = detections.list, 
-        status.df = status.df, tz.study.area = tz.study.area)
+        status.df = status.df, tz.study.area = tz.study.area, movements = movements, simple.movements = simple.movements)
     array.overview.fragment <- printArrayOverview(array.overview)
     if (nrow(section.overview) > 3) 
       survival.graph.size <- "width=90%" else survival.graph.size <- "height=4in"

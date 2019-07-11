@@ -4,7 +4,8 @@
 \alias{printIndividuals}
 \title{Print individual graphics}
 \usage{
-printIndividuals(redraw, detections.list, status.df, tz.study.area)
+printIndividuals(redraw, detections.list, status.df, tz.study.area,
+  movements, simple.movements)
 }
 \arguments{
 \item{redraw}{When report is set to TRUE, controls if files created in a previous run of the function should be overridden.}
@@ -14,6 +15,8 @@ printIndividuals(redraw, detections.list, status.df, tz.study.area)
 \item{status.df}{A dataframe with all the final data for each fish, created by assembleOutput.}
 
 \item{tz.study.area}{The time-zone of the study area. Necessary to convert the ALS time data, which is in UTC.}
+
+\item{movements}{A list of movements for each target tag, created by groupMovements.}
 }
 \value{
 String to be included in printRmd
