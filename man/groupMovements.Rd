@@ -18,11 +18,11 @@ groupMovements(detections.list, bio, spatial, speed.method, maximum.time,
 
 \item{maximum.time}{The number of minutes that must pass between detections for a new event to be created.}
 
-\item{tz.study.area}{The timezone of the study area. Necessary to conver the ALS time data, which is in UTC.}
+\item{tz.study.area}{The time-zone of the study area. Necessary to convert the ALS time data, which is in UTC.}
 
 \item{dist.mat}{A matrix of the distances between the deployed ALS.}
 
-\item{invalid.dist}{Wether or not the distance matrix suplied is valid for the study area.}
+\item{invalid.dist}{Whether or not the distance matrix supplied is valid for the study area.}
 }
 \value{
 A list of movement events for each fish.

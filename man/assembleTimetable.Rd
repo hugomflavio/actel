@@ -15,15 +15,15 @@ assembleTimetable(movements, sections, spatial, minimum.detections,
 
 \item{spatial}{A list of the spatial objects, created by assembleSpatial.}
 
-\item{minimum.detections}{The mininum number of times a tag must have been recorded during the study period for it to be considered a true tag and not random noise.}
+\item{minimum.detections}{The minimum number of times a tag must have been recorded during the study period for it to be considered a true tag and not random noise.}
 
 \item{dist.mat}{A matrix of the distances between the deployed ALS.}
 
-\item{invalid.dist}{Wether or not the distance matrix suplied is valid for the study area.}
+\item{invalid.dist}{Whether or not the distance matrix supplied is valid for the study area.}
 
 \item{speed.method}{One of 'last to first' or 'first to first'. In the former, the last detection on a given array/section is matched to the first detection on the next array/section (default). If changed to 'first to first', the first detection on two consecutive arrays/sections are used to perform the calculations.}
 
-\item{if.last.skip.section}{Indicates wether a fish detected at the last array of a given section should be considered to have disappeared in the next section. Defaults to TRUE. I.e.: In a study with sections 'River' and 'Fjord', where 'River3' is the last river array, a fish last detected at River3 will be considered as 'disapeared in the Fjord'.}
+\item{if.last.skip.section}{Indicates whether a fish detected at the last array of a given section should be considered to have disappeared in the next section. Defaults to TRUE. I.e.: In a study with sections 'River' and 'Fjord', where 'River3' is the last river array, a fish last detected at River3 will be considered as 'disappeared in the Fjord'.}
 
 \item{success.arrays}{The ALS arrays that mark the end of the study area. If a fish crosses one of these arrays, it is considered to have successfully migrated through the area.}
 

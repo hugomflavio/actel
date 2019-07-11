@@ -13,7 +13,7 @@ convertTimes(input, start.timestamp, end.timestamp, tz.study.area)
 
 \item{end.timestamp}{Detection data posterior to this date is not analysed. Improves processing time when loading large amounts of detection data.}
 
-\item{tz.study.area}{The timezone of the study area. Necessary to conver the ALS time data, which is in UTC.}
+\item{tz.study.area}{The time-zone of the study area. Necessary to convert the ALS time data, which is in UTC.}
 }
 \value{
 A dataframe with corrected timestamps.

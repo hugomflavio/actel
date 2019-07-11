@@ -2,7 +2,7 @@
 % Please edit documentation in R/groupMovements.R
 \name{upstreamCheck}
 \alias{upstreamCheck}
-\title{Check for movements upstream fo the release site.}
+\title{Check for movements upstream of the release site.}
 \usage{
 upstreamCheck(i, recipient, bio, spatial)
 }
@@ -16,6 +16,6 @@ upstreamCheck(i, recipient, bio, spatial)
 \item{spatial}{A list of the spatial objects, created by assembleSpatial.}
 }
 \description{
-Check for movements upstream fo the release site.
+Check for movements upstream of the release site.
 }
 \keyword{internal}

@@ -9,7 +9,7 @@
   \item{Release.date}{The date and time of release}
   \item{Release.site}{The release site}
   \item{Serial.nr}{The serial number of the implanted tag}
-  \item{Signal}{The Signal emmited by the implanted tag}
+  \item{Signal}{The Signal emitted by the implanted tag}
   \item{Group}{The group of the tagged fish}
   \item{Total.Length.mm}{The length of the tagged fish}
   \item{Mass.g}{The mass of the tagged fish}

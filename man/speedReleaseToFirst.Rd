@@ -16,7 +16,7 @@ speedReleaseToFirst(fish, status.df, movements, dist.mat,
 
 \item{dist.mat}{A matrix of the distances between the deployed ALS.}
 
-\item{invalid.dist}{Wether or not the distance matrix suplied is valid for the study area.}
+\item{invalid.dist}{Whether or not the distance matrix supplied is valid for the study area.}
 
 \item{silent}{logical: If TRUE, debug messages are issued (only works within actel)}
 }

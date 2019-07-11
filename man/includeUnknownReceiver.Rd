@@ -9,7 +9,7 @@ includeUnknownReceiver(spatial, unknown.receivers)
 \arguments{
 \item{spatial}{A list of the spatial objects, created by assembleSpatial.}
 
-\item{unknown.receivers}{serial number of the receivers to be inlucded}
+\item{unknown.receivers}{serial number of the receivers to be included}
 }
 \description{
 Temporarily include missing receivers in the spatial object

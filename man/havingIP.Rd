@@ -7,7 +7,7 @@
 havingIP()
 }
 \description{
-For an unknown reason, R will crash if it attemps to open the html report in a pc with no internet connection.
+For an unknown reason, R will crash if it attempts to open the html report in a pc with no internet connection.
 The report opens, but the progress freezes and R eventually crashes. Can be removed once figured out why this
 is happening.
 }

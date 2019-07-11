@@ -23,9 +23,9 @@ deployValues(i, timetable, movements, events, sections, spatial, dist.mat,
 
 \item{dist.mat}{A matrix of the distances between the deployed ALS.}
 
-\item{invalid.dist}{Wether or not the distance matrix suplied is valid for the study area.}
+\item{invalid.dist}{Whether or not the distance matrix supplied is valid for the study area.}
 
-\item{if.last.skip.section}{Indicates wether a fish detected at the last array of a given section should be considered to have disappeared in the next section. Defaults to TRUE. I.e.: In a study with sections 'River' and 'Fjord', where 'River3' is the last river array, a fish last detected at River3 will be considered as 'disapeared in the Fjord'.}
+\item{if.last.skip.section}{Indicates whether a fish detected at the last array of a given section should be considered to have disappeared in the next section. Defaults to TRUE. I.e.: In a study with sections 'River' and 'Fjord', where 'River3' is the last river array, a fish last detected at River3 will be considered as 'disappeared in the Fjord'.}
 
 \item{success.arrays}{The ALS arrays that mark the end of the study area. If a fish crosses one of these arrays, it is considered to have successfully migrated through the area.}
 

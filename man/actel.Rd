@@ -18,23 +18,23 @@ actel(path = NULL, sections, success.arrays, minimum.detections = 2,
 
 \item{success.arrays}{The ALS arrays that mark the end of the study area. If a fish crosses one of these arrays, it is considered to have successfully migrated through the area.}
 
-\item{minimum.detections}{The mininum number of times a tag must have been recorded during the study period for it to be considered a true tag and not random noise.}
+\item{minimum.detections}{The minimum number of times a tag must have been recorded during the study period for it to be considered a true tag and not random noise.}
 
 \item{maximum.time}{The number of minutes that must pass between detections for a new event to be created.}
 
 \item{speed.method}{One of 'last to first' or 'first to first'. In the former, the last detection on a given array/section is matched to the first detection on the next array/section (default). If changed to 'first to first', the first detection on two consecutive arrays/sections are used to perform the calculations.}
 
-\item{if.last.skip.section}{Indicates wether a fish detected at the last array of a given section should be considered to have disappeared in the next section. Defaults to TRUE. I.e.: In a study with sections 'River' and 'Fjord', where 'River3' is the last river array, a fish last detected at River3 will be considered as 'disapeared in the Fjord'.}
+\item{if.last.skip.section}{Indicates whether a fish detected at the last array of a given section should be considered to have disappeared in the next section. Defaults to TRUE. I.e.: In a study with sections 'River' and 'Fjord', where 'River3' is the last river array, a fish last detected at River3 will be considered as 'disappeared in the Fjord'.}
 
-\item{tz.study.area}{The timezone of the study area. Necessary to conver the ALS time data, which is in UTC.}
+\item{tz.study.area}{The time-zone of the study area. Necessary to convert the ALS time data, which is in UTC.}
 
 \item{start.timestamp}{Detection data prior to this date is not analysed. Improves processing time when loading large amounts of detection data.}
 
 \item{end.timestamp}{Detection data posterior to this date is not analysed. Improves processing time when loading large amounts of detection data.}
 
-\item{report}{Wether graphics, tables and LaTeX report files should be created. Defaults to TRUE. Allows automatic compiling of a PDF report after the analysis.}
+\item{report}{Whether graphics, tables and LaTeX report files should be created. Defaults to TRUE. Allows automatic compiling of a PDF report after the analysis.}
 
-\item{redraw}{When report is set to TRUE, controls if files created in a previous run of the function should be overriden.}
+\item{redraw}{When report is set to TRUE, controls if files created in a previous run of the function should be overridden.}
 
 \item{override}{A list of tags for which the user intends to manually define entering and leaving points for each study section.}
 

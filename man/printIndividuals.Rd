@@ -7,13 +7,13 @@
 printIndividuals(redraw, detections.list, status.df, tz.study.area)
 }
 \arguments{
-\item{redraw}{When report is set to TRUE, controls if files created in a previous run of the function should be overriden.}
+\item{redraw}{When report is set to TRUE, controls if files created in a previous run of the function should be overridden.}
 
 \item{detections.list}{A list of the detections split by each target tag, created by splitDetections.}
 
 \item{status.df}{A dataframe with all the final data for each fish, created by assembleOutput.}
 
-\item{tz.study.area}{The timezone of the study area. Necessary to conver the ALS time data, which is in UTC.}
+\item{tz.study.area}{The time-zone of the study area. Necessary to convert the ALS time data, which is in UTC.}
 }
 \value{
 String to be included in printRmd

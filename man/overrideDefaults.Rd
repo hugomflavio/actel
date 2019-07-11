@@ -17,6 +17,6 @@ overrideDefaults(i, movements, sections)
 The first and last events for each section for the target fish.
 }
 \description{
-If the user has called for an override for a specific tag, this funtion will allow for a fully manual choice of events.
+If the user has called for an override for a specific tag, this function will allow for a fully manual choice of events.
 }
 \keyword{internal}

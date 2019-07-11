@@ -12,6 +12,6 @@ commentCheck(line, tag)
 \item{tag}{The tag number currently being analysed}
 }
 \description{
-Checks if the user has invoqued the comment command for a specific fish, and stores the comment.
+Checks if the user has invoked the comment command for a specific fish, and stores the comment.
 }
 \keyword{internal}

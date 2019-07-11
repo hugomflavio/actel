@@ -11,7 +11,7 @@ efficiencyMatrix(spatial, movements, minimum.detections)
 
 \item{movements}{A list of movements for each target tag, created by groupMovements.}
 
-\item{minimum.detections}{The mininum number of times a tag must have been recorded during the study period for it to be considered a true tag and not random noise.}
+\item{minimum.detections}{The minimum number of times a tag must have been recorded during the study period for it to be considered a true tag and not random noise.}
 }
 \value{
 a matrix of detection histories per fish.
