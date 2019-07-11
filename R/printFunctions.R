@@ -497,7 +497,7 @@ cat(last.array.results)
 #' 
 #' @keywords internal
 #' 
-printIndividuals <- function(redraw, detections.list, status.df, tz.study.area.) {
+printIndividuals <- function(redraw, detections.list, status.df, tz.study.area) {
   cbPalette <- c("#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7", "#999999")
   names(cbPalette) <- c("Orange", "Blue", "Green", "Yellow", "Darkblue", "Darkorange", "Pink", "Grey")
   appendTo(c("Screen", "Report"), "M: Drawing individual graphics for the report.")
@@ -570,10 +570,7 @@ printIndividuals <- function(redraw, detections.list, status.df, tz.study.area.)
     setTxtProgressBar(pb, i)
     flush.console()
   }
-  rm(i, fish)
   close(pb)
-  rm(pb)
-  }
   return(individual.plots)
 }
 
