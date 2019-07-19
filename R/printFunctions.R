@@ -492,12 +492,13 @@ cat(last.array.results)
 #' @inheritParams actel
 #' @inheritParams groupMovements
 #' @inheritParams simplifyMovements
+#' @param extention the format of the generated graphics
 #' 
 #' @return String to be included in printRmd
 #' 
 #' @keywords internal
 #' 
-printIndividuals <- function(redraw, detections.list, status.df, tz.study.area, movements, simple.movements) {
+printIndividuals <- function(redraw, detections.list, status.df, tz.study.area, movements, simple.movements, extention = "png") {
   cbPalette <- c("#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7", "#999999")
   names(cbPalette) <- c("Orange", "Blue", "Green", "Yellow", "Darkblue", "Darkorange", "Pink", "Grey")
   appendTo(c("Screen", "Report"), "M: Drawing individual graphics for the report.")
@@ -561,11 +562,6 @@ printIndividuals <- function(redraw, detections.list, status.df, tz.study.area, 
       if (default.cols) {
         p <- p + ggplot2::theme_bw()
       }
-      # Plot movements
-      p <- p + ggplot2::geom_path(data = all.moves.line, ggplot2::aes(x = Timestamp, y = Station, group = 1), col = "grey40", linetype = "dashed")
-      if (add.simple.movements) {
-        p <- p + ggplot2::geom_path(data = simple.moves.line, ggplot2::aes(x = Timestamp, y = Station, group = 1), col = "grey40")
-      }
       # Plot starting line
       p <- p + ggplot2::geom_vline(xintercept = start.line, linetype = "dashed")
       # Plot entry/exit lines
@@ -575,6 +571,11 @@ printIndividuals <- function(redraw, detections.list, status.df, tz.study.area, 
         }
       }
       rm(l)
+      # Plot movements
+      p <- p + ggplot2::geom_path(data = all.moves.line, ggplot2::aes(x = Timestamp, y = Station, group = 1), col = "grey40", linetype = "dashed")
+      if (add.simple.movements) {
+        p <- p + ggplot2::geom_path(data = simple.moves.line, ggplot2::aes(x = Timestamp, y = Station, group = 1), col = "grey40")
+      }
       # Trim graphic
       p <- p + ggplot2::xlim(first.time, last.time)
       # Paint
@@ -590,13 +591,13 @@ printIndividuals <- function(redraw, detections.list, status.df, tz.study.area, 
       # Caption and title
       p <- p + ggplot2::guides(colour = ggplot2::guide_legend(reverse = T))
       p <- p + ggplot2::labs(title = paste(fish, " (", status.df[status.df$Transmitter == fish, "Status"], ")", sep = ""), x = paste("tz: ", tz.study.area, sep = ""), y = "Station Standard Name")
-      ggplot2::ggsave(paste("Report/", fish, ".png", sep = ""), width = 5, height = 4)  # better to save in png to avoid point overlapping issues
+      ggplot2::ggsave(paste0("Report/", fish, ".", extention), width = 5, height = 4)  # better to save in png to avoid point overlapping issues
       rm(PlotData, start.line, last.time, relevant.line, first.time)
     }
     if (i%%2 == 0) {
-      individual.plots <- paste(individual.plots, "![](", fish, ".png){ width=50% }\n", sep = "")
+      individual.plots <- paste0(individual.plots, "![](", fish, ".", extention, "){ width=50% }\n")
     } else {
-      individual.plots <- paste(individual.plots, "![](", fish, ".png){ width=50% }", sep = "")
+      individual.plots <- paste0(individual.plots, "![](", fish, ".", extention, "){ width=50% }")
     }
     setTxtProgressBar(pb, i)
   }
