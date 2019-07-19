@@ -16,7 +16,6 @@ Imports:
     readr,
     ggplot2,
     reshape2,
-    xtable,
     fs,
     knitr,
     rmarkdown
