@@ -46,7 +46,7 @@ Here are some examples:
 
 **Detection graphics**
 
-<img src="vignettes/LaTeX_example_fish1.png" alt="drawing" width="430"/> <img src="vignettes/LaTeX_example_fish2.png" alt="drawing" width="430"/>
+<img src="vignettes/R64K-4521.png" alt="drawing" width="430"/> <img src="vignettes/R64K-4526.png" alt="drawing" width="430"/>
 
 **Times of arrival**
 
