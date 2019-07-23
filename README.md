@@ -1,3 +1,5 @@
+Jump to [**installation instructions**](#installing-actel)
+
 ## Actel: Acoustic telemetry data sorting
 
 If you are tracking animals during their migration using acoustic telemetry, actel is the package for you. 
@@ -27,7 +29,7 @@ By bringing together the study area configuration and the recorded detections, a
 
 ## Unlock actel's full potential
 
-To trully learn how to operate actel, you must read the package vignettes. These have been arranged so that you can
+To truly learn how to operate actel, you must read the package vignettes. These have been arranged so that you can
 prepare your analysis as you learn; quite soon you will get your first results!
 
 Here are some examples: 
@@ -49,4 +51,31 @@ Here are some examples:
 **Summary information**
 
 <img src="vignettes/LaTeX_example_survival.svg" alt="drawing" height="370"/> <img src="vignettes/example_progression.svg" alt="drawing" height="370"/>
+
+## Installing actel
+
+To install actel, you will need to the devtools package installed.
+
+    install.packages("devtools")
+    library("devtools")
+    
+Now you can either install actel sourcing remotely or locally.
+
+**a) install directly from the repository:**
+
+    devtools::install_github("hugomflavio/actel", build_opts = c("--no-resave-data", "--no-manual"))
+
+**b) install locally:**
+
+1. Download actel's source files here: [**actel-master.zip**](https://github.com/hugomflavio/actel/archive/master.zip)
+1. Unzip the file and move your R session into the newly created folder
+1. Run: 
+
+        devtools::install_github("actel-master", build_vignettes = TRUE)
+
+After installing, you should read the package vignettes, which can be found by running:
+
+    browseVignettes('actel')
+
+<span style="color:red">**Note:**</span> There have been some reports that the **vignettes are not being installed** through option A. If you installed actel remotely and the vignettes are not showing up, **try using the second installation method**.
 
