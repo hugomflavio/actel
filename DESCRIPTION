@@ -16,10 +16,10 @@ Imports:
     readr,
     ggplot2,
     reshape2,
-    xtable,
     fs,
     knitr,
-    rmarkdown
+    rmarkdown,
+    circular
 Suggests: 
     raster,
     gdistance,

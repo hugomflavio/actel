@@ -3,13 +3,14 @@
 #' @inheritParams loadDetections
 #' @inheritParams simplifyMovements
 #' @inheritParams actel
+#' @param simple.movements A list of valid-only movements for each fish
 #'
 #' @return A list of detection matrices split by groups and release sites
 #' 
 #' @keywords internal 
 #'
-assembleMatrices <- function(spatial, movements, minimum.detections, status.df) {
-  temp <- efficiencyMatrix(spatial = spatial, movements = movements, minimum.detections = minimum.detections)
+assembleMatrices <- function(spatial, simple.movements, minimum.detections, status.df) {
+  temp <- efficiencyMatrix(spatial = spatial, simple.movements = simple.movements, minimum.detections = minimum.detections)
   mymatrix <- includeMissing(x = temp, status.df = status.df)
   link <- sapply(status.df$Signal, grep, rownames(mymatrix))
   mymatrix <- mymatrix[link, ]  
@@ -302,19 +303,20 @@ getReleaseCJS <- function(the.matrices, status.df) {
 #' @inheritParams actel
 #' @inheritParams loadDetections
 #' @inheritParams simplifyMovements
+#' @inheritParams assembleMatrices
 #' 
 #' @return a matrix of detection histories per fish.
 #' 
 #' @keywords internal
 #' 
-efficiencyMatrix <- function(spatial, movements, minimum.detections) {
+efficiencyMatrix <- function(spatial, simple.movements, minimum.detections) {
   appendTo("debug", "Starting efficiencyMatrix.")
-  efficiency <- as.data.frame(matrix(ncol = length(unlist(spatial$array.order)), nrow = length(movements)))
+  efficiency <- as.data.frame(matrix(ncol = length(unlist(spatial$array.order)), nrow = length(simple.movements)))
   colnames(efficiency) <- unlist(spatial$array.order)
-  rownames(efficiency) <- stripCodeSpaces(names(movements))
+  rownames(efficiency) <- stripCodeSpaces(names(simple.movements))
   efficiency[is.na(efficiency)] = 0
-  for (i in 1:length(movements)) {
-    submoves <- movements[[i]][!grepl("Unknown", movements[[i]][, "Array"]), ]
+  for (i in 1:length(simple.movements)) {
+    submoves <- simple.movements[[i]][!grepl("Unknown", simple.movements[[i]][, "Array"]), ]
     if (nrow(submoves) >= 1) {
       A <- match(submoves[,"Array"],unlist(spatial$array.order))
       B1 <- unique(A)

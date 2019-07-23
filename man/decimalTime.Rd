@@ -15,4 +15,3 @@ Decimal hour equivalent (single value or vector)
 \description{
 Wrapper for timeConverter
 }
-\keyword{internal}

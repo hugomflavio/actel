@@ -31,6 +31,9 @@ knitr::opts_chunk$set(
 
 In this page you can find additional help if you run into trouble using actel. Each message/warning/error in this page is followed by a short text detailing the problem. If your problem persists after trying out the proposed solutions, feel free to contact the development team.
 
+Note :
+  : As actel evolves, some new errors and messages may accidentally be left out of this page. If you encounter a message or error that is not reported here, please open an issue at [actel's GitHub reposiroty.](https://github.com/hugomflavio/actel/issues)
+
 ### Errors and messages while importing the data:
 
 1. **The target path does not exist**

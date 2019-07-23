@@ -1,3 +1,36 @@
+#' Calculate the standard error of the mean
+#' 
+#' @param x input data
+#' @param na.rm logical: if TRUE, missing values are removed.
+#' @param silent logica: if TRUE, The number of NA's removed is not displayed.
+#' 
+#' @return SDM
+#' 
+#' @export
+#' 
+std.error <- function(x, na.rm = TRUE, silent = FALSE){
+ a <- length(x)
+ if(na.rm) 
+  x <- x[!is.na(x)]
+ output <- sd(x) / sqrt(length(x))
+ if (!silent && a != length(x)) 
+  cat("M: Ommited", a - length(x), "missing values.\n")
+ return(output)
+}
+
+#' Calculate the absolute values by which X can be divided
+#' 
+#' @param x the value to be divided
+#' 
+#' @return a vector of values that, when dividing x, return integers
+#' 
+#' @export
+#' 
+divisors <- function(x){
+    y <- seq_len(x)
+    return(y[x %% y == 0])
+}
+
 #' Convert hh:mm:ss time to hh.hhh
 #'
 #' Wrapper for timeConverter
@@ -6,15 +39,15 @@
 #' 
 #' @return Decimal hour equivalent (single value or vector)
 #' 
-#' @keywords internal
+#' @export
 #' 
 decimalTime <- function(input) {
-  if (length(x) < 1) 
+  if (length(input) < 1) 
     stop("Input appears to be empty.")
-  if (length(x) == 1) 
-    output <- timeConverter(x)
-  if (length(x) > 1) 
-    output <- unlist(lapply(x, timeConverter))
+  if (length(input) == 1) 
+    output <- timeConverter(input)
+  if (length(input) > 1) 
+    output <- unlist(lapply(input, timeConverter))
   return(output)
 }
 
@@ -47,7 +80,7 @@ timeConverter <- function(input) {
 #' 
 #' @return Trimmed character string
 #' 
-#' @keywords internal
+#' @export
 #' 
 substrRight <- function(input, n) {
   substr(input, nchar(input) - n + 1, nchar(input))
@@ -121,10 +154,13 @@ combine <- function(input) {
 #' 
 #' @return The rounded value
 #' 
-#' @keywords internal
+#' @export
 #' 
 roundUp <- function(input, to = 10) {
-  to * (input%/%to + as.logical(input%%to))
+  if (inherits(input, "list"))
+    lapply(input, function(input) to * (input %/% to + as.logical(input %% to)))
+  else
+    to * (input %/% to + as.logical(input %% to))
 }
 
 #' Forcefully round a number down
@@ -136,7 +172,7 @@ roundUp <- function(input, to = 10) {
 #' 
 #' @return The rounded value
 #' 
-#' @keywords internal
+#' @export
 #' 
 roundDown <- function(input, to = 10) {
   to * (input%/%to)

@@ -72,7 +72,7 @@ assembleSpatial <- function(bio, sections) {
     array.order[[j]] <- levels(stations$Array)[grepl(j, levels(stations$Array))]
   }
   if (any(trigger <- unlist(lapply(array.order,length)) == 0)) {
-    appendTo(c("Screen","Warnings"), decision <- readline(paste("W: No arrays were found that match section(s) ",paste(names(array.order)[trigger], collapse = ", "), ". There could be a typing mistake!\n   Continue the analysis?(y/N) ", sep = "")))
+    appendTo(c("Screen", "Warning"), decision <- readline(paste("W: No arrays were found that match section(s) ",paste(names(array.order)[trigger], collapse = ", "), ". There could be a typing mistake!\n   Continue the analysis?(y/N) ", sep = "")))
     if (decision != "y" | decision != "Y" ){
       emergencyBreak()
       stop("Stopping analysis per user command.\n")

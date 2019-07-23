@@ -87,11 +87,18 @@ printDotplots <- function(status.df, invalid.dist) {
   t1 <- status.df[status.df$Detections > 0, c("Transmitter", "Detections", colnames(status.df)[grepl("Time.until", colnames(status.df)) | grepl("Speed.to", colnames(status.df)) | grepl("Time.in", 
     colnames(status.df))])]
   t1$Transmitter <- factor(t1$Transmitter, levels = rev(t1$Transmitter))
-  largest <- c(-1, -1, unlist(apply(t1[, c(-1, -2)], 2, function(x) if (!all(is.na(x))) {
-    max(x, na.rm = T)
-  } else {
-    NA
-  })))
+  largest <- c(-1, -1, 
+    unlist(
+      apply(t1[, c(-1, -2)], 2, 
+        function(x) 
+        if (!all(is.na(x))) {
+          max(x, na.rm = T)
+        } else {
+          NA
+        }
+      )
+    )
+  )
   largest[grepl("Speed.to", colnames(t1))] <- -1
   keep.seconds <- largest <= 600 & largest >= 0
   to.minutes <- largest <= 36000 & largest > 600
@@ -112,6 +119,9 @@ printDotplots <- function(status.df, invalid.dist) {
   } else {
     t2 <- t1[, !grepl("Speed.to", colnames(t1))]
   }
+  colnames(t2) <- sub("Time.i", "I", colnames(t2))
+  colnames(t2) <- sub("Time.u", "U", colnames(t2))
+  colnames(t2) <- sub("Speed.t", "T", colnames(t2))
   PlotData <- suppressMessages(reshape2::melt(t2))
   PlotData$Colour <- "Orange"
   for (j in colnames(t2)[-1]) {
@@ -143,7 +153,7 @@ printDotplots <- function(status.df, invalid.dist) {
   # p <- p + ggplot2::theme(strip.text.x = ggplot2::element_text(size = 0.5))
   p <- p + ggplot2::labs(x = "", y = "")
   # ggplot2::ggsave(paste("Report/dotplots.pdf", sep = ""), width = 6, height = 10)
-  ggplot2::ggsave(paste("Report/dotplots.png", sep = ""), width = 6, height = 10)
+  ggplot2::ggsave(paste("Report/dotplots.png", sep = ""), width = 6, height = (1.3 + 0.115 * (nrow(t2) - 1)))
   appendTo("debug", "Terminating printDotplots.")
 }
 
@@ -492,12 +502,14 @@ cat(last.array.results)
 #' @inheritParams actel
 #' @inheritParams groupMovements
 #' @inheritParams simplifyMovements
+#' @inheritParams assembleMatrices
+#' @param extention the format of the generated graphics
 #' 
 #' @return String to be included in printRmd
 #' 
 #' @keywords internal
 #' 
-printIndividuals <- function(redraw, detections.list, status.df, tz.study.area) {
+printIndividuals <- function(redraw, detections.list, status.df, tz.study.area, movements, simple.movements, extention = "png") {
   cbPalette <- c("#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7", "#999999")
   names(cbPalette) <- c("Orange", "Blue", "Green", "Yellow", "Darkblue", "Darkorange", "Pink", "Grey")
   appendTo(c("Screen", "Report"), "M: Drawing individual graphics for the report.")
@@ -508,9 +520,25 @@ printIndividuals <- function(redraw, detections.list, status.df, tz.study.area) 
   individual.plots <- ""
   for (i in 1:length(detections.list)) {
     fish <- names(detections.list)[i]
+    PlotData <- detections.list[[fish]]
     if (!(exists("redraw") && redraw == FALSE && file.exists(paste("Report/", fish, ".png", sep = "")))) {
-      appendTo("debug",paste("Debug: Printing graphic for fish", fish, ".", sep = ""))
-      PlotData <- detections.list[[fish]]
+      all.moves.line <- data.frame(
+          Station = as.vector(t(movements[[fish]][, c("First station", "Last station")])),
+          Timestamp = as.vector(t(movements[[fish]][, c("First time", "Last time")]))
+        )
+      all.moves.line$Station <- factor(all.moves.line$Station, levels = levels(PlotData$Standard.Name))
+      all.moves.line$Timestamp <- as.POSIXct(all.moves.line$Timestamp, tz = tz.study.area)
+      add.simple.movements <- FALSE
+      if (!is.null(simple.movements[[fish]])) {
+        add.simple.movements <- TRUE
+        simple.moves.line <- data.frame(
+          Station = as.vector(t(simple.movements[[fish]][, c("First station", "Last station")])),
+          Timestamp = as.vector(t(simple.movements[[fish]][, c("First time", "Last time")]))
+          )
+        simple.moves.line$Station <- factor(simple.moves.line$Station, levels = levels(PlotData$Standard.Name))
+        simple.moves.line$Timestamp <- as.POSIXct(simple.moves.line$Timestamp, tz = tz.study.area)
+      }
+      appendTo("debug", paste("Debug: Printing graphic for fish", fish, ".", sep = ""))
       colnames(PlotData)[1] <- "Timestamp"
       the.row <- status.df$Signal == tail(strsplit(fish, "-")[[1]], 1)
       start.line <- as.POSIXct(status.df$Release.date[the.row], tz = tz.study.area)
@@ -518,7 +546,9 @@ printIndividuals <- function(redraw, detections.list, status.df, tz.study.area) 
       attributes(first.time)$tzone <- tz.study.area
       last.time <- as.POSIXct(tail(PlotData$Timestamp, 1), tz = tz.study.area)
       relevant.line <- status.df[the.row, (grepl("Arrived", colnames(status.df)) | grepl("Left", colnames(status.df)))]
+      # Start plot
       p <- ggplot2::ggplot(PlotData, ggplot2::aes(x = Timestamp, y = Standard.Name, colour = Array))
+      # Choose background
       default.cols <- TRUE
       if (status.df$P.type[the.row] == "Overridden") {
         p <- p + ggplot2::theme(
@@ -543,35 +573,99 @@ printIndividuals <- function(redraw, detections.list, status.df, tz.study.area) 
       if (default.cols) {
         p <- p + ggplot2::theme_bw()
       }
+      # Plot starting line
       p <- p + ggplot2::geom_vline(xintercept = start.line, linetype = "dashed")
+      # Plot entry/exit lines
       for (l in 1:length(relevant.line)) {
         if (!is.na(relevant.line[l])) {
           p <- p + ggplot2::geom_vline(xintercept = as.POSIXct(relevant.line[[l]], tz = tz.study.area), linetype = "dashed", color = "grey")
         }
       }
       rm(l)
+      # Plot movements
+      p <- p + ggplot2::geom_path(data = all.moves.line, ggplot2::aes(x = Timestamp, y = Station, group = 1), col = "grey40", linetype = "dashed")
+      if (add.simple.movements) {
+        p <- p + ggplot2::geom_path(data = simple.moves.line, ggplot2::aes(x = Timestamp, y = Station, group = 1), col = "grey40")
+      }
+      # Trim graphic
       p <- p + ggplot2::xlim(first.time, last.time)
+      # Paint
       if (length(levels(PlotData$Array)) <= 8) {
         p <- p + ggplot2::scale_color_manual(values = as.vector(cbPalette)[1:length(levels(PlotData$Array))], drop = FALSE)
       } else {
         p <- p + ggplot2::scale_color_discrete(drop = FALSE)
       }
+      # Plot points
       p <- p + ggplot2::geom_point()
+      # Fixate Y axis
+      p <- p + ggplot2::scale_y_discrete(drop = FALSE)
+      # Caption and title
       p <- p + ggplot2::guides(colour = ggplot2::guide_legend(reverse = T))
       p <- p + ggplot2::labs(title = paste(fish, " (", status.df[status.df$Transmitter == fish, "Status"], ")", sep = ""), x = paste("tz: ", tz.study.area, sep = ""), y = "Station Standard Name")
-      ggplot2::ggsave(paste("Report/", fish, ".png", sep = ""), width = 5, height = 4)  # better to save in png to avoid point overlapping issues
+      ggplot2::ggsave(paste0("Report/", fish, ".", extention), width = 5, height = 4)  # better to save in png to avoid point overlapping issues
       rm(PlotData, start.line, last.time, relevant.line, first.time)
     }
     if (i%%2 == 0) {
-      individual.plots <- paste(individual.plots, "![](", fish, ".png){ width=50% }\n", sep = "")
+      individual.plots <- paste0(individual.plots, "![](", fish, ".", extention, "){ width=50% }\n")
     } else {
-      individual.plots <- paste(individual.plots, "![](", fish, ".png){ width=50% }", sep = "")
+      individual.plots <- paste0(individual.plots, "![](", fish, ".", extention, "){ width=50% }")
     }
     setTxtProgressBar(pb, i)
-    flush.console()
   }
   close(pb)
   return(individual.plots)
+}
+
+#' Print circular graphics for each array
+#' 
+#' Prints the time of first entry point on each of the arrays. Functions adapted from the circular R package.
+#' 
+#' @param times a (list of) circular object(s)
+#' 
+#' @keywords internal
+#' 
+#' @return A rmd string to be attached to the report.
+#' 
+printCircular <- function(times, status.df){
+  cbPalette <- c("#56B4E9", "#c0ff3e", "#E69F00", "#F0E442", "#0072B2", "#D55E00", "#CC79A7", "#999999")
+  circular.plots <- ""
+  colours <- paste(cbPalette[c(1:length(unique(status.df$Group)))], 80, sep = "")
+  for (i in 1:length(times)) {
+    if (length(unique(status.df$Group)) > 1) {
+      link <- match(names(times[[i]]), status.df$Transmitter)
+      groups <- factor(status.df$Group[link], levels = levels(status.df$Group))
+      trim.times <- split(times[[i]], groups)
+      ylegend <- -0.97 + (0.1 * (length(unique(groups)) - 2))
+    } else {
+      trim.times <- times[i]
+      names(trim.times) <- unique(status.df$Group)
+      ylegend <- -0.97
+    }
+    prop <- roundDown(1 / max(unlist(lapply(trim.times, function(x) table(roundUp(x, to = 1)) / sum(!is.na(x))))), to = 1)
+    {svg(paste0("Report/times_", names(times)[i], ".svg"), height = 5, width = 5, bg = "transparent")
+    par(mar = c(1, 2, 2, 1))
+    circular:::CirclePlotRad(main = names(times)[i], shrink = 1.05)
+    # circularSection(from = sunset, 
+    #   to = sunrize, units = "hours", template = "clock24", 
+    #   limits = c(1, 0), fill = scales::alpha("grey", 0.3), border = "transparent")
+    params <- myRoseDiag(trim.times, bins = 24, radii.scale = "linear",
+      prop = prop, tcl.text = -0.1, tol = 0.05, col = colours)
+    roseMean(trim.times, col = params$col, mean.length = c(0.07, -0.07), mean.lwd = 6,
+      box.range = "std.error", fill = "white", border = "black",
+      box.size = c(1.015, 0.985), edge.length = c(0.025, -0.025),
+      edge.lwd = 2)
+    ringsRel(plot.params = params, border = "black", ring.text = TRUE, 
+      ring.text.pos = 0.07, rings.lty = "f5", ring.text.cex = 0.8)
+      legend(x = -1.2, y = ylegend,
+      legend = paste(names(trim.times), " (", unlist(lapply(trim.times, function(x) sum(!is.na(x)))), ")", sep =""),
+      fill = params$col, bty = "n", x.intersp = 0.3, cex = 0.8)
+    dev.off()}
+    if (i %% 2 == 0)
+      circular.plots <- paste0(circular.plots, "![](times_", names(times)[i], ".svg){ width=50% }\n")
+    else
+      circular.plots <- paste0(circular.plots, "![](times_", names(times)[i], ".svg){ width=50% }")
+  }
+  return(circular.plots)
 }
 
 #' Print Rmd report
@@ -585,12 +679,13 @@ printIndividuals <- function(redraw, detections.list, status.df, tz.study.area) 
 #' @param array.overview.fragment Rmarkdown string specifying the array overview results.
 #' @param survival.graph.size Rmarkdown string specifying the type size of the survival graphics.
 #' @param individual.plots Rmarkdown string specifying the name of the individual plots.
+#' @param circular.plots Rmarkdown string specifying the name of the circular plots.
 #' @inheritParams loadDetections
 #' 
 #' @keywords internal
 #' 
 printRmd <- function(name.fragment, header.fragment, biometric.fragment, efficiency.fragment, array.overview.fragment,
-  survival.graph.size, individual.plots, spatial){
+  survival.graph.size, individual.plots, circular.plots, spatial){
   appendTo("Screen", "M: Producing final report.")
   if (file.exists(reportname <- paste("Report/actel_report", name.fragment, ".Rmd", sep = ""))) {
     continue <- TRUE
@@ -641,6 +736,7 @@ Number of listed receivers: **`r I(spatial$number.of.receivers)`** (of which **'
 
 Data time range: ', stringr::str_extract(pattern = '(?<=Data time range: )[^\r]*', string = report), '
 
+Found a bug? [**Report it here.**](https://github.com/hugomflavio/actel/issues)
 
 ### List of Stations
 
@@ -694,7 +790,7 @@ knitr::kable(section.overview)
 ### Progression
 
 Note:
-  : The progression calculations do not account for intra-section backwards movements. This implies that the total number of fish to have been **last seen** at a given array may be lower than the displayed below. Please refer to the [section survival overview](#survival) to find out where each of your fish was considered to have disappeared.
+  : The progression calculations do not account for intra-section backwards movements. This implies that the total number of fish to have been **last seen** at a given array may be lower than the displayed below. Please refer to the [section survival overview](#survival) to find out where your fish were considered to have disappeared.
   
 <center>
 ![](progression.png){ width=75% }
@@ -702,7 +798,22 @@ Note:
 
 ', array.overview.fragment, '
 
+
+### Time of arrival at each Array
+
+Note:
+  : Coloured lines on the outer circle indicate the mean value for each group and the respective ranges show the standard error of the mean. Each group\'s bars sum to 100%. The number of data points in each group is presented between brackets in the legend of each pannel. 
+
+<center>
+', circular.plots,'
+</center>
+
+
 ### Dotplots
+
+Note:
+  : The **top** 10% of the values for each panel are marked in **red**.
+  : The **bottom** 10% of the values for each panel are marked in **orange**.
 
 <center>
 ![](dotplots.png){ width=95% }
@@ -719,13 +830,14 @@ cat(gsub("\\r", "", readr::read_file("../temp_log.txt")))
 ### Individual plots
 
 Note:
+  : The detections are coloured by array. The vertical black dashed line shows the time of release. The vertical grey dashed lines show the assigned moments of entry and exit for each study area section. The full dark-grey line shows the movement events considered valid, while the dashed dark-grey line shows the movement events considered invalid.
+  : The movement event lines move straight between the first and last station of each event (i.e. in-between detections will not be individually linked by the line).
   : Manually **edited** fish are highlighted with **yellow** graphic borders.
   : Manually **overridden** fish are highlighted with **red** graphic borders.
 
 <center>
 ', individual.plots,'
 </center>
-
 
 ', sep = ""), fill = TRUE)
 sink()
@@ -813,6 +925,7 @@ h4 {
   <a href="#biometric-graphics">Biometrics</a>
   <a href="#survival">Survival</a>
   <a href="#progression">Progression</a>
+  <a href="#time-of-arrival-at-each-array">Arrival times</a>
   <a href="#dotplots">Dotplots</a>
   <a href="#full-log">Full log</a>
   <a href="#individual-plots">Individuals</a>

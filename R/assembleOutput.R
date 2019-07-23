@@ -50,7 +50,7 @@ assembleOutput <- function(timetable, bio, movements, spatial, sections, dist.ma
           status.df[i, df.to.col] <- dist.mat[dist.row, dist.col]/status.df[i, df.from.col]
         }
       } else {
-        appendTo(c("Screen", "Warnings", "Report"), paste("Error: Fish ", status.df$Transmitter[i], " was detected before being released!", sep = ""))
+        appendTo(c("Screen", "Warning", "Report"), paste("Error: Fish ", status.df$Transmitter[i], " was detected before being released!", sep = ""))
         appendTo("Screen", paste("  Release time: ", status.df[i, "Release.date"], sep = ""))
         appendTo("Screen", paste("  First valid detection: ", status.df[i, paste("Arrived", first.section, sep = ".")], " (", first.section, ").", sep = ""))
         cat("  Movement table for fish", status.df$Transmitter[i], "\n")

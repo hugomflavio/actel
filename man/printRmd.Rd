@@ -6,7 +6,7 @@
 \usage{
 printRmd(name.fragment, header.fragment, biometric.fragment,
   efficiency.fragment, array.overview.fragment, survival.graph.size,
-  individual.plots, spatial)
+  individual.plots, circular.plots, spatial)
 }
 \arguments{
 \item{name.fragment}{Rmarkdown string specifying the type of report for the title.}
@@ -22,6 +22,8 @@ printRmd(name.fragment, header.fragment, biometric.fragment,
 \item{survival.graph.size}{Rmarkdown string specifying the type size of the survival graphics.}
 
 \item{individual.plots}{Rmarkdown string specifying the name of the individual plots.}
+
+\item{circular.plots}{Rmarkdown string specifying the name of the circular plots.}
 
 \item{spatial}{A list of the spatial objects, created by assembleSpatial.}
 }
