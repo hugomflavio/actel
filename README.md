@@ -76,7 +76,7 @@ Now you can either install actel sourcing remotely or locally.
 1. Unzip the file and move your R session into the newly created folder
 1. Run: 
 
-        devtools::install_github("actel-master", build_vignettes = TRUE)
+        devtools::install("actel-master", build_vignettes = TRUE)
 
 After installing, you should read the package vignettes, which can be found by running:
 
