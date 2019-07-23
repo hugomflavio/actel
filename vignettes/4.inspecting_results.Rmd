@@ -111,6 +111,10 @@ In this object you will find the matrix/matrices that were used for efficiency e
 Note:
   : These matrices only represent the forward movements. You can read more about it in the description of the `overall.CJS`.
 
+### arrival.times
+
+This data frame contains the timestamps of first valid detection on each array, for each fish. While in actel it is used to draw the circular plots, you can also use it to test for differences between groups!
+
 ## Results in your working directory
 
 On top of the results stored in your R session, actel saves some additional information in your working directory.
@@ -167,6 +171,10 @@ This is the main non-R output. If you activated the `report` option, actel will 
 
 	You can also examine the detailed values in the tables supplied for each fish group.
 
+1. **Time of arrival at each array**
+
+	For each of your study area's arrays, a circular plot will be drawn of the arrival time of each fish. The fish are grouped by the groups listed in the *biometrics.csv* file. These plots are saved in .svg format in the Report folder, so you can easily export them elsewhere, if needed.
+
 1. **Fish comparisons (Dotplots)**
 
 	As the name suggests, this plot compares a series of variables across all your fish: The total number of detections, and the time until/time in each of your study area sections. To simplify the visualisation, for each variable, the **top 10%** of the data is painted in **Red**, and the **bottom 10%** of the data is painted in **Orange**.
@@ -175,13 +183,15 @@ This is the main non-R output. If you activated the `report` option, actel will 
 
 1. **Actel log**
 
-	This section contains the same information as the actel log saved as a text file in your target folder. It is useful to have a look at a few things. Amongst them are the number of target tags, the detection data range, the number of ALS (i.e. hydrophones). These can help you spot any missing data (i.e. if you tagged 100 fish and had only 80 target tags, some tags are missing).
+	This section contains the same information as the actel log saved as a text file in your target folder. It is useful to have a look at a few things: the number of target tags, the detection data range, the number of ALS (i.e. hydrophones) can help you spot any missing data (i.e. if you tagged 100 fish and had only 80 target tags, some tags are missing from your input files!).
 
 1. **Graphics of detected tags**
 
-	This section contains a plot for each of your target tags, showing all the detections found in the data for the respective fish. Further more, it shows the release time in the black dashed line, and the times picked by actel as entry/exit of each section in the grey dashed lines. Lastly, the fate assigned by actel to the fish is displayed in the header, between brackets.
+	This section contains a plot for each of your target tags, showing all the detections found in the data for the respective fish. The detections are coloured by array. The vertical black dashed line shows the time of release. The vertical grey dashed lines show the assigned moments of entry and exit for each study area section. The full dark-grey line shows the movement events considered valid, while the dashed dark-grey line shows the movement events considered invalid.
 
-	We recommend that you go through all of these graphics and verify that everything is looking ok (i.e. actel has assigned fates and entry/exit points correctly). This is also a good chance to have a closer look at the tags you flagged as suspicious above.
+	The movement event lines move straight between the first and last station of each event (i.e. in-between detections will not be individually linked by the line). Lastly, the fate assigned by actel to the fish is displayed in the header, between brackets.
+
+	We recommend that you go through all of these graphics and verify that everything is looking alright (i.e. actel has assigned fates and entry/exit points correctly). This is also a good chance to have a closer look at the tags you flagged as suspicious above.
 
 	Note that fish where you had to manually intervene during the analysis will be highlighted with a yellow border, and fish that were manually overridden through the `override` command will be highlighted with a red border.
 
