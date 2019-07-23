@@ -50,7 +50,7 @@ Here are some examples:
 
 **Times of arrival**
 
-<img src="vignettes/times_River2.svg" alt="drawing" width="410"/> <img src="vignettes/times_Sea1.svg" alt="drawing" width="410"/>
+<img src="vignettes/times_River3.svg" alt="drawing" width="410"/> <img src="vignettes/times_Sea1.svg" alt="drawing" width="410"/>
 
 
 **Summary information**
