@@ -32,7 +32,7 @@ knitr::opts_chunk$set(
 In this page you can find additional help if you run into trouble using actel. Each message/warning/error in this page is followed by a short text detailing the problem. If your problem persists after trying out the proposed solutions, feel free to contact the development team.
 
 Note :
-  : As actel evolves, some new errors and messages may accidentally be left out of this page. If you encounter a message or error that is not reported here, please open an issue at [actel's GitHub reposiroty.](https://github.com/hugomflavio/actel/issues)
+  : As actel evolves, some new errors and messages may accidentally be left out of this page. If you encounter a message or error that is not reported here, please open an issue at [actel's GitHub repository.](https://github.com/hugomflavio/actel/issues)
 
 ### Errors and messages while importing the data:
 
@@ -73,7 +73,7 @@ Note :
 	Error: Could not find a 'detections' folder nor a 'detections.csv' file.
 	```
 
-	Actel could not find one of the needed files in the working directory. Please make sure that you are targetting the correct directory, and that the files are named exactly as described.
+	Actel could not find one of the needed files in the working directory. Please make sure that you are targeting the correct directory, and that the files are named exactly as described.
 
 1. **Something is wrong in the input files**
 
@@ -81,7 +81,7 @@ Note :
 	Error: No 'Array' column found in the spatial file, but a 'Group' column is present. Use the 'Group' column to define the arrays? (Y/n)
 	```
 
-	Earlier versions of actel used a 'Group' column to group arrays. This failsafe allows you to bypass the issues this would cause.
+	Earlier versions of actel used a 'Group' column to group arrays. This fail-safe allows you to bypass the issues this would cause.
 
 	```
 	Error: The spatial file must contain an 'Array' column.
