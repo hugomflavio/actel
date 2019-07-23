@@ -163,7 +163,7 @@ Here are some examples:
 
 <img src="LaTeX_example_survival.svg" alt="drawing" width="330"/> <img src="example_progression.svg" alt="drawing" width="330"/>
 
-<img src="LaTeX_example_fish1.png" alt="drawing" width="330"/> <img src="LaTeX_example_fish2.png" alt="drawing" width="330"/>
+<img src="R64K-4521.png" alt="drawing" width="330"/> <img src="R64K-4526.png" alt="drawing" width="330"/>
 
 Note:
   : Even if something fails during the report printing, your results will still be saved the *actel_results.RData* file in your working directory!

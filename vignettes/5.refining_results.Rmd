@@ -78,9 +78,9 @@ And that is it! Repeat the process for all the tags that you want to manually as
 
 When you trigger the manual mode, actel will flag the results and report as having been corrected. As such, the output files are no longer called "actel_report.pdf" and "actel_results.RData" but instead "actel_report_corrected.pdf" and "actel_results_corrected.RData".
 
-On top of that, the graphics for fish that have been manually overriden will be highlighted in red, so you can quickly find them. Below you can see the difference between the original graphic (on the left) and the manually overriden version (on the right):
+On top of that, the graphics for fish that have been manually overridden will be highlighted in red, so you can quickly find them. Below you can see the difference between the original graphic (on the left) and the manually overridden version (on the right):
 
-<img src="R64K-4526_original.png" alt="drawing" width="330"/> <img src="R64K-4526_overridden.png" alt="drawing" width="330"/>
+<img src="R64K-4526.png" alt="drawing" width="330"/> <img src="R64K-4526_overridden.png" alt="drawing" width="330"/>
 
 
 [Back to top.](#)
