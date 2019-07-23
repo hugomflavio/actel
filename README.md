@@ -48,6 +48,11 @@ Here are some examples:
 
 <img src="vignettes/LaTeX_example_fish1.png" alt="drawing" width="430"/> <img src="vignettes/LaTeX_example_fish2.png" alt="drawing" width="430"/>
 
+**Times of arrival**
+
+<img src="vignettes/times_River2.svg" alt="drawing" width="410"/> <img src="vignettes/times_Sea1.svg" alt="drawing" width="410"/>
+
+
 **Summary information**
 
 <img src="vignettes/LaTeX_example_survival.svg" alt="drawing" height="370"/> <img src="vignettes/example_progression.svg" alt="drawing" height="370"/>
