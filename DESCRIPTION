@@ -18,7 +18,8 @@ Imports:
     reshape2,
     fs,
     knitr,
-    rmarkdown
+    rmarkdown,
+    circular
 Suggests: 
     raster,
     gdistance,
