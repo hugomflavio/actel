@@ -1,3 +1,6 @@
+#' @importFrom circular sd mean.circular var
+NULL
+
 #' Actel: Acoustic telemetry data sorting
 #' 
 #' The actel package provides a systematic way of analysing fish migration data.
