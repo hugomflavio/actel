@@ -6,7 +6,7 @@
 #' 
 #' @param path Path to the folder containing the data. If the R session is already running in the target folder, path may be left as NA
 #' @param sections The sections in which the study was divided. Must be coincident with the names given to the ALS arrays. (i.e. if an array is 'River1', then the respective section is 'River') 
-#' @param success.arrays The ALS arrays that mark the end of the study area. If a fish crosses one of these arrays, it is considered to have successfully migrated through the area.
+#' @param success.arrays The ALS arrays mark the end of the study area. If a fish crosses one of these arrays, it is considered to have successfully migrated through the area.
 #' @param minimum.detections The minimum number of times a tag must have been recorded during the study period for it to be considered a true tag and not random noise.
 #' @param maximum.time The number of minutes that must pass between detections for a new event to be created.
 #' @param speed.method One of 'last to first' or 'first to first'. In the former, the last detection on a given array/section is matched to the first detection on the next array/section (default). If changed to 'first to first', the first detection on two consecutive arrays/sections are used to perform the calculations.
@@ -101,15 +101,15 @@ actel <- function(path = NULL, sections, success.arrays, minimum.detections = 2,
       appendTo(c("Screen", "Report", "Warning"), "Error: The distance matrix appears to be missing data (ncol != nrow). Deactivating speed calculation to avoid function failure.")
       invalid.dist <- TRUE
     }
-    if (sum(nrow(spatial$stations), nrow(spatial$release.sites)) != nrow(dist.mat)) {
+    if (!invalid.dist && sum(nrow(spatial$stations), nrow(spatial$release.sites)) != nrow(dist.mat)) {
       appendTo(c("Screen", "Report", "Warning"), "Error: The number of spatial points does not match the number of rows in the distance matrix. Deactivating speed calculation to avoid function failure.")
       invalid.dist <- TRUE
     }
-    if (any(!matchl(spatial$stations$Standard.Name, colnames(dist.mat))) | any(!matchl(spatial$release.sites$Standard.Name, colnames(dist.mat)))) {
+    if (!invalid.dist && (any(!matchl(spatial$stations$Standard.Name, colnames(dist.mat))) | any(!matchl(spatial$release.sites$Standard.Name, colnames(dist.mat))))) {
       appendTo(c("Screen", "Report", "Warning"), "Error: Some stations and/or release sites are not present in the distance matrix. Deactivating speed calculation to avoid function failure.")
       invalid.dist <- TRUE
     }    
-    if (any(rownames(dist.mat) != colnames(dist.mat))) {
+    if (!invalid.dist && any(rownames(dist.mat) != colnames(dist.mat))) {
       appendTo(c("Screen", "Report", "Warning"), "Error: Some stations and/or release sites are not present in the distance matrix. Deactivating speed calculation to avoid function failure.")
       invalid.dist <- TRUE
     }    
@@ -172,7 +172,7 @@ actel <- function(path = NULL, sections, success.arrays, minimum.detections = 2,
     save(simple.movements, file = "debug_simple.movements.RData")
   appendTo(c("Screen", "Report"), "M: Getting summary information tables.")
   
-  the.matrices <- assembleMatrices(spatial = spatial, movements = simple.movements, minimum.detections = minimum.detections, status.df = status.df)
+  the.matrices <- assembleMatrices(spatial = spatial, simple.movements = simple.movements, minimum.detections = minimum.detections, status.df = status.df)
   last.array.results <- getEstimate(spatial = spatial, detections.list = detections.list, replicate = replicate)
   if (is.list(last.array.results)) 
     estimate <- last.array.results$results$combined.efficiency
@@ -190,8 +190,11 @@ actel <- function(path = NULL, sections, success.arrays, minimum.detections = 2,
   array.overview <- assembleArrayOverview(group.CJS = group.CJS)
   section.overview <- assembleSectionOverview(status.df = status.df, sections = sections)
 
+  times <- getTimes(simple.movements = simple.movements, spatial = spatial, 
+    tz.study.area = tz.study.area, type = "Arrival")
+
   if (debug)
-    save(array.overview, section.overview, file = "debug_summary.RData")
+    save(array.overview, section.overview, times, file = "debug_summary.RData")
   
   if (!is.null(override)) {
     header.fragment <- paste('<span style="color:red">Manual mode has been triggered for **', length(override),'** fish.</span>\n', sep = "")
@@ -221,11 +224,11 @@ actel <- function(path = NULL, sections, success.arrays, minimum.detections = 2,
   if (invalid.dist)
     save(detections, movements, simple.movements, status.df, 
       section.overview, array.overview, the.matrices, efficiency, 
-      last.array.results, spatial, file = resultsname)
+      last.array.results, spatial, times, file = resultsname)
   else
     save(detections, movements, simple.movements, status.df, 
       section.overview, array.overview, the.matrices, efficiency,
-      last.array.results, spatial, dist.mat, file = resultsname)
+      last.array.results, spatial, times, dist.mat, file = resultsname)
 
   if (report) {
     biometric.fragment <- printBiometrics(bio = bio)
@@ -235,6 +238,7 @@ actel <- function(path = NULL, sections, success.arrays, minimum.detections = 2,
     printProgression(status.df = status.df, overall.CJS = overall.CJS, split.CJS = split.CJS, group.CJS = group.CJS)
     individual.plots <- printIndividuals(redraw = redraw, detections.list = detections.list, 
         status.df = status.df, tz.study.area = tz.study.area, movements = movements, simple.movements = simple.movements)
+    circular.plots <- printCircular(times = convertTimesToCircular(times), status.df = status.df)
     array.overview.fragment <- printArrayOverview(array.overview)
     if (nrow(section.overview) > 3) 
       survival.graph.size <- "width=90%" else survival.graph.size <- "height=4in"
@@ -249,7 +253,7 @@ actel <- function(path = NULL, sections, success.arrays, minimum.detections = 2,
   if (report) {
     appendTo("debug", "debug: Printing report")
     rmarkdown::render(reportname <- printRmd(name.fragment = name.fragment, header.fragment = header.fragment, 
-        biometric.fragment = biometric.fragment, survival.graph.size = survival.graph.size,
+        biometric.fragment = biometric.fragment, survival.graph.size = survival.graph.size, circular.plots = circular.plots,
         individual.plots = individual.plots, spatial = spatial, efficiency.fragment = efficiency.fragment, array.overview.fragment = array.overview.fragment), quiet = TRUE)
     appendTo("debug", "debug: Moving report")
     fs::file_move(sub("Rmd", "html", reportname), sub("Report/", "", sub("Rmd", "html", reportname)))
@@ -273,12 +277,11 @@ actel <- function(path = NULL, sections, success.arrays, minimum.detections = 2,
   if (invalid.dist)
     return(list(detections = detections, movements = movements, simple.movements = simple.movements,
       status.df = status.df, section.overview = section.overview, array.overview = array.overview,
-      matrices = the.matrices, efficiency = overall.CJS, 
+      matrices = the.matrices, efficiency = overall.CJS, arrival.times = times, 
       last.array.results = last.array.results, spatial = spatial))
   else
     return(list(detections = detections, movements = movements, simple.movements = simple.movements,
       status.df = status.df, section.overview = section.overview, array.overview = array.overview,
-      matrices = the.matrices, efficiency = overall.CJS, 
+      matrices = the.matrices, efficiency = overall.CJS, arrival.times = times, 
       last.array.results = last.array.results, spatial = spatial, dist.mat = dist.mat))
 }
-
