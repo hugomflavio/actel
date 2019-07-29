@@ -188,7 +188,7 @@ actel <- function(path = NULL, sections, success.arrays, minimum.detections = 2,
   split.CJS <- getSplitCJS(the.matrices, fixed.efficiency = overall.CJS$efficiency)
   group.CJS <- getGroupCJS(the.matrices, status.df, fixed.efficiency = overall.CJS$efficiency)
   if (debug)
-    save(the.matrices, last.array.results, overall.CJS, split.CJS, group.CJS, file = "debug_CJS.RData")
+    save(the.matrices, last.array.results, estimate, overall.CJS, split.CJS, group.CJS, file = "debug_CJS.RData")
 
   array.overview <- assembleArrayOverview(group.CJS = group.CJS)
   section.overview <- assembleSectionOverview(status.df = status.df, sections = sections)
@@ -217,7 +217,7 @@ actel <- function(path = NULL, sections, success.arrays, minimum.detections = 2,
       }
     }
     appendTo("Screen", paste("M: An actel results file is already present in the present directory, saving new results as '", resultsname,"'.", sep = ""))
-    rm(continue,index)
+    rm(continue, index)
   } else {
     appendTo(c("Screen", "Report"), paste("M: Saving results to '", resultsname, "'.", sep = ""))
   }

@@ -542,11 +542,11 @@ combineCJS <- function(..., estimate = NULL, fixed.efficiency = NULL, silent = F
   }
 
   if(length(combinedmatrices) == 1)
-    return(simpleCJS(combinedmatrices[[1]]))
+    return(simpleCJS(combinedmatrices[[1]], estimate = estimate, fixed.efficiency = fixed.efficiency))
 
   the.CJSs <- list()
   for (i in combinedmatrices) {
-    the.CJSs[[length(the.CJSs) + 1]] <- simpleCJS(i, estimate = estimate)
+    the.CJSs[[length(the.CJSs) + 1]] <- simpleCJS(i, estimate = estimate, fixed.efficiency = fixed.efficiency)
   }
 
   return(recalculateCJS(input = the.CJSs, estimate = estimate, fixed.efficiency = fixed.efficiency))
@@ -683,7 +683,7 @@ recalculateCJS <- function(input, estimate = NULL, fixed.efficiency = NULL){
       if (tail(S, 1) > 1)
         S[length(S)] = 1
     }
-    M[ncol(absolutes)] <- round(m[ncol(absolutes)] / estimate,0)
+    M[ncol(absolutes)] <- round(m[ncol(absolutes)] / estimate, 0)
     if (M[ncol(absolutes)] > M[ncol(absolutes) - 1])
       M[ncol(absolutes)] = M[ncol(absolutes) - 1]
   } else {
