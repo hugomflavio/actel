@@ -115,7 +115,7 @@ overrideDefaults <- function(i, movements, sections) {
                     last.events = last.events,
                     j = j, sections = sections, movements = movements)
       } else {
-        decision <- readline(paste("Confirm that the fish did not pass this section?(y/N) "))
+        decision <- commentCheck(line = paste("Confirm that the fish did not pass this section?(y/N) "), tag = i)
         if (decision == "y" | decision == "Y") {
           check = FALSE
         } else {
@@ -350,7 +350,7 @@ eventOrderCheck <- function(i, last.events, sections, movements, processing.type
       appendTo("UD", decision)
       if (decision == "Y" | decision == "y") {
         while (decision == "Y" | decision == "y") {
-          position <- suppressWarnings(as.numeric(readline(paste("Which last valid event would you like to edit? (1-", length(last.events), ") ", sep = ""))))
+          position <- suppressWarnings(as.numeric(commentCheck(line = paste("Which last valid event would you like to edit? (1-", length(last.events), ") ", sep = ""), tag = i)))
           appendTo("UD", position)
           if (is.na(position)) {
             decision <- commentCheck(line = "W: The inserted value is not numeric. Abort last valid events' edition?(y/N) ", tag = i)
