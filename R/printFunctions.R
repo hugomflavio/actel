@@ -741,14 +741,14 @@ Found a bug? [**Report it here.**](https://github.com/hugomflavio/actel/issues)
 ### List of Stations
 
 ```{r stations, echo = FALSE}
-knitr::kable(spatial$stations)
+knitr::kable(spatial$stations, row.names = FALSE)
 ```
 
 
 ### List of Release sites
 
 ```{r releases, echo = FALSE}
-knitr::kable(spatial$release.sites)
+knitr::kable(spatial$release.sites, row.names = FALSE)
 ```
 
 ### Array forward efficiency
