@@ -12,7 +12,7 @@
 assembleMatrices <- function(spatial, simple.movements, minimum.detections, status.df) {
   temp <- efficiencyMatrix(spatial = spatial, simple.movements = simple.movements, minimum.detections = minimum.detections)
   mymatrix <- includeMissing(x = temp, status.df = status.df)
-  link <- sapply(status.df$Signal, grep, rownames(mymatrix))
+  link <- sapply(status.df$Signal, function(x) grep(paste0("^", x, "$"), rownames(mymatrix)))
   mymatrix <- mymatrix[link, ]  
 
   recipient <- split(mymatrix, paste0(status.df$Group, ".", status.df$Release.site))

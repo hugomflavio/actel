@@ -207,13 +207,13 @@ simplifyMovements <- function(fish = NULL, movements, status.df, sections){
   if (is.null(fish))
     fish <- names(movements)
   for (i in fish) {
-    the.row <- grep(i, status.df$Transmitter)
+    the.row <- grep(paste0("^", i, "$"), status.df$Transmitter)
     for (j in sections) {
       the.arrival <- grep(paste("Arrived", j, sep = "."), colnames(status.df))
       the.departure <- grep(paste("Left", j, sep = "."), colnames(status.df))
-      if (is.na(status.df[the.row, the.arrival] && any(grepl(j, movements[[i]][, "Array"]))))
+      if (is.na(status.df[the.row, the.arrival]) && any(grepl(j, movements[[i]][, "Array"]))) {
         movements[[i]] <- movements[[i]][-grep(j, movements[[i]][, "Array"]),]
-      else {
+      } else {
         link <- grepl(j, movements[[i]][,"Array"]) & ( movements[[i]][,"First time"] < status.df[the.row,the.arrival] | movements[[i]][,"Last time"] > status.df[the.row,the.departure])
         if (any(link)) {
           actel:::appendTo("debug", paste("Removing", sum(link), j, "movement event(s) from fish", i, "."))
