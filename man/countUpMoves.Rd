@@ -8,8 +8,6 @@ countUpMoves(movements, spatial)
 }
 \arguments{
 \item{movements}{A list of movements for each target tag, created by groupMovements.}
-
-\item{spatial}{A list of the spatial objects, created by assembleSpatial.}
 }
 \value{
 The number of backwards movements and the maximum consecutive backwards movements

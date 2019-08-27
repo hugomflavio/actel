@@ -4,13 +4,11 @@
 \alias{loadDetections}
 \title{Combine ALS detections}
 \usage{
-loadDetections(path, spatial, start.timestamp, end.timestamp,
+loadDetections(path, start.timestamp = NULL, end.timestamp = NULL,
   tz.study.area)
 }
 \arguments{
-\item{path}{Path to the folder containing the data. If the R session is already running in the target folder, path may be left as NA}
-
-\item{spatial}{A list of the spatial objects, created by assembleSpatial.}
+\item{path}{the path(s) to the detection files}
 
 \item{start.timestamp}{Detection data prior to this date is not analysed. Improves processing time when loading large amounts of detection data.}
 

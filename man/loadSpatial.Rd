@@ -4,7 +4,10 @@
 \alias{loadSpatial}
 \title{Load Spatial file and Check the structure}
 \usage{
-loadSpatial()
+loadSpatial(file)
+}
+\arguments{
+\item{file}{an input file with spatial data.}
 }
 \value{
 The spatial dataframe

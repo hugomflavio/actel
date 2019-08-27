@@ -7,8 +7,6 @@
 getEstimate(spatial, detections.list, replicate)
 }
 \arguments{
-\item{spatial}{A list of the spatial objects, created by assembleSpatial.}
-
 \item{detections.list}{A list of the detections split by each target tag, created by splitDetections.}
 }
 \value{

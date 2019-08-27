@@ -8,8 +8,6 @@ unknownReceiversCheckB(detections.list, spatial)
 }
 \arguments{
 \item{detections.list}{A list of the detections split by each target tag, created by splitDetections.}
-
-\item{spatial}{A list of the spatial objects, created by assembleSpatial.}
 }
 \value{
 A list containing an updated spatial list and a TRUE/FALSE object indicating whether or not Standard station names must be reprocessed.
