@@ -12,7 +12,7 @@
 #' 
 #' @keywords internal
 #' 
-splitDetections <- function(detections, bio, spatial, exclude.tags, silent = FALSE) {
+splitDetections <- function(detections, bio, spatial, exclude.tags = NULL, silent = FALSE) {
   appendTo("debug", "Starting splitDetections.")
   my.list <- split(detections, detections$Transmitter)
   my.list <- excludeTags(input = my.list, exclude.tags = exclude.tags, silent = silent)

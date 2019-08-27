@@ -1,16 +1,18 @@
 #' Load Spatial file and Check the structure
 #' 
+#' @inheritParams assembleSpatial
+#' 
 #' @return The spatial dataframe
 #' 
 #' @keywords internal
 #' 
-loadSpatial <- function(){
+loadSpatial <- function(file){
   appendTo("debug","Starting loadSpatial.")
-  if (file.exists("spatial.csv"))
-    input <- read.csv("spatial.csv")
+  if (file.exists(file))
+    input <- read.csv(file)
   else {
     emergencyBreak()
-    stop("Could not find a 'spatial.csv' file in the working directory.\n")
+    stop("Could not find a '", file, "' file in the working directory.\n")
   }
   if (!any(grepl("Array", colnames(input)))) {
     if (any(grepl("Group", colnames(input)))) {
@@ -46,17 +48,19 @@ loadSpatial <- function(){
 
 #' Import biometrics
 #' 
+#' @param file an input file with biometric data.
+#' 
 #' @keywords internal
 #' 
 #' @return The biometrics table
 #' 
-loadBio <- function(){
+loadBio <- function(file){
   appendTo("debug", "Starting loadBio.")
-  if (file.exists("biometrics.csv"))
-    bio <- read.csv("biometrics.csv")
+  if (file.exists(file))
+    bio <- read.csv(file)
   else {
     emergencyBreak()
-    stop("Could not find a 'biometrics.csv' file in the working directory.\n")
+    stop("Could not find a '", file, "' file in the working directory.\n")
   }  
 
   if (!any(grepl("Release.date", colnames(bio)))) {
@@ -126,16 +130,16 @@ loadBio <- function(){
 #' Finds the detections' files and processes them.
 #' 
 #' @inheritParams actel
-#' @param spatial A list of the spatial objects, created by assembleSpatial.
+#' @param path the path(s) to the detection files
 #' 
 #' @return A dataframe with all the detections
 #' 
 #' @keywords internal
 #' 
-loadDetections <- function(path, spatial, start.timestamp, end.timestamp, tz.study.area) {
+loadDetections <- function(path, start.timestamp = NULL, end.timestamp = NULL, tz.study.area) {
   appendTo("debug", "Starting loadDetections.")
   # Find the detection files
-  file.list <- findFiles()
+  file.list <- findFiles(path = path)
   number.of.files <- length(file.list)
   # Prepare the detection files
   data.files <- list()
@@ -180,14 +184,12 @@ loadDetections <- function(path, spatial, start.timestamp, end.timestamp, tz.stu
   # Convert time-zones
   output <- convertTimes(input = output, start.timestamp = start.timestamp, 
     end.timestamp = end.timestamp, tz.study.area = tz.study.area)
-  # Standardize the station names
-  output <- standardizeStations(input = output, spatial = spatial)
 
   actel.detections <- list(detections = output, timestamp = Sys.time())
   if (file_test("-d", "detections")) {
-    save(actel.detections,file="detections/actel.detections.RData")
+    save(actel.detections, file = "detections/actel.detections.RData")
   } else {
-    save(actel.detections,file="actel.detections.RData")
+    save(actel.detections, file = "actel.detections.RData")
   }
   
   appendTo(c("Screen","Report"), paste("Data time range: ", as.character(head(output$Timestamp, 1)), " to ", as.character(tail(output$Timestamp, 1)), " (", tz.study.area, ").", sep = ""))
@@ -197,19 +199,32 @@ loadDetections <- function(path, spatial, start.timestamp, end.timestamp, tz.stu
 
 #' Find file names
 #'
+#' @inheritParams loadDetections
+#' 
 #' @return A vector of the file names.
 #'
 #' @keywords internal
 #' 
-findFiles <- function() {
+findFiles <- function(path = NULL) {
   appendTo("debug", "Starting findFiles.")
-  if (file_test("-d", "detections")) {
-    file.list <- paste("detections/", list.files("detections", pattern = "*.csv"), sep = "")
-  } else {
-    if (file.exists("detections.csv")) {
-      file.list <- "detections.csv"
+  if (is.null(path)) {
+    if (file_test("-d", "detections")) {
+      file.list <- paste("detections/", list.files("detections", pattern = "*.csv"), sep = "")
     } else {
-      stop("Could not find a 'detections' folder nor a 'detections.csv' file.\n")
+      if (file.exists("detections.csv")) {
+        file.list <- "detections.csv"
+      } else {
+        stop("Could not find a 'detections' folder nor a 'detections.csv' file.\n")
+      }
+    }
+  } else {
+    file.list <- NULL
+    for (folder in path) {
+      if (file_test("-d", folder)) {
+        file.list <- c(file.list, paste0(folder, "/", list.files(folder, pattern = "*.csv")))
+      } else {
+        stop("Could not find a '", folder, "' directory in the current working directory.\n")
+      }
     }
   }
   appendTo("debug", "Terminating findFiles.")

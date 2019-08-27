@@ -61,9 +61,9 @@ actel <- function(path = NULL, sections, success.arrays, minimum.detections = 2,
  
   appendTo(c("Screen", "Report"), "M: Importing data. This process may take a while.")
   
-  bio <- loadBio()
+  bio <- loadBio(file = "biometrics.csv")
 
-  spatial <- assembleSpatial(bio = bio, sections = sections)
+  spatial <- assembleSpatial(file = "spatial.csv", bio = bio, sections = sections)
   appendTo("Report", paste("Number of target tags: ", nrow(bio), ".", sep = ""))
   
   recompile <- TRUE
@@ -75,7 +75,7 @@ actel <- function(path = NULL, sections, success.arrays, minimum.detections = 2,
     appendTo("UD",decision)
     if (decision != "N" & decision != "n"){
       appendTo(c("Screen","Report"), paste("M: Using detections previously compiled on ", actel.detections$timestamp, ".", sep = ""))
-      detections <- standardizeStations(input = actel.detections$detections, spatial = spatial)
+      # detections <- standardizeStations(input = actel.detections$detections, spatial = spatial)
       detections <- convertTimes (input = detections, start.timestamp = start.timestamp, end.timestamp = end.timestamp, tz.study.area = tz.study.area)
       appendTo(c("Screen","Report"), paste("Data time range: ", as.character(head(detections$Timestamp, 1)), " to ", as.character(tail(detections$Timestamp, 1)), " (", tz.study.area, ").", sep = ""))
       recompile <- FALSE
@@ -86,9 +86,12 @@ actel <- function(path = NULL, sections, success.arrays, minimum.detections = 2,
   }
 
   if (recompile)
-    detections <- loadDetections(path = path, spatial = spatial, 
-      start.timestamp = start.timestamp, end.timestamp = end.timestamp, tz.study.area = tz.study.area)
+    detections <- loadDetections(path = path, start.timestamp = start.timestamp, 
+      end.timestamp = end.timestamp, tz.study.area = tz.study.area)
   
+  # Standardize the station names
+  detections <- standardizeStations(input = detections, spatial = spatial)
+
   unknownReceiversCheckA(spatial = spatial, detections = detections)
   
   emptyReceiversCheck(spatial = spatial, detections = detections)
