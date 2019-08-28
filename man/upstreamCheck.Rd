@@ -13,6 +13,9 @@ upstreamCheck(i, recipient, bio, spatial)
 
 \item{bio}{A table with the tags and biometrics of the studied fish.}
 }
+\value{
+The checked recipient
+}
 \description{
 Check for movements upstream of the release site.
 }

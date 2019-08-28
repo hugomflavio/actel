@@ -4,7 +4,7 @@
 \alias{findFiles}
 \title{Find file names}
 \usage{
-findFiles(path = NULL)
+findFiles(path = NULL, pattern = NULL)
 }
 \arguments{
 \item{path}{the path(s) to the detection files}

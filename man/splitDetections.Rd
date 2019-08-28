@@ -4,7 +4,8 @@
 \alias{splitDetections}
 \title{Split detections by tag}
 \usage{
-splitDetections(detections, bio, spatial, exclude.tags, silent = FALSE)
+splitDetections(detections, bio, spatial, exclude.tags = NULL,
+  silent = FALSE)
 }
 \arguments{
 \item{detections}{A dataframe with all the detections. Supplied by loadDetections.}

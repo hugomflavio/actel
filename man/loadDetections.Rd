@@ -4,8 +4,8 @@
 \alias{loadDetections}
 \title{Combine ALS detections}
 \usage{
-loadDetections(path, start.timestamp = NULL, end.timestamp = NULL,
-  tz.study.area)
+loadDetections(path = "detections", start.timestamp = NULL,
+  end.timestamp = NULL, tz.study.area)
 }
 \arguments{
 \item{path}{the path(s) to the detection files}

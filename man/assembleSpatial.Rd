@@ -4,9 +4,11 @@
 \alias{assembleSpatial}
 \title{Process spatial elements}
 \usage{
-assembleSpatial(bio, sections)
+assembleSpatial(file, bio, sections)
 }
 \arguments{
+\item{file}{an input file with spatial data.}
+
 \item{bio}{A table with the tags and biometrics of the studied fish.}
 
 \item{sections}{The sections in which the study was divided. Must be coincident with the names given to the ALS arrays. (i.e. if an array is 'River1', then the respective section is 'River')}
