@@ -24,57 +24,72 @@ groupMovements <- function(detections.list, bio, spatial, speed.method, maximum.
     for (i in names(detections.list)) {
       appendTo("debug", paste("Debug: (Movements) Analysing fish ", i, ".", sep = ""))
       if (invalid.dist) {
-        recipient <- matrix(nrow = 1, ncol = 8)
+        # recipient <- matrix(nrow = 1, ncol = 9)
+        recipient <- data.frame(
+          Array = NA_character_, 
+          Detections = NA_integer_, 
+          First.station = NA_character_, 
+          Last.station = NA_character_, 
+          First.time = NA_character_, 
+          Last.time = NA_character_, 
+          Time.travelling = NA_character_, 
+          Time.on.array = NA_character_, 
+          Valid = NA,
+          stringsAsFactors = FALSE
+          )
       } else {
-        recipient <- matrix(nrow = 1, ncol = 9)
+        # recipient <- matrix(nrow = 1, ncol = 10)
+        recipient <- data.frame(
+          Array = NA_character_, 
+          Detections = NA_integer_, 
+          First.station = NA_character_, 
+          Last.station = NA_character_, 
+          First.time = NA_character_, 
+          Last.time = NA_character_, 
+          Time.travelling = NA_character_, 
+          Time.on.array = NA_character_, 
+          Average.speed.m.s = NA_real_,
+          Valid = NA,
+          stringsAsFactors = FALSE
+          )
       }
-      recipient <- as.data.frame(recipient)
-      if (invalid.dist) {
-        colnames(recipient) <- c("Array", "Detections", "First station", "Last station", "First time", "Last time", "Time travelling", "Time on array")        
-      } else {
-        colnames(recipient) <- c("Array", "Detections", "First station", "Last station", "First time", "Last time", "Time travelling", "Time on array", "Average speed m.s")
-      }
-      j = 1
+      # recipient <- as.data.frame(recipient)
+      # if (invalid.dist) {
+        # colnames(recipient) <- c("Array", "Detections", "First.station", "Last.station", "First.time", "Last.time", "Time.travelling", "Time.on.array", "Valid")        
+      # } else {
+        # colnames(recipient) <- c("Array", "Detections", "First.station", "Last.station", "First.time", "Last.time", "Time.travelling", "Time.on.array", "Average.speed.m.s", "Valid")
+      # }
       z = 1
-      time.limit <- TRUE
-      brake <- nrow(detections.list[[i]])
-      # While the row number is smaller or equal to the total number of rows
-      while (j <= brake) {
-        # For each station array
-        for (k in levels(spatial$stations$Array)) {
-          # if there are still rows to go and if the detection array matches the array being analysed
-          if (j <= brake) 
-          if (detections.list[[i]][j, "Array"] == k) {
-            recipient[z, "Array"] = k
-            recipient[z, "Detections"] = 0
-            recipient[z, "First station"] = paste(detections.list[[i]][j, "Standard.Name"])
-            recipient[z, "First time"] = paste(detections.list[[i]][j, 1])
-            # while 1) the array remains the same 2) the row number is smaller or equal to the total number of rows 3) the time limit is not broken (default is 1 hour)
-            while (detections.list[[i]][j, "Array"] == k & j <= brake & time.limit) {
-              recipient[z, "Detections"] = recipient[z, "Detections"] + 1
-              # If the row number is smaller than the total number of rows
-              if (j < brake) 
-                time.limit <- difftime(detections.list[[i]][j + 1, 1], detections.list[[i]][j, 1], units = "mins") < maximum.time
-              j = j + 1
-              counter = counter + 1
-            }
-            time.limit <- TRUE
-            recipient[z, "Last station"] = paste(detections.list[[i]][j - 1, "Standard.Name"])
-            recipient[z, "Last time"] = paste(detections.list[[i]][j - 1, 1])
-            z = z + 1
-            if (i == tail(names(detections.list), 1)) 
-              counter <- sum(unlist(lapply(detections.list, nrow)))
-            setTxtProgressBar(pb, counter)
-            flush.console()
-          }
-        }
+      array.shifts <- c(which(detections.list[[i]]$Array[-1] != detections.list[[i]]$Array[-length(detections.list[[i]]$Array)]), nrow(detections.list[[i]]))
+      time.shifts <- which(difftime(detections.list[[i]]$Timestamp[-1], detections.list[[i]]$Timestamp[-length(detections.list[[i]]$Timestamp)], units = "mins") > maximum.time)
+      all.shifts <- sort(unique(c(array.shifts, time.shifts)))
+      for (j in seq_len(length(all.shifts))) {
+        if (j == 1)
+          start <- 1
+        else
+          start <- all.shifts[j - 1] + 1
+        stop <- all.shifts[j]
+        recipient[z, "Array"] = paste(detections.list[[i]]$Array[start])
+        recipient[z, "Detections"] = stop - start + 1
+        recipient[z, "First.station"] = paste(detections.list[[i]]$Standard.Name[start])
+        recipient[z, "First.time"] = paste(detections.list[[i]]$Timestamp[start])
+        recipient[z, "Last.station"] = paste(detections.list[[i]]$Standard.Name[stop])
+        recipient[z, "Last.time"] = paste(detections.list[[i]]$Timestamp[stop])
+        z = z + 1
+        counter <- counter + stop - start + 1
+        # if (i == tail(names(detections.list), 1)) 
+        #   counter <- sum(unlist(lapply(detections.list, nrow)))
+        setTxtProgressBar(pb, counter)
+        flush.console()
       }
+
+      recipient$Valid <- TRUE
+
+      recipient <- upstreamCheck(i = i, recipient = recipient, bio = bio, spatial = spatial)
       
-      upstreamCheck(i = i, recipient = recipient, bio = bio, spatial = spatial)
-      
-      recipient[, "First time"] <- as.POSIXct(recipient[, "First time"], tz = tz.study.area)
-      recipient[, "Last time"] <- as.POSIXct(recipient[, "Last time"], tz = tz.study.area)
-      if (nrow(recipient) >= 1) {
+      if (!is.null(recipient)) {
+        recipient[, "First.time"] <- as.POSIXct(recipient[, "First.time"], tz = tz.study.area)
+        recipient[, "Last.time"] <- as.POSIXct(recipient[, "Last.time"], tz = tz.study.area)
         if (!invalid.dist)
           movements[[length(movements) + 1]] <- movementSpeeds(movements = recipient, 
             speed.method = speed.method, dist.mat = dist.mat, silent = FALSE)
@@ -87,7 +102,6 @@ groupMovements <- function(detections.list, bio, spatial, speed.method, maximum.
     }
     close(pb)
     rm(pb)
-    rm(i, counter, round.points)
   }
   appendTo("debug", "Done.")
   return(movements)
@@ -99,6 +113,8 @@ groupMovements <- function(detections.list, bio, spatial, speed.method, maximum.
 #' @inheritParams loadDetections
 #' @param i The tag being analysed.
 #' @param recipient The movement events table for the tag.
+#' 
+#' @return The checked recipient
 #' 
 #' @keywords internal
 #' 
@@ -119,7 +135,7 @@ upstreamCheck <- function(i, recipient, bio, spatial) {
     appendTo("Screen", paste("   Release site:", t1))
     appendTo("Screen", paste("   Expected first array:", t2))
     cat(paste("\n   Movement table for fish ", i, ":\n", sep =""))
-    print(recipient)
+    print(recipient[, -c(7:10)])
     cat("\n")
     appendTo("Screen", "You may either:\n  a) Stop the analysis if the expected first array is wrong;\n  b) Continue as is (does not impact the results);\n  c) Remove a movement event, if you are confident it is a false detection.")
     cat("\n")
@@ -144,8 +160,8 @@ upstreamCheck <- function(i, recipient, bio, spatial) {
         while (check) {
           if (reprint) {
             cat(paste("\n   Movement table for fish ", i, ":\n", sep =""))
-            rownames(recipient) <- 1:nrow(recipient)
-            print(recipient)
+            # rownames(recipient) <- 1:nrow(recipient)
+            print(recipient[recipient$Valid, -c(7:10)])
             cat("\n")
           }
           row.line <- suppressWarnings(as.numeric(readline("Which movement event would you like to remove? ")))
@@ -162,8 +178,8 @@ upstreamCheck <- function(i, recipient, bio, spatial) {
             if ( row.line < 1 | row.line > nrow(recipient)) {
               appendTo("Screen", paste("Invalid row, please choose a number between 1 and ",nrow(recipient),", or leave blank to abort.", sep = ""))
             } else {
-              recipient <- recipient[-row.line, ]
-              if (nrow(recipient) >= 1){
+              recipient$Valid[row.line] <- FALSE
+              if (any(recipient$Valid)){
                 decision <- readline("Do you want to remove more movement events?(y/N) ")
                 appendTo("UD", decision)
               } else {
@@ -187,6 +203,10 @@ upstreamCheck <- function(i, recipient, bio, spatial) {
       }
     }
   }
+  if (nrow(recipient) > 0)
+    return(recipient)
+  else
+    return(NULL)
   appendTo("debug", "Done.")
 }
 
@@ -214,7 +234,7 @@ simplifyMovements <- function(fish = NULL, movements, status.df, sections){
       if (is.na(status.df[the.row, the.arrival]) && any(grepl(j, movements[[i]][, "Array"]))) {
         movements[[i]] <- movements[[i]][-grep(j, movements[[i]][, "Array"]),]
       } else {
-        link <- grepl(j, movements[[i]][,"Array"]) & ( movements[[i]][,"First time"] < status.df[the.row,the.arrival] | movements[[i]][,"Last time"] > status.df[the.row,the.departure])
+        link <- grepl(j, movements[[i]][,"Array"]) & ( movements[[i]][,"First.time"] < status.df[the.row,the.arrival] | movements[[i]][,"Last.time"] > status.df[the.row,the.departure])
         if (any(link)) {
           actel:::appendTo("debug", paste("Removing", sum(link), j, "movement event(s) from fish", i, "."))
           movements[[i]] <- movements[[i]][!link,]
