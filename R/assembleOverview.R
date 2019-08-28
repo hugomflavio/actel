@@ -10,7 +10,7 @@
 #' @keywords internal
 #' 
 assembleSectionOverview <- function(status.df, sections) {
-  appendTo("debug", "Starting assembleOverview.")
+  appendTo("debug", "Starting assembleSectionOverview.")
   section.overview <- as.data.frame.matrix(with(status.df, table(Group, Status)))
   section.overview$Total <- as.vector(with(status.df, table(Group)))
   colnames(section.overview) <- gsub(" ", ".", colnames(section.overview))
@@ -34,7 +34,7 @@ assembleSectionOverview <- function(status.df, sections) {
     }
   }
   recipient <- c("Total", paste("Disap..in", sections[1], sep = "."), recipient, "Succeeded")
-  appendTo("debug", "Done.")
+  appendTo("debug", "Terminating assembleSectionOverview.")
   return(section.overview[, recipient])
 }
 
@@ -52,6 +52,6 @@ assembleArrayOverview <- function(group.CJS) {
     recipient[[i]] <- recipient[[i]][1:3, ]
     rownames(recipient[[i]]) <- c("Known", "Estimated", "Difference")
   }
-  
+  appendTo("debug", "Terminating assembleArrayOverview.")  
   return(recipient)
 }
