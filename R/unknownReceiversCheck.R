@@ -27,15 +27,15 @@ unknownReceiversCheckB <- function(detections.list, spatial) {
   appendTo("debug", "Starting unknownReceiversCheckB.")
   reset.names <- FALSE
   for (i in names(detections.list)) {
-    if (any(is.na(match(detections.list[[i]][, "Receiver"], spatial$receivers.serial)))) {
-      A <- detections.list[[i]][, "Receiver"]
+    if (any(is.na(match(detections.list[[i]][, Receiver], spatial$receivers.serial)))) {
+      A <- detections.list[[i]][, Receiver]
       B <- spatial$receivers.serial
-      unknown.receivers <- as.character(unique(detections.list[[i]][is.na(match(A, B)), "Receiver"]))
+      unknown.receivers <- unique(detections.list[[i]][is.na(match(A, B)), Receiver])
       appendTo(c("Screen", "Report", "Warning"), paste("W: Fish ", i, " was detected in one or more receivers that are not listed in the study area (receiver(s): ", paste(unknown.receivers, collapse = ", "), ")!", sep = ""))
       cat("Possible options:\n   a) Stop and doublecheck the data (recommended)\n   b) Temporary include the hydrophone(s) to the stations list\n")
       check <- TRUE
       while (check) {
-        decision <- commentCheck(line = "Which option should be followed?(a/b) ", tag = i)
+        decision <- commentCheck(line = "Which option should be followed?(a/b/comment) ", tag = i)
         if (decision == "a" | decision == "A" | decision == "b" | decision == "B") 
           check <- FALSE else cat("Option not recognized, please try again.\n")
         appendTo("UD", decision)

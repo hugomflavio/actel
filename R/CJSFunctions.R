@@ -316,20 +316,18 @@ efficiencyMatrix <- function(spatial, simple.movements, minimum.detections) {
   rownames(efficiency) <- stripCodeSpaces(names(simple.movements))
   efficiency[is.na(efficiency)] = 0
   for (i in 1:length(simple.movements)) {
-    submoves <- simple.movements[[i]][!grepl("Unknown", simple.movements[[i]][, "Array"]), ]
-    if (nrow(submoves) >= 1) {
-      A <- match(submoves[,"Array"],unlist(spatial$array.order))
-      B1 <- unique(A)
-      B2 <- order(A)[!duplicated(sort(A))] 
-      if (is.unsorted(B2)) {
-        temp <- matrix(ncol = length(B1), nrow = length(B1))
-        for (j in 1:length(B1)) {
-            temp[j,] <- c(rep(FALSE, j - 1), B1[j] > B1[j:length(B1)])
-        }
-        B1 <- B1[!apply(temp,2,any)]
+    submoves <- simple.movements[[i]]
+    A <- match(submoves$Array,unlist(spatial$array.order))
+    B1 <- unique(A)
+    B2 <- order(A)[!duplicated(sort(A))] 
+    if (is.unsorted(B2)) {
+      temp <- matrix(ncol = length(B1), nrow = length(B1))
+      for (j in 1:length(B1)) {
+          temp[j,] <- c(rep(FALSE, j - 1), B1[j] > B1[j:length(B1)])
       }
-      efficiency[i, B1] <- 1
+      B1 <- B1[!apply(temp,2,any)]
     }
+    efficiency[i, B1] <- 1
   }
   efficiency$Release <- 1
   appendTo("debug", "Terminating efficiencyMatrix.")
@@ -378,8 +376,8 @@ lastMatrix <- function(spatial, detections.list, replicate){
   colnames(efficiency) <- c("original","replicate")
   rownames(efficiency) <- names(detections.list)
   for (i in 1:length(detections.list)) {
-    efficiency[i, "original"] <- any(!is.na(match(original,detections.list[[i]][,"Standard.Name"])))
-    efficiency[i, "replicate"] <- any(!is.na(match(replicate,detections.list[[i]][,"Standard.Name"])))
+    efficiency[i, "original"] <- any(!is.na(match(original,detections.list[[i]]$Standard.Name)))
+    efficiency[i, "replicate"] <- any(!is.na(match(replicate,detections.list[[i]]$Standard.Name)))
   }
   appendTo("debug", "Terminating lastMatrix.")
   return(efficiency)
@@ -398,7 +396,7 @@ lastMatrix <- function(spatial, detections.list, replicate){
 #' @export
 #' 
 dualArrayCJS <- function(input, silent = TRUE){
-  if(!silent) appendTo("debug", "Starting dualArray.")
+  if(!silent) appendTo("debug", "Starting dualArrayCJS.")
   r <- z <- p <- m <- M <- rep(NA, ncol(input))
   for(i in 1:(ncol(input))){
     # number of tags detected at i and elsewhere (r)
@@ -427,7 +425,7 @@ dualArrayCJS <- function(input, silent = TRUE){
   colnames(absolutes) <- ""
   rownames(absolutes) <- c("detected at original:", "detected at replicate: ", "detected at both:")
   names(p) <- c("original", "replicate")
-  if(!silent) appendTo("debug", "Terminating dualArray.")
+  if(!silent) appendTo("debug", "Terminating dualArrayCJS.")
   return(list(absolutes = absolutes, single.efficiency = p, combined.efficiency = combined.p))
 }
 
@@ -546,7 +544,8 @@ combineCJS <- function(..., estimate = NULL, fixed.efficiency = NULL, silent = F
 
   the.CJSs <- list()
   for (i in combinedmatrices) {
-    the.CJSs[[length(the.CJSs) + 1]] <- simpleCJS(i, estimate = estimate, fixed.efficiency = fixed.efficiency)
+    the.efficiency <- fixed.efficiency[match(colnames(i), names(fixed.efficiency))]
+    the.CJSs[[length(the.CJSs) + 1]] <- simpleCJS(i, estimate = estimate, fixed.efficiency = the.efficiency)
   }
 
   return(recalculateCJS(input = the.CJSs, estimate = estimate, fixed.efficiency = fixed.efficiency))

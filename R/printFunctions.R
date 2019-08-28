@@ -523,17 +523,17 @@ printIndividuals <- function(redraw, detections.list, status.df, tz.study.area, 
     PlotData <- detections.list[[fish]]
     if (!(exists("redraw") && redraw == FALSE && file.exists(paste("Report/", fish, ".png", sep = "")))) {
       all.moves.line <- data.frame(
-          Station = as.vector(t(movements[[fish]][, c("First station", "Last station")])),
-          Timestamp = as.vector(t(movements[[fish]][, c("First time", "Last time")]))
-        )
+        Station = as.vector(t(movements[[fish]][, c("First.station", "Last.station")])),
+        Timestamp = as.vector(t(movements[[fish]][, c("First.time", "Last.time")]))
+      )
       all.moves.line$Station <- factor(all.moves.line$Station, levels = levels(PlotData$Standard.Name))
       all.moves.line$Timestamp <- as.POSIXct(all.moves.line$Timestamp, tz = tz.study.area)
       add.simple.movements <- FALSE
       if (!is.null(simple.movements[[fish]])) {
         add.simple.movements <- TRUE
         simple.moves.line <- data.frame(
-          Station = as.vector(t(simple.movements[[fish]][, c("First station", "Last station")])),
-          Timestamp = as.vector(t(simple.movements[[fish]][, c("First time", "Last time")]))
+          Station = as.vector(t(simple.movements[[fish]][, c("First.station", "Last.station")])),
+          Timestamp = as.vector(t(simple.movements[[fish]][, c("First.time", "Last.time")]))
           )
         simple.moves.line$Station <- factor(simple.moves.line$Station, levels = levels(PlotData$Standard.Name))
         simple.moves.line$Timestamp <- as.POSIXct(simple.moves.line$Timestamp, tz = tz.study.area)
@@ -633,7 +633,7 @@ printCircular <- function(times, status.df){
   for (i in 1:length(times)) {
     if (length(unique(status.df$Group)) > 1) {
       link <- match(names(times[[i]]), status.df$Transmitter)
-      groups <- factor(status.df$Group[link], levels = levels(status.df$Group))
+      groups <- factor(status.df$Group[link], levels = sort(unique(status.df$Group)))
       trim.times <- split(times[[i]], groups)
       ylegend <- -0.97 + (0.1 * (length(unique(groups)) - 2))
     } else {
