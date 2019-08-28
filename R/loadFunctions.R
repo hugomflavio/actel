@@ -57,7 +57,7 @@ loadSpatial <- function(file){
 loadBio <- function(file){
   appendTo("debug", "Starting loadBio.")
   if (file.exists(file))
-    bio <- read.csv(file)
+    bio <- read.csv(file, stringsAsFactors = FALSE)
   else {
     emergencyBreak()
     stop("Could not find a '", file, "' file in the working directory.\n")
@@ -132,20 +132,24 @@ loadBio <- function(file){
 #' @inheritParams actel
 #' @param path the path(s) to the detection files
 #' 
+#' @import data.table
+#' 
 #' @return A dataframe with all the detections
 #' 
 #' @keywords internal
 #' 
-loadDetections <- function(path, start.timestamp = NULL, end.timestamp = NULL, tz.study.area) {
+loadDetections <- function(path = "detections", start.timestamp = NULL, end.timestamp = NULL, tz.study.area) {
   appendTo("debug", "Starting loadDetections.")
   # Find the detection files
-  file.list <- findFiles(path = path)
+  if (!file_test("-d", "detections"))
+    stop("Could not find a 'detections' folder.\n")
+  file.list <- findFiles(path = path, pattern = "*.csv")
   number.of.files <- length(file.list)
   # Prepare the detection files
   data.files <- list()
   for (i in file.list) {
     appendTo("debug", paste("Importing file '", i, "'.", sep = ""))
-    data.files[[length(data.files) + 1]] <- read.csv(i)
+    data.files[[length(data.files) + 1]] <- data.table::fread(i, fill = TRUE)
     names(data.files)[length(data.files)] <- i
     if(nrow(data.files[[i]]) > 0){
       unknown.file <- TRUE
@@ -186,11 +190,7 @@ loadDetections <- function(path, start.timestamp = NULL, end.timestamp = NULL, t
     end.timestamp = end.timestamp, tz.study.area = tz.study.area)
 
   actel.detections <- list(detections = output, timestamp = Sys.time())
-  if (file_test("-d", "detections")) {
     save(actel.detections, file = "detections/actel.detections.RData")
-  } else {
-    save(actel.detections, file = "actel.detections.RData")
-  }
   
   appendTo(c("Screen","Report"), paste("Data time range: ", as.character(head(output$Timestamp, 1)), " to ", as.character(tail(output$Timestamp, 1)), " (", tz.study.area, ").", sep = ""))
   appendTo("debug", "Terminating loadDetections.")
@@ -205,23 +205,15 @@ loadDetections <- function(path, start.timestamp = NULL, end.timestamp = NULL, t
 #'
 #' @keywords internal
 #' 
-findFiles <- function(path = NULL) {
+findFiles <- function(path = NULL, pattern = NULL) {
   appendTo("debug", "Starting findFiles.")
   if (is.null(path)) {
-    if (file_test("-d", "detections")) {
-      file.list <- paste("detections/", list.files("detections", pattern = "*.csv"), sep = "")
-    } else {
-      if (file.exists("detections.csv")) {
-        file.list <- "detections.csv"
-      } else {
-        stop("Could not find a 'detections' folder nor a 'detections.csv' file.\n")
-      }
-    }
+      file.list <- list.files(pattern = pattern)
   } else {
     file.list <- NULL
     for (folder in path) {
       if (file_test("-d", folder)) {
-        file.list <- c(file.list, paste0(folder, "/", list.files(folder, pattern = "*.csv")))
+        file.list <- c(file.list, paste0(folder, "/", list.files(folder, pattern = pattern)))
       } else {
         stop("Could not find a '", folder, "' directory in the current working directory.\n")
       }
@@ -245,7 +237,7 @@ processThelmaFile <- function(input) {
   appendTo("debug", "Starting processThelmaFile.")
   output <- input[, c(1, 8, 3, 4)]
   colnames(output) <- c("Timestamp", "Receiver", "CodeSpace", "Signal")
-  output[, "Timestamp"] <- as.POSIXct(output[, "Timestamp"], format = "%Y-%m-%dT%H:%M:%S", tz = "UTC")
+  output[, "Timestamp"] <- fasttime::fastPOSIXct(output[, "Timestamp"], tz = "UTC")
   appendTo("debug", "Terminating processThelmaFile.")
   return(output)
 }
@@ -261,30 +253,19 @@ processThelmaFile <- function(input) {
 #' @keywords internal
 #' 
 processVemcoFile <- function(input) {
-  appendTo("debug", "Starting processVemcoFile.")
-  input[, "Transmitter"] <- as.character(input[, "Transmitter"])
-  input[, "Receiver"] <- as.character(input[, "Receiver"])
-  recipientA <- c()
-  recipientB <- c()
-  recipientC <- c()
+  appendTo("Debug", "Starting processVemcoFile.")
+  # input[, "Transmitter"] <- as.character(input[, "Transmitter"])
+  # input[, "Receiver"] <- as.character(input[, "Receiver"])
   appendTo("Debug", "Processing data inside the file...")
-  flush.console()
-  for (j in seq_len(nrow(input))) {
-    recipientA[j] <- paste(unlist(strsplit(input[j, "Transmitter"], "-"))[c(1, 2)], collapse = "-")
-    recipientB[j] <- unlist(strsplit(input[j, "Transmitter"], "-"))[3]
-    recipientC[j] <- unlist(strsplit(input[j, "Receiver"], "-"))[2]
-  }
+  transmitter_aux <- strsplit(input$Transmitter, "-", fixed = TRUE)
+  receiver_aux <- strsplit(input$Receiver, "-", fixed = TRUE) # split model and serial
+  input[, "CodeSpace"] <- unlist(lapply(transmitter_aux, function(x) paste(x[1:2], collapse = "-"))) # Rejoin code space
+  input[, "Signal"] <- unlist(lapply(transmitter_aux, function(x) x[3])) # extract only signal
+  input[, "Receiver"] <- unlist(lapply(receiver_aux, function(x) x[2])) # extract only the serial
   appendTo("Debug", "Done!")
-  rm(j)
-  input[, "CodeSpace"] <- recipientA
-  rm(recipientA)
-  input[, "Signal"] <- recipientB
-  rm(recipientB)
-  input[, "Receiver"] <- recipientC
-  rm(recipientC)
   colnames(input)[1] <- c("Timestamp")
   input <- input[, c("Timestamp", "Receiver", "CodeSpace", "Signal")]
-  input[, "Timestamp"] <- as.POSIXct(input[, "Timestamp"], format = "%Y-%m-%d %H:%M:%S", tz = "UTC")
+  input$Timestamp <- fasttime::fastPOSIXct(input$Timestamp, tz = "UTC")
   appendTo("debug", "Terminating processVemcoFile.")
   return(input)
 }
@@ -371,7 +352,7 @@ convertCodes <- function(input) {
 #' 
 convertTimes <- function(input, start.timestamp, end.timestamp, tz.study.area) {
   appendTo("debug", "Starting convertTimes.")
-  input$Timestamp <- as.POSIXct(input$Timestamp, tz = "GMT")
+  input$Timestamp <- fasttime::fastPOSIXct(input$Timestamp, tz = "UTC")
   attributes(input$Timestamp)$tzone <- tz.study.area
   input <- input[order(input$Timestamp), ]
   if (!is.null(start.timestamp)){
