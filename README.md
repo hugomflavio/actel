@@ -59,7 +59,7 @@ Here are some examples:
 
 ## Installing actel
 
-To install actel, you will need to the devtools package installed.
+To install actel, you will need to have the devtools package installed.
 
     install.packages("devtools")
     library("devtools")
