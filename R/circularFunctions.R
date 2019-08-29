@@ -10,6 +10,7 @@
 #' @return A data frame with the timestamps for each fish (rows) and array (columns)
 #' 
 getTimes <- function(simple.movements, spatial, tz.study.area, type = c("Arrival", "Departure")){
+  appendTo("Debug", "Starting getTimes.")
   type <- match.arg(type)
   output <- matrix(nrow = length(simple.movements), ncol = length(unlist(spatial$array.order)) + 1)
   colnames(output) <- c("Transmitter", unlist(spatial$array.order))
@@ -17,16 +18,17 @@ getTimes <- function(simple.movements, spatial, tz.study.area, type = c("Arrival
   output$Transmitter <- names(simple.movements)
   for (i in 1:length(simple.movements)) {
     for (j in 2:ncol(output)) {
-      if (type == "Arrival") the.row <- head(which(grepl(colnames(output)[j], simple.movements[[i]][, "Array"])), 1)
-      if (type == "Departure") the.row <- tail(which(grepl(colnames(output)[j], simple.movements[[i]][, "Array"])), 1)
+      if (type == "Arrival") the.row <- head(which(grepl(colnames(output)[j], simple.movements[[i]]$Array)), 1)
+      if (type == "Departure") the.row <- tail(which(grepl(colnames(output)[j], simple.movements[[i]]$Array)), 1)
       if (length(the.row) != 0) {
-        if (type == "Arrival") output[i,j] <- as.character(simple.movements[[i]][the.row,"First time"])
-        if (type == "Departure") output[i,j] <- as.character(simple.movements[[i]][the.row,"Last time"])
+        if (type == "Arrival") output[i,j] <- as.character(simple.movements[[i]]$First.time[the.row])
+        if (type == "Departure") output[i,j] <- as.character(simple.movements[[i]]$Last.time[the.row])
       }
       if (i == nrow(output))
         output[,j] <- as.POSIXct(output[,j], tz = tz.study.area)
     }
   }
+  appendTo("Debug", "Terminating getTimes.")
   return(output)
 }
 
@@ -39,6 +41,7 @@ getTimes <- function(simple.movements, spatial, tz.study.area, type = c("Arrival
 #' @return A list of circular objects
 #' 
 convertTimesToCircular <- function(times) {
+  appendTo("Debug", "Starting convertTimesToCircular.")
   output <- list()
   cols.with.data <- apply(times, 2, function(x) !all(is.na(x)))
   times <- times[, cols.with.data]
@@ -47,6 +50,7 @@ convertTimesToCircular <- function(times) {
     names(output[[i - 1]]) <- times$Transmitter
   }
   names(output) <- colnames(times)[2:ncol(times)]
+  appendTo("Debug", "Terminating convertTimesToCircular.")
   return(output)
 }
 

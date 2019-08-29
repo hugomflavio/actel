@@ -6,6 +6,7 @@
 #' @inheritParams simplifyMovements
 #' @inheritParams loadDetections
 #' @inheritParams groupMovements
+#' @param movements A list of movements for each target tag, created by groupMovements.
 #' 
 #' @return A table of the entering and leaving points for each section per target tag
 #' 
@@ -40,46 +41,86 @@ assembleTimetable <- function(movements, sections, spatial, minimum.detections,
   rownames(timetable) <- names(movements)
   
   for (i in names(movements)) {
-    original.trigger <- FALSE
-    if (exists("override") && any(grepl(i, override))) {
+    if (!is.null(override) && any(grepl(i, override))) {
+      ## If the fish is marked for manual mode
       processing.type <- "Overridden"
       events <- overrideDefaults(i, movements[[i]], sections)
+      ## Jump to updating movements and deploying values
     } else {
-      processing.type <- "Auto"
-      # Find the last events for each section If there is more than one detection event
-      if (all(movements[[i]][, "Array"] == "Unknown")) {
-        appendTo(c("Screen","Report", "Warning"), paste("W: Fish ", i, " only moved through unknown hydrophones. Considered invalid.", sep = ""))
-        last.events <- rep(NA, length(sections))
-      } else {
-        if (any(movements[[i]][, "Array"] == "Unknown")) {
-          appendTo(c("Screen","Report"), paste("M: Disregarding ", sum(movements[[i]][, "Array"] == "Unknown"), " unknown events from fish ", i, "'s movement table.", sep = ""))
-          original.trigger <- TRUE
-          original.movements <- movements[[i]]
-          movements[[i]] <- movements[[i]][movements[[i]][, "Array"] != "Unknown", ]
-          rownames(movements[[i]]) <- seq_len(nrow(movements[[i]]))
+      if (movements[[i]][, any(Valid)]) {
+        ## If there are any valid events (invalid could only be caused by upstream detection)
+        processing.type <- "Auto"
+        ## Find the last events for each section If there is more than one detection event
+        if (movements[[i]][(Valid), all(Array == "Unknown")]) {
+          ## If all the events are in unknown arrays
+          appendTo(c("Screen","Report", "Warning"), paste("W: Fish ", i, " only moved through unknown hydrophones. Considered invalid.", sep = ""))
+          last.events <- rep(NA, length(sections))
+          movements[[i]]$Valid <- FALSE
+          ## Jump to find first events
+        } else {
+          ## If all or some events are in known locations
+          if (movements[[i]][(Valid), any(Array == "Unknown")]) {
+            ## If some unknown events must be discarded
+            appendTo(c("Screen","Report"), paste("M: Disregarding ", sum(movements[[i]][, "Array"] == "Unknown"), " unknown events from fish ", i, "'s movement table.", sep = ""))
+            movements[[i]][(Array == "Unknown")]$Valid <- FALSE
+          }
+          recipient <- findLastEvents(i = i, movements = movements[[i]], 
+            sections = sections, minimum.detections = minimum.detections, 
+            processing.type = processing.type, cautious.assignment = cautious.assignment)
+          last.events <- recipient[[1]]
+          processing.type <- recipient[[2]]
         }
-        recipient <- findLastEvents(i = i, movements = movements[[i]], 
-          sections = sections, minimum.detections = minimum.detections, 
-          processing.type = processing.type, cautious.assignment = cautious.assignment)
-        last.events <- recipient[[1]]
-        processing.type <- recipient[[2]]
-      }
+      } else {
+        ## If all the events are invalid
+        last.events <- rep(NA, length(sections))
+        processing.type <- "Manual"
+      }      
       recipient <- findFirstEvents(i = i, last.events = last.events, 
         movements = movements[[i]], sections = sections, 
         processing.type = processing.type, cautious.assignment = cautious.assignment)
       events <- recipient[[1]]
       processing.type <- recipient[[2]]
     }
+    ## First update movement validity based on selected events
+    movements[[i]] <- updateMovementValidity(movements = movements[[i]], events = events, sections = sections)
+    ## Second, deploy the values
     timetable <- deployValues(i = i, timetable = timetable, movements = movements[[i]], 
       events = events, sections = sections, spatial = spatial, dist.mat = dist.mat, 
       invalid.dist = invalid.dist, if.last.skip.section = if.last.skip.section, 
       success.arrays = success.arrays, processing.type = processing.type, speed.method = speed.method)
-    if (original.trigger)
-      movements[[i]] <- original.movements
   }
   timetable$Transmitter <- rownames(timetable)
   appendTo("debug", "Terminating assembleTimetable.")
-  return(timetable)
+  return(list(timetable = timetable, movements = movements))
+}
+
+#' Update movement validity based on the chosen first and last events for each section
+#' 
+#' @inheritParams actel
+#' @inheritParams deployValues
+#' @inheritParams assembleTimetable
+#' 
+#' @keywords internal
+#' 
+#' @return the updated movement's table
+#' 
+updateMovementValidity <- function(movements, events, sections){
+  appendTo("Debug", "Starting updateMovementValidity.")
+  for (j in seq_len(length(sections))) {
+    link <- movements[, grepl(sections[j], Array)]
+    if (is.na(events$last.events[j])) {
+      if (any(link))
+        movements[link, "Valid"] <- FALSE
+    } else {
+      if (any(which(link) > events$last.events[j]))
+        movements[which(link)[which(link) > events$last.events[j]]]$Valid <- FALSE
+      if (any(which(link) < events$first.events[j]))
+        movements[which(link)[which(link) < events$first.events[j]]]$Valid <- FALSE
+    }
+    rm(link)
+  }
+  appendTo("Debug", "Terminating updateMovementValidity.")
+  return(movements)
 }
 
 #' Override automated logics
@@ -115,7 +156,7 @@ overrideDefaults <- function(i, movements, sections) {
                     last.events = last.events,
                     j = j, sections = sections, movements = movements)
       } else {
-        decision <- commentCheck(line = paste("Confirm that the fish did not pass this section?(y/N) "), tag = i)
+        decision <- commentCheck(line = paste("Confirm that the fish did not pass this section?(y/N/comment) "), tag = i)
         if (decision == "y" | decision == "Y") {
           check = FALSE
         } else {
@@ -230,15 +271,15 @@ overrideEventCheck <- function(type, the.event, up.boundary, t, last.events, j, 
 findLastEvents <- function(i, movements, sections, minimum.detections, processing.type, cautious.assignment) {
   appendTo("debug", paste("Starting findLastEvents for fish ", i, ".", sep = ""))
   if (nrow(movements) > 1) {
-    last.events <- rep(NA,length(sections))
+    last.events <- rep(NA, length(sections))
     for (l in seq_len(length(sections))) {
       trigger <- FALSE
-      matching.events <- which(grepl(sections[l], movements[,"Array"]))
+      matching.events <- movements[, which(grepl(sections[l], Array) & Valid)]
       if(length(matching.events) >= 1){
         if(cautious.assignment){
           trigger <- TRUE
           for(j in rev(matching.events)){
-            if (movements[j, "Detections"] > 1) {
+            if (movements[j, Detections] > 1) {
               last.events[l] <- j
               (break)
             } 
@@ -247,17 +288,18 @@ findLastEvents <- function(i, movements, sections, minimum.detections, processin
           last.events[l] <- tail(matching.events, 1)
         }
       }
-      if (trigger && is.null(last.events[l])) {
+      if (trigger && is.na(last.events[l])) {
         processing.type <- "Manual"
-        cat(paste("W: No ", sections[l], " detection events with more than one detection were found for fish ", i, ". Opening movements list for inspection.\n\n", sep = ""))
-        print(movements)
+        ## I used cat here because the appendTo will be used later on, when the findFirstEvents comes up
+        cat(paste0("W: No ", sections[l], " detection events with more than one detection were found for fish ", i, ". Opening movements list for inspection.\n"))
+        print(movements[(Valid), -c("Valid")])
         cat("\n")
         check = TRUE
         while (check) {
-          new.value <- suppressWarnings(as.numeric(commentCheck(line = paste("Which event should be considered the LAST", sections[l], "detection event? "), tag = i)))
+          new.value <- suppressWarnings(as.numeric(commentCheck(line = paste("Which event should be considered the LAST", sections[l], "detection event?(comment) "), tag = i)))
           appendTo("UD", new.value)
           if (is.na(new.value)) {
-            decision <- commentCheck(line = paste("W: The inserted value is not numeric. Continuing will erase all", sections[l], "related timestamps. Proceed?(y/N) "), tag = i)
+            decision <- commentCheck(line = paste("W: The inserted value is not numeric. Continuing will erase all", sections[l], "related timestamps. Proceed?(y/N/comment) "), tag = i)
             appendTo("UD", decision)
             if (decision == "Y" | decision == "y") {
               appendTo("Screen", paste("M: Erasing ", sections[l], " related timestamps for fish ", i, ".", sep = ""))
@@ -269,6 +311,7 @@ findLastEvents <- function(i, movements, sections, minimum.detections, processin
             rm(decision)
           } else {
             valid.row = TRUE
+            new.value <- movements[(Valid), which = TRUE][new.value]
             if (!grepl(sections[l], movements[new.value, "Array"])) {
               cat("M: Invalid row (not a", sections[l], "event), please try again.\n")
               valid.row = FALSE
@@ -320,23 +363,27 @@ eventOrderCheck <- function(i, last.events, sections, movements, processing.type
   appendTo("debug", paste("Starting eventOrderCheck for fish ", i, ".", sep = ""))
   trigger <- vector()
   for (l in seq_len(length(sections))) {
-    trigger[grep(sections[l], movements[movements[, "Array"] != "Unknown", "Array"])] <- l
+    trigger[movements[(Valid), grep(sections[l], Array)]] <- l
   }
   rm(l)
   if (is.unsorted(trigger)) {
+    ## If Inter-section backward movements detected
     if (is.unsorted(last.events, na.rm = T)) {
+      ## If last events are not ordered
       appendTo(c("Screen", "Report", "Warning"), paste("W: Inter-section backwards movements were detected for Fish ", i, " and the last events are not ordered!", sep = ""))
       not.ordered.trigger <- TRUE
       decision <- "Y"
       cat("   Opening movements list for inspection.\n")
     } else {
+      ## If last events are ordered
       appendTo(c("Screen", "Report", "Warning"), paste("W: Inter-section backwards movements were detected for Fish ", i, ".", sep = ""))
       not.ordered.trigger <- FALSE
-      decision <- commentCheck(line = paste("Would you like to see the movement table for fish", i, "?(y/N) "), tag = i)
+      decision <- commentCheck(line = paste("Would you like to see the movement table for fish", i, "?(y/N/comment) "), tag = i)
       appendTo("UD", decision)
     }
     if (decision == "Y" | decision == "y") {
-      print(movements)
+      ## If the user decides to see the movements
+      print(movements[(Valid), -c("Valid")])
       rm(decision)
       cat("\n")
       appendTo("Screen", paste("Current last events: ", paste(last.events, collapse = ", "), " (", paste(sections, collapse = ", "), ").", sep = ""))
@@ -345,20 +392,24 @@ eventOrderCheck <- function(i, last.events, sections, movements, processing.type
         appendTo(c("Screen"), "The last movement event of a section must NOT precede the last movement event\nof a previous section (i.e. Actel cannot cope with inter-section U turns).\nPlease edit the last valid events so this is not the case anymore.\n")
         decision <- "Y"
       } else {
-        decision <- commentCheck(line = "Would you like to edit the last valid events?(y/N) ", tag = i)
+        decision <- commentCheck(line = "Would you like to edit the last valid events?(y/N/comment) ", tag = i)
       }
       appendTo("UD", decision)
       if (decision == "Y" | decision == "y") {
+        ## If the user decides to edit the last events
         while (decision == "Y" | decision == "y") {
-          position <- suppressWarnings(as.numeric(commentCheck(line = paste("Which last valid event would you like to edit? (1-", length(last.events), ") ", sep = ""), tag = i)))
+          position <- suppressWarnings(as.numeric(commentCheck(line = paste("Which last valid event would you like to edit?(1-", length(last.events), "/comment) ", sep = ""), tag = i)))
+          ## The position is the last event to edit
           appendTo("UD", position)
           if (is.na(position)) {
-            decision <- commentCheck(line = "W: The inserted value is not numeric. Abort last valid events' edition?(y/N) ", tag = i)
+            ## If no position was set
+            decision <- commentCheck(line = "W: The inserted value is not numeric. Abort last valid events' edition?(y/N/comment) ", tag = i)
             appendTo("UD", decision)
             if (decision != "Y" & decision != "y") {
               decision <- "Y"
             } else {
               if (is.unsorted(last.events, na.rm = T)) {
+                ## If the user decides to abort but last events are still not ordered
                 cat("\n")
                 appendTo("Screen", paste("Current last events: ", paste(last.events, collapse = ", "), " (", paste(sections, collapse = ", "), ").", sep = ""))
                 cat("\n")
@@ -369,60 +420,73 @@ eventOrderCheck <- function(i, last.events, sections, movements, processing.type
               }
             }
           } else {
+            ## If the position is numeric
             if (position > 0 & position <= length(last.events)) {
+              ## If the position is within the limits of the last events
               check = TRUE
               invalidate = FALSE
               while (check) {
                 new.value <- suppressWarnings(as.numeric(commentCheck(line = paste("New last valid event for ", sections[position], ": ", sep = ""), tag = i)))
                 appendTo("UD", new.value)
                 if (is.na(new.value)) {
-                  decision <- commentCheck(line = paste("W: The inserted value is not numeric. Continuing will render ", sections[position], " events invalid. Proceed? (y/N)", sep = ""), tag = i)
+                  ## If the selected row is not numeric
+                  decision <- commentCheck(line = paste("W: The inserted value is not numeric. Continuing will render ", sections[position], " events invalid. Proceed?(y/N/comment) ", sep = ""), tag = i)
                   appendTo("UD", decision)
                   if (decision == "Y" | decision == "y") {
+                    ## Decides to remove the last event
                     check = FALSE
                     invalidate = TRUE
                   }
                   rm(decision)
                 } else {
+                  # If the selected row is numeric
+                  new.value <- movements[(Valid), which = TRUE][new.value]
                   if (!grepl(sections[position], movements[new.value, "Array"])) {
+                    ## If the elected row does not belong to the right section
                     cat("M: Invalid row (not a", sections[position], "event), please try again.\n")
                   } else {
+                    ## else terminate the while
                     check = FALSE
                   }
                 }
               }
               rm(check)
               if (invalidate) {
+                ## If the user decided to remove the last event
                 last.events[position] <- NA
               } else {
+                ## If a new value was set
                 last.events[position] <- new.value
               }
               rm(position, new.value, invalidate)
               if (is.unsorted(last.events, na.rm = T)) {
+                ## if after the edition the values are still not ordered, edits must continue
                 cat("\n")
                 appendTo("Screen", paste("Current last events: ", paste(last.events, collapse = ", "), " (", paste(sections, collapse = ", "), ").", sep = ""))
                 cat("\n")
                 appendTo("Screen", "The last events are not ordered. Please continue editing the last events until the last movement \nevent of each section is NOT lower than the last movement event of a section that precedes it.")
                 decision <- "Y"
               } else {
-                decision <- commentCheck(line = "Continue editing last valid events?(y/N) ", tag = i)
+                ## Else the user can decide if he wants to continue or stop
+                decision <- commentCheck(line = "Continue editing last valid events?(y/N/comment) ", tag = i)
               }
               appendTo("UD", decision)
             } else {
+              ## If the position is outside the limits of the last events
               cat("M: That event is not available, please try again.\n")
             }
           }
         }
-        appendTo("Report", paste("M: Last valid events for fish ", i, " were manually edited to: ", paste(last.events, collapse = ", "), ".", sep = ""))
+        appendTo("Report", paste0("M: Last valid events for fish ", i, " were manually edited to: ", paste(last.events, collapse = ", "), "."))
         processing.type <- "Manual"
       } else {
-        appendTo("Report", paste("M: Default last valid events for fish ", i, " were kept upon inspection.", sep = ""))
+        appendTo("Report", paste0("M: Default last valid events for fish ", i, " were kept upon inspection."))
       }
     } else {
-      appendTo("Report", paste("M: Default last valid events were kept without inspection.", sep = ""))
+      appendTo("Report", paste0("M: Default last valid events for fish ", i, " were kept without inspection."))
     }
   }
-  appendTo("debug", paste("Terminating eventOrderCheck for fish ", i, ".", sep = ""))
+  appendTo("debug", paste0("Terminating eventOrderCheck for fish ", i, "."))
   return(list(last.events = last.events, processing.type = processing.type))
 }
 
@@ -453,7 +517,7 @@ findFirstRow <- function(l, last.events, movements, sections) {
   }
   if (!exists("first.row")) {
     for (k in seq_len(nrow(movements))) {
-      if (grepl(sections[l], movements[k, "Array"])) {
+      if (movements[k, grepl(sections[l], Array) & Valid]) {
         first.row = k
         (break)
       }
@@ -486,12 +550,12 @@ findFirstEvents <- function(i, last.events, movements, sections, processing.type
     trigger <- FALSE
     if (!is.na(last.events[l])) {
       first.row <- findFirstRow(l, last.events, movements, sections)
-      matching.events <- which(grepl(sections[l], movements[,"Array"]))
+      matching.events <- movements[, which(grepl(sections[l], Array) & Valid)]
       valid.events <- matching.events[matching.events >= first.row]
       if(cautious.assignment){
         trigger <- TRUE
         for(j in valid.events){
-          if (movements[j, "Detections"] > 1) {
+          if (movements[j, Detections] > 1) {
             first.events[l] <- j
             (break)
           } 
@@ -503,7 +567,7 @@ findFirstEvents <- function(i, last.events, movements, sections, processing.type
     if (trigger && is.null(first.events[l])) {
       check = TRUE
       while (check) {
-        new.value <- suppressWarnings(as.numeric(commentCheck(line = paste("Which event should be considered the FIRST", sections[l], "detection event? "), tag = i)))
+        new.value <- suppressWarnings(as.numeric(commentCheck(line = paste("Which event should be considered the FIRST", sections[l], "detection event?(comment) "), tag = i)))
         appendTo("UD", new.value)
         if (is.na(new.value)) {
           decision <- commentCheck(line = paste("W: The inserted value is not numeric. Continuing will erase all", sections[l], "related timestamps. Proceed?(y/N) "), tag = i)
@@ -518,6 +582,7 @@ findFirstEvents <- function(i, last.events, movements, sections, processing.type
           rm(decision)
         } else {
           valid.row = TRUE
+          new.value <- movements[(Valid), which = TRUE][new.value]
           if (!grepl(sections[l], movements[new.value, "Array"])) {
             cat("M: Invalid row (not a", sections[l], "event), please try again.\n")
             valid.row = FALSE
@@ -562,13 +627,13 @@ deployValues <- function(i, timetable, movements, events, sections, spatial,
   dist.mat, invalid.dist, if.last.skip.section, success.arrays, processing.type, speed.method) {
   appendTo("debug", paste("Starting deployValues for fish ", i, ".", sep = ""))
   if (any(!is.na(events$last.events))) {
-    last.last <- tail(events$last.events[!is.na(events$last.events)],1)
+    last.last <- tail(events$last.events[!is.na(events$last.events)], 1)
     for (j in seq_len(length(sections))) {
       if (!is.na(events$first.events[j])) {
-        timetable[i, paste("Arrived", sections[j], sep = ".")] <- paste(movements[events$first.events[j], "First time"])
-        timetable[i, paste("First.station", sections[j], sep = ".")] <- movements[events$first.events[j], "First station"]
-        timetable[i, paste("Left", sections[j], sep = ".")] <- paste(movements[events$last.events[j], "Last time"])
-        timetable[i, paste("Last.station", sections[j], sep = ".")] <- movements[events$last.events[j], "Last station"]
+        timetable[i, paste("Arrived", sections[j], sep = ".")] <- paste(movements[[events$first.events[j], "First.time"]])
+        timetable[i, paste("First.station", sections[j], sep = ".")] <- movements[[events$first.events[j], "First.station"]]
+        timetable[i, paste("Left", sections[j], sep = ".")] <- paste(movements[[events$last.events[j], "Last.time"]])
+        timetable[i, paste("Last.station", sections[j], sep = ".")] <- movements[[events$last.events[j], "Last.station"]]
         timetable[i, paste("Time.in", sections[j], sep = ".")] <- as.vector(difftime(timetable[i, paste("Left", sections[j], sep = ".")], timetable[i, paste("Arrived", sections[j], sep = ".")], 
           units = "secs"))
         if (speed.method == "last to first" && !invalid.dist) {
@@ -605,9 +670,9 @@ deployValues <- function(i, timetable, movements, events, sections, spatial,
         }
       }
       # If the last last event was on the active section
-      if (grepl(sections[j], movements[last.last, "Array"])) {
+      if (grepl(sections[j], movements$Array[last.last])) {
         # If we are not on the last section and the last last event was on the last array of the section
-        partA <- movements[last.last, "Array"]
+        partA <- movements$Array[last.last]
         partB <- spatial$array.order[[sections[j]]]
         long.test <- match(partA, partB) == length(spatial$array.order[[sections[j]]])
         if (if.last.skip.section && j < length(sections) && long.test) {
@@ -616,16 +681,16 @@ deployValues <- function(i, timetable, movements, events, sections, spatial,
           timetable[i, "Status"] <- paste("Disap. in", sections[j])
         }
       }
-      timetable[i, "Very.last.array"] <- movements[last.last, "Array"]
+      timetable[i, "Very.last.array"] <- movements$Array[last.last]
     }
   } else {
     timetable[i, "Status"] <- paste("Disap. in", sections[1])
     timetable[i, "Very.last.array"] <- "Release"
   }
-  timetable[i, "Detections"] <- sum(movements[, "Detections"])
+  timetable[i, "Detections"] <- movements[, sum(Detections)]
 
-  if (any(movements$Array != "Unknown")) {
-    temp <- movements[movements$Array != "Unknown",]
+  if (movements[, any(Array != "Unknown")]) {
+    temp <- movements[Array != "Unknown", ]
     recipient <- countUpMoves(movements = temp, spatial = spatial)
     timetable[i, "Backwards.movements"] <- recipient[[1]]
     timetable[i, "Max.cons.back.moves"] <- recipient[[2]]
@@ -635,7 +700,7 @@ deployValues <- function(i, timetable, movements, events, sections, spatial,
   }
   timetable[i, "P.type"] <- processing.type
   testA <- !is.na(timetable[i, paste("Left", tail(sections, 1), sep = ".")])
-  testB <- any(!is.na(match(success.arrays, movements[tail(events$last.events, 1), "Array"])))
+  testB <- any(!is.na(match(success.arrays, movements[tail(events$last.events, 1), Array])))
   if (testA & testB) 
     timetable[i, "Status"] <- "Succeeded"
   appendTo("debug", paste("Terminating deployValues for fish ", i, ".", sep = ""))
@@ -656,7 +721,7 @@ countUpMoves <- function(movements, spatial){
   if (nrow(movements) > 1) {# Determine number of backwards movements
     array.sequence <- vector()
     for (i in seq_len(length(unlist(spatial$array.order)))) {
-      array.sequence[grep(unlist(spatial$array.order)[i], movements[movements[, "Array"] != "Unknown", "Array"])] <- i
+      array.sequence[grep(unlist(spatial$array.order)[i], movements[, Array])] <- i
     }
     backwards.movement <- vector()
     for (i in 2:length(array.sequence)) {

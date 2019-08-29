@@ -13,8 +13,6 @@ assembleTimetable(movements, sections, spatial, minimum.detections,
 
 \item{sections}{The sections in which the study was divided. Must be coincident with the names given to the ALS arrays. (i.e. if an array is 'River1', then the respective section is 'River')}
 
-\item{spatial}{A list of the spatial objects, created by assembleSpatial.}
-
 \item{minimum.detections}{The minimum number of times a tag must have been recorded during the study period for it to be considered a true tag and not random noise.}
 
 \item{dist.mat}{A matrix of the distances between the deployed ALS.}

@@ -35,6 +35,11 @@ actel <- function(path = NULL, sections, success.arrays, minimum.detections = 2,
     exclude.tags = NULL, debug = FALSE, cautious.assignment = TRUE, replicate = NULL) {
   
   my.home <- getwd()
+
+  if (debug) {
+    on.exit(save(list = ls(), file = "actel_debug.RData"), add = TRUE)
+    appendTo("Screen", "!!!--- Debug mode has been activated ---!!!")
+  }
   
   if (!debug)
     on.exit(deleteHelpers(), add = TRUE)
@@ -49,35 +54,74 @@ actel <- function(path = NULL, sections, success.arrays, minimum.detections = 2,
   
   deleteHelpers()
   
+  the.function.call <- paste0("actel(path = ", ifelse(is.null(path), "NULL", paste0("'", path, "'")), 
+      ", sections = ", paste0("c('", paste(sections, collapse = "', '"), "')"), 
+      ", success.arrays = ", paste0("c('", paste(success.arrays, collapse = "', '"), "')"), 
+      ", minimum.detections = ", minimum.detections,
+      ", maximum.time = ", maximum.time,
+      ", speed.method = ", paste0("c('", speed.method, "')"),
+      ", if.last.skip.section = ", ifelse(if.last.skip.section, "TRUE", "FALSE"),
+      ", tz.study.area = ", ifelse(is.null(tz.study.area), "NULL", paste0("'", tz.study.area, "'")), 
+      ", start.timestamp = ", ifelse(is.null(start.timestamp), "NULL", paste0("'", start.timestamp, "'")),
+      ", end.timestamp = ", ifelse(is.null(end.timestamp), "NULL", paste0("'", end.timestamp, "'")),
+      ", report = ", ifelse(report, "TRUE", "FALSE"), 
+      ", redraw = ", ifelse(redraw, "TRUE", "FALSE"),
+      ", override = ", ifelse(is.null(override), "NULL", paste0("c('", paste(override, collapse = "', '"), "')")),
+      ", exclude.tags = ", ifelse(is.null(exclude.tags), "NULL", paste0("c('", paste(exclude.tags, collapse = "', '"), "')")), 
+      ", debug = ", ifelse(debug, "TRUE", "FALSE"), 
+      ", cautious.assignment = ", ifelse(cautious.assignment, "TRUE", "FALSE"), 
+      ", replicate = ", ifelse(is.null(replicate),"NULL", paste0("c('", paste(replicate, collapse = "', '"), "')")), ")"
+      )
+
   appendTo("Report", "Acoustic telemetry data analysis report.\n") 
   
   path <- pathCheck(my.home = my.home, path = path)
   
+  if (debug)
+    appendTo("Report", "!!!--- Debug mode has been activated ---!!!\n")
+
   appendTo(c("Report"), paste("Timestamp:", Sys.time(), "\n\nM: Selected folder: ", getwd(), "\nM: Success has been defined as last detection in: ", paste(success.arrays, collapse = ", "), 
     ".", sep = ""))
+
   appendTo(c("Screen"), "M: Moving to selected work directory")
   
   report <- folderCheck(report = report, redraw = redraw)
  
   appendTo(c("Screen", "Report"), "M: Importing data. This process may take a while.")
   
-  bio <- loadBio()
+  bio <- loadBio(file = "biometrics.csv")
 
-  spatial <- assembleSpatial(bio = bio, sections = sections)
-  appendTo("Report", paste("Number of target tags: ", nrow(bio), ".", sep = ""))
+  # Check that all the overriden fish are part of the study
+  if (!is.null(override) && any(link <- is.na(match(unlist(lapply(strsplit(override, "-"), function(x) tail(x, 1))), bio$Signal))))
+    stop("Some tag signals listed in 'override' ('", paste0(override[link], collapse = "', '"), "') are not listed in the biometrics file.\n")
+
+  spatial <- assembleSpatial(file = "spatial.csv", bio = bio, sections = sections)
+  appendTo(c("Screen", "Report"), paste("M: Number of target tags: ", nrow(bio), ".", sep = ""))
   
+  # Prepare detection loading
   recompile <- TRUE
   detection.paths <- c(file.exists("actel.detections.RData"), file.exists("detections/actel.detections.RData"))
+  
   if (any(detection.paths)) {
-    if(detection.paths[2]) load("detections/actel.detections.RData") else load("actel.detections.RData")
+
+    if (all(detection.paths)) 
+      appendTo(c("Screen", "Warning", "Report"), "W: Previously compiled detections were found both in the current directory and in a 'detections' folder.\n   Loading ONLY the compiled detections present in the 'detections' folder.")
+    
+    if(detection.paths[2]) 
+      load("detections/actel.detections.RData")
+    else
+      load("actel.detections.RData")
+    
     appendTo("Screen", paste("M: The detections have been processed on ", actel.detections$timestamp, ".\n   If the input detection files were not changed, it is safe to use these again.", sep = ""))
     decision <- readline("   Reuse processed detections?(Y/n) ")
-    appendTo("UD",decision)
+    appendTo("UD", decision)
     if (decision != "N" & decision != "n"){
       appendTo(c("Screen","Report"), paste("M: Using detections previously compiled on ", actel.detections$timestamp, ".", sep = ""))
-      detections <- standardizeStations(input = actel.detections$detections, spatial = spatial)
+      # detections <- standardizeStations(input = actel.detections$detections, spatial = spatial)
+      detections <- actel.detections$detections
+      attributes(detections$Timestamp)$tzone <- "UTC"
       detections <- convertTimes (input = detections, start.timestamp = start.timestamp, end.timestamp = end.timestamp, tz.study.area = tz.study.area)
-      appendTo(c("Screen","Report"), paste("Data time range: ", as.character(head(detections$Timestamp, 1)), " to ", as.character(tail(detections$Timestamp, 1)), " (", tz.study.area, ").", sep = ""))
+      appendTo(c("Screen","Report"), paste("M: Data time range: ", as.character(head(detections$Timestamp, 1)), " to ", as.character(tail(detections$Timestamp, 1)), " (", tz.study.area, ").", sep = ""))
       recompile <- FALSE
     } else {
       appendTo("Screen", "M: Reprocessing the detections.")
@@ -86,9 +130,12 @@ actel <- function(path = NULL, sections, success.arrays, minimum.detections = 2,
   }
 
   if (recompile)
-    detections <- loadDetections(path = path, spatial = spatial, 
-      start.timestamp = start.timestamp, end.timestamp = end.timestamp, tz.study.area = tz.study.area)
+    detections <- loadDetections(path = "detections", start.timestamp = start.timestamp, 
+      end.timestamp = end.timestamp, tz.study.area = tz.study.area)
   
+  # Standardize the station names
+  detections <- standardizeStations(input = detections, spatial = spatial)
+
   unknownReceiversCheckA(spatial = spatial, detections = detections)
   
   emptyReceiversCheck(spatial = spatial, detections = detections)
@@ -120,17 +167,10 @@ actel <- function(path = NULL, sections, success.arrays, minimum.detections = 2,
     dist.mat <- NA
   }
   
-  if (debug)
-    save(path, sections, success.arrays, minimum.detections, maximum.time, speed.method, if.last.skip.section, 
-    tz.study.area, start.timestamp, end.timestamp, report, redraw, override, exclude.tags, debug, 
-    cautious.assignment, bio, spatial, detections, dist.mat, invalid.dist, replicate, file="debug_start.RData")
-
   recipient <- splitDetections(detections = detections, bio = bio, spatial = spatial, exclude.tags = exclude.tags)
   detections.list <- recipient[[1]]
   bio <- recipient[[2]]
   rm(recipient)
-  if (debug)
-    save(detections.list, file = "debug_detections.list.RData")
 
   recipient <- unknownReceiversCheckB(detections.list = detections.list, spatial = spatial)
   spatial <- recipient[[1]]
@@ -141,38 +181,33 @@ actel <- function(path = NULL, sections, success.arrays, minimum.detections = 2,
     bio <- recipient[[2]]
   }
   rm(recipient)
-  if (debug)
-    save(detections.list, file = "debug_detections.list.RData")
+
+  detections.list <- detectionBeforeReleaseCheck(input = detections.list, bio = bio)
 
   appendTo(c("Screen", "Report"), "M: Data successfully imported!\nM: Creating movement records for the valid tags.")
   movements <- groupMovements(detections.list = detections.list, bio = bio, spatial = spatial,
     speed.method = speed.method, maximum.time = maximum.time, tz.study.area = tz.study.area, dist.mat = dist.mat, invalid.dist = invalid.dist)
-  if (debug)
-    save(movements, file = "debug_movements.RData")
+  movements <- lapply(movements, data.table::as.data.table)
   
-  timetable <- assembleTimetable(movements = movements, sections = sections, spatial = spatial, 
+  recipient <- assembleTimetable(movements = movements, sections = sections, spatial = spatial, 
     minimum.detections = minimum.detections, dist.mat = dist.mat, invalid.dist = invalid.dist, 
     speed.method = speed.method, if.last.skip.section = if.last.skip.section, success.arrays = success.arrays, 
     override = override, cautious.assignment = cautious.assignment)
+  timetable <- recipient[[1]]
+  movements <- recipient[[2]]
   appendTo(c("Screen", "Report"), "M: Timetable successfully filled. Fitting in the remaining variables.")
-  if (debug)
-    save(timetable, file = "debug_timetable.RData")
   
   status.df <- assembleOutput(timetable = timetable, bio = bio, movements = movements, spatial = spatial, 
     sections = sections, dist.mat = dist.mat, invalid.dist = invalid.dist, tz.study.area = tz.study.area)
-  if (debug)
-    save(status.df, file = "debug_status.df.RData")
   
   for(fish in names(movements)){
     movements[[fish]] <- speedReleaseToFirst(fish = fish, status.df = status.df, movements = movements[[fish]],
      dist.mat = dist.mat, invalid.dist = invalid.dist, silent = FALSE)
   }
-  if (debug)
-    save(movements, file = "debug_movements.RData")
 
-  simple.movements <- simplifyMovements(movements = movements, status.df = status.df, sections = sections)
-  if (debug)
-    save(simple.movements, file = "debug_simple.movements.RData")
+  # simple.movements <- simplifyMovements(movements = movements, status.df = status.df, sections = sections)
+  simple.movements <- lapply(movements, function(x) x[(Valid), ])
+  simple.movements <- simple.movements[unlist(lapply(simple.movements, nrow)) > 0]
   appendTo(c("Screen", "Report"), "M: Getting summary information tables.")
   
   the.matrices <- assembleMatrices(spatial = spatial, simple.movements = simple.movements, minimum.detections = minimum.detections, status.df = status.df)
@@ -187,8 +222,6 @@ actel <- function(path = NULL, sections, success.arrays, minimum.detections = 2,
     overall.CJS <- combineCJS(the.matrices, estimate = estimate)
   split.CJS <- getSplitCJS(the.matrices, fixed.efficiency = overall.CJS$efficiency)
   group.CJS <- getGroupCJS(the.matrices, status.df, fixed.efficiency = overall.CJS$efficiency)
-  if (debug)
-    save(the.matrices, last.array.results, estimate, overall.CJS, split.CJS, group.CJS, file = "debug_CJS.RData")
 
   array.overview <- assembleArrayOverview(group.CJS = group.CJS)
   section.overview <- assembleSectionOverview(status.df = status.df, sections = sections)
@@ -196,8 +229,6 @@ actel <- function(path = NULL, sections, success.arrays, minimum.detections = 2,
   times <- getTimes(simple.movements = simple.movements, spatial = spatial, 
     tz.study.area = tz.study.area, type = "Arrival")
 
-  if (debug)
-    save(array.overview, section.overview, times, file = "debug_summary.RData")
   
   if (!is.null(override)) {
     header.fragment <- paste('<span style="color:red">Manual mode has been triggered for **', length(override),'** fish.</span>\n', sep = "")
@@ -251,8 +282,10 @@ actel <- function(path = NULL, sections, success.arrays, minimum.detections = 2,
   
   appendTo("Report", "\n-------------------")
   if (file.exists("temp_UD.txt")) 
-    appendTo("Report", paste("User inverventions:\n-------------------\n", gsub("\r", "", readr::read_file("temp_UD.txt")), "-------------------", sep = ""))
+    appendTo("Report", paste0("User inverventions:\n-------------------\n", gsub("\r", "", readr::read_file("temp_UD.txt")), "-------------------"))
   
+  appendTo("Report", paste0("Function call:\n-------------------\n", the.function.call, "\n-------------------"))
+
   if (report) {
     appendTo("debug", "debug: Printing report")
     rmarkdown::render(reportname <- printRmd(name.fragment = name.fragment, header.fragment = header.fragment, 
@@ -280,11 +313,11 @@ actel <- function(path = NULL, sections, success.arrays, minimum.detections = 2,
   if (invalid.dist)
     return(list(detections = detections, movements = movements, simple.movements = simple.movements,
       status.df = status.df, section.overview = section.overview, array.overview = array.overview,
-      matrices = the.matrices, efficiency = overall.CJS, arrival.times = times, 
+      matrices = the.matrices, efficiency = overall.CJS, times = times, 
       last.array.results = last.array.results, spatial = spatial))
   else
     return(list(detections = detections, movements = movements, simple.movements = simple.movements,
       status.df = status.df, section.overview = section.overview, array.overview = array.overview,
-      matrices = the.matrices, efficiency = overall.CJS, arrival.times = times, 
+      matrices = the.matrices, efficiency = overall.CJS, times = times, 
       last.array.results = last.array.results, spatial = spatial, dist.mat = dist.mat))
 }

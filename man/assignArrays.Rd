@@ -8,8 +8,6 @@ assignArrays(input, spatial)
 }
 \arguments{
 \item{input}{list of detections}
-
-\item{spatial}{A list of the spatial objects, created by assembleSpatial.}
 }
 \description{
 Match the detection's receiver to its respective array.

@@ -19,8 +19,6 @@ deployValues(i, timetable, movements, events, sections, spatial, dist.mat,
 
 \item{sections}{The sections in which the study was divided. Must be coincident with the names given to the ALS arrays. (i.e. if an array is 'River1', then the respective section is 'River')}
 
-\item{spatial}{A list of the spatial objects, created by assembleSpatial.}
-
 \item{dist.mat}{A matrix of the distances between the deployed ALS.}
 
 \item{invalid.dist}{Whether or not the distance matrix supplied is valid for the study area.}

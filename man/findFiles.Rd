@@ -4,7 +4,10 @@
 \alias{findFiles}
 \title{Find file names}
 \usage{
-findFiles()
+findFiles(path = NULL, pattern = NULL)
+}
+\arguments{
+\item{path}{the path(s) to the detection files}
 }
 \value{
 A vector of the file names.

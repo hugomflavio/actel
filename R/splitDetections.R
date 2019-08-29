@@ -12,7 +12,7 @@
 #' 
 #' @keywords internal
 #' 
-splitDetections <- function(detections, bio, spatial, exclude.tags, silent = FALSE) {
+splitDetections <- function(detections, bio, spatial, exclude.tags = NULL, silent = FALSE) {
   appendTo("debug", "Starting splitDetections.")
   my.list <- split(detections, detections$Transmitter)
   my.list <- excludeTags(input = my.list, exclude.tags = exclude.tags, silent = silent)
@@ -127,6 +127,54 @@ noDetectionsCheck <- function(input, bio){
   }
   appendTo("debug", "Terminating noDetectionsCheck.")  
   return(list(list = tag.list,link = link))
+}
+
+#' Check if there are detections for the target tags before release.
+#'
+#' @param input list of detections
+#' @inheritParams splitDetections
+#' 
+#' @keywords internal
+#' 
+#' @return The detections list without invalid detections.
+#' 
+detectionBeforeReleaseCheck <- function(input, bio){
+  appendTo("debug", "Starting detectionBeforeReleaseCheck.")  
+  tag.list <- stripCodeSpaces(names(input))
+  link <- match(bio$Signal, tag.list)
+  for(i in seq_len(length(link))) {
+    if (!is.na(link[i])) {
+      if (any(to.remove <- !(input[[link[i]]]$Timestamp > bio$Release.date[i]))) {
+        appendTo(c("Screen", "Warning", "Report"), paste0("Error: Fish ", names(input)[link[i]], " was detected before being released!"))
+        appendTo("Screen", paste0("  Release time: ", bio$Release.date[i]))
+        appendTo("Screen", paste0("  First detection time: ", input[[link[i]]]$Timestamp[1]))
+        appendTo("Screen", paste0("  Number of detections before release: ", sum(to.remove)))
+        cat("\n")
+        appendTo("Screen", "You may either:\n  a) Stop the analysis and check the data;\n  b) Discard the before-release detections and continue.")
+        cat("\n")
+        unknown.input = TRUE
+        while (unknown.input) {
+          decision <- commentCheck(line = "Decision:(a/b/comment) ", tag = status.df$Transmitter[i])
+          if (decision == "a" | decision == "A") {
+            unknown.input = FALSE
+            emergencyBreak()
+            stop("Script stopped by user command.")
+          }
+          if (decision == "b" | decision == "B")
+            unknown.input = FALSE
+          if (unknown.input)
+            cat("Option not recognised, please input either 'a' or 'b'.\n")
+        }
+        appendTo("UD", decision)
+        if (decision == "b" | decision == "B") {
+          input[[link[i]]] <- input[[link[i]]][-to.remove, ]
+          appendTo(c("Screen", "Warning", "Report"), paste0("M: ", sum(to.remove), " detections from Fish ", names(input)[link[i]], " were removed per user command."))
+        }
+      }
+    }
+  }
+  appendTo("debug", "Terminating detectionBeforeReleaseCheck.")  
+  return(input)
 }
 
 #' Remove Code Spaces from transmitter names

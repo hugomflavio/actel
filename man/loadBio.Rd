@@ -4,7 +4,10 @@
 \alias{loadBio}
 \title{Import biometrics}
 \usage{
-loadBio()
+loadBio(file)
+}
+\arguments{
+\item{file}{an input file with biometric data.}
 }
 \value{
 The biometrics table

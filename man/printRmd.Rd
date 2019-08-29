@@ -24,8 +24,6 @@ printRmd(name.fragment, header.fragment, biometric.fragment,
 \item{individual.plots}{Rmarkdown string specifying the name of the individual plots.}
 
 \item{circular.plots}{Rmarkdown string specifying the name of the circular plots.}
-
-\item{spatial}{A list of the spatial objects, created by assembleSpatial.}
 }
 \description{
 Creates a Rmd report and converts it to hmtl.

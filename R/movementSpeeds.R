@@ -100,16 +100,16 @@ speedReleaseToFirst <- function(fish, status.df, movements, dist.mat, invalid.di
   the.row <- match(fish,status.df$Transmitter)
   origin.time <- status.df[the.row,"Release.date"]
   origin.place <- as.character(status.df[the.row,"Release.site"])
-  if (origin.time <= movements[1, 5]) {
-    a <- as.vector(difftime(movements[1, 5], origin.time, units = "hours"))
+  if (origin.time <= movements[[1, 5]]) {
+    a <- as.vector(difftime(movements[[1, 5]], origin.time, units = "hours"))
     h <- a%/%1
     m <- ((a%%1) * 60)%/%1
     if (m < 10) 
       m <- paste("0", m, sep = "")
     movements[1, 7] <- paste(h, m, sep = ":")
     if (!invalid.dist) {
-      a.sec <- as.vector(difftime(movements[1, 5], origin.time, units = "secs"))
-      my.dist <- dist.mat[movements[1, 3], origin.place]
+      a.sec <- as.vector(difftime(movements[[1, 5]], origin.time, units = "secs"))
+      my.dist <- dist.mat[movements[[1, 3]], origin.place]
       movements[1, 9] <- round(my.dist/a.sec, 6)
     }
   } else {

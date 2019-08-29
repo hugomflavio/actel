@@ -2,6 +2,7 @@
 #' 
 #' Creates a list containing multiple spatial elements required throughout the analyses
 #' 
+#' @param file an input file with spatial data.
 #' @inheritParams splitDetections
 #' @inheritParams actel
 #' 
@@ -9,9 +10,9 @@
 #' 
 #' @keywords internal
 #' 
-assembleSpatial <- function(bio, sections) {
+assembleSpatial <- function(file, bio, sections) {
   appendTo("debug", "Starting assembleSpatial.")
-  input <- loadSpatial()
+  input <- loadSpatial(file = file)
   # Create standard names
   input <- setSpatialStandards(input = input)
   # Break the stations away

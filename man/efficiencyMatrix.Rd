@@ -7,8 +7,6 @@
 efficiencyMatrix(spatial, simple.movements, minimum.detections)
 }
 \arguments{
-\item{spatial}{A list of the spatial objects, created by assembleSpatial.}
-
 \item{simple.movements}{A list of valid-only movements for each fish}
 
 \item{minimum.detections}{The minimum number of times a tag must have been recorded during the study period for it to be considered a true tag and not random noise.}

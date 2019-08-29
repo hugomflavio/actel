@@ -10,8 +10,6 @@ getTimes(simple.movements, spatial, tz.study.area, type = c("Arrival",
 \arguments{
 \item{simple.movements}{A list of valid-only movements for each fish}
 
-\item{spatial}{A list of the spatial objects, created by assembleSpatial.}
-
 \item{tz.study.area}{The time-zone of the study area. Necessary to convert the ALS time data, which is in UTC.}
 
 \item{type}{The point to be recorded: one of "Arrival" or "Departure".}

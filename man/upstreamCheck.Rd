@@ -12,8 +12,9 @@ upstreamCheck(i, recipient, bio, spatial)
 \item{recipient}{The movement events table for the tag.}
 
 \item{bio}{A table with the tags and biometrics of the studied fish.}
-
-\item{spatial}{A list of the spatial objects, created by assembleSpatial.}
+}
+\value{
+The checked recipient
 }
 \description{
 Check for movements upstream of the release site.

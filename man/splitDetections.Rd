@@ -4,14 +4,13 @@
 \alias{splitDetections}
 \title{Split detections by tag}
 \usage{
-splitDetections(detections, bio, spatial, exclude.tags, silent = FALSE)
+splitDetections(detections, bio, spatial, exclude.tags = NULL,
+  silent = FALSE)
 }
 \arguments{
 \item{detections}{A dataframe with all the detections. Supplied by loadDetections.}
 
 \item{bio}{A table with the tags and biometrics of the studied fish.}
-
-\item{spatial}{A list of the spatial objects, created by assembleSpatial.}
 
 \item{exclude.tags}{A list of tags that should be excluded from the detection data before any analyses are performed. Intended to be used if stray tags from a different code space but with the same signal as a target tag are detected in the study area.}
 
