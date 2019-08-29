@@ -373,7 +373,7 @@ versionCheck <- function() {
   rep.ver.short <- substr(rep.ver, start = 1, stop = nchar(rep.ver) - 5) 
   inst.ver <- packageVersion("actel")
   inst.ver.short <- substr(inst.ver, start = 1, stop = nchar(as.character(inst.ver)) - 5) 
-  if (rep.ver.short > inst.ver.short)
+  if (rep.ver.short != inst.ver.short)
     cat(paste0("-------------------------------------------------------------\n!!! A NEW VERSION of actel is available! (v.", inst.ver.short, " -> v.", rep.ver.short, ")\n!!! You should update actel before continuing.\n!!! To learn how to update actel, run updateActel()\n-------------------------------------------------------------\n"))
 }
 
