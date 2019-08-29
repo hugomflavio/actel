@@ -363,3 +363,29 @@ havingIP <- function() {
   validIP <- "((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)[.]){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)"
   any(grep(validIP, ipmessage))
 }
+
+#' Compare installed version with GitHub version
+#' 
+#' @keywords internal
+#' 
+versionCheck <- function() {
+  rep.ver <- unlist(strsplit(readLines('https://raw.githubusercontent.com/hugomflavio/actel/master/DESCRIPTION')[3], " "))[2]
+  rep.ver.short <- substr(rep.ver, start = 1, stop = nchar(rep.ver) - 5) 
+  inst.ver <- packageVersion("actel")
+  inst.ver.short <- substr(inst.ver, start = 1, stop = nchar(as.character(inst.ver)) - 5) 
+  if (rep.ver.short > inst.ver.short)
+    cat(paste0("-------------------------------------------------------------\n!!! A NEW VERSION of actel is available! (v.", inst.ver.short, " -> v.", rep.ver.short, ")\n!!! You should update actel before continuing.\n!!! To learn how to update actel, run updateActel()\n-------------------------------------------------------------\n"))
+}
+
+#' Open actel installation instructions
+#' 
+#' @export
+#' 
+updateActel <- function() {
+  if (havingIP()) {
+    cat("M: Opening actel's installation instructions.\n")
+    browseURL("https://github.com/hugomflavio/actel#installing-actel")
+  } else {
+    cat("M: Could not detect an internet connection. Find installation instructions in this page:\n   https://github.com/hugomflavio/actel#installing-actel\n")
+  }
+}

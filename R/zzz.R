@@ -1,3 +1,5 @@
 .onAttach <- function(libname, pkgname){
-  packageStartupMessage("Welcome to actel! Here are some useful tips:\n  - We strongly recommend that you read the package vignettes at browseVignettes('actel')\n  - You can create template files with createWorkspace()\n  - Try out exampleWorkspace() for a demonstration of the work process!\nIf you run into trouble, contact the team at: hdmfla@aqua.dtu.dk")
+  packageStartupMessage("Welcome to actel! Here are some useful tips:\n  - Find the package manual at browseVignettes('actel')\n  - Create template files with createWorkspace()\n  - Use exampleWorkspace() to see an example!")
+	if (havingIP()) 
+		versionCheck()
 }
