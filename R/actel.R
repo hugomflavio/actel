@@ -96,11 +96,22 @@ actel <- function(path = NULL, sections, success.arrays, minimum.detections = 2,
     stop("Some tag signals listed in 'override' ('", paste0(override[link], collapse = "', '"), "') are not listed in the biometrics file.\n")
 
   spatial <- assembleSpatial(file = "spatial.csv", bio = bio, sections = sections)
-  appendTo("Report", paste("Number of target tags: ", nrow(bio), ".", sep = ""))
+  appendTo(c("Screen", "Report"), paste("M: Number of target tags: ", nrow(bio), ".", sep = ""))
   
+  # Prepare detection loading
   recompile <- TRUE
-  if (file.exists("detections/actel.detections.RData")) {
-    load("detections/actel.detections.RData") 
+  detection.paths <- c(file.exists("actel.detections.RData"), file.exists("detections/actel.detections.RData"))
+  
+  if (any(detection.paths)) {
+
+    if (all(detection.paths)) 
+      appendTo(c("Screen", "Warning", "Report"), "W: Previously compiled detections were found both in the current directory and in a 'detections' folder.\n   Loading ONLY the compiled detections present in the 'detections' folder.")
+    
+    if(detection.paths[2]) 
+      load("detections/actel.detections.RData")
+    else
+      load("actel.detections.RData")
+    
     appendTo("Screen", paste("M: The detections have been processed on ", actel.detections$timestamp, ".\n   If the input detection files were not changed, it is safe to use these again.", sep = ""))
     decision <- readline("   Reuse processed detections?(Y/n) ")
     appendTo("UD", decision)
@@ -110,7 +121,7 @@ actel <- function(path = NULL, sections, success.arrays, minimum.detections = 2,
       detections <- actel.detections$detections
       attributes(detections$Timestamp)$tzone <- "UTC"
       detections <- convertTimes (input = detections, start.timestamp = start.timestamp, end.timestamp = end.timestamp, tz.study.area = tz.study.area)
-      appendTo(c("Screen","Report"), paste("Data time range: ", as.character(head(detections$Timestamp, 1)), " to ", as.character(tail(detections$Timestamp, 1)), " (", tz.study.area, ").", sep = ""))
+      appendTo(c("Screen","Report"), paste("M: Data time range: ", as.character(head(detections$Timestamp, 1)), " to ", as.character(tail(detections$Timestamp, 1)), " (", tz.study.area, ").", sep = ""))
       recompile <- FALSE
     } else {
       appendTo("Screen", "M: Reprocessing the detections.")

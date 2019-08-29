@@ -64,7 +64,7 @@ unknownReceiversCheckB <- function(detections.list, spatial) {
 emptyReceiversCheck <- function(spatial, detections){
   appendTo("debug", "Starting emptyReceiversCheck.")
   empty.receivers <- sum(is.na(match(spatial$receivers.serial, unique(detections$Receiver))))
-  appendTo("Report", paste("Number of ALS: ", spatial$number.of.receivers, " (of which ", empty.receivers, " had no detections)", sep = ""))
+  appendTo(c("Screen", "Report"), paste("M: Number of ALS: ", spatial$number.of.receivers, " (of which ", empty.receivers, " had no detections)", sep = ""))
   if (empty.receivers > 0) 
     appendTo(c("Screen", "Report", "Warning"), paste("W: No detections were found for receiver(s) ", paste(sort(spatial$receivers.serial[is.na(match(spatial$receivers.serial, unique(detections$Receiver)))]), 
       collapse = ", "), ".", sep = ""))

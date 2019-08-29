@@ -141,9 +141,16 @@ loadBio <- function(file){
 loadDetections <- function(path = "detections", start.timestamp = NULL, end.timestamp = NULL, tz.study.area) {
   appendTo("debug", "Starting loadDetections.")
   # Find the detection files
-  if (!file_test("-d", "detections"))
-    stop("Could not find a 'detections' folder.\n")
-  file.list <- findFiles(path = path, pattern = "*.csv")
+  if (file_test("-d", path)) {
+    file.list <- findFiles(path = path, pattern = "*.csv")
+  } else {
+    if (file.exists("detections.csv"))
+      file.list <- "detections.csv"
+    else
+      stop("Could not find a 'detections' folder nor a 'detections.csv' file.\n")
+  }
+  if (file_test("-d", path) & file.exists("detections.csv"))
+    actel:::appendTo(c("Screen", "Warning", "Report"), "W: Both a 'detections' folder and a 'detections.csv' file are present in the current directory.\n   Loading ONLY the files present in the 'detections' folder.")
   number.of.files <- length(file.list)
   # Prepare the detection files
   data.files <- list()
@@ -192,7 +199,7 @@ loadDetections <- function(path = "detections", start.timestamp = NULL, end.time
   actel.detections <- list(detections = output, timestamp = Sys.time())
     save(actel.detections, file = "detections/actel.detections.RData")
   
-  appendTo(c("Screen","Report"), paste("Data time range: ", as.character(head(output$Timestamp, 1)), " to ", as.character(tail(output$Timestamp, 1)), " (", tz.study.area, ").", sep = ""))
+  appendTo(c("Screen", "Report"), paste("M: Data time range: ", as.character(head(output$Timestamp, 1)), " to ", as.character(tail(output$Timestamp, 1)), " (", tz.study.area, ").", sep = ""))
   appendTo("debug", "Terminating loadDetections.")
   return(output)
 }
