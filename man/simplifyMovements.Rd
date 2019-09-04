@@ -2,22 +2,26 @@
 % Please edit documentation in R/groupMovements.R
 \name{simplifyMovements}
 \alias{simplifyMovements}
-\title{Removes discarded events}
+\title{Removes invalid events}
 \usage{
-simplifyMovements(fish = NULL, movements, status.df, sections)
+simplifyMovements(movements, status.df, speed.method, dist.mat,
+  invalid.dist)
 }
 \arguments{
-\item{fish}{The transmitter to be refined. If left empty, all fish present in the movements will be simplified.}
-
 \item{movements}{A list of movements for each target tag, created by groupMovements.}
 
 \item{status.df}{A dataframe with all the final data for each fish, created by assembleOutput.}
 
-\item{sections}{The sections in which the study was divided. Must be coincident with the names given to the ALS arrays. (i.e. if an array is 'River1', then the respective section is 'River')}
+\item{speed.method}{One of 'last to first' or 'first to first'. In the former, the last detection on a given array/section is matched to the first detection on the next array/section (default). If changed to 'first to first', the first detection on two consecutive arrays/sections are used to perform the calculations.}
+
+\item{dist.mat}{A matrix of the distances between the deployed ALS.}
+
+\item{invalid.dist}{Whether or not the distance matrix supplied is valid for the study area.}
 }
 \value{
 The movement dataframe containing only valid events
 }
 \description{
-Simplify the movement events based on the actel results.
+Remove invalid movement events and recalculte times/speeds.
 }
+\keyword{internal}

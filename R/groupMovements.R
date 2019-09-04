@@ -90,12 +90,15 @@ groupMovements <- function(detections.list, bio, spatial, speed.method, maximum.
       if (!is.null(recipient)) {
         recipient[, "First.time"] <- as.POSIXct(recipient[, "First.time"], tz = tz.study.area)
         recipient[, "Last.time"] <- as.POSIXct(recipient[, "Last.time"], tz = tz.study.area)
-        if (!invalid.dist)
-          movements[[length(movements) + 1]] <- movementSpeeds(movements = recipient, 
-            speed.method = speed.method, dist.mat = dist.mat, silent = FALSE)
-        else
-          movements[[length(movements) + 1]] <- movementTimes(movements = recipient,
+        
+        recipient <- data.table::as.data.table(recipient)
+        recipient <- movementTimes(movements = recipient,
             silent = FALSE)
+        if (!invalid.dist)
+          recipient <- movementSpeeds(movements = recipient, 
+            speed.method = speed.method, dist.mat = dist.mat, silent = FALSE)
+        
+        movements[[length(movements) + 1]] <- recipient
         names(movements)[length(movements)] <- i
       }
       rm(recipient)
@@ -210,42 +213,28 @@ upstreamCheck <- function(i, recipient, bio, spatial) {
   appendTo("debug", "Done.")
 }
 
-#' Removes discarded events
+#' Removes invalid events
 #' 
-#' Simplify the movement events based on the actel results. 
+#' Remove invalid movement events and recalculte times/speeds.
 #'
-#' @param fish The transmitter to be refined. If left empty, all fish present in the movements will be simplified.
 #' @inheritParams actel
-#' @param status.df A dataframe with all the final data for each fish, created by assembleOutput.
+#' @inheritParams groupMovements
 #' @param movements A list of movements for each target tag, created by groupMovements.
+#' @param status.df A dataframe with all the final data for each fish, created by assembleOutput.
+#' 
+#' @keywords internal
 #' 
 #' @return The movement dataframe containing only valid events
 #' 
-#' @export
-#' 
-simplifyMovements <- function(fish = NULL, movements, status.df, sections){
-  if (is.null(fish))
-    fish <- names(movements)
-  for (i in fish) {
-    the.row <- grep(paste0("^", i, "$"), status.df$Transmitter)
-    for (j in sections) {
-      the.arrival <- grep(paste("Arrived", j, sep = "."), colnames(status.df))
-      the.departure <- grep(paste("Left", j, sep = "."), colnames(status.df))
-      if (is.na(status.df[the.row, the.arrival]) && any(grepl(j, movements[[i]][, "Array"]))) {
-        movements[[i]] <- movements[[i]][-grep(j, movements[[i]][, "Array"]),]
-      } else {
-        link <- grepl(j, movements[[i]][,"Array"]) & ( movements[[i]][,"First.time"] < status.df[the.row,the.arrival] | movements[[i]][,"Last.time"] > status.df[the.row,the.departure])
-        if (any(link)) {
-          actel:::appendTo("debug", paste("Removing", sum(link), j, "movement event(s) from fish", i, "."))
-          movements[[i]] <- movements[[i]][!link,]
-        }
-        rm(link)
-      }
-    }
-    if (nrow(movements[[i]]) == 0) {
-      movements <- movements[!grepl(i, names(movements))]
-      actel:::appendTo("debug", paste("All movement events were removed for fish", i, ". Removing fish from simple movements", sep = ""))
-    }
+simplifyMovements <- function(movements, status.df, speed.method, dist.mat, invalid.dist) {
+  simple.movements <- lapply(movements, function(x) x[(Valid), ])
+  simple.movements <- simple.movements[unlist(lapply(simple.movements, nrow)) > 0]
+  for(fish in names(simple.movements)){
+    aux <- movementTimes(movements = simple.movements[[fish]], silent = FALSE)
+    if (!invalid.dist)
+        aux <- movementSpeeds(movements = aux, speed.method = speed.method, dist.mat = dist.mat, silent = FALSE)
+    simple.movements[[fish]] <- speedReleaseToFirst(fish = fish, status.df = status.df, movements = aux,
+     dist.mat = dist.mat, invalid.dist = invalid.dist, silent = FALSE)
   }
-  return(movements)
+  return(simple.movements)
 }

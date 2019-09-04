@@ -117,7 +117,6 @@ actel <- function(path = NULL, sections, success.arrays, minimum.detections = 2,
     appendTo("UD", decision)
     if (decision != "N" & decision != "n"){
       appendTo(c("Screen","Report"), paste("M: Using detections previously compiled on ", actel.detections$timestamp, ".", sep = ""))
-      # detections <- standardizeStations(input = actel.detections$detections, spatial = spatial)
       detections <- actel.detections$detections
       attributes(detections$Timestamp)$tzone <- "UTC"
       detections <- convertTimes (input = detections, start.timestamp = start.timestamp, end.timestamp = end.timestamp, tz.study.area = tz.study.area)
@@ -187,7 +186,6 @@ actel <- function(path = NULL, sections, success.arrays, minimum.detections = 2,
   appendTo(c("Screen", "Report"), "M: Data successfully imported!\nM: Creating movement records for the valid tags.")
   movements <- groupMovements(detections.list = detections.list, bio = bio, spatial = spatial,
     speed.method = speed.method, maximum.time = maximum.time, tz.study.area = tz.study.area, dist.mat = dist.mat, invalid.dist = invalid.dist)
-  movements <- lapply(movements, data.table::as.data.table)
   
   recipient <- assembleTimetable(movements = movements, sections = sections, spatial = spatial, 
     minimum.detections = minimum.detections, dist.mat = dist.mat, invalid.dist = invalid.dist, 
@@ -205,9 +203,9 @@ actel <- function(path = NULL, sections, success.arrays, minimum.detections = 2,
      dist.mat = dist.mat, invalid.dist = invalid.dist, silent = FALSE)
   }
 
-  # simple.movements <- simplifyMovements(movements = movements, status.df = status.df, sections = sections)
-  simple.movements <- lapply(movements, function(x) x[(Valid), ])
-  simple.movements <- simple.movements[unlist(lapply(simple.movements, nrow)) > 0]
+  simple.movements <- simplifyMovements(movements = movements, status.df = status.df, 
+    speed.method = speed.method, dist.mat = dist.mat, invalid.dist = invalid.dist)
+
   appendTo(c("Screen", "Report"), "M: Getting summary information tables.")
   
   the.matrices <- assembleMatrices(spatial = spatial, simple.movements = simple.movements, minimum.detections = minimum.detections, status.df = status.df)
