@@ -49,9 +49,9 @@ transitionLayer <- function(shape, size, EPSGcode, directions = c(16,8,4), force
 		project.raster <- is.na(shape.mask)
 		project.raster[project.raster == 0] <- 10000 # make land extremely hard to cross
 		#### The transition layer will be used as the shape for calculating least-cost distance
-		transition.layer <- gdistance::transition(1 / project.raster, mean, directions = as.numeric(directions))
+		transition.layer <- gdistance::transition(1 / project.raster, transitionFunction = mean, directions = as.numeric(directions))
 		transition.layer <- gdistance::geoCorrection(transition.layer, type = "c") # correct for shape distortion, as well as for diagonal connections between grid cells
-		save(transition.layer,file="transition.layer.RData")
+		save(transition.layer, file = "transition.layer.RData")
 		message("M: The transition layer was saved to 'transition.layer.RData' in the current work directory.")
 	}
 }

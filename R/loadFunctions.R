@@ -197,7 +197,7 @@ loadDetections <- function(path = "detections", start.timestamp = NULL, end.time
     end.timestamp = end.timestamp, tz.study.area = tz.study.area)
 
   actel.detections <- list(detections = output, timestamp = Sys.time())
-    save(actel.detections, file = "detections/actel.detections.RData")
+    save(actel.detections, file = ifelse(file_test("-d", path), paste0(path, "/actel.detections.RData"), "actel.detections.RData"))
   
   appendTo(c("Screen", "Report"), paste("M: Data time range: ", as.character(head(output$Timestamp, 1)), " to ", as.character(tail(output$Timestamp, 1)), " (", tz.study.area, ").", sep = ""))
   appendTo("debug", "Terminating loadDetections.")
