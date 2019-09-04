@@ -77,8 +77,8 @@ groupMovements <- function(detections.list, bio, spatial, speed.method, maximum.
         recipient[z, "Last.time"] = paste(detections.list[[i]]$Timestamp[stop])
         z = z + 1
         counter <- counter + stop - start + 1
-        # if (i == tail(names(detections.list), 1)) 
-        #   counter <- sum(unlist(lapply(detections.list, nrow)))
+        if (i == tail(names(detections.list), 1)) 
+          counter <- sum(unlist(lapply(detections.list, nrow)))
         setTxtProgressBar(pb, counter)
         flush.console()
       }
