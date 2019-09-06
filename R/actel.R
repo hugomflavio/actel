@@ -99,39 +99,7 @@ actel <- function(path = NULL, sections, success.arrays, minimum.detections = 2,
   appendTo(c("Screen", "Report"), paste("M: Number of target tags: ", nrow(bio), ".", sep = ""))
   
   # Prepare detection loading
-  recompile <- TRUE
-  detection.paths <- c(file.exists("actel.detections.RData"), file.exists("detections/actel.detections.RData"))
-  
-  if (any(detection.paths)) {
-
-    if (all(detection.paths)) 
-      appendTo(c("Screen", "Warning", "Report"), "W: Previously compiled detections were found both in the current directory and in a 'detections' folder.\n   Loading ONLY the compiled detections present in the 'detections' folder.")
-    
-    if(detection.paths[2]) 
-      load("detections/actel.detections.RData")
-    else
-      load("actel.detections.RData")
-    
-    appendTo("Screen", paste("M: The detections have been processed on ", actel.detections$timestamp, ".\n   If the input detection files were not changed, it is safe to use these again.", sep = ""))
-    decision <- readline("   Reuse processed detections?(Y/n) ")
-    appendTo("UD", decision)
-    if (decision != "N" & decision != "n"){
-      appendTo(c("Screen","Report"), paste("M: Using detections previously compiled on ", actel.detections$timestamp, ".", sep = ""))
-      detections <- actel.detections$detections
-      attributes(detections$Timestamp)$tzone <- "UTC"
-      detections <- convertTimes (input = detections, start.timestamp = start.timestamp, end.timestamp = end.timestamp, tz.study.area = tz.study.area)
-      appendTo(c("Screen","Report"), paste("M: Data time range: ", as.character(head(detections$Timestamp, 1)), " to ", as.character(tail(detections$Timestamp, 1)), " (", tz.study.area, ").", sep = ""))
-      recompile <- FALSE
-    } else {
-      appendTo("Screen", "M: Reprocessing the detections.")
-    }
-    rm(actel.detections)
-  }
-
-  if (recompile)
-    detections <- loadDetections(path = "detections", start.timestamp = start.timestamp, 
-      end.timestamp = end.timestamp, tz.study.area = tz.study.area)
-  
+  detections <- loadDetections(start.timestamp = start.timestamp, end.timestamp = end.timestamp, tz.study.area = tz.study.area)
   # Standardize the station names
   detections <- standardizeStations(input = detections, spatial = spatial)
 

@@ -125,6 +125,54 @@ loadBio <- function(file){
   return(bio)
 }
 
+#' Load ALS detections
+#'
+#' If there are previously compiled detections present, offers the chance to reuse. Otherwise triggers combineDetections.
+#' 
+#' @inheritParams actel
+#' 
+#' @import data.table
+#' 
+#' @return A dataframe with all the detections
+#' 
+#' @keywords internal
+#' 
+loadDetections <- function(start.timestamp = NULL, end.timestamp = NULL, tz.study.area) {
+  recompile <- TRUE
+  detection.paths <- c(file.exists("actel.detections.RData"), file.exists("detections/actel.detections.RData"))
+  
+  if (any(detection.paths)) {
+
+    if (all(detection.paths)) 
+      appendTo(c("Screen", "Warning", "Report"), "W: Previously compiled detections were found both in the current directory and in a 'detections' folder.\n   Loading ONLY the compiled detections present in the 'detections' folder.")
+    
+    if(detection.paths[2]) 
+      load("detections/actel.detections.RData")
+    else
+      load("actel.detections.RData")
+    
+    appendTo("Screen", paste("M: The detections have been processed on ", actel.detections$timestamp, ".\n   If the input detection files were not changed, it is safe to use these again.", sep = ""))
+    decision <- readline("   Reuse processed detections?(Y/n) ")
+    appendTo("UD", decision)
+    if (decision != "N" & decision != "n"){
+      appendTo(c("Screen","Report"), paste("M: Using detections previously compiled on ", actel.detections$timestamp, ".", sep = ""))
+      detections <- actel.detections$detections
+      attributes(detections$Timestamp)$tzone <- "UTC"
+      detections <- convertTimes(input = detections, start.timestamp = start.timestamp, end.timestamp = end.timestamp, tz.study.area = tz.study.area)
+      appendTo(c("Screen","Report"), paste("M: Data time range: ", as.character(head(detections$Timestamp, 1)), " to ", as.character(tail(detections$Timestamp, 1)), " (", tz.study.area, ").", sep = ""))
+      recompile <- FALSE
+    } else {
+      appendTo("Screen", "M: Reprocessing the detections.")
+    }
+    rm(actel.detections)
+  }
+  if (recompile)
+    detections <- compileDetections(path = "detections", start.timestamp = start.timestamp, 
+      end.timestamp = end.timestamp, tz.study.area = tz.study.area)
+  return(detections)
+}
+
+
 #' Combine ALS detections
 #'
 #' Finds the detections' files and processes them.
@@ -138,7 +186,7 @@ loadBio <- function(file){
 #' 
 #' @keywords internal
 #' 
-loadDetections <- function(path = "detections", start.timestamp = NULL, end.timestamp = NULL, tz.study.area) {
+compileDetections <- function(path = "detections", start.timestamp = NULL, end.timestamp = NULL, tz.study.area) {
   appendTo("debug", "Starting loadDetections.")
   # Find the detection files
   if (file_test("-d", path)) {
