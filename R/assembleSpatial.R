@@ -10,7 +10,7 @@
 #' 
 #' @keywords internal
 #' 
-assembleSpatial <- function(file, bio, sections) {
+assembleSpatial <- function(file, bio, sections = NULL) {
   appendTo("debug", "Starting assembleSpatial.")
   input <- loadSpatial(file = file)
   # Create standard names
@@ -68,15 +68,17 @@ assembleSpatial <- function(file, bio, sections) {
   }
   # Wrap up
   number.of.receivers <- sum(!is.na(stations[, receiver.columns]))
-  array.order <- list()  # Used to determine if the fish's last detection was in the last array of a given section
-  for (j in sections) {
-    array.order[[j]] <- levels(stations$Array)[grepl(j, levels(stations$Array))]
-  }
-  if (any(trigger <- unlist(lapply(array.order,length)) == 0)) {
-    appendTo(c("Screen", "Warning"), decision <- readline(paste("W: No arrays were found that match section(s) ",paste(names(array.order)[trigger], collapse = ", "), ". There could be a typing mistake!\n   Continue the analysis?(y/N) ", sep = "")))
-    if (decision != "y" | decision != "Y" ){
-      emergencyBreak()
-      stop("Stopping analysis per user command.\n")
+  if (exists(sections)) {
+    array.order <- list()  # Used to determine if the fish's last detection was in the last array of a given section
+    for (j in sections) {
+      array.order[[j]] <- levels(stations$Array)[grepl(j, levels(stations$Array))]
+    }
+    if (any(trigger <- unlist(lapply(array.order,length)) == 0)) {
+      appendTo(c("Screen", "Warning"), decision <- readline(paste("W: No arrays were found that match section(s) ",paste(names(array.order)[trigger], collapse = ", "), ". There could be a typing mistake!\n   Continue the analysis?(y/N) ", sep = "")))
+      if (decision != "y" | decision != "Y" ){
+        emergencyBreak()
+        stop("Stopping analysis per user command.\n")
+      }
     }
   }
   # Order release sites by entry point.

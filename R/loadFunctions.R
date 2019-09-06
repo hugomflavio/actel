@@ -429,7 +429,7 @@ convertTimes <- function(input, start.timestamp, end.timestamp, tz.study.area) {
 #' Matches the ALS serial number to the stations in the study area, standardizing the ALS station names.
 #' 
 #' @inheritParams convertCodes
-#' @inheritParams loadDetections
+#' @param spatial A list of spatial objects in the study area
 #'
 #' @return A dataframe with standardized station names.
 #'
