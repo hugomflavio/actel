@@ -82,5 +82,8 @@ After installing, you should read the package vignettes, which can be found by r
 
     browseVignettes('actel')
 
-<span style="color:red">**Note:**</span> There have been some reports that the **vignettes are not being installed** through option A. If you installed actel remotely and the vignettes are not showing up, **try using the second installation method**.
+<span style="color:red">**Note:**</span> 
+
+1. There have been some reports that the **vignettes are not being installed** through option A. If you installed actel remotely and the vignettes are not showing up, **try using the second installation method**.
+1. If you are getting "pandoc document conversion" errors during the package installation, try installing the [newest version of pandoc](https://pandoc.org/installing.html), restarting R and trying again.
 
