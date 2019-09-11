@@ -170,7 +170,7 @@ detectionBeforeReleaseCheck <- function(input, bio){
         if (decision == "b" | decision == "B") {
           if (all(to.remove)) {
             appendTo(c("Screen", "Warning", "Report"), paste0("W: ALL detections from Fish ", names(input)[link[i]], " were removed per user command."))
-            remove.tag <- c(remove.tag, i)
+            remove.tag <- c(remove.tag, link[i])
           } else {
             input[[link[i]]] <- input[[link[i]]][!to.remove, ]
             appendTo(c("Screen", "Warning", "Report"), paste0("M: ", sum(to.remove), " detections from Fish ", names(input)[link[i]], " were removed per user command."))
