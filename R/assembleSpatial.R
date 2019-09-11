@@ -68,7 +68,7 @@ assembleSpatial <- function(file, bio, sections = NULL) {
   }
   # Wrap up
   number.of.receivers <- sum(!is.na(stations[, receiver.columns]))
-  if (exists(sections)) {
+  if (!is.null(sections)) {
     array.order <- list()  # Used to determine if the fish's last detection was in the last array of a given section
     for (j in sections) {
       array.order[[j]] <- levels(stations$Array)[grepl(j, levels(stations$Array))]
@@ -80,9 +80,11 @@ assembleSpatial <- function(file, bio, sections = NULL) {
         stop("Stopping analysis per user command.\n")
       }
     }
+  } else {
+    array.order <- list(all = levels(stations$Array))
   }
   # Order release sites by entry point.
-  if(!is.ordered(match(release.sites$Array, unlist(array.order))))
+  if (!is.ordered(match(release.sites$Array, unlist(array.order))))
     release.sites <- release.sites[order(match(release.sites$Array, unlist(array.order))),]
   # join everything
   output <- list(stations = stations, 
