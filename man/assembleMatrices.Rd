@@ -10,8 +10,6 @@ assembleMatrices(spatial, simple.movements, minimum.detections, status.df)
 \item{simple.movements}{A list of valid-only movements for each fish}
 
 \item{minimum.detections}{The minimum number of times a tag must have been recorded during the study period for it to be considered a true tag and not random noise.}
-
-\item{status.df}{A dataframe with all the final data for each fish, created by assembleOutput.}
 }
 \value{
 A list of detection matrices split by groups and release sites

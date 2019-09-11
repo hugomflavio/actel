@@ -9,8 +9,6 @@ getGroupCJS(the.matrices, status.df, fixed.efficiency = NULL)
 \arguments{
 \item{the.matrices}{A list of detection matrices}
 
-\item{status.df}{A dataframe with all the final data for each fish, created by assembleOutput.}
-
 \item{fixed.efficiency}{A vector of fixed efficiency estimates from a more complete CJS model.}
 }
 \value{

@@ -4,11 +4,11 @@
 \alias{speedReleaseToFirst}
 \title{Calculate time and speed since release.}
 \usage{
-speedReleaseToFirst(fish, status.df, movements, dist.mat,
-  invalid.dist = FALSE, silent = TRUE)
+speedReleaseToFirst(fish, bio, movements, dist.mat, invalid.dist = FALSE,
+  silent = TRUE)
 }
 \arguments{
-\item{status.df}{A dataframe with all the final data for each fish, created by assembleOutput.}
+\item{bio}{A table with the tags and biometrics of the studied fish.}
 
 \item{movements}{A list of movements for each target tag, created by groupMovements.}
 

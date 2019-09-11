@@ -8,8 +8,6 @@ includeMissing(x, status.df)
 }
 \arguments{
 \item{x}{an efficiency matrix}
-
-\item{status.df}{A dataframe with all the final data for each fish, created by assembleOutput.}
 }
 \value{
 a matrix of detection histories per fish, including fish that were never detected.

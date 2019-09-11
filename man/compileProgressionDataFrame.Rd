@@ -8,8 +8,6 @@ compileProgressionDataFrame(status.df, group.CJS, detailed.absolutes, i,
   the.levels)
 }
 \arguments{
-\item{status.df}{A dataframe with all the final data for each fish, created by assembleOutput.}
-
 \item{group.CJS}{a list of CJS's for each group, with release sites merged}
 
 \item{detailed.absolutes}{a list of absolutes extracted from split.CJS}

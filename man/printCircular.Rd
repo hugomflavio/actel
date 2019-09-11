@@ -4,7 +4,7 @@
 \alias{printCircular}
 \title{Print circular graphics for each array}
 \usage{
-printCircular(times, status.df)
+printCircular(times, bio)
 }
 \arguments{
 \item{times}{a (list of) circular object(s)}

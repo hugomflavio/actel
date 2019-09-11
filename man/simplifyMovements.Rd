@@ -4,13 +4,12 @@
 \alias{simplifyMovements}
 \title{Removes invalid events}
 \usage{
-simplifyMovements(movements, status.df, speed.method, dist.mat,
-  invalid.dist)
+simplifyMovements(movements, bio, speed.method, dist.mat, invalid.dist)
 }
 \arguments{
 \item{movements}{A list of movements for each target tag, created by groupMovements.}
 
-\item{status.df}{A dataframe with all the final data for each fish, created by assembleOutput.}
+\item{bio}{A table with the tags and biometrics of the studied fish.}
 
 \item{speed.method}{One of 'last to first' or 'first to first'. In the former, the last detection on a given array/section is matched to the first detection on the next array/section (default). If changed to 'first to first', the first detection on two consecutive arrays/sections are used to perform the calculations.}
 

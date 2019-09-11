@@ -6,6 +6,10 @@
 \usage{
 assembleArrayOverview(group.CJS)
 }
+\value{
+A dataframe containing the progression per group of fish present in the biometrics.
+}
 \description{
 Create array.overview
 }
+\keyword{internal}

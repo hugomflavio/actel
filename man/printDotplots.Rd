@@ -7,8 +7,6 @@
 printDotplots(status.df, invalid.dist)
 }
 \arguments{
-\item{status.df}{A dataframe with all the final data for each fish, created by assembleOutput.}
-
 \item{invalid.dist}{Whether or not the distance matrix supplied is valid for the study area.}
 }
 \description{

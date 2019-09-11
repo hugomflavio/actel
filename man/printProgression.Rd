@@ -7,8 +7,6 @@
 printProgression(status.df, overall.CJS, split.CJS, group.CJS)
 }
 \arguments{
-\item{status.df}{A dataframe with all the final data for each fish, created by assembleOutput.}
-
 \item{overall.CJS}{a single CJS with all the groups and release sites merged}
 
 \item{split.CJS}{a list of CJS's for each group.release combination}

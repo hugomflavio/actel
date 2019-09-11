@@ -8,8 +8,6 @@ getReleaseCJS(the.matrices, status.df)
 }
 \arguments{
 \item{the.matrices}{A list of detection matrices}
-
-\item{status.df}{A dataframe with all the final data for each fish, created by assembleOutput.}
 }
 \value{
 A list of CJS results
