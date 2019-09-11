@@ -154,6 +154,11 @@ actel <- function(path = NULL, sections, success.arrays, minimum.detections = 2,
   appendTo(c("Screen", "Report"), "M: Data successfully imported!\nM: Creating movement records for the valid tags.")
   movements <- groupMovements(detections.list = detections.list, bio = bio, spatial = spatial,
     speed.method = speed.method, maximum.time = maximum.time, tz.study.area = tz.study.area, dist.mat = dist.mat, invalid.dist = invalid.dist)
+
+  for(fish in names(movements)){
+    movements[[fish]] <- speedReleaseToFirst(fish = fish, bio = bio, movements = movements[[fish]],
+     dist.mat = dist.mat, invalid.dist = invalid.dist, silent = FALSE)
+  }
   
   recipient <- assembleTimetable(movements = movements, sections = sections, spatial = spatial, 
     minimum.detections = minimum.detections, dist.mat = dist.mat, invalid.dist = invalid.dist, 
@@ -166,12 +171,7 @@ actel <- function(path = NULL, sections, success.arrays, minimum.detections = 2,
   status.df <- assembleOutput(timetable = timetable, bio = bio, movements = movements, spatial = spatial, 
     sections = sections, dist.mat = dist.mat, invalid.dist = invalid.dist, tz.study.area = tz.study.area)
   
-  for(fish in names(movements)){
-    movements[[fish]] <- speedReleaseToFirst(fish = fish, status.df = status.df, movements = movements[[fish]],
-     dist.mat = dist.mat, invalid.dist = invalid.dist, silent = FALSE)
-  }
-
-  simple.movements <- simplifyMovements(movements = movements, status.df = status.df, 
+  simple.movements <- simplifyMovements(movements = movements, bio = bio, 
     speed.method = speed.method, dist.mat = dist.mat, invalid.dist = invalid.dist)
 
   appendTo(c("Screen", "Report"), "M: Getting summary information tables.")
@@ -236,9 +236,9 @@ actel <- function(path = NULL, sections, success.arrays, minimum.detections = 2,
     printDotplots(status.df = status.df, invalid.dist = invalid.dist)
     printSurvivalGraphic(section.overview = section.overview)
     printProgression(status.df = status.df, overall.CJS = overall.CJS, split.CJS = split.CJS, group.CJS = group.CJS)
-    individual.plots <- printIndividuals(redraw = redraw, detections.list = detections.list, 
+    individual.plots <- printIndividuals(redraw = redraw, detections.list = detections.list, bio = bio, 
         status.df = status.df, tz.study.area = tz.study.area, movements = movements, simple.movements = simple.movements)
-    circular.plots <- printCircular(times = convertTimesToCircular(times), status.df = status.df)
+    circular.plots <- printCircular(times = convertTimesToCircular(times), bio = bio)
     array.overview.fragment <- printArrayOverview(array.overview)
     if (nrow(section.overview) > 3) 
       survival.graph.size <- "width=90%" else survival.graph.size <- "height=4in"
