@@ -187,7 +187,7 @@ loadDetections <- function(start.timestamp = NULL, end.timestamp = NULL, tz.stud
 #' @keywords internal
 #' 
 compileDetections <- function(path = "detections", start.timestamp = NULL, end.timestamp = NULL, tz.study.area) {
-  appendTo("debug", "Starting loadDetections.")
+  appendTo("Screen", "M: Compiling detections...")
   # Find the detection files
   if (file_test("-d", path)) {
     file.list <- findFiles(path = path, pattern = "*.csv")
@@ -204,7 +204,7 @@ compileDetections <- function(path = "detections", start.timestamp = NULL, end.t
   data.files <- list()
   for (i in file.list) {
     appendTo("debug", paste("Importing file '", i, "'.", sep = ""))
-    data.files[[length(data.files) + 1]] <- data.table::fread(i, fill = TRUE)
+    data.files[[length(data.files) + 1]] <- data.table::fread(i, fill = TRUE, showProgress = FALSE)
     names(data.files)[length(data.files)] <- i
     if(nrow(data.files[[i]]) > 0){
       unknown.file <- TRUE
