@@ -547,7 +547,8 @@ printIndividuals <- function(redraw, detections.list, bio, status.df = NULL, tz.
       attributes(first.time)$tzone <- tz.study.area
       last.time <- as.POSIXct(tail(PlotData$Timestamp, 1), tz = tz.study.area)
       if (!is.null(status.df)) {
-        relevant.line <- status.df[the.row, (grepl("Arrived", colnames(status.df)) | grepl("Left", colnames(status.df)))]
+        status.row <- which(status.df$Transmitter == fish)
+        relevant.line <- status.df[status.row, (grepl("Arrived", colnames(status.df)) | grepl("Left", colnames(status.df)))]
       }
       # Start plot
       p <- ggplot2::ggplot(PlotData, ggplot2::aes(x = Timestamp, y = Standard.Name, colour = Array))
@@ -611,7 +612,11 @@ printIndividuals <- function(redraw, detections.list, bio, status.df = NULL, tz.
       else
         p <- p + ggplot2::labs(title = paste(fish, " (", nrow(PlotData), " detections)", sep = ""), x = paste("tz: ", tz.study.area, sep = ""), y = "Station Standard Name")
       # Save
-      ggplot2::ggsave(paste0("Report/", fish, ".", extention), width = 5, height = 4)  # better to save in png to avoid point overlapping issues
+      if (length(levels(PlotData$Standard.Name)) <= 30)
+        the.height <- 4
+      else
+        the.height <- 4 + (length(levels(PlotData$Standard.Name)) - 30) * 0.1
+      ggplot2::ggsave(paste0("Report/", fish, ".", extention), width = 5, height = the.height)  # better to save in png to avoid point overlapping issues
       rm(PlotData, start.line, last.time, first.time)
     }
     if (i%%2 == 0) {
