@@ -93,12 +93,12 @@ movementTimes <- function(movements, silent = TRUE){
 #' 
 #' @export
 #' 
-speedReleaseToFirst <- function(fish, status.df, movements, dist.mat, invalid.dist = FALSE, silent = TRUE){
+speedReleaseToFirst <- function(fish, bio, movements, dist.mat, invalid.dist = FALSE, silent = TRUE){
   if (!silent) 
     appendTo("debug", "Starting speedReleaseToFirst.")
-  the.row <- match(fish,status.df$Transmitter)
-  origin.time <- status.df[the.row,"Release.date"]
-  origin.place <- as.character(status.df[the.row,"Release.site"])
+  the.row <- match(fish,bio$Transmitter)
+  origin.time <- bio[the.row,"Release.date"]
+  origin.place <- as.character(bio[the.row,"Release.site"])
   if (origin.time <= movements$First.time[1]) {
     a <- as.vector(difftime(movements$First.time[1], origin.time, units = "hours"))
     h <- a%/%1

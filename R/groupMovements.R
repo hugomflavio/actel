@@ -220,20 +220,19 @@ upstreamCheck <- function(i, recipient, bio, spatial) {
 #' @inheritParams actel
 #' @inheritParams groupMovements
 #' @param movements A list of movements for each target tag, created by groupMovements.
-#' @param status.df A dataframe with all the final data for each fish, created by assembleOutput.
 #' 
 #' @keywords internal
 #' 
 #' @return The movement dataframe containing only valid events
 #' 
-simplifyMovements <- function(movements, status.df, speed.method, dist.mat, invalid.dist) {
+simplifyMovements <- function(movements, bio, speed.method, dist.mat, invalid.dist) {
   simple.movements <- lapply(movements, function(x) x[(Valid), ])
   simple.movements <- simple.movements[unlist(lapply(simple.movements, nrow)) > 0]
   for(fish in names(simple.movements)){
     aux <- movementTimes(movements = simple.movements[[fish]], silent = FALSE)
     if (!invalid.dist)
         aux <- movementSpeeds(movements = aux, speed.method = speed.method, dist.mat = dist.mat, silent = FALSE)
-    simple.movements[[fish]] <- speedReleaseToFirst(fish = fish, status.df = status.df, movements = aux,
+    simple.movements[[fish]] <- speedReleaseToFirst(fish = fish, bio = bio, movements = aux,
      dist.mat = dist.mat, invalid.dist = invalid.dist, silent = FALSE)
   }
   return(simple.movements)

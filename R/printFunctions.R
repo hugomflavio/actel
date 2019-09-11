@@ -509,7 +509,8 @@ cat(last.array.results)
 #' 
 #' @keywords internal
 #' 
-printIndividuals <- function(redraw, detections.list, status.df, tz.study.area, movements, simple.movements, extention = "png") {
+printIndividuals <- function(redraw, detections.list, bio, status.df = NULL, tz.study.area, 
+  movements, simple.movements = NULL, extention = "png") {
   cbPalette <- c("#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7", "#999999")
   names(cbPalette) <- c("Orange", "Blue", "Green", "Yellow", "Darkblue", "Darkorange", "Pink", "Grey")
   appendTo(c("Screen", "Report"), "M: Drawing individual graphics for the report.")
@@ -540,17 +541,19 @@ printIndividuals <- function(redraw, detections.list, status.df, tz.study.area, 
       }
       appendTo("debug", paste("Debug: Printing graphic for fish", fish, ".", sep = ""))
       colnames(PlotData)[1] <- "Timestamp"
-      the.row <- status.df$Signal == tail(strsplit(fish, "-")[[1]], 1)
-      start.line <- as.POSIXct(status.df$Release.date[the.row], tz = tz.study.area)
+      the.row <- which(bio$Transmitter == fish)
+      start.line <- as.POSIXct(bio$Release.date[the.row], tz = tz.study.area)
       first.time <- min(c(as.POSIXct(head(PlotData$Timestamp, 1), tz = tz.study.area), start.line))
       attributes(first.time)$tzone <- tz.study.area
       last.time <- as.POSIXct(tail(PlotData$Timestamp, 1), tz = tz.study.area)
-      relevant.line <- status.df[the.row, (grepl("Arrived", colnames(status.df)) | grepl("Left", colnames(status.df)))]
+      if (!is.null(status.df)) {
+        relevant.line <- status.df[the.row, (grepl("Arrived", colnames(status.df)) | grepl("Left", colnames(status.df)))]
+      }
       # Start plot
       p <- ggplot2::ggplot(PlotData, ggplot2::aes(x = Timestamp, y = Standard.Name, colour = Array))
       # Choose background
       default.cols <- TRUE
-      if (status.df$P.type[the.row] == "Overridden") {
+      if (!is.null(status.df) && status.df$P.type[the.row] == "Overridden") {
         p <- p + ggplot2::theme(
           panel.background = ggplot2::element_rect(fill = "white"),
           panel.border = ggplot2::element_rect(fill = NA, colour = "#ef3b32" , size = 2),
@@ -560,7 +563,7 @@ printIndividuals <- function(redraw, detections.list, status.df, tz.study.area, 
           )
         default.cols <- FALSE
       } 
-      if (status.df$P.type[the.row] == "Manual") {
+      if (!is.null(status.df) && status.df$P.type[the.row] == "Manual") {
          p <- p + ggplot2::theme(
           panel.background = ggplot2::element_rect(fill = "white"),
           panel.border = ggplot2::element_rect(fill = NA, colour = "#ffd016" , size = 2),
@@ -576,12 +579,14 @@ printIndividuals <- function(redraw, detections.list, status.df, tz.study.area, 
       # Plot starting line
       p <- p + ggplot2::geom_vline(xintercept = start.line, linetype = "dashed")
       # Plot entry/exit lines
-      for (l in 1:length(relevant.line)) {
-        if (!is.na(relevant.line[l])) {
-          p <- p + ggplot2::geom_vline(xintercept = as.POSIXct(relevant.line[[l]], tz = tz.study.area), linetype = "dashed", color = "grey")
+      if (!is.null(status.df)) {
+        for (l in 1:length(relevant.line)) {
+          if (!is.na(relevant.line[l])) {
+            p <- p + ggplot2::geom_vline(xintercept = as.POSIXct(relevant.line[[l]], tz = tz.study.area), linetype = "dashed", color = "grey")
+          }
         }
+        rm(l, relevant.line)
       }
-      rm(l)
       # Plot movements
       p <- p + ggplot2::geom_path(data = all.moves.line, ggplot2::aes(x = Timestamp, y = Station, group = 1), col = "grey40", linetype = "dashed")
       if (add.simple.movements) {
@@ -601,9 +606,13 @@ printIndividuals <- function(redraw, detections.list, status.df, tz.study.area, 
       p <- p + ggplot2::scale_y_discrete(drop = FALSE)
       # Caption and title
       p <- p + ggplot2::guides(colour = ggplot2::guide_legend(reverse = T))
-      p <- p + ggplot2::labs(title = paste(fish, " (", status.df[status.df$Transmitter == fish, "Status"], ")", sep = ""), x = paste("tz: ", tz.study.area, sep = ""), y = "Station Standard Name")
+      if (!is.null(status.df))
+        p <- p + ggplot2::labs(title = paste(fish, " (", status.df[status.df$Transmitter == fish, "Status"], ")", sep = ""), x = paste("tz: ", tz.study.area, sep = ""), y = "Station Standard Name")
+      else
+        p <- p + ggplot2::labs(title = paste(fish, " (", nrow(PlotData), " detections)", sep = ""), x = paste("tz: ", tz.study.area, sep = ""), y = "Station Standard Name")
+      # Save
       ggplot2::ggsave(paste0("Report/", fish, ".", extention), width = 5, height = 4)  # better to save in png to avoid point overlapping issues
-      rm(PlotData, start.line, last.time, relevant.line, first.time)
+      rm(PlotData, start.line, last.time, first.time)
     }
     if (i%%2 == 0) {
       individual.plots <- paste0(individual.plots, "![](", fish, ".", extention, "){ width=50% }\n")
@@ -626,19 +635,19 @@ printIndividuals <- function(redraw, detections.list, status.df, tz.study.area, 
 #' 
 #' @return A rmd string to be attached to the report.
 #' 
-printCircular <- function(times, status.df){
+printCircular <- function(times, bio){
   cbPalette <- c("#56B4E9", "#c0ff3e", "#E69F00", "#F0E442", "#0072B2", "#D55E00", "#CC79A7", "#999999")
   circular.plots <- ""
-  colours <- paste(cbPalette[c(1:length(unique(status.df$Group)))], 80, sep = "")
+  colours <- paste(cbPalette[c(1:length(unique(bio$Group)))], 80, sep = "")
   for (i in 1:length(times)) {
-    if (length(unique(status.df$Group)) > 1) {
-      link <- match(names(times[[i]]), status.df$Transmitter)
-      groups <- factor(status.df$Group[link], levels = sort(unique(status.df$Group)))
+    if (length(unique(bio$Group)) > 1) {
+      link <- match(names(times[[i]]), bio$Transmitter)
+      groups <- factor(bio$Group[link], levels = sort(unique(bio$Group)))
       trim.times <- split(times[[i]], groups)
       ylegend <- -0.97 + (0.1 * (length(unique(groups)) - 2))
     } else {
       trim.times <- times[i]
-      names(trim.times) <- unique(status.df$Group)
+      names(trim.times) <- unique(bio$Group)
       ylegend <- -0.97
     }
     prop <- roundDown(1 / max(unlist(lapply(trim.times, function(x) table(roundUp(x, to = 1)) / sum(!is.na(x))))), to = 1)
@@ -708,7 +717,6 @@ printRmd <- function(name.fragment, header.fragment, biometric.fragment, efficie
     unknown.fragment <- ""
   } 
   report <- readr::read_file("temp_log.txt")
-  folder.fragment <- 
   sink(reportname)
   cat(paste(
 '---
