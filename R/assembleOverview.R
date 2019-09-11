@@ -41,6 +41,10 @@ assembleSectionOverview <- function(status.df, sections) {
 
 #' Create array.overview
 #'
+#' @return A dataframe containing the progression per group of fish present in the biometrics.
+#' 
+#' @keywords internal
+#' 
 assembleArrayOverview <- function(group.CJS) {
   appendTo("debug", "Starting assembleArrayOverview.")
   recipient <- lapply(group.CJS, function(x) x$absolutes)
