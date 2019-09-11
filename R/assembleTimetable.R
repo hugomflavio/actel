@@ -142,7 +142,7 @@ overrideDefaults <- function(i, movements, sections) {
   last.events <- vector()
   first.events <- vector()
   cat("Opening movements list for inspection.\n\n")
-  print(movements)
+  print(movements, topn = nrow(movements))
   cat("\n")
   for (j in seq_len(length(sections))) {
     check = TRUE
@@ -292,7 +292,7 @@ findLastEvents <- function(i, movements, sections, minimum.detections, processin
         processing.type <- "Manual"
         ## I used cat here because the appendTo will be used later on, when the findFirstEvents comes up
         cat(paste0("W: No ", sections[l], " detection events with more than one detection were found for fish ", i, ". Opening movements list for inspection.\n"))
-        print(movements[(Valid), -c("Valid")])
+        print(movements[(Valid), -c("Valid")], topn = nrow(movements[(Valid), -c("Valid")]))
         cat("\n")
         check = TRUE
         while (check) {
@@ -383,7 +383,7 @@ eventOrderCheck <- function(i, last.events, sections, movements, processing.type
     }
     if (decision == "Y" | decision == "y") {
       ## If the user decides to see the movements
-      print(movements[(Valid), -c("Valid")])
+      print(movements[(Valid), -c("Valid")], topn = nrow(movements[(Valid), -c("Valid")]))
       rm(decision)
       cat("\n")
       appendTo("Screen", paste("Current last events: ", paste(last.events, collapse = ", "), " (", paste(sections, collapse = ", "), ").", sep = ""))

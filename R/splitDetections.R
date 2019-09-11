@@ -140,6 +140,7 @@ noDetectionsCheck <- function(input, bio){
 #' 
 detectionBeforeReleaseCheck <- function(input, bio){
   appendTo("debug", "Starting detectionBeforeReleaseCheck.")  
+  remove.tag <- NULL
   tag.list <- stripCodeSpaces(names(input))
   link <- match(bio$Signal, tag.list)
   for(i in seq_len(length(link))) {
@@ -167,11 +168,19 @@ detectionBeforeReleaseCheck <- function(input, bio){
         }
         appendTo("UD", decision)
         if (decision == "b" | decision == "B") {
-          input[[link[i]]] <- input[[link[i]]][-to.remove, ]
-          appendTo(c("Screen", "Warning", "Report"), paste0("M: ", sum(to.remove), " detections from Fish ", names(input)[link[i]], " were removed per user command."))
+          if (all(to.remove)) {
+            appendTo(c("Screen", "Warning", "Report"), paste0("W: ALL detections from Fish ", names(input)[link[i]], " were removed per user command."))
+            remove.tag <- c(remove.tag, i)
+          } else {
+            input[[link[i]]] <- input[[link[i]]][!to.remove, ]
+            appendTo(c("Screen", "Warning", "Report"), paste0("M: ", sum(to.remove), " detections from Fish ", names(input)[link[i]], " were removed per user command."))
+          }
         }
       }
     }
+  }
+  if (!is.null(remove.tag)) {
+    input <- input[-remove.tag]
   }
   appendTo("debug", "Terminating detectionBeforeReleaseCheck.")  
   return(input)
