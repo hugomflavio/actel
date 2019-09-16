@@ -8,6 +8,8 @@ standardizeStations(input, spatial)
 }
 \arguments{
 \item{input}{A dataframe of standardized detections.}
+
+\item{spatial}{A list of spatial objects in the study area}
 }
 \value{
 A dataframe with standardized station names.

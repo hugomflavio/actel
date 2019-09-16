@@ -4,7 +4,7 @@
 \alias{assembleSpatial}
 \title{Process spatial elements}
 \usage{
-assembleSpatial(file, bio, sections)
+assembleSpatial(file, bio, sections = NULL)
 }
 \arguments{
 \item{file}{an input file with spatial data.}
