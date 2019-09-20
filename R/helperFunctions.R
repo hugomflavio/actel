@@ -230,7 +230,7 @@ emergencyBreak <- function() {
   appendTo("Report", "\nAn exception occurred, stopping the process!\n\n-------------------")
   if (file.exists("temp_UD.txt")) 
     appendTo("Report", paste("User inverventions:\n-------------------\n", gsub("\r", "", readr::read_file("temp_UD.txt")), "-------------------", sep = ""))
-  appendTo(c("Screen", "Report"), paste("M: Saving report as '", paste(gsub(":", ".", sub(" ", ".", as.character(Sys.time()))), "actel.log-STOP.txt", sep = "."), "'.", sep = ""))
+  # appendTo(c("Screen", "Report"), paste("M: Saving report as '", paste(gsub(":", ".", sub(" ", ".", as.character(Sys.time()))), "actel.log-STOP.txt", sep = "."), "'.", sep = ""))
   file.rename("temp_log.txt", paste(gsub(":", ".", sub(" ", ".", as.character(Sys.time()))), "actel.log-STOP.txt", sep = "."))
   deleteHelpers(TRUE)
 }
@@ -249,8 +249,7 @@ pathCheck <- function(my.home, path) {
     if (dir.exists(path)) {
       setwd(path)
     } else {
-      appendTo(c("Screen", "Report"), paste("Error: The selected path does not exist. Details:\n  Current directory: ", getwd(), "\n  Path: ", path, "\n\nYou may either:\n  a) continue the analysis in the current directory;\n  b) restart the function.", 
-        sep = ""))
+      appendTo(c("Screen", "Report"), paste0("Error: The selected path does not exist. Details:\n  Current directory: ", getwd(), "\n  Path: ", path, "\n\nYou may either:\n  a) continue the analysis in the current directory;\n  b) restart the function."))
       unknown.input = TRUE
       while (unknown.input) {
         decision <- readline("Decision:(a/b) ")
@@ -275,7 +274,7 @@ pathCheck <- function(my.home, path) {
     deleteHelpers()
   moveHelpers(my.home)
   appendTo("debug", "Done.")
-  return(path = path)
+  return(path)
 }
 
 #' Move helper files to new directory

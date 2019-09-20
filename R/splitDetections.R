@@ -38,6 +38,43 @@ splitDetections <- function(detections, bio, spatial, exclude.tags = NULL, silen
   return(list(trimmed.list = trimmed.list, bio = bio))
 }
 
+#' Split detections by tag
+#'
+#' Splits the detections' table by tags and selects only detections from target tags
+#' 
+#' @inheritParams actel
+#' @inheritParams loadDetections
+#' @param bio A table with the tags and biometrics of the studied fish.
+#' @param detections A dataframe with all the detections. Supplied by loadDetections.
+#' @param silent logical: if TRUE, suppress messages.
+#' 
+#' @return A list of detections for each tag.
+#' 
+#' @keywords internal
+#' 
+new_splitDetections <- function(detections, bio, exclude.tags = NULL, silent = FALSE) {
+  appendTo("debug", "Starting splitDetections.")
+  my.list <- split(detections, detections$Transmitter)
+  my.list <- excludeTags(input = my.list, exclude.tags = exclude.tags, silent = silent)
+  
+  tags <- noDetectionsCheck(input = my.list, bio = bio)
+  dupSignalsCheck(input = my.list, bio = bio, tag.list = tags$list)
+  
+  appendTo("debug", "Debug: Creating 'trimmed.list'.")
+  bio$Transmitter <- names(my.list)[tags[["link"]]]
+  trimmed.list <- my.list[tags[["link"]]]
+  non.empty <- unlist(lapply(trimmed.list, function(x) length(x) != 0))
+  trimmed.list <- trimmed.list[non.empty]
+  if (!silent){
+    collectStrays(input = my.list[-na.exclude(tags[["link"]])])
+    storeStrays()
+  }
+
+  appendTo("debug", "Terminating splitDetections.")
+  return(list(trimmed.list = trimmed.list, bio = bio))
+}
+
+
 #' Collect summary information on the tags detected but that are not part of the study.
 #'
 #' @param input list of detections for the tags to be excluded.
