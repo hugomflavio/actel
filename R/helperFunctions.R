@@ -1,3 +1,36 @@
+#' Update study area for actel v.0.0.4
+#' 
+#' Converts the spatial.csv in itself + a deployments.csv file.
+#' 
+#' @inheritParams migration
+#' 
+#' @export
+#' 
+updateStudy <- function(tz.study.area) {
+  if (file.exists("deployments.csv")) {
+    cat("M: A 'deployments.csv' file is already present in the current directory.\n")
+  } else {
+    spatial <- new_loadSpatial(file = "spatial.csv")
+    detections <- loadDetections(tz.study.area = tz.study.area, force = TRUE)
+    stations <- spatial[spatial$Type == "Hydrophone", ]
+    deployments <- stations[, c("Receiver", "Station.Name")]
+    if (sum(grepl("Receiver", colnames(stations))) >= 1) {
+      the.rows <- which(grepl("Receiver", colnames(stations)))[-1]
+      for (i in the.rows) {
+        recipient <- stations[!is.na(stations[, i]) , c(i, "Station.Name")]
+        rbind(deployments, recipient)
+      }
+    }
+    deployments[, "Start"] <- min(detections$Timestamp) - 1
+    deployments[,  "Stop"] <- max(detections$Timestamp) + 1
+    write.csv(deployments, "deployments.csv", row.names = FALSE)
+    write.csv(spatial, "spatial_obsulete.csv", row.names = FALSE)
+    write.csv(spatial[, !grepl("Receiver", colnames(spatial))], "spatial.csv", row.names = FALSE)
+    cat("M: Study area updated. A copy of the original 'spatial.csv' file was stored as 'spatial_obsulete.csv'.\n")
+    deleteHelpers()
+  }
+}
+
 #' Calculate the standard error of the mean
 #' 
 #' @param x input data
