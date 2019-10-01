@@ -298,10 +298,10 @@ printMigrationRmd <- function(name.fragment, header.fragment, biometric.fragment
         continue <- FALSE
       }
     }
-    appendTo("Screen",paste("M: An actel report is already present in the present directory, saving new report as 'actel_report", name.fragment, ".", index, ".html'.", sep = ""))
+    appendTo("Screen",paste("M: An actel report is already present in the present directory, saving new report as 'actel_migration_report", name.fragment, ".", index, ".html'.", sep = ""))
     rm(continue,index)
   } else {
-    appendTo("Screen",paste("M: Saving actel report as 'actel_report", name.fragment, ".html'.", sep = ""))
+    appendTo("Screen",paste("M: Saving actel report as 'actel_migration_report", name.fragment, ".html'.", sep = ""))
   }
   if (any(grepl("Unknown", spatial$stations$Standard.Name))) {
     unknown.fragment <- paste('<span style="color:red"> Number of relevant unknown receivers: **', sum(grepl("Unknown", spatial$stations$Standard.Name)), '**</span>\n', sep = "")

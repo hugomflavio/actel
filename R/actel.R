@@ -34,6 +34,13 @@ actel <- function(path = NULL, sections, success.arrays, minimum.detections = 2,
     end.timestamp = NULL, report = TRUE, redraw = TRUE, override = NULL, 
     exclude.tags = NULL, debug = FALSE, cautious.assignment = TRUE, replicate = NULL) {
   
+  cat(paste0(
+"NOTE: The function 'actel' is deprecated. Please switch to the function 'migration' as soon as possible.
+  The new function requires a 'deployments.csv' file. To convert your study data automatically
+  to the new format, run: updateStudy(tz.study.area = '", tz.study.area, "')\n"))
+
+  readline("Press ENTER to continue with actel, or ESC to stop the function.\n")
+
   my.home <- getwd()
 
   if (debug) {

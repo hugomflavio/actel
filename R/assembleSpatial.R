@@ -44,17 +44,28 @@ assembleSpatial <- function(file, bio, sections = NULL) {
                                   Latitude = NA, 
                                   Array = stations$Array[1])
     } else {
-      A <- input[input$Type == "Release", "Station.Name"]
+      A <- input$Station.Name[input$Type == "Release"]
       B <- unique(bio$Release.site)
-      if (any(is.na(match(A, B)))) {
-        appendTo(c("Screen", "Report", "Warning"), ": There is a mismatch between the release sites reported and the release locations for the smolts.")
+      if (any(is.na(match(B, A)))) {
+        appendTo(c("Screen", "Report", "Warning"), "Error: There is a mismatch between the release sites reported and the release locations for the smolts.")
+        cat("   Release sites listed in the spatial file:", paste(A, collapse = ", "), "\n")
+        cat("   Sites listed in the biometrics file 'Release.site' column:", paste(B, collapse = ", ", "\n"))
         emergencyBreak()
         stop("The release names should be identical in the spatial objects file and in the biometrics file.\n")
       } else {
         from.row <- input$Type == "Release"
-        from.col <- colnames(input)[!grepl("Receiver",colnames(input))]
+        from.col <- colnames(input)[!grepl("Receiver", colnames(input))]
         release.sites <- input[from.row, from.col]
         row.names(release.sites) <- 1:nrow(release.sites)
+      }
+      A <- unique(stations$Array)
+      B <- unique(release.sites$Array)
+      if (any(is.na(match(B, A)))) {
+        appendTo(c("Screen", "Report", "Warning"), "Error: There is a mismatch between the expected first array of a release site and the list of arrays.")
+        cat("   Arrays listed in the spatial file:", paste(A, collapse = ", "), "\n")
+        cat("   Expected first arrays of the release sites:", paste(B, collapse = ", ", "\n"))
+        emergencyBreak()
+        stop("The expected first arrays should match the arrays where stations where deployed in the spatial file.\n")
       }
     }
   } else {
@@ -126,17 +137,28 @@ new_assembleSpatial <- function(spatial, bio, sections = NULL) {
                                   Latitude = NA_real_, 
                                   Array = stations$Array[1])
     } else {
-      A <- spatial[spatial$Type == "Release", "Station.Name"]
+      A <- spatial$Station.Name[spatial$Type == "Release"]
       B <- unique(bio$Release.site)
-      if (any(is.na(match(A, B)))) {
-        appendTo(c("Screen", "Report", "Warning"), ": There is a mismatch between the release sites reported and the release locations for the smolts.")
+      if (any(is.na(match(B, A)))) {
+        appendTo(c("Screen", "Report", "Warning"), "Error: There is a mismatch between the release sites reported and the release locations for the smolts.")
+        cat("   Release sites listed in the spatial file:", paste(A, collapse = ", "), "\n")
+        cat("   Sites listed in the biometrics file 'Release.site' column:", paste(B, collapse = ", ", "\n"))
         emergencyBreak()
         stop("The release names should be identical in the spatial objects file and in the biometrics file.\n")
       } else {
         from.row <- spatial$Type == "Release"
-        from.col <- colnames(spatial)[!grepl("Receiver",colnames(spatial))]
+        from.col <- colnames(spatial)[!grepl("Receiver", colnames(spatial))]
         release.sites <- spatial[from.row, from.col]
         row.names(release.sites) <- 1:nrow(release.sites)
+      }
+      A <- unique(stations$Array)
+      B <- unique(release.sites$Array)
+      if (any(is.na(match(B, A)))) {
+        appendTo(c("Screen", "Report", "Warning"), "Error: There is a mismatch between the expected first array of a release site and the list of arrays.")
+        cat("   Arrays listed in the spatial file:", paste(A, collapse = ", "), "\n")
+        cat("   Expected first arrays of the release sites:", paste(B, collapse = ", ", "\n"))
+        emergencyBreak()
+        stop("The expected first arrays should match the arrays where stations where deployed in the spatial file.\n")
       }
     }
   } else {

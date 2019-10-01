@@ -102,8 +102,8 @@ loadDeployments <- function(file, tz.study.area){
   }
   input$Receiver <- as.character(input$Receiver)
   input$Receiver <- sapply(input$Receiver, function(x) tail(unlist(strsplit(x, "-")), 1))
-  input$Start <- fasttime::fastPOSIXct(input$Start, tz = tz.study.area)
-  input$Stop <- fasttime::fastPOSIXct(input$Stop, tz = tz.study.area)
+  input$Start <- as.POSIXct(input$Start, tz = tz.study.area)
+  input$Stop <- as.POSIXct(input$Stop, tz = tz.study.area)
   appendTo("debug","Terminating loadDeployments.")
   return(input)
 }
@@ -151,6 +151,11 @@ loadSpatial <- function(file){
       stop("Could not recognise the data in the 'Type' column as only one of 'Hydrophone' or 'Release'. Please doublecheck the spatial file.\n")
     }
   }
+  if (!any(grepl("Station.Name", colnames(input)))) {
+    appendTo(c("Screen", "Warning", "Report"), "W: No 'Station.Name' column found in the spatial file.\n   Creating a 'Station.Name' column to avoid function failure.")
+    input$Station.Name <- paste0("St.", 1:nrow(input))
+    input[input$Type == "Release", "Station.Name"] <- paste0("RS.", 1:sum(input$Type == "Release"))
+  }
   appendTo("debug","Terminating loadSpatial.")
   return(input)
 }
@@ -171,6 +176,17 @@ new_loadSpatial <- function(file){
   else {
     emergencyBreak()
     stop("Could not find a '", file, "' file in the working directory.\n")
+  }
+  if (!any(grepl("Station.Name", colnames(input)))) {
+    emergencyBreak()
+    stop("The spatial file must contain a 'Station.Name' column.\n")
+  } else {
+    if (any(link <- table(input$Station.Name) > 1)) {
+      appendTo(c("Screen", "Warning", "Report"), "Error: The 'Station.Name' column in the spatial file must not have duplicated values.")
+      cat("Duplicated stations:", paste(names(table(input$Station.Name))[link], collapse = ", "), "\n")
+      emergencyBreak()
+      stop("Fatal exception found. Read lines above for more details.\n")
+    }
   }
   if (!any(grepl("Array", colnames(input)))) {
     if (any(grepl("Group", colnames(input)))) {
@@ -413,7 +429,7 @@ loadBio <- function(file){
 #' 
 #' @keywords internal
 #' 
-loadDetections <- function(start.timestamp = NULL, end.timestamp = NULL, tz.study.area) {
+loadDetections <- function(start.timestamp = NULL, end.timestamp = NULL, tz.study.area, force = FALSE) {
   recompile <- TRUE
   detection.paths <- c(file.exists("actel.detections.RData"), file.exists("detections/actel.detections.RData"))
   
@@ -427,8 +443,12 @@ loadDetections <- function(start.timestamp = NULL, end.timestamp = NULL, tz.stud
     else
       load("actel.detections.RData")
     
-    appendTo("Screen", paste("M: The detections have been processed on ", actel.detections$timestamp, ".\n   If the input detection files were not changed, it is safe to use these again.", sep = ""))
-    decision <- readline("   Reuse processed detections?(Y/n) ")
+    if (force) {
+      decision <- "Y"
+    } else {
+      appendTo("Screen", paste("M: The detections have been processed on ", actel.detections$timestamp, ".\n   If the input detection files were not changed, it is safe to use these again.", sep = ""))
+      decision <- readline("   Reuse processed detections?(Y/n) ")
+    }
     appendTo("UD", decision)
     if (decision != "N" & decision != "n"){
       appendTo(c("Screen","Report"), paste("M: Using detections previously compiled on ", actel.detections$timestamp, ".", sep = ""))

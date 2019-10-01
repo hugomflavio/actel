@@ -225,7 +225,7 @@ printExploreRmd <- function(biometric.fragment, individual.plots, circular.plots
         continue <- FALSE
       }
     }
-    appendTo("Screen", paste0("M: An actel report is already present in the present directory, saving new report as 'actel_report.", index, ".html'."))
+    appendTo("Screen", paste0("M: An actel report is already present in the present directory, saving new report as 'actel_explore_report.", index, ".html'."))
     rm(continue,index)
   } else {
     appendTo("Screen", "M: Saving actel report as 'actel_explore_report.html'.")
