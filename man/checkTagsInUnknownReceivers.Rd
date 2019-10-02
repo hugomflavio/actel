@@ -4,7 +4,7 @@
 \alias{checkTagsInUnknownReceivers}
 \title{Check for target data in the unknown receivers}
 \usage{
-checkTagsInUnknownReceivers(detections.list, spatial)
+checkTagsInUnknownReceivers(detections.list, deployments, spatial)
 }
 \arguments{
 \item{detections.list}{A list of the detections split by each target tag, created by splitDetections.}

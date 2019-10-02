@@ -150,13 +150,13 @@ actel <- function(path = NULL, sections, success.arrays, minimum.detections = 2,
   spatial <- recipient[[1]]
   if (recipient[[2]]) {
     detections <- standardizeStations(input = detections, spatial = spatial)
-    recipient <- splitDetections(detections = detections, bio = bio, spatial = spatial, exclude.tags = exclude.tags, silent = TRUE)
+    recipient <- deprecated_splitDetections(detections = detections, bio = bio, spatial = spatial, exclude.tags = exclude.tags, silent = TRUE)
     detections.list <- recipient[[1]]
     bio <- recipient[[2]]
   }
   rm(recipient)
 
-  detections.list <- detectionBeforeReleaseCheck(input = detections.list, bio = bio)
+  detections.list <- checkDetectionsBeforeRelease(input = detections.list, bio = bio)
 
   appendTo(c("Screen", "Report"), "M: Data successfully imported!\nM: Creating movement records for the valid tags.")
   movements <- groupMovements(detections.list = detections.list, bio = bio, spatial = spatial,

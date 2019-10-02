@@ -77,13 +77,12 @@ checkUnknownReceivers <- function(input) {
 #' 
 #' @keywords internal
 #' 
-checkTagsInUnknownReceivers <- function(detections.list, spatial) {
+checkTagsInUnknownReceivers <- function(detections.list, deployments, spatial) {
   appendTo("debug", "Starting tagsInUnknownReceivers")
-  reset.names <- FALSE
   for (i in names(detections.list)) {
-    if (any(is.na(match(detections.list[[i]][, Receiver], spatial$receivers.serial)))) {
-      A <- detections.list[[i]][, Receiver]
-      B <- spatial$receivers.serial
+    if (any(is.na(detections.list[[i]]$Standard.Name))) {
+      A <- detections.list[[i]]$Receiver
+      B <- names(deployments)
       unknown.receivers <- unique(detections.list[[i]][is.na(match(A, B)), Receiver])
       appendTo(c("Screen", "Report", "Warning"), paste("W: Fish ", i, " was detected in one or more receivers that are not listed in the study area (receiver(s): ", paste(unknown.receivers, collapse = ", "), ")!", sep = ""))
       cat("Possible options:\n   a) Stop and doublecheck the data (recommended)\n   b) Temporary include the hydrophone(s) to the stations list\n")
@@ -91,7 +90,9 @@ checkTagsInUnknownReceivers <- function(detections.list, spatial) {
       while (check) {
         decision <- commentCheck(line = "Which option should be followed?(a/b/comment) ", tag = i)
         if (decision == "a" | decision == "A" | decision == "b" | decision == "B") 
-          check <- FALSE else cat("Option not recognized, please try again.\n")
+          check <- FALSE 
+        else 
+          cat("Option not recognized, please try again.\n")
         appendTo("UD", decision)
       }
       if (decision == "a" | decision == "A") {
@@ -99,15 +100,14 @@ checkTagsInUnknownReceivers <- function(detections.list, spatial) {
         stop("Stopping analysis per user command.\n")
       }
       if (decision == "b" | decision == "B") {
-        reset.names <- TRUE
-        recipient <- includeUnknownReceiver(spatial = spatial, deployments = deployments, unknown.receivers = unknown.receivers)
+        recipient <- new_includeUnknownReceiver(spatial = spatial, deployments = deployments, unknown.receivers = unknown.receivers)
         spatial <- recipient[[1]]
         deployments <- recipient[[2]]
       }
     }
   }
-  appendTo("debug", "Terminating tagsInUnknownReceivers")
-  return(list(spatial = spatial, deployments = deploymentss))
+  appendTo("debug", "Terminating unknownReceiversCheckB.")
+  return(list(spatial = spatial, deployments = deployments))
 }
 
 #' Check if there are detections for the target tags before release.

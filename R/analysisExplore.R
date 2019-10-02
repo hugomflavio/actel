@@ -99,7 +99,7 @@ explore <- function(path = NULL, maximum.time = 60,
   dist.mat <- recipient[[1]]
   invalid.dist <- recipient[[2]]
   rm(recipient)
-  recipient <- new_splitDetections(detections = detections, bio = bio, exclude.tags = exclude.tags) # Split the detections by tag, store full transmitter names in bio
+  recipient <- splitDetections(detections = detections, bio = bio, exclude.tags = exclude.tags) # Split the detections by tag, store full transmitter names in bio
   detections.list <- recipient[[1]]
   bio <- recipient[[2]]
   rm(recipient)
