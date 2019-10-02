@@ -1,35 +1,49 @@
-#' Check report compatibility
-#' 
-#' Creates a "Report" folder if necessary and silently activates ggplot2 and reshape2 to avoid startup messages
+#' Collect summary information on the tags detected but that are not part of the study.
 #'
-#' @return A TRUE/FALSE decision
+#' @param input list of detections for the tags to be excluded.
+#' @param restart logical: if TRUE, remove file 'temp_strays.csv' from the working directory.
 #' 
 #' @keywords internal
 #' 
-folderCheck <- function(report, redraw){
-  if (report) {
-    appendTo("Report", "M: 'report' option has been activated.")
-    if (length(setdiff(c("ggplot2", "reshape2"), rownames(installed.packages()))) > 0) {
-      appendTo(c("Screen", "Report", "Warning"), "W: 'report' option can only be activated if 'ggplot2' and 'reshape2' are installed. Please install these. Deactivating 'Report' for the current job.")
-      report <- FALSE
-    } else {
-      suppressPackageStartupMessages(library(ggplot2))
-      suppressPackageStartupMessages(library(reshape2))
-      if (!dir.exists("Report")) {
-        appendTo("Screen", "M: Creating 'Report' subdirectory to store report files.")
-        dir.create("Report")
-      } else {
-        if (redraw) {
-        appendTo("Screen", "W: 'Report' directory already present. Overwriting files already present.")
+collectStrays <- function(input, restart = FALSE){
+  appendTo("debug", "Starting collectStrays.")
+  if (restart && file.exists("temp_strays.csv")) {
+    file.remove("temp_strays.csv")
+  }
+  if (length(input) > 0) {
+    recipient <- data.frame(Transmitter = names(input), 
+      N.detections = unlist(lapply(input,nrow)), 
+      First.detection = unlist(lapply(input, function(x) as.character(head(x$Timestamp,1)))),
+      Last.detection = unlist(lapply(input, function(x) as.character(tail(x$Timestamp,1)))),
+      Receivers = unlist(lapply(input, function(x) paste(unique(x$Receiver), collapse = ", ")))
+      )
+    write.table(recipient, file = "temp_strays.csv", sep = ",", append = file.exists("temp_strays.csv"), row.names = FALSE, col.names = !file.exists("temp_strays.csv"))
+  }
+  appendTo("debug", "Terminating collectStrays.")
+}
+
+#' Store summary information on the stray tags detected in a permanent file.
+#'
+#' @keywords internal
+#'
+storeStrays <- function(){
+  appendTo("debug", "Starting storeStrays.")
+  if (file.exists("temp_strays.csv")) {
+    if (file.exists(newname <- "stray_tags.csv")) {
+      continue <- TRUE
+      index <- 1
+      while (continue) {
+        if (file.exists(newname <- paste("stray_tags", index, "csv", sep = "."))) {
+          index <- index + 1
         } else {
-        appendTo("Screen", "W: 'Report' directory already present. Skipping files already present.")
+          continue <- FALSE
         }
       }
     }
+    file.rename("temp_strays.csv", newname)
   }
-  return(report)
+  appendTo("debug", "Terminating storeStrays.")
 }
-
 
 #' Print biometric graphics 
 #'
@@ -161,7 +175,7 @@ printDotplots <- function(status.df, invalid.dist) {
 #'
 #' Prints survival graphics per fish group.
 #' 
-#' @param section.overview A dataframe containing the survival per group of fish present in the biometrics. Supplied by assembleOverview.
+#' @param section.overview A data frame containing the survival per group of fish present in the biometrics. Supplied by assembleOverview.
 #' 
 #' @keywords internal
 #' 
@@ -297,7 +311,7 @@ printProgression <- function(status.df, overall.CJS, split.CJS, group.CJS) {
 #' 
 #' @keywords internal
 #' 
-#' @return An updated progression dataframe and an updated the.levels
+#' @return An updated progression data frame and an updated the.levels
 #' 
 compileProgressionDataFrame <- function(status.df, group.CJS, detailed.absolutes, i, the.levels){
   known.overall <- apply(group.CJS[[i]]$absolutes[c(1,3),], 2, sum, na.rm = TRUE)
@@ -333,11 +347,11 @@ compileProgressionDataFrame <- function(status.df, group.CJS, detailed.absolutes
 #' The "additions" will give the labels
 #' 
 #' @inheritParams printProgression
-#' @param progression the progression dataframe, provided by compileProgressionDataFrame
+#' @param progression the progression data frame, provided by compileProgressionDataFrame
 #' 
 #' @keywords internal
 #' 
-#' @return The additions dataframe, or NULL if additions should be aborted.
+#' @return The additions data frame, or NULL if additions should be aborted.
 #' 
 prepareAdditions <- function(group.CJS, progression) {
   if (sum(unlist(lapply(group.CJS, function(x) length(x$additions)))) > 0) {
@@ -363,7 +377,7 @@ prepareAdditions <- function(group.CJS, progression) {
 #' 
 #' @inheritParams printProgression
 #' 
-#' @return the totals dataframe
+#' @return the totals data frame
 #' 
 #' @keywords internal
 #' 
@@ -391,11 +405,11 @@ prepareTotals <- function(group.CJS) {
 #' 
 #' @inheritParams printProgression
 #' @inheritParams prepareAdditions
-#' @param totals the totals dataframe, provided by prepareTotals
+#' @param totals the totals data frame, provided by prepareTotals
 #' 
 #' @keywords internal
 #' 
-#' @return the final total dataframe
+#' @return the final total data frame
 #' 
 prepareFinalTotals <- function(group.CJS, totals, progression){
   for(i in names(group.CJS)){
@@ -425,7 +439,7 @@ prepareFinalTotals <- function(group.CJS, totals, progression){
 
 #' print Rmd fragment for inclusion in the report
 #' 
-#' @param array.overview a list of abolute detection numbers for each group
+#' @param array.overview a list of absolute detection numbers for each group
 #' 
 #' @return Rmd fragment
 #' 
@@ -503,14 +517,14 @@ cat(last.array.results)
 #' @inheritParams groupMovements
 #' @inheritParams simplifyMovements
 #' @inheritParams assembleMatrices
-#' @param extention the format of the generated graphics
+#' @param extension the format of the generated graphics
 #' 
 #' @return String to be included in printRmd
 #' 
 #' @keywords internal
 #' 
 printIndividuals <- function(redraw, detections.list, bio, status.df = NULL, tz.study.area, 
-  movements, simple.movements = NULL, extention = "png") {
+  movements, simple.movements = NULL, extension = "png") {
   cbPalette <- c("#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7", "#999999")
   names(cbPalette) <- c("Orange", "Blue", "Green", "Yellow", "Darkblue", "Darkorange", "Pink", "Grey")
   appendTo(c("Screen", "Report"), "M: Drawing individual graphics for the report.")
@@ -616,13 +630,13 @@ printIndividuals <- function(redraw, detections.list, bio, status.df = NULL, tz.
         the.height <- 4
       else
         the.height <- 4 + (length(levels(PlotData$Standard.Name)) - 30) * 0.1
-      ggplot2::ggsave(paste0("Report/", fish, ".", extention), width = 5, height = the.height)  # better to save in png to avoid point overlapping issues
+      ggplot2::ggsave(paste0("Report/", fish, ".", extension), width = 5, height = the.height)  # better to save in png to avoid point overlapping issues
       rm(PlotData, start.line, last.time, first.time)
     }
     if (i%%2 == 0) {
-      individual.plots <- paste0(individual.plots, "![](", fish, ".", extention, "){ width=50% }\n")
+      individual.plots <- paste0(individual.plots, "![](", fish, ".", extension, "){ width=50% }\n")
     } else {
-      individual.plots <- paste0(individual.plots, "![](", fish, ".", extention, "){ width=50% }")
+      individual.plots <- paste0(individual.plots, "![](", fish, ".", extension, "){ width=50% }")
     }
     setTxtProgressBar(pb, i)
   }
@@ -682,272 +696,293 @@ printCircular <- function(times, bio){
   return(circular.plots)
 }
 
-#' Print Rmd report
-#'
-#' Creates a Rmd report and converts it to hmtl.
+#' Draw a section on the outside of the circle
 #' 
-#' @param name.fragment Rmarkdown string specifying the type of report for the title.
-#' @param header.fragment Rmarkdown string specifying the type of report for the header.
-#' @param biometric.fragment Rmarkdown string specifying the biometric graphics drawn.
-#' @param efficiency.fragment Rmarkdown string specifying the efficiency results.
-#' @param array.overview.fragment Rmarkdown string specifying the array overview results.
-#' @param survival.graph.size Rmarkdown string specifying the type size of the survival graphics.
-#' @param individual.plots Rmarkdown string specifying the name of the individual plots.
-#' @param circular.plots Rmarkdown string specifying the name of the circular plots.
-#' @inheritParams loadDetections
+#' @param from value where the section should start
+#' @param to value where the section should end
+#' @param units units of the from and to variables, defaults to "hours"
+#' @param template variable to feed into the circular package base functions
+#' @param limits two values controlling the vertical start and end points of the section
+#' @param fill The colour of the section
+#' @param border The colour of the section's border
 #' 
 #' @keywords internal
 #' 
-printRmd <- function(name.fragment, header.fragment, biometric.fragment, efficiency.fragment, array.overview.fragment,
-  survival.graph.size, individual.plots, circular.plots, spatial){
-  appendTo("Screen", "M: Producing final report.")
-  if (file.exists(reportname <- paste("Report/actel_report", name.fragment, ".Rmd", sep = ""))) {
-    continue <- TRUE
-    index <- 1
-    while (continue) {
-      if(file.exists(reportname <- paste("Report/actel_report", name.fragment, ".", index, ".Rmd", sep = ""))) {
-        index <- index + 1
-      } else {
-        continue <- FALSE
+circularSection <- function(from, to, units = "hours", template = "clock24", limits = c(1, 0), fill = "white", border = "black"){
+  if( inherits(from,"character") ){
+    hour.from <- circular(decimalTime(from), units = units, template = template)
+    hour.to <- circular(decimalTime(to), units = units, template = template)
+  } else {
+    hour.from <- circular(from, units = units, template = template)
+    hour.to <- circular(to, units = units, template = template)
+  }
+  if(hour.to < hour.from) hour.to <- hour.to + 24
+  zero <- attr(hour.from,"circularp")$zero # extracted from the circular data
+  xmin <- as.numeric(conversion.circular(hour.from, units = "radians")) * -1
+  xmax <- as.numeric(conversion.circular(hour.to, units = "radians")) * -1
+  xx <- c(limits[1] * cos(seq(xmin, xmax, length = 1000) + zero), rev(limits[2] * cos(seq(xmin, xmax, length = 1000) + zero)))
+  yy <- c(limits[1] * sin(seq(xmin, xmax, length = 1000) + zero), rev(limits[2] * sin(seq(xmin, xmax, length = 1000) + zero)))
+  polygon(xx, yy, col = fill, border = border)
+}
+
+#' Edited rose diagram function
+#' 
+#' Adapted from the rose.diag function of the circular package
+#' 
+#' @param x a vector, matrix or data.frame. The object is coerced to class circular.
+#' @param pch point character to use. See help on par.
+#' @param cex point character size. See help on par.
+#' @param axes logical: if TRUE axes are plotted according to properties of x.
+#' @param shrink parameter that controls the size of the plotted circle. Default is 1. Larger values shrink the circle, while smaller values enlarge the circle.
+#' @param bins number of arcs to partition the circle with.
+#' @param upper logical: if TRUE, the rose diagram cells are "upper"-closed intervals.
+#' @param ticks logical: if TRUE ticks are plotted according to the value of bins.
+#' @param tcl length of the ticks.
+#' @param tcl.text the position of the axis labels.
+#' @param radii.scale make possible to choose sector radius form: square-root of relative frequency (sqrt, default) or conventional linear scale (linear).
+#' @param border the colour to draw the border. The default, NULL, means to use par("fg"). Use border = NA to omit borders.
+#' @param col the colour for filling the rose diagram. The default, NULL, is to leave rose diagram unfilled. The values are recycled if needed.
+#' @param tol proportion of white space at the margins of plot.
+#' @param uin desired values for the units per inch parameter. If of length 1, the desired units per inch on the x axis.
+#' @param xlim,ylim the ranges to be encompassed by the x and y axes. Useful for centering the plot
+#' @param prop numerical constant determining the radii of the sectors. By default, prop = 1. 
+#' @param digits number of digits used to print axis values.
+#' @param plot.info an object from plot.circular that contains information on the zero, the rotation and next.points.
+#' @param units the units used in the plot. If NULL the units of the first component of 'x' is used.
+#' @param template the template of the plot. Ignored if plot.info is provided.
+#' @param zero the zero of the plot. Ignored if plot.info or template are provided.
+#' @param rotation the rotation of the plot. Ignored if plot.info or template are provided.
+#' @param main,sub,xlab,ylab title, subtitle, x label and y label of the plot.
+#' @param add add the rose diag to an existing plot.
+#' @param control.circle parameters passed to plot.default in order to draw the circle. The function circle.control is used to set the parameters.
+#' @param rings logical: if TRUE, inner rings are displayed for visual reference
+#' @param rings.lty line type of the rings, See help on par.
+#' @param ring.text logical: if notes should be displayed.
+#' @param ring.text.pos The position of the rings' text. Ignored if ring.text is set to FALSE.
+#' @param ring.text.cex The size of the ring's text. Ignored if ring.text is set to FALSE.
+#' 
+#' @return A list with the zero, rotation and next.points values, to be parsed to an overlaying graphic.
+#' 
+myRoseDiag <- function (x, pch = 16, cex = 1, axes = TRUE, shrink = 1, bins = 24, 
+  upper = TRUE, ticks = TRUE, tcl = 0.025, tcl.text = 0.125, 
+  radii.scale = c("sqrt", "linear"), border = NULL, col = c("lightblue", "#c0ff3e80", "#ffc0cb80", "#F0E4424D", "#0072B24D", "#D55E004D"), 
+  tol = 0.04, uin = NULL, xlim = c(-1, 1), ylim = c(-1, 1), 
+  prop = 1, digits = 2, plot.info = NULL, units = NULL, template = NULL, 
+  zero = NULL, rotation = NULL, main = NULL, sub = NULL, xlab = "", 
+  ylab = "", add = TRUE, control.circle = circular::circle.control(), rings = c("none", "absolute", "relative"), 
+  rings.lty = 2, ring.text = FALSE, ring.text.pos = -0.04, ring.text.cex = 1) {
+  rings <- match.arg(rings)
+  radii.scale <- match.arg(radii.scale)
+  
+  if (is.list(x)) {
+    max.length <- max(unlist(lapply(x, length)))
+    for (i in 1:length(x)) {
+      if (length(x[[i]]) < max.length)
+        x[[i]] <- c(x[[i]], circular::circular(rep(NA, max.length - length(x[[i]]))))
+    }
+  }
+  
+  xx <- as.data.frame(x)
+  nseries <- ncol(xx)
+  
+  if (length(col) != nseries)
+    col <- rep(col, length.out = nseries)
+  xcircularp <- attr(circular::as.circular(xx[, 1]), "circularp")
+  modulo <- xcircularp$modulo
+  if (is.null(units)) 
+    units <- xcircularp$units
+  if (is.null(plot.info)) {
+    if (is.null(template)) 
+      template <- xcircularp$template
+    if (template == "geographics" | template == "clock24") {
+      zero <- pi / 2
+      rotation <- "clock"
+    } else {
+      if (template == "clock12") {
+        zero <- pi / 2
+        rotation <- "clock"
+        modulo <- "pi"
       }
     }
-    appendTo("Screen",paste("M: An actel report is already present in the present directory, saving new report as 'actel_report", name.fragment, ".", index, ".html'.", sep = ""))
-    rm(continue,index)
+    if (is.null(zero)) 
+      zero <- xcircularp$zero
+    if (is.null(rotation)) 
+      rotation <- xcircularp$rotation
+    next.points <- 0
   } else {
-    appendTo("Screen",paste("M: Saving actel report as 'actel_report", name.fragment, ".html'.", sep = ""))
+    zero <- plot.info$zero
+    rotation <- plot.info$rotation
+    next.points <- plot.info$next.points
   }
-  if (any(grepl("Ukn.", spatial$stations$Standard.Name))) {
-    unknown.fragment <- paste('<span style="color:red"> Number of relevant unknown receivers: **', sum(grepl("Ukn.", spatial$stations$Standard.Name)), '**</span>\n', sep = "")
+  if (!add) {
+    circular:::CirclePlotRad(xlim = xlim, ylim = ylim, uin = uin, shrink = shrink, 
+      tol = tol, main = main, sub = sub, xlab = xlab, ylab = ylab, 
+      control.circle = control.circle)
+  }
+  if (is.null(bins)) {
+    bins <- NROW(x)
   } else {
-    unknown.fragment <- ""
-  } 
-  report <- readr::read_file("temp_log.txt")
-  sink(reportname)
-  cat(paste(
-'---
-title: "Acoustic telemetry analysis report"
-author: "Actel package"
-output: 
-  html_document:
-    includes:
-      after_body: toc_menu.html
----
-
-### Summary
-
-Selected folder: ', stringr::str_extract(pattern = '(?<=M: Selected folder: )[^\r]*', string = report), '
-
-Timestamp: **', stringr::str_extract(pattern = '(?<=Timestamp:)[^\r]*', string = report), '** 
-
-Number of target tags: **`r I(nrow(status.df))`**
-
-', header.fragment,' 
-
-Number of listed receivers: **`r I(spatial$number.of.receivers)`** (of which **', stringr::str_extract(pattern = '(?<=of which )[0-9]*', string = report), '** had no detections)
-
-', unknown.fragment,'
-
-Data time range: ', stringr::str_extract(pattern = '(?<=Data time range: )[^\r]*', string = report), '
-
-Found a bug? [**Report it here.**](https://github.com/hugomflavio/actel/issues)
-
-### List of Stations
-
-```{r stations, echo = FALSE}
-knitr::kable(spatial$stations, row.names = FALSE)
-```
-
-
-### List of Release sites
-
-```{r releases, echo = FALSE}
-knitr::kable(spatial$release.sites, row.names = FALSE)
-```
-
-### Array forward efficiency
-
-', efficiency.fragment,'
-
-### Warning messages
-
-```{r warnings, echo = FALSE, comment = NA}
-if(file.exists("../temp_warnings.txt")) cat(gsub("\\r", "", readr::read_file("../temp_warnings.txt"))) else cat("No warnings were raised during the analysis.")
-```
-
-
-### User comments
-
-```{r comments, echo = FALSE, comment = NA}
- if(file.exists("../temp_comments.txt")) cat(gsub("\\r", "", readr::read_file("../temp_comments.txt"))) else cat("No comments were included during the analysis.")
-```
-
-
-### Biometric graphics
-
-<center>
-', biometric.fragment,'
-</center>
-
-
-### Survival
-
-```{r survival, echo = FALSE}
-knitr::kable(section.overview)
-```
-
-<center>
-![](survival.png){ ',survival.graph.size ,' }
-</center>
-
-
-### Progression
-
-Note:
-  : The progression calculations do not account for intra-section backwards movements. This implies that the total number of fish to have been **last seen** at a given array may be lower than the displayed below. Please refer to the [section survival overview](#survival) to find out where your fish were considered to have disappeared.
-  
-<center>
-![](progression.png){ width=75% }
-</center>
-
-', array.overview.fragment, '
-
-
-### Time of arrival at each Array
-
-Note:
-  : Coloured lines on the outer circle indicate the mean value for each group and the respective ranges show the standard error of the mean. Each group\'s bars sum to 100%. The number of data points in each group is presented between brackets in the legend of each pannel. 
-
-<center>
-', circular.plots,'
-</center>
-
-
-### Dotplots
-
-Note:
-  : The **top** 10% of the values for each panel are marked in **red**.
-  : The **bottom** 10% of the values for each panel are marked in **orange**.
-
-<center>
-![](dotplots.png){ width=95% }
-</center>
-
-
-### Full log
-
-```{r log, echo = FALSE, comment = NA}
-cat(gsub("\\r", "", readr::read_file("../temp_log.txt")))
-```
-
-
-### Individual plots
-
-Note:
-  : The detections are coloured by array. The vertical black dashed line shows the time of release. The vertical grey dashed lines show the assigned moments of entry and exit for each study area section. The full dark-grey line shows the movement events considered valid, while the dashed dark-grey line shows the movement events considered invalid.
-  : The movement event lines move straight between the first and last station of each event (i.e. in-between detections will not be individually linked by the line).
-  : Manually **edited** fish are highlighted with **yellow** graphic borders.
-  : Manually **overridden** fish are highlighted with **red** graphic borders.
-
-<center>
-', individual.plots,'
-</center>
-
-', sep = ""), fill = TRUE)
-sink()
-
-if(file.exists("Report/toc_menu.html"))
-  file.remove("Report/toc_menu.html")
-sink("Report/toc_menu.html")
-cat(
-'<style>
-h3 {
-  padding-top: 25px;
-  padding-bottom: 15px;
+    bins <- round(bins)
+    if (bins <= 0) 
+      stop("bins must be non negative")
+  }
+  if (is.null(border)) {
+    border <- seq(nseries)
+  } else {
+    if (length(border) != nseries) {
+      border <- rep(border, length.out = nseries)
+    }
+  }
+  pch <- rep(pch, nseries, length.out = nseries)
+  if (axes) {
+    circular::axis.circular(units = units, template = template, zero = zero, 
+      rotation = rotation, digits = digits, cex = cex, 
+      tcl = tcl, tcl.text = tcl.text)
+  }
+  if (!is.logical(ticks)) 
+    stop("ticks must be logical")
+  if (ticks) {
+    at <- circular::circular((0:bins) / bins * 2 * pi, zero = zero, rotation = rotation)
+    circular::ticks.circular(at, tcl = tcl)
+  }
+  for (iseries in 1:nseries) {
+    x <- xx[, iseries]
+    x <- c(na.omit(x))
+    n <- length(x)
+    if (n) {
+      x <- circular::conversion.circular(x, units = "radians", modulo = modulo)
+      attr(x, "circularp") <- attr(x, "class") <- NULL
+      if (template == "clock12") 
+        x <- 2 * x
+      x <- x %% (2 * pi)
+      circular:::RosediagRad(x, zero = zero, rotation, bins, upper, 
+        radii.scale, prop, border, col = col[iseries])
+    }
+  }
+  return(invisible(list(zero = zero, rotation = rotation, next.points = 0, x = x, bins = bins,
+    radii.scale = radii.scale, prop = prop, col = col)))
 }
 
-h4 {
-  padding-top: 25px;
-  padding-bottom: 15px;
+#' Draw rings at absolute points
+#' 
+#' Adapted from RosediagRad to draw rings inside the circular plot. Called if rings = TRUE in myRoseDiag
+#' 
+#' @inheritParams myRoseDiag
+#' 
+#' @keywords internal
+#'  
+ringsAbs <- function(plot.params, border, rings.lty, 
+  ring.text, ring.text.pos, ring.text.cex){
+  n <- length(plot.params$x)
+  freq <- rep(plot.params$x, plot.params$bins)
+  arc <- (2 * pi)/plot.params$bins
+  breaks <- seq(0, 2 * pi, length.out = (plot.params$bins + 1))
+  freq <- hist.default(plot.params$x, breaks = breaks, plot = FALSE)$counts   
+  my.max <- range(freq)[2]
+  my.breaks <- my.max / divisors(my.max)
+    while(length(my.breaks) < 3){
+      my.max <- my.max + 1
+      my.breaks <- divisors(my.max)
+    } 
+  clean.breaks <- my.breaks[-c(1, length(my.breaks))]
+  nlines <- my.max / clean.breaks
+  breaker <- clean.breaks[which.min(abs(nlines - 4))]
+  line.values <- seq(from = breaker, to = my.max, by = breaker)
+  rel.values <- line.values / n
+  if (plot.params$radii.scale == "sqrt") {
+     radius <- sqrt(rel.values)*plot.params$prop
+  } else {
+     radius <- rel.values*plot.params$prop
+  }
+  for (i in 1:length(radius)) {
+    xx <- c(radius[i] * cos(seq(0, 2 * pi, length = 1000) + plot.params$zero))
+    yy <- c(radius[i] * sin(seq(0, 2 * pi, length = 1000) + plot.params$zero))
+    polygon(xx, yy, border = border, lty = rings.lty)
+  }
+  if(ring.text){
+    text(x = rep(0, length(radius)), y = (radius * -1) + ring.text.pos, line.values, cex = ring.text.cex)
+  }
 }
 
-/* The sidebar menu */
-.sidenav {
-  height: 100%; 
-  width: 110px; 
-  position: fixed; 
-  z-index: 1; 
-  top: 0; 
-  left: 0;
-  background-color: #fcfcfc;
-  overflow-x: hidden; 
-  padding-top: 20px;
+#' Draw rings at relative points
+#' 
+#' Adapted from RosediagRad to draw rings inside the circular plot. Called if rings = TRUE in myRoseDiag
+#' 
+#' @inheritParams myRoseDiag
+#' 
+#' @keywords internal
+#'  
+ringsRel <- function(plot.params, border, rings.lty, 
+  ring.text, ring.text.pos, ring.text.cex){
+  range <- seq(from = 0, to = 1 / plot.params$prop, length.out = 5)
+  radius <- c(0.25, 0.50, 0.75, 1)
+  line.values <- paste(round(range * 100, 2), "%", sep = "")
+  if (plot.params$radii.scale == "sqrt")
+    radius <- sqrt(radius)
+  for (i in 1:3) {
+    xx <- c(radius[i] * cos(seq(0, 2 * pi, length = 1000) + plot.params$zero))
+    yy <- c(radius[i] * sin(seq(0, 2 * pi, length = 1000) + plot.params$zero))
+    polygon(xx, yy, border = border, lty = rings.lty)
+  }
+
+  if(ring.text)
+    text(x = rep(0, 4), y = (radius * -1) + ring.text.pos, line.values[-1], cex = ring.text.cex)
 }
 
-/* The navigation menu links */
-.sidenav a {
-  padding: 6px 8px 6px 16px;
-  text-decoration: none;
-  /*font-size: 25px;*/
-  color: #818181;
-  display: block;
+#' Draw mean value in the axis margin
+#' 
+#' Computes and draws the mean value for a given dataset, may also plot standard error of the mean
+#' or standard deviation ranges.
+#' 
+#' @param input the input dataset
+#' @param mean.col colour of the mean dash.
+#' @param mean.length vertical length of the mean dash.
+#' @param mean.lwd width of the mean dash.
+#' @param box.range One of "none", "std.error" or "sd", controls the statistic used to draw the range boxes.
+#' @param fill Fill colour for the range box.
+#' @param border Border colour for the range box.
+#' @param box.size Vertical size of the range box.
+#' @param edge.length Vertical size of the edge whiskers in the range box.
+#' @param edge.lwd Width of the edge whiskers in the range box.
+#' 
+roseMean <- function(input, col = c("cornflowerblue", "chartreuse3", "deeppink"),
+  mean.length = c(0.0125, -0.0125), mean.lwd = 4,
+  box.range = c("none", "std.error", "sd"), fill = "white", border = "black",
+  box.size = c(1.015, 0.985), edge.length = c(0.025, -0.025), edge.lwd = 2){
+  box.range <- match.arg(box.range)
+  col <- scales::alpha(col, 1)
+  if(is.matrix(input) | is.data.frame(input)){
+    plotdata <- list()
+    for(i in 1:ncol(input)) plotdata[[i]] <- input[,i]
+    names(plotdata) <- colnames(input)
+  } else {
+    if (is.list(input)){
+      if (any(!unlist(lapply(input, function(x) inherits(x, "circular")))))
+        stop("Input is a list but not all elements in the list are circular objects.\n")
+      plotdata <- input
+    } else {
+      plotdata <- list(input)
+    }
+  }
+  if (!exists("plotdata"))
+    stop("Input must be a list of circular objects, a data.frame, a matrix or a vector.\n")
+  for (i in 1:length(plotdata)) {
+  b <- circular::mean.circular(plotdata[[i]], na.rm = T)
+  if(box.range != "none"){
+    if(box.range == "std.error")
+      c <- std.error(plotdata[[i]], silent = TRUE)
+    if(box.range == "sd")
+      c <- sd(plotdata[[i]])
+    zero <- attr(plotdata[[i]], "circularp")$zero # extracted from the circular data
+    left <- as.numeric(circular::conversion.circular((b - c), units = "radians")) * -1
+    right <- as.numeric(circular::conversion.circular((b + c), units = "radians")) * -1
+      xx <- c(box.size[1] * cos(seq(left, right, length = 1000) + zero), rev(box.size[2] * cos(seq(left, right, length = 1000) + zero)))
+      yy <- c(box.size[1] * sin(seq(left, right, length = 1000) + zero), rev(box.size[2] * sin(seq(left, right, length = 1000) + zero)))
+      polygon(xx, yy, col = fill, border = border)
+    circular::lines.circular(c(b + c, b + c), edge.length, lwd = edge.lwd, col = border)
+    circular::lines.circular(c(b - c, b - c), edge.length, lwd = edge.lwd, col = border)
+  }
+  circular::lines.circular(c(b, b), mean.length, lwd = mean.lwd, col = col[i], lend = 1)
+  }
 }
-
-.sidenav p {
-  padding: 6px 8px 6px 16px;
-  text-decoration: none;
-  font-size: 25px;
-  color: #818181;
-  display: block;
-}
-
-.sidenav a:hover {
-  background-color: #52a548;
-  color: #f1f1f1;
-}
-
-.fluid-row {
-  margin-left: 110px; /* Same as the width of the sidebar */
-  padding: 0px 10px;
-}
-
-.section {
-  margin-left: 110px; /* Same as the width of the sidebar */
-  padding: 0px 10px;
-}
-
-.level4 {
-  margin-left: 0px; /* Same as the width of the sidebar */
-  padding: 0px 0px;
-}
-
-/* On smaller screens, where height is less than 450px, change the style of the sidebar (less padding and a smaller font size) */
-@media screen and (max-height: 450px) {
-  .sidenav {padding-top: 15px;}
-  .sidenav a {font-size: 18px;}
-}
-</style>
-  
-<div class="sidenav">
-  <p>Index:</p>
-  <a href="#summary">Summary</a>
-  <a href="#list-of-stations">Stations</a>
-  <a href="#list-of-release-sites">Releases</a>
-  <a href="#array-forward-efficiency">Efficiency</a>
-  <a href="#warning-messages">Warnings</a>
-  <a href="#user-comments">Comments</a>
-  <a href="#biometric-graphics">Biometrics</a>
-  <a href="#survival">Survival</a>
-  <a href="#progression">Progression</a>
-  <a href="#time-of-arrival-at-each-array">Arrival times</a>
-  <a href="#dotplots">Dotplots</a>
-  <a href="#full-log">Full log</a>
-  <a href="#individual-plots">Individuals</a>
-</div>
-', fill = TRUE)
-sink()
-return(reportname)
-}
-
-
-
 

@@ -87,14 +87,14 @@ explore <- function(path = NULL, maximum.time = 60,
   appendTo(c("Screen", "Report"), paste("M: Number of target tags: ", nrow(bio), ".", sep = ""))
   deployments <- loadDeployments(file = "deployments.csv", tz.study.area = tz.study.area)
   checkDeploymentTimes(input = deployments) # check that receivers are not deployed before being retrieved
-  spatial <- new_loadSpatial(file = "spatial.csv")
+  spatial <- loadSpatial(file = "spatial.csv")
   spatial <- setSpatialStandards(input = spatial) # Create Standard.Name for each station
   deployments <- checkDeploymentStations(input = deployments, spatial = spatial) # match Station.Name in the deployments to Station.Name in spatial, and vice-versa
   deployments <- createUniqueSerials(input = deployments) # Prepare serial numbers to overwrite the serials in detections
   detections <- loadDetections(start.timestamp = start.timestamp, end.timestamp = end.timestamp, tz.study.area = tz.study.area)
-  detections <- new_standardizeStations(detections = detections, spatial = spatial, deployments = deployments) # get standardize station and receiver names, check for receivers with no detections
-  unknown.detections <- unknownReceivers(input = detections) # Check if there are detections from unknown detections
-  spatial <- new_assembleSpatial(spatial = spatial, bio = bio, sections = NULL) # Finish structuring the spatial file
+  detections <- createStandards(detections = detections, spatial = spatial, deployments = deployments) # get standardize station and receiver names, check for receivers with no detections
+  unknown.detections <- checkUnknownReceivers(input = detections) # Check if there are detections from unknown detections
+  spatial <- transformSpatial(spatial = spatial, bio = bio, sections = NULL) # Finish structuring the spatial file
   recipient <- loadDistances(spatial = spatial) # Load distances and check if they are valid
   dist.mat <- recipient[[1]]
   invalid.dist <- recipient[[2]]
@@ -103,12 +103,12 @@ explore <- function(path = NULL, maximum.time = 60,
   detections.list <- recipient[[1]]
   bio <- recipient[[2]]
   rm(recipient)
-  recipient <- tagsInUnknownReceivers(detections.list = detections.list, deployments = deployments, spatial = spatial) # Check if there is any data loss due to unknown receivers
+  recipient <- checkTagsInUnknownReceivers(detections.list = detections.list, deployments = deployments, spatial = spatial) # Check if there is any data loss due to unknown receivers
   spatial <- recipient[[1]]
   deployments <- recipient[[2]]
   rm(recipient)
   detections.list <- labelUnknowns(detections.list = detections.list)
-  detections.list <- detectionBeforeReleaseCheck(input = detections.list, bio = bio)
+  detections.list <- checkDetectionsBeforeRelease(input = detections.list, bio = bio)
   appendTo(c("Screen", "Report"), "M: Data successfully imported!")
 # -------------------------------------
   

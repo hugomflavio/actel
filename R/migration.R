@@ -773,3 +773,136 @@ countUpMoves <- function(movements, spatial){
   appendTo("debug", "Terminating countUpMoves.")
   return(list(up.moves = up.moves, Max.back.moves = Max.back.moves))
 }
+
+#' Create status.df
+#'
+#' Combines the timetable and the original biometrics.
+#' 
+#' @inheritParams actel
+#' @inheritParams deployValues
+#' @inheritParams splitDetections
+#' @inheritParams simplifyMovements
+#' @inheritParams loadDetections
+#' @inheritParams groupMovements
+#' 
+#' @return A data frame containing all the final data for each fish.
+#' 
+#' @keywords internal
+#' 
+assembleOutput <- function(timetable, bio, movements, spatial, sections, dist.mat, invalid.dist, tz.study.area) {
+  appendTo("debug", "Merging 'bio' and 'timetable'.")
+  status.df <- merge(bio, timetable, by = "Transmitter", all = T)
+  
+  appendTo("debug", "Completing entries for fish that were never detected.")
+  status.df$Status[is.na(status.df$Status)] <- paste("Disap. in", sections[1])
+  status.df$Status <- factor(status.df$Status, levels = c(paste("Disap. in", sections), "Succeeded"))
+  status.df$Very.last.array[is.na(status.df$Very.last.array)] <- "Release"
+  status.df$Very.last.array <- factor(status.df$Very.last.array, levels = c("Release", levels(spatial$stations$Array)))
+  status.df$P.type[is.na(status.df$P.type)] <- "Skipped"
+  status.df$Detections[is.na(status.df$Detections)] <- 0
+
+  the.cols <- grepl("Release.date", colnames(status.df)) | grepl("Arrived",colnames(status.df)) | grepl("Left",colnames(status.df))
+  for (i in colnames(status.df)[the.cols]) {
+    status.df[, i] <- as.POSIXct(status.df[,i], tz = tz.study.area)
+  }
+  rm(the.cols)
+  
+  appendTo("debug", "Calculating time from release to first detection.")
+  for (i in 1:nrow(status.df)) {
+    appendTo("debug", paste("(status.df) Analysing fish ", status.df$Signal[i], " (", i, ").", sep = ""))
+    arriving.points <- status.df[i, paste("Arrived", sections, sep = ".")]
+    if (any(!is.na(arriving.points))) {
+      first.section <- sections[head(which(!is.na(arriving.points)), 1)]
+      pointA <- as.POSIXct(status.df[i, paste("Arrived", first.section, sep = ".")], tz = tz.study.area)
+      pointB <- as.POSIXct(status.df[i, "Release.date"], tz = tz.study.area)
+      AtoB <- as.vector(difftime(pointA, pointB, units = "secs"))
+      status.df[i, paste("Time.until", first.section, sep = ".")] <- AtoB
+      if (!invalid.dist) {
+        dist.row <- status.df[i, paste("First.station", first.section, sep = ".")]
+        dist.col <- as.character(status.df[i, "Release.site"])
+        df.to.col <- paste("Speed.to", first.section, sep = ".")
+        df.from.col <- paste("Time.until", first.section, sep = ".")
+        status.df[i, df.to.col] <- dist.mat[dist.row, dist.col]/status.df[i, df.from.col]
+      }
+      rm(AtoB)
+    }
+  }
+  rm(i)
+  
+  if (file.exists("temp_comments.txt")) {
+    temp <- read.table("temp_comments.txt", header = F, sep = "\t")
+    status.df[, "Script.comments"] <- NA
+    for (i in seq_len(nrow(temp))) {
+      link <- match(temp[i, 1], status.df$Transmitter)
+      if (is.na(status.df$Script.comments[link])) {
+        status.df$Script.comments[link] <- paste(temp[i, 2])
+      } else {
+        status.df$Script.comments[link] <- paste(status.df$Script.comments[link], temp[i, 2], sep = "// ")
+      }
+    }
+  }
+  appendTo("debug", "Done.")
+  return(status.df)
+}
+
+#' Create section.overview
+#'
+#' Produces a table with the survival per group of fish present in the biometrics.
+#' 
+#' @inheritParams actel
+#' @inheritParams simplifyMovements
+#' 
+#' @return A data frame containing the survival per group of fish present in the biometrics.
+#' 
+#' @keywords internal
+#' 
+assembleSectionOverview <- function(status.df, sections) {
+  appendTo("debug", "Starting assembleSectionOverview.")
+  section.overview <- as.data.frame.matrix(with(status.df, table(Group, Status)))
+  section.overview$Total <- as.vector(with(status.df, table(Group)))
+  colnames(section.overview) <- gsub(" ", ".", colnames(section.overview))
+  if (length(sections) >= 2) {
+    to.col <- paste("Migrated.to", sections[2], sep = ".")
+    from.col <- paste("Disap..in", sections[1], sep = ".")
+    section.overview[, to.col] <- section.overview$Total - section.overview[, from.col]
+    recipient <- vector()
+    for (i in 2:length(sections)) {
+      recipient <- c(recipient, paste(c("Migrated.to", "Disap..in"), sections[i], sep = "."))
+    }
+  } else {
+    recipient <- NULL
+  }
+  if (length(sections) > 2) {
+    for (i in 3:length(sections)) {
+      to.col <- paste("Migrated.to", sections[i], sep = ".")
+      from.colA <- paste("Migrated.to", sections[i - 1], sep = ".")
+      from.colB <- paste("Disap..in", sections[i - 1], sep = ".")
+      section.overview[, to.col] <- section.overview[, from.colA] - section.overview[, from.colB]
+    }
+  }
+  recipient <- c("Total", paste("Disap..in", sections[1], sep = "."), recipient, "Succeeded")
+  appendTo("debug", "Terminating assembleSectionOverview.")
+  return(section.overview[, recipient])
+}
+
+
+#' Create array.overview
+#'
+#' @return A data frame containing the progression per group of fish present in the biometrics.
+#' 
+#' @keywords internal
+#' 
+assembleArrayOverview <- function(group.CJS) {
+  appendTo("debug", "Starting assembleArrayOverview.")
+  recipient <- lapply(group.CJS, function(x) x$absolutes)
+
+  for (i in 1:length(recipient)) {
+    recipient[[i]][1, ] <- apply(recipient[[i]][c(1,3), ], 2, sum, na.rm = TRUE)
+    recipient[[i]][2, ] <- recipient[[i]][4, ]
+    recipient[[i]][3, ] <- recipient[[i]][2, ] - recipient[[i]][1, ]
+    recipient[[i]] <- recipient[[i]][1:3, ]
+    rownames(recipient[[i]]) <- c("Known", "Estimated", "Difference")
+  }
+  appendTo("debug", "Terminating assembleArrayOverview.")  
+  return(recipient)
+}

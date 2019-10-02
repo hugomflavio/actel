@@ -1,3 +1,11 @@
+#' Load distances matrix
+#' 
+#' @param spatial A list of spatial objects in the study area
+#' 
+#' @keywords internal 
+#' 
+#' @return a list containing the distances matrix and a TRUE/FALSE value indicating whether or not that distances matrix is valid for the target study area.
+#' 
 loadDistances <- function(spatial) {
   # Check for distances
   invalid.dist <- TRUE
@@ -28,38 +36,6 @@ loadDistances <- function(spatial) {
   return(list(dist.mat = dist.mat, invalid.dist = invalid.dist))  
 }
 
-labelUnknowns <- function(detections.list) {
-  if (any(unlist(lapply(detections.list, function(x) any(is.na(x$Array)))))) {
-    tags <- NULL
-    receivers <- NULL
-    lapply(detections.list, function(x) {
-      if (any(is.na(x$Array))) {
-        tags <- c(tags, unique(x$Transmitter))
-        receivers <- c(receivers, unique(x$Transmitter[is.na(x$Array)]))
-      }})
-    appendTo(c("Screen", "Report", "Warning"), paste0("W: Fish ", paste(tags, collapse = ", ") , ifelse(length(tags) > 1, " were", " was"), " detected in one or more receivers that are not listed in the study area (receiver(s): ", paste(unique(receivers), collapse = ", "), ")!"))
-    cat("Possible options:\n   a) Stop and doublecheck the data (recommended)\n   b) Temporary include the unknown hydrophone(s) in the analysis\n")
-    check <- TRUE
-    while (check) {
-      decision <- readline("Which option should be followed?(a/b) ")
-      if (decision == "a" | decision == "A" | decision == "b" | decision == "B") 
-        check <- FALSE else cat("Option not recognized, please try again.\n")
-      appendTo("UD", decision)
-    }
-    if (decision == "a" | decision == "A") {
-      emergencyBreak()
-      stop("Stopping analysis per user command.\n")
-    }
-    detections.list <- lapply(detections.list, function(x) {
-      levels(x$Standard.Name) <- c(levels(x$Standard.Name), "Unknown")
-      x$Standard.Name[is.na(x$Standard.Name)] <- "Unknown"
-      levels(x$Array) <- c(levels(x$Array), "Unknown")
-      x$Array[is.na(x$Array)] <- "Unknown"
-      return(x)
-    })
-  }
-  return(detections.list)
-}
 
 #' Load deployments file and Check the structure
 #' 
@@ -124,59 +100,6 @@ loadSpatial <- function(file){
     emergencyBreak()
     stop("Could not find a '", file, "' file in the working directory.\n")
   }
-  if (!any(grepl("Array", colnames(input)))) {
-    if (any(grepl("Group", colnames(input)))) {
-      decision <- readline("Error: No 'Array' column found in the spatial file, but a 'Group' column is present. Use the 'Group' column to define the arrays? (Y/n) ")
-      appendTo("UD", decision)
-      if (decision == "N" & decision == "n") {
-        emergencyBreak()
-        stop("The spatial file must contain an 'Array' column.\n")
-      } else {
-        appendTo("Report","Error: No 'Array' column found in the spatial file, but a 'Group' column is present. Using the 'Group' column to define the arrays.")  
-        colnames(input)[grepl("Group", colnames(input))] <- "Array"
-      }
-    }
-  }
-  if (!any(grepl("Receiver", colnames(input)))) {
-    appendTo("Report", "Error: No 'Receiver' columns found in the spatial file.")
-    emergencyBreak()
-    stop("The spatial file must contain at least one 'Receiver' column.\n")
-  }
-  if (!any(grepl("Type", colnames(input)))) {
-    appendTo("Screen", "M: No 'Type' column found in 'spatial.csv'. Assigning all rows as hydrophones.")
-    input$Type <- "Hydrophone"
-  } else {
-    if (any(is.na(match(unique(input$Type), c("Hydrophone","Release"))))){
-      emergencyBreak()
-      stop("Could not recognise the data in the 'Type' column as only one of 'Hydrophone' or 'Release'. Please doublecheck the spatial file.\n")
-    }
-  }
-  if (!any(grepl("Station.Name", colnames(input)))) {
-    appendTo(c("Screen", "Warning", "Report"), "W: No 'Station.Name' column found in the spatial file.\n   Creating a 'Station.Name' column to avoid function failure.")
-    input$Station.Name <- paste0("St.", 1:nrow(input))
-    input[input$Type == "Release", "Station.Name"] <- paste0("RS.", 1:sum(input$Type == "Release"))
-  }
-  appendTo("debug","Terminating loadSpatial.")
-  return(input)
-}
-
-
-#' Load Spatial file and Check the structure
-#' 
-#' @inheritParams assembleSpatial
-#' 
-#' @return The spatial dataframe
-#' 
-#' @keywords internal
-#' 
-new_loadSpatial <- function(file){
-  appendTo("debug","Starting new_loadSpatial.")
-  if (file.exists(file))
-    input <- read.csv(file)
-  else {
-    emergencyBreak()
-    stop("Could not find a '", file, "' file in the working directory.\n")
-  }
   if (!any(grepl("Station.Name", colnames(input)))) {
     emergencyBreak()
     stop("The spatial file must contain a 'Station.Name' column.\n")
@@ -210,133 +133,11 @@ new_loadSpatial <- function(file){
       stop("Could not recognise the data in the 'Type' column as only one of 'Hydrophone' or 'Release'. Please doublecheck the spatial file.\n")
     }
   }
-  appendTo("debug","Terminating new_loadSpatial.")
+  appendTo("debug","Terminating loadSpatial.")
   return(input)
 }
 
 
-checkDeploymentTimes <- function(input) {
-  appendTo("debug","Terminating checkDeploymentTimes")
-  aux <- split(input, input$Receiver)
-  for (i in 1:length(aux)) {
-    if (nrow(aux[[i]]) > 1) {
-      A <- aux[[i]]$Start[-1]
-      B <- aux[[i]]$Stop[-nrow(aux[[i]])]
-      AtoB <- as.numeric(difftime(A, B))
-      if (any(AtoB < 0)) {
-        appendTo(c("Screen", "Report"), paste0("Error: Receiver ", names(aux)[i], " was re-deployed before being retrieved:\n"))
-        aux[[i]][, "Bleh"] <- ""
-        aux[[i]][c(FALSE, AtoB < 0), "Bleh"] <- " <- !!!"
-        names(aux[[i]])[ncol(aux[[i]])] <- ""
-        print(aux[[i]], row.names = FALSE)
-        cat("\n")
-        emergencyBreak()
-        stop("Fatal exception found. Read lines above for more details.\n")      
-      }
-    }
-  }
-  appendTo("debug","Terminating checkDeploymentTimes")
-}
-
-checkDeploymentStations <- function(input, spatial) {
-  appendTo("debug","Terminating checkDeploymentStations")
-  aux <- spatial[spatial$Type == "Hydrophone", ]
-  link <- match(unique(input$Station.Name), aux$Station.Name)
-  if (any(is.na(link))) {
-    appendTo(c("Screen", "Report", "Warning"), paste0("W: ", ifelse(sum(is.na(link)) > 1, "Stations", "Station"), " '", paste(unique(input$Station.Name)[is.na(link)], collapse = "', '"), "' ", ifelse(sum(is.na(link)) > 1, "are", "is"), " listed in the deployments but are not part of the study's stations. Discarding deployments at unknown stations."))
-    to.remove <- match(input$Station.Name, unique(input$Station.Name)[is.na(link)])
-    input <- input[is.na(to.remove), ]
-  }
-  link <- match(aux$Station.Name, unique(input$Station.Name))
-  if (any(is.na(link))) {
-    appendTo(c("Screen", "Report"), paste0("Error: Stations '", paste(aux$Station.Name[is.na(link)], collapse = "', '"), "' are listed in the spatial file but no receivers were ever deployed there."))
-    emergencyBreak()
-    stop("Fatal exception found. Read lines above for more details.\n")      
-  }
-  appendTo("debug","Terminating checkDeploymentStations")
-  return(input)
-}
-
-createUniqueSerials <- function(input) {
-  appendTo("debug","Terminating createUniqueSerials")
-  output <- split(input, input$Receiver)
-  for (i in 1:length(output)) {
-    if (nrow(output[[i]]) > 1) {
-      output[[i]]$Receiver <- paste0(output[[i]]$Receiver, ".dpl.", 1:nrow(output[[i]]))
-    }
-  }
-  appendTo("debug","Terminating createUniqueSerials")
-  return(output)
-}
-
-
-new_standardizeStations <- function(detections, spatial, deployments) {
-  appendTo("debug","Terminating new_standardizeStations")
-  detections$Receiver <- as.character(detections$Receiver)
-  detections$Standard.Name <- NA_character_
-  detections$Array <- NA_character_
-  empty.receivers <- NULL
-  for (i in 1:length(deployments)) {
-    receiver.link <- detections$Receiver == names(deployments)[i]
-    if (all(!receiver.link)) {
-      empty.receivers <- c(empty.receivers, names(deployments)[i])
-    } else {
-      for (j in 1:nrow(deployments[[i]])) {
-        # find target rows in detections
-        deployment.link <- detections$Timestamp[receiver.link] >= deployments[[i]]$Start[j] & 
-          detections$Timestamp[receiver.link] < deployments[[i]]$Stop[j]
-        # rename receiver
-        detections$Receiver[receiver.link][deployment.link] <- deployments[[i]]$Receiver[j]
-        # find corresponding standard station name
-        the.station <- match(deployments[[i]]$Station.Name[j], spatial$Station.Name)
-        # include Standard.Name
-        detections$Standard.Name[receiver.link][deployment.link] <- spatial$Standard.Name[the.station]
-        # include Array
-        detections$Array[receiver.link][deployment.link] <- as.character(spatial$Array[the.station])
-      }
-      if (any(the.error <- is.na(detections$Standard.Name[receiver.link]))) {
-        appendTo(c("Screen", "Report"), paste0("Error: ", sum(the.error), " detections for receiver ", names(deployments)[i], " do not fall within deployment periods."))
-        cat("\n")
-        print(detections[receiver.link][the.error, -c(6, 7)])
-        cat("\n")
-        cat("Possible options:\n   a) Stop and doublecheck the data (recommended)\n   b) Discard orphan detections.\n")
-        check <- TRUE
-        while (check) {
-          decision <- readline("Which option should be followed?(a/b) ")
-          if (decision == "a" | decision == "A" | decision == "b" | decision == "B") 
-            check <- FALSE else cat("Option not recognized, please try again.\n")
-          appendTo("UD", decision)
-        }
-        if (decision == "a" | decision == "A") {
-          emergencyBreak()
-          stop("Stopping analysis per user command.\n")
-        } else {
-          rows.to.remove <- detections[receiver.link, which = TRUE][the.error]
-          detections <- detections[-rows.to.remove]
-        }
-       }
-    }
-  }
-  appendTo(c("Screen", "Report"), paste0("M: Number of ALS: ", length(deployments), " (of which ", length(empty.receivers), " had no detections)"))
-  if (!is.null(empty.receivers))
-    appendTo(c("Screen", "Report", "Warning"), paste0("W: No detections were found for receiver(s) ", paste0(empty.receivers, collapse = ", "), "."))
-  appendTo("debug","Terminating new_standardizeStations")
-  aux <- spatial[spatial$Type == "Hydrophone", ]
-  detections$Receiver <- as.factor(detections$Receiver)
-  detections$Array <- factor(detections$Array, levels = unique(aux$Array))
-  detections$Standard.Name <- factor(detections$Standard.Name, levels = aux$Standard.Name)
-  return(detections)
-}
-
-
-unknownReceivers <- function(input) {
-  appendTo("debug","Terminating unknownReceivers")
-  unknown <- is.na(input$Standard.Name)
-  if (any(unknown)) {
-    appendTo(c("Screen", "Report", "Warning"), paste0("W: Detections from receivers ", paste(unique(input$Receiver[unknown]), collapse = ", "), " are present in the data, but these receivers are not part of the study's stations. Doublecheck potential errors."))
-  }
-  appendTo("debug","Terminating unknownReceivers")
-}
 
 #' Import biometrics
 #' 
@@ -468,6 +269,7 @@ loadDetections <- function(start.timestamp = NULL, end.timestamp = NULL, tz.stud
   return(detections)
 }
 
+# LOAD DETECTION HELPERS:
 
 #' Combine ALS detections
 #'
@@ -580,7 +382,7 @@ findFiles <- function(path = NULL, pattern = NULL) {
 #' 
 #' @param input the file name, supplied by findFiles.
 #'
-#' @return A dataframe of standardized detections from the input file.
+#' @return A data frame of standardized detections from the input file.
 #'
 #' @keywords internal
 #' 
@@ -599,7 +401,7 @@ processThelmaFile <- function(input) {
 #' 
 #' @inheritParams processThelmaFile
 #'
-#' @return A dataframe of standardized detections from the input file.
+#' @return A data frame of standardized detections from the input file.
 #'
 #' @keywords internal
 #' 
@@ -628,7 +430,7 @@ processVemcoFile <- function(input) {
 #' @param data.files The list of processed files, supplied by loadDetections.
 #' @param file.list The list of valid files, supplied by loadDetections.
 #'
-#' @return A dataframe of standardized detections from all the input files.
+#' @return A data frame of standardized detections from all the input files.
 #'
 #' @keywords internal
 #' 
@@ -649,13 +451,13 @@ bindDetections <- function(data.files, file.list) {
   return(output)
 }
 
-#' Convert codespaces
+#' Convert code spaces
 #' 
 #' Unifies CodeSpace names, to avoid having different names depending on ALS vendor.
 #' 
-#' @param input A dataframe of standardized detections.
+#' @param input A data frame of standardized detections.
 #'
-#' @return A dataframe with standardized code spaces.
+#' @return A data frame with standardized code spaces.
 #'
 #' @keywords internal
 #' 
@@ -697,7 +499,7 @@ convertCodes <- function(input) {
 #' @inheritParams convertCodes
 #' @inheritParams actel
 #'
-#' @return A dataframe with corrected timestamps.
+#' @return A data frame with corrected timestamps.
 #'
 #' @keywords internal
 #' 
@@ -717,30 +519,5 @@ convertTimes <- function(input, start.timestamp, end.timestamp, tz.study.area) {
   input$Receiver <- droplevels(input$Receiver)
   input$Transmitter <- as.factor(paste(input$CodeSpace, input$Signal, sep = "-"))
   appendTo("debug", "Terminating convertTimes.")
-  return(input)
-}
-
-#' Standardize Stations
-#' 
-#' Matches the ALS serial number to the stations in the study area, standardizing the ALS station names.
-#' 
-#' @inheritParams convertCodes
-#' @param spatial A list of spatial objects in the study area
-#'
-#' @return A dataframe with standardized station names.
-#'
-#' @keywords internal
-#' 
-standardizeStations <- function(input, spatial) {
-  appendTo("debug", "Starting standardizeStations.")
-  input$Standard.Name <- NA
-  for (i in spatial$receiver.columns) {
-    link <- match(input$Receiver, spatial$stations[, i])
-    new.names <- spatial$stations$Standard.Name[link]
-    places <- seq_len(nrow(input))[!is.na(link)]
-    input$Standard.Name[places] <- new.names[!is.na(link)]
-  }
-  input$Standard.Name <- factor(input$Standard.Name, spatial$stations$Standard.Name)
-  appendTo("debug", "Terminating standardizeStations.")
   return(input)
 }

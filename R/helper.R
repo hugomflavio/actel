@@ -327,6 +327,38 @@ moveHelpers <- function(my.home) {
   }
 }
 
+#' Check report compatibility
+#' 
+#' Creates a "Report" folder if necessary and silently activates ggplot2 and reshape2 to avoid startup messages
+#'
+#' @return A TRUE/FALSE decision
+#' 
+#' @keywords internal
+#' 
+folderCheck <- function(report, redraw){
+  if (report) {
+    appendTo("Report", "M: 'report' option has been activated.")
+    if (length(setdiff(c("ggplot2", "reshape2"), rownames(installed.packages()))) > 0) {
+      appendTo(c("Screen", "Report", "Warning"), "W: 'report' option can only be activated if 'ggplot2' and 'reshape2' are installed. Please install these. Deactivating 'Report' for the current job.")
+      report <- FALSE
+    } else {
+      suppressPackageStartupMessages(library(ggplot2))
+      suppressPackageStartupMessages(library(reshape2))
+      if (!dir.exists("Report")) {
+        appendTo("Screen", "M: Creating 'Report' subdirectory to store report files.")
+        dir.create("Report")
+      } else {
+        if (redraw) {
+        appendTo("Screen", "W: 'Report' directory already present. Overwriting files already present.")
+        } else {
+        appendTo("Screen", "W: 'Report' directory already present. Skipping files already present.")
+        }
+      }
+    }
+  }
+  return(report)
+}
+
 #' Write in comments
 #' 
 #' Checks if the user has invoked the comment command for a specific fish, and stores the comment.
