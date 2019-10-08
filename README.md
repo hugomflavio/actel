@@ -5,27 +5,24 @@ Jump to [**installation instructions**](#installing-actel)
 If you are tracking animals during their migration using acoustic telemetry, actel is the package for you. 
 By bringing together the study area configuration and the recorded detections, actel provides a systematic way of analysing fish migration data.
 
-<img src="vignettes/study_area.png" alt="drawing" width="870"/>
+<img src="vignettes/mb_arrays.svg" alt="drawing" width="870"/>
 
 ### Main functions:
 
-**1. exampleWorkspace()**
+**1. explore()**
 
-  The exampleWorkspace() function creates a directory containing real data. You can
-  then run the analysis on that data to get an overview of the process. When you run
-  exampleWorkspace() the code required to analyse the data will be automatically
-  provided.
+  explore() allows you to quickly go get a summary of your data. You can use explore() to get
+  a general feel for the study results, and check if the input files are behaving as expected
  
-**2. createWorkspace()**
+**2. migration()**
 
-  The createWorkspace() function is similar to the one above, but it creates template 
-  files instead, which you can use to quickly transform your data to the required formats.
+  The migration() analysis runs the same initial checks as explore(), but on top of it, it analysis
+  the fish behaviour. By selecting the arrays that lead to success, you can define whether or not
+  your fish survived the study. Multiple options allow you to tweak the analysis to fit your study perfectly.
  
-**3. actel()**
+**3. residency()**
 
-  The actel() function runs your analysis. This function has many variables and
-  although you do not need to work with all of them right away, we recommend
-  that you read the actel vignettes before running this function.
+  The residency() analysis is still under construction. Keep an eye out for updates!
 
 ## Unlock actel's full potential
 
@@ -48,14 +45,14 @@ Here are some examples:
 
 <img src="vignettes/R64K-4521.png" alt="drawing" width="430"/> <img src="vignettes/R64K-4526.png" alt="drawing" width="430"/>
 
-**Times of arrival**
+**Times of arrival and summary information**
 
-<img src="vignettes/times_River3.svg" alt="drawing" width="410"/> <img src="vignettes/times_Sea1.svg" alt="drawing" width="410"/>
+<img src="vignettes/times_River3.svg" alt="drawing" width="410"/> <img src="vignettes/LaTeX_example_survival.svg" alt="drawing" height="370"/>
 
+**Array efficiency and fish progression**
 
-**Summary information**
+<img src="vignettes/mb_efficiency.svg" alt="drawing" width="870"/>
 
-<img src="vignettes/LaTeX_example_survival.svg" alt="drawing" height="370"/> <img src="vignettes/example_progression.svg" alt="drawing" height="370"/>
 
 ## Installing actel
 
@@ -72,11 +69,11 @@ Now you can either install actel sourcing remotely or locally.
 
 **b) install locally:**
 
-1. Download actel's source files here: [**actel-master.zip**](https://github.com/hugomflavio/actel/archive/master.zip)
+1. Download actel's source files here: [**actel-devel.zip**](https://github.com/hugomflavio/actel/archive/devel.zip)
 1. Unzip the file and move your R session into the newly created folder
 1. Run: 
 
-        devtools::install("actel-master", build_vignettes = TRUE)
+        devtools::install("actel-devel", build_vignettes = TRUE)
 
 After installing, you should read the package vignettes, which can be found by running:
 
