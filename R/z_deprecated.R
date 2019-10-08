@@ -1,3 +1,129 @@
+#' Calculate CJS for each group.release combination
+#' 
+#' @param the.matrices A list of detection matrices
+#' @inheritParams simpleCJS
+#' 
+#' @return A list of CJS results
+#' 
+#' @keywords internal
+#' 
+getSplitCJS <- function(the.matrices, fixed.efficiency = NULL){
+  output <- list()
+  for(i in 1:length(the.matrices)){
+    if(is.null(fixed.efficiency))
+      efficiency.subset <- NULL
+    else
+      efficiency.subset <- fixed.efficiency[match(colnames(the.matrices[[i]]), names(fixed.efficiency))]
+    output[[i]] <- simpleCJS(the.matrices[[i]], fixed.efficiency = efficiency.subset, silent = TRUE)
+  }
+  names(output) <- names(the.matrices)
+  return(output)
+}
+
+#' Calculate CJS for each group
+#' 
+#' @inheritParams getSplitCJS
+#' @inheritParams simplifyMovements
+#' @inheritParams simpleCJS
+#' 
+#' @return A list of CJS results
+#' 
+#' @keywords internal
+#' 
+getGroupCJS <- function(the.matrices, status.df, fixed.efficiency = NULL) {
+  output <- list()
+  for (i in 1:length(unique(status.df$Group))) {
+    link <- grepl(paste0("^", unique(status.df$Group)[i]), names(the.matrices))
+    if(sum(link) == 1)
+      output[[i]] <- simpleCJS(the.matrices[[which(link)]], fixed.efficiency = fixed.efficiency, silent = TRUE)
+    else
+      output[[i]] <- combineCJS(the.matrices[link], fixed.efficiency = fixed.efficiency, silent = TRUE)
+  } 
+  names(output) <- unique(status.df$Group)
+  return(output)
+}
+
+#' Print progression graphic
+#'
+#' Prints progression graphics per fish group and release site.
+#' 
+#' @inheritParams actel
+#' @inheritParams simplifyMovements
+#' @param overall.CJS a single CJS with all the groups and release sites merged
+#' @param split.CJS a list of CJS's for each group.release combination
+#' @param group.CJS a list of CJS's for each group, with release sites merged
+#' 
+#' @keywords internal
+#' 
+printProgression <- function(status.df, overall.CJS, split.CJS, group.CJS) {
+  appendTo("debug", "Starting printProgression_test.")
+  ## Absolutes per array per group per release site.
+  detailed.absolutes <- lapply(split.CJS, function(x) x$absolutes)
+  maxcols <- max(unlist(lapply(detailed.absolutes, ncol)))
+  for(i in 1:length(detailed.absolutes)) {
+    if (ncol(detailed.absolutes[[i]]) < maxcols)
+      detailed.absolutes[[i]] <- detailed.absolutes[[i]][, -1]
+  }
+  ## Progression dataframe
+  the.levels <- c()
+  recipient <- compileProgressionDataFrame(status.df = status.df, group.CJS = group.CJS, 
+    detailed.absolutes = detailed.absolutes, i = 1, the.levels = the.levels)
+  progression <- recipient[[1]]
+  the.levels <- recipient[[2]]
+  if (length(group.CJS) > 1) { 
+    for (i in 2:length(group.CJS)) {
+      recipient <- compileProgressionDataFrame(status.df = status.df, group.CJS = group.CJS, 
+        detailed.absolutes = detailed.absolutes, i = i, the.levels = the.levels)
+      progression <- rbind(progression, recipient[[1]])
+      the.levels <- recipient[[2]]
+    }
+  }
+  the.levels <- c(the.levels, "Estimated")
+  progression$Fill <- factor(progression$Fill, levels = rev(unique(the.levels)))
+  progression$Value[is.na(progression$Value)] <- 0
+  progression$Array <- factor(progression$Array, levels = unique(progression$Array))
+  progression$Group <- factor(progression$Group, levels = names(group.CJS))
+
+  # prepareFunctions
+  abort.additions <- FALSE
+  temp <- prepareAdditions(group.CJS = group.CJS, progression = progression)
+  if (is.null(temp)) {
+    abort.additions <- TRUE
+  } else {
+    additions <- temp
+  }
+  totals <- prepareTotals(group.CJS = group.CJS)
+  the.final.totals <- prepareFinalTotals (group.CJS = group.CJS, totals = totals, progression = progression)
+
+  # Plot
+  the.ceiling <- max(the.final.totals$n)
+  cbPalette <- c("#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7", "#999999")
+  names(cbPalette) <- c("Orange", "Blue", "Green", "Yellow", "Darkblue", "Darkorange", "Pink", "Grey")
+  p <- ggplot2::ggplot(data = progression, ggplot2::aes(x = Array, y = Value))
+  # The bars
+  p <- p + ggplot2::geom_bar(stat = "identity", ggplot2::aes(fill = Fill))
+  # The totals dashed line
+  p <- p + ggplot2::geom_line(data = the.final.totals, ggplot2::aes(x = nArray,
+    y = n, group = Group), linetype = "dashed", colour = "red")
+  # The additions annotation
+  if (!abort.additions)
+    p <- p + ggplot2::geom_text(data = additions, ggplot2::aes(x = (as.numeric(Array) - 0.5), 
+    label = paste0(" +", n, " released")), y = the.ceiling, hjust = 0, vjust = -0.5, colour = "red")
+  p <- p + ggplot2::facet_grid(Group ~ .)
+  p <- p + ggplot2::theme_bw()
+  p <- p + ggplot2::theme(panel.grid.minor.x = ggplot2::element_blank(), 
+    panel.grid.major.x = ggplot2::element_blank())
+  if (length(levels(progression$Fill)) <= 8) {
+    p <- p + ggplot2::scale_fill_manual(values = as.vector(cbPalette)[c(8, 1:length(levels(progression$Fill))-1)])
+  }
+  p <- p + ggplot2::theme(legend.title = ggplot2::element_blank())
+  p <- p + ggplot2::scale_y_continuous(minor_breaks = seq(0, round(the.ceiling * 1.2, 0), 2), limits = c(0, the.ceiling * 1.2))
+  p <- p + ggplot2::labs(y = "", x = "")
+  ggplot2::ggsave("Report/progression.png", width = 7, height = 6)
+  appendTo("debug", "Terminating printProgression_test.")
+}
+
+
 #' Check for unknown receivers in the raw detections
 #' 
 #' @inheritParams splitDetections

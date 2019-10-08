@@ -1,3 +1,76 @@
+#' Load spatial.dot
+#' 
+#' @param input The name of the dot file
+#' @param spatial A spatial data frame
+#' @inheritParams migration
+#' 
+#' @return The dot list
+#' 
+#' @keywords internal
+#' 
+loadDot <- function(string = NULL, input = NULL, spatial, sections) {
+  if (is.null(string) & is.null(input))
+    stop("No dot file or data were specified.")
+  if (is.null(string)) {
+    tryCatch(dot <- readDot(input = input), 
+      error = function(e) {
+        emergencyBreak()
+        stop("The contents of the file '", input, "' could not be recognised by the readDot function.\n", call. = FALSE)
+        })
+  } else {
+    dot <- readDot(string = string)
+  }
+  mat <- dotMatrix(input = dot)
+  if (any(is.na(match(unique(spatial$Array), colnames(mat))))) {
+    emergencyBreak()
+    stop("Not all the arrays listed in the 'spatial.csv' file are present in the 'spatial.dot' file.\n")
+  }
+  if (any(is.na(match(unique(spatial$Array), colnames(mat))))) {
+    emergencyBreak()
+    stop("Not all the arrays listed in the 'spatial.dot' file are present in the 'spatial.csv' file.\n")
+  }
+  arrays <- dotList(input = dot, sections = sections)
+  arrays <- dotPaths(input = arrays, mat = mat)
+  return(list(dot = dot, arrays = arrays))
+}
+
+#' Read dot file
+#' 
+#' @param input A simple .dot file
+#' 
+#' @return A table with A to B rows
+#' 
+#' @keywords internal
+#' 
+readDot <- function (input = NULL, string = NULL) {
+  if (is.null(string) & is.null(input))
+    stop("No dot file or data were specified.")
+  if (is.null(string))
+    lines <- readLines(input)
+  else
+    lines <- string
+  paths <- lines[grepl("-[->]", lines)]
+  paths <- gsub("[ ;]", "", paths)
+  paths <- gsub("\\[label=[^\\]]","", paths)
+  nodes <- strsplit(paths,"-[->]")
+  recipient <- data.frame(
+    A = character(), 
+    to = character(),
+    B = character(), 
+    stringsAsFactors = FALSE)
+  for (i in 1:length(nodes)) {
+    n <- length(nodes[[i]])
+    type <- gsub(paste0(nodes[[i]], collapse = "|"), "", paths[[i]])
+    aux <- data.frame(
+      A = nodes[[i]][1:(n - 1)], 
+      to = sapply(seq(from = 1, to = nchar(type), by = 2), function(i) substr(type, i, i + 1)),
+      B = nodes[[i]][2:n], 
+      stringsAsFactors = FALSE)
+    recipient <- rbind(recipient, aux)
+  }
+  return(recipient)
+}
+
 #' Load distances matrix
 #' 
 #' @param spatial A list of spatial objects in the study area
@@ -106,7 +179,7 @@ loadSpatial <- function(file){
   } else {
     if (any(link <- table(input$Station.Name) > 1)) {
       appendTo(c("Screen", "Warning", "Report"), "Error: The 'Station.Name' column in the spatial file must not have duplicated values.")
-      cat("Duplicated stations:", paste(names(table(input$Station.Name))[link], collapse = ", "), "\n")
+      cat("Stations appearing more than once:", paste(names(table(input$Station.Name))[link], collapse = ", "), "\n")
       emergencyBreak()
       stop("Fatal exception found. Read lines above for more details.\n")
     }
@@ -388,9 +461,15 @@ findFiles <- function(path = NULL, pattern = NULL) {
 #' 
 processThelmaFile <- function(input) {
   appendTo("debug", "Starting processThelmaFile.")
-  output <- input[, c(1, 8, 3, 4)]
-  colnames(output) <- c("Timestamp", "Receiver", "CodeSpace", "Signal")
-  output[, "Timestamp"] <- fasttime::fastPOSIXct(output[, "Timestamp"], tz = "UTC")
+  input <- as.data.frame(input)
+  output <- data.table(
+    Timestamp = fasttime::fastPOSIXct(sapply(input[, 1], function(x) gsub("Z", "", gsub("T", " ", x))), tz = "UTC"),
+    Receiver = input[, 8],
+    CodeSpace = input[, 3],
+    Signal = input[, 4])
+  # output <- input[, c(1, 8, 3, 4)]
+  # colnames(output) <- c("Timestamp", "Receiver", "CodeSpace", "Signal")
+  # output[, "Timestamp"] <- fasttime::fastPOSIXct(output[, "Timestamp"], tz = "UTC")
   appendTo("debug", "Terminating processThelmaFile.")
   return(output)
 }
@@ -505,16 +584,17 @@ convertCodes <- function(input) {
 #' 
 convertTimes <- function(input, start.timestamp, end.timestamp, tz.study.area) {
   appendTo("debug", "Starting convertTimes.")
-  input$Timestamp <- fasttime::fastPOSIXct(input$Timestamp, tz = "UTC")
   attributes(input$Timestamp)$tzone <- tz.study.area
   input <- input[order(input$Timestamp), ]
   if (!is.null(start.timestamp)){
-    input <- input[counter <- input[, 1] >= as.POSIXct(start.timestamp, tz = tz.study.area), ]
-    appendTo(c("Screen","Report"), paste("M: Discarding detection data previous to ",start.timestamp," per user command (", sum(counter), " detections discarded).", sep = ""))
+    onr <- nrow(input)
+    input <- input[Timestamp >= as.POSIXct(start.timestamp, tz = tz.study.area)]
+    appendTo(c("Screen","Report"), paste("M: Discarding detection data previous to ",start.timestamp," per user command (", onr - nrow(input), " detections discarded).", sep = ""))
   }
   if (!is.null(end.timestamp)){
-    input <- input[counter <- input[, 1] <= as.POSIXct(end.timestamp, tz = tz.study.area), ]
-    appendTo(c("Screen","Report"), paste("M: Discarding detection data posterior to ",end.timestamp," per user command (", sum(counter), " detections discarded).", sep = ""))
+    onr <- nrow(input)
+    input <- input[Timestamp <= as.POSIXct(end.timestamp, tz = tz.study.area), ]
+    appendTo(c("Screen","Report"), paste("M: Discarding detection data posterior to ",end.timestamp," per user command (", onr - nrow(input), " detections discarded).", sep = ""))
   }
   input$Receiver <- droplevels(input$Receiver)
   input$Transmitter <- as.factor(paste(input$CodeSpace, input$Signal, sep = "-"))

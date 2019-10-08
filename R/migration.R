@@ -906,3 +906,22 @@ assembleArrayOverview <- function(group.CJS) {
   appendTo("debug", "Terminating assembleArrayOverview.")  
   return(recipient)
 }
+
+#' Create array.overview
+#'
+#' @return A data frame containing the progression per group of fish present in the biometrics.
+#' 
+#' @keywords internal
+#' 
+mbAssembleArrayOverview <- function(input) {
+  appendTo("debug", "Starting mbAssembleArrayOverview.")
+  for (i in 1:length(input)) {
+    input[[i]][1, ] <- apply(input[[i]][c(1,3), ], 2, sum, na.rm = TRUE)
+    input[[i]][2, ] <- input[[i]][4, ]
+    input[[i]][3, ] <- input[[i]][2, ] - input[[i]][1, ]
+    input[[i]] <- input[[i]][1:3, ]
+    rownames(input[[i]]) <- c("Known", "Estimated", "Difference")
+  }
+  appendTo("debug", "Terminating mbAssembleArrayOverview.")  
+  return(input)
+}

@@ -10,7 +10,7 @@ updateStudy <- function(tz.study.area) {
   if (file.exists("deployments.csv")) {
     cat("M: A 'deployments.csv' file is already present in the current directory.\n")
   } else {
-    spatial <- new_loadSpatial(file = "spatial.csv")
+    spatial <- loadSpatial(file = "spatial.csv")
     detections <- loadDetections(tz.study.area = tz.study.area, force = TRUE)
     stations <- spatial[spatial$Type == "Hydrophone", ]
     deployments <- stations[, c("Receiver", "Station.Name")]

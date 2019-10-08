@@ -1,3 +1,129 @@
+#' Assembles CJS tables for all group x release site combinations
+#' 
+#' @param mat the original presence/absence matrices
+#' @param CJS A list of CJS calculated for each group x release site x array combinations
+#' @param arrays a list of arrays
+#' 
+#' @return A CJS results table for each group x release site combination
+#' 
+#' @keywords internal
+#' 
+assembleSplitCJS <- function(mat, CJS, arrays) {
+  recipient <- list()
+  for (i in names(CJS)) {
+    recipient[[length(recipient) + 1]] <- assembleArrayCJS(mat = mat[i], CJS = CJS[[i]], arrays = arrays)[[1]]
+  }
+  names(recipient) <- names(CJS)
+  return(recipient)
+}
+
+#' Assembles CJS tables for all groups
+#' 
+#' @param mat the original presence/absence matrices
+#' @param CJS A list of CJS calculated for each group x array combinations
+#' @param arrays a list of arrays
+#' 
+#' @return A CJS results table for each group 
+#' 
+#' @keywords internal
+#' 
+assembleGroupCJS <- function(mat, CJS, arrays) {
+  recipient <- list()
+  for (i in names(CJS)) {
+    link <- grepl(paste0("^", i), names(mat))
+    recipient[[length(recipient) + 1]] <- assembleArrayCJS(mat = mat[link], CJS = CJS[[i]], arrays = arrays)[[1]]
+  }
+  names(recipient) <- names(CJS)
+  return(recipient)
+}
+
+#' Break the detection matrices per array
+#' 
+#' @param m the original presence/absence matrices
+#' @param arrays a list of arrays
+#' 
+#' @return a list of matrices, split by array
+#' 
+#' @keywords internal
+#' 
+breakMatricesByArray <- function(m, arrays) {
+  recipient <- list()
+  for (i in 1:length(arrays)) {
+    if (!is.null(arrays[[i]]$downstream)) {
+      # grab only relevant arrays
+      a.regex <- paste(c(names(arrays)[i], arrays[[i]]$downstream), collapse = "|")
+      aux  <- lapply(m, function(m) m[, which(grepl(a.regex, colnames(m)))])
+      # Failsafe in case some fish are released at one of the peers
+      keep <- unlist(lapply(m, function(m) any(grepl(names(arrays)[i], colnames(m)))))
+      aux  <- aux[keep]
+      # Convert peers to single function and add fake start
+      aux  <- lapply(aux, function(m) {
+        if (ncol(m) > 2) {
+          m[, 2:ncol(m)] <- apply(m[, 2:ncol(m)], 2, as.logical)
+          m$AnyPeer <- as.numeric(apply(m[-1], 1, any))
+        } else {
+          colnames(m)[2] <- "AnyPeer"
+        }
+        # The fake start prevents the CJS functions from breaking if the efficiency of the array is 0
+        m$FakeStart <- rep(1, nrow(m))
+        return(m[, c(ncol(m), 1, (ncol(m) - 1))])
+      })
+      # If all peers are 0, the CJS functions will crash. The same happens if the array is all 0's
+      zero.check <- unlist(lapply(aux, function(x) sum(x$AnyPeer) == 0 | sum(x[, 2]) == 0))
+      if (all(zero.check)) {
+        appendTo(c("Screen", "Warning", "Report"), paste0("W: No fish passed through any of the efficiency peers of array ", names(arrays)[i], "."))
+      } else {
+        recipient[[length(recipient) + 1]] <- aux[!zero.check]
+        names(recipient)[length(recipient)] <- names(arrays)[i]
+      }
+    }
+  }
+  if (length(recipient) == 0) {
+    appendTo(c("Screen", "Warning", "Report"), "W: None of the arrays has valid efficiency peers.")
+    return(NULL)
+  } else {
+    return(recipient)
+  }
+}
+
+#' Combine the individual CJS's of each array into a single table
+#' 
+#' @param mat the original presence/absence matrices
+#' @param CJS A list of CJS calculated for each array
+#' @param arrays a list of arrays
+#' 
+#' @return A list with the CJS absolute numbers and efficiency estimates
+#' 
+#' @keywords internal
+#' 
+assembleArrayCJS <- function(mat, CJS, arrays) { 
+  # Compile final objects
+  absolutes <- matrix(nrow = 4, ncol = length(arrays))
+  colnames(absolutes) <- names(arrays)
+  rownames(absolutes) <- c("detected", "here plus on peers", "not here but on peers", "estimated")
+  absolutes <- as.data.frame(absolutes)
+  efficiency <- rep(NA, length(arrays))
+  names(efficiency) <- names(arrays)
+  for (i in 1:length(CJS)) {
+    absolutes[, names(CJS)[i]] <- CJS[[i]]$absolutes[, 2]
+    efficiency[names(CJS)[i]] <- CJS[[i]]$efficiency[2]
+  }
+  # Fix estimated for arrays with 0% efficiency and Fix absolutes for arrays with no peers
+  fix.zero <- na.as.false(efficiency == 0)
+  fix.peers <- is.na(efficiency)
+  for (i in 1:length(arrays)) {
+    if (fix.zero[i])
+      absolutes[4, i] <- sum(absolutes[4, arrays[[i]]$before])
+    if (fix.peers[i]) {
+      absolutes[1, i] <- sum(unlist(lapply(mat, function(m) {
+        if (any(colnames(m) == names(arrays)[i]))
+          return(sum(m[, names(arrays)[i]]))
+      })))
+    }
+  }
+  return(list(absolutes = absolutes, efficiency = efficiency))
+}
+
 #' Assemble detection matrices
 #' 
 #' @inheritParams loadDetections
@@ -221,27 +347,40 @@ simpleCJS <- function(input, estimate = NULL, fixed.efficiency = NULL, silent = 
 
 #' Calculate CJS for each group.release combination
 #' 
-#' @param the.matrices A list of detection matrices
+#' @param m A list of detection matrices
 #' @inheritParams simpleCJS
 #' 
 #' @return A list of CJS results
 #' 
 #' @keywords internal
 #' 
-getSplitCJS <- function(the.matrices, fixed.efficiency = NULL){
-  output <- list()
-  for(i in 1:length(the.matrices)){
-    if(is.null(fixed.efficiency))
-      efficiency.subset <- NULL
+mbSplitCJS <- function(m, fixed.efficiency = NULL) {
+  recipient <- lapply(m, function(m) {
+    if (is.na(fixed.efficiency[grepl(colnames(m[[1]])[2], names(fixed.efficiency))]))
+      array.efficiency <- NULL
     else
-      efficiency.subset <- fixed.efficiency[match(colnames(the.matrices[[i]]), names(fixed.efficiency))]
-    output[[i]] <- simpleCJS(the.matrices[[i]], fixed.efficiency = efficiency.subset, silent = TRUE)
+      array.efficiency <- c(1, fixed.efficiency[grepl(colnames(m[[1]])[2], names(fixed.efficiency))], 1)
+    return(lapply(m, function(mm) simpleCJS(mm, fixed.efficiency = array.efficiency, silent = TRUE)))
+  })
+  groups <- unique(unlist(lapply(recipient, names)))
+  output <- list()
+  for (group in groups) {
+    output[[length(output) + 1]] <- lapply(recipient, function(r) {
+      if (any(grepl(group, names(r))))
+        return(r[[which(grepl(group, names(r)))]])
+      else
+        return(NULL)
+    })
   }
-  names(output) <- names(the.matrices)
+  output <- lapply(output, function(x) {
+    keep <- !unlist(lapply(x, is.null))
+    return(x[keep])
+  })
+  names(output) <- groups
   return(output)
 }
 
-#' Calculate CJS for each group
+#' Calculate CJS for each group for each array
 #' 
 #' @inheritParams getSplitCJS
 #' @inheritParams simplifyMovements
@@ -251,19 +390,30 @@ getSplitCJS <- function(the.matrices, fixed.efficiency = NULL){
 #' 
 #' @keywords internal
 #' 
-getGroupCJS <- function(the.matrices, status.df, fixed.efficiency = NULL) {
+mbGroupCJS <- function(m, status.df, fixed.efficiency = NULL) {
   output <- list()
   for (i in 1:length(unique(status.df$Group))) {
-    link <- grepl(paste0("^", unique(status.df$Group)[i]), names(the.matrices))
-    if(sum(link) == 1)
-      output[[i]] <- simpleCJS(the.matrices[[which(link)]], fixed.efficiency = fixed.efficiency, silent = TRUE)
-    else
-      output[[i]] <- combineCJS(the.matrices[link], fixed.efficiency = fixed.efficiency, silent = TRUE)
+    output[[i]] <- lapply(m, function(m_i) {
+      if (is.na(fixed.efficiency[grepl(colnames(m_i[[1]])[2], names(fixed.efficiency))]))
+        array.efficiency <- NULL
+      else
+        array.efficiency <- c(1, fixed.efficiency[grepl(colnames(m_i[[1]])[2], names(fixed.efficiency))], 1)
+      link <- grepl(paste0("^", unique(status.df$Group)[i]), names(m_i))
+      if (any(link)) {
+        if(sum(link) == 1)
+          return(simpleCJS(m_i[[which(link)]], fixed.efficiency = array.efficiency, silent = TRUE))
+        else
+          return(combineCJS(m_i[link], fixed.efficiency = array.efficiency, silent = TRUE))
+      } else {
+        return(NULL)
+      }
+    })
+    names(output[[i]]) <- names(m)
   } 
+  output <- lapply(output, function(x) x[!unlist(lapply(x, is.null))])
   names(output) <- unique(status.df$Group)
   return(output)
 }
-
 
 #' Calculate CJS per release site
 #' 
@@ -281,7 +431,6 @@ getReleaseCJS <- function(the.matrices, status.df) {
   for(i in unique(status.df$Release.site)) {
     recipient[[i]] <- the.matrices[grepl(paste0(".",i), names(the.matrices))]
   }
-
 
   output <- list()
   for (i in names(recipient)) {
@@ -382,7 +531,6 @@ lastMatrix <- function(spatial, detections.list, replicate){
   appendTo("debug", "Terminating lastMatrix.")
   return(efficiency)
 }
-
 
 #' Calculate estimated last-array efficiency
 #'

@@ -1,3 +1,108 @@
+#' Create numerical distances between dot elements
+#' 
+#' @param input a dot data frame
+#' 
+#' @return a matrix of distances between arrays
+#' 
+#' @keywords internal
+#' 
+dotMatrix <- function(input) {
+  nodes <- unique(unlist(input[, c(1, 3)]))
+  graph <- matrix(0, length(nodes), length(nodes), dimnames = list(nodes, nodes))
+  for (i in 1:nrow(input)) {
+    graph[input$A[i], input$B[i]] <- 1
+    graph[input$B[i], input$A[i]] <- 1
+  }
+  for (i in 1:(length(nodes)-1)) {
+    for (A in nodes) {
+      for (B in nodes) {
+        if (graph[A, B] == i) {
+          candidates <- rownames(graph) != B & rownames(graph) != A & graph[, B] == 1
+          if (any(candidates)) {
+            to.change <- names(candidates)[candidates]
+            for (j in to.change) {
+              if (graph[A, j] == 0) 
+                graph[A, j] <- graph[A, j] + 1 + i
+            }
+          }
+        }
+      }
+    }
+  }
+  return(graph)
+}
+
+#' Break the dot data frame into a list
+#' 
+#' @param input a dot data frame
+#' @inheritParams migration
+#' 
+#' @return A list containing, for each array, the arrays that connect to it and to which it connects.
+#' 
+#' @keywords internal
+#' 
+dotList <- function(input, sections) {
+  input$SectionA <- rep(NA_character_, nrow(input))
+  input$SectionB <- rep(NA_character_, nrow(input))
+  for (section in sections) {
+     input$SectionA[grepl(section, input$A)] <- section
+     input$SectionB[grepl(section, input$B)] <- section
+  }
+  input$Edge <- with(input, SectionA != SectionB)
+
+  arrays <- list()
+  for (a in unique(unlist(input[,c(1, 3)]))) {
+    auxA <- input[input$A == a, ]
+    auxB <- input[input$B == a, ]
+    recipient <- list(
+      before = if (nrow(auxB) == 0) { NULL  } else { unique(auxB$A) },
+      after  = if (nrow(auxA) == 0) { NULL  } else { unique(auxA$B) },
+      edge   = if (nrow(auxA) == 0) { FALSE } else { any(auxA$Edge) })
+    arrays[[length(arrays) + 1]] <- recipient
+    names(arrays)[length(arrays)] <- a
+  }
+  return(arrays)
+}
+
+#' Find arrays valid for efficiency calculation
+#' 
+#' @param input A dot list
+#' @param mat A dot distance matrix
+#' 
+#' @return The input list, with an extra element for each array with valid efficiency peers
+#' 
+#' @keywords internal
+#' 
+dotPaths <- function(input, mat) {
+  for (a in names(input)) {
+    downstream <- NULL
+    to.check <- input[[a]]$after
+    while (!is.null(to.check)) {
+      new.check <- NULL
+      for (b in to.check) {
+        # If A and B are adjacent, check that there are no more paths leading to B
+        if (mat[a, b] == 1 && length(input[[b]]$before) == 1) {
+          if (is.null(downstream) || !grepl(b, downstream)) {
+            downstream <- c(downstream, b)
+            new.check <- c(new.check, input[[b]]$after)
+          }        
+        }
+        # If B is far away, check that the paths leading to B are in valid the downstream list
+        if (mat[a, b] > 1 && all(!is.na(match(input[[b]]$before, downstream)))) {
+          if (is.null(downstream) ||!grepl(b, downstream)) {
+            downstream <- c(downstream, b)
+            new.check <- c(new.check, input[[b]]$after)
+          }
+        }
+        to.check <- unique(new.check)
+      }
+    }
+    input[[a]]$downstream <- downstream
+  }
+  return(input)
+}
+
+
 #' Process spatial elements
 #' 
 #' Creates a list containing multiple spatial elements required throughout the analyses

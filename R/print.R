@@ -1,3 +1,169 @@
+#' Print progression diagram
+#'
+#' @inheritParams migration
+#' @inheritParams createStandards
+#' @param dot a dot data frame
+#' @param overall.CJS a single CJS with all the groups and release sites merged
+#' @param status.df A data frame with the final migration results
+#'  
+#' @keywords internal
+#' 
+mbPrintProgression <- function(dot, sections, overall.CJS, spatial, status.df) {
+  cbPalette <- c("#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7", "#999999")
+  names(cbPalette) <- c("Orange", "Blue", "Green", "Yellow", "Darkblue", "Darkorange", "Pink", "Grey")
+
+  # Prepare node data frame
+    diagram_nodes <- data.frame(
+    id = 1:length(unique(unlist(dot[, c(1, 3)]))),
+    original.label = unique(unlist(dot[, c(1, 3)])),
+    label = unique(unlist(dot[, c(1, 3)])),
+    stringsAsFactors = FALSE)
+    if (length(sections) <= length(cbPalette)) {
+    diagram_nodes$fillcolor <- rep(NA_character_, nrow(diagram_nodes))
+    for (i in 1:length(sections)) {
+       diagram_nodes$fillcolor[grepl(sections[i], diagram_nodes$label)] <- cbPalette[i]
+    }
+  } else {
+    diagram_nodes$fillcolor <- rep("#56B4E9", nrow(diagram_nodes))
+  }
+  for (i in 1:nrow(diagram_nodes)) {
+    link <- grep(diagram_nodes$label[i], names(overall.CJS$absolutes))
+    diagram_nodes$label[i] <- paste0(diagram_nodes$label[i], 
+      "\\nEfficiency: ", ifelse(is.na(overall.CJS$efficiency[link]), "--", round(overall.CJS$efficiency[link] * 100, 0)),
+      "%\\nDetected: ", overall.CJS$absolutes[1, link], 
+      "\\nMax.Est.: ", ifelse(is.na(overall.CJS$absolutes[4, link]), "--",overall.CJS$absolutes[4, link]))
+  }
+
+  # Release nodes
+  release_nodes <- spatial$release.sites[, c("Standard.Name", "Array")]
+  n <- table(status.df$Release.site)
+  release_nodes$n <- n[match(names(n), release_nodes$Standard.Name)]
+  release_nodes$label <- apply(release_nodes, 1, function(s) {
+    paste0(s[1], "\\nn = ", s[3])
+  })
+  release_nodes$id <- nrow(diagram_nodes) + 1:nrow(release_nodes)
+
+  # node string
+  node_list <- split(diagram_nodes, diagram_nodes$fillcolor)
+  node_aux <- paste0(unlist(lapply(node_list, function(n) {
+    s <- paste0("node [fillcolor = '", n$fillcolor[1], "']\n")
+    s <- paste0(s, paste0(n$id, " [label = '", n$label, "']", collapse = "\n"), "\n")
+  })), collapse = "\n")
+
+  node_fragment <- paste0(node_aux, "\n", 
+    paste0("node [fillcolor = '#e0f4ff'\nfontcolor = '#727475'\nstyle = 'rounded, filled'\nshape = box]\n", 
+    paste0(release_nodes$id, " [label = 'R.S.: ", release_nodes$label, "']", collapse = "\n"), "\n"))
+
+  # prepare edge data frame
+  diagram_edges <- as.data.frame(apply(dot[, c(1, 3)], 2, function(x) match(x, diagram_nodes$original.label)))
+  colnames(diagram_edges) <- c("from", "to")
+
+  # Release edges
+  release_edges <- data.frame(from = release_nodes$id,
+    to = diagram_nodes$id[match(release_nodes$Array, diagram_nodes$original.label)])
+
+  # edge string
+  combined_edges <- rbind(diagram_edges, release_edges)
+  edge_fragment <- paste0(apply(combined_edges, 1, function(x) paste0(x, collapse = "->")), collapse = "\n")
+
+  x <- paste0("digraph {
+  rankdir = LR
+  node [shape = circle,
+        style = filled,
+        fontname = helvetica,
+        fontcolor = white,
+        color = grey]
+
+  ", node_fragment, "
+
+  edge [color = grey]
+  ", edge_fragment, "
+  }")
+
+  plot <- DiagrammeR::grViz(x)
+  plot_string <- DiagrammeRsvg::export_svg(plot)
+  plot_raw <- charToRaw(plot_string)
+  rsvg::rsvg_svg(svg = plot_raw, file = "Report/mb_efficiency.svg")
+}
+
+#' Print DOT diagram
+#' 
+#' @param dot a dot data frame
+#' @inheritParams migration
+#' @inheritParams setSpatialStandards
+#' 
+#' @keywords internal
+#' 
+printDot <- function(dot, sections, spatial) {
+# requires:
+# DiagrammeR
+# DiagrammeRsvg
+# rsvg
+  cbPalette <- c("#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7", "#999999")
+  names(cbPalette) <- c("Orange", "Blue", "Green", "Yellow", "Darkblue", "Darkorange", "Pink", "Grey")
+
+  # Prepare node data frame
+    diagram_nodes <- data.frame(
+    id = 1:length(unique(unlist(dot[, c(1, 3)]))),
+    label = unique(unlist(dot[, c(1, 3)])),
+    stringsAsFactors = FALSE)
+    if (length(sections) <= length(cbPalette)) {
+    diagram_nodes$fillcolor <- rep(NA_character_, nrow(diagram_nodes))
+    for (i in 1:length(sections)) {
+       diagram_nodes$fillcolor[grepl(sections[i], diagram_nodes$label)] <- cbPalette[i]
+    }
+  } else {
+    diagram_nodes$fillcolor <- rep("#56B4E9", nrow(diagram_nodes))
+  }
+
+ # Release nodes
+  release_nodes <- spatial$release.sites[, c("Standard.Name", "Array")]
+  colnames(release_nodes)[1] <- "label"
+  release_nodes$id <- nrow(diagram_nodes) + 1:nrow(release_nodes)
+
+  # node string
+  node_list <- split(diagram_nodes, diagram_nodes$fillcolor)
+  node_aux <- paste0(unlist(lapply(node_list, function(n) {
+    s <- paste0("node [fillcolor = '", n$fillcolor[1], "']\n")
+    s <- paste0(s, paste0(n$id, " [label = '", n$label, "']", collapse = "\n"), "\n")
+  })), collapse = "\n")
+
+  node_fragment <- paste0(node_aux, "\n", 
+    paste0("node [fillcolor = '#e0f4ff'\nfontcolor = '#727475'\nstyle = 'rounded, filled'\nshape = box]\n", 
+    paste0(release_nodes$id, " [label = 'R.S.: ", release_nodes$label, "']", collapse = "\n"), "\n"))
+
+  # prepare edge data frame
+  diagram_edges <- as.data.frame(apply(dot[, c(1, 3)], 2, function(x) match(x, diagram_nodes$label)))
+  colnames(diagram_edges) <- c("from", "to")
+
+  # Release edges
+  release_edges <- data.frame(from = release_nodes$id,
+    to = diagram_nodes$id[match(release_nodes$Array, diagram_nodes$label)])
+
+  # edge string
+  combined_edges <- rbind(diagram_edges, release_edges)
+  edge_fragment <- paste0(apply(combined_edges, 1, function(x) paste0(x, collapse = "->")), collapse = "\n")
+
+  x <- paste0("digraph {
+  rankdir = LR
+  node [shape = circle,
+        style = filled,
+        fontname = helvetica,
+        fontcolor = white,
+        color = grey]
+
+  ", node_fragment, "
+
+  edge [color = grey]
+  ", edge_fragment, "
+  }")
+
+  plot <- DiagrammeR::grViz(x)
+  plot_string <- DiagrammeRsvg::export_svg(plot)
+  plot_raw <- charToRaw(plot_string)
+  rsvg::rsvg_svg(svg = plot_raw, file = "Report/mb_arrays.svg")
+}
+
 #' Collect summary information on the tags detected but that are not part of the study.
 #'
 #' @param input list of detections for the tags to be excluded.
@@ -219,86 +385,6 @@ printSurvivalGraphic <- function(section.overview) {
   appendTo("debug", "Terminating printSurvivalGraphic.")
 }
 
-#' Print progression graphic
-#'
-#' Prints progression graphics per fish group and release site.
-#' 
-#' @inheritParams actel
-#' @inheritParams simplifyMovements
-#' @param overall.CJS a single CJS with all the groups and release sites merged
-#' @param split.CJS a list of CJS's for each group.release combination
-#' @param group.CJS a list of CJS's for each group, with release sites merged
-#' 
-#' @keywords internal
-#' 
-printProgression <- function(status.df, overall.CJS, split.CJS, group.CJS) {
-  appendTo("debug", "Starting printProgression_test.")
-  ## Absolutes per array per group per release site.
-  detailed.absolutes <- lapply(split.CJS, function(x) x$absolutes)
-  maxcols <- max(unlist(lapply(detailed.absolutes, ncol)))
-  for(i in 1:length(detailed.absolutes)) {
-    if (ncol(detailed.absolutes[[i]]) < maxcols)
-      detailed.absolutes[[i]] <- detailed.absolutes[[i]][, -1]
-  }
-  ## Progression dataframe
-  the.levels <- c()
-  recipient <- compileProgressionDataFrame(status.df = status.df, group.CJS = group.CJS, 
-    detailed.absolutes = detailed.absolutes, i = 1, the.levels = the.levels)
-  progression <- recipient[[1]]
-  the.levels <- recipient[[2]]
-  if (length(group.CJS) > 1) { 
-    for (i in 2:length(group.CJS)) {
-      recipient <- compileProgressionDataFrame(status.df = status.df, group.CJS = group.CJS, 
-        detailed.absolutes = detailed.absolutes, i = i, the.levels = the.levels)
-      progression <- rbind(progression, recipient[[1]])
-      the.levels <- recipient[[2]]
-    }
-  }
-  the.levels <- c(the.levels, "Estimated")
-  progression$Fill <- factor(progression$Fill, levels = rev(unique(the.levels)))
-  progression$Value[is.na(progression$Value)] <- 0
-  progression$Array <- factor(progression$Array, levels = unique(progression$Array))
-  progression$Group <- factor(progression$Group, levels = names(group.CJS))
-
-  # prepareFunctions
-  abort.additions <- FALSE
-  temp <- prepareAdditions(group.CJS = group.CJS, progression = progression)
-  if (is.null(temp)) {
-    abort.additions <- TRUE
-  } else {
-    additions <- temp
-  }
-  totals <- prepareTotals(group.CJS = group.CJS)
-  the.final.totals <- prepareFinalTotals (group.CJS = group.CJS, totals = totals, progression = progression)
-
-  # Plot
-  the.ceiling <- max(the.final.totals$n)
-  cbPalette <- c("#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7", "#999999")
-  names(cbPalette) <- c("Orange", "Blue", "Green", "Yellow", "Darkblue", "Darkorange", "Pink", "Grey")
-  p <- ggplot2::ggplot(data = progression, ggplot2::aes(x = Array, y = Value))
-  # The bars
-  p <- p + ggplot2::geom_bar(stat = "identity", ggplot2::aes(fill = Fill))
-  # The totals dashed line
-  p <- p + ggplot2::geom_line(data = the.final.totals, ggplot2::aes(x = nArray,
-    y = n, group = Group), linetype = "dashed", colour = "red")
-  # The additions annotation
-  if (!abort.additions)
-    p <- p + ggplot2::geom_text(data = additions, ggplot2::aes(x = (as.numeric(Array) - 0.5), 
-    label = paste0(" +", n, " released")), y = the.ceiling, hjust = 0, vjust = -0.5, colour = "red")
-  p <- p + ggplot2::facet_grid(Group ~ .)
-  p <- p + ggplot2::theme_bw()
-  p <- p + ggplot2::theme(panel.grid.minor.x = ggplot2::element_blank(), 
-    panel.grid.major.x = ggplot2::element_blank())
-  if (length(levels(progression$Fill)) <= 8) {
-    p <- p + ggplot2::scale_fill_manual(values = as.vector(cbPalette)[c(8, 1:length(levels(progression$Fill))-1)])
-  }
-  p <- p + ggplot2::theme(legend.title = ggplot2::element_blank())
-  p <- p + ggplot2::scale_y_continuous(minor_breaks = seq(0, round(the.ceiling * 1.2, 0), 2), limits = c(0, the.ceiling * 1.2))
-  p <- p + ggplot2::labs(y = "", x = "")
-  ggplot2::ggsave("Report/progression.png", width = 7, height = 6)
-  appendTo("debug", "Terminating printProgression_test.")
-}
-
 #' Compile Progression in a ggplot-friendly fashion
 #' 
 #' Used within printProgression
@@ -479,8 +565,7 @@ knitr::kable(overall.CJS$absolutes)
 
 ```{r efficiency2, echo = FALSE}
 to.print <- t(paste(round(overall.CJS$efficiency * 100, 1), "%", sep = ""))
-if (grepl("NA", to.print[, ncol(to.print)]))
- to.print[, ncol(to.print)] = "-"
+to.print[grepl("NA", to.print)] <- "-"
 colnames(to.print) <- names(overall.CJS$efficiency)
 rownames(to.print) <- "efficiency"
 knitr::kable(to.print)
@@ -663,6 +748,7 @@ printCircular <- function(times, bio){
       link <- match(names(times[[i]]), bio$Transmitter)
       groups <- factor(bio$Group[link], levels = sort(unique(bio$Group)))
       trim.times <- split(times[[i]], groups)
+      trim.times <- trim.times[!unlist(lapply(trim.times, function(x) all(is.na(x))))]
       ylegend <- -0.97 + (0.1 * (length(unique(groups)) - 2))
     } else {
       trim.times <- times[i]
