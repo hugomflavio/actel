@@ -65,7 +65,7 @@ Now you can either install actel sourcing remotely or locally.
 
 **a) install directly from the repository:**
 
-    devtools::install_github("hugomflavio/actel", build_opts = c("--no-resave-data", "--no-manual"))
+    devtools::install_github("hugomflavio/actel", build_opts = c("--no-resave-data", "--no-manual"), ref = "devel")
 
 **b) install locally:**
 
