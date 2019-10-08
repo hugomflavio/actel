@@ -21,7 +21,10 @@ Imports:
     rmarkdown,
     circular,
     data.table,
-    fasttime
+    fasttime,
+    DiagrammeR,
+    DiagrammeRsvg,
+    rsvg
 Suggests: 
     raster,
     gdistance,
