@@ -94,7 +94,7 @@ mbPrintProgression <- function(dot, sections, overall.CJS, spatial, status.df) {
 #' 
 #' @keywords internal
 #' 
-printDot <- function(dot, sections, spatial) {
+printDot <- function(dot, sections = NULL, spatial) {
 # requires:
 # DiagrammeR
 # DiagrammeRsvg
@@ -103,11 +103,11 @@ printDot <- function(dot, sections, spatial) {
   names(cbPalette) <- c("Orange", "Blue", "Green", "Yellow", "Darkblue", "Darkorange", "Pink", "Grey")
 
   # Prepare node data frame
-    diagram_nodes <- data.frame(
+  diagram_nodes <- data.frame(
     id = 1:length(unique(unlist(dot[, c(1, 3)]))),
     label = unique(unlist(dot[, c(1, 3)])),
     stringsAsFactors = FALSE)
-    if (length(sections) <= length(cbPalette)) {
+  if (!is.null(sections) && length(sections) <= length(cbPalette)) {
     diagram_nodes$fillcolor <- rep(NA_character_, nrow(diagram_nodes))
     for (i in 1:length(sections)) {
        diagram_nodes$fillcolor[grepl(sections[i], diagram_nodes$label)] <- cbPalette[i]
@@ -590,6 +590,55 @@ knitr::kable(last.array.results$results$absolutes)
 ```{r efficiency3, echo = FALSE,  comment = NA}
 cat(last.array.results)
 ```', sep = "")
+  }
+  return(efficiency.fragment)
+}
+
+#' Print efficiency fragment
+#'
+#' Prints the ALS inter-array efficiency for inclusion in printRmd.
+#' 
+#' @inheritParams printProgression
+#' @param intra.CJS The output of the getEstimate calculations.
+#' 
+#' @keywords internal
+#' 
+mbPrintEfficiency <- function(overall.CJS, intra.CJS){
+    efficiency.fragment <- paste('
+**Individuals detected and estimated**
+
+```{r efficiency1, echo = FALSE}
+knitr::kable(overall.CJS$absolutes)
+```
+
+**Array efficiency**
+
+```{r efficiency2, echo = FALSE}
+to.print <- t(paste(round(overall.CJS$efficiency * 100, 1), "%", sep = ""))
+to.print[grepl("NA", to.print)] <- "-"
+colnames(to.print) <- names(overall.CJS$efficiency)
+rownames(to.print) <- "efficiency"
+knitr::kable(to.print)
+```
+
+#### Intra array efficiency estimates
+')
+  if (!is.null(intra.CJS)){
+    for (i in 1:length(intra.CJS)) {
+    efficiency.fragment <- paste0(efficiency.fragment, '
+**Array: ', names(intra.CJS)[i], '**
+
+```{r efficiency',i + 2,', echo = FALSE,  comment = NA}
+knitr::kable(intra.array.CJS[[',i ,']]$absolutes)
+```
+
+*Estimated efficiency:* ', round(intra.CJS[[i]]$combined.efficiency * 100, 2), "%\n")
+    }
+  } else {
+    efficiency.fragment <- paste0(efficiency.fragment, '
+```{r efficiency3, echo = FALSE,  comment = NA}
+cat("No intra-array replicates were indicated.")
+```')
   }
   return(efficiency.fragment)
 }

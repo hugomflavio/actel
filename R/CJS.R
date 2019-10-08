@@ -1,3 +1,61 @@
+#' Prepare intra-array matrices for selected arrays
+#' 
+#' @param replicates A list of arrays containing the respective replicate stations
+#' @param CJS The overall CJS results
+#' @inheritParams setSpatialStandards
+#' @inheritParams labelUnknowns
+#' 
+#' @return A list of dual matrices
+#' 
+#' @keywords internal
+#' 
+getDualMatrices <- function(replicates, CJS, spatial, detections.list) {
+output <- list()
+  for(i in 1:length(replicates)) {
+    continue <- TRUE
+    if (!is.na(CJS$efficiency[names(replicates)[i]])) {
+      appendTo(c("Screen", "Warning", "Report"), paste0("W: An inter-array efficiency has already been calculated for array ", names(replicates)[i],"."))
+      decision <- readline("   Do you want to replace this with an intra-array efficiency estimate?(y/N) ")
+      if (decision == "y" | decision == "Y") {
+        appendTo("Report", paste0("   Replacing efficiency estimation."))
+        continue <- TRUE
+      } else {
+        appendTo("Report", paste0("   Keeping inter-array efficiency estimation."))     
+        continue <- FALSE
+      }
+    }
+    if (continue) {
+      output[[length(output) + 1]] <- dualMatrix(array = names(replicates)[i], 
+        replicates = replicates[[i]], spatial = spatial, detections.list = detections.list)
+      names(output)[[length(output)]] <- names(replicates)[i]
+    }
+  }
+  return(output)
+}
+
+#' Incorporate intra-array estimates in the overall CJS object
+#' 
+#' @param m A list of dual matrices
+#' @param CJS The overall CJS results
+#' 
+#' @return A list containing the updated overall CJS and the intra-array CJS results
+#' 
+#' @keywords internal
+#' 
+includeIntraArrayEstimates <- function(m, CJS) {
+  if(length(m) > 0) {
+    intra.CJS <- lapply(m, dualArrayCJS)
+    for (i in names(intra.CJS)) {
+      CJS$absolutes[4, i] <- round(CJS$absolutes[1, i] * intra.CJS[[i]]$combined.efficiency, 0)
+      CJS$efficiency[i] <- intra.CJS[[i]]$combined.efficiency
+    }
+  } else {
+    intra.CJS <- NULL
+  }
+  return(list(CJS = CJS, intra.CJS = intra.CJS))
+}
+
+
 #' Assembles CJS tables for all group x release site combinations
 #' 
 #' @param mat the original presence/absence matrices
@@ -157,33 +215,6 @@ assembleMatrices <- function(spatial, simple.movements, minimum.detections, stat
     }
   }
   return(recipient)
-}
-
-#' Get efficiency estimate for last array
-#' 
-#' @inheritParams loadDetections
-#' @inheritParams groupMovements
-#' @inheritParams actel
-#' 
-#' @return the modified CJS model for the last array
-#' 
-#' @keywords internal
-#' 
-getEstimate <- function(spatial, detections.list, replicate){
-  if (!is.null(replicate)) {
-    get.estimate = TRUE
-    last.array <- tryCatch(lastMatrix(spatial = spatial, detections.list = detections.list, replicate = replicate),
-      error = function(e) {cat("Error in lastMatrix(): "); message(e); cat("\nRunning CJS without last array efficiency estimate.\n"); get.estimate <<- FALSE})
-    if (get.estimate) {
-      last.array.efficiency <- dualArrayCJS(input = last.array, silent = FALSE)
-      last.array.results <- list(results = last.array.efficiency, matrix = last.array)
-    } else {
-      last.array.results <- "Replicates could not be used for last array estimation."
-    }
-  } else {
-    last.array.results <- "No last array replicates were indicated."
-  }
-  return(last.array.results)
 }
 
 #' Compute simple CJS model
@@ -501,6 +532,7 @@ includeMissing <- function(x, status.df){
   return(x)
 }
 
+
 #' Compile detection matrix for last array
 #'
 #' @inheritParams actel
@@ -511,24 +543,24 @@ includeMissing <- function(x, status.df){
 #' 
 #' @keywords internal
 #' 
-lastMatrix <- function(spatial, detections.list, replicate){
-  appendTo("debug", "Starting lastMatrix.")
-  all.stations <- spatial$stations$Standard.Name[spatial$stations$Array == tail(unlist(spatial$array.order), 1)]
-  if (any(link <- !replicate %in% all.stations)) {
+dualMatrix <- function(array, replicates, spatial, detections.list){
+  appendTo("debug", "Starting dualMatrix.")
+  all.stations <- spatial$stations$Standard.Name[spatial$stations$Array == array]
+  if (any(link <- !replicates %in% all.stations)) {
     if (sum(link) > 1)
-      stop(paste("Stations ", paste(replicate[link], collapse = ", "), " are not part of ", tail(unlist(spatial$array.order), 1), " (available stations: ", paste(all.stations, collapse = ", "), ").", sep = ""))
+      stop(paste("Stations ", paste(replicates[link], collapse = ", "), " are not part of ", array, " (available stations: ", paste(all.stations, collapse = ", "), ").", sep = ""))
     else
-      stop(paste("Station ", paste(replicate[link], collapse = ", "), " is not part of ", tail(unlist(spatial$array.order), 1), " (available stations: ", paste(all.stations, collapse = ", "), ").", sep = ""))      
+      stop(paste("Station ", paste(replicates[link], collapse = ", "), " is not part of ", array, " (available stations: ", paste(all.stations, collapse = ", "), ").", sep = ""))      
   }
-  original <- all.stations[!all.stations %in% replicate]
+  original <- all.stations[!all.stations %in% replicates]
   efficiency <- as.data.frame(matrix(ncol = 2, nrow = length(detections.list)))
-  colnames(efficiency) <- c("original","replicate")
+  colnames(efficiency) <- c("original","replicates")
   rownames(efficiency) <- names(detections.list)
   for (i in 1:length(detections.list)) {
-    efficiency[i, "original"] <- any(!is.na(match(original,detections.list[[i]]$Standard.Name)))
-    efficiency[i, "replicate"] <- any(!is.na(match(replicate,detections.list[[i]]$Standard.Name)))
+    efficiency[i, "original"] <- any(!is.na(match(original, detections.list[[i]]$Standard.Name)))
+    efficiency[i, "replicates"] <- any(!is.na(match(replicates, detections.list[[i]]$Standard.Name)))
   }
-  appendTo("debug", "Terminating lastMatrix.")
+  appendTo("debug", "Terminating dualMatrix.")
   return(efficiency)
 }
 
@@ -571,8 +603,8 @@ dualArrayCJS <- function(input, silent = TRUE){
   combined.p <- 1 - prod(1 - p)
   absolutes <- matrix(c(apply(input, 2, sum), r[1]), nrow = 3)
   colnames(absolutes) <- ""
-  rownames(absolutes) <- c("detected at original:", "detected at replicate: ", "detected at both:")
-  names(p) <- c("original", "replicate")
+  rownames(absolutes) <- c("detected at original:", "detected at replicates: ", "detected at both:")
+  names(p) <- c("original", "replicates")
   if(!silent) appendTo("debug", "Terminating dualArrayCJS.")
   return(list(absolutes = absolutes, single.efficiency = p, combined.efficiency = combined.p))
 }

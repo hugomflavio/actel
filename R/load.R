@@ -8,7 +8,7 @@
 #' 
 #' @keywords internal
 #' 
-loadDot <- function(string = NULL, input = NULL, spatial, sections) {
+loadDot <- function(string = NULL, input = NULL, spatial, sections = NULL) {
   if (is.null(string) & is.null(input))
     stop("No dot file or data were specified.")
   if (is.null(string)) {

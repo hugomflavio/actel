@@ -1,3 +1,61 @@
+#' Compile detection matrix for last array
+#'
+#' @inheritParams actel
+#' @inheritParams loadDetections
+#' @inheritParams groupMovements
+#' 
+#' @return a matrix of detection histories per fish for the last array.
+#' 
+#' @keywords internal
+#' 
+lastMatrix <- function(spatial, detections.list, replicate){
+  appendTo("debug", "Starting lastMatrix.")
+  all.stations <- spatial$stations$Standard.Name[spatial$stations$Array == tail(unlist(spatial$array.order), 1)]
+  if (any(link <- !replicate %in% all.stations)) {
+    if (sum(link) > 1)
+      stop(paste("Stations ", paste(replicate[link], collapse = ", "), " are not part of ", tail(unlist(spatial$array.order), 1), " (available stations: ", paste(all.stations, collapse = ", "), ").", sep = ""))
+    else
+      stop(paste("Station ", paste(replicate[link], collapse = ", "), " is not part of ", tail(unlist(spatial$array.order), 1), " (available stations: ", paste(all.stations, collapse = ", "), ").", sep = ""))      
+  }
+  original <- all.stations[!all.stations %in% replicate]
+  efficiency <- as.data.frame(matrix(ncol = 2, nrow = length(detections.list)))
+  colnames(efficiency) <- c("original","replicate")
+  rownames(efficiency) <- names(detections.list)
+  for (i in 1:length(detections.list)) {
+    efficiency[i, "original"] <- any(!is.na(match(original,detections.list[[i]]$Standard.Name)))
+    efficiency[i, "replicate"] <- any(!is.na(match(replicate,detections.list[[i]]$Standard.Name)))
+  }
+  appendTo("debug", "Terminating lastMatrix.")
+  return(efficiency)
+}
+
+#' Get efficiency estimate for last array
+#' 
+#' @inheritParams loadDetections
+#' @inheritParams groupMovements
+#' @inheritParams actel
+#' 
+#' @return the modified CJS model for the last array
+#' 
+#' @keywords internal
+#' 
+getEstimate <- function(spatial, detections.list, replicate){
+  if (!is.null(replicate)) {
+    get.estimate = TRUE
+    last.array <- tryCatch(lastMatrix(spatial = spatial, detections.list = detections.list, replicate = replicate),
+      error = function(e) {cat("Error in lastMatrix(): "); message(e); cat("\nRunning CJS without last array efficiency estimate.\n"); get.estimate <<- FALSE})
+    if (get.estimate) {
+      last.array.efficiency <- dualArrayCJS(input = last.array, silent = FALSE)
+      last.array.results <- list(results = last.array.efficiency, matrix = last.array)
+    } else {
+      last.array.results <- "Replicates could not be used for last array estimation."
+    }
+  } else {
+    last.array.results <- "No last array replicates were indicated."
+  }
+  return(last.array.results)
+}
+
 #' Calculate CJS for each group.release combination
 #' 
 #' @param the.matrices A list of detection matrices

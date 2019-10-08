@@ -29,7 +29,7 @@ migration <- function(path = NULL, sections, success.arrays, minimum.detections 
   maximum.time = 60, speed.method = c("last to first", "first to first"), 
   if.last.skip.section = TRUE, tz.study.area, start.timestamp = NULL, 
   end.timestamp = NULL, report = TRUE, override = NULL, 
-  exclude.tags = NULL, debug = FALSE, cautious.assignment = TRUE, replicate = NULL) {
+  exclude.tags = NULL, debug = FALSE, cautious.assignment = TRUE, replicates = NULL) {
   
   speed.method <- match.arg(speed.method)
   my.home <- getwd()
@@ -65,7 +65,7 @@ migration <- function(path = NULL, sections, success.arrays, minimum.detections 
       ", exclude.tags = ", ifelse(is.null(exclude.tags), "NULL", paste0("c('", paste(exclude.tags, collapse = "', '"), "')")), 
       ", debug = ", ifelse(debug, "TRUE", "FALSE"), 
       ", cautious.assignment = ", ifelse(cautious.assignment, "TRUE", "FALSE"), 
-      ", replicate = ", ifelse(is.null(replicate),"NULL", paste0("c('", paste(replicate, collapse = "', '"), "')")), ")"
+      ", replicates = ", ifelse(is.null(replicates),"NULL", paste0("c('", paste(replicates, collapse = "', '"), "')")), ")"
       )
 # --------------------
 
@@ -158,18 +158,15 @@ migration <- function(path = NULL, sections, success.arrays, minimum.detections 
 
   appendTo(c("Screen", "Report"), "M: Getting summary information tables.")
   
-  the.matrices <- assembleMatrices(spatial = spatial, simple.movements = simple.movements, minimum.detections = minimum.detections, status.df = status.df)
-  # NOTE NOTE NOTE
-  # This last array results can be expanded to a method of getting efficiency for every array that has no peers
-  last.array.results <- getEstimate(spatial = spatial, detections.list = detections.list, replicate = replicate)
+  section.overview <- assembleSectionOverview(status.df = status.df, sections = sections)
 
-  # obsulete fragment, need to find a new solution for this
-  # if (is.list(last.array.results)) 
-  #   estimate <- last.array.results$results$combined.efficiency
-  # else
-  #   estimate <- NULL
-  # --
-  # NOTE ESTIMATE IS CURRENTLY NOT WORKING. NEED FIX
+  times <- getTimes(simple.movements = simple.movements, spatial = spatial, 
+    tz.study.area = tz.study.area, type = "Arrival")
+# -------------------------------------
+
+# CJS stuff
+  the.matrices <- assembleMatrices(spatial = spatial, simple.movements = simple.movements, minimum.detections = minimum.detections, status.df = status.df)
+
   m.by.array <- breakMatricesByArray(m = the.matrices, arrays = arrays)
   CJS.list <- lapply(m.by.array, function(m) {
     if (length(m) == 1)
@@ -180,6 +177,16 @@ migration <- function(path = NULL, sections, success.arrays, minimum.detections 
 
   overall.CJS <- assembleArrayCJS(mat = the.matrices, CJS = CJS.list, arrays = arrays)
 
+  if (!is.null(replicates)) {
+    intra.array.matrices <- getDualMatrices(replicates = replicates, CJS = overall.CJS, spatial = spatial, detections.list = detections.list)
+    recipient <- includeIntraArrayEstimates(m = intra.array.matrices, CJS = overall.CJS)
+    overall.CJS <- recipient[[1]]
+    intra.array.CJS <- recipient[[2]]
+    rm(recipient)
+  } else {
+    intra.array.CJS <- NULL
+  }
+
   aux <- mbSplitCJS(m = m.by.array, fixed.efficiency = overall.CJS$efficiency)
   aux <- aux[names(the.matrices)]
   split.CJS <- assembleSplitCJS(mat = the.matrices, CJS = aux, arrays = arrays)
@@ -189,11 +196,6 @@ migration <- function(path = NULL, sections, success.arrays, minimum.detections 
   group.CJS <- assembleGroupCJS(mat = the.matrices, CJS = aux, arrays = arrays)
   array.overview <- mbAssembleArrayOverview(input = group.CJS)
   rm(aux)
-
-  section.overview <- assembleSectionOverview(status.df = status.df, sections = sections)
-
-  times <- getTimes(simple.movements = simple.movements, spatial = spatial, 
-    tz.study.area = tz.study.area, type = "Arrival")
 # -------------------------------------
 
 # wrap up in-R objects
@@ -224,19 +226,19 @@ migration <- function(path = NULL, sections, success.arrays, minimum.detections 
   efficiency <- overall.CJS
   deployments <- do.call(rbind.data.frame, deployments)
   if (invalid.dist)
-    save(detections, movements, simple.movements, status.df, 
+    save(detections, movements, simple.movements, status.df,
       section.overview, array.overview, the.matrices, efficiency, 
-      last.array.results, spatial, times, file = resultsname)
+      intra.array.CJS, spatial, times, file = resultsname)
   else
-    save(detections, movements, simple.movements, status.df, 
+    save(detections, movements, simple.movements, status.df,
       section.overview, array.overview, the.matrices, efficiency,
-      last.array.results, spatial, times, dist.mat, file = resultsname)
+      intra.array.CJS, spatial, times, dist.mat, file = resultsname)
 # ------------
 
 # Print graphics
   if (report) {
     biometric.fragment <- printBiometrics(bio = bio)
-    efficiency.fragment <- printEfficiency(overall.CJS = overall.CJS, last.array.results = last.array.results)
+    efficiency.fragment <- mbPrintEfficiency(overall.CJS = overall.CJS, intra.CJS = intra.array.CJS)
     printDotplots(status.df = status.df, invalid.dist = invalid.dist)
     printSurvivalGraphic(section.overview = section.overview)
     # printProgression(status.df = status.df, overall.CJS = overall.CJS, split.CJS = split.CJS, group.CJS = group.CJS)
@@ -291,12 +293,12 @@ migration <- function(path = NULL, sections, success.arrays, minimum.detections 
     return(list(detections = detections, movements = movements, simple.movements = simple.movements,
       status.df = status.df, section.overview = section.overview, array.overview = array.overview,
       matrices = the.matrices, efficiency = overall.CJS, times = times, 
-      last.array.results = last.array.results, spatial = spatial))
+      intra.array.CJS = intra.array.CJS, spatial = spatial))
   else
     return(list(detections = detections, movements = movements, simple.movements = simple.movements,
       status.df = status.df, section.overview = section.overview, array.overview = array.overview,
       matrices = the.matrices, efficiency = overall.CJS, times = times, 
-      last.array.results = last.array.results, spatial = spatial, dist.mat = dist.mat))
+      intra.array.CJS = intra.array.CJS, spatial = spatial, dist.mat = dist.mat))
 }
 
 

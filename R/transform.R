@@ -41,14 +41,16 @@ dotMatrix <- function(input) {
 #' 
 #' @keywords internal
 #' 
-dotList <- function(input, sections) {
+dotList <- function(input, sections = NULL) {
   input$SectionA <- rep(NA_character_, nrow(input))
   input$SectionB <- rep(NA_character_, nrow(input))
-  for (section in sections) {
-     input$SectionA[grepl(section, input$A)] <- section
-     input$SectionB[grepl(section, input$B)] <- section
+  if (!is.null(sections)) {
+    for (section in sections) {
+       input$SectionA[grepl(section, input$A)] <- section
+       input$SectionB[grepl(section, input$B)] <- section
+    }
+    input$Edge <- with(input, SectionA != SectionB)
   }
-  input$Edge <- with(input, SectionA != SectionB)
 
   arrays <- list()
   for (a in unique(unlist(input[,c(1, 3)]))) {
