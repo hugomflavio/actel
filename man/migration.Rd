@@ -10,7 +10,7 @@ migration(path = NULL, sections, success.arrays,
   if.last.skip.section = TRUE, tz.study.area, start.timestamp = NULL,
   end.timestamp = NULL, report = TRUE, override = NULL,
   exclude.tags = NULL, debug = FALSE, cautious.assignment = TRUE,
-  replicate = NULL)
+  replicates = NULL)
 }
 \arguments{
 \item{path}{Path to the folder containing the data. If the R session is already running in the target folder, path may be left as NA}
