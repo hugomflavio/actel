@@ -11,7 +11,7 @@ By bringing together the study area configuration and the recorded detections, a
 
 **1. explore()**
 
-  explore() allows you to quickly go get a summary of your data. You can use explore() to get
+  explore() allows you to quickly get a summary of your data. You can use explore() to get
   a general feel for the study results, and check if the input files are behaving as expected
  
 **2. migration()**
