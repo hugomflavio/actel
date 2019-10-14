@@ -4,7 +4,7 @@
 \alias{printDot}
 \title{Print DOT diagram}
 \usage{
-printDot(dot, sections, spatial)
+printDot(dot, sections = NULL, spatial)
 }
 \arguments{
 \item{dot}{a dot data frame}

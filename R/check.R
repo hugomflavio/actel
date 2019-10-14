@@ -78,6 +78,10 @@ checkUnknownReceivers <- function(input) {
 #' @keywords internal
 #' 
 checkTagsInUnknownReceivers <- function(detections.list, deployments, spatial) {
+  # NOTE: The NULL variables below are actually column names used by data.table.
+  # This definition is just to prevent the package check from issuing a note due unknown variables.
+  Receiver <- NULL
+
   appendTo("debug", "Starting tagsInUnknownReceivers")
   for (i in names(detections.list)) {
     if (any(is.na(detections.list[[i]]$Standard.Name))) {
@@ -100,7 +104,7 @@ checkTagsInUnknownReceivers <- function(detections.list, deployments, spatial) {
         stop("Stopping analysis per user command.\n")
       }
       if (decision == "b" | decision == "B") {
-        recipient <- new_includeUnknownReceiver(spatial = spatial, deployments = deployments, unknown.receivers = unknown.receivers)
+        recipient <- includeUnknownReceiver(spatial = spatial, deployments = deployments, unknown.receivers = unknown.receivers)
         spatial <- recipient[[1]]
         deployments <- recipient[[2]]
       }
@@ -136,7 +140,7 @@ checkDetectionsBeforeRelease <- function(input, bio){
         cat("\n")
         unknown.input = TRUE
         while (unknown.input) {
-          decision <- commentCheck(line = "Decision:(a/b/comment) ", tag = status.df$Transmitter[i])
+          decision <- commentCheck(line = "Decision:(a/b/comment) ", tag = bio$Transmitter[i])
           if (decision == "a" | decision == "A") {
             unknown.input = FALSE
             emergencyBreak()

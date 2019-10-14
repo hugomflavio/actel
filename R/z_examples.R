@@ -19,10 +19,14 @@ createWorkspace <- function() {
 #' Create an example Workspace
 #'
 #' Creates a ready-to-run workspace with example data.
+#' 
+#' @param example.spatial A dataset containing the positions of the deployed ALS and release site.
+#' @param example.biometrics A dataset containing the positions of the deployed ALS and release site.
+#' @param example.detections A dataset containing the detections of the deployed ALS, for the 60 fish.
 #'
 #' @export
 #' 
-exampleWorkspace <- function() {
+exampleWorkspace <- function(example.spatial = example.spatial, example.biometrics = example.biometrics, example.detections = example.detections) {
   if (!dir.exists("exampleWorkspace")) 
     dir.create("exampleWorkspace")
   write.csv(example.spatial, "exampleWorkspace/spatial.csv", row.names = FALSE)
@@ -51,7 +55,7 @@ And follow the instructions as they come. Once finished, explore the object 'res
 #'   \item{Receiver}{The ALS deployed (leave empty if the row is a release site)}
 #'   \item{Latitude}{The latitude of the ALS or release site}
 #'   \item{Longitude}{The longitude of the ALS or release site}
-#'   \item{Group}{The Array to which the ALS belongs, or the first ALS array downstream of the release site.}
+#'   \item{Array}{The Array to which the ALS belongs, or the first ALS array downstream of the release site.}
 #'   \item{Type}{The type of spatial object (must be either Hydrophone or Release)}
 #' }
 #' @source Data collected by the authors.

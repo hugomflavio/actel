@@ -19,13 +19,19 @@ knitr::opts_chunk$set(
 ## Index
 
 1. [Preparing your data](1.0.workspace_requirements.html)
-    1. [**Structuring the study area**](1.1.study_area.html)
+    1. [__Structuring the study area__](1.1.study_area.html)
     1. [Creating a distances matrix](1.2.distances_matrix.html)
-1. [Running actel](2.0.running_analysis.html)
-1. [What is actel doing?](3.0.the_sorting_process.html)
-    1. [Errors and messages](3.1.messages.html)
-1. [Inspecting the results](4.inspecting_results.html)
-1. [Refining the results](5.refining_results.html)
+1. [explore()](2.0.explore.html)
+    1. [From raw to movements](2.1.explore_processes.html)
+    1. [Inspecting the results](2.2.explore_results.html)
+1. [migration()](3.0.migration.html)
+    1. [Processes behind migration()](3.1.migration_processes.html)
+    1. [Inspecting the results](3.2.migration_results.html)
+1. [residency()](4.0.residency.html)
+    1. [Processes behind residency()](4.1.residency_processes.html)
+    1. [Inspecting the results](4.2.residency_results.html)
+1. [Errors and messages](5.messages.html)
+1. [Refining the results](6.refining_results.html)
 
 ## From the field to the computer
 
@@ -46,11 +52,11 @@ The sections are typed into the `actel()` function, and should be ordered in the
 
 ### Arrays
 
-The hydrophone arrays are tightly linked to the study sections. An array called "River1" is expected to belong to section "River", an array called "Fjord3" is expected to belong to section "Fjord", and so forth. Array names **must** be an exact copy of the section they belong to, plus the number of the array. The order by which the fish are expected to pass these arrays is determined by the array number (i.e. River1 comes before River2). Therefore, it is **very important** that you number your arrays correctly.
+The hydrophone arrays are tightly linked to the study sections. An array called "River1" is expected to belong to section "River", an array called "Fjord3" is expected to belong to section "Fjord", and so forth. Array names **must** be an exact copy of the section they belong to, plus the number of the array. The connectivity between the arrays is determined either by their order of appearance in the _spatial.csv_ file, __or__ by a _spatial.dot_ file. Therefore, it is **very important** that you structure your arrays correctly.
 
 #### Avoid overlapping arrays
 
-When a fish moves from one array to another, a new movement event is created (you will learn more about movement events later on). This means that, if you have two hydrophones close to each other, but listed in two different arrays, you can end up with many 'false' movement events (i.e. the fish is just standing still within range of both arrays). Here is an example:
+When a fish moves from one array to another, a new movement event is created (you will learn more about movement events later on). This means that, if you have two receivers close to each other, but listed in two different arrays, you can end up with many 'false' movement events (i.e. the fish is just standing still within range of both arrays). Here is an example:
 
 ```{r, echo=FALSE, results='asis'}
 load("badmovements.Rdata")
@@ -59,17 +65,25 @@ knitr::kable(badmovements[20:25,1:7])
 
 Stations 15 and 17 are very close to each other, but were placed in different arrays. That in turn led to the creation of numerous events with only one detection, with nearly no time travelling between them. This fish ended up having 58 movement events, during most of which it was most likely just standing still.
 
-As a rule of thumb, if two hydrophones' ranges are likely to overlap, you should consider assigning them to the same array:
+As a rule of thumb, if two receivers' ranges are likely to overlap, you should consider assigning them to the same array:
 
 <img src="arrays_good.svg" alt="drawing" width="330"/> <img src="arrays_bad.svg" alt="drawing" width="330"/>
 
 #### Rivers with multiple parallel channels
 
-You may be wondering how to arrange your arrays if you have multiple pathways that the fish may take. Arrays are sorted in a linear order (i.e. River1 comes before River2, which comes before River3) and if a fish fails to be detected on an array, it will be reflected in the efficiency calculations. As such, your arrays should be transversal to all your river channels. 
+If your study area includes multiple pathways that the fish may take, you must tell actel how to structure the data. By default, arrays are sorted in a linear order according to the spatial.csv file. To instruct actel to act otherwise, you must create a 'spatial.dot' file. The spatial.dot file is very simple; all you need to do is connect your arrays with arrows. Here is an example:
 
-Here is an example:
+```
+River1 -> River2 -> River3 -> Fjord -> Sea1 -> Sea2 -> Sea3
+River1 -> River4 -> River5 -> Fjord
+River4 -> River6 -> Fjord
+```
 
-<img src="parallel_channels_good.svg" alt="drawing" width="330"/> <img src="parallel_channels_bad.svg" alt="drawing" width="330"/>
+Note that, for each branch, you will need a new line, that starts and ends in an array that is part of the main branch. The study area listed above looks like this:
+
+<img src="multi-branch.svg" alt="drawing" width="680"/>
+
+This will allow actel to properly structure your study area, and correctly estimate efficiency values for each array.
 
 Now you know how to organise your study area in a way that actel will understand!
 

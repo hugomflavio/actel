@@ -4,10 +4,12 @@
 \alias{loadSpatial}
 \title{Load Spatial file and Check the structure}
 \usage{
-loadSpatial(file)
+loadSpatial(file, verbose = FALSE)
 }
 \arguments{
 \item{file}{an input file with spatial data.}
+
+\item{verbose}{Logical: If TRUE, the appendTo function is enabled.}
 }
 \value{
 The spatial dataframe
@@ -15,4 +17,3 @@ The spatial dataframe
 \description{
 Load Spatial file and Check the structure
 }
-\keyword{internal}

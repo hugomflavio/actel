@@ -1,0 +1,179 @@
+---
+title: "2.0) explore()"
+author: "Hugo Flávio"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{2.0) explore()}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+## Index
+
+1. [Preparing your data](1.0.workspace_requirements.html)
+    1. [Structuring the study area](1.1.study_area.html)
+    1. [Creating a distances matrix](1.2.distances_matrix.html)
+1. [**explore()**](2.0.explore.html)
+    1. [From raw to movements](2.1.explore_processes.html)
+    1. [Inspecting the explore() results](2.2.explore_results.html)
+1. [migration()](3.0.migration.html)
+    1. [Processes behind migration()](3.1.migration_processes.html)
+		1. [Inspecting the migration() results](3.2.migration_results.html)
+1. [residency()](4.0.residency.html)
+    1. [Processes behind residency()](4.1.residency_processes.html)
+		1. [Inspecting the residency() results](4.2.residency_results.html)
+1. [Errors and messages](5.messages.html)
+1. [Refining the results](6.refining_results.html)
+
+
+## The explore() function
+
+The parameters in the `explore()` function are transversal to all functions.
+
+Although there are many parameters available, *you do not need to start working with all of them right away*. This is because many of these parameters have default values. If you want to make a quick check of your data, you can run explore() and just set the `path` and the `tz.study.area` parameters and you will be ready to get some results!
+
+E.g.:
+```r
+explore(path = NULL, tz.study.area = "Europe/London")
+```
+
+Curious about how explore() processes your data? [Have a look under the hood!](2.1.explore_processes.html)
+
+Need help going through the output of explore()? [Find more details here.](2.1.explore_results.html)
+
+
+## General parameters
+
+All the parameters of explore(), which also exist in migration() and residency(), are explained below.
+
+### path
+
+The `path` is the way to the folder where you want to run the analysis. If you are already working in the folder where you have your data files, leave path as `NULL` and the analysis will be run in the current directory.
+
+### maximum.time
+
+If a fish is detected multiple times at one array without being detected on other arrays, these detections are grouped into a single event, assuming that the time difference between two consecutive detections does not exceed `maximum.time` (which is set in **minutes**). Should the time between detections exceed `maximum.time`, a new movement event will be created, on the same hydrophone array.
+
+In the example below, you can see how the same detections can be interpreted as a different number of movement events depending on whether we set `maximum.time` to **a)** 120 minutes, **b)** 60 minutes or **c)** 30 minutes.
+
+<img src="maximum_time.svg" alt="drawing" width="680"/>
+
+#### Movements table for example a:
+
+|Array  | Detections|First station |Last station |First time          |Last time           |Time travelling |Time on array |
+|:------|----------:|:-------------|:------------|:-------------------|:-------------------|:---------------|:-------------|
+|Array1 |         14|St.1          |St.1         |2019-05-15 12:00:00 |2019-05-15 19:45:00 |NA              |7:45          |
+
+#### Movements table for example b:
+
+|Array  | Detections|First station |Last station |First time          |Last time           |Time travelling |Time on array |
+|:------|----------:|:-------------|:------------|:-------------------|:-------------------|:---------------|:-------------|
+|Array1 |          7|St.1          |St.1         |2019-05-15 12:00:00 |2019-05-15 14:40:00 |NA              |2:40          |
+|Array1 |          6|St.1          |St.1         |2019-05-15 16:00:00 |2019-05-15 18:00:00 |1:20            |2:00          |
+|Array1 |          1|St.1          |St.1         |2019-05-15 19:45:00 |2019-05-15 19:45:00 |1:45            |0:00          |
+
+#### Movements table for example c:
+
+|Array  | Detections|First station |Last station |First time          |Last time           |Time travelling |Time on array |
+|:------|----------:|:-------------|:------------|:-------------------|:-------------------|:---------------|:-------------|
+|Array1 |          4|St.1          |St.1         |2019-05-15 12:00:00 |2019-05-15 13:00:00 |NA              |1:00          |
+|Array1 |          3|St.1          |St.1         |2019-05-15 13:50:00 |2019-05-15 14:40:00 |0:50            |0:50          |
+|Array1 |          2|St.1          |St.1         |2019-05-15 16:00:00 |2019-05-15 16:20:00 |1:20            |0:20          |
+|Array1 |          4|St.1          |St.1         |2019-05-15 17:10:00 |2019-05-15 18:00:00 |0:50            |0:50          |
+|Array1 |          1|St.1          |St.1         |2019-05-15 19:45:00 |2019-05-15 19:45:00 |1:45            |0:00          |
+
+### speed.method
+
+When calculating movement speeds from one array to the next, it is important to know if actel should count the time from the **last** detection on one array until the **first** detection on the next, or if you want actel to count the time from the **first** detection on one array to the **first** detection on the next. This is what `speed.method` is doing. You can choose one of `"last to first"` or `"first to first"`. The example below illustrates the difference between both:
+
+<img src="speed_method.svg" alt="drawing" width="680"/>
+
+Note:
+  : If you do not supply a distance matrix, speeds cannot be calculated. Instead, the time difference will be displayed.
+
+### tz.study.area
+
+Hydrophones usually work in Coordinated Universal Time (UTC). Although this is nice to integrate data from multiple hydrophones, depending on where you are working, it may mean that the hydrophones' time is actually displaced from the daytime in your study area. To correct for this, you must include your time zone in this field. For example, when we have study areas in Denmark, we must use `tz.study.area = "Europe/Copenhagen"`.
+
+Time zones can be complicated business, so to help you out, you can search <a href="https://en.wikipedia.org/wiki/List_of_tz_database_time_zones" target="_blank">this wiki page</a> for the time zone code which you should use.
+
+Note:
+  : This time zone **must** match the time zone of the release times listed in the [biometrics file](1.0.workspace_requirements.html#biometrics-file) and in the [deployments file](1.0.workspace_requirements.html#deployments.file).
+
+
+### start.timestamp and end.timestamp
+
+Sometimes your hydrophones contain much more detection data than what you are interested in, which can increase the time it takes to process all the detections. By including a `start.timestamp` and/or an `end.timestamp`, you can trim the detection data to those target date and times.
+
+This is particularly relevant if, for example, you used some of your tags as testers before the study started, or if you used one of ths study's hydrophones to activate and test the tags. A fish being detected before being released is a major issue, and actel will complain about that:
+
+```
+Error: Fish R64K-1111 was detected before being released!
+  Release time: 2018-04-10 12:00:00
+  First detection time: 2018-04-10 09:33:02
+  Number of detections before release: 1
+
+You may either:
+  a) Stop the analysis and check the data;
+  b) Discard the before-release detections and continue.
+
+Decision:(a/b/comment) 
+```
+
+Although you can choose to continue the analysis by discarding the before-release detections, it is highly recommended that you check potential errors in the input files first.
+
+Note:
+  : The timestamps **must** be written in **yyyy-mm-dd hh:mm:ss** format, in the same time zone as your study area.
+  : Curious about that "comment" option in the decision? [Read more about here]
+
+
+### report
+
+The `report` option activates a series of print functions that draw tables and figures for later integration in a html report. When you activate this option, a new *Report* subdirectory is created, where all the relevant files are stored. Before finishing, actel assembles the html report and stores it in your working directory. If you already have a report in your working directory, actel will create a new file with a different name.
+
+You can also inspect each graphic individually in the *Report* subdirectory.
+
+Here are some examples:
+
+<img src="LaTeX_example_survival.svg" alt="drawing" width="330"/> <img src="R64K-4526.png" alt="drawing" width="330"/>
+
+<img src="mb_efficiency.svg" alt="drawing" width="680"/>
+
+Note:
+  : Even if something fails during the report printing, your results will still be saved the *actel_results.RData* file in your working directory!
+
+
+### exclude.tags
+
+It is possible for a stray tag with the same signal as one of your tags enter the study area. Although this is unexpected, it would mean you could end up with two tags that differ only in code spaces. As actel works based on the tag signals alone, it does not know which tag is yours, and which is a stray, so you must intervene. If this happens, the following error is issued:
+
+````
+Error: One or more signals match more than one tag in the detections! Showing relevant signals/tags.
+   Signal 1081 was found on tags A69-1601-1081, R64K-1081.
+Error in checkDupSignals(input = my.list, bio = bio, tag.list = tags$list) : 
+  Fatal exception found. Stopping analysis.
+````
+
+As you can see above, signal 1081 appears both in tags A69-1601-1081 and R64K-1081. As you should be able to identify your tag between the two, you can exclude the other tag and re-start the analysis. Once you do that, actel will let you know the problem is solved:
+
+````
+M: Excluding tag(s) A69-1601-1081 from the analysis per used command (detections removed: 1, respectively).
+````
+
+If more than one tag causes trouble, you can list multiple tags to be excluded, like this: `exclude.tags = c("A69-1601-1081", "A69-1601-1220")`.
+
+Now that you know how to run the explore analysis, you may want to:
+
+__[Learn more about what explore() is doing](2.1.explore_processes.html)__
+
+__[Learn more about the results of explore()](2.2.explore_results.html)__
+
+[Back to top.](#)

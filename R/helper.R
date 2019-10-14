@@ -342,8 +342,8 @@ folderCheck <- function(report, redraw){
       appendTo(c("Screen", "Report", "Warning"), "W: 'report' option can only be activated if 'ggplot2' and 'reshape2' are installed. Please install these. Deactivating 'Report' for the current job.")
       report <- FALSE
     } else {
-      suppressPackageStartupMessages(library(ggplot2))
-      suppressPackageStartupMessages(library(reshape2))
+      # suppressPackageStartupMessages(library(ggplot2))
+      # suppressPackageStartupMessages(library(reshape2))
       if (!dir.exists("Report")) {
         appendTo("Screen", "M: Creating 'Report' subdirectory to store report files.")
         dir.create("Report")
@@ -386,6 +386,8 @@ commentCheck <- function(line, tag) {
 }
 
 #' Delete previous analysis files from the current workspace. Input files are not deleted.
+#' 
+#' @param skip A vector of files to be ignored.
 #' 
 #' @export
 #' 
@@ -434,10 +436,12 @@ havingIP <- function() {
 #' 
 versionCheck <- function() {
   rep.ver <- unlist(strsplit(readLines('https://raw.githubusercontent.com/hugomflavio/actel/master/DESCRIPTION')[3], " "))[2]
-  rep.ver.short <- substr(rep.ver, start = 1, stop = nchar(rep.ver) - 5) 
-  inst.ver <- packageVersion("actel")
+  rep.ver.short <- substr(rep.ver, start = 1, stop = nchar(rep.ver) - 5)
+  rep.ver.num <- as.numeric(gsub(".", "", rep.ver.short))
+  inst.ver <- utils::packageVersion("actel")
   inst.ver.short <- substr(inst.ver, start = 1, stop = nchar(as.character(inst.ver)) - 5) 
-  if (rep.ver.short != inst.ver.short)
+  inst.ver.num <- as.numeric(gsub(".", "", inst.ver.short))
+  if (rep.ver.short > inst.ver.short)
     cat(paste0("-------------------------------------------------------------\n!!! A NEW VERSION of actel is available! (v.", inst.ver.short, " -> v.", rep.ver.short, ")\n!!! You should update actel before continuing.\n!!! To learn how to update actel, run updateActel()\n-------------------------------------------------------------\n"))
 }
 

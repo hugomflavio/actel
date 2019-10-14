@@ -19,6 +19,9 @@ ringsRel(plot.params, border, rings.lty, ring.text, ring.text.pos,
 \item{ring.text.cex}{The size of the ring's text. Ignored if ring.text is set to FALSE.}
 }
 \description{
-Adapted from RosediagRad to draw rings inside the circular plot. Called if rings = TRUE in myRoseDiag
+Adapted from RosediagRad (from the circular package) to draw rings inside the circular plot. Called if rings = TRUE in myRoseDiag
+}
+\details{
+For more details about the circular package, visit its homepage at https://github.com/cran/circular
 }
 \keyword{internal}

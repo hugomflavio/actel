@@ -43,7 +43,7 @@ migration(path = NULL, sections, success.arrays,
 
 \item{cautious.assignment}{If TRUE, actel avoids assigning events with one detection as first and/or last events of a section.}
 
-\item{redraw}{When report is set to TRUE, controls if files created in a previous run of the function should be overridden.}
+\item{replicates}{A list containing, for each desired array, the standard names of the stations to be used as a replicate, for efficiency estimations.}
 }
 \value{
 A list containing 1) the detections used during the analysis, 2) the movement events, 3) the status dataframe, 4) the survival overview per group, 5) the progression through the study area, 6) the ALS array/sections' efficiency, 7) the list of spatial objects used during the analysis.

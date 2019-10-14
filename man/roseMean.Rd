@@ -13,6 +13,8 @@ roseMean(input, col = c("cornflowerblue", "chartreuse3", "deeppink"),
 \arguments{
 \item{input}{the input dataset}
 
+\item{col}{The colours to be used when drawing the means.}
+
 \item{mean.length}{vertical length of the mean dash.}
 
 \item{mean.lwd}{width of the mean dash.}
@@ -28,8 +30,6 @@ roseMean(input, col = c("cornflowerblue", "chartreuse3", "deeppink"),
 \item{edge.length}{Vertical size of the edge whiskers in the range box.}
 
 \item{edge.lwd}{Width of the edge whiskers in the range box.}
-
-\item{mean.col}{colour of the mean dash.}
 }
 \description{
 Computes and draws the mean value for a given dataset, may also plot standard error of the mean

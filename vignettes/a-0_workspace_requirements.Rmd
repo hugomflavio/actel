@@ -21,15 +21,21 @@ knitr::opts_chunk$set(
 1. [**Preparing your data**](1.0.workspace_requirements.html)
     1. [Structuring the study area](1.1.study_area.html)
     1. [Creating a distances matrix](1.2.distances_matrix.html)
-1. [Running actel](2.0.running_analysis.html)
-1. [What is actel doing?](3.0.the_sorting_process.html)
-    1. [Errors and messages](3.1.messages.html)
-1. [Inspecting the results](4.inspecting_results.html)
-1. [Refining the results](5.refining_results.html)
+1. [explore()](2.0.explore.html)
+    1. [From raw to movements](2.1.explore_processes.html)
+    1. [Inspecting the explore() results](2.2.explore_results.html)
+1. [migration()](3.0.migration.html)
+    1. [Processes behind migration()](3.1.migration_processes.html)
+    1. [Inspecting the migration() results](3.2.migration_results.html)
+1. [residency()](4.0.residency.html)
+    1. [Processes behind residency()](4.1.residency_processes.html)
+    1. [Inspecting the residency() results](4.2.residency_results.html)
+1. [Errors and messages](5.messages.html)
+1. [Refining the results](6.refining_results.html)
 
 ## Preparing your data
 
-Actel requires that you organise your input files in a specific fashion. Critically, you should have a file named **biometrics.csv** and one named **spatial.csv** (We will look into the file contents in detail soon). Finally, you also need a **detections** directory, containing all your detection files in *.csv*  format. To create a blank workspace ready to be used, simply run `createWorkspace()`, and a template will be generated automatically in your current work directory.
+Actel requires that you organise your input files in a specific fashion. Critically, you should have a file named **biometrics.csv**, one named **spatial.csv**, and one named **deployments.csv** (We will look into the file contents in detail soon). Finally, you also need a **detections** directory, containing all your detection files in *.csv*  format. To create a blank workspace ready to be used, simply run `createWorkspace()`, and a template will be generated automatically in your current work directory.
 
 ## Biometrics file
 
@@ -52,7 +58,7 @@ Although the column order is not important, it is essential that this table cont
 
 Release.date
   : Corresponds to the date and time when the fish was released, and **must** be typed in **yyyy-mm-dd hh:mm:ss** format. 
-  : **Note:** These timestamps **must** be in the same time zone as the study area, which you will later list in the `tz.study.area` variable, when you run actel.
+  : **Note:** These timestamps **must** be in the local time zone of the study area, which you will later supply in the `tz.study.area` parameter.
 
 Signal 
   : Corresponds to the code emitted by the tag that was implanted on the fish. If you are unsure as to what exactly is the signal being emitted by your tag, you can ask the tag manufacturer more about the differences between code spaces and signals.
@@ -72,7 +78,6 @@ Your spatial file should look similar to this:
 
 ```{r, echo=FALSE, results='asis'}
   spatial <- data.frame(Station.Name=c("River East","River West","Estuary","Site A","Site B")
-    ,Receiver=c("123001","123002","331",NA,NA)
     ,Latitude=c(8.411,8.521,8.402,8.442,8.442)
     ,Longitude=c(40.411,40.521,40.402,40.442,40.442)
     ,Array=c("River1","River1","River2","River1","River2")
@@ -81,14 +86,16 @@ Your spatial file should look similar to this:
 knitr::kable(spatial)
 ```
 
-In this file you should include both your acoustic receivers (i.e. hydrophones) and your release sites. It is essential that this table has the following columns:
+In this file you should include both your station deployment sites and your release sites. It is essential that this table has the following columns:
 
-Receiver
-  : The serial number of the hydrophone placed at this position. If you had more than one hydrophone at the same position (e.g. because the first one was lost), simply create a new *Receiver* column and add the serial number of the new hydrophone there. Add as many *Receiver* columns as you need to fit in all the hydrophones you used at a given station.
+Station.Name
+  : The name of the station will be used to match the receiver deployments.
 
 Array
-  : If you are listing a hydrophone: The array to which the hydrophone belongs. Arrays from a given study section must differ only in number. I.e. arrays **must** have this format: *section#*.
+  : If you are listing a station: The array to which the station belongs. Arrays from a given study section must differ only in number. I.e. arrays **must** have this format: *section#*.*
   : If you are listing a release site: The first array that the fish is expected to cross after being released.
+
+\* This does not apply for the explore() function, which does not take sections into consideration.
 
 Type
   : The nature of the item you are listing. You **must** choose between "Hydrophone" or "Release".
@@ -106,14 +113,42 @@ W: At least one release site has been indicated in the spatial file, but no rele
 
 **[Click here to learn more about how to organise your study area in an actel-friendly way.](1.1.study_area.html)**
 
+## Deployments file
+
+The deployments file is where you will list the receivers you used in the study. here is an example:
+
+```{r, echo=FALSE, results='asis'}
+  deployments <- data.frame(Receiver = c(11111, 22222, 33333),
+    Station.Name = c("River East","River West","Estuary")
+    ,Start = c("2018-01-01 11:30:00", "2018-01-01 11:33:00", "2018-01-01 11:34:00")
+    ,Stop = c("2018-05-03 09:30:00", "2018-05-04 08:33:00", "2018-05-05 12:00:00")
+    )
+knitr::kable(deployments)
+```
+
+Short description of the columns:
+
+Receiver
+  : The serial number of the receiver. If a receiver was retrieved and re-deployed, you should add extra rows for each deployment.
+
+Station.Name
+  : The name of the station where the receiver was deployed. It **must** match one of the station names in the spatial file.
+
+Start and Stop
+  : The times when the receiver was deployed and when the receiver was retrieved, respectively. Must be in a **yyyy-mm-dd hh:mm:ss** format.
+  : Note that these time stamps **must** be in the local time zone of the study area, which you will later supply in the `tz.study.area` parameter.
+
 ## Detections
 
 Including your detections is the easiest part. Copy the *.csv* files offloaded from your hydrophones to the *detections* folder that was created by the *createWorkspace()* function and actel will know they are to be imported. Right now actel can upload files generated from VEMCO and THELMA manufactured hydrophones. If you have an hydrophone from a different manufacturer, or if you are using one of the supported manufacturers and get the warning displayed below, please to contact us so we can solve the issue.
 
 ```
-W: File 'filename' does not match to any of the supported hydrophone file formats! If your file corresponds to a hydrophone log and actel did not recognize it, please contact the developer team: teamcontact
+W: File 'filename' does not match to any of the supported hydrophone file formats! If your file corresponds to a hydrophone log and actel did not recognize it, please contact the developer team through www.github.com/hugomflavio/actel/issues/new
 ```
 
+Note:
+  : The detection time stamps must be in UTC. This is the default time zone used by the receivers, so as long as you did not edit the raw files, all should be ready to go.
+  
 ## Optional: Distances matrix
 
 A distances matrix is a table that contains information on  the distance (in metres) between every pair of spatial elements in your study area (i.e. your receivers and your release sites). It looks like the table below:
@@ -130,6 +165,46 @@ A distances matrix is a table that contains information on  the distance (in met
 
 **[You can learn more about creating distances matrices in this page.](1.2.distances_matrix.html)**
 
-Now that you know how to organise your workspace, [let's get the analysis going!](2.0.running_analysis.html)
+## Optional: Spatial.dot file
+
+If your study are has multiple branches, then you need to tell actel how these branches connect with each other. This file is optional because, if ommitted, actel will assume that your study area is composed by a single branch and that the array order is the one listed in the spatial.csv file.
+
+The spatial.dot file is very simple; all you need to do is connect your arrays with arrows. Here is an example:
+
+```
+River1 -> River2 -> River3 -> Fjord -> Sea1 -> Sea2 -> Sea3
+River1 -> River4 -> River5 -> Fjord
+River4 -> River6 -> Fjord
+```
+
+Note that, for each branch, you will need a new line, that starts and ends in an array that is part of the main branch. The study area listed above looks like this:
+
+<img src="multi-branch.svg" alt="drawing" width="680"/>
+
+## Running the analysis
+
+Now that you have prepared your workspace, it is time to start the analysis. The first thing you need to do is decide which analysis you want to run: `explore()`, `migration()` or `residency()`. Here is some more information on them:
+
+**1. explore()**
+
+  explore() allows you to quickly go get a summary of your data. You can use explore() to get
+  a general feel for the study results, and check if the input files are behaving as expected. 
+
+  [Learn more about the explore function.](2.0.explore.html)
+ 
+**2. migration()**
+
+  The migration() analysis runs the same initial checks as explore(), but on top of it, it analysis
+  the fish behaviour. By selecting the arrays that lead to success, you can define whether or not
+  your fish survived the study. Multiple options allow you to tweak the analysis to fit your study perfectly.
+
+  [Learn more about the migration function.](3.0.migration.html)
+ 
+**3. residency()**
+
+  The residency() analysis is still under construction. Keep an eye out for updates!
+
+  [Learn more about the residency function.](4.0.residency.html)
+
 
 [Back to top.](#)

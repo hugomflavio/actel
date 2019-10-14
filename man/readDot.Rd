@@ -7,7 +7,9 @@
 readDot(input = NULL, string = NULL)
 }
 \arguments{
-\item{input}{A simple .dot file}
+\item{input}{The name of the dot file}
+
+\item{string}{A dot string}
 }
 \value{
 A table with A to B rows
@@ -15,4 +17,3 @@ A table with A to B rows
 \description{
 Read dot file
 }
-\keyword{internal}

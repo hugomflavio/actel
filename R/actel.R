@@ -1,4 +1,4 @@
-#' @importFrom circular sd mean.circular var
+#' @importFrom circular sd.circular mean.circular var.circular
 NULL
 
 #' Actel: Acoustic telemetry data sorting
@@ -23,6 +23,7 @@ NULL
 #' @param exclude.tags A list of tags that should be excluded from the detection data before any analyses are performed. Intended to be used if stray tags from a different code space but with the same signal as a target tag are detected in the study area.
 #' @param debug If TRUE, temporary files are not deleted at the end of the analysis. Defaults to FALSE.
 #' @param cautious.assignment If TRUE, actel avoids assigning events with one detection as first and/or last events of a section.
+#' @param replicate A vector of station standard names to use as a replicate of the last array, for efficiency estimations.
 #' 
 #' @return A list containing 1) the detections used during the analysis, 2) the movement events, 3) the status dataframe, 4) the survival overview per group, 5) the progression through the study area, 6) the ALS array/sections' efficiency, 7) the list of spatial objects used during the analysis.
 #' 

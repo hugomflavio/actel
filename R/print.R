@@ -222,6 +222,10 @@ storeStrays <- function(){
 #' @keywords internal
 #' 
 printBiometrics <- function(bio) {
+  # NOTE: The NULL variables below are actually column names used by ggplot.
+  # This definition is just to prevent the package check from issuing a note due unknown variables.
+  Group <- NULL
+
   appendTo("debug", "Starting printBiometrics.")
   biometric.fragment <- ""
   if (any(C <- grepl("Length", colnames(bio)) | grepl("Weight", colnames(bio)) | grepl("Mass", colnames(bio)) | grepl("Size", colnames(bio)))) {
@@ -263,6 +267,11 @@ printBiometrics <- function(bio) {
 #' @keywords internal
 #' 
 printDotplots <- function(status.df, invalid.dist) {
+  # NOTE: The NULL variables below are actually column names used by ggplot.
+  # This definition is just to prevent the package check from issuing a note due unknown variables.
+  value <- NULL
+  Transmitter <- NULL
+
   appendTo("debug", "Starting printDotplots.")
   t1 <- status.df[status.df$Detections > 0, c("Transmitter", "Detections", colnames(status.df)[grepl("Time.until", colnames(status.df)) | grepl("Speed.to", colnames(status.df)) | grepl("Time.in", 
     colnames(status.df))])]
@@ -374,7 +383,7 @@ printSurvivalGraphic <- function(section.overview) {
     survival$value[active.row] <- section.overview[j, ncol(section.overview)]/section.overview[j, 1]
   }
   survival$section <- factor(survival$section, levels = unique(survival$section))
-  p <- ggplot2::ggplot(survival, ggplot2::aes(x = section, y = value))
+  p <- ggplot2::ggplot(survival, ggplot2::aes(x = survival$section, y = survival$value))
   p <- p + ggplot2::geom_bar(stat = "identity", fill = cbPalette[[2]], colour = cbPalette[[2]])
   p <- p + ggplot2::facet_grid(. ~ group)
   p <- p + ggplot2::theme_bw()
@@ -659,6 +668,13 @@ cat("No intra-array replicates were indicated.")
 #' 
 printIndividuals <- function(redraw, detections.list, bio, status.df = NULL, tz.study.area, 
   movements, simple.movements = NULL, extension = "png") {
+  # NOTE: The NULL variables below are actually column names used by ggplot.
+  # This definition is just to prevent the package check from issuing a note due unknown variables.
+  Timestamp <- NULL
+  Standard.Name <- NULL
+  Array <- NULL
+  Station <- NULL
+
   cbPalette <- c("#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7", "#999999")
   names(cbPalette) <- c("Orange", "Blue", "Green", "Yellow", "Darkblue", "Darkorange", "Pink", "Grey")
   appendTo(c("Screen", "Report"), "M: Drawing individual graphics for the report.")
@@ -780,9 +796,12 @@ printIndividuals <- function(redraw, detections.list, bio, status.df = NULL, tz.
 
 #' Print circular graphics for each array
 #' 
-#' Prints the time of first entry point on each of the arrays. Functions adapted from the circular R package.
+#' Prints the time of first entry point on each of the arrays. Contains functions adapted from the circular R package.
+#' 
+#' For more details about the original function, visit the circular package homepage at https://github.com/cran/circular
 #' 
 #' @param times a (list of) circular object(s)
+#' @inheritParams splitDetections
 #' 
 #' @keywords internal
 #' 
@@ -805,9 +824,9 @@ printCircular <- function(times, bio){
       ylegend <- -0.97
     }
     prop <- roundDown(1 / max(unlist(lapply(trim.times, function(x) table(roundUp(x, to = 1)) / sum(!is.na(x))))), to = 1)
-    {svg(paste0("Report/times_", names(times)[i], ".svg"), height = 5, width = 5, bg = "transparent")
+    {grDevices::svg(paste0("Report/times_", names(times)[i], ".svg"), height = 5, width = 5, bg = "transparent")
     par(mar = c(1, 2, 2, 1))
-    circular:::CirclePlotRad(main = names(times)[i], shrink = 1.05)
+    copyOfCirclePlotRad(main = names(times)[i], shrink = 1.05)
     # circularSection(from = sunset, 
     #   to = sunrize, units = "hours", template = "clock24", 
     #   limits = c(1, 0), fill = scales::alpha("grey", 0.3), border = "transparent")
@@ -822,7 +841,7 @@ printCircular <- function(times, bio){
       legend(x = -1.2, y = ylegend,
       legend = paste(names(trim.times), " (", unlist(lapply(trim.times, function(x) sum(!is.na(x)))), ")", sep =""),
       fill = params$col, bty = "n", x.intersp = 0.3, cex = 0.8)
-    dev.off()}
+    grDevices::dev.off()}
     if (i %% 2 == 0)
       circular.plots <- paste0(circular.plots, "![](times_", names(times)[i], ".svg){ width=50% }\n")
     else
@@ -845,16 +864,16 @@ printCircular <- function(times, bio){
 #' 
 circularSection <- function(from, to, units = "hours", template = "clock24", limits = c(1, 0), fill = "white", border = "black"){
   if( inherits(from,"character") ){
-    hour.from <- circular(decimalTime(from), units = units, template = template)
-    hour.to <- circular(decimalTime(to), units = units, template = template)
+    hour.from <- circular::circular(decimalTime(from), units = units, template = template)
+    hour.to <- circular::circular(decimalTime(to), units = units, template = template)
   } else {
-    hour.from <- circular(from, units = units, template = template)
-    hour.to <- circular(to, units = units, template = template)
+    hour.from <- circular::circular(from, units = units, template = template)
+    hour.to <- circular::circular(to, units = units, template = template)
   }
   if(hour.to < hour.from) hour.to <- hour.to + 24
   zero <- attr(hour.from,"circularp")$zero # extracted from the circular data
-  xmin <- as.numeric(conversion.circular(hour.from, units = "radians")) * -1
-  xmax <- as.numeric(conversion.circular(hour.to, units = "radians")) * -1
+  xmin <- as.numeric(circular::conversion.circular(hour.from, units = "radians")) * -1
+  xmax <- as.numeric(circular::conversion.circular(hour.to, units = "radians")) * -1
   xx <- c(limits[1] * cos(seq(xmin, xmax, length = 1000) + zero), rev(limits[2] * cos(seq(xmin, xmax, length = 1000) + zero)))
   yy <- c(limits[1] * sin(seq(xmin, xmax, length = 1000) + zero), rev(limits[2] * sin(seq(xmin, xmax, length = 1000) + zero)))
   polygon(xx, yy, col = fill, border = border)
@@ -862,7 +881,9 @@ circularSection <- function(from, to, units = "hours", template = "clock24", lim
 
 #' Edited rose diagram function
 #' 
-#' Adapted from the rose.diag function of the circular package
+#' Adapted from the rose.diag function of the circular package.
+#' 
+#' For more details about the original function, visit the circular package homepage at https://github.com/cran/circular
 #' 
 #' @param x a vector, matrix or data.frame. The object is coerced to class circular.
 #' @param pch point character to use. See help on par.
@@ -950,7 +971,7 @@ myRoseDiag <- function (x, pch = 16, cex = 1, axes = TRUE, shrink = 1, bins = 24
     next.points <- plot.info$next.points
   }
   if (!add) {
-    circular:::CirclePlotRad(xlim = xlim, ylim = ylim, uin = uin, shrink = shrink, 
+    copyOfCirclePlotRad(xlim = xlim, ylim = ylim, uin = uin, shrink = shrink, 
       tol = tol, main = main, sub = sub, xlab = xlab, ylab = ylab, 
       control.circle = control.circle)
   }
@@ -990,7 +1011,7 @@ myRoseDiag <- function (x, pch = 16, cex = 1, axes = TRUE, shrink = 1, bins = 24
       if (template == "clock12") 
         x <- 2 * x
       x <- x %% (2 * pi)
-      circular:::RosediagRad(x, zero = zero, rotation, bins, upper, 
+      copyOfRosediagRad(x, zero = zero, rotation, bins, upper, 
         radii.scale, prop, border, col = col[iseries])
     }
   }
@@ -1000,7 +1021,9 @@ myRoseDiag <- function (x, pch = 16, cex = 1, axes = TRUE, shrink = 1, bins = 24
 
 #' Draw rings at absolute points
 #' 
-#' Adapted from RosediagRad to draw rings inside the circular plot. Called if rings = TRUE in myRoseDiag
+#' Adapted from RosediagRad (from the circular package) to draw rings inside the circular plot. Called if rings = TRUE in myRoseDiag
+#' 
+#' For more details about the circular package, visit its homepage at https://github.com/cran/circular
 #' 
 #' @inheritParams myRoseDiag
 #' 
@@ -1041,7 +1064,9 @@ ringsAbs <- function(plot.params, border, rings.lty,
 
 #' Draw rings at relative points
 #' 
-#' Adapted from RosediagRad to draw rings inside the circular plot. Called if rings = TRUE in myRoseDiag
+#' Adapted from RosediagRad (from the circular package) to draw rings inside the circular plot. Called if rings = TRUE in myRoseDiag
+#' 
+#' For more details about the circular package, visit its homepage at https://github.com/cran/circular
 #' 
 #' @inheritParams myRoseDiag
 #' 
@@ -1070,7 +1095,7 @@ ringsRel <- function(plot.params, border, rings.lty,
 #' or standard deviation ranges.
 #' 
 #' @param input the input dataset
-#' @param mean.col colour of the mean dash.
+#' @param col The colours to be used when drawing the means.
 #' @param mean.length vertical length of the mean dash.
 #' @param mean.lwd width of the mean dash.
 #' @param box.range One of "none", "std.error" or "sd", controls the statistic used to draw the range boxes.
@@ -1121,3 +1146,113 @@ roseMean <- function(input, col = c("cornflowerblue", "chartreuse3", "deeppink")
   }
 }
 
+#' circular:::circlePlotRad
+#' 
+#' This function is an EXACT copy of the function circlePlotRad in the circular package. 
+#' As the function is not exported by the original package, I have copied it here to resolve
+#' the note thrown by devtools:check()
+#' 
+#' For more details about the original function, visit the circular package homepage at https://github.com/cran/circular
+#' 
+#' @param xlim,ylim the ranges to be encompassed by the x and y axes. Useful for centering the plot.
+#' @param uin desired values for the units per inch parameter. If of length 1, the desired units per inch on the x axis.
+#' @param shrink parameter that controls the size of the plotted circle. Default is 1. Larger values shrink the circle, while smaller values enlarge the circle.
+#' @param tol proportion of white space at the margins of plot.
+#' @param main,sub,xlab,ylab title, subtitle, x label and y label of the plot.
+#' @param control.circle parameters passed to plot.default in order to draw the circle. The function circle.control is used to set the parameters.
+#' 
+#' @keywords internal
+#' 
+copyOfCirclePlotRad <- function (xlim = c(-1, 1), ylim = c(-1, 1), uin = NULL, shrink = 1, 
+    tol = 0.04, main = NULL, sub = NULL, xlab = NULL, ylab = NULL, 
+    control.circle = circular::circle.control()) 
+{
+    xlim <- shrink * xlim
+    ylim <- shrink * ylim
+    midx <- 0.5 * (xlim[2] + xlim[1])
+    xlim <- midx + (1 + tol) * 0.5 * c(-1, 1) * (xlim[2] - xlim[1])
+    midy <- 0.5 * (ylim[2] + ylim[1])
+    ylim <- midy + (1 + tol) * 0.5 * c(-1, 1) * (ylim[2] - ylim[1])
+    oldpin <- par("pin")
+    xuin <- oxuin <- oldpin[1]/diff(xlim)
+    yuin <- oyuin <- oldpin[2]/diff(ylim)
+    if (is.null(uin)) {
+        if (yuin > xuin) 
+            yuin <- xuin
+        else xuin <- yuin
+    }
+    else {
+        if (length(uin) == 1) 
+            uin <- uin * c(1, 1)
+        if (any(c(xuin, yuin) < uin)) 
+            stop("uin is too large to fit plot in")
+        xuin <- uin[1]
+        yuin <- uin[2]
+    }
+    xlim <- midx + oxuin/xuin * c(-1, 1) * diff(xlim) * 0.5
+    ylim <- midy + oyuin/yuin * c(-1, 1) * diff(ylim) * 0.5
+    n <- control.circle$n
+    x <- cos(seq(0, 2 * pi, length = n))
+    y <- sin(seq(0, 2 * pi, length = n))
+    axes <- FALSE
+    log <- ""
+    xaxs <- "i"
+    yaxs <- "i"
+    ann <- par("ann")
+    frame.plot <- axes
+    panel.first <- NULL
+    panel.last <- NULL
+    asp <- NA
+    plot.default(x = x, y = y, type = control.circle$type, xlim = xlim, 
+        ylim = ylim, log = "", main = main, sub = sub, 
+        xlab = xlab, ylab = ylab, ann = ann, axes = axes, frame.plot = frame.plot, 
+        panel.first = panel.first, panel.last = panel.last, asp = asp, 
+        col = control.circle$col, bg = control.circle$bg, pch = control.circle$pch, 
+        cex = control.circle$cex, lty = control.circle$lty, lwd = control.circle$lwd)
+}
+
+#' circular:::RosediagRad
+#' 
+#' This function is an EXACT copy of the function RosediagRad in the circular package. 
+#' As the function is not exported by the original package, I have copied it here to resolve
+#' the note thrown by devtools:check()
+#' 
+#' For more details about the original function, visit the circular package homepage at https://github.com/cran/circular
+#' 
+#' @inheritParams myRoseDiag
+#' @keywords internal
+#' 
+copyOfRosediagRad <- function (x, zero, rotation, bins, upper, radii.scale, prop, 
+    border, col, ...) 
+{
+    n <- length(x)
+    freq <- rep(0, bins)
+    arc <- (2 * pi)/bins
+    if (!is.logical(upper)) 
+        stop("upper must be logical")
+    if (upper == TRUE) 
+        x[x == 0] <- 2 * pi
+    x[x >= 2 * pi] <- 2 * pi - 4 * .Machine$double.eps
+    breaks <- seq(0, 2 * pi, length.out = (bins + 1))
+    freq <- hist.default(x, breaks = breaks, plot = FALSE, right = upper)$counts
+    rel.freq <- freq/n
+    if (rotation == "clock") 
+        rel.freq <- rev(rel.freq)
+    if (radii.scale == "sqrt") {
+        radius <- sqrt(rel.freq) * prop
+    }
+    else {
+        radius <- rel.freq * prop
+    }
+    sector <- seq(0, 2 * pi - (2 * pi)/bins, length = bins)
+    mids <- seq(arc/2, 2 * pi - pi/bins, length = bins)
+    for (i in 1:bins) {
+        if (rel.freq[i] != 0) {
+            xx <- c(0, radius[i] * cos(seq(sector[i], sector[i] + 
+                (2 * pi)/bins, length = 1000/bins) + zero), 0)
+            yy <- c(0, radius[i] * sin(seq(sector[i], sector[i] + 
+                (2 * pi)/bins, length = 1000/bins) + zero), 0)
+            polygon(xx, yy, border = border, col = col, ...)
+        }
+    }
+}

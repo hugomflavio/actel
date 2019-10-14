@@ -5,7 +5,6 @@
 #' It is strongly recommended to read the package vignettes before attempting to run the analyses. You can find the vignettes by running browseVignettes('actel') .
 #' 
 #' @param path Path to the folder containing the data. If the R session is already running in the target folder, path may be left as NA
-#' @param success.arrays The ALS arrays mark the end of the study area. If a fish crosses one of these arrays, it is considered to have successfully migrated through the area.
 #' @param maximum.time The number of minutes that must pass between detections for a new event to be created.
 #' @param speed.method One of 'last to first' or 'first to first'. In the former, the last detection on a given array/section is matched to the first detection on the next array/section (default). If changed to 'first to first', the first detection on two consecutive arrays/sections are used to perform the calculations.
 #' @param tz.study.area The time-zone of the study area. Necessary to convert the ALS time data, which is in UTC.
@@ -14,11 +13,14 @@
 #' @param report Whether graphics, tables and LaTeX report files should be created. Defaults to TRUE. Allows automatic compiling of a PDF report after the analysis.
 #' @param exclude.tags A list of tags that should be excluded from the detection data before any analyses are performed. Intended to be used if stray tags from a different code space but with the same signal as a target tag are detected in the study area.
 #' @param debug If TRUE, temporary files are not deleted at the end of the analysis. Defaults to FALSE.
-#' @param cautious.assignment If TRUE, actel avoids assigning events with one detection as first and/or last events of a section.
 #' 
 #' @return A list containing 1) the detections used during the analysis, 2) the movement events, 3) the status dataframe, 4) the survival overview per group, 5) the progression through the study area, 6) the ALS array/sections' efficiency, 7) the list of spatial objects used during the analysis.
 #' 
 #' @export
+#' 
+#' @import stats
+#' @import utils
+#' @import graphics
 #' 
 explore <- function(path = NULL, maximum.time = 60, 
     speed.method = c("last to first", "first to first"),
@@ -87,8 +89,7 @@ explore <- function(path = NULL, maximum.time = 60,
   appendTo(c("Screen", "Report"), paste("M: Number of target tags: ", nrow(bio), ".", sep = ""))
   deployments <- loadDeployments(file = "deployments.csv", tz.study.area = tz.study.area)
   checkDeploymentTimes(input = deployments) # check that receivers are not deployed before being retrieved
-  spatial <- loadSpatial(file = "spatial.csv")
-  spatial <- setSpatialStandards(input = spatial) # Create Standard.Name for each station
+  spatial <- loadSpatial(file = "spatial.csv", verbose = TRUE)
   deployments <- checkDeploymentStations(input = deployments, spatial = spatial) # match Station.Name in the deployments to Station.Name in spatial, and vice-versa
   deployments <- createUniqueSerials(input = deployments) # Prepare serial numbers to overwrite the serials in detections
   detections <- loadDetections(start.timestamp = start.timestamp, end.timestamp = end.timestamp, tz.study.area = tz.study.area)

@@ -114,6 +114,10 @@ getGroupCJS <- function(the.matrices, status.df, fixed.efficiency = NULL) {
 #' @keywords internal
 #' 
 printProgression <- function(status.df, overall.CJS, split.CJS, group.CJS) {
+  # NOTE: The NULL variables below are actually column names used by ggplot.
+  # This definition is just to prevent the package check from issuing a note due unknown variables.
+  Group <- NULL
+
   appendTo("debug", "Starting printProgression_test.")
   ## Absolutes per array per group per release site.
   detailed.absolutes <- lapply(split.CJS, function(x) x$absolutes)
@@ -157,16 +161,16 @@ printProgression <- function(status.df, overall.CJS, split.CJS, group.CJS) {
   the.ceiling <- max(the.final.totals$n)
   cbPalette <- c("#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7", "#999999")
   names(cbPalette) <- c("Orange", "Blue", "Green", "Yellow", "Darkblue", "Darkorange", "Pink", "Grey")
-  p <- ggplot2::ggplot(data = progression, ggplot2::aes(x = Array, y = Value))
+  p <- ggplot2::ggplot(data = progression, ggplot2::aes(x = progression$Array, y = progression$Value))
   # The bars
-  p <- p + ggplot2::geom_bar(stat = "identity", ggplot2::aes(fill = Fill))
+  p <- p + ggplot2::geom_bar(stat = "identity", ggplot2::aes(fill = progression$Fill))
   # The totals dashed line
-  p <- p + ggplot2::geom_line(data = the.final.totals, ggplot2::aes(x = nArray,
-    y = n, group = Group), linetype = "dashed", colour = "red")
+  p <- p + ggplot2::geom_line(data = the.final.totals, ggplot2::aes(x = the.final.totals$nArray,
+    y = the.final.totals$n, group = the.final.totals$Group), linetype = "dashed", colour = "red")
   # The additions annotation
   if (!abort.additions)
-    p <- p + ggplot2::geom_text(data = additions, ggplot2::aes(x = (as.numeric(Array) - 0.5), 
-    label = paste0(" +", n, " released")), y = the.ceiling, hjust = 0, vjust = -0.5, colour = "red")
+    p <- p + ggplot2::geom_text(data = additions, ggplot2::aes(x = (as.numeric(additions$Array) - 0.5), 
+    label = paste0(" +", additions$n, " released")), y = additions$the.ceiling, hjust = 0, vjust = -0.5, colour = "red")
   p <- p + ggplot2::facet_grid(Group ~ .)
   p <- p + ggplot2::theme_bw()
   p <- p + ggplot2::theme(panel.grid.minor.x = ggplot2::element_blank(), 
@@ -225,6 +229,10 @@ unknownReceiversCheckA <- function(detections, spatial){
 #' @keywords internal
 #' 
 unknownReceiversCheckB <- function(detections.list, spatial) {
+  # NOTE: The NULL variables below are actually column names used by data.table.
+  # This definition is just to prevent the package check from issuing a note due unknown variables.
+  Receiver <- NULL
+  
   appendTo("debug", "Starting unknownReceiversCheckB.")
   reset.names <- FALSE
   for (i in names(detections.list)) {

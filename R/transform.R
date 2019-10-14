@@ -204,7 +204,7 @@ transformSpatial <- function(spatial, bio, sections = NULL) {
 #' @keywords internal
 #' 
 setSpatialStandards <- function(input){
-  appendTo("debug","Terminating setSpatialStandards")
+  appendTo("debug","Starting setSpatialStandards")
   input$Standard.Name <- as.character(input$Station.Name)
   link <- input$Type == "Hydrophone"
   input$Standard.Name[link] <- paste("St.", seq_len(sum(input$Type == "Hydrophone")), sep = "")

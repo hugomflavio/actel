@@ -27,36 +27,6 @@ knitr::opts_chunk$set(
 1. [**Inspecting the results**](4.inspecting_results.html)
 1. [Refining the results](5.refining_results.html)
 
-## Results within R
-
-If you ran the actel function and stored it into an object, this object will now be a list, containing all the useful results actel has compiled for you:
-
-### detections
-
-The `detections` object is a list of the raw detections found in your detections file, split by each of the target tags. This is the base data with which actel worked. Here is an example:
-
-|Timestamp           |Receiver |CodeSpace |Signal |Transmitter |Standard.Name |Array  |
-|:-------------------|:--------|:---------|:------|:-----------|:-------------|:------|
-|2018-04-18 19:07:45 |130763   |R64K      |4701   |R64K-4701   |St.2          |River1 |
-|2018-04-18 19:08:06 |130763   |R64K      |4701   |R64K-4701   |St.2          |River1 |
-|2018-04-18 19:56:39 |130766   |R64K      |4701   |R64K-4701   |St.7          |River1 |
-|2018-04-18 20:01:11 |126324   |R64K      |4701   |R64K-4701   |St.5          |River1 |
-|2018-04-18 20:13:43 |126324   |R64K      |4701   |R64K-4701   |St.5          |River1 |
-|2018-04-18 20:15:11 |126324   |R64K      |4701   |R64K-4701   |St.5          |River1 |
-
-
-### movements
-
-The `movements` object is a list of the movement events created during [the sorting process](3.0.the_sorting_process.html#from-detections-to-movements). These records can become very useful if you need to go back to a given fish and inspect the movements in more detail. Here is an example:
-
-|Array  | Detections|First station |Last station |First time          |Last time           |Time travelling |Time on array |
-|:------|----------:|:-------------|:------------|:-------------------|:-------------------|:---------------|:-------------|
-|River1 |         92|St.2          |St.2         |2018-04-18 19:07:45 |2018-04-18 23:27:29 |NA              |4:19          |
-|River2 |          1|St.11         |St.11        |2018-04-18 23:49:16 |2018-04-18 23:49:16 |0:21            |-             |
-|River3 |          3|St.12         |St.12        |2018-04-19 01:52:34 |2018-04-19 01:57:01 |2:03            |0:04          |
-|River4 |         10|St.13         |St.13        |2018-04-19 03:35:44 |2018-04-19 03:42:17 |1:38            |0:06          |
-|Bay1   |         52|St.16         |St.17        |2018-04-20 05:33:51 |2018-04-20 06:12:20 |25:51           |0:38          |
-|Bay1   |         69|St.17         |St.16        |2018-04-20 12:00:31 |2018-04-20 13:00:36 |5:48            |1:00          |
 
 ### simple.movements
 
@@ -111,53 +81,21 @@ In this object you will find the matrix/matrices that were used for efficiency e
 Note:
   : These matrices only represent the forward movements. You can read more about it in the description of the `overall.CJS`.
 
-### arrival.times
 
-This data frame contains the timestamps of first valid detection on each array, for each fish. While in actel it is used to draw the circular plots, you can also use it to test for differences between groups!
 
-## Results in your working directory
 
-On top of the results stored in your R session, actel saves some additional information in your working directory.
 
-### actel_results.RData
 
-To make sure that you don't accidentally loose your results, actel stores them right away in the target folder. The results present in this file are the same as the ones you obtain directly in your R console (see above).
 
-### actel.log.txt
 
-This log is where actel has written what was done during the analysis. It contains everything: summary information, errors, warnings and messages and the options you have taken while the analysis was running. It is worth keeping it in case you need to find out the reasoning behind some result. To avoid overwriting when conducting multiple analysis, the actel.log.txt file is preceded by the timestamp of when it was created (e.g. '2019-05-14.10.51.40.actel.log').
 
-### stray_tags.csv
 
-Depending on how closed your study area is, the deployed hydrophones may pick up stray tags that came in range during the study period. Actel stores a brief summary of these tags in this .csv file, in case you are interested in knowing which tags these were, and perhaps want to share the codes with your colleagues.
 
-### actel_report.html (if report = TRUE)
 
-This is the main non-R output. If you activated the `report` option, actel will compile a html report for you. This report contains the following sections:
-
-1. **Summary**
-
-  Contains brief information on the study. It is useful to check up if anything looks wrong (i.e. the number of target tags, the data range).
-
-1. **Stations** and **Releases**
-
-	A table containing the spatial elements of the study (i.e. receivers and release sites). Any unknown hydrophones found during the analysis will also show up here. Since the station names can vary wildly, actel creates Standard names for your stations (e.g. "St.1","St.2"). When looking at the individual detection graphics, you can refer back to this table to match the standard names with the hydrophone serial numbers.
 
 1. **Array forward efficiency**
 
 	Here you can see how efficient your receiver arrays were at detecting the fish that moved past them. These results can also be found in the `overall.CJS` object, which is in your results in R. If you supplied replicates, the results of the estimation of the last array efficiency will also show up here.
-
-1. **Warning messages**
-
-	These represent warnings, errors and particularly important messages that were displayed during the analysis. By having them extracted and put together here, you can easily find out what went wrong.
-
-1. **User comments**
-
-	Should you type in any comments during the analysis, they will be displayed here, so you can quickly remember that lingering detail that you wrote while looking at the fish's movement table.
-
-1. **Biometrics**
-
-	Actel crawls through you biometrics file in search for columns containing the keywords *length*, *weight* or *mass*. Should it find any matching column, it will print boxplots of the distribution of the selected parameters, divided by each fish group listed in the same file. This can be very helpful in quickly finding typos in the data (e.g. a displaced decimal separator).
 
 1. **Survival**
 
@@ -171,9 +109,6 @@ This is the main non-R output. If you activated the `report` option, actel will 
 
 	You can also examine the detailed values in the tables supplied for each fish group.
 
-1. **Time of arrival at each array**
-
-	For each of your study area's arrays, a circular plot will be drawn of the arrival time of each fish. The fish are grouped by the groups listed in the *biometrics.csv* file. These plots are saved in .svg format in the Report folder, so you can easily export them elsewhere, if needed.
 
 1. **Fish comparisons (Dotplots)**
 
@@ -181,25 +116,17 @@ This is the main non-R output. If you activated the `report` option, actel will 
 
 	This plot is meant to help you find fish with uncommon behaviour. Fish with a lot of detections are likely staying for a very long time within hydrophone range; a fish that moves too fast in comparison to the remaining may have been carried inside a predator. It is up to you to look at these graphics and decide if anything looks odd. If it does, then save the tag number, so you can have a closer look at the respective detections plot.
 
-1. **Actel log**
-
-	This section contains the same information as the actel log saved as a text file in your target folder. It is useful to have a look at a few things: the number of target tags, the detection data range, the number of ALS (i.e. hydrophones) can help you spot any missing data (i.e. if you tagged 100 fish and had only 80 target tags, some tags are missing from your input files!).
 
 1. **Graphics of detected tags**
 
-	This section contains a plot for each of your target tags, showing all the detections found in the data for the respective fish. The detections are coloured by array. The vertical black dashed line shows the time of release. The vertical grey dashed lines show the assigned moments of entry and exit for each study area section. The full dark-grey line shows the movement events considered valid, while the dashed dark-grey line shows the movement events considered invalid.
+The vertical grey dashed lines show the assigned moments of entry and exit for each study area section. The full dark-grey line shows the movement events considered valid, while the dashed dark-grey line shows the movement events considered invalid.
 
-	The movement event lines move straight between the first and last station of each event (i.e. in-between detections will not be individually linked by the line). Lastly, the fate assigned by actel to the fish is displayed in the header, between brackets.
+  We recommend that you go through all of these graphics and verify that everything is looking alright (i.e. actel has assigned fates and entry/exit points correctly). This is also a good chance to have a closer look at the tags you flagged as suspicious above.
 
-	We recommend that you go through all of these graphics and verify that everything is looking alright (i.e. actel has assigned fates and entry/exit points correctly). This is also a good chance to have a closer look at the tags you flagged as suspicious above.
+  Note that fish where you had to manually intervene during the analysis will be highlighted with a yellow border, and fish that were manually overridden through the `override` command will be highlighted with a red border.
 
-	Note that fish where you had to manually intervene during the analysis will be highlighted with a yellow border, and fish that were manually overridden through the `override` command will be highlighted with a red border.
+  If you find out that actel has miss-assigned something, you can act upon it, as we will see further below.
 
-	If you find out that actel has miss-assigned something, you can act upon it, as we will see further below.
-
-### 'Report' folder (if report = TRUE)
-
-Activating the `report` option will trigger the creation of this folder. This folder contains all the pieces used to build the actel report we just presented above. If the compiling of the html report fails for some reason, you can always look at the individual graphics in this folder.
 
 ## What if actel has miss-assigned something?
 

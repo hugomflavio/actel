@@ -4,9 +4,11 @@
 \alias{loadDot}
 \title{Load spatial.dot}
 \usage{
-loadDot(string = NULL, input = NULL, spatial, sections)
+loadDot(string = NULL, input = NULL, spatial, sections = NULL)
 }
 \arguments{
+\item{string}{A dot string}
+
 \item{input}{The name of the dot file}
 
 \item{spatial}{A spatial data frame}

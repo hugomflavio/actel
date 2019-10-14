@@ -2,6 +2,7 @@
 #' 
 #' @param input The name of the dot file
 #' @param spatial A spatial data frame
+#' @param string A dot string
 #' @inheritParams migration
 #' 
 #' @return The dot list
@@ -36,11 +37,11 @@ loadDot <- function(string = NULL, input = NULL, spatial, sections = NULL) {
 
 #' Read dot file
 #' 
-#' @param input A simple .dot file
+#' @inheritParams loadDot
 #' 
 #' @return A table with A to B rows
 #' 
-#' @keywords internal
+#' @export
 #' 
 readDot <- function (input = NULL, string = NULL) {
   if (is.null(string) & is.null(input))
@@ -160,13 +161,15 @@ loadDeployments <- function(file, tz.study.area){
 #' Load Spatial file and Check the structure
 #' 
 #' @inheritParams assembleSpatial
+#' @param verbose Logical: If TRUE, the appendTo function is enabled.
 #' 
 #' @return The spatial dataframe
 #' 
-#' @keywords internal
+#' @export
 #' 
-loadSpatial <- function(file){
-  appendTo("debug","Starting loadSpatial.")
+loadSpatial <- function(file, verbose = FALSE){
+  if (verbose)
+    appendTo("debug","Starting loadSpatial.")
   if (file.exists(file))
     input <- read.csv(file)
   else {
@@ -178,9 +181,13 @@ loadSpatial <- function(file){
     stop("The spatial file must contain a 'Station.Name' column.\n")
   } else {
     if (any(link <- table(input$Station.Name) > 1)) {
-      appendTo(c("Screen", "Warning", "Report"), "Error: The 'Station.Name' column in the spatial file must not have duplicated values.")
+      if (verbose)
+        appendTo(c("Screen", "Warning", "Report"), "Error: The 'Station.Name' column in the spatial file must not have duplicated values.")
+      else
+        cat("Error: The 'Station.Name' column in the spatial file must not have duplicated values.")
       cat("Stations appearing more than once:", paste(names(table(input$Station.Name))[link], collapse = ", "), "\n")
-      emergencyBreak()
+      if (verbose)
+        emergencyBreak()
       stop("Fatal exception found. Read lines above for more details.\n")
     }
   }
@@ -189,24 +196,30 @@ loadSpatial <- function(file){
       decision <- readline("Error: No 'Array' column found in the spatial file, but a 'Group' column is present. Use the 'Group' column to define the arrays? (Y/n) ")
       appendTo("UD", decision)
       if (decision == "N" & decision == "n") {
-        emergencyBreak()
+        if (verbose)
+          emergencyBreak()
         stop("The spatial file must contain an 'Array' column.\n")
       } else {
-        appendTo("Report","Error: No 'Array' column found in the spatial file, but a 'Group' column is present. Using the 'Group' column to define the arrays.")  
+        if (verbose)
+          appendTo("Report", "Error: No 'Array' column found in the spatial file, but a 'Group' column is present. Using the 'Group' column to define the arrays.")  
         colnames(input)[grepl("Group", colnames(input))] <- "Array"
       }
     }
   }
   if (!any(grepl("Type", colnames(input)))) {
-    appendTo("Screen", "M: No 'Type' column found in 'spatial.csv'. Assigning all rows as hydrophones.")
+    if (verbose)
+      appendTo("Screen", "M: No 'Type' column found in 'spatial.csv'. Assigning all rows as hydrophones.")
     input$Type <- "Hydrophone"
   } else {
     if (any(is.na(match(unique(input$Type), c("Hydrophone","Release"))))){
-      emergencyBreak()
+      if (verbose)
+        emergencyBreak()
       stop("Could not recognise the data in the 'Type' column as only one of 'Hydrophone' or 'Release'. Please doublecheck the spatial file.\n")
     }
   }
-  appendTo("debug","Terminating loadSpatial.")
+  input <- setSpatialStandards(input = input) # Create Standard.Name for each station  
+  if (verbose)
+    appendTo("debug","Terminating loadSpatial.")
   return(input)
 }
 
@@ -304,19 +317,20 @@ loadBio <- function(file){
 #' @keywords internal
 #' 
 loadDetections <- function(start.timestamp = NULL, end.timestamp = NULL, tz.study.area, force = FALSE) {
+  # NOTE: The variable actel.detections is loaded from a RData file, if present. To avoid package check
+  #   notes, the variable name is created before any use.
+  actel.detections <- NULL
+    
   recompile <- TRUE
   detection.paths <- c(file.exists("actel.detections.RData"), file.exists("detections/actel.detections.RData"))
   
   if (any(detection.paths)) {
-
     if (all(detection.paths)) 
       appendTo(c("Screen", "Warning", "Report"), "W: Previously compiled detections were found both in the current directory and in a 'detections' folder.\n   Loading ONLY the compiled detections present in the 'detections' folder.")
-    
     if(detection.paths[2]) 
       load("detections/actel.detections.RData")
     else
       load("actel.detections.RData")
-    
     if (force) {
       decision <- "Y"
     } else {
@@ -336,6 +350,7 @@ loadDetections <- function(start.timestamp = NULL, end.timestamp = NULL, tz.stud
     }
     rm(actel.detections)
   }
+
   if (recompile)
     detections <- compileDetections(path = "detections", start.timestamp = start.timestamp, 
       end.timestamp = end.timestamp, tz.study.area = tz.study.area)
@@ -369,7 +384,7 @@ compileDetections <- function(path = "detections", start.timestamp = NULL, end.t
       stop("Could not find a 'detections' folder nor a 'detections.csv' file.\n")
   }
   if (file_test("-d", path) & file.exists("detections.csv"))
-    actel:::appendTo(c("Screen", "Warning", "Report"), "W: Both a 'detections' folder and a 'detections.csv' file are present in the current directory.\n   Loading ONLY the files present in the 'detections' folder.")
+    appendTo(c("Screen", "Warning", "Report"), "W: Both a 'detections' folder and a 'detections.csv' file are present in the current directory.\n   Loading ONLY the files present in the 'detections' folder.")
   number.of.files <- length(file.list)
   # Prepare the detection files
   data.files <- list()
@@ -390,7 +405,7 @@ compileDetections <- function(path = "detections", start.timestamp = NULL, end.t
         unknown.file <- FALSE
       }
       if (unknown.file) {
-        appendTo(c("Screen", "Report", "Warning"), paste("W: File '", i, "' does not match to any of the supported hydrophone file formats!\n   If your file corresponds to a hydrophone log and actel did not recognize it, please contact the developer team: hdmfla@aqua.dtu.dk", 
+        appendTo(c("Screen", "Report", "Warning"), paste("W: File '", i, "' does not match to any of the supported hydrophone file formats!\n   If your file corresponds to a hydrophone log and actel did not recognize it, please contact the developer team through at www.github.com/hugomflavio/actel/issues/new", 
           sep = ""))
         file.list <- file.list[-grep(i, file.list)]
       }
@@ -583,6 +598,10 @@ convertCodes <- function(input) {
 #' @keywords internal
 #' 
 convertTimes <- function(input, start.timestamp, end.timestamp, tz.study.area) {
+  # NOTE: The NULL variables below are actually column names used by data.table.
+  # This definition is just to prevent the package check from issuing a note due unknown variables.
+  Timestamp <- NULL
+
   appendTo("debug", "Starting convertTimes.")
   attributes(input$Timestamp)$tzone <- tz.study.area
   input <- input[order(input$Timestamp), ]

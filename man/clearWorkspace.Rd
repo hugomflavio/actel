@@ -6,6 +6,9 @@
 \usage{
 clearWorkspace(skip = NA)
 }
+\arguments{
+\item{skip}{A vector of files to be ignored.}
+}
 \description{
 Delete previous analysis files from the current workspace. Input files are not deleted.
 }

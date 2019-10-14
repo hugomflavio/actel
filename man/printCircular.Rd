@@ -8,11 +8,16 @@ printCircular(times, bio)
 }
 \arguments{
 \item{times}{a (list of) circular object(s)}
+
+\item{bio}{A table with the tags and biometrics of the studied fish.}
 }
 \value{
 A rmd string to be attached to the report.
 }
 \description{
-Prints the time of first entry point on each of the arrays. Functions adapted from the circular R package.
+Prints the time of first entry point on each of the arrays. Contains functions adapted from the circular R package.
+}
+\details{
+For more details about the original function, visit the circular package homepage at https://github.com/cran/circular
 }
 \keyword{internal}

@@ -10,7 +10,7 @@
   \item{Receiver}{The ALS deployed (leave empty if the row is a release site)}
   \item{Latitude}{The latitude of the ALS or release site}
   \item{Longitude}{The longitude of the ALS or release site}
-  \item{Group}{The Array to which the ALS belongs, or the first ALS array downstream of the release site.}
+  \item{Array}{The Array to which the ALS belongs, or the first ALS array downstream of the release site.}
   \item{Type}{The type of spatial object (must be either Hydrophone or Release)}
 }}
 \source{

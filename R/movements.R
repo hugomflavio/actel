@@ -217,6 +217,10 @@ upstreamCheck <- function(i, recipient, bio, spatial) {
 #' @return The movement data frame containing only valid events
 #' 
 simplifyMovements <- function(movements, bio, speed.method, dist.mat, invalid.dist) {
+  # NOTE: The NULL variables below are actually column names used by data.table.
+  # This definition is just to prevent the package check from issuing a note due unknown variables.
+  Valid <- NULL
+
   simple.movements <- lapply(movements, function(x) x[(Valid), ])
   simple.movements <- simple.movements[unlist(lapply(simple.movements, nrow)) > 0]
   for(fish in names(simple.movements)){
@@ -320,6 +324,7 @@ movementTimes <- function(movements, silent = TRUE){
 #' @inheritParams actel
 #' @inheritParams groupMovements
 #' @inheritParams movementSpeeds
+#' @param fish The tag ID of the fish currently being analysed
 #' 
 #' @return The movement data frame containing the missing information.
 #' 

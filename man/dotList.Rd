@@ -4,7 +4,7 @@
 \alias{dotList}
 \title{Break the dot data frame into a list}
 \usage{
-dotList(input, sections)
+dotList(input, sections = NULL)
 }
 \arguments{
 \item{input}{a dot data frame}

@@ -1,10 +1,10 @@
 ---
-title: "3) What is actel doing?"
+title: "3.1) Processes behind migration()"
 author: "Hugo Flávio"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{3) What is actel doing?}
+  %\VignetteIndexEntry{3.1) Processes behind migration()}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -21,30 +21,18 @@ knitr::opts_chunk$set(
 1. [Preparing your data](1.0.workspace_requirements.html)
     1. [Structuring the study area](1.1.study_area.html)
     1. [Creating a distances matrix](1.2.distances_matrix.html)
-1. [Running actel](2.0.running_analysis.html)
-1. [**What is actel doing?**](3.0.the_sorting_process.html)
-    1. [Errors and messages](3.1.messages.html)
-1. [Inspecting the results](4.inspecting_results.html)
-1. [Refining the results](5.refining_results.html)
+1. [explore()](2.0.explore.html)
+    1. [From raw to movements](2.1.explore_processes.html)
+    1. [Inspecting the explore() results](2.2.explore_results.html)
+1. [migration()](3.0.migration.html)
+    1. [__Processes behind migration()__](3.1.migration_processes.html)
+    1. [Inspecting the migration() results](3.2.migration_results.html)
+1. [residency()](4.0.residency.html)
+    1. [Processes behind residency()](4.1.residency_processes.html)
+    1. [Inspecting the residency() results](4.2.residency_results.html)
+1. [Errors and messages](5.messages.html)
+1. [Refining the results](6.refining_results.html)
 
-## Under the hood
-
-You have [prepared your code](2.0.running_analysis.html) and started the analysis. Now you will learn more about what actel is doing.
-
-Note:
-  : To keep the this page shorter, we have replaced the big movement tables with "[...]".
-
-The first thing actel does is import your data. This also includes all of your detection files, which can take a bit of time. Then, actel performs some checks to make sure everything is all right. If anything is out of the ordinary, actel will let you know. If need help with any messages, warnings or errors, you can find more about them in our [list of errors and messages](3.1.messages.html).
-
-## From detections to movements
-
-Once everything is in place, actel will group the detections for each fish in multiple movement events. This process is entirely automatic, and the outcome depends on two things:
-
-Arrays
-  : When a fish moves from one receiver array to another, a new movement event is created. These arrays are defined by you in the [spatial file](1.0.workspace_requirements.html#spatial-file), so it is worth it to spend some time thinking about how you want to arrange your receivers.
-
-`maximum.time`
-  : This parameter controls the creation of multiple events for consecutive detections on the same receiver array. You can [find more information on this parameter here](2.0.running_analysis.html#maximum.time)
 
 ## Timetable
 
@@ -168,29 +156,6 @@ You can then find all your comments on the PDF report and on the final data fram
 ## Combining the time data with the biometrics
 
 The hardest part is done. Now, actel will automatically combine the time information with the information you included in the biometrics file. This new dataframe is called *status.df*, and will be available to you in the function output. It is also here that the [`success.arrays`](2.0.running_analysis.html#success.arrays) come in. If your fish was last detected on an one of those arrays, it will be assigned as "Succeeded".
-
-This is an automatic process, and there is only one thing that can trigger a warning: a fish being detected before being released. If this happens, the following message will show up:
-
-````
-Error: Fish R64K-1865 was detected before being released!
-  Release time: 2018-04-26 12:00:00
-  First valid detection: 2018-04-17 08:33:04 (River).
-  Movement table for fish R64K-1865
-  [...]
-
-You may either:
-  a) Stop the analysis and check your data
-  b) Continue anyway (time and speed from release to first valid detection wont be calculated).
-
-Decision:(a/b)
-````
-
-It is then up to you to decide which path to take. In the example above, for example, the error could be due to a mistake when typing the data (i.e. the fish may have been released on the 16th and not the 26th). You can always continue running the analysis to verify if this problem arises with other fish, so you can identify what is going on.
-
-Note:
-  : This comparison is based on the movement events selected as first and last events for each section. If you have `cautious.assignment` disabled, an isolated false detection could be causing this error to show up.
-
-If you conclude that the problem is being caused due to bad assignment of the first and last events for each section, you can include the tag number in the [`override.tags` variable](2.0.running_analysis.html#override) and take [full control over it](5.refining_results.html).
 
 ## Inspecting the results
 

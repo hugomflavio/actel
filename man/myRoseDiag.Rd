@@ -83,5 +83,8 @@ myRoseDiag(x, pch = 16, cex = 1, axes = TRUE, shrink = 1,
 A list with the zero, rotation and next.points values, to be parsed to an overlaying graphic.
 }
 \description{
-Adapted from the rose.diag function of the circular package
+Adapted from the rose.diag function of the circular package.
+}
+\details{
+For more details about the original function, visit the circular package homepage at https://github.com/cran/circular
 }

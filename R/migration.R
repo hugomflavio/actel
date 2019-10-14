@@ -16,6 +16,11 @@ assembleTimetable <- function(movements, sections, spatial, minimum.detections,
   dist.mat, invalid.dist, speed.method, if.last.skip.section, success.arrays, override, cautious.assignment) {
   appendTo("debug", "Starting assembleTimetable.")
   appendTo(c("Screen", "Report"), "M: Initiating timetable development. Your assistance may be needed during the process.")
+
+  # NOTE: The NULL variables below are actually column names used by data.table.
+  # This definition is just to prevent the package check from issuing a note due unknown variables.
+  Valid <- NULL 
+  Array <- NULL
   
   recipient <- vector()
   if (invalid.dist) {
@@ -105,6 +110,10 @@ assembleTimetable <- function(movements, sections, spatial, minimum.detections,
 #' @return the updated movement's table
 #' 
 updateMovementValidity <- function(movements, events, sections){
+  # NOTE: The NULL variables below are actually column names used by data.table.
+  # This definition is just to prevent the package check from issuing a note due unknown variables.
+  Array <- NULL
+    
   appendTo("Debug", "Starting updateMovementValidity.")
   for (j in seq_len(length(sections))) {
     link <- movements[, grepl(sections[j], Array)]
@@ -269,6 +278,12 @@ overrideEventCheck <- function(type, the.event, up.boundary, t, last.events, j, 
 #' @keywords internal
 #' 
 findLastEvents <- function(i, movements, sections, minimum.detections, processing.type, cautious.assignment) {
+  # NOTE: The NULL variables below are actually column names used by data.table.
+  # This definition is just to prevent the package check from issuing a note due unknown variables.
+  Array <- NULL
+  Valid <- NULL
+  Detections <- NULL
+
   appendTo("debug", paste("Starting findLastEvents for fish ", i, ".", sep = ""))
   if (nrow(movements) > 1) {
     last.events <- rep(NA, length(sections))
@@ -360,6 +375,10 @@ findLastEvents <- function(i, movements, sections, minimum.detections, processin
 #' @keywords internal
 #' 
 eventOrderCheck <- function(i, last.events, sections, movements, processing.type) {
+  # NOTE: The NULL variables below are actually column names used by data.table.
+  # This definition is just to prevent the package check from issuing a note due unknown variables.
+  Valid <- NULL
+  Array <- NULL  
   appendTo("debug", paste("Starting eventOrderCheck for fish ", i, ".", sep = ""))
   trigger <- vector()
   for (l in seq_len(length(sections))) {
@@ -504,6 +523,11 @@ eventOrderCheck <- function(i, last.events, sections, movements, processing.type
 #' @keywords internal
 #' 
 findFirstRow <- function(l, last.events, movements, sections) {
+  # NOTE: The NULL variables below are actually column names used by data.table.
+  # This definition is just to prevent the package check from issuing a note due unknown variables.
+  Array <- NULL
+  Valid <- NULL
+
   appendTo("debug", "Starting findFirstRow.")
   if (l > 1) {
     for (k in rev(seq_len(l - 1))) {
@@ -543,6 +567,12 @@ findFirstRow <- function(l, last.events, movements, sections) {
 #' @keywords internal
 #' 
 findFirstEvents <- function(i, last.events, movements, sections, processing.type, cautious.assignment) {
+  # NOTE: The NULL variables below are actually column names used by data.table.
+  # This definition is just to prevent the package check from issuing a note due unknown variables.
+  Array <- NULL
+  Valid <- NULL
+  Detections <- NULL
+
   appendTo("debug", paste("Starting findFirstEvents for fish ", i, ".", sep = ""))
   first.events <- rep(NA, length(sections))
   for (l in seq_len(length(sections))) {
@@ -625,6 +655,11 @@ findFirstEvents <- function(i, last.events, movements, sections, processing.type
 #' 
 deployValues <- function(i, timetable, movements, events, sections, spatial, 
   dist.mat, invalid.dist, if.last.skip.section, success.arrays, processing.type, speed.method) {
+  # NOTE: The NULL variables below are actually column names used by data.table.
+  # This definition is just to prevent the package check from issuing a note due unknown variables.
+  Detections <- NULL
+  Array <- NULL
+
   appendTo("debug", paste("Starting deployValues for fish ", i, ".", sep = ""))
   if (any(!is.na(events$last.events))) {
     last.last <- tail(events$last.events[!is.na(events$last.events)], 1)
@@ -717,6 +752,10 @@ deployValues <- function(i, timetable, movements, events, sections, spatial,
 #' @return The number of backwards movements and the maximum consecutive backwards movements
 #' 
 countUpMoves <- function(movements, spatial){
+  # NOTE: The NULL variables below are actually column names used by data.table.
+  # This definition is just to prevent the package check from issuing a note due unknown variables.
+  Array <- NULL
+
   appendTo("debug", "Starting countUpMoves.")
   if (nrow(movements) > 1) {# Determine number of backwards movements
     array.sequence <- vector()

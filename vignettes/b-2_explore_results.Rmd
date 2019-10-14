@@ -1,0 +1,136 @@
+---
+title: "2.2) Inspecting the explore() results"
+author: "Hugo Flávio"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{2.2) Inspecting the explore() results}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+## Index
+
+1. [Preparing your data](1.0.workspace_requirements.html)
+    1. [Structuring the study area](1.1.study_area.html)
+    1. [Creating a distances matrix](1.2.distances_matrix.html)
+1. [explore()](2.0.explore.html)
+    1. [From raw to movements](2.1.explore_processes.html)
+    1. [__Inspecting the explore() results__](2.2.explore_results.html)
+1. [migration()](3.0.migration.html)
+    1. [Processes behind migration()](3.1.migration_processes.html)
+    1. [Inspecting the migration() results](3.2.migration_results.html)
+1. [residency()](4.0.residency.html)
+    1. [Processes behind residency()](4.1.residency_processes.html)
+    1. [Inspecting the residency() results](4.2.residency_results.html)
+1. [Errors and messages](5.messages.html)
+1. [Refining the results](6.refining_results.html)
+
+
+## Results within R
+
+If you ran the actel function and stored it into an object, this object will now be a list, containing all the useful results actel has compiled for you:
+
+### detections
+
+The `detections` object is a list of the raw detections found in your detections file, split by each of the target tags. This is the base data with which actel worked. Here is an example:
+
+|Timestamp           |Receiver |CodeSpace |Signal |Transmitter |Standard.Name |Array  |
+|:-------------------|:--------|:---------|:------|:-----------|:-------------|:------|
+|2018-04-18 19:07:45 |130763   |R64K      |4701   |R64K-4701   |St.2          |River1 |
+|2018-04-18 19:08:06 |130763   |R64K      |4701   |R64K-4701   |St.2          |River1 |
+|2018-04-18 19:56:39 |130766   |R64K      |4701   |R64K-4701   |St.7          |River1 |
+|2018-04-18 20:01:11 |126324   |R64K      |4701   |R64K-4701   |St.5          |River1 |
+|2018-04-18 20:13:43 |126324   |R64K      |4701   |R64K-4701   |St.5          |River1 |
+|2018-04-18 20:15:11 |126324   |R64K      |4701   |R64K-4701   |St.5          |River1 |
+
+
+### movements
+
+The `movements` object is a list of the movement events created during [the sorting process](3.0.the_sorting_process.html#from-detections-to-movements). These records can become very useful if you need to go back to a given fish and inspect the movements in more detail. Here is an example:
+
+|Array  | Detections|First station |Last station |First time          |Last time           |Time travelling |Time on array |
+|:------|----------:|:-------------|:------------|:-------------------|:-------------------|:---------------|:-------------|
+|River1 |         92|St.2          |St.2         |2018-04-18 19:07:45 |2018-04-18 23:27:29 |NA              |4:19          |
+|River2 |          1|St.11         |St.11        |2018-04-18 23:49:16 |2018-04-18 23:49:16 |0:21            |-             |
+|River3 |          3|St.12         |St.12        |2018-04-19 01:52:34 |2018-04-19 01:57:01 |2:03            |0:04          |
+|River4 |         10|St.13         |St.13        |2018-04-19 03:35:44 |2018-04-19 03:42:17 |1:38            |0:06          |
+|Bay1   |         52|St.16         |St.17        |2018-04-20 05:33:51 |2018-04-20 06:12:20 |25:51           |0:38          |
+|Bay1   |         69|St.17         |St.16        |2018-04-20 12:00:31 |2018-04-20 13:00:36 |5:48            |1:00          |
+
+
+### times
+
+This data frame contains the time stamps of first valid detection on each array, for each fish. These are used to draw the circular plots in the report (like the ones below), but you can also use them to test for differences between groups!
+
+<img src="times_River3.svg" alt="drawing" width="330"/> <img src="times_Sea1.svg" alt="drawing" width="330"/>
+
+
+## Results in your working directory
+
+On top of the results stored in your R session, actel saves some additional information in your working directory.
+
+### actel_explore_results.RData
+
+To make sure that you don't accidentally loose your results, actel stores them right away in the target folder. The results present in this file are the same as the ones you obtain directly in your R console (see above).
+
+### actel.log.txt
+
+This log is where actel has written what was done during the analysis. It contains everything: summary information, errors, warnings and messages and the options you have taken while the analysis was running. It is worth keeping it in case you need to find out the reasoning behind some result. To avoid overwriting when conducting multiple analysis, the actel.log.txt file is preceded by the timestamp of when it was created (e.g. '2019-05-14.10.51.40.actel.log.txt').
+
+### stray_tags.csv
+
+Depending on how open your study area is, the deployed receivers may pick up stray tags that came in range during the study period. Actel stores a brief summary of these tags in the stray_tags.csv file, in case you are interested in knowing more about these tags, or perhaps share the codes with your colleagues.
+
+### actel_explore_report.html (if report = TRUE)
+
+This is the main non-R output. If you activated the `report` option, actel will compile a html report for you. This report contains the following sections:
+
+1. **Summary**
+
+  Contains brief information on the study. It is useful to check up if anything looks wrong (i.e. the number of target tags, the data range).
+
+1. **Stations** and **Releases**
+
+  A table containing the spatial elements of the study (i.e. receivers and release sites). Any unknown receivers found during the analysis will also show up here. Since the station names can vary wildly, actel creates Standard names for your stations (e.g. "St.1","St.2"). When looking at the individual detection graphics, you can refer back to this table to match the standard names to the respective station names.
+
+1. **Warning messages**
+
+  These represent warnings, errors and particularly important messages that were displayed during the analysis. By having them extracted and put together here, you can easily find out what went wrong.
+
+1. **User comments**
+
+  Should you type in any comments during the analysis, they will be displayed here, so you can quickly remember that lingering detail that you wrote while looking at the fish's movement table.
+
+1. **Biometrics**
+
+  Actel crawls through you biometrics file in search for columns containing the keywords *length*, *weight* or *mass*. Should it find any matching column, it will print boxplots of the distribution of the selected parameters, divided by each fish group listed in the same file. This can be very helpful in quickly finding typos in the data (e.g. a displaced decimal separator).
+
+1. **Time of arrival at each array**
+
+  For each of your study area's arrays, a circular plot will be drawn of the arrival time of each fish. The fish are grouped by the groups listed in the *biometrics.csv* file. These plots are saved in .svg format in the Report folder, so you can easily use them elsewhere, if needed.
+
+1. **Actel log**
+
+  This section contains the same information as the actel log saved as a text file in your target folder. It is useful to have a look at a few things: the number of target tags, the detection data range, the number of ALS (i.e. hydrophones) can help you spot any missing data (i.e. if you tagged 100 fish and had only 80 target tags, some tags are missing from your input files!).
+
+1. **Graphics of detected tags**
+
+  This section contains a plot for each of your target tags, showing all the detections found in the data for the respective fish. The detections are coloured by array. The vertical black dashed line shows the time of release. 
+  The movement event lines move straight between the first and last station of each event (i.e. in-between detections will not be individually linked by the line). Lastly, the total number of detections for the fish is displayed in the header, between brackets.
+
+### 'Report' folder (if report = TRUE)
+
+Activating the `report` option will trigger the creation of this folder. This folder contains all the pieces used to build the actel report we just presented above. If the compiling of the html report fails for some reason, you can always look at the individual graphics in this folder.
+
+
+To advance into more detailed analyses, you can proceed either to the __[migration()](3.0.migration.html)__ analysis or to the __[residency()](4.0.residency.html)__ analysis. These will use the movement events created here to extract more complex metrics!
+
+[Back to top.](#)

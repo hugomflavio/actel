@@ -8,12 +8,17 @@ Description: Designed for studies where fish tagged with acoustic tags are expec
     possibility for user intervention on tags that deviate from that behaviour. Actel allows
     you to run your analysis in a systematic way, and makes it easy to compare results
     from different studies.
-License: GPL-3
+License: GPL-3 + file LICENSE
 Encoding: UTF-8
 LazyData: true
 RoxygenNote: 6.1.1
-Imports: 
+Depends: R (>= 2.10)
+Imports:
+    stats,
+    utils,
+    graphics,
     readr,
+    scales,
     ggplot2,
     reshape2,
     fs,
@@ -24,6 +29,7 @@ Imports:
     fasttime,
     DiagrammeR,
     DiagrammeRsvg,
+    stringr,
     rsvg
 Suggests: 
     raster,
@@ -32,3 +38,5 @@ Suggests:
     tools,
     rgdal
 VignetteBuilder: knitr
+URL: https://github.com/hugomflavio/actel
+BugReports: https://github.com/hugomflavio/actel/issues

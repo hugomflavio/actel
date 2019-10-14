@@ -20,12 +20,18 @@ knitr::opts_chunk$set(
 
 1. [Preparing your data](1.0.workspace_requirements.html)
     1. [Structuring the study area](1.1.study_area.html)
-    1. [**Creating a distances matrix**](1.2.distances_matrix.html)
-1. [Running actel](2.0.running_analysis.html)
-1. [What is actel doing?](3.0.the_sorting_process.html)
-    1. [Errors and messages](3.1.messages.html)
-1. [Inspecting the results](4.inspecting_results.html)
-1. [Refining the results](5.refining_results.html)
+    1. [__Creating a distances matrix__](1.2.distances_matrix.html)
+1. [explore()](2.0.explore.html)
+    1. [From raw to movements](2.1.explore_processes.html)
+    1. [Inspecting the explore() results](2.2.explore_results.html)
+1. [migration()](3.0.migration.html)
+    1. [Processes behind migration()](3.1.migration_processes.html)
+    1. [Inspecting the migration() results](3.2.migration_results.html)
+1. [residency()](4.0.residency.html)
+    1. [Processes behind residency()](4.1.residency_processes.html)
+    1. [Inspecting the residency() results](4.2.residency_results.html)
+1. [Errors and messages](5.messages.html)
+1. [Refining the results](6.refining_results.html)
 
 ## What is the distances matrix?
 

@@ -8,6 +8,8 @@ speedReleaseToFirst(fish, bio, movements, dist.mat, invalid.dist = FALSE,
   silent = TRUE)
 }
 \arguments{
+\item{fish}{The tag ID of the fish currently being analysed}
+
 \item{bio}{A table with the tags and biometrics of the studied fish.}
 
 \item{movements}{A list of movements for each target tag, created by groupMovements.}

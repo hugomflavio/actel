@@ -446,38 +446,6 @@ mbGroupCJS <- function(m, status.df, fixed.efficiency = NULL) {
   return(output)
 }
 
-#' Calculate CJS per release site
-#' 
-#' @inheritParams getSplitCJS
-#' @inheritParams simplifyMovements
-#' 
-#' @return A list of CJS results
-#' 
-#' @keywords internal
-#' 
-getReleaseCJS <- function(the.matrices, status.df) {
-  appendTo("debug", "Starting getReleaseCJS.")
-
-  recipient <- list()
-  for(i in unique(status.df$Release.site)) {
-    recipient[[i]] <- the.matrices[grepl(paste0(".",i), names(the.matrices))]
-  }
-
-  output <- list()
-  for (i in names(recipient)) {
-    if (exists("last.array.efficiency")){
-      inter.array <- simpleCJS(recipient[[i]], estimate = last.array.efficiency$combined.efficiency, silent = FALSE)
-      output[[length(output) + 1]] <- list(results = inter.array, matrix = recipient[[i]])
-    } else {
-      inter.array <- simpleCJS(recipient[[i]], silent = FALSE)
-      output[[length(output) + 1]] <- list(results = inter.array, matrix = recipient[[i]])
-    }
-  }
-  names(output) <- names(recipient)
-  appendTo("debug", "Terminating getReleaseCJS.")
-  return(list(inter.array = output, last.array = last.array.results))
-}
-
 #' Compile inter-array detection matrix
 #'
 #' @inheritParams actel
