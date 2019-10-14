@@ -18,24 +18,26 @@ knitr::opts_chunk$set(
 
 ## Index
 
-1. [**Preparing your data**](1.0.workspace_requirements.html)
-    1. [Structuring the study area](1.1.study_area.html)
-    1. [Creating a distances matrix](1.2.distances_matrix.html)
-1. [explore()](2.0.explore.html)
-    1. [From raw to movements](2.1.explore_processes.html)
-    1. [Inspecting the explore() results](2.2.explore_results.html)
-1. [migration()](3.0.migration.html)
-    1. [Processes behind migration()](3.1.migration_processes.html)
-    1. [Inspecting the migration() results](3.2.migration_results.html)
-1. [residency()](4.0.residency.html)
-    1. [Processes behind residency()](4.1.residency_processes.html)
-    1. [Inspecting the residency() results](4.2.residency_results.html)
-1. [Errors and messages](5.messages.html)
-1. [Refining the results](6.refining_results.html)
+1. [**Preparing your data**](a-0_workspace_requirements.html)
+    1. [Structuring the study area](a-1_study_area.html)
+    1. [Creating a distances matrix](a-2_distances_matrix.html)
+1. [explore()](b-0_explore.html)
+    1. [From raw to movements](b-1_explore_processes.html)
+    1. [Inspecting the explore() results](b-2_explore_results.html)
+1. [migration()](c-0_migration.html)
+    1. [Processes behind migration()](c-1_migration_processes.html)
+    1. [Inspecting the migration() results](c-2_migration_results.html)
+1. [residency()](d-0_residency.html)
+    1. [Processes behind residency()](d-1_residency_processes.html)
+    1. [Inspecting the residency() results](d-2_residency_results.html)
+1. [Errors and messages](e.messages.html)
+1. [Refining the results](f.refining_results.html)
 
 ## Preparing your data
 
-Actel requires that you organise your input files in a specific fashion. Critically, you should have a file named **biometrics.csv**, one named **spatial.csv**, and one named **deployments.csv** (We will look into the file contents in detail soon). Finally, you also need a **detections** directory, containing all your detection files in *.csv*  format. To create a blank workspace ready to be used, simply run `createWorkspace()`, and a template will be generated automatically in your current work directory.
+Actel requires that you organise your input files in a specific fashion. Critically, you should have a file named **biometrics.csv**, one named **spatial.csv**, and one named **deployments.csv** (we will look into the file contents in detail soon). Finally, you also need a **detections directory**, containing all your detection files in *.csv*  format. 
+
+To create a blank workspace ready to be used, run `createWorkspace()`, and a template will be generated automatically in your current work directory (remember to delete the example rows before including your data).
 
 ## Biometrics file
 
@@ -58,19 +60,20 @@ Although the column order is not important, it is essential that this table cont
 
 Release.date
   : Corresponds to the date and time when the fish was released, and **must** be typed in **yyyy-mm-dd hh:mm:ss** format. 
-  : **Note:** These timestamps **must** be in the local time zone of the study area, which you will later supply in the `tz.study.area` parameter.
+  : Note that the timestamps must be in the **local time zone** of the study area, which you will later supply in the `tz.study.area` parameter.
 
 Signal 
-  : Corresponds to the code emitted by the tag that was implanted on the fish. If you are unsure as to what exactly is the signal being emitted by your tag, you can ask the tag manufacturer more about the differences between code spaces and signals.
+  : Corresponds to the code emitted by the tag that was implanted on the fish. If you are unsure as to what signal is being emitted by your tag, you should ask the tag manufacturer more about the differences between code spaces and signals.
 
-The *Group* and *Release.site* columns are also important but, if you only have one group or one release site, actel can generate these columns for you. If this happens, you will receive a message:
+The **Group** and **Release.site** columns are also important but, if you only have one group or one release site, actel can generate these columns for you. If this happens, you will receive a message:
 
 ```
 M: No Release site has been indicated in the biometrics file. Creating a 'Release.site' column to avoid script failure. Filling with 'unspecified'.
 M: No 'Group' column found in the biometrics file. Assigning all fish to group 'All'.
 ```
 
-You can then append to this biometrics table as many columns with information relevant to your study as you want. Importantly, if the biometrics table has columns with keywords such as *length*, *weight* or *mass*, graphics showing the distribution of these parameters per fish group will be drawn for you.
+Note:
+  : You can then append as many columns as you want to **biometrics.csv**. Importantly, if the biometrics have columns with keywords such as *length*, *weight* or *mass*, graphics showing the distribution of these parameters per fish group will be drawn for you in the report.
 
 ## Spatial file
 
@@ -111,7 +114,7 @@ W: At least one release site has been indicated in the spatial file, but no rele
    Discarding release site information to avoid script failure. Please doublecheck your data.
 ```
 
-**[Click here to learn more about how to organise your study area in an actel-friendly way.](1.1.study_area.html)**
+**[Click here to learn more about how to organise your study area in an actel-friendly way.](a-1_study_area.html)**
 
 ## Deployments file
 
@@ -163,7 +166,7 @@ A distances matrix is a table that contains information on  the distance (in met
 |St.6    | 9272.568| 7906.415| 5888.683| 2372.298|   408.8854|     0.0000| 11476.409|
 |Release | 2229.759| 3569.994| 5621.219| 9115.958| 11067.5236| 11476.4090|     0.000|
 
-**[You can learn more about creating distances matrices in this page.](1.2.distances_matrix.html)**
+**[You can learn more about creating distances matrices in this page.](a-2_distances_matrix.html)**
 
 ## Optional: Spatial.dot file
 
@@ -190,7 +193,7 @@ Now that you have prepared your workspace, it is time to start the analysis. The
   explore() allows you to quickly go get a summary of your data. You can use explore() to get
   a general feel for the study results, and check if the input files are behaving as expected. 
 
-  [Learn more about the explore function.](2.0.explore.html)
+  [Learn more about the explore function.](b-0_explore.html)
  
 **2. migration()**
 
@@ -198,13 +201,13 @@ Now that you have prepared your workspace, it is time to start the analysis. The
   the fish behaviour. By selecting the arrays that lead to success, you can define whether or not
   your fish survived the study. Multiple options allow you to tweak the analysis to fit your study perfectly.
 
-  [Learn more about the migration function.](3.0.migration.html)
+  [Learn more about the migration function.](c-0_migration.html)
  
 **3. residency()**
 
   The residency() analysis is still under construction. Keep an eye out for updates!
 
-  [Learn more about the residency function.](4.0.residency.html)
+  [Learn more about the residency function.](d-0_residency.html)
 
 
 [Back to top.](#)

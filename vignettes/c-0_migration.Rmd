@@ -18,27 +18,26 @@ knitr::opts_chunk$set(
 
 ## Index
 
-1. [Preparing your data](1.0.workspace_requirements.html)
-    1. [Structuring the study area](1.1.study_area.html)
-    1. [Creating a distances matrix](1.2.distances_matrix.html)
-1. [explore()](2.0.explore.html)
-    1. [From raw to movements](2.1.explore_processes.html)
-    1. [Inspecting the explore() results](2.2.explore_results.html)
-1. [__migration()__](3.0.migration.html)
-    1. [Processes behind migration()](3.1.migration_processes.html)
-    1. [Inspecting the migration() results](3.2.migration_results.html)
-1. [residency()](4.0.residency.html)
-    1. [Processes behind residency()](4.1.residency_processes.html)
-    1. [Inspecting the residency() results](4.2.residency_results.html)
-1. [Errors and messages](5.messages.html)
-1. [Refining the results](6.refining_results.html)
-
+1. [Preparing your data](a-0_workspace_requirements.html)
+    1. [Structuring the study area](a-1_study_area.html)
+    1. [Creating a distances matrix](a-2_distances_matrix.html)
+1. [explore()](b-0_explore.html)
+    1. [From raw to movements](b-1_explore_processes.html)
+    1. [Inspecting the explore() results](b-2_explore_results.html)
+1. [__migration()__](c-0_migration.html)
+    1. [Processes behind migration()](c-1_migration_processes.html)
+    1. [Inspecting the migration() results](c-2_migration_results.html)
+1. [residency()](d-0_residency.html)
+    1. [Processes behind residency()](d-1_residency_processes.html)
+    1. [Inspecting the residency() results](d-2_residency_results.html)
+1. [Errors and messages](e.messages.html)
+1. [Refining the results](f.refining_results.html)
 
 ## Parameters shared by the migration and residency function
 
 ### minimum.detections
 
-This variable controls how many times a fish must be registered to be considered valid, if there is only one movement event. Movement events are [explained in greater detail here](3.0.the_sorting_process.html#from-detections-to-movements). Lets have a look at an example:
+This variable controls how many times a fish must be registered to be considered valid, if there is only one movement event. Movement events are [explained in greater detail here](c-0_the_sorting_process.html#from-detections-to-movements). Lets have a look at an example:
 
 Fish A only has one movement event at *River1*, with one detection.
     
@@ -50,11 +49,11 @@ If a Fish has more than one movement event, then the `minimum.detections` variab
 
 ### sections
 
-The study area sections must be set in the order that you expect your fish will cross them. I.e. if you expect your fish to move from the river, to a fjord and ultimately to the sea (and you have hydrophones in all these ecosystems), then `sections = c("River","Fjord","Sea")`. On the other hand, if you expect your fish to migrate upstream, then `sections = c("Sea","Fjord","River")`. To learn more about how to organise your study area in an actel-friendly way, have a look at [this manual page.](1.1.study_area.html)
+The study area sections must be set in the order that you expect your fish will cross them. I.e. if you expect your fish to move from the river, to a fjord and ultimately to the sea (and you have hydrophones in all these ecosystems), then `sections = c("River","Fjord","Sea")`. On the other hand, if you expect your fish to migrate upstream, then `sections = c("Sea","Fjord","River")`. To learn more about how to organise your study area in an actel-friendly way, have a look at [this manual page.](a-1_study_area.html)
 
 ### override
 
-Once you finish your analysis, you should go through the generated html report (or the files present in the *Results* folder), and check for any strange behaviour. We will discuss this in more detail [later on](4.inspecting_results.html), but for now the important message is that, if you would like to manually change the results for any set of tags, you can list those tags in `override` to trigger full manual mode (e.g. `override = c("R64K-1234","R64K-1405")`).
+Once you finish your analysis, you should go through the generated html report (or the files present in the *Results* folder), and check for any strange behaviour. We will discuss this in more detail [later on](c-2_migration_results.html), but for now the important message is that, if you would like to manually change the results for any set of tags, you can list those tags in `override` to trigger full manual mode (e.g. `override = c("R64K-1234","R64K-1405")`).
 
 When you list tags in `override`, actel will recognise them and enter full manual mode when it is their turn to be analysed. You will know this is happening when you see the following message:
 
@@ -62,7 +61,7 @@ When you list tags in `override`, actel will recognise them and enter full manua
 M: Override has been triggered for fish R64K-1234. Entering full manual mode.
 ```
 
-You can find more information on [how to operate full manual mode here](5.refining_results.html).
+You can find more information on [how to operate full manual mode here](f-0_refining_results.html).
 
 ### cautious.assignment
 
@@ -86,7 +85,6 @@ Note:
 Also note that you **must** use the stations standard names (i.e. St.10, St.12) when referring to them in actel. If you are not sure what your spatial standard name is, and the column *Standard.Name* does not yet exist in your spatial.csv file, you can run `emptyMatrix()` and that column will be generated for you in the spatial.csv file.
 
 
-[you will be ready to start](3.0.the_sorting_process.html)!
 
 #### Simplified actel function (showing defaults):
 ```r

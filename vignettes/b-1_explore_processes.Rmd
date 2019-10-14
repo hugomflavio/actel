@@ -18,27 +18,27 @@ knitr::opts_chunk$set(
 
 ## Index
 
-1. [Preparing your data](1.0.workspace_requirements.html)
-    1. [Structuring the study area](1.1.study_area.html)
-    1. [Creating a distances matrix](1.2.distances_matrix.html)
-1. [explore()](2.0.explore.html)
-    1. [__From raw to movements__](2.1.explore_processes.html)
-    1. [Inspecting the explore() results](2.2.explore_results.html)
-1. [migration()](3.0.migration.html)
-    1. [Processes behind migration()](3.1.migration_processes.html)
-    1. [Inspecting the migration() results](3.2.migration_results.html)
-1. [residency()](4.0.residency.html)
-    1. [Processes behind residency()](4.1.residency_processes.html)
-    1. [Inspecting the residency() results](4.2.residency_results.html)
-1. [Errors and messages](5.messages.html)
-1. [Refining the results](6.refining_results.html)
+1. [Preparing your data](a-0_workspace_requirements.html)
+    1. [Structuring the study area](a-1_study_area.html)
+    1. [Creating a distances matrix](a-2_distances_matrix.html)
+1. [explore()](b-0_explore.html)
+    1. [__From raw to movements__](b-1_explore_processes.html)
+    1. [Inspecting the explore() results](b-2_explore_results.html)
+1. [migration()](c-0_migration.html)
+    1. [Processes behind migration()](c-1_migration_processes.html)
+    1. [Inspecting the migration() results](c-2_migration_results.html)
+1. [residency()](d-0_residency.html)
+    1. [Processes behind residency()](d-1_residency_processes.html)
+    1. [Inspecting the residency() results](d-2_residency_results.html)
+1. [Errors and messages](e.messages.html)
+1. [Refining the results](f.refining_results.html)
 
 
 ## Making sure everything checks out
 
 The first thing actel does is import your data. This also includes all of your detection files, which can take a bit of time. Then, actel performs many verifications to make sure everything is all right. As the list of checks is long, I won't explore each one of them in detail here. Should something be out of the ordinary, actel will let you know with a warning or an error message, depending on the severity of the issue. 
 
-If you need help with any messages, warnings or errors, you can find more about them in the [list of errors and messages](3.1.messages.html).
+If you need help with any messages, warnings or errors, you can find more about them in the [list of errors and messages](e-0_messages.html).
 
 ## Organising the detections
 
@@ -52,7 +52,7 @@ If you are interest in knowing whether or not there were any stray tags in your 
 
 It is at this point that the parameter [`exclude.tags`]() comes in:
 
-actel uses the tag's signal to find your fish, to avoid issues with different definitions of code spaces by different manufacturers. However, if two tags with the same signal but different code spaces show up at your study area, actel will not know which one to choose. Should this happen, you must specify which tag **should be excluded** in the `exclude.tags` parameter and restart the analysis. You can [find an example here.](2.0.explore.html#exclude.tags)
+actel uses the tag's signal to find your fish, to avoid issues with different definitions of code spaces by different manufacturers. However, if two tags with the same signal but different code spaces show up at your study area, actel will not know which one to choose. Should this happen, you must specify which tag **should be excluded** in the `exclude.tags` parameter and restart the analysis. You can [find an example here.](b-0_explore.html#exclude.tags)
 
 Once the detections are sorted and validated, actel is ready to start compiling movement events.
 
@@ -61,10 +61,10 @@ Once the detections are sorted and validated, actel is ready to start compiling 
 The process of compiling movement events is entirely automatic, and the outcome depends on two things:
 
 Arrays
-  : When a fish moves from one receiver array to another, a new movement event is created. These arrays are defined by you in the [spatial file](1.0.workspace_requirements.html#spatial-file), so it is worth it to spend some time thinking about how you want to arrange your receivers.
+  : When a fish moves from one receiver array to another, a new movement event is created. These arrays are defined by you in the [spatial file](a-0_workspace_requirements.html#spatial-file), so it is worth it to spend some time thinking about how you want to arrange your receivers.
 
 `maximum.time`
-  : This parameter controls the creation of multiple events for consecutive detections on the same receiver array. You can [find more information on this parameter here](2.0.explore.html#maximum.time).
+  : This parameter controls the creation of multiple events for consecutive detections on the same receiver array. You can [find more information on this parameter here](b-0_explore.html#maximum.time).
 
 By the end of this process, you will have a list containing the movement events for each of the target tags that were detected during the study.
 
@@ -81,9 +81,9 @@ The last thing explore() does is find out the time of first detection at each ar
 
 ## The explore() analysis ends here
 
-This movement events list is the main output of the explore() analysis. This, together with the html report generated, will give you an idea of what your data looks like. To advance into more detailed analyses, you can proceed either to the __[migration()](3.0.migration.html)__ analysis or to the __[residency()](4.0.residency.html)__ analysis. These will use the movement events created here to extract more complex metrics!
+This movement events list is the main output of the explore() analysis. This, together with the html report generated, will give you an idea of what your data looks like. To advance into more detailed analyses, you can proceed either to the __[migration()](c-0_migration.html)__ analysis or to the __[residency()](d-0_residency.html)__ analysis. These will use the movement events created here to extract more complex metrics!
 
-Alternatively, you can also have a more __[detailed look at the outputs of the explore().](2.2.explore_results.html)__
+Alternatively, you can also have a more __[detailed look at the outputs of the explore().](b-2_explore_results.html)__
 
 [Back to top.](#)
 
