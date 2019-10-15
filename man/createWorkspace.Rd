@@ -4,7 +4,7 @@
 \alias{createWorkspace}
 \title{Create a default Workspace}
 \usage{
-createWorkspace()
+createWorkspace(dir = "actel_workspace")
 }
 \description{
 Produces the files and folders required to run the package, which the user can use as a template.
