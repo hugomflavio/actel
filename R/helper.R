@@ -51,6 +51,27 @@ std.error <- function(x, na.rm = TRUE, silent = FALSE){
  return(output)
 }
 
+#' Calculate the standard error of the mean
+#' 
+#' @param x input data
+#' @param na.rm logical: if TRUE, missing values are removed.
+#' @param silent logica: if TRUE, The number of NA's removed is not displayed.
+#' 
+#' @return SDM
+#' 
+#' @export
+#' 
+std.error.circular <- function(x, na.rm = TRUE, silent = FALSE){
+ a <- length(x)
+ if(na.rm) 
+  x <- x[!is.na(x)]
+ output <- circular::sd.circular(x) / sqrt(length(x))
+ if (!silent && a != length(x)) 
+  cat("M: Ommited", a - length(x), "missing values.\n")
+ return(output)
+}
+
+
 #' Calculate the absolute values by which X can be divided
 #' 
 #' @param x the value to be divided

@@ -1127,22 +1127,22 @@ roseMean <- function(input, col = c("cornflowerblue", "chartreuse3", "deeppink")
   if (!exists("plotdata"))
     stop("Input must be a list of circular objects, a data.frame, a matrix or a vector.\n")
   for (i in 1:length(plotdata)) {
-  b <- circular::mean.circular(plotdata[[i]], na.rm = T)
+  m <- circular::mean.circular(plotdata[[i]], na.rm = T)
   if(box.range != "none"){
     if(box.range == "std.error")
-      c <- std.error(plotdata[[i]], silent = TRUE)
+      range <- std.error.circular(plotdata[[i]], silent = TRUE)
     if(box.range == "sd")
-      c <- sd(plotdata[[i]])
+      range <- circular::sd.circular(plotdata[[i]])
     zero <- attr(plotdata[[i]], "circularp")$zero # extracted from the circular data
-    left <- as.numeric(circular::conversion.circular((b - c), units = "radians")) * -1
-    right <- as.numeric(circular::conversion.circular((b + c), units = "radians")) * -1
-      xx <- c(box.size[1] * cos(seq(left, right, length = 1000) + zero), rev(box.size[2] * cos(seq(left, right, length = 1000) + zero)))
-      yy <- c(box.size[1] * sin(seq(left, right, length = 1000) + zero), rev(box.size[2] * sin(seq(left, right, length = 1000) + zero)))
-      polygon(xx, yy, col = fill, border = border)
-    circular::lines.circular(c(b + c, b + c), edge.length, lwd = edge.lwd, col = border)
-    circular::lines.circular(c(b - c, b - c), edge.length, lwd = edge.lwd, col = border)
+    left <- as.numeric(circular::conversion.circular((m - range), units = "radians")) * -1
+    right <- as.numeric(circular::conversion.circular((m + range), units = "radians")) * -1
+    xx <- c(box.size[1] * cos(seq(left, right, length = 1000) + zero), rev(box.size[2] * cos(seq(left, right, length = 1000) + zero)))
+    yy <- c(box.size[1] * sin(seq(left, right, length = 1000) + zero), rev(box.size[2] * sin(seq(left, right, length = 1000) + zero)))
+    polygon(xx, yy, col = fill, border = border)
+    circular::lines.circular(c(m + range, m + range), edge.length, lwd = edge.lwd, col = border)
+    circular::lines.circular(c(m - range, m - range), edge.length, lwd = edge.lwd, col = border)
   }
-  circular::lines.circular(c(b, b), mean.length, lwd = mean.lwd, col = col[i], lend = 1)
+  circular::lines.circular(c(m, m), mean.length, lwd = mean.lwd, col = col[i], lend = 1)
   }
 }
 

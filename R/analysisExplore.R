@@ -278,7 +278,7 @@ Found a bug? [**Report it here.**](https://github.com/hugomflavio/actel/issues)
 
 ### Study area
 
-Arrays with the same background belong to the same section. Release sites are marked with "R.S."
+Release sites are marked with "R.S."
 
 <img src="mb_arrays.svg" alt="Missing file" style="padding-top: 15px;"/>
 

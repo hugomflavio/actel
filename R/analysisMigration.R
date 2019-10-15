@@ -208,11 +208,11 @@ migration <- function(path = NULL, sections, success.arrays = NULL, minimum.dete
     header.fragment <- name.fragment <- ""
   }
 
-  if (file.exists(resultsname <- paste("migration_results", name.fragment, ".RData", sep = ""))) {
+  if (file.exists(resultsname <- paste("actel_migration_results", name.fragment, ".RData", sep = ""))) {
     continue <- TRUE
     index <- 1
     while (continue) {
-      if (file.exists(resultsname <- paste("migration_results", name.fragment, ".", index, ".RData", sep = ""))) {
+      if (file.exists(resultsname <- paste("actel_migration_results", name.fragment, ".", index, ".RData", sep = ""))) {
         index <- index + 1
       } else {
         continue <- FALSE
