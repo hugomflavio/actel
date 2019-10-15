@@ -126,7 +126,7 @@ distancesMatrix <- function(t.layer = "transition.layer.RData", starters = NULL,
 	sp::coordinates(targets) <- ~ longitude + latitude # converts the file to a spatialPoints object
 	raster::crs(targets) <- raster::crs(data.crs)
 	#### Calculate a matrix of distances to each object
-	dist.mat <- data.frame(gdistance::costDistance(transition.layer, starters, targets))
+	dist.mat <- data.frame(gdistance::costDistance(t.layer, starters, targets))
 	if (rename) {
 		rownames(dist.mat) <- outputRows
 		colnames(dist.mat) <- outputCols
@@ -149,18 +149,7 @@ emptyMatrix <- function(){
 	if(!file.exists("spatial.csv"))
 		stop("Could not find a 'spatial.csv' file in the current working directory.\n")
 
-	input <- read.csv("spatial.csv")
-
-	if (!any(grepl("Type", colnames(input))))
-    stop("No 'Type' column found in 'spatial.csv'. Please identify receivers as 'Hydrophone' and release sites as 'Release' in a 'Type' column.\n")
-
-	if (any(is.na(match(unique(input$Type), c("Hydrophone","Release")))))
-    stop("Could not recognise the data in the 'Type' column as only one of 'Hydrophone' or 'Release'. Please doublecheck the spatial file.\n")
-
-	if (sum(input$Type == "Release") == 0)
-    stop("No release sites are present in 'spatial.csv'. At least one release site is necessary for speed calculations.\n")
-
-  input <- setSpatialStandards(input)
+	input <- loadSpatial(file = "spatial.csv")
 
   output <- matrix(nrow = nrow(input), ncol = nrow(input))
   colnames(output) <- rownames(output) <- input$Standard.Name

@@ -1,0 +1,36 @@
+---
+title: "4.2) Inspecting the residency() results"
+author: "Hugo Flávio"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{4.2) Inspecting the residency() results}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+## Index
+
+1. [Preparing your data](a-0_workspace_requirements.html)
+    1. [Structuring the study area](a-1_study_area.html)
+    1. [Creating a distances matrix](a-2_distances_matrix.html)
+1. [explore()](b-0_explore.html)
+    1. [From raw to movements](b-1_explore_processes.html)
+    1. [Inspecting the explore() results](b-2_explore_results.html)
+1. [migration()](c-0_migration.html)
+    1. [Processes behind migration()](c-1_migration_processes.html)
+    1. [Inspecting the migration() results](c-2_migration_results.html)
+    1. [Manual mode in migration()](c-3_migration_manual_mode.html)
+1. [residency()](d-0_residency.html)
+    1. [Processes behind residency()](d-1_residency_processes.html)
+    1. [__Inspecting the residency() results__](d-2_residency_results.html)
+1. [Errors and messages](e-0_messages.html)
+
+The residency analysis is still under construction. Stay tunned for updates!
