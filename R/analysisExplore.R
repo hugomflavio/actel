@@ -158,9 +158,9 @@ explore <- function(path = NULL, maximum.time = 60,
   detections <- detections.list
   deployments <- do.call(rbind.data.frame, deployments)
   if (invalid.dist)
-    save(detections, movements, spatial, times, file = resultsname)
+    save(detections, spatial, deployments, movements, times, file = resultsname)
   else
-    save(detections, movements, spatial, times, dist.mat, file = resultsname)
+    save(detections, spatial, deployments, movements, times, dist.mat, file = resultsname)
 # ------------
 
 # Print graphics
@@ -209,9 +209,9 @@ explore <- function(path = NULL, maximum.time = 60,
     deleteHelpers()
 
   if (invalid.dist)
-    return(list(detections = detections, movements = movements, times = times, spatial = spatial, deployments = deployments))
+    return(list(detections = detections, spatial = spatial, deployments = deployments, movements = movements, times = times))
   else
-    return(list(detections = detections, movements = movements, times = times, spatial = spatial, deployments = deployments, dist.mat = dist.mat))
+    return(list(detections = detections, spatial = spatial, deployments = deployments, movements = movements, times = times, dist.mat = dist.mat))
 }
 
 

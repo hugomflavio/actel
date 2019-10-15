@@ -408,7 +408,7 @@ eventOrderCheck <- function(i, last.events, sections, movements, processing.type
       appendTo("Screen", paste("Current last events: ", paste(last.events, collapse = ", "), " (", paste(sections, collapse = ", "), ").", sep = ""))
       cat("\n")
       if (not.ordered.trigger) {
-        appendTo(c("Screen"), "The last movement event of a section must NOT precede the last movement event\nof a previous section (i.e. Actel cannot cope with inter-section U turns).\nPlease edit the last valid events so this is not the case anymore.\n")
+        appendTo(c("Screen"), "The last movement event of a section must NOT precede the last movement event of a \nprevious section (i.e. the migration analysis cannot cope with inter-section U turns).\nPlease edit the last valid events so this is not the case anymore.\n")
         decision <- "Y"
       } else {
         decision <- commentCheck(line = "Would you like to edit the last valid events?(y/N/comment) ", tag = i)

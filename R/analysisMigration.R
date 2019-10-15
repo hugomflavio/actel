@@ -25,7 +25,7 @@
 #' 
 #' @export
 #' 
-migration <- function(path = NULL, sections, success.arrays, minimum.detections = 2, 
+migration <- function(path = NULL, sections, success.arrays = NULL, minimum.detections = 2, 
   maximum.time = 60, speed.method = c("last to first", "first to first"), 
   if.last.skip.section = TRUE, tz.study.area, start.timestamp = NULL, 
   end.timestamp = NULL, report = TRUE, override = NULL, 
@@ -126,6 +126,9 @@ migration <- function(path = NULL, sections, success.arrays, minimum.detections 
   rm(recipient)
   detections.list <- labelUnknowns(detections.list = detections.list)
   detections.list <- checkDetectionsBeforeRelease(input = detections.list, bio = bio)
+  if (is.null(success.arrays))
+    success.arrays <- names(arrays)[unlist(lapply(arrays, function(x) is.null(x$after)))]
+  
   appendTo(c("Screen", "Report"), "M: Data successfully imported!")
 # -------------------------------------
   
@@ -222,16 +225,16 @@ migration <- function(path = NULL, sections, success.arrays, minimum.detections 
   }
 
   detections <- detections.list
-  efficiency <- overall.CJS
   deployments <- do.call(rbind.data.frame, deployments)
+  matrices <- the.matrices
   if (invalid.dist)
-    save(detections, movements, simple.movements, status.df,
-      section.overview, array.overview, the.matrices, efficiency, 
-      intra.array.CJS, spatial, times, file = resultsname)
+    save(detections, spatial, deployments, movements, simple.movements, status.df,
+      section.overview, array.overview, matrices, overall.CJS, 
+      intra.array.CJS, times, file = resultsname)
   else
-    save(detections, movements, simple.movements, status.df,
-      section.overview, array.overview, the.matrices, efficiency,
-      intra.array.CJS, spatial, times, dist.mat, file = resultsname)
+    save(detections, spatial, deployments, movements, simple.movements, status.df,
+      section.overview, array.overview, matrices, overall.CJS,
+      intra.array.CJS, times, dist.mat, file = resultsname)
 # ------------
 
 # Print graphics
@@ -289,15 +292,17 @@ migration <- function(path = NULL, sections, success.arrays, minimum.detections 
     deleteHelpers()
 
   if (invalid.dist)
-    return(list(detections = detections, movements = movements, simple.movements = simple.movements,
+    return(list(detections = detections, spatial = spatial, deployments = deployments,
+      movements = movements, simple.movements = simple.movements,
       status.df = status.df, section.overview = section.overview, array.overview = array.overview,
-      matrices = the.matrices, efficiency = overall.CJS, times = times, 
-      intra.array.CJS = intra.array.CJS, spatial = spatial))
+      matrices = matrices, overall.CJS = overall.CJS, 
+      intra.array.CJS = intra.array.CJS, times = times))
   else
-    return(list(detections = detections, movements = movements, simple.movements = simple.movements,
+    return(list(detections = detections, spatial = spatial, deployments = deployments,
+      movements = movements, simple.movements = simple.movements,
       status.df = status.df, section.overview = section.overview, array.overview = array.overview,
-      matrices = the.matrices, efficiency = overall.CJS, times = times, 
-      intra.array.CJS = intra.array.CJS, spatial = spatial, dist.mat = dist.mat))
+      matrices = matrices, overall.CJS = overall.CJS, 
+      intra.array.CJS = intra.array.CJS, times = times, dist.mat = dist.mat))
 }
 
 #' Print Rmd report

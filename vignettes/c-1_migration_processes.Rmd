@@ -27,22 +27,24 @@ knitr::opts_chunk$set(
 1. [migration()](c-0_migration.html)
     1. [__Processes behind migration()__](c-1_migration_processes.html)
     1. [Inspecting the migration() results](c-2_migration_results.html)
+    1. [Manual mode in migration()](c-3_migration_manual_mode.html)
 1. [residency()](d-0_residency.html)
     1. [Processes behind residency()](d-1_residency_processes.html)
     1. [Inspecting the residency() results](d-2_residency_results.html)
 1. [Errors and messages](e.messages.html)
-1. [Refining the results](f.refining_results.html)
 
+## Compiling a timetable
 
-## Timetable
+The initial processes of migration() are the same as those from [the explore() function](b-1_explore_processes.html). 
 
-Once the movement events have been defined, they will be used to fill in the timetable, which is the most important step. For each fish, we will find out the very first and very last movement event for each of the study area's [sections](2.0.running_analysis.html#sections). This allows us to determine when the fish entered and left the study area's sections, and ultimately determine the fish's fate.
+Once the movement events have been defined, they will be used to fill in the timetable, which is the most important step of migration(). For each fish, actel will find out the first and last valid movement event for each of the [study area's sections](a-1_study_area.html#sections). Once actel determines when the fish entered and left the study area's sections, it becomes possible to determine the fish's fate.
 
-This process is semi-automatic: If the fish behaves as expected (i.e. linear migration), actel can easily find what it needs, but if there are some odd movement events, actel will ask for help to ensure everything is making sense.
+Note:
+  : This process is semi-automatic: If the fish behaves as expected (i.e. linear migration), actel can easily find what it needs, but if there are some odd movement events, actel will ask for help to ensure everything is making sense.
 
 ### Odd behaviour
 
-Actel expects your fish to move linearly from the release site to the last array on your spatial file (hence why the array order is very important). If this happens, the task of obtaining the first and last times on each section is very simple. However, sometimes fish like to play funny games in your study area, and things can get a bit trickier:
+Actel expects your fish to move linearly from the release site to the last array on your study area (hence why [ordering the arrays properly](a-1_study_area.html#arrays) is very important). If this happens, the task of obtaining the first and last times on each section is very simple. However, sometimes fish like to play funny games in your study area, and things can get a bit trickier:
 
 ### Backwards movements
 
@@ -62,10 +64,10 @@ Since the upstream movements imply going to an upstream section, this has direct
 
 ````
 W: Inter-section backwards movements were detected for Fish R64K-4456.
-Would you like to see the movement table for fish R64K-4456 ?(y/N)
+Would you like to see the movement table for fish R64K-4456 ?(y/N/comment)
 ````
 
-By default, actel will consider the very last event of each section as the point when the fish leave that section. For this example, that means that the fish would be considered to leave the river (for the last time) on event **5**, enter the fjord (for the last time) in event **6** and leave the fjord in event **7**.
+By default, actel will consider the very last event of each section as the point when the fish left that section. For this example, that means that the fish would be considered to have left the river (for the last time) on event **5**, entered the fjord (for the last time) in event **6** and finally left the fjord in event **7**.
 
 #### B) Both Movement events and last events are unordered
 
@@ -82,9 +84,9 @@ If actel were to keep the default rules (i.e. the fish left the river on event *
 
 1. Discard the Fjord detections (i.e. events 3, 4, 5 and 6)
 
-2. Assume the fish was predated between event 4 and 5, and discard events 6 and 7.
+2. Assume the fish was predated between event 4 and 5, and discard events 5, 6 and 7.
 
-There is no universal answer to this, you must analyse your scenario and decide the best course of action
+There is no universal answer to this, you must analyse your scenario and decide the best course of action.
 
 
 #### Correcting the last events
@@ -95,19 +97,19 @@ Whether because you answered 'y' on example **A**, or because you were faced wit
 [...]
 Current last events: 6, 20, 33 (River, Fjord, Sea).
 
-Would you like to edit the last valid events?(y/N) 
+Would you like to edit the last valid events?(y/N/comment) 
 ````
 
 The "Current last events" are pre-selected by actel for each section. If you want to edit any of these, you just have to reply "y" to the current question, select which last event you want to edit (1, 2 or 3 in this case) and the new movement event that should be considered the last event:
 
 ````
-Would you like to edit the last valid events?(y/N) y
-Which last valid event would you like to edit? (1-3) 2
+Would you like to edit the last valid events?(y/N/comment) y
+Which last valid event would you like to edit? (1-3/comment) 2
 New last valid event for Fjord: 21
-Continue editing last valid events?(y/N)
+Continue editing last valid events?(y/N/comment)
 ````
 
-If you make a mistake, don't worry; actel will not let you select an event that is not from the current section (e.g. Fjord), nor an event that is previous to the currently defined last event for the previous section (e.g. if the last river event is event 6, you can not select event 5 as the fjord last event).
+If you make a mistake, don't worry; actel will not let you select an event that is not from the current section (e.g. Fjord in the example above), nor an event that is previous to the currently defined last event for the previous section (e.g. if the last river event is event 6, you can not select event 5 as the fjord last event).
 
 After you select the new event, you will be asked if you want to edit more last events. This also means that you can correct any changes you made, should you make a mistake.
 
@@ -115,15 +117,15 @@ Note:
   : Once you inspect the movement events, if you decide that all the events for a given section are invalid, you can select that section and, when asked which would be the "New last valid event", simply leave the field empty, and a new question will show up:
 
 ````
-Would you like to edit the last valid events?(y/N) y
+Would you like to edit the last valid events?(y/N/comment) y
 Which last valid event would you like to edit? (1-3) 2
 New last valid event for Fjord:
-W: The inserted value is not numeric. Continuing will erase all Fjord related timestamps. Proceed?(y/N) 
+W: The inserted value is not numeric. Continuing will erase all Fjord related timestamps. Proceed?(y/N/comment) 
 ````
 
 ### Events with one detection
 
-By default, actel tries to avoid assigning movement events with one detection as the first and/or last events for a given section. This is because these isolated events are more likely to be miss-detections than events with more than one detection. However, if it happens that all the movement events for a given section have only one detection, actel will ask you to decide which events should be used.
+By default, actel avoids assigning movement events with one detection as the first and/or last valid events for a given section. This is because these isolated events are more likely to be miss-detections than events with more than one detection. However, if it happens that all the movement events for a given section have only one detection, actel will ask you to decide which events should be used.
 
 Since actel starts by selecting the last movement events for all sections and only then the first events, you will be asked to assign a last event and *only after* to determine the first event:
 
@@ -132,33 +134,33 @@ W: No Sea detection events with more than one detection were found for fish R64K
 
 [...]
 
-Which event should be considered the LAST Sea detection event? 5
-Which event should be considered the FIRST Sea detection event? 
+Which event should be considered the LAST Sea detection event?(comment) 5
+Which event should be considered the FIRST Sea detection event?(comment) 
 ````
 Note:
   : Like above, if you believe that the events for that section are not valid, you can tell actel to discard those events. When prompted for the last or first movement event of a section, just press enter without any input.
 
-If you believe that the cautious assignment rule is not suitable for your study area (i.e. your fish move very fast or your receiver range is limited), you can [disable `cautious.assignment` when you run the analysis](2.0.running_analysis.html#cautious.assignment).
+If you believe that the cautious assignment rule is not suitable for your study area (i.e. your fish move very fast or your receiver range is limited), you can [disable `cautious.assignment` when you run the analysis](c-0_migration.html#cautious.assignment).
 
 ### Leaving comments for later
 
-If a fish is causing doubts, you can attach a comment to it at any time. Just reply "comment" to a question and the comment dialogue will be triggered:
+If a fish is causing doubts, you can attach a comment to it at any time. Just reply "comment" to a question when the word "comment" shows up between brackets and the comment dialogue will be triggered:
 
 ````
-Continue editing last valid events?(y/N) comment
+Continue editing last valid events?(y/N/comment) comment
 New comment on fish R64K-4456: Was this fish eaten?
 M: Comment successfully stored, returning to the previous interaction.
-Continue editing last valid events?(y/N) 
+Continue editing last valid events?(y/N/comment) 
 ````
 
-You can then find all your comments on the PDF report and on the final data frame.
+You can then find all your comments in the [html report](c-2_migration_results.html##actel_migration_report.html-if-report-true) and in the [final data frame](c-2_migration_results.html#status.df).
 
 ## Combining the time data with the biometrics
 
-The hardest part is done. Now, actel will automatically combine the time information with the information you included in the biometrics file. This new dataframe is called *status.df*, and will be available to you in the function output. It is also here that the [`success.arrays`](2.0.running_analysis.html#success.arrays) come in. If your fish was last detected on an one of those arrays, it will be assigned as "Succeeded".
+The hardest part is done. Now, actel will automatically combine the time information with the information you included in the biometrics file. This new data frame is called *status.df*, and will be available to you in the function output. It is also here that the [success.arrays variable](c-0_migration.html#success.arrays) comes in. If your fish was last detected on an one of those arrays, it will be assigned as "Succeeded".
 
 ## Inspecting the results
 
-Finally, actel will compile some summary tables, prepare the report, and finish up. It is time to [have a look at the results!](4.inspecting_results.html)
+Finally, actel will compile some summary tables, prepare the report, and finish up. It is time to [have a look at the results!](c-2_migration_results.html)
 
 [Back to top.](#)

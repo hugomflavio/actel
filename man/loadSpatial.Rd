@@ -4,7 +4,7 @@
 \alias{loadSpatial}
 \title{Load Spatial file and Check the structure}
 \usage{
-loadSpatial(file, verbose = FALSE)
+loadSpatial(file = "spatial.csv", verbose = FALSE)
 }
 \arguments{
 \item{file}{an input file with spatial data.}

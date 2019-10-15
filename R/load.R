@@ -167,7 +167,7 @@ loadDeployments <- function(file, tz.study.area){
 #' 
 #' @export
 #' 
-loadSpatial <- function(file, verbose = FALSE){
+loadSpatial <- function(file = "spatial.csv", verbose = FALSE){
   if (verbose)
     appendTo("debug","Starting loadSpatial.")
   if (file.exists(file))

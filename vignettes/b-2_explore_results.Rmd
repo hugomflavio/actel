@@ -27,16 +27,16 @@ knitr::opts_chunk$set(
 1. [migration()](c-0_migration.html)
     1. [Processes behind migration()](c-1_migration_processes.html)
     1. [Inspecting the migration() results](c-2_migration_results.html)
+    1. [Manual mode in migration()](c-3_migration_manual_mode.html)
 1. [residency()](d-0_residency.html)
     1. [Processes behind residency()](d-1_residency_processes.html)
     1. [Inspecting the residency() results](d-2_residency_results.html)
 1. [Errors and messages](e.messages.html)
-1. [Refining the results](f.refining_results.html)
 
 
 ## Results within R
 
-If you ran the actel function and stored it into an object, this object will now be a list, containing all the useful results actel has compiled for you:
+If you ran the explore function and stored it into an object (i.e. `output <- explore(...)`), this object will now be a list, containing all the useful results actel has compiled for you:
 
 ### detections
 
@@ -51,10 +51,17 @@ The `detections` object is a list of the raw detections found in your detections
 |2018-04-18 20:13:43 |126324   |R64K      |4701   |R64K-4701   |St.5          |River1 |
 |2018-04-18 20:15:11 |126324   |R64K      |4701   |R64K-4701   |St.5          |River1 |
 
+### spatial
+
+The `spatial` object is a list containing the stations, release sites and some more summary information. This object may come in handy if you have to go back to your results some time after you completed the analysis, so you can verify the study area design and match the stations names to their locations.
+
+### deployments
+
+The deployments data frame is similar to t deployments.csv file, with the exception that unique serial numbers have been created for receivers which were deployed more than once.
 
 ### movements
 
-The `movements` object is a list of the movement events created during [the sorting process](c-0_the_sorting_process.html#from-detections-to-movements). These records can become very useful if you need to go back to a given fish and inspect the movements in more detail. Here is an example:
+The `movements` object is a list of the movement events created during [the detection sorting process](b-1_explore_processes.html#from-detections-to-movements). These records can become very useful if you need to go back to a given fish and inspect its behaviour in more detail. Here is an example:
 
 |Array  | Detections|First station |Last station |First time          |Last time           |Time travelling |Time on array |
 |:------|----------:|:-------------|:------------|:-------------------|:-------------------|:---------------|:-------------|
@@ -68,9 +75,13 @@ The `movements` object is a list of the movement events created during [the sort
 
 ### times
 
-This data frame contains the time stamps of first valid detection on each array, for each fish. These are used to draw the circular plots in the report (like the ones below), but you can also use them to test for differences between groups!
+This data frame contains the time stamps of first valid detection in each array, for each fish. These are used to draw the circular plots in the report (like the ones below), but you can also use them to test for differences between groups!
 
 <img src="times_River3.svg" alt="drawing" width="330"/> <img src="times_Sea1.svg" alt="drawing" width="330"/>
+
+### dist.mat
+
+If a valid [distance matrix](a-2_distances_matrix.html) was supplied for the analysis, it will be returned together with the results. This allows you to easily check speeds between specific movements of particular interest, and can serve as a basis for other relevant metrics.
 
 
 ## Results in your working directory
@@ -83,11 +94,11 @@ To make sure that you don't accidentally loose your results, actel stores them r
 
 ### actel.log.txt
 
-This log is where actel has written what was done during the analysis. It contains everything: summary information, errors, warnings and messages and the options you have taken while the analysis was running. It is worth keeping it in case you need to find out the reasoning behind some result. To avoid overwriting when conducting multiple analysis, the actel.log.txt file is preceded by the timestamp of when it was created (e.g. '2019-05-14.10.51.40.actel.log.txt').
+This log acts as a carbon copy of the analysis. It contains everything: summary information, errors, warnings and messages and the options you have taken while the analysis was running. It is worth keeping it in case you need to find out the reasoning behind some result. To avoid overwriting when conducting multiple analysis, the actel.log.txt file is preceded by the timestamp of when it was created (e.g. '2019-05-14.10.51.40.actel.log.txt').
 
 ### stray_tags.csv
 
-Depending on how open your study area is, the deployed receivers may pick up stray tags that came in range during the study period. Actel stores a brief summary of these tags in the stray_tags.csv file, in case you are interested in knowing more about these tags, or perhaps share the codes with your colleagues.
+Deployed receivers may pick up stray tags that came in range during the study period. Actel stores a brief summary of these tags in the stray_tags.csv file, in case you are interested in knowing more about these tags, or perhaps share the codes with your colleagues.
 
 ### actel_explore_report.html (if report = TRUE)
 
@@ -97,9 +108,9 @@ This is the main non-R output. If you activated the `report` option, actel will 
 
   Contains brief information on the study. It is useful to check up if anything looks wrong (i.e. the number of target tags, the data range).
 
-1. **Stations** and **Releases**
+1. **Stations**, **Deployments** and **Releases**
 
-  A table containing the spatial elements of the study (i.e. receivers and release sites). Any unknown receivers found during the analysis will also show up here. Since the station names can vary wildly, actel creates Standard names for your stations (e.g. "St.1","St.2"). When looking at the individual detection graphics, you can refer back to this table to match the standard names to the respective station names.
+  These sections contain tables listing the stations, deployments and release sites considered for the analysis. Any unknown receivers found during the analysis will also show up here. Since the station names can vary wildly, actel creates Standard names for your stations (e.g. "St.1", "St.2"). When looking at the [individual detection graphics](#graphics-of-detected-tags), you can refer back to the spatial table to match the standard names to the respective station names.
 
 1. **Warning messages**
 
@@ -111,7 +122,7 @@ This is the main non-R output. If you activated the `report` option, actel will 
 
 1. **Biometrics**
 
-  Actel crawls through you biometrics file in search for columns containing the keywords *length*, *weight* or *mass*. Should it find any matching column, it will print boxplots of the distribution of the selected parameters, divided by each fish group listed in the same file. This can be very helpful in quickly finding typos in the data (e.g. a displaced decimal separator).
+  Actel crawls through you biometrics file in search for columns containing the keywords *length*, *weight* or *mass*. Should it find any matching column, it will print boxplots of the distribution of the selected arguments, divided by each fish group listed in the same file. This can be very helpful in quickly finding typos in the data (e.g. a displaced decimal separator).
 
 1. **Time of arrival at each array**
 

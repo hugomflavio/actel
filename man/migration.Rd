@@ -4,7 +4,7 @@
 \alias{migration}
 \title{Actel: Acoustic telemetry data sorting}
 \usage{
-migration(path = NULL, sections, success.arrays,
+migration(path = NULL, sections, success.arrays = NULL,
   minimum.detections = 2, maximum.time = 60,
   speed.method = c("last to first", "first to first"),
   if.last.skip.section = TRUE, tz.study.area, start.timestamp = NULL,
