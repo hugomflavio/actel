@@ -5,44 +5,63 @@
 #' @export
 #' 
 createWorkspace <- function() {
-  spatial <- data.frame(Station.Name = c("Example station1", "Example station2", "Example station3", "Example release1", "Example release2"), Receiver = c("123001", "123002", "331", NA, NA), 
-  Latitude = c(8.411, 8.521, 8.402, 8.442, 8.442), Longitude = c(40.411, 40.521, 40.402, 40.442, 40.442), Array = c("River1", "River1", "River2", "River1", "River2"), Type = c("Hydrophone", 
-    "Hydrophone", "Hydrophone", "Release", "Release"))
+  spatial <- data.frame(
+    Station.Name = c("Example station1", "Example station2", "Example station3", "Example release1", "Example release2"),
+    Latitude = c(8.411, 8.521, 8.402, 8.442, 8.442),
+    Longitude = c(40.411, 40.521, 40.402, 40.442, 40.442), 
+    Array = c("River1", "River1", "River2", "River1", "River2"), 
+    Type = c("Hydrophone", "Hydrophone", "Hydrophone", "Release", "Release"))
   write.csv(spatial, "spatial.csv", row.names = FALSE)
-  biometrics <- data.frame(Release.date = c("2018-02-01 10:05:00", "2018-02-01 10:10:00", "2018-02-01 10:15:00"), Serial.nr = c("12340001", "12501034", "19340301"), Signal = c(1, 1034, 301), 
-  Length.mm = c(150, 160, 170), Weight.g = c(40, 60, 50), Array = c("Wild", "Hatchery", "Wild"), Release.site = c("Example release1", "Example release1", "Example release2"))
+
+  biometrics <- data.frame(
+    Release.date = c("2018-02-01 10:05:00", "2018-02-01 10:10:00", "2018-02-01 10:15:00"), 
+    Serial.nr = c("12340001", "12501034", "19340301"), 
+    Signal = c(1, 1034, 301), 
+    Length.mm = c(150, 160, 170), 
+    Weight.g = c(40, 60, 50), 
+    Array = c("Wild", "Hatchery", "Wild"), 
+    Release.site = c("Example release1", "Example release1", "Example release2"))
   write.csv(biometrics, "biometrics.csv", row.names = FALSE)
+
+  deployments <- data.frame(
+    Receiver = c("123001", "123002", "331"), 
+    Station.Name = c("Example station1", "Example station2", "Example station3"),
+    Start = c("2018-01-25 12:00:00", "2018-01-25 12:00:00", "2018-01-25 12:00:00"),
+    Stop = c("2018-04-03 12:00:00", "2018-04-03 12:00:00", "2018-04-03 12:00:00"))
+  write.csv(deployments, "deployments.csv", row.names = FALSE)
+
   if (!dir.exists("detections")) 
-  dir.create("detections")
+    dir.create("detections")
+  message("M: Workspace files created.")
 }
 
 #' Create an example Workspace
 #'
 #' Creates a ready-to-run workspace with example data.
 #' 
-#' @param example.spatial A dataset containing the positions of the deployed ALS and release site.
-#' @param example.biometrics A dataset containing the positions of the deployed ALS and release site.
-#' @param example.detections A dataset containing the detections of the deployed ALS, for the 60 fish.
+#' @param spatial A dataset containing the positions of the deployed ALS and release site.
+#' @param biometrics A dataset containing the positions of the deployed ALS and release site.
+#' @param detections A dataset containing the detections of the deployed ALS, for the 60 fish.
+#' @param deployments A dataset containing the deployed receivers.
 #'
 #' @export
 #' 
-exampleWorkspace <- function(example.spatial = example.spatial, example.biometrics = example.biometrics, example.detections = example.detections) {
+exampleWorkspace <- function(spatial = example.spatial, biometrics = example.biometrics, detections = example.detections, deployments = example.deployments) {
   if (!dir.exists("exampleWorkspace")) 
     dir.create("exampleWorkspace")
-  write.csv(example.spatial, "exampleWorkspace/spatial.csv", row.names = FALSE)
-  write.csv(example.biometrics, "exampleWorkspace/biometrics.csv", row.names = FALSE)
+  write.csv(spatial, "exampleWorkspace/spatial.csv", row.names = FALSE)
+  write.csv(biometrics, "exampleWorkspace/biometrics.csv", row.names = FALSE)
+  write.csv(deployments, "exampleWorkspace/deployments.csv", row.names = FALSE)
   if (!dir.exists("exampleWorkspace/detections")) 
     dir.create("exampleWorkspace/detections")
-  my.list <- split(example.detections, example.detections$Receiver)
+  my.list <- split(detections, detections$Receiver)
   for (i in names(my.list)) {
     write.csv(my.list[[i]], paste("exampleWorkspace/detections/", i, ".csv", sep = ""), row.names = FALSE)
   }
-  cat("The example workspace is now ready. To run the analysis on the example data, run:\n
-\tresults <- actel(path = 'exampleWorkspace', sections = c('River','Fjord','Sea'), success.arrays = 'Sea1',
-\t\tminimum.detections = 2, maximum.time = 60, speed.method = 'last to first', if.last.skip.section = TRUE,
-\t\ttz.study.area = 'Europe/Copenhagen', start.timestamp = NULL, end.timestamp = NULL, report = TRUE, redraw = TRUE, 
-\t\toverride = NULL, exclude.tags = NULL, debug = FALSE, cautious.assignment = TRUE, replicate = NULL)\n
-And follow the instructions as they come. Once finished, explore the object 'results' for the output.\n")
+  message("M: The example workspace is now ready. To run the analysis on the example data, run:\n
+  results <- migration(path = 'exampleWorkspace', sections = c('River', 'Fjord', 'Sea'), 
+  \t\t     success.arrays = 'Sea1', tz.study.area = 'Europe/Copenhagen')\n
+And follow the instructions as they come. Once finished, explore the object 'results' for the output.")
 }
 
 #' Example spatial data
@@ -91,3 +110,17 @@ And follow the instructions as they come. Once finished, explore the object 'res
 #' }
 #' @source Data collected by the authors.
 "example.detections"
+
+#' Example deployment data
+#'
+#' A dataset containing the deployed receivers.
+#'
+#' @format A data frame with 17 rows and 4 variables:
+#' \describe{
+#'   \item{Receiver}{The receiver serial number}
+#'   \item{Station.Name}{The name given to the receiver}
+#'   \item{Start}{The date and time of the deployment}
+#'   \item{Stop}{The date and time of the retrieval}
+#' }
+#' @source Data collected by the authors.
+"example.deployments"

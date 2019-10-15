@@ -594,7 +594,7 @@ findFirstEvents <- function(i, last.events, movements, sections, processing.type
         first.events[l] <- head(valid.events, 1)
       }
     }
-    if (trigger && is.null(first.events[l])) {
+    if (trigger && is.na(first.events[l])) {
       check = TRUE
       while (check) {
         new.value <- suppressWarnings(as.numeric(commentCheck(line = paste("Which event should be considered the FIRST", sections[l], "detection event?(comment) "), tag = i)))

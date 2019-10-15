@@ -127,9 +127,14 @@ breakMatricesByArray <- function(m, arrays) {
         return(m[, c(ncol(m), 1, (ncol(m) - 1))])
       })
       # If all peers are 0, the CJS functions will crash. The same happens if the array is all 0's
-      zero.check <- unlist(lapply(aux, function(x) sum(x$AnyPeer) == 0 | sum(x[, 2]) == 0))
+      own.zero.check <- unlist(lapply(aux, function(x) sum(x[, 2]) == 0))
+      peer.zero.check <- unlist(lapply(aux, function(x) sum(x$AnyPeer) == 0))
+      zero.check <- own.zero.check | peer.zero.check
       if (all(zero.check)) {
-        appendTo(c("Screen", "Warning", "Report"), paste0("W: No fish passed through any of the efficiency peers of array ", names(arrays)[i], "."))
+        if (all(own.zero.check))
+          appendTo(c("Screen", "Warning", "Report"), paste0("W: No fish passed through array ", names(arrays)[i], "."))
+        if (all(peer.zero.check))
+          appendTo(c("Screen", "Warning", "Report"), paste0("W: No fish passed through any of the efficiency peers of array ", names(arrays)[i], "."))
       } else {
         recipient[[length(recipient) + 1]] <- aux[!zero.check]
         names(recipient)[length(recipient)] <- names(arrays)[i]
