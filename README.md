@@ -16,7 +16,7 @@ By bringing together the study area configuration and the recorded detections, a
  
 **2. migration()**
 
-  The migration() analysis runs the same initial checks as explore(), but on top of it, it analysis
+  The migration() analysis runs the same initial checks as explore(), but on top of it, it analyses
   the fish behaviour. By selecting the arrays that lead to success, you can define whether or not
   your fish survived the study. Multiple options allow you to tweak the analysis to fit your study perfectly.
  
