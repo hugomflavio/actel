@@ -31,7 +31,7 @@ knitr::opts_chunk$set(
 1. [residency()](d-0_residency.html)
     1. [Processes behind residency()](d-1_residency_processes.html)
     1. [Inspecting the residency() results](d-2_residency_results.html)
-1. [Errors and messages](e.messages.html)
+1. [Errors and messages](e-0_messages.html)
 
 ## Preparing your data
 
@@ -59,11 +59,10 @@ knitr::kable(biometrics)
 Although the column order is not important, it is essential that this table contains two columns:
 
 Release.date
-  : Corresponds to the date and time when the fish was released, and **must** be typed in **yyyy-mm-dd hh:mm:ss** format. 
-  : Note that the timestamps must be in the **local time zone** of the study area, which you will later supply in the `tz.study.area` argument.
+  : Corresponds to the date and time when the fish was released, and **must** be typed in **yyyy-mm-dd hh:mm:ss** format. Note that the timestamps must be in the **local time zone** of the study area, which you will later supply in the `tz.study.area` argument.
 
 Signal 
-  : Corresponds to the code emitted by the tag that was implanted on the fish. If you are unsure as to what signal is being emitted by your tag, you should ask the tag manufacturer more about the differences between code spaces and signals.
+  : Corresponds to the code emitted by your tags. If you are unsure as to what signals are, you should ask the tag manufacturer more about the differences between code spaces and signals.
 
 The **Group** and **Release.site** columns are also important but, if you only have one group or one release site, actel can generate these columns for you. If this happens, you will receive a message:
 
@@ -73,7 +72,7 @@ M: No 'Group' column found in the biometrics file. Assigning all fish to group '
 ```
 
 Note:
-  : You can then append as many columns as you want to **biometrics.csv**. Importantly, if the biometrics have columns with keywords such as *length*, *weight* or *mass*, graphics showing the distribution of these parameters per fish group will be drawn for you in the report.
+  : You can append as many columns as you want to **biometrics.csv**. Importantly, if the biometrics have columns with keywords such as *length*, *weight* or *mass*, graphics showing the distribution of these parameters per fish group will be drawn for you in the report.
 
 ## Spatial file
 
@@ -95,10 +94,10 @@ Station.Name
   : The name of the station will be used to match the receiver deployments.
 
 Array
-  : If you are listing a station: The array to which the station belongs. Arrays from a given study section must differ only in number. I.e. arrays **must** have this format: *section#*.*
-  : If you are listing a release site: The first array that the fish is expected to cross after being released.
-
-\* This does not apply for the explore() function, which does not take sections into consideration.
+  : If you are listing a station: 
+    The array to which the station belongs. Arrays from a given study section must differ only in number. I.e. arrays **must** have this format: *section#*.
+  : If you are listing a release site: 
+    The first array that the fish is expected to cross after being released.
 
 Type
   : The nature of the item you are listing. You **must** choose between "Hydrophone" or "Release".
@@ -138,19 +137,18 @@ Station.Name
   : The name of the station where the receiver was deployed. It **must** match one of the station names in the spatial file.
 
 Start and Stop
-  : The times when the receiver was deployed and when the receiver was retrieved, respectively. Must be in a **yyyy-mm-dd hh:mm:ss** format.
-  : Note that these time stamps **must** be in the local time zone of the study area, which you will later supply in the `tz.study.area` argument.
+  : The times when the receiver was deployed and when the receiver was retrieved, respectively. Must be in a **yyyy-mm-dd hh:mm:ss** format. Note that these time stamps **must** be in the local time zone of the study area, which you will later supply in the `tz.study.area` argument.
 
 ## Detections
 
-Including your detections is the easiest part. Copy the *.csv* files offloaded from your hydrophones to the *detections* folder that was created by the *createWorkspace()* function and actel will know they are to be imported. Right now actel can upload files generated from VEMCO and THELMA manufactured hydrophones. If you have an hydrophone from a different manufacturer, or if you are using one of the supported manufacturers and get the warning displayed below, please to contact us so we can solve the issue.
+Including your detections is the easiest part. Copy the *.csv* files offloaded from your receivers to the *detections* folder that was created by the *createWorkspace()* function and actel will know they are to be imported. Right now actel can upload files generated from VEMCO and THELMA manufactured receivers. If you have an receiver from a different manufacturer, or if you are using one of the supported manufacturers and get the warning displayed below, please to contact us so we can solve the issue.
 
 ```
 W: File 'filename' does not match to any of the supported hydrophone file formats! If your file corresponds to a hydrophone log and actel did not recognize it, please contact the developer team through www.github.com/hugomflavio/actel/issues/new
 ```
 
 Note:
-  : The detection time stamps must be in UTC. This is the default time zone used by the receivers, so as long as you did not edit the raw files, all should be ready to go.
+  : **The detection time stamps must be in UTC**. This is the default time zone used by the receivers, so as long as you did not edit the raw files, all should be ready to go.
   
 ## Optional: Distances matrix
 
@@ -170,7 +168,7 @@ A distances matrix is a table that contains information on  the distance (in met
 
 ## Optional: Spatial.dot file
 
-If your study are has multiple branches, then you need to tell actel how these branches connect with each other. This file is optional because, if ommitted, actel will assume that your study area is composed by a single branch and that the array order is the one listed in the spatial.csv file.
+If your study area has multiple branches, then you need to tell actel how these branches connect with each other. This file is optional because, if ommitted, actel will assume that your study area is composed by a single branch and that the array order is the one listed in the spatial.csv file.
 
 The spatial.dot file is very simple; all you need to do is connect your arrays with arrows. Here is an example:
 
@@ -197,7 +195,7 @@ Now that you have prepared your workspace, it is time to start the analysis. The
  
 **2. migration()**
 
-  The migration() analysis runs the same initial checks as explore(), but on top of it, it analysis
+  The migration() analysis runs the same initial checks as explore(), but on top of it, it analyses
   the fish behaviour. By selecting the arrays that lead to success, you can define whether or not
   your fish survived the study. Multiple options allow you to tweak the analysis to fit your study perfectly.
 

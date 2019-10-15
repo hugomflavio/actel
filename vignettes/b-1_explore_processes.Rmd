@@ -31,7 +31,7 @@ knitr::opts_chunk$set(
 1. [residency()](d-0_residency.html)
     1. [Processes behind residency()](d-1_residency_processes.html)
     1. [Inspecting the residency() results](d-2_residency_results.html)
-1. [Errors and messages](e.messages.html)
+1. [Errors and messages](e-0_messages.html)
 
 
 ## Making sure everything checks out
@@ -45,16 +45,17 @@ If you need help with any messages, warnings or errors, you can find more about 
 Once everything is in place, actel will start by:
 
 1. Splitting the detections by transmitter,
-2. Match the signals listed in the biometrics 
+2. Match the signals listed in the biometrics, 
 3. Keep only the detections useful for the study. 
-
-If you are interest in knowing whether or not there were any stray tags in your study area, have a look at the "stray_tags.csv" file, which is created automatically in your working directory.
 
 It is at this point that the argument [`exclude.tags`]() comes in:
 
-actel uses the tag's signal to find your fish, to avoid issues with different definitions of code spaces by different manufacturers. However, if two tags with the same signal but different code spaces show up at your study area, actel will not know which one to choose. Should this happen, you must specify which tag **should be excluded** in the `exclude.tags` argument and restart the analysis. You can [find an example here.](b-0_explore.html#exclude.tags)
+Actel uses the tag's signal to find your fish. However, if two tags with the same signal but different code spaces show up at your study area, actel will not know which one to choose. Should this happen, you must specify which tag **should be excluded** in the `exclude.tags` argument and restart the analysis. You can [find an example here.](b-0_explore.html#exclude.tags)
 
 Once the detections are sorted and validated, actel is ready to start compiling movement events.
+
+Note:
+  : If your detections contain data from stray tags (i.e. tags that do not belong to your study), a summary of this will be stored in a "stray_tags.csv" file.
 
 ## From detections to movements
 
@@ -64,19 +65,14 @@ Arrays
   : When a fish moves from one receiver array to another, a new movement event is created. These arrays are defined by you in the [spatial file](a-0_workspace_requirements.html#spatial-file), so it is worth it to spend some time thinking about how you want to arrange your receivers.
 
 `maximum.time`
-  : This argument controls the creation of multiple events for consecutive detections on the same receiver array. You can [find more information on this argument here](b-0_explore.html#maximum.time).
+  : This argument controls the creation of multiple events for consecutive detections on the same receiver array. You can [find more information about this argument here](b-0_explore.html#maximum.time).
 
 By the end of this process, you will have a list containing the movement events for each of the target tags that were detected during the study.
 
 
-### Leaving comments for later
-
-If a fish is causing doubts, you can attach a comment to it whenever the option "comment" shows up. Just reply "comment" to the prompt comment dialogue will be triggered. Once you type in your note, it will be stored together with the respective tag.
-
-
 ## Bonus: Time of first detection at each array
 
-The last thing explore() does is find out the time of first detection at each array, for each fish. This information is then used to plot circular graphics in the report, and is also returned within R as an output of the function.
+The last thing explore() does is find out the time of first detection at each array, for each fish. This information is then used to plot [circular graphics in the report](b-2_explore_results.html#times), and is also returned within R as an output of the function.
 
 
 ## The explore() analysis ends here

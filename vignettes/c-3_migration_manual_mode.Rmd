@@ -1,10 +1,10 @@
 ---
-title: "6) Refining the results"
+title: "3.3) Manual mode in migration()"
 author: "Hugo Flávio"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{6) Refining the results}
+  %\VignetteIndexEntry{3.3) Manual mode in migration()}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -31,7 +31,7 @@ knitr::opts_chunk$set(
 1. [residency()](d-0_residency.html)
     1. [Processes behind residency()](d-1_residency_processes.html)
     1. [Inspecting the residency() results](d-2_residency_results.html)
-1. [Errors and messages](e.messages.html)
+1. [Errors and messages](e-0_messages.html)
 
 ## Refining the results
 

@@ -31,7 +31,7 @@ knitr::opts_chunk$set(
 1. [residency()](d-0_residency.html)
     1. [Processes behind residency()](d-1_residency_processes.html)
     1. [Inspecting the residency() results](d-2_residency_results.html)
-1. [Errors and messages](e.messages.html)
+1. [Errors and messages](e-0_messages.html)
 
 ## Compiling a timetable
 
@@ -44,11 +44,11 @@ Note:
 
 ### Odd behaviour
 
-Actel expects your fish to move linearly from the release site to the last array on your study area (hence why [ordering the arrays properly](a-1_study_area.html#arrays) is very important). If this happens, the task of obtaining the first and last times on each section is very simple. However, sometimes fish like to play funny games in your study area, and things can get a bit trickier:
+Actel expects your fish to move linearly from the release site to the last array on your study area (hence why [ordering the arrays properly](a-1_study_area.html#arrays) is very important). If this happens, the task of obtaining the first and last times in each section is very simple. However, sometimes fish like to play funny games in your study area, and things can get a bit trickier:
 
 ### Backwards movements
 
-Tagged fish can move backwards either because they are reluctant of the new environments or because something ate them and is now moving randomly. The very first evidence of this is that the arrays to which each movement event belongs will no longer be arranged as expected. 
+Tagged fish can move backwards either because they are reluctant of the new environments or because something ate them and you are now tracking the predator. The very first evidence of this is that the arrays to which each movement event belongs will no longer be arranged as expected. 
 
 If this happens, but then the fish continues its journey, then the last movement events on each section will still be ordered as expected. Otherwise, if the fish moves backwards and then never returns, then the last movement events of each section will also be in an unexpected order. 
 
@@ -73,14 +73,14 @@ By default, actel will consider the very last event of each section as the point
 
 In example **B**, events 1, 2, 3, 4 and 5 are all within expected, but then the fish moves upstream both on event 6 and event 7. The fish then disappears. This means that the last event in the Fjord is actually **before** the last event in the River. 
 
-This has both an impact on the assignment of times and on the assignment of the fish's fate. Unlike above, where you could choose to see the movement events, here they will be opened for you, as this situation will require your intervention.
+This has both an impact on the assignment of times and on the assignment of the fish's fate. Unlike above, where you could choose not to take action, this situation will require your intervention.
 
 ````
 W: Inter-section backwards movements were detected for Fish R64K-4526 and the last events are not ordered!
    Opening movements list for inspection.
 ````
 
-If actel were to keep the default rules (i.e. the fish left the river on event **7**, and left the fjord on event **6**), then it would be impossible to find a suitable first Fjord event. There are two options you can follow here:
+If actel were to keep the default rules (i.e. the fish left the river on event **7**, and left the fjord on event **6**), then it would be impossible to find a suitable first Fjord event. There are multiple options you can follow here, e.g.:
 
 1. Discard the Fjord detections (i.e. events 3, 4, 5 and 6)
 
@@ -125,7 +125,7 @@ W: The inserted value is not numeric. Continuing will erase all Fjord related ti
 
 ### Events with one detection
 
-By default, actel avoids assigning movement events with one detection as the first and/or last valid events for a given section. This is because these isolated events are more likely to be miss-detections than events with more than one detection. However, if it happens that all the movement events for a given section have only one detection, actel will ask you to decide which events should be used.
+By default, actel avoids assigning [movement events with one detection as the first and/or last valid events](c-0_migration.html#cautious.assignment) for a given section. This is because these isolated events are more likely to be miss-detections than events with more than one detection. However, if it happens that all the movement events for a given section have only one detection, actel will ask you to decide which events should be used.
 
 Since actel starts by selecting the last movement events for all sections and only then the first events, you will be asked to assign a last event and *only after* to determine the first event:
 
@@ -153,7 +153,7 @@ M: Comment successfully stored, returning to the previous interaction.
 Continue editing last valid events?(y/N/comment) 
 ````
 
-You can then find all your comments in the [html report](c-2_migration_results.html##actel_migration_report.html-if-report-true) and in the [final data frame](c-2_migration_results.html#status.df).
+You can then find all your comments in the [html report](c-2_migration_results.html#actel_migration_report.html-if-report-true) and in the [final data frame](c-2_migration_results.html#status.df).
 
 ## Combining the time data with the biometrics
 

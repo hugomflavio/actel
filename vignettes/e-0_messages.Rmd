@@ -31,7 +31,7 @@ knitr::opts_chunk$set(
 1. [residency()](d-0_residency.html)
     1. [Processes behind residency()](d-1_residency_processes.html)
     1. [Inspecting the residency() results](d-2_residency_results.html)
-1. [__Errors and messages__](e.messages.html)
+1. [__Errors and messages__](e-0_messages.html)
 
 ## List of Messages, Warnings and Errors
 
@@ -50,7 +50,7 @@ Note :
 	  Path: [...]
 	You may either:
 	  a) continue the analysis in the current directory;
-	  b) restart the function."
+	  b) restart the function.
 	Decision:(a/b) 
 	```
 
@@ -66,10 +66,9 @@ Note :
 
 	```
 	W: 'Report' directory already present. Overwriting files already present.
-	W: 'Report' directory already present. Skipping files already present.
 	```
 
-	If you are running actel for the second time in a given folder, the 'Report' directory may have already been created. Depending on whether you set `redraw`as TRUE or FALSE, previously present files may get overwritten.
+	If you are running actel for the second time in a given folder, the 'Report' directory may have already been created. IF the folder exists, previously present files may get overwritten.
 
 1. **Some files are missing**
 
@@ -114,7 +113,7 @@ Note :
 	W: # files were excluded from further analyses.
 	```
 
-	Not all files in your 'detections' folder were recognised as hydrophone logs. Make sure you did not edit the detection files manually before feeding them to Actel. If the problem persists, contact the developer team.
+	Not all files in your 'detections' folder were recognised as receiver logs. Make sure you did not edit the detection files manually before feeding them to Actel. If the problem persists, contact the developer team.
 
 1. **Automatic handling of exceptions**
 
@@ -164,7 +163,7 @@ Note :
   W: Detections from receivers [serial numbers] are present in the data, but these receivers are not part of the study's stations. Doublecheck potential errors.
 	```
 
-	Somewhere in your detection files, there are detections for hydrophones that are not listed in the spatial file. If some of your target tags are detected in these receivers, this warning will escalate to the one below.
+	Somewhere in your detection files, there are detections for receivers that are not listed in the spatial file. If some of your target tags are detected in these receivers, this warning will escalate to the one below.
 
 	```
   W: Fish [transmitter] was detected in one or more receivers that are not listed in the study area (receiver(s): [receivers serial])!
@@ -174,13 +173,13 @@ Note :
   Which option should be followed?(a/b) 
 	```
 
-	At least one of your target tags were detected in a hydrophone that is not listed in the spatial file. If you are truly unsure about the provenance of this unknown receiver, you can temporarily include it to the stations list, and then have a look at the movement events to find out when were your fish detected there. Note that this hydrophone will not be used to determine the fish's arrival/departure points from the various sections.
+	At least one of your target tags were detected in a receiver that is not listed in the spatial file. If you are truly unsure about the provenance of this unknown receiver, you can temporarily include it to the stations list, and then have a look at the movement events to find out when were your fish detected there. Note that this receiver will not be used to determine the fish's arrival/departure points from the various sections.
 
 	```
   W: No detections were found for receiver(s) [receivers serial].
 	```
 
-	One or more of the hydrophone listed in the spatial file had 0 detections in the detection files (not even noise/stray detections). While this is not bad on its own (perhaps nothing passed through that hydrophone), it may also mean that there are some detection files missing from the 'detections' folder.
+	One or more of the receiver listed in the spatial file had 0 detections in the detection files (not even noise/stray detections). While this is not bad on its own (perhaps nothing passed through that receiver), it may also mean that there are some detection files missing from the 'detections' folder.
 
 1. **Something is off with the transmitters**
 
@@ -197,9 +196,28 @@ Note :
   Error: Fatal exception found. Stopping analysis.
 	```
 
-	To simplify the sorting and analysing process, actel works based on the tag signals alone. Usually, all the tags you are working with will be operating in the same code space, so this is not a problem. However, it is possible for a stray tag (i.e. a tag from an animal tagged by someone else) to come within range of your hydrophones while your study is going on. Should this stray tag have an identical signal to one of your target tags, then actel will not know which of the tag is yours.
+	To simplify the sorting and analysing process, actel works based on the tag signals alone. Usually, all the tags you are working with will be operating in the same code space, so this is not a problem. However, it is possible for a stray tag (i.e. a tag from an animal tagged by someone else) to come within range of your receivers while your study is going on. Should this stray tag have an identical signal to one of your target tags, then actel will not know which of the tag is yours.
 
 	To fix this, find out which of the tags listed is yours, and include all the others with the same signal in the 'excluded.tags' variable.
+
+1. **Detections before release**
+
+	```
+	Error: Fish R64K-1111 was detected before being released!
+	  Release time: 2018-04-10 12:00:00
+	  First detection time: 2018-04-10 09:33:02
+	  Number of detections before release: 1
+
+	You may either:
+	  a) Stop the analysis and check the data;
+	  b) Discard the before-release detections and continue.
+
+	Decision:(a/b/comment) 
+	```
+
+	Usually this can mean one of three things: The first and most obvious is that there is a mistake in the release time information. Secondly, either that tag may have been used as a tester before being implanted or one receiver may have been used to activate the tags before deployment. Lastly, the tag and the receiver may have been in close range in transport and the receiver has picked up some detections on the way.
+
+	If you are sure that the release time information is correct, and the detections before release seem consistent with the second or third case presented above, you can use the `start.timestamp` variable to trim the detection data and remove the undesired detections. However, we recommend that you **always** exhaust other possibilities before doing this, to make sure there are no real mistakes in the data.
 
 #### Exceptions during Movement event creation
 
@@ -210,7 +228,7 @@ Note :
 	Please correct this before continuing.
 	```
 
-	There could be a typo in the array listed as first array for a release site. Doublecheck the spatial file and make sure the arrays listed in the release sites match the arrays listed in the hydrophones.
+	There could be a typo in the array listed as first array for a release site. Doublecheck the spatial file and make sure the arrays listed in the release sites match the arrays listed in the receivers.
 
 1. **Backwards movements**
   
@@ -231,14 +249,14 @@ Note :
 
 #### Exceptions while filling in the timetable
 
-1. **Unknown hydrophones**
+1. **Unknown receivers**
 
 	```
 	M: Disregarding [#] unknown events from fish [transmitter]'s movement table.
 	W: Fish [transmitter] only moved through unknown hydrophones. Considered invalid.
 	```
 
-	If you are running the analysis with unknown hydrophones (see the messages for these above), these will be excluded from the timetable analysis. If the fish only moved through unknown hydrophones, the message will escalate to a warning.
+	If you are running the analysis with unknown receivers (see the messages for these above), these will be excluded from the timetable analysis. If the fish only moved through unknown receivers, the message will escalate to a warning.
 
 1. **Triggering override**
 	
@@ -278,26 +296,7 @@ Note :
 
 	If there are backwards inter-section movements and, on top of that, the last events are not ordered (i.e. the fish was not last seen on section A before being last seen on section B), then the warning will escalate and you will have to take action.
 
-	You can [read more about backward movements here.](3.0.the_sorting_process.html#backwards-movements)
-
-#### Exceptions while merging the timetable and the fish information
-
-1. **Detections before release**
-
-	```
-	Error: Fish [transmitter] was detected before being released!
-	  Release time:
-	  First valid detection:
-	  Movement table for fish [transmitter]:
-	  [...]
-	You may either:
-	  a) Stop the analysis and check your data;
-	  b) Continue anyway (time and speed from release to first valid detection will not be calculated).
-	```
-
-	Usually this can mean one of three things: The first and most obvious is that there is a mistake in the release time information. Secondly, either that tag may have been used as a tester before being implanted or one hydrophone may have been used to activate the tags before deployment. Lastly, the tag and the hydrophone may have been in close range in transport and the hydrophone has picked up some detections on the way.
-
-	If you are sure that the release time information is correct, and the detections before release seem consistent with the second or third case presented above, you can use the `start.timestamp` variable to trim the detection data and remove the undesired detections. However, we recommend that you **always** exhaust other possibilities before doing this, to make sure there are no real mistakes in the data.
+	You can [read more about backward movements here.](c-1_migration_processes.html#backwards-movements)
 
 ### Errors and messages while saving and terminating:
 
@@ -305,19 +304,9 @@ Note :
 
 	```
 	M: An actel results file is already present in the present directory, saving new results as 'actel_results.#.RData'.
-	M: An actel report is already present in the present directory, saving new report as 'actel_report.#.pdf'.	
+	M: An actel report is already present in the present directory, saving new report as 'actel_report.#.html'.	
 	```
 	If there are already actel-generated files (reports and results) in the current directory, actel will save the new reports in a new file with a different name, to avoid overwriting previous results.
-
-1. **Failing to compile report**
-
-	```
-	Something went wrong when compiling the PDF report. Please find the individual graphics in the folder 'Report'.
-	If you do not have LaTeX installed, check out how to quickly get it running in the package vignettes.
-	If you do have LaTeX installed, you can manually compile the file 'actel_report.tex', which has been stored in the folder 'Report'.
-	```
-
-	If you activated the `report` option, actel will attempt to compile a PDF report based on a TeX file. If you do not have TeX installed, you can [find out how to install TeX here](2.1.installing_tex.html). IF you have a TeX distribution installed and the problem persists, please contact the development team.
 
 **<a href="javascript:history.back()">Return to previous page</a>**
 

@@ -31,18 +31,18 @@ knitr::opts_chunk$set(
 1. [residency()](d-0_residency.html)
     1. [Processes behind residency()](d-1_residency_processes.html)
     1. [Inspecting the residency() results](d-2_residency_results.html)
-1. [Errors and messages](e.messages.html)
+1. [Errors and messages](e-0_messages.html)
 
 
 ## The explore() function
 
 The arguments in the `explore()` function are transversal to all functions.
 
-Although there are many arguments available, *you do not need to start working with all of them right away*. This is because many of these arguments have default values. If you want to make a quick check of your data, you can run explore() and just set the `path` and the `tz.study.area` arguments and you will be ready to get some results!
+Although there are many arguments available, *you do not need to start working with all of them right away*. This is because many of these arguments have default values. If you want to make a quick check of your study, just run explore() with a `tz.study.area` argument in the same directory as your data and you will be ready to get some results!
 
 E.g.:
 ```r
-explore(path = NULL, tz.study.area = "Europe/London")
+explore(tz.study.area = "Europe/London")
 ```
 
 Curious about how explore() processes your data? [Have a look under the hood!](b-1_explore_processes.html)
@@ -65,7 +65,7 @@ The `path` is the way to the folder where you want to run the analysis. If you a
 
 ### maximum.time
 
-If a fish is detected multiple times at one array without being detected on other arrays, these detections are grouped into a single event, assuming that the time difference between two consecutive detections does not exceed `maximum.time` (which is set in **minutes**). Should the time between detections exceed `maximum.time`, a new movement event will be created, on the same hydrophone array.
+If a fish is detected multiple times in one array without being detected in other arrays, these detections are grouped into a single event, assuming that the time difference between two consecutive detections does not exceed `maximum.time` (which is **set in minutes**). Should the time between detections exceed `maximum.time`, a new movement event will be created, in the same receiver array.
 
 In the example below, you can see how the same detections can be interpreted as a different number of movement events depending on whether we set `maximum.time` to **a)** 120 minutes, **b)** 60 minutes or **c)** 30 minutes.
 
@@ -97,7 +97,7 @@ In the example below, you can see how the same detections can be interpreted as 
 
 ### speed.method
 
-When calculating movement speeds from one array to the next, it is important to know if actel should count the time from the **last** detection on one array until the **first** detection on the next, or if you want actel to count the time from the **first** detection on one array to the **first** detection on the next. This is what `speed.method` is doing. You can choose one of `"last to first"` or `"first to first"`. The example below illustrates the difference between both:
+When calculating movement speeds from one array to the next, it is important to know if actel should count the time **from the last** detection in one array **to the first** detection in the next, or if you want actel to count the time **from the first detection** in one array  **to the first detection** in the next. This is what `speed.method` is doing. You can choose one of `"last to first"` or `"first to first"`. The example below illustrates the difference between both methods:
 
 <img src="speed_method.svg" alt="drawing" width="680"/>
 
@@ -106,19 +106,19 @@ Note:
 
 ### tz.study.area
 
-Hydrophones usually work in Coordinated Universal Time (UTC). Although this is nice to integrate data from multiple hydrophones, depending on where you are working, it may mean that the hydrophones' time is actually displaced from the daytime in your study area. To correct for this, you must include your time zone in this field. For example, when we have study areas in Denmark, we must use `tz.study.area = "Europe/Copenhagen"`.
+Receivers usually work in Coordinated Universal Time (UTC). Although this is nice to integrate data from multiple receivers, depending on where you are working, it may mean that the receivers' time is actually displaced from the daytime in your study area. To correct for this, you must include your time zone in this field. For example, when we have study areas in Denmark, we must use `tz.study.area = "Europe/Copenhagen"`.
 
 Time zones can be complicated business, so to help you out, you can search <a href="https://en.wikipedia.org/wiki/List_of_tz_database_time_zones" target="_blank">this wiki page</a> for the time zone code which you should use.
 
 Note:
-  : This time zone **must** match the time zone of the release times listed in the [biometrics file](a-0_workspace_requirements.html#biometrics-file) and in the [deployments file](a-0_workspace_requirements.html#deployments.file).
+  : This time zone **must** match the time zone of the release times listed in the [biometrics file](a-0_workspace_requirements.html#biometrics-file) and in the [deployments file](a-0_workspace_requirements.html#deployments-file).
 
 
 ### start.timestamp and end.timestamp
 
-Sometimes your hydrophones contain much more detection data than what you are interested in, which can increase the time it takes to process all the detections. By including a `start.timestamp` and/or an `end.timestamp`, you can trim the detection data to those target date and times.
+Sometimes your receivers contain much more detection data than what you are interested in, which can increase the time it takes to process all the detections. By including a `start.timestamp` and/or an `end.timestamp`, you can trim the detection data to those target times.
 
-This is particularly relevant if, for example, you used some of your tags as testers before the study started, or if you used one of ths study's hydrophones to activate and test the tags. A fish being detected before being released is a major issue, and actel will complain about that:
+This is particularly relevant if, for example, you used some of your tags as testers before the study started, or if you used one of the receivers to activate and test the tags. A fish being detected before being released is a major issue, and actel will complain about that:
 
 ```
 Error: Fish R64K-1111 was detected before being released!
@@ -133,7 +133,7 @@ You may either:
 Decision:(a/b/comment) 
 ```
 
-Although you can choose to continue the analysis by discarding the before-release detections, it is highly recommended that you check potential errors in the input files first.
+When you get an error like this, it is **highly recommended** that you check potential errors in the input files before discarding data.
 
 Note:
   : The timestamps **must** be written in **yyyy-mm-dd hh:mm:ss** format, in the same time zone as your study area.
@@ -142,7 +142,7 @@ Note:
 
 ### report
 
-The `report` option activates a series of print functions that draw tables and figures for later integration in a html report. When you activate this option, a new *Report* subdirectory is created, where all the relevant files are stored. Before finishing, actel assembles the html report and stores it in your working directory. If you already have a report in your working directory, actel will create a new file with a different name.
+The `report` option activates a series of print functions that draw tables and figures for later integration in a html report. When you activate this option, a new *Report* subdirectory is created, where all the relevant files are stored. Before finishing, actel assembles the [html report](c-2_explore_processes.html#actel_explore_report.html-if-report-true) and stores it in your working directory. If you already have a report in your working directory, actel will create a new file with a different name.
 
 You can also inspect each graphic individually in the *Report* subdirectory.
 
@@ -158,7 +158,7 @@ Note:
 
 ### exclude.tags
 
-It is possible for a stray tag with the same signal as one of your tags enter the study area. Although this is unexpected, it would mean you could end up with two tags that differ only in code spaces. As actel works based on the tag signals alone, it does not know which tag is yours, and which is a stray, so you must intervene. If this happens, the following error is issued:
+It is possible for a stray tag with the same signal as one of your tags to enter the study area. Although this is unexpected, it would mean you could end up with two tags that differ only in code spaces. As actel works based on the tag signals alone, it does not know which tag is yours, and which is a stray, so you must intervene. If this happens, the following error is issued:
 
 ````
 Error: One or more signals match more than one tag in the detections! Showing relevant signals/tags.

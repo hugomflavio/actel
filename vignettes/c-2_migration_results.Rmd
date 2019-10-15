@@ -31,7 +31,7 @@ knitr::opts_chunk$set(
 1. [residency()](d-0_residency.html)
     1. [Processes behind residency()](d-1_residency_processes.html)
     1. [Inspecting the residency() results](d-2_residency_results.html)
-1. [Errors and messages](e.messages.html)
+1. [Errors and messages](e-0_messages.html)
 
 
 ## Results within R
@@ -44,7 +44,7 @@ The `simple.movements` represents a simplified version of the `movements` object
 
 ### status.df
 
-The `status.df` is a data frame that combines [both the timetable data and your biometrics](3.0.the_sorting_process.html#combining-the-time-data-with-the-biometrics) into a single, organised table. If you have stored any comments during the analysis process, they will show up in a reserved column in this table. 
+The `status.df` is a data frame that combines [both the timetable data and your biometrics](c-1_migration_processes.html#combining-the-time-data-with-the-biometrics) into a single, organised table. If you have stored any comments during the analysis process, they will show up in a reserved column in this table. 
 
 The `status.df` also contains the recorded fate for each fish (i.e. disappeared somewhere or succeeded at crossing the study area), and summary information on the number and length of the recorded backwards movements. This table can be quite big, so it may be a good idea to use `head(status.df)`  the first time you look at it.
 
@@ -66,15 +66,12 @@ The `array.overview` shows you the number of known and estimated fish, per group
 Note:
   : These only take into account forward movements. I.e., if the fish moved backwards, the results displayed in array.overview will no longer match the known survival. When looking for survival estimates, you should always refer back to the `section.overview` object for confirmation of the number of fish that entered/left each section.
 
-If you activated the [report option](c-0_migration.html#report), this table is then converted into a graphic, which can be found in the actel migration report, under the section "Progression".
+If you activated the [report option](b-0_explore.html#report), this table is then converted into a graphic, which can be found in the actel migration report, under the section "Progression".
 
 
-### the.matrices
+### matrices
 
-In this object you will find the matrix/matrices that were used for efficiency estimations during CJS modelling.
-
-Note:
-  : These matrices only represent the forward movements. You can read more about it below, in the description of the `overall.CJS`.
+In this object you will find the matrix/matrices that were used for efficiency estimations during CJS modelling. Notet hat these matrices only represent the forward movements. You can read more about it below, in the description of the `overall.CJS`.
 
 
 ### overall.CJS
@@ -87,17 +84,17 @@ During the migration analysis, actel calculates forward efficiency only to impro
 
 In example **A**, the fish moved out to sea, and was detected at the array River1 and Fjord2, but not at Fjord1. This is considered a missed event for Fjord1. Even if the fish then moved backwards and ended up being detected at Fjord1 at a later time (example **B**), since the first expected detection was missed, this fish will still be considered as missed by Fjord1, as far as efficiency calculations are concerned.
 
-These efficiency calculations are dependant on the way how you organise your receivers, so it is important that you [organise your study area in an actel-friendly way.](a-1_study_area.html).
+These efficiency calculations are dependant on the way how you organise your receivers, so it is important that you [organise your study area in an actel-friendly way.](a-1_study_area.html)
 
 
 ### intra.array.CJS
 
-If you provided intra-array estimates in the [estimates argument](c-0_migration.html#estimates), actel will estimate intra-array efficiencies for the target arrays. These results are stored in the object `intra.array.CJS`, and the combined efficiency estimate is used to complement the overall CJS.
+If you provided intra-array estimates in the [replicates argument](c-0_migration.html#replicates), actel will estimate intra-array efficiencies for the target arrays. These results are stored in the object `intra.array.CJS`, and the combined efficiency estimate is used to complement the overall CJS.
 
 
 ## Results in your working directory
 
-On top of the [outputs saved by explore](b-2_explore_results.html#results-in-your-working-directory); migration will also save some additional information in your working directory. Like above, I will only detail **new** outputs here.
+The migration function saves [outputs similar to those saved by explore](b-2_explore_results.html#results-in-your-working-directory). The main differences are in the two listed below.
 
 
 ### actel_migration_results.RData
@@ -107,30 +104,30 @@ To make sure that you don't accidentally loose your results, actel stores them r
 
 ### actel_migration_report.html (if report = TRUE)
 
-This is the main non-R output. If you activated the `report` option, actel will compile a html report for you. The migration report contains the same sections as the explore function, plus the following:
+This is the main non-R output. If you activated the `report` option, actel will compile a html report for you. The migration report contains the same sections as the explore report, plus the following:
 
 1. **Array forward efficiency**
 
   Here you can see how efficient your receiver arrays were at detecting the fish that moved past them. These results can also be found in the `overall.CJS` object, which is in your results in R. If you supplied replicates, the results of the intra-array estimations will also show up here.
 
-1. **Survival**
+2. **Survival**
 
   The survival is displayed both as a table and a figure, both of which use the content of the `section.overview` object, which is in your results in R.
 
-1. **Progression**
+3. **Progression**
 
   The progression plot is a visual representation of the `overall.CJS` object, which is in your results in R. 
   You can also examine the detailed values per group in the tables supplied (i.e. the `array.overview` object).
 
 
-1. **Fish comparisons (Dotplots)**
+4. **Fish comparisons (Dotplots)**
 
   As the name suggests, this plot compares variables across all your fish: The total number of detections, and the time until/time in each of your study area sections. To simplify the visualisation, for each variable, the **top 10%** of the data is painted in **Red**, and the **bottom 10%** of the data is painted in **Orange**.
 
   This plot is meant to help you find fish with uncommon behaviour. Fish with a lot of detections are likely staying for a very long time within receiver range; a fish that moves too fast in comparison to the remaining may have been carried by a predator. It is up to you to look at these graphics and decide if anything looks odd. If it does, then note down the tag number, so you can have a closer look at the respective plot of detections.
 
 
-1. **Graphics of detected tags**
+5. **Graphics of detected tags**
 
   These graphics contain more information than those created by the explore function. The vertical grey dashed lines show the assigned moments of entry and exit for each study area section. The full dark-grey line shows the movement events considered valid, while the dashed dark-grey line shows the movement events considered invalid.
 
