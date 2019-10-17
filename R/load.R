@@ -281,7 +281,7 @@ loadBio <- function(file, tz.study.area){
   }
 
   if (!any(grepl("Release.site", colnames(bio)))) {
-    appendTo("Screen", "M: No Release site has been indicated in the biometrics file. Creating a 'Release.site' column to avoid function failure. Filling with 'unspecified'.", call. = FALSE)
+    appendTo("Screen", "M: No Release site has been indicated in the biometrics file. Creating a 'Release.site' column to avoid function failure. Filling with 'unspecified'.")
     bio$Release.site <- "unspecified"
   } else {
     bio$Release.site <- factor(bio$Release.site)
