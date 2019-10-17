@@ -20,7 +20,7 @@ checkDeploymentTimes <- function(input) {
         print(aux[[i]], row.names = FALSE)
         cat("\n")
         emergencyBreak()
-        stop("Fatal exception found. Read lines above for more details.\n")      
+        stop("Fatal exception found. Read lines above for more details.\n", call. = FALSE)      
       }
     }
   }
@@ -47,7 +47,7 @@ checkDeploymentStations <- function(input, spatial) {
   if (any(is.na(link))) {
     appendTo(c("Screen", "Report"), paste0("Error: Stations '", paste(aux$Station.Name[is.na(link)], collapse = "', '"), "' are listed in the spatial file but no receivers were ever deployed there."))
     emergencyBreak()
-    stop("Fatal exception found. Read lines above for more details.\n")      
+    stop("Fatal exception found. Read lines above for more details.\n", call. = FALSE)      
   }
   appendTo("debug","Terminating checkDeploymentStations")
   return(input)
@@ -101,7 +101,7 @@ checkTagsInUnknownReceivers <- function(detections.list, deployments, spatial) {
       }
       if (decision == "a" | decision == "A") {
         emergencyBreak()
-        stop("Stopping analysis per user command.\n")
+        stop("Stopping analysis per user command.\n", call. = FALSE)
       }
       if (decision == "b" | decision == "B") {
         recipient <- includeUnknownReceiver(spatial = spatial, deployments = deployments, unknown.receivers = unknown.receivers)
@@ -144,7 +144,7 @@ checkDetectionsBeforeRelease <- function(input, bio){
           if (decision == "a" | decision == "A") {
             unknown.input = FALSE
             emergencyBreak()
-            stop("Script stopped by user command.")
+            stop("Script stopped by user command.", call. = FALSE)
           }
           if (decision == "b" | decision == "B")
             unknown.input = FALSE
@@ -185,7 +185,7 @@ checkNoDetections <- function(input, bio){
   if (all(is.na(link))) {
     appendTo(c("Screen", "Report"), "M: No detections were found in the input data which matched the target signals.")
     emergencyBreak()
-    stop("Stopping analysis due to absence of valid detections.\n")
+    stop("Stopping analysis due to absence of valid detections.\n", call. = FALSE)
   }
   appendTo("debug", "Terminating noDetectionsCheck.")  
   return(list(list = tag.list,link = link))
@@ -213,7 +213,7 @@ checkDupSignals <- function(input, bio, tag.list){
     rm(t3)
     for (i in seq_len(nrow(dupsig))) appendTo(c("Screen", "Report"), paste("   Signal ", dupsig$Signal[i], " was found on tags ", dupsig$Tags[i], ".", sep = ""))
     emergencyBreak()
-    stop("Fatal exception found. Stopping analysis.\n")
+    stop("Fatal exception found. Stopping analysis.\n", call. = FALSE)
   }
   appendTo("debug", "Terminating dupSignalsCheck.")  
 }

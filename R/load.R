@@ -11,7 +11,7 @@
 #' 
 loadDot <- function(string = NULL, input = NULL, spatial, sections = NULL) {
   if (is.null(string) & is.null(input))
-    stop("No dot file or data were specified.")
+    stop("No dot file or dot string were specified.")
   if (is.null(string)) {
     tryCatch(dot <- readDot(input = input), 
       error = function(e) {
@@ -24,11 +24,11 @@ loadDot <- function(string = NULL, input = NULL, spatial, sections = NULL) {
   mat <- dotMatrix(input = dot)
   if (any(is.na(match(unique(spatial$Array), colnames(mat))))) {
     emergencyBreak()
-    stop("Not all the arrays listed in the 'spatial.csv' file are present in the 'spatial.dot' file.\n")
+    stop("Not all the arrays listed in the 'spatial.csv' file are present in the 'spatial.dot' file.\n", call. = FALSE)
   }
   if (any(is.na(match(unique(spatial$Array), colnames(mat))))) {
     emergencyBreak()
-    stop("Not all the arrays listed in the 'spatial.dot' file are present in the 'spatial.csv' file.\n")
+    stop("Not all the arrays listed in the 'spatial.dot' file are present in the 'spatial.csv' file.\n", call. = FALSE)
   }
   arrays <- dotList(input = dot, sections = sections)
   arrays <- dotPaths(input = arrays, mat = mat)
@@ -125,30 +125,30 @@ loadDeployments <- function(file, tz.study.area){
     input <- read.csv(file)
   else {
     emergencyBreak()
-    stop("Could not find a '", file, "' file in the working directory.\n")
+    stop("Could not find a '", file, "' file in the working directory.\n", call. = FALSE)
   }
   default.cols <- c("Receiver", "Station.Name", "Start", "Stop")
   link <- match(default.cols, colnames(input))
   if (any(is.na(link))) {
     appendTo("Report", paste0("Error: Column(s) '", paste(default.cols[is.na(link)], collapse = "', '"), "'are missing in the deployments file."))
     emergencyBreak()
-    stop(paste0("Column(s) '", paste(default.cols[is.na(link)], collapse = "', '"), "'are missing in the deployments file.\n"))
+    stop(paste0("Column(s) '", paste(default.cols[is.na(link)], collapse = "', '"), "'are missing in the deployments file.\n"), call. = FALSE)
   }
   if (any(!grepl("^[1-2][0-9][0-9][0-9]-[0-1][0-9]-[0-3][0-9] [0-2][0-9]:[0-5][0-9]", input$Start))) {
     emergencyBreak()
-    stop("Not all values in the 'Start' column appear to be in a 'yyyy-mm-dd hh:mm' format (seconds are optional). Please doublecheck the deployments file.\n")
+    stop("Not all values in the 'Start' column appear to be in a 'yyyy-mm-dd hh:mm' format (seconds are optional). Please doublecheck the deployments file.\n", call. = FALSE)
   }
   if (any(!grepl("^[1-2][0-9][0-9][0-9]-[0-1][0-9]-[0-3][0-9] [0-2][0-9]:[0-5][0-9]", input$Stop))) {
     emergencyBreak()
-    stop("Not all values in the 'Stop' column appear to be in a 'yyyy-mm-dd hh:mm' format (seconds are optional). Please doublecheck the deployments file.\n")
+    stop("Not all values in the 'Stop' column appear to be in a 'yyyy-mm-dd hh:mm' format (seconds are optional). Please doublecheck the deployments file.\n", call. = FALSE)
   }
   if (inherits(try(as.POSIXct(input$Start), silent = TRUE),"try-error")){
     emergencyBreak()
-    stop("Could not recognise the data in the 'Release.date' column as POSIX-compatible timestamps. Please doublecheck the biometrics file.\n")
+    stop("Could not recognise the data in the 'Release.date' column as POSIX-compatible timestamps. Please doublecheck the biometrics file.\n", call. = FALSE)
   }
   if (inherits(try(as.POSIXct(input$Stop), silent = TRUE),"try-error")){
     emergencyBreak()
-    stop("Could not recognise the data in the 'Release.date' column as POSIX-compatible timestamps. Please doublecheck the biometrics file.\n")
+    stop("Could not recognise the data in the 'Release.date' column as POSIX-compatible timestamps. Please doublecheck the biometrics file.\n", call. = FALSE)
   }
   input$Receiver <- as.character(input$Receiver)
   input$Receiver <- sapply(input$Receiver, function(x) tail(unlist(strsplit(x, "-")), 1))
@@ -174,11 +174,11 @@ loadSpatial <- function(file = "spatial.csv", verbose = FALSE){
     input <- read.csv(file)
   else {
     emergencyBreak()
-    stop("Could not find a '", file, "' file in the working directory.\n")
+    stop("Could not find a '", file, "' file in the working directory.\n", call. = FALSE)
   }
   if (!any(grepl("Station.Name", colnames(input)))) {
     emergencyBreak()
-    stop("The spatial file must contain a 'Station.Name' column.\n")
+    stop("The spatial file must contain a 'Station.Name' column.\n", call. = FALSE)
   } else {
     if (any(link <- table(input$Station.Name) > 1)) {
       if (verbose)
@@ -188,7 +188,7 @@ loadSpatial <- function(file = "spatial.csv", verbose = FALSE){
       cat("Stations appearing more than once:", paste(names(table(input$Station.Name))[link], collapse = ", "), "\n")
       if (verbose)
         emergencyBreak()
-      stop("Fatal exception found. Read lines above for more details.\n")
+      stop("Fatal exception found. Read lines above for more details.\n", call. = FALSE)
     }
   }
   if (!any(grepl("Array", colnames(input)))) {
@@ -198,10 +198,10 @@ loadSpatial <- function(file = "spatial.csv", verbose = FALSE){
       if (decision == "N" & decision == "n") {
         if (verbose)
           emergencyBreak()
-        stop("The spatial file must contain an 'Array' column.\n")
+        stop("The spatial file must contain an 'Array' column.\n", call. = FALSE)
       } else {
         if (verbose)
-          appendTo("Report", "Error: No 'Array' column found in the spatial file, but a 'Group' column is present. Using the 'Group' column to define the arrays.")  
+          appendTo("Report", "WARNING: No 'Array' column found in the spatial file, but a 'Group' column is present. Using the 'Group' column to define the arrays.")  
         colnames(input)[grepl("Group", colnames(input))] <- "Array"
       }
     }
@@ -214,7 +214,7 @@ loadSpatial <- function(file = "spatial.csv", verbose = FALSE){
     if (any(is.na(match(unique(input$Type), c("Hydrophone","Release"))))){
       if (verbose)
         emergencyBreak()
-      stop("Could not recognise the data in the 'Type' column as only one of 'Hydrophone' or 'Release'. Please doublecheck the spatial file.\n")
+      stop("Could not recognise the data in the 'Type' column as only one of 'Hydrophone' or 'Release'. Please doublecheck the spatial file.\n", call. = FALSE)
     }
   }
   input <- setSpatialStandards(input = input) # Create Standard.Name for each station  
@@ -242,46 +242,46 @@ loadBio <- function(file, tz.study.area){
     bio <- read.csv(file, stringsAsFactors = FALSE)
   else {
     emergencyBreak()
-    stop("Could not find a '", file, "' file in the working directory.\n")
+    stop("Could not find a '", file, "' file in the working directory.\n", call. = FALSE)
   }  
 
   if (!any(grepl("Release.date", colnames(bio)))) {
     emergencyBreak()
-    stop("The biometrics file must contain an 'Release.date' column.\n")
+    stop("The biometrics file must contain an 'Release.date' column.\n", call. = FALSE)
   }
 
   if (any(!grepl("^[1-2][0-9][0-9][0-9]-[0-1][0-9]-[0-3][0-9] [0-2][0-9]:[0-5][0-9]", bio$Release.date))) {
     emergencyBreak()
-    stop("Not all values in the 'Release.date' column appear to be in a 'yyyy-mm-dd hh:mm' format (seconds are optional). Please doublecheck the biometrics file.\n")
+    stop("Not all values in the 'Release.date' column appear to be in a 'yyyy-mm-dd hh:mm' format (seconds are optional). Please doublecheck the biometrics file.\n", call. = FALSE)
   }
   
   if (inherits(try(bio$Release.date <- as.POSIXct(bio$Release.date, tz = tz.study.area), silent = TRUE),"try-error")){
     emergencyBreak()
-    stop("Could not recognise the data in the 'Release.date' column as POSIX-compatible timestamps. Please doublecheck the biometrics file.\n")
+    stop("Could not recognise the data in the 'Release.date' column as POSIX-compatible timestamps. Please doublecheck the biometrics file.\n", call. = FALSE)
   }
 
   if (!any(grepl("Signal", colnames(bio)))){
     emergencyBreak()
-    stop("The biometrics file must contain an 'Signal' column.\n")
+    stop("The biometrics file must contain an 'Signal' column.\n", call. = FALSE)
   }
 
   if (!inherits(bio$Signal,"integer")) {
     emergencyBreak()
-    stop("Could not recognise the data in the 'Signal' column as integers. Please doublecheck the biometrics file.\n")
+    stop("Could not recognise the data in the 'Signal' column as integers. Please doublecheck the biometrics file.\n", call. = FALSE)
   }
 
   if (any(is.na(bio$Signal))) {
     emergencyBreak()
-    stop("Some fish have no 'Signal' information. Please doublecheck the biometrics file.\n")
+    stop("Some fish have no 'Signal' information. Please doublecheck the biometrics file.\n", call. = FALSE)
   }
 
   if (any(link <- table(bio$Signal) > 1)) {
     emergencyBreak()
-    stop(ifelse(sum(link) > 1, "Signals ", "Signal "), paste(names(table(bio$Signal))[link], collapse = ", "), ifelse(sum(link) > 1," are ", " is "), "duplicated in the biometrics file.\n")
+    stop(ifelse(sum(link) > 1, "Signals ", "Signal "), paste(names(table(bio$Signal))[link], collapse = ", "), ifelse(sum(link) > 1," are ", " is "), "duplicated in the biometrics file.\n", call. = FALSE)
   }
 
   if (!any(grepl("Release.site", colnames(bio)))) {
-    appendTo("Screen", "M: No Release site has been indicated in the biometrics file. Creating a 'Release.site' column to avoid function failure. Filling with 'unspecified'.")
+    appendTo("Screen", "M: No Release site has been indicated in the biometrics file. Creating a 'Release.site' column to avoid function failure. Filling with 'unspecified'.", call. = FALSE)
     bio$Release.site <- "unspecified"
   } else {
     bio$Release.site <- factor(bio$Release.site)
@@ -383,7 +383,7 @@ compileDetections <- function(path = "detections", start.timestamp = NULL, end.t
     if (file.exists("detections.csv"))
       file.list <- "detections.csv"
     else
-      stop("Could not find a 'detections' folder nor a 'detections.csv' file.\n")
+      stop("Could not find a 'detections' folder nor a 'detections.csv' file.\n", call. = FALSE)
   }
   if (file_test("-d", path) & file.exists("detections.csv"))
     appendTo(c("Screen", "Warning", "Report"), "W: Both a 'detections' folder and a 'detections.csv' file are present in the current directory.\n   Loading ONLY the files present in the 'detections' folder.")
@@ -458,7 +458,7 @@ findFiles <- function(path = NULL, pattern = NULL) {
       if (file_test("-d", folder)) {
         file.list <- c(file.list, paste0(folder, "/", list.files(folder, pattern = pattern)))
       } else {
-        stop("Could not find a '", folder, "' directory in the current working directory.\n")
+        stop("Could not find a '", folder, "' directory in the current working directory.\n", call. = FALSE)
       }
     }
   }
@@ -539,7 +539,7 @@ bindDetections <- function(data.files, file.list) {
     if (length(temp) > 1) 
       for (i in 2:length(temp)) output <- rbind(output, temp[[i]])
   } else {
-    stop("No valid detection files were found.\n")
+    stop("No valid detection files were found.\n", call. = FALSE)
   }
   output$Receiver <- as.factor(output$Receiver)
   output$CodeSpace <- as.factor(output$CodeSpace)

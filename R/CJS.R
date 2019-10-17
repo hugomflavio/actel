@@ -214,7 +214,7 @@ assembleMatrices <- function(spatial, simple.movements, minimum.detections, stat
     for(i in 1:length(recipient)){
       r <- sapply(spatial$release.sites$Standard.Name, function(x) grepl(x, names(recipient)[i]))
       if(sum(r) > 1)
-        stop("Multiple release sites match the matrix name. Make sure that the release sites are not contained within the fish groups or within themselves.\n")
+        stop("Multiple release sites match the matrix name. Make sure that the release sites' names are not contained within the fish groups or within themselves.\n")
       the.col <- which(grepl(spatial$release.sites$Array[r], colnames(recipient[[i]])))
       recipient[[i]] <- recipient[[i]][,c(1, the.col:ncol(recipient[[i]]))]
     }
@@ -248,7 +248,7 @@ simpleCJS <- function(input, estimate = NULL, fixed.efficiency = NULL, silent = 
   if (!is.null(estimate)) {
     # stop if multiple estimate values are provided.
     if (!is.null(estimate) && length(estimate) != 1)
-      stop("Please use only one value for estimate.")
+      stop("Please use only one value for estimate.\n")
     # stop if estimate exceeds 1
     if (!is.null(estimate) && (estimate < 0 | estimate > 1))
       stop("estimate must be between 0 and 1.\n")
@@ -262,7 +262,7 @@ simpleCJS <- function(input, estimate = NULL, fixed.efficiency = NULL, silent = 
      stop("Fixed efficiency was set but its length is not the same as the maximum number of columns in the input.\n")
     # stop if any efficiency exceeds 1
     if (any(fixed.efficiency > 1, na.rm = TRUE))
-      stop("Fixed efficiency estimates must be between 0 and 1.")
+      stop("Fixed efficiency estimates must be between 0 and 1.\n")
     # Fake estimate to avoid further changes below.
     if (!is.na(tail(fixed.efficiency, 1)))
      estimate <- tail(fixed.efficiency, 1)
@@ -521,9 +521,9 @@ dualMatrix <- function(array, replicates, spatial, detections.list){
   all.stations <- spatial$stations$Standard.Name[spatial$stations$Array == array]
   if (any(link <- !replicates %in% all.stations)) {
     if (sum(link) > 1)
-      stop(paste("Stations ", paste(replicates[link], collapse = ", "), " are not part of ", array, " (available stations: ", paste(all.stations, collapse = ", "), ").", sep = ""))
+      stop(paste0("In replicates: Stations ", paste(replicates[link], collapse = ", "), " are not part of ", array, " (available stations: ", paste(all.stations, collapse = ", "), ")."), call. = FALSE)
     else
-      stop(paste("Station ", paste(replicates[link], collapse = ", "), " is not part of ", array, " (available stations: ", paste(all.stations, collapse = ", "), ").", sep = ""))      
+      stop(paste0("In replicates: Station ", paste(replicates[link], collapse = ", "), " is not part of ", array, " (available stations: ", paste(all.stations, collapse = ", "), ")."), call. = FALSE)      
   }
   original <- all.stations[!all.stations %in% replicates]
   efficiency <- as.data.frame(matrix(ncol = 2, nrow = length(detections.list)))
@@ -630,10 +630,10 @@ combineCJS <- function(..., estimate = NULL, fixed.efficiency = NULL, silent = F
     stop("Please choose only one of 'estimate' or 'fixed.efficiency'.\n")
   # stop if multiple estimate values are provided.
   if (!is.null(estimate) && length(estimate) != 1)
-    stop("Please use only one value for estimate.")
+    stop("Please use only one value for estimate.\n")
   # stop if any efficiency exceeds 1
   if (any(fixed.efficiency > 1, na.rm = TRUE))
-    stop("Fixed efficiency estimates must be between 0 and 1.")
+    stop("Fixed efficiency estimates must be between 0 and 1.\n")
 
   # hack to figure the number of arguments in the dots, because I could not find a better way around it.
   arg.names <- names(match.call())
@@ -664,7 +664,7 @@ combineCJS <- function(..., estimate = NULL, fixed.efficiency = NULL, silent = F
   # stop if not all matrices finish in the same array
   the.last <- unlist(lapply(input, function(x) tail(colnames(x),1)))
   if (length(unique(the.last)) > 1)
-    stop("The last array is not the same in all input matrices\n")
+    stop("The last array is not the same in all input matrices.\n")
 
   ncols <- unlist(lapply(input, ncol))
   groups <- rev(sort(unique(ncols)))
@@ -750,7 +750,7 @@ recalculateCJS <- function(input, estimate = NULL, fixed.efficiency = NULL){
         warning("Array'", colnames(input[[1]])[i],"' detected 0 fish. Skipping survival estimation.")
         M[i] = input[[1]][4, i]
       } else {
-        stop("You reached a safety stop. The code for this exception does not exist yet. Contact the development team.")
+        stop("You reached a safety stop. The code for this exception does not exist yet. Contact the development team.\n")
       }
       S[length(S) + 1] = -999
     } else {

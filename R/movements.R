@@ -121,7 +121,7 @@ upstreamCheck <- function(i, recipient, bio, spatial) {
   if (is.na(t3)) {
     appendTo("Report", "Error: There is a mismatch between the expected first array of a release site and the list of arrays.\nPlease correct this before continuing.")
     emergencyBreak()
-    stop("There is a mismatch between the expected first array of a release site and the list of arrays.\nPlease correct this before continuing.\n")
+    stop("There is a mismatch between the expected first array of a release site and the list of arrays.\nPlease correct this before continuing.\n", call. = FALSE)
   }
   t4 <- match(recipient$Array[recipient$Array != "Unknown"], unlist(spatial$array.order))  # The relative position of the arrays where the fish was detected
   if (any(t4 < t3)) {
@@ -141,7 +141,7 @@ upstreamCheck <- function(i, recipient, bio, spatial) {
         unknown.input = FALSE
         appendTo("UD", decision)
         emergencyBreak()
-        stop("Script stopped by user command.")
+        stop("Script stopped by user command.", call. = FALSE)
       }
       if (decision == "b" | decision == "B") {
         appendTo("UD", decision)

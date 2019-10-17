@@ -314,7 +314,7 @@ pathCheck <- function(my.home, path) {
         if (decision == "b" | decision == "B") {
           unknown.input = FALSE
           emergencyBreak()
-          stop("Analysis stopped by user command.\n")
+          stop("Analysis stopped by user command.\n", call. = FALSE)
         }
         if (unknown.input) {
           cat("Option not recognized, please input either 'a' or 'b'.\n")

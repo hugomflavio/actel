@@ -16,12 +16,12 @@ transitionLayer <- function(shape, size, EPSGcode, directions = c(16,8,4), force
 	directions <- as.character(directions)
 	directions <- match.arg(directions)
 	if (!file.exists(shape))
-		stop(paste0("Could not find file '", shape, "' in the working directory.\n"))
+		stop(paste0("Could not find file '", shape, "' in the working directory.\n"), call. = FALSE)
 	if (tools::file_ext(shape) == "shp") {
 		shape <- sub(".shp", "", shape)
 		shape <- rgdal::readOGR(dsn = ".", layer = shape, verbose = FALSE) #study area shapefile
 	} else {
-		stop("'shape' must be a .shp file.\n")
+		stop("'shape' must be a .shp file.\n", call. = FALSE)
 	}
 	data.crs <- raster::crs(paste("+init=epsg:", EPSGcode, sep = ""))
 	raster::crs(shape)<-raster::crs(data.crs) # Set CRS 
@@ -33,7 +33,7 @@ transitionLayer <- function(shape, size, EPSGcode, directions = c(16,8,4), force
 		cat("Number of resulting pixels:\n")
 		print(pixel.res)
 		cat("\n")
-		stop("The extent of the shapefile divided by the pixel size must result in an integer.\n")
+		stop("The extent of the shapefile divided by the pixel size must result in an integer.\n", call. = FALSE)
 	}
 	if (!force && any(pixel.res > 2000)) {
 		warning("The chosen pixel size creates a transition layer with one or two axes greater 
@@ -79,22 +79,22 @@ distancesMatrix <- function(t.layer = "transition.layer.RData", starters = NULL,
 	new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[, "Package"])]
 	if (length(new.packages)>0) {
 		stop(paste("This function requires packages '", paste(new.packages,collapse="', '"), 
-			"' to operate. Please install them before proceeding.\n", sep = ""))
+			"' to operate. Please install them before proceeding.\n", sep = ""), call. = FALSE)
 	}
 	data.crs <- raster::crs(paste("+init=epsg:", EPSGcode, sep = ""))
 
 	if (tools::file_ext(t.layer) == "RData") {
 		load(t.layer)
-		if (!exists("transition.layer")) stop(paste("Could not find a transition layer in '", t.layer, "'.\n", sep = ""))
+		if (!exists("transition.layer")) stop(paste("Could not find a transition layer in '", t.layer, "'.\n", sep = ""), call. = FALSE)
 	} else {
-		stop(paste("'", t.layer, "' could not be recognised as .RData file, please make sure the file name is correct.\n", sep = ""))
+		stop(paste("'", t.layer, "' could not be recognised as .RData file, please make sure the file name is correct.\n", sep = ""), call. = FALSE)
 	}
 
 	if (actel)
 		starters <- targets <- "spatial.csv"
 
 	if (tools::file_ext(starters) != "csv" | tools::file_ext(targets) != "csv"){
-		stop("One of the point files (starters or targets) does not appear to be writen in csv format.\n")
+		stop("One of the point files (starters or targets) does not appear to be writen in csv format.\n", call. = FALSE)
 	}
 	starters <- read.csv(starters) 
 	
@@ -147,7 +147,7 @@ distancesMatrix <- function(t.layer = "transition.layer.RData", starters = NULL,
 #' 
 emptyMatrix <- function(){
 	if(!file.exists("spatial.csv"))
-		stop("Could not find a 'spatial.csv' file in the current working directory.\n")
+		stop("Could not find a 'spatial.csv' file in the current working directory.\n", call. = FALSE)
 
 	input <- loadSpatial(file = "spatial.csv")
 
@@ -176,7 +176,7 @@ emptyMatrix <- function(){
 #' 
 completeMatrix <- function(){
 	if (!file.exists("distances.csv"))
-		stop("Could not find a 'distances.csv' file in the current working directory.\n")
+		stop("Could not find a 'distances.csv' file in the current working directory.\n", call. = FALSE)
 
 	input <- read.csv("distances.csv", row.names = 1)
 

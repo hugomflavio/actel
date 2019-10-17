@@ -141,7 +141,7 @@ transformSpatial <- function(spatial, bio, sections = NULL) {
         cat("   Release sites listed in the spatial file:", paste(A, collapse = ", "), "\n")
         cat("   Sites listed in the biometrics file 'Release.site' column:", paste(B, collapse = ", ", "\n"))
         emergencyBreak()
-        stop("The release names should be identical in the spatial objects file and in the biometrics file.\n")
+        stop("The release names should be identical in the spatial objects file and in the biometrics file.\n", call. = FALSE)
       } else {
         from.row <- spatial$Type == "Release"
         from.col <- colnames(spatial)[!grepl("Receiver", colnames(spatial))]
@@ -155,7 +155,7 @@ transformSpatial <- function(spatial, bio, sections = NULL) {
         cat("   Arrays listed in the spatial file:", paste(A, collapse = ", "), "\n")
         cat("   Expected first arrays of the release sites:", paste(B, collapse = ", ", "\n"))
         emergencyBreak()
-        stop("The expected first arrays should match the arrays where stations where deployed in the spatial file.\n")
+        stop("The expected first arrays should match the arrays where stations where deployed in the spatial file.\n", call. = FALSE)
       }
     }
   } else {
@@ -178,7 +178,7 @@ transformSpatial <- function(spatial, bio, sections = NULL) {
       appendTo(c("Screen", "Warning"), decision <- readline(paste("W: No arrays were found that match section(s) ",paste(names(array.order)[trigger], collapse = ", "), ". There could be a typing mistake!\n   Continue the analysis?(y/N) ", sep = "")))
       if (decision != "y" | decision != "Y" ){
         emergencyBreak()
-        stop("Stopping analysis per user command.\n")
+        stop("Stopping analysis per user command.\n", call. = FALSE)
       }
     }
   } else {
@@ -287,7 +287,7 @@ createStandards <- function(detections, spatial, deployments) {
         }
         if (decision == "a" | decision == "A") {
           emergencyBreak()
-          stop("Stopping analysis per user command.\n")
+          stop("Stopping analysis per user command.\n", call. = FALSE)
         } else {
           rows.to.remove <- detections[receiver.link, which = TRUE][the.error]
           detections <- detections[-rows.to.remove]
@@ -370,7 +370,7 @@ labelUnknowns <- function(detections.list) {
     }
     if (decision == "a" | decision == "A") {
       emergencyBreak()
-      stop("Stopping analysis per user command.\n")
+      stop("Stopping analysis per user command.\n", call. = FALSE)
     }
     detections.list <- lapply(detections.list, function(x) {
       levels(x$Standard.Name) <- c(levels(x$Standard.Name), "Unknown")
