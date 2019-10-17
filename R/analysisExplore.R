@@ -85,7 +85,7 @@ explore <- function(path = NULL, maximum.time = 60,
 
 # Load, structure and check the inputs
   appendTo(c("Screen", "Report"), "M: Importing data. This process may take a while.")
-  bio <- loadBio(file = "biometrics.csv")
+  bio <- loadBio(file = "biometrics.csv",tz.study.area = tz.study.area)
   appendTo(c("Screen", "Report"), paste("M: Number of target tags: ", nrow(bio), ".", sep = ""))
   deployments <- loadDeployments(file = "deployments.csv", tz.study.area = tz.study.area)
   checkDeploymentTimes(input = deployments) # check that receivers are not deployed before being retrieved

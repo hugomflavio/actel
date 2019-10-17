@@ -228,12 +228,15 @@ loadSpatial <- function(file = "spatial.csv", verbose = FALSE){
 #' Import biometrics
 #' 
 #' @param file an input file with biometric data.
+#' @inheritParams explore
 #' 
 #' @keywords internal
 #' 
 #' @return The biometrics table
 #' 
-loadBio <- function(file){
+#' @export
+#' 
+loadBio <- function(file, tz.study.area){
   appendTo("debug", "Starting loadBio.")
   if (file.exists(file))
     bio <- read.csv(file, stringsAsFactors = FALSE)
@@ -252,7 +255,7 @@ loadBio <- function(file){
     stop("Not all values in the 'Release.date' column appear to be in a 'yyyy-mm-dd hh:mm' format (seconds are optional). Please doublecheck the biometrics file.\n")
   }
   
-  if (inherits(try(as.POSIXct(bio$Release.date), silent = TRUE),"try-error")){
+  if (inherits(try(bio$Release.date <- as.POSIXct(bio$Release.date, tz = tz.study.area), silent = TRUE),"try-error")){
     emergencyBreak()
     stop("Could not recognise the data in the 'Release.date' column as POSIX-compatible timestamps. Please doublecheck the biometrics file.\n")
   }
@@ -288,7 +291,6 @@ loadBio <- function(file){
       bio$Release.site[is.na(bio$Release.site)] <- "unspecified"
     }
   }
-
   if (!any(grepl("Group", colnames(bio)))) {
     appendTo("Screen", "M: No 'Group' column found in the biometrics file. Assigning all fish to group 'All'.")
     bio$Group <- "All"

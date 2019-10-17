@@ -4,10 +4,12 @@
 \alias{loadBio}
 \title{Import biometrics}
 \usage{
-loadBio(file)
+loadBio(file, tz.study.area)
 }
 \arguments{
 \item{file}{an input file with biometric data.}
+
+\item{tz.study.area}{The time-zone of the study area. Necessary to convert the ALS time data, which is in UTC.}
 }
 \value{
 The biometrics table

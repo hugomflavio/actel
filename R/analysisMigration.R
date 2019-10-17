@@ -87,7 +87,7 @@ migration <- function(path = NULL, sections, success.arrays = NULL, minimum.dete
 
 # Load, structure and check the inputs
   appendTo(c("Screen", "Report"), "M: Importing data. This process may take a while.")
-  bio <- loadBio(file = "biometrics.csv")
+  bio <- loadBio(file = "biometrics.csv", tz.study.area = tz.study.area)
   appendTo(c("Screen", "Report"), paste("M: Number of target tags: ", nrow(bio), ".", sep = ""))
   # Check that all the overriden fish are part of the study
   if (!is.null(override) && any(link <- is.na(match(unlist(lapply(strsplit(override, "-"), function(x) tail(x, 1))), bio$Signal))))
