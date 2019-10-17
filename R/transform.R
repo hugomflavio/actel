@@ -110,6 +110,7 @@ dotPaths <- function(input, mat) {
 #' Creates a list containing multiple spatial elements required throughout the analyses
 #' 
 #' @param file an input file with spatial data.
+#' @param first.array Either NULL or the top level array in the study area.
 #' @inheritParams splitDetections
 #' @inheritParams actel
 #' 
@@ -117,8 +118,8 @@ dotPaths <- function(input, mat) {
 #' 
 #' @keywords internal
 #' 
-transformSpatial <- function(spatial, bio, sections = NULL) {
-  appendTo("debug", "Starting new_assembleSpatial.")
+transformSpatial <- function(spatial, bio, sections = NULL, first.array = NULL) {
+  appendTo("debug", "Starting transformSpatial.")
   # Break the stations away
   appendTo("debug", "Creating 'stations'.")
   stations <- spatial[spatial$Type == "Hydrophone", -match("Type", colnames(spatial))]
@@ -127,11 +128,15 @@ transformSpatial <- function(spatial, bio, sections = NULL) {
   # If there is any release site in the spatial file
   if (sum(spatial$Type == "Release") > 0) {
     if (length(unique(bio$Release.site)) == 1 && unique(bio$Release.site) == "unspecified") {
-      appendTo(c("Screen", "Report", "Warning"), "W: At least one release site has been indicated in the spatial file, but no release sites were specified in the biometrics file.\n   Discarding release site information to avoid script failure. Please doublecheck your data.")
+      appendTo(c("Screen", "Report", "Warning"), "W: At least one release site has been indicated in the spatial file, but no release sites were specified in the biometrics file.\n   Discarding release site information and assuming all fish were released at the top level array to avoid function failure.\n   Please doublecheck your data.")
+      if (is.null(first.array)) {
+        emergencyBreak()
+        stop("There is more than one top level array in the study area. Please specify release site(s) in the 'spatial.csv' file and in the 'biometrics.csv' file.\n", call. = FALSE)
+      }
       release.sites <- data.frame(Station.Name = "unspecified", 
                                   Longitude = NA_real_, 
                                   Latitude = NA_real_, 
-                                  Array = stations$Array[1],
+                                  Array = first.array,
                                   Standar.Name = "unspecified")
     } else {
       A <- spatial$Station.Name[spatial$Type == "Release"]
@@ -160,12 +165,16 @@ transformSpatial <- function(spatial, bio, sections = NULL) {
     }
   } else {
     if (length(unique(bio$Release.site)) > 1){
-      appendTo("Screen", "M: Release sites were not specified in the spatial file but more than one release site is reported in the biometric data.\n   Assuming all released fish go through all receiver arrays.")
+      appendTo("Screen", "M: Release sites were not specified in the spatial file but more than one release site is reported in the biometric data.\n   Assuming all released fish start at the top level array.")
+      if (is.null(first.array)) {
+        emergencyBreak()
+        stop("There is more than one top level array in the study area. Please specify release site(s) in the 'spatial.csv' file and in the 'biometrics.csv' file.\n", call. = FALSE)
+      }
     }
     release.sites <- data.frame(Station.Name = unique(bio$Release.site), 
                                 Longitude = NA_real_,
                                 Latitude = NA_real_, 
-                                Array = rep(stations$Array[1], length(unique(bio$Release.site))),
+                                Array = rep(first.array, length(unique(bio$Release.site))),
                                 Standard.Name = unique(bio$Release.site))
   }
   # Wrap up
@@ -191,7 +200,7 @@ transformSpatial <- function(spatial, bio, sections = NULL) {
   output <- list(stations = stations, 
                  release.sites = release.sites, 
                  array.order = array.order)
-  appendTo("debug", "Terminating new_assembleSpatial")
+  appendTo("debug", "Terminating transformSpatial")
   return(output)
 }
 

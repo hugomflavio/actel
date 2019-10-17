@@ -4,12 +4,14 @@
 \alias{transformSpatial}
 \title{Process spatial elements}
 \usage{
-transformSpatial(spatial, bio, sections = NULL)
+transformSpatial(spatial, bio, sections = NULL, first.array = NULL)
 }
 \arguments{
 \item{bio}{A table with the tags and biometrics of the studied fish.}
 
 \item{sections}{The sections in which the study was divided. Must be coincident with the names given to the ALS arrays. (i.e. if an array is 'River1', then the respective section is 'River')}
+
+\item{first.array}{Either NULL or the top level array in the study area.}
 
 \item{file}{an input file with spatial data.}
 }

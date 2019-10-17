@@ -108,7 +108,13 @@ explore <- function(path = NULL, maximum.time = 60,
   dot <- recipient[[1]]
   arrays <- recipient[[2]]
   rm(recipient)
-  spatial <- transformSpatial(spatial = spatial, bio = bio, sections = NULL) # Finish structuring the spatial file
+
+  # Check if there is a logical first array in the study area, should a replacement release site need to be created.
+  if (sum(unlist(lapply(arrays, function(a) is.null(a$before)))) == 1)
+    first.array <- names(arrays)[unlist(lapply(arrays, function(a) is.null(a$before)))]
+  else
+    first.array <- NULL
+  spatial <- transformSpatial(spatial = spatial, bio = bio, sections = NULL, first.array = first.array) # Finish structuring the spatial file
   arrays <- arrays[unlist(spatial$array.order)]
 
   recipient <- loadDistances(spatial = spatial) # Load distances and check if they are valid
