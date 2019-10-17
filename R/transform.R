@@ -131,7 +131,8 @@ transformSpatial <- function(spatial, bio, sections = NULL) {
       release.sites <- data.frame(Station.Name = "unspecified", 
                                   Longitude = NA_real_, 
                                   Latitude = NA_real_, 
-                                  Array = stations$Array[1])
+                                  Array = stations$Array[1],
+                                  Standar.Name = "unspecified")
     } else {
       A <- spatial$Station.Name[spatial$Type == "Release"]
       B <- unique(bio$Release.site)
@@ -164,7 +165,8 @@ transformSpatial <- function(spatial, bio, sections = NULL) {
     release.sites <- data.frame(Station.Name = unique(bio$Release.site), 
                                 Longitude = NA_real_,
                                 Latitude = NA_real_, 
-                                Array = rep(stations$Array[1], length(unique(bio$Release.site))))
+                                Array = rep(stations$Array[1], length(unique(bio$Release.site))),
+                                Standard.Name = unique(bio$Release.site))
   }
   # Wrap up
   if (!is.null(sections)) {
