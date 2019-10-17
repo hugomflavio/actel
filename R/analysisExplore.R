@@ -96,7 +96,7 @@ explore <- function(path = NULL, maximum.time = 60,
   
   detections <- loadDetections(start.timestamp = start.timestamp, end.timestamp = end.timestamp, tz.study.area = tz.study.area)
   detections <- createStandards(detections = detections, spatial = spatial, deployments = deployments) # get standardize station and receiver names, check for receivers with no detections
-  unknown.detections <- checkUnknownReceivers(input = detections) # Check if there are detections from unknown detections
+  checkUnknownReceivers(input = detections) # Check if there are detections from unknown detections
   
   if (file.exists("spatial.dot")) {
     appendTo(c("Screen", "Report"), "M: A 'spatial.dot' file was detected, activating multi-branch analysis.")
