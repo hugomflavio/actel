@@ -89,6 +89,7 @@ migration <- function(path = NULL, sections, success.arrays = NULL, minimum.dete
   appendTo(c("Screen", "Report"), "M: Importing data. This process may take a while.")
   bio <- loadBio(file = "biometrics.csv", tz.study.area = tz.study.area)
   appendTo(c("Screen", "Report"), paste("M: Number of target tags: ", nrow(bio), ".", sep = ""))
+  
   # Check that all the overriden fish are part of the study
   if (!is.null(override) && any(link <- is.na(match(unlist(lapply(strsplit(override, "-"), function(x) tail(x, 1))), bio$Signal))))
     stop("Some tag signals listed in 'override' ('", paste0(override[link], collapse = "', '"), "') are not listed in the biometrics file.\n")
@@ -97,9 +98,11 @@ migration <- function(path = NULL, sections, success.arrays = NULL, minimum.dete
   spatial <- loadSpatial(file = "spatial.csv", verbose = TRUE)
   deployments <- checkDeploymentStations(input = deployments, spatial = spatial) # match Station.Name in the deployments to Station.Name in spatial, and vice-versa
   deployments <- createUniqueSerials(input = deployments) # Prepare serial numbers to overwrite the serials in detections
+
   detections <- loadDetections(start.timestamp = start.timestamp, end.timestamp = end.timestamp, tz.study.area = tz.study.area)
   detections <- createStandards(detections = detections, spatial = spatial, deployments = deployments) # get standardize station and receiver names, check for receivers with no detections
   unknown.detections <- checkUnknownReceivers(input = detections) # Check if there are detections from unknown detections
+
   if (file.exists("spatial.dot")) {
     appendTo(c("Screen", "Report"), "M: A 'spatial.dot' file was detected, activating multi-branch analysis.")
     recipient <- loadDot(input = "spatial.dot", spatial = spatial, sections = sections)
@@ -112,23 +115,26 @@ migration <- function(path = NULL, sections, success.arrays = NULL, minimum.dete
   rm(recipient)
   spatial <- transformSpatial(spatial = spatial, bio = bio, sections = sections) # Finish structuring the spatial file
   arrays <- arrays[unlist(spatial$array.order)]
+
   recipient <- loadDistances(spatial = spatial) # Load distances and check if they are valid
   dist.mat <- recipient[[1]]
   invalid.dist <- recipient[[2]]
   rm(recipient)
+
   recipient <- splitDetections(detections = detections, bio = bio, exclude.tags = exclude.tags) # Split the detections by tag, store full transmitter names in bio
   detections.list <- recipient[[1]]
   bio <- recipient[[2]]
   rm(recipient)
+
   recipient <- checkTagsInUnknownReceivers(detections.list = detections.list, deployments = deployments, spatial = spatial) # Check if there is any data loss due to unknown receivers
   spatial <- recipient[[1]]
   deployments <- recipient[[2]]
   rm(recipient)
+
   detections.list <- labelUnknowns(detections.list = detections.list)
   detections.list <- checkDetectionsBeforeRelease(input = detections.list, bio = bio)
   if (is.null(success.arrays))
     success.arrays <- names(arrays)[unlist(lapply(arrays, function(x) is.null(x$after)))]
-  
   appendTo(c("Screen", "Report"), "M: Data successfully imported!")
 # -------------------------------------
   
