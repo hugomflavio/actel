@@ -107,9 +107,9 @@ assembleGroupCJS <- function(mat, CJS, arrays) {
 breakMatricesByArray <- function(m, arrays) {
   recipient <- list()
   for (i in 1:length(arrays)) {
-    if (!is.null(arrays[[i]]$downstream)) {
+    if (!is.null(arrays[[i]]$peers)) {
       # grab only relevant arrays
-      a.regex <- paste(c(names(arrays)[i], arrays[[i]]$downstream), collapse = "|")
+      a.regex <- paste(c(names(arrays)[i], arrays[[i]]$peers), collapse = "|")
       aux  <- lapply(m, function(m) m[, which(grepl(a.regex, colnames(m)))])
       # Failsafe in case some fish are released at one of the peers
       keep <- unlist(lapply(m, function(m) any(grepl(names(arrays)[i], colnames(m)))))
