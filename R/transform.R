@@ -69,13 +69,13 @@ dotList <- function(input, sections = NULL) {
 #' Find arrays valid for efficiency calculation
 #' 
 #' @param input A dot list
-#' @param mat A dot distance matrix
+#' @param dotmat A dot distance matrix
 #' 
 #' @return The input list, with an extra element for each array with valid efficiency peers
 #' 
 #' @keywords internal
 #' 
-dotPaths <- function(input, mat) {
+dotPaths <- function(input, dotmat) {
   for (a in names(input)) {
     downstream <- NULL
     to.check <- input[[a]]$after

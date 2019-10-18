@@ -128,6 +128,7 @@ migration <- function(path = NULL, sections, success.arrays = NULL, minimum.dete
   }
   dot <- recipient[[1]]
   arrays <- recipient[[2]]
+  dotmat <- recipient[[3]]
   rm(recipient)
 
   # Check if there is a logical first array in the study area, should a replacement release site need to be created.

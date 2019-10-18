@@ -33,6 +33,8 @@ loadDot <- function(string = NULL, input = NULL, spatial, sections = NULL) {
   arrays <- dotList(input = dot, sections = sections)
   arrays <- dotPaths(input = arrays, mat = mat)
   return(list(dot = dot, arrays = arrays))
+  arrays <- dotPaths(input = arrays, dotmat = mat)
+  return(list(dot = dot, arrays = arrays, dotmat = mat))
 }
 
 #' Read dot file
