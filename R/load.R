@@ -206,6 +206,10 @@ loadSpatial <- function(file = "spatial.csv", verbose = FALSE){
       }
     }
   }
+  if (any(grepl(" ", input$Array))) {
+    appendTo("Screen", "M: Replacing spaces in array names to prevent function failure.")
+    input$Array <- gsub(" ", "_", input$Array)
+  }
   if (!any(grepl("Type", colnames(input)))) {
     if (verbose)
       appendTo("Screen", "M: No 'Type' column found in 'spatial.csv'. Assigning all rows as hydrophones.")
