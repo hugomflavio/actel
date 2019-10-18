@@ -31,8 +31,6 @@ loadDot <- function(string = NULL, input = NULL, spatial, sections = NULL) {
     stop("Not all the arrays listed in the 'spatial.dot' file are present in the 'spatial.csv' file.\n", call. = FALSE)
   }
   arrays <- dotList(input = dot, sections = sections)
-  arrays <- dotPaths(input = arrays, mat = mat)
-  return(list(dot = dot, arrays = arrays))
   arrays <- dotPaths(input = arrays, dotmat = mat)
   return(list(dot = dot, arrays = arrays, dotmat = mat))
 }
@@ -144,7 +142,7 @@ loadDeployments <- function(file, tz.study.area){
     emergencyBreak()
     stop("Not all values in the 'Stop' column appear to be in a 'yyyy-mm-dd hh:mm' format (seconds are optional). Please doublecheck the deployments file.\n", call. = FALSE)
   }
-  if (inherits(try(as.POSIXct(input$Start), silent = TRUE),"try-error")){
+  if (inherits(try(as.POSIXct(input$Start), silent = TRUE), "try-error")){
     emergencyBreak()
     stop("Could not recognise the data in the 'Release.date' column as POSIX-compatible timestamps. Please doublecheck the biometrics file.\n", call. = FALSE)
   }
@@ -209,7 +207,7 @@ loadSpatial <- function(file = "spatial.csv", verbose = FALSE){
     }
   }
   if (any(grepl(" ", input$Array))) {
-    appendTo("Screen", "M: Replacing spaces in array names to prevent function failure.")
+    appendTo("Screen", "W: Replacing spaces in array names to prevent function failure.")
     input$Array <- gsub(" ", "_", input$Array)
   }
   if (!any(grepl("Type", colnames(input)))) {
