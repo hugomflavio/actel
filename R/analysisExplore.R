@@ -31,7 +31,26 @@ explore <- function(path = NULL, maximum.time = 60,
   speed.method <- match.arg(speed.method)
   my.home <- getwd()
 
-# Prepare clean up before function ends
+# check arguments quality
+  my.home <- getwd()
+  if (!is.numeric(maximum.time))
+    stop("'maximum.time' must be numerical.\n", call. = FALSE)
+  speed.method <- match.arg(speed.method)
+  if (!is.null(start.timestamp) && !grepl("^[1-2][0-9][0-9][0-9]-[0-1][0-9]-[0-3][0-9] [0-2][0-9]:[0-5][0-9]:[0-5][0-9]", start.timestamp))
+    stop("'start.timestamp' must be in 'yyyy-mm-dd hh:mm:ss' format.\n", call. = FALSE)
+  if (!is.null(end.timestamp) && !grepl("^[1-2][0-9][0-9][0-9]-[0-1][0-9]-[0-3][0-9] [0-2][0-9]:[0-5][0-9]:[0-5][0-9]", end.timestamp))
+    stop("'end.timestamp' must be in 'yyyy-mm-dd hh:mm:ss' format.\n", call. = FALSE)
+  if (!is.logical(report))
+    stop("'report' must be logical.\n", call. = FALSE)
+  if (!is.numeric(jump.warning))
+    stop("'jump.warning' must be numeric.\n", call. = FALSE)
+  if (!is.numeric(jump.error))
+    stop("'jump.error' must be numeric.\n", call. = FALSE)
+  if (!is.logical(debug))
+    stop("'debug' must be logical.\n", call. = FALSE)
+# ------------------------
+
+# Prepare clean-up before function ends
   if (debug) {
     on.exit(save(list = ls(), file = "explore_debug.RData"), add = TRUE)
     appendTo("Screen", "!!!--- Debug mode has been activated ---!!!")

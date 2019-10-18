@@ -25,8 +25,32 @@ migration <- function(path = NULL, sections, success.arrays = NULL, minimum.dete
   
   speed.method <- match.arg(speed.method)
   my.home <- getwd()
+  if (!is.numeric(minimum.detections))
+    stop("'minimum.detections' must be numeric.\n", call. = FALSE)
+  if (!is.numeric(maximum.time))
+    stop("'maximum.time' must be numeric.\n", call. = FALSE)
+  speed.method <- match.arg(speed.method)
+  if (!is.logical(if.last.skip.section))
+    stop("'if.last.skip.section' must be logical.\n", call. = FALSE)
+  if (!is.null(start.timestamp) && !grepl("^[1-2][0-9][0-9][0-9]-[0-1][0-9]-[0-3][0-9] [0-2][0-9]:[0-5][0-9]:[0-5][0-9]", start.timestamp))
+    stop("'start.timestamp' must be in 'yyyy-mm-dd hh:mm:ss' format.\n", call. = FALSE)
+  if (!is.null(end.timestamp) && !grepl("^[1-2][0-9][0-9][0-9]-[0-1][0-9]-[0-3][0-9] [0-2][0-9]:[0-5][0-9]:[0-5][0-9]", end.timestamp))
+    stop("'end.timestamp' must be in 'yyyy-mm-dd hh:mm:ss' format.\n", call. = FALSE)
+  if (!is.logical(report))
+    stop("'report' must be logical.\n", call. = FALSE)
+  if (!is.logical(cautious.assignment))
+    stop("'cautious.assignment' must be logical.\n", call. = FALSE)
+  if (!is.null(replicates) && !is.list(replicates))
+    stop("'replicates' must be a list.\n", call. = FALSE)
+  if (!is.numeric(jump.warning))
+    stop("'jump.warning' must be numeric.\n", call. = FALSE)
+  if (!is.numeric(jump.error))
+    stop("'jump.error' must be numeric.\n", call. = FALSE)
+  if (!is.logical(debug))
+    stop("'debug' must be logical.\n", call. = FALSE)
+# ------------------------
 
-# Prepare clean up before function ends
+# Prepare clean-up before function ends
   if (debug) {
     on.exit(save(list = ls(), file = "migration_debug.RData"), add = TRUE)
     appendTo("Screen", "!!!--- Debug mode has been activated ---!!!")
