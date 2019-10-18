@@ -173,6 +173,7 @@ migration <- function(path = NULL, sections, success.arrays = NULL, minimum.dete
   }
   
   recipient <- assembleTimetable(movements = movements, sections = sections, spatial = spatial, 
+  recipient <- assembleTimetable(movements = movements, sections = sections, spatial = spatial, arrays = arrays,
     minimum.detections = minimum.detections, dist.mat = dist.mat, invalid.dist = invalid.dist, 
     speed.method = speed.method, if.last.skip.section = if.last.skip.section, success.arrays = success.arrays, 
     override = override, cautious.assignment = cautious.assignment)
