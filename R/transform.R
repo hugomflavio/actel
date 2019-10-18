@@ -144,7 +144,7 @@ transformSpatial <- function(spatial, bio, sections = NULL, first.array = NULL) 
       if (any(is.na(match(B, A)))) {
         appendTo(c("Screen", "Report", "Warning"), "Error: There is a mismatch between the release sites reported and the release locations for the smolts.")
         cat("   Release sites listed in the spatial file:", paste(A, collapse = ", "), "\n")
-        cat("   Sites listed in the biometrics file 'Release.site' column:", paste(B, collapse = ", ", "\n"))
+        cat("   Sites listed in the biometrics file 'Release.site' column:", paste(B, collapse = ", "), "\n")
         emergencyBreak()
         stop("The release names should be identical in the spatial objects file and in the biometrics file.\n", call. = FALSE)
       } else {
@@ -158,7 +158,7 @@ transformSpatial <- function(spatial, bio, sections = NULL, first.array = NULL) 
       if (any(is.na(match(B, A)))) {
         appendTo(c("Screen", "Report", "Warning"), "Error: There is a mismatch between the expected first array of a release site and the list of arrays.")
         cat("   Arrays listed in the spatial file:", paste(A, collapse = ", "), "\n")
-        cat("   Expected first arrays of the release sites:", paste(B, collapse = ", ", "\n"))
+        cat("   Expected first arrays of the release sites:", paste(B, collapse = ", "), "\n")
         emergencyBreak()
         stop("The expected first arrays should match the arrays where stations where deployed in the spatial file.\n", call. = FALSE)
       }
