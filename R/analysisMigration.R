@@ -175,7 +175,6 @@ migration <- function(path = NULL, sections, success.arrays = NULL, minimum.dete
      dist.mat = dist.mat, invalid.dist = invalid.dist, silent = FALSE)
   }
   
-  recipient <- assembleTimetable(movements = movements, sections = sections, spatial = spatial, 
   movements <- checkUpstream(movements = movements, bio = bio, spatial = spatial, arrays = arrays)
 
   movements <- checkJumpDistance(movements = movements, bio = bio, dotmat = dotmat, 
