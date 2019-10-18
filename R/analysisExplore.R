@@ -160,6 +160,8 @@ explore <- function(path = NULL, maximum.time = 60, speed.method = c("last to fi
   movements <- checkJumpDistance(movements = movements, bio = bio, dotmat = dotmat, 
     spatial = spatial, jump.warning = jump.warning, jump.error = jump.error)
 
+  simple.movements <- simplifyMovements(movements = movements, bio = bio, 
+    speed.method = speed.method, dist.mat = dist.mat, invalid.dist = invalid.dist)
 
   times <- getTimes(simple.movements = simple.movements, spatial = spatial, 
     tz.study.area = tz.study.area, type = "Arrival")
@@ -185,9 +187,9 @@ explore <- function(path = NULL, maximum.time = 60, speed.method = c("last to fi
   detections <- detections.list
   deployments <- do.call(rbind.data.frame, deployments)
   if (invalid.dist)
-    save(detections, spatial, deployments, movements, times, file = resultsname)
+    save(detections, spatial, deployments, movements, simple.movements, times, file = resultsname)
   else
-    save(detections, spatial, deployments, movements, times, dist.mat, file = resultsname)
+    save(detections, spatial, deployments, movements, simple.movements, times, dist.mat, file = resultsname)
 # ------------
 
 # Print graphics
@@ -235,10 +237,13 @@ explore <- function(path = NULL, maximum.time = 60, speed.method = c("last to fi
   if (!debug)
     deleteHelpers()
 
-  if (invalid.dist)
-    return(list(detections = detections, spatial = spatial, deployments = deployments, movements = movements, times = times))
-  else
-    return(list(detections = detections, spatial = spatial, deployments = deployments, movements = movements, times = times, dist.mat = dist.mat))
+  if (invalid.dist) {
+    return(list(detections = detections, spatial = spatial, deployments = deployments, 
+      movements = movements, simple.movements = simple.movements, times = times))
+  } else {
+    return(list(detections = detections, spatial = spatial, deployments = deployments, 
+      movements = movements, simple.movements = simple.movements, times = times, dist.mat = dist.mat))
+  }
 }
 
 
