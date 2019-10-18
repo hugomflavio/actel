@@ -77,25 +77,40 @@ dotList <- function(input, sections = NULL) {
 #' 
 dotPaths <- function(input, dotmat) {
   for (a in names(input)) {
-    downstream <- NULL
+    # Get efficiency peers
+    peers <- NULL
     to.check <- input[[a]]$after
     while (!is.null(to.check)) {
       new.check <- NULL
       for (b in to.check) {
         # If A and B are adjacent, check that there are no more paths leading to B
-        if (mat[a, b] == 1 && length(input[[b]]$before) == 1) {
+        if (dotmat[a, b] == 1 && length(input[[b]]$before) == 1) {
+          if (is.null(peers) || !grepl(b, peers)) {
+            peers <- c(peers, b)
+            new.check <- c(new.check, input[[b]]$after)
+          }        
+        }
+        # If B is far away, check that the paths leading to B are in valid the peers list
+        if (dotmat[a, b] > 1 && all(!is.na(match(input[[b]]$before, peers)))) {
+          if (is.null(peers) || !grepl(b, peers)) {
+            peers <- c(peers, b)
+            new.check <- c(new.check, input[[b]]$after)
+          }
+        }
+        to.check <- unique(new.check)
+      }
+    }
+    input[[a]]$peers <- peers
+    # get all downstream
+    downstream <- NULL
+    to.check <- input[[a]]$after
+    while (!is.null(to.check)) {
+      new.check <- NULL
+      for (b in to.check) {
           if (is.null(downstream) || !grepl(b, downstream)) {
             downstream <- c(downstream, b)
             new.check <- c(new.check, input[[b]]$after)
           }        
-        }
-        # If B is far away, check that the paths leading to B are in valid the downstream list
-        if (mat[a, b] > 1 && all(!is.na(match(input[[b]]$before, downstream)))) {
-          if (is.null(downstream) ||!grepl(b, downstream)) {
-            downstream <- c(downstream, b)
-            new.check <- c(new.check, input[[b]]$after)
-          }
-        }
         to.check <- unique(new.check)
       }
     }
