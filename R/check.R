@@ -1,3 +1,77 @@
+      cat("\n")
+      appendTo("Screen", "You may either:\n  a) Stop the analysis if the expected first array is wrong;\n  b) Continue as is (does not impact the results);\n  c) Render a movement event invalid, if you are confident it is a false detection.")
+      cat("\n")
+      unknown.input = TRUE
+      while (unknown.input) {
+        decision <- commentCheck(line = "Decision:(a/b/c/comment) ", tag = fish)
+        if (decision == "a" | decision == "A") {
+          unknown.input = FALSE
+          appendTo("UD", decision)
+          emergencyBreak()
+          stop("Script stopped by user command.", call. = FALSE)
+        }
+        if (decision == "b" | decision == "B") {
+          appendTo("UD", decision)
+          unknown.input = FALSE
+        }
+        if (decision == "c" | decision == "C") {
+          appendTo("UD", decision)
+          unknown.input = FALSE
+          check = TRUE
+          appendTo("Screen", "Note: You can select multiple events at once by separating them with a space.")
+          while (check) {
+            the.string <- commentCheck(line = "Events to be rendered invalid: ", tag = fish)
+            the.rows <- suppressWarnings(as.integer(unlist(strsplit(the.string, "\ "))))
+            appendTo("UD", the.string)
+            if (all(is.na(the.rows))) {
+              decision <- readline("W: The input could not be recognised as row numbers, would you like to abort the process?(y/N) ")
+              appendTo("UD", decision)
+              if (decision == "y" | decision == "Y") {
+                appendTo("Screen", "Aborting.")                 
+                check <- FALSE
+              } else {
+                check <- TRUE
+              }
+            } else {
+              if (any(is.na(the.rows))) {
+                appendTo("Screen", "W: Part of the input could not be recognised as a row number.")
+                the.rows <- the.rows[!is.na(the.rows)]
+              }
+              if (all(the.rows > 0 & the.rows <= nrow(movements[[fish]]))) {
+                decision <- readline(paste0("Confirm: Would you like to render event(s) ", paste(the.rows, collapse = ", "), " invalid?(y/N) "))
+                appendTo("UD", decision)
+                if (decision == "y" | decision == "Y") {
+                  movements[[fish]]$Valid[the.rows] <- FALSE
+                  attributes(movements[[fish]])$p.type <- "Manual"
+                  appendTo(c("Screen", "Report"), paste0("M: Movement event(s) ", paste(the.rows, collapse = ", "), " from fish ", fish," rendered invalid per user command."))
+                  decision <- readline("Would you like to render any more movements invalid?(y/N) ")
+                  appendTo("UD", decision)
+                  if (decision == "y" | decision == "Y") {
+                    check <- TRUE
+                    appendTo("Screen", paste0("M: Updated movement table of fish ", fish, ":"))
+                    print(movements[[fish]])
+                    appendTo("Screen", "Note: You can select multiple events at once by separating them with a space.")
+                  } else {
+                    check <- FALSE
+                  }
+                }
+              } else {
+                appendTo("Screen", paste0("Please select only events within the row limits (1-", nrow(movements[[fish]]),")."))
+                check <- TRUE
+              }
+            }
+          } # end while
+        }
+        if (unknown.input) {
+          appendTo("Screen", "Option not recognized, please input either 'a', 'b', 'c' or 'comment'.")
+        }
+      }
+    }
+  }
+  appendTo("Debug", "Terminating checkUpstream.")
+  return(movements)
+}
+
 #' Confirm that receivers were not re-deployed before being retrieved
 #' 
 #' @param input the table of deployments
