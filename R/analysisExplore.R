@@ -63,26 +63,16 @@ explore <- function(path = NULL, maximum.time = 60, speed.method = c("last to fi
 
 # Store function call
   the.function.call <- paste0("explore(path = ", ifelse(is.null(path), "NULL", paste0("'", path, "'")), 
-      # ", sections = ", paste0("c('", paste(sections, collapse = "', '"), "')"), 
-      # ", success.arrays = ", paste0("c('", paste(success.arrays, collapse = "', '"), "')"), 
-      # ", minimum.detections = ", minimum.detections,
       ", maximum.time = ", maximum.time,
       ", speed.method = ", paste0("c('", speed.method, "')"),
-      # ", if.last.skip.section = ", ifelse(if.last.skip.section, "TRUE", "FALSE"),
       ", tz.study.area = ", ifelse(is.null(tz.study.area), "NULL", paste0("'", tz.study.area, "'")), 
       ", start.timestamp = ", ifelse(is.null(start.timestamp), "NULL", paste0("'", start.timestamp, "'")),
       ", end.timestamp = ", ifelse(is.null(end.timestamp), "NULL", paste0("'", end.timestamp, "'")),
       ", report = ", ifelse(report, "TRUE", "FALSE"), 
-      # ", redraw = ", ifelse(redraw, "TRUE", "FALSE"),
-      # ", override = ", ifelse(is.null(override), "NULL", paste0("c('", paste(override, collapse = "', '"), "')")),
       ", exclude.tags = ", ifelse(is.null(exclude.tags), "NULL", paste0("c('", paste(exclude.tags, collapse = "', '"), "')")), 
       ", jump.warning = ", jump.warning,
       ", jump.error = ", jump.error,
       ", debug = ", ifelse(debug, "TRUE", "FALSE"), 
-      # ", cautious.assignment = ", ifelse(cautious.assignment, "TRUE", "FALSE"), 
-      # ", replicate = ", ifelse(is.null(replicate),"NULL", paste0("c('", paste(replicate, collapse = "', '"), "')")), 
-      ")"
-      )
       ")")
 # --------------------
 
