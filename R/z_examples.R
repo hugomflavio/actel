@@ -1,5 +1,7 @@
 #' Create a default Workspace
 #'
+#' @param dir The name of the target directory. Will be created if not present
+#' 
 #' Produces the files and folders required to run the package, which the user can use as a template.
 #'
 #' @export
@@ -42,22 +44,22 @@ createWorkspace <- function(dir = "actel_workspace") {
 #'
 #' Creates a ready-to-run workspace with example data.
 #' 
-#' @param spatial A dataset containing the positions of the deployed ALS and release site.
-#' @param biometrics A dataset containing the positions of the deployed ALS and release site.
-#' @param detections A dataset containing the detections of the deployed ALS, for the 60 fish.
-#' @param deployments A dataset containing the deployed receivers.
+#' @param example.spatial A dataset containing the positions of the deployed ALS and release site.
+#' @param example.biometrics A dataset containing the positions of the deployed ALS and release site.
+#' @param example.detections A dataset containing the detections of the deployed ALS, for the 60 fish.
+#' @param example.deployments A dataset containing the deployed receivers.
 #'
 #' @export
 #' 
-exampleWorkspace <- function(spatial = example.spatial, biometrics = example.biometrics, detections = example.detections, deployments = example.deployments) {
+exampleWorkspace <- function(example.spatial = example.spatial, example.biometrics = example.biometrics, example.detections = example.detections, example.deployments = example.deployments) {
   if (!dir.exists("exampleWorkspace")) 
     dir.create("exampleWorkspace")
-  write.csv(spatial, "exampleWorkspace/spatial.csv", row.names = FALSE)
-  write.csv(biometrics, "exampleWorkspace/biometrics.csv", row.names = FALSE)
-  write.csv(deployments, "exampleWorkspace/deployments.csv", row.names = FALSE)
+  write.csv(example.spatial, "exampleWorkspace/spatial.csv", row.names = FALSE)
+  write.csv(example.biometrics, "exampleWorkspace/biometrics.csv", row.names = FALSE)
+  write.csv(example.deployments, "exampleWorkspace/deployments.csv", row.names = FALSE)
   if (!dir.exists("exampleWorkspace/detections")) 
     dir.create("exampleWorkspace/detections")
-  my.list <- split(detections, detections$Receiver)
+  my.list <- split(example.detections, example.detections$Receiver)
   for (i in names(my.list)) {
     write.csv(my.list[[i]], paste("exampleWorkspace/detections/", i, ".csv", sep = ""), row.names = FALSE)
   }
@@ -74,7 +76,6 @@ And follow the instructions as they come. Once finished, explore the object 'res
 #' @format A data frame with 18 rows and 6 variables:
 #' \describe{
 #'   \item{Station.Name}{The name of the ALS or release site}
-#'   \item{Receiver}{The ALS deployed (leave empty if the row is a release site)}
 #'   \item{Latitude}{The latitude of the ALS or release site}
 #'   \item{Longitude}{The longitude of the ALS or release site}
 #'   \item{Array}{The Array to which the ALS belongs, or the first ALS array downstream of the release site.}
