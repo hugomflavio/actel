@@ -97,6 +97,114 @@ checkUpstream <- function(movements, bio, spatial, arrays) {
   return(movements)
 }
 
+#' Check if fish are jumping over arrays
+#' 
+#' @inheritParams simplifyMovements
+#' @inheritParams splitDetections
+#' @inheritParams dotPaths
+#' @inheritParams explore
+#' @inheritParams createStandards
+#' 
+#' @return a checked movements list
+#' 
+#' @keywords internal
+#' 
+checkJumpDistance <- function(movements, bio, spatial, dotmat, jump.warning = 2, jump.error = 3) {
+  # NOTE: The NULL variables below are actually column names used by data.table.
+  # This definition is just to prevent the package check from issuing a note due unknown variables.
+  Valid <- NULL
+  for (fish in names(movements)) {
+    # Check release-to-first
+    release <- as.character(bio$Release.site[na.as.false(bio$Transmitter == fish)])
+    release.array <- with(spatial, release.sites[release.sites$Standard.Name == release, "Array"])
+    release.jump <- dotmat[as.character(release.array), as.character(movements[[fish]]$Array[1])] + 1
+    if (release.jump > jump.warning) {
+      # Trigger warning
+      appendTo(c("Report", "Warning", "Screen"), 
+        paste0("W: Fish ", fish, " jumped through ", release.jump - 1, 
+          ifelse(release.jump > 2, " arrays ", " array "), 
+          "from release to first event (Release -> ", movements[[fish]]$Array[1], ")."))
+    }
+    if (release.jump > jump.error)
+      trigger.error <- TRUE
+    else
+      trigger.error <- FALSE
+    # Check event-to-event
+    if (nrow(movements[[fish]]) > 1) {
+      A <- movements[[fish]]$Array[-nrow(movements[[fish]])]
+      B <- movements[[fish]]$Array[-1]
+      aux <- cbind(A, B)
+      jumps <- apply(aux, 1, function(x) dotmat[x[1], x[2]])
+      names(jumps) <- paste(A, "->", B)
+      if (any(link <- which(jumps > jump.warning))) {
+        for (i in 1:length(link)) {
+          # Trigger warning
+          appendTo(c("Report", "Warning", "Screen"), 
+            paste0("W: Fish ", fish, " jumped through ", jumps[link[i]] - 1, 
+              ifelse(jumps[link[i]] > 2, " arrays ", " array "), 
+              "in events ", link[i], " -> ", link[i] + 1, " (", names(jumps)[link[i]], ")."))
+        }
+      }
+      if (any(jumps[link] > jump.error))
+        trigger.error <- TRUE
+    }
+    # Trigger user interaction
+    if (trigger.error) {
+      appendTo("Screen", paste0("M: Opening movement table of fish ", fish, " for inspection:"))
+      print(movements[[fish]])
+      decision <- commentCheck(line = "Would you like any movement event invalid?(y/N/comment) ", tag = fish)
+      appendTo("UD", decision)
+      if (decision == "y" | decision == "Y") {
+        appendTo("Screen", "Note: You can select multiple events at once by separating them with a space.")
+        check <- TRUE
+        while (check) {
+          the.string <- commentCheck(line = "Events to be rendered invalid: ", tag = fish)
+          the.rows <- suppressWarnings(as.integer(unlist(strsplit(the.string, "\ "))))
+          appendTo("UD", the.string)
+          if (all(is.na(the.rows))) {
+            decision <- readline("W: The input could not be recognised as row numbers, would you like to abort the process?(y/N) ")
+            appendTo("UD", decision)
+            if (decision == "y" | decision == "Y") {
+              appendTo("Screen", "Aborting.")                 
+              check <- FALSE
+            } else {
+              check <- TRUE
+            }
+          } else {
+            if (any(is.na(the.rows))) {
+              appendTo("Screen", "W: Part of the input could not be recognised as a row number.")
+              the.rows <- the.rows[!is.na(the.rows)]
+            }
+            if (all(the.rows > 0 & the.rows <= nrow(movements[[fish]]))) {
+              decision <- readline(paste0("Confirm: Would you like to render event(s) ", paste(the.rows, collapse = ", "), " invalid?(y/N) "))
+              appendTo("UD", decision)
+              if (decision == "y" | decision == "Y") {
+                movements[[fish]]$Valid[the.rows] <- FALSE
+                attributes(movements[[fish]])$p.type <- "Manual"
+                appendTo(c("Screen", "Report"), paste0("M: Movement event(s) ", paste(the.rows, collapse = ", "), " from fish ", fish," rendered invalid per user command."))
+                decision <- readline("Would you like to render any more movements invalid?(y/N) ")
+                appendTo("UD", decision)
+                if (decision == "y" | decision == "Y") {
+                  check <- TRUE
+                  appendTo("Screen", paste0("M: Updated movement table of fish ", fish, ":"))
+                  print(movements[[fish]])
+                  appendTo("Screen", "Note: You can select multiple events at once by separating them with a space.")
+                } else {
+                  check <- FALSE
+                }
+              }
+            } else {
+              appendTo("Screen", paste0("Please select only events within the row limits (1-", nrow(movements[[fish]]),")."))
+              check <- TRUE
+            }
+          }
+        } # end while
+      }
+    } # end trigger error
+  }
+  return(movements)
+}
+
 #' Confirm that receivers were not re-deployed before being retrieved
 #' 
 #' @param input the table of deployments
