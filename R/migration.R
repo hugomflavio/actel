@@ -6,13 +6,14 @@
 #' @inheritParams simplifyMovements
 #' @inheritParams loadDetections
 #' @inheritParams groupMovements
+#' @inheritParams assembleArrayCJS
 #' @param movements A list of movements for each target tag, created by groupMovements.
 #' 
 #' @return A table of the entering and leaving points for each section per target tag
 #' 
 #' @keywords internal
 #' 
-assembleTimetable <- function(movements, sections, spatial, minimum.detections, 
+assembleTimetable <- function(movements, sections, spatial, arrays, minimum.detections, 
   dist.mat, invalid.dist, speed.method, if.last.skip.section, success.arrays, override, cautious.assignment) {
   appendTo("debug", "Starting assembleTimetable.")
   appendTo(c("Screen", "Report"), "M: Initiating timetable development. Your assistance may be needed during the process.")
@@ -90,7 +91,7 @@ assembleTimetable <- function(movements, sections, spatial, minimum.detections,
     movements[[i]] <- updateMovementValidity(movements = movements[[i]], events = events, sections = sections)
     ## Second, deploy the values
     timetable <- deployValues(i = i, timetable = timetable, movements = movements[[i]], 
-      events = events, sections = sections, spatial = spatial, dist.mat = dist.mat, 
+      events = events, sections = sections, spatial = spatial, arrays = arrays, dist.mat = dist.mat, 
       invalid.dist = invalid.dist, if.last.skip.section = if.last.skip.section, 
       success.arrays = success.arrays, processing.type = processing.type, speed.method = speed.method)
   }
@@ -653,8 +654,8 @@ findFirstEvents <- function(i, last.events, movements, sections, processing.type
 #' 
 #' @keywords internal
 #' 
-deployValues <- function(i, timetable, movements, events, sections, spatial, 
-  dist.mat, invalid.dist, if.last.skip.section, success.arrays, processing.type, speed.method) {
+deployValues <- function(i, timetable, movements, events, sections, spatial, arrays,
+  dist.mat, invalid.dist, if.last.skip.section, success.arrays, speed.method) {
   # NOTE: The NULL variables below are actually column names used by data.table.
   # This definition is just to prevent the package check from issuing a note due unknown variables.
   Detections <- NULL
@@ -726,7 +727,7 @@ deployValues <- function(i, timetable, movements, events, sections, spatial,
 
   if (movements[, any(Array != "Unknown")]) {
     temp <- movements[Array != "Unknown", ]
-    recipient <- countUpMoves(movements = temp, spatial = spatial)
+    recipient <- countBackMoves(movements = temp, arrays = arrays)
     timetable[i, "Backwards.movements"] <- recipient[[1]]
     timetable[i, "Max.cons.back.moves"] <- recipient[[2]]
   } else {
@@ -751,66 +752,30 @@ deployValues <- function(i, timetable, movements, events, sections, spatial,
 #' 
 #' @return The number of backwards movements and the maximum consecutive backwards movements
 #' 
-countUpMoves <- function(movements, spatial){
-  # NOTE: The NULL variables below are actually column names used by data.table.
-  # This definition is just to prevent the package check from issuing a note due unknown variables.
-  Array <- NULL
-
-  appendTo("debug", "Starting countUpMoves.")
+countBackMoves <- function(movements, arrays){
+  appendTo("debug", "Starting countBackMoves.")
   if (nrow(movements) > 1) {# Determine number of backwards movements
-    array.sequence <- vector()
-    for (i in seq_len(length(unlist(spatial$array.order)))) {
-      array.sequence[grep(unlist(spatial$array.order)[i], movements[, Array])] <- i
-    }
-    backwards.movement <- vector()
-    for (i in 2:length(array.sequence)) {
-      backwards.movement[i - 1] <- array.sequence[i] < array.sequence[i - 1]
-    }
-    up.moves <- sum(backwards.movement)
-    # Find out maximum consecutive backwards movements
-    recipient <- vector()
-    restart <- TRUE
-    if (length(backwards.movement) > 1) {
-      for (i in 2:length(backwards.movement)) {
-        if (restart) {
-          counter <- 1
-          store <- FALSE
-        }
-        if (backwards.movement[i]) {
-          store <- TRUE
-          if (backwards.movement[i - 1]) {
-            restart <- FALSE
-            counter <- counter + 1
-          } else {
-            restart <- TRUE
-          }
-        }
-        if (store) {
-          recipient[length(recipient) + 1] <- counter
-        }
-      }
-      if (length(recipient) == 0) {
-        if (up.moves == 0) {
-          Max.back.moves <- 0
-        } else {
-          Max.back.moves <- 1
-        }
-      } else {
-        Max.back.moves <- max(recipient)
-      }
-    } else {
-      if (backwards.movement) {
-        Max.back.moves <- 1
-      } else {
-        Max.back.moves <- 0
-      }
-    }
+    direction <- NULL
+    A <- movements$Array[-nrow(movements)]
+    B <- movements$Array[-1]
+    aux <- cbind(A, B)
+    backwards.movements <- apply(aux, 1, function(x)
+      if(x[1] != x[2]) 
+        is.na(match(x[2], arrays[[x[1]]]$downstream))
+      else
+        FALSE
+      )
+    sum.back.moves <- sum(backwards.movements)
+    if (sum.back.moves > 0) 
+      max.back.moves <- max(rle(backwards.movements)$lengths[which(rle(backwards.movements)$values == TRUE)])
+    else
+      max.back.moves <- 0
   } else {
-    up.moves <- 0
-    Max.back.moves <- 0
+    sum.back.moves <- 0
+    max.back.moves <- 0
   }
-  appendTo("debug", "Terminating countUpMoves.")
-  return(list(up.moves = up.moves, Max.back.moves = Max.back.moves))
+  appendTo("debug", "Terminating countBackMoves.")
+  return(list(sum.back.moves = sum.back.moves, max.back.moves = max.back.moves))
 }
 
 #' Create status.df
