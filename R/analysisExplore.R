@@ -13,7 +13,9 @@
 #' @param report Whether graphics, tables and LaTeX report files should be created. Defaults to TRUE. Allows automatic compiling of a PDF report after the analysis.
 #' @param exclude.tags A list of tags that should be excluded from the detection data before any analyses are performed. Intended to be used if stray tags from a different code space but with the same signal as a target tag are detected in the study area.
 #' @param debug If TRUE, temporary files are not deleted at the end of the analysis. Defaults to FALSE.
-#' 
+#' @param jump.warning Integer value. If a fish crosses ´jump.warning´ arrays without being detected, a warning is issued.
+#' @param jump.error Integer value. If a fish crosses ´jump.error´ arrays without being detected, user intervention is suggested.
+#'  
 #' @return A list containing 1) the detections used during the analysis, 2) the movement events, 3) the status dataframe, 4) the survival overview per group, 5) the progression through the study area, 6) the ALS array/sections' efficiency, 7) the list of spatial objects used during the analysis.
 #' 
 #' @export
@@ -22,14 +24,9 @@
 #' @import utils
 #' @import graphics
 #' 
-explore <- function(path = NULL, maximum.time = 60, 
-    speed.method = c("last to first", "first to first"),
-    tz.study.area, start.timestamp = NULL, 
-    end.timestamp = NULL, report = TRUE,  
-    exclude.tags = NULL, debug = FALSE) {
-  
-  speed.method <- match.arg(speed.method)
-  my.home <- getwd()
+explore <- function(path = NULL, maximum.time = 60, speed.method = c("last to first", "first to first"),
+    tz.study.area, start.timestamp = NULL, end.timestamp = NULL, report = TRUE,  
+    exclude.tags = NULL, jump.warning = 2, jump.error = 3, debug = FALSE) {
 
 # check arguments quality
   my.home <- getwd()
@@ -79,11 +76,14 @@ explore <- function(path = NULL, maximum.time = 60,
       # ", redraw = ", ifelse(redraw, "TRUE", "FALSE"),
       # ", override = ", ifelse(is.null(override), "NULL", paste0("c('", paste(override, collapse = "', '"), "')")),
       ", exclude.tags = ", ifelse(is.null(exclude.tags), "NULL", paste0("c('", paste(exclude.tags, collapse = "', '"), "')")), 
+      ", jump.warning = ", jump.warning,
+      ", jump.error = ", jump.error,
       ", debug = ", ifelse(debug, "TRUE", "FALSE"), 
       # ", cautious.assignment = ", ifelse(cautious.assignment, "TRUE", "FALSE"), 
       # ", replicate = ", ifelse(is.null(replicate),"NULL", paste0("c('", paste(replicate, collapse = "', '"), "')")), 
       ")"
       )
+      ")")
 # --------------------
 
 # Final arrangements before beginning
@@ -166,8 +166,12 @@ explore <- function(path = NULL, maximum.time = 60,
     movements[[fish]] <- speedReleaseToFirst(fish = fish, bio = bio, movements = movements[[fish]],
      dist.mat = dist.mat, invalid.dist = invalid.dist, silent = FALSE)
   }
-  
-  times <- getTimes(simple.movements = movements, spatial = spatial, 
+
+  movements <- checkJumpDistance(movements = movements, bio = bio, dotmat = dotmat, 
+    spatial = spatial, jump.warning = jump.warning, jump.error = jump.error)
+
+
+  times <- getTimes(simple.movements = simple.movements, spatial = spatial, 
     tz.study.area = tz.study.area, type = "Arrival")
 # -------------------------------------
 
@@ -368,6 +372,8 @@ cat(gsub("\\r", "", readr::read_file("../temp_log.txt")))
 Note:
   : The detections are coloured by array. The vertical black dashed line shows the time of release. The dashed dark-grey line shows the generated movement events.
   : The movement event lines move straight between the first and last station of each event (i.e. in-between detections will not be individually linked by the line).
+  : Manually **edited** fish are highlighted with **yellow** graphic borders.
+
 
 <center>
 ', individual.plots,'

@@ -21,9 +21,10 @@ migration <- function(path = NULL, sections, success.arrays = NULL, minimum.dete
   maximum.time = 60, speed.method = c("last to first", "first to first"), 
   if.last.skip.section = TRUE, tz.study.area, start.timestamp = NULL, 
   end.timestamp = NULL, report = TRUE, override = NULL, 
-  exclude.tags = NULL, debug = FALSE, cautious.assignment = TRUE, replicates = NULL) {
+  exclude.tags = NULL, cautious.assignment = TRUE, replicates = NULL,
+  jump.warning = 2, jump.error = 3, debug = FALSE) {
   
-  speed.method <- match.arg(speed.method)
+# check argument quality
   my.home <- getwd()
   if (!is.numeric(minimum.detections))
     stop("'minimum.detections' must be numeric.\n", call. = FALSE)
@@ -81,8 +82,10 @@ migration <- function(path = NULL, sections, success.arrays = NULL, minimum.dete
       ", exclude.tags = ", ifelse(is.null(exclude.tags), "NULL", paste0("c('", paste(exclude.tags, collapse = "', '"), "')")), 
       ", debug = ", ifelse(debug, "TRUE", "FALSE"), 
       ", cautious.assignment = ", ifelse(cautious.assignment, "TRUE", "FALSE"), 
-      ", replicates = ", ifelse(is.null(replicates),"NULL", paste0("c('", paste(replicates, collapse = "', '"), "')")), ")"
-      )
+      ", replicates = ", ifelse(is.null(replicates),"NULL", paste0("c('", paste(replicates, collapse = "', '"), "')")),
+      ", jump.warning = ", jump.warning,
+      ", jump.error = ", jump.error,
+      ")")
 # --------------------
 
 # Final arrangements before beginning
@@ -174,6 +177,9 @@ migration <- function(path = NULL, sections, success.arrays = NULL, minimum.dete
   
   recipient <- assembleTimetable(movements = movements, sections = sections, spatial = spatial, 
   movements <- checkUpstream(movements = movements, bio = bio, spatial = spatial, arrays = arrays)
+
+  movements <- checkJumpDistance(movements = movements, bio = bio, dotmat = dotmat, 
+    spatial = spatial, jump.warning = jump.warning, jump.error = jump.error)
 
   recipient <- assembleTimetable(movements = movements, sections = sections, spatial = spatial, arrays = arrays,
     minimum.detections = minimum.detections, dist.mat = dist.mat, invalid.dist = invalid.dist, 
