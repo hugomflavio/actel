@@ -76,8 +76,6 @@ groupMovements <- function(detections.list, bio, spatial, speed.method, maximum.
       }
 
       recipient$Valid <- TRUE
-
-      recipient <- upstreamCheck(i = i, recipient = recipient, bio = bio, spatial = spatial)
       
       if (!is.null(recipient)) {
         recipient[, "First.time"] <- as.POSIXct(recipient[, "First.time"], tz = tz.study.area)
