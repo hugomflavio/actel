@@ -100,39 +100,6 @@ assembleTimetable <- function(movements, sections, spatial, arrays, minimum.dete
   return(list(timetable = timetable, movements = movements))
 }
 
-#' Update movement validity based on the chosen first and last events for each section
-#' 
-#' @inheritParams actel
-#' @inheritParams deployValues
-#' @inheritParams assembleTimetable
-#' 
-#' @keywords internal
-#' 
-#' @return the updated movement's table
-#' 
-updateMovementValidity <- function(movements, events, sections){
-  # NOTE: The NULL variables below are actually column names used by data.table.
-  # This definition is just to prevent the package check from issuing a note due unknown variables.
-  Array <- NULL
-    
-  appendTo("Debug", "Starting updateMovementValidity.")
-  for (j in seq_len(length(sections))) {
-    link <- movements[, grepl(sections[j], Array)]
-    if (is.na(events$last.events[j])) {
-      if (any(link))
-        movements[link, "Valid"] <- FALSE
-    } else {
-      if (any(which(link) > events$last.events[j]))
-        movements[which(link)[which(link) > events$last.events[j]]]$Valid <- FALSE
-      if (any(which(link) < events$first.events[j]))
-        movements[which(link)[which(link) < events$first.events[j]]]$Valid <- FALSE
-    }
-    rm(link)
-  }
-  appendTo("Debug", "Terminating updateMovementValidity.")
-  return(movements)
-}
-
 #' Override automated logics
 #'
 #' If the user has called for an override for a specific tag, this function will allow for a fully manual choice of events.
@@ -635,6 +602,37 @@ findFirstEvents <- function(i, last.events, movements, sections, processing.type
   appendTo("debug", paste("Terminating findFirstEvents for fish ", i, ".", sep = ""))
   return(list(events = list(first.events = first.events, last.events = last.events),
         processing.type = processing.type))
+#' Update movement validity based on the chosen first and last events for each section
+#' 
+#' @inheritParams actel
+#' @inheritParams deployValues
+#' @inheritParams assembleTimetable
+#' 
+#' @keywords internal
+#' 
+#' @return the updated movement's table
+#' 
+updateMovementValidity <- function(movements, events, sections){
+  # NOTE: The NULL variables below are actually column names used by data.table.
+  # This definition is just to prevent the package check from issuing a note due unknown variables.
+  Array <- NULL
+    
+  appendTo("Debug", "Starting updateMovementValidity.")
+  for (j in seq_len(length(sections))) {
+    link <- movements[, grepl(sections[j], Array)]
+    if (is.na(events$last.events[j])) {
+      if (any(link))
+        movements[link, "Valid"] <- FALSE
+    } else {
+      if (any(which(link) > events$last.events[j]))
+        movements[which(link)[which(link) > events$last.events[j]]]$Valid <- FALSE
+      if (any(which(link) < events$first.events[j]))
+        movements[which(link)[which(link) < events$first.events[j]]]$Valid <- FALSE
+    }
+    rm(link)
+  }
+  appendTo("Debug", "Terminating updateMovementValidity.")
+  return(movements)
 }
 
 #' Deploy chosen values
