@@ -7,7 +7,8 @@
 explore(path = NULL, maximum.time = 60,
   speed.method = c("last to first", "first to first"), tz.study.area,
   start.timestamp = NULL, end.timestamp = NULL, report = TRUE,
-  exclude.tags = NULL, debug = FALSE)
+  exclude.tags = NULL, jump.warning = 2, jump.error = 3,
+  debug = FALSE)
 }
 \arguments{
 \item{path}{Path to the folder containing the data. If the R session is already running in the target folder, path may be left as NA}
@@ -25,6 +26,10 @@ explore(path = NULL, maximum.time = 60,
 \item{report}{Whether graphics, tables and LaTeX report files should be created. Defaults to TRUE. Allows automatic compiling of a PDF report after the analysis.}
 
 \item{exclude.tags}{A list of tags that should be excluded from the detection data before any analyses are performed. Intended to be used if stray tags from a different code space but with the same signal as a target tag are detected in the study area.}
+
+\item{jump.warning}{Integer value. If a fish crosses ´jump.warning´ arrays without being detected, a warning is issued.}
+
+\item{jump.error}{Integer value. If a fish crosses ´jump.error´ arrays without being detected, user intervention is suggested.}
 
 \item{debug}{If TRUE, temporary files are not deleted at the end of the analysis. Defaults to FALSE.}
 }

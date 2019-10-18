@@ -4,7 +4,7 @@
 \alias{findLastEvents}
 \title{Find last events}
 \usage{
-findLastEvents(i, movements, sections, minimum.detections, processing.type,
+findLastEvents(i, movements, sections, minimum.detections,
   cautious.assignment)
 }
 \arguments{
@@ -15,8 +15,6 @@ findLastEvents(i, movements, sections, minimum.detections, processing.type,
 \item{sections}{The sections in which the study was divided. Must be coincident with the names given to the ALS arrays. (i.e. if an array is 'River1', then the respective section is 'River')}
 
 \item{minimum.detections}{The minimum number of times a tag must have been recorded during the study period for it to be considered a true tag and not random noise.}
-
-\item{processing.type}{the current processing type for the fish. Is supplied by the function assembleTimetable.}
 
 \item{cautious.assignment}{If TRUE, actel avoids assigning events with one detection as first and/or last events of a section.}
 }

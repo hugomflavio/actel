@@ -4,12 +4,12 @@
 \alias{dotPaths}
 \title{Find arrays valid for efficiency calculation}
 \usage{
-dotPaths(input, mat)
+dotPaths(input, dotmat)
 }
 \arguments{
 \item{input}{A dot list}
 
-\item{mat}{A dot distance matrix}
+\item{dotmat}{A dot distance matrix}
 }
 \value{
 The input list, with an extra element for each array with valid efficiency peers

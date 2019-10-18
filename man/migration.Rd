@@ -9,8 +9,8 @@ migration(path = NULL, sections, success.arrays = NULL,
   speed.method = c("last to first", "first to first"),
   if.last.skip.section = TRUE, tz.study.area, start.timestamp = NULL,
   end.timestamp = NULL, report = TRUE, override = NULL,
-  exclude.tags = NULL, debug = FALSE, cautious.assignment = TRUE,
-  replicates = NULL)
+  exclude.tags = NULL, cautious.assignment = TRUE, replicates = NULL,
+  jump.warning = 2, jump.error = 3, debug = FALSE)
 }
 \arguments{
 \item{path}{Path to the folder containing the data. If the R session is already running in the target folder, path may be left as NA}
@@ -39,11 +39,15 @@ migration(path = NULL, sections, success.arrays = NULL,
 
 \item{exclude.tags}{A list of tags that should be excluded from the detection data before any analyses are performed. Intended to be used if stray tags from a different code space but with the same signal as a target tag are detected in the study area.}
 
-\item{debug}{If TRUE, temporary files are not deleted at the end of the analysis. Defaults to FALSE.}
-
 \item{cautious.assignment}{If TRUE, actel avoids assigning events with one detection as first and/or last events of a section.}
 
 \item{replicates}{A list containing, for each desired array, the standard names of the stations to be used as a replicate, for efficiency estimations.}
+
+\item{jump.warning}{Integer value. If a fish crosses ´jump.warning´ arrays without being detected, a warning is issued.}
+
+\item{jump.error}{Integer value. If a fish crosses ´jump.error´ arrays without being detected, user intervention is suggested.}
+
+\item{debug}{If TRUE, temporary files are not deleted at the end of the analysis. Defaults to FALSE.}
 }
 \value{
 A list containing 1) the detections used during the analysis, 2) the movement events, 3) the status dataframe, 4) the survival overview per group, 5) the progression through the study area, 6) the ALS array/sections' efficiency, 7) the list of spatial objects used during the analysis.

@@ -7,7 +7,6 @@
 \format{A data frame with 18 rows and 6 variables:
 \describe{
   \item{Station.Name}{The name of the ALS or release site}
-  \item{Receiver}{The ALS deployed (leave empty if the row is a release site)}
   \item{Latitude}{The latitude of the ALS or release site}
   \item{Longitude}{The longitude of the ALS or release site}
   \item{Array}{The Array to which the ALS belongs, or the first ALS array downstream of the release site.}
