@@ -1,3 +1,28 @@
+#' Check for movements upstream of the release site.
+#'
+#' @inheritParams splitDetections
+#' @inheritParams loadDetections
+#' 
+#' @return The updated movements
+#' 
+#' @keywords internal
+#' 
+checkUpstream <- function(movements, bio, spatial, arrays) {
+  # NOTE: The NULL variables below are actually column names used by data.table.
+  # This definition is just to prevent the package check from issuing a note due unknown variables.
+  Array <- NULL
+  for (fish in names(movements)) {
+    appendTo("debug", paste("Starting checkUpstream for fish ", fish, ".", sep = ""))
+    release.site <- as.character(bio$Release.site[na.as.false(bio$Transmitter == fish)])
+    release.array <- as.character(with(spatial, release.sites[release.sites$Standard.Name == release.site, "Array"]))
+    downstream.arrays <- c(release.array, arrays[[release.array]]$downstream)
+    if (any(is.na(match(movements[[fish]][Array != "Unknown"]$Array, downstream.arrays)))) {
+      cat("\n")
+      appendTo(c("Screen", "Report", "Warning"), paste0("W: Fish ", fish, " was detected behind its release site! Opening relevant data for inspection."))
+      appendTo("Screen", paste("   Release site:", release.site))
+      appendTo("Screen", paste("   Expected first array:", release.array))
+      cat(paste("\n   Movement table for fish ", fish, ":\n", sep =""))
+      print(movements[[fish]])
       cat("\n")
       appendTo("Screen", "You may either:\n  a) Stop the analysis if the expected first array is wrong;\n  b) Continue as is (does not impact the results);\n  c) Render a movement event invalid, if you are confident it is a false detection.")
       cat("\n")
