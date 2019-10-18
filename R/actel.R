@@ -160,7 +160,7 @@ actel <- function(path = NULL, sections, success.arrays, minimum.detections = 2,
   detections.list <- checkDetectionsBeforeRelease(input = detections.list, bio = bio)
 
   appendTo(c("Screen", "Report"), "M: Data successfully imported!\nM: Creating movement records for the valid tags.")
-  movements <- groupMovements(detections.list = detections.list, bio = bio, spatial = spatial,
+  movements <- deprecated_groupMovements(detections.list = detections.list, bio = bio, spatial = spatial,
     speed.method = speed.method, maximum.time = maximum.time, tz.study.area = tz.study.area, dist.mat = dist.mat, invalid.dist = invalid.dist)
 
   for(fish in names(movements)){
