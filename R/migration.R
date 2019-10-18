@@ -49,13 +49,12 @@ assembleTimetable <- function(movements, sections, spatial, arrays, minimum.dete
   for (i in names(movements)) {
     if (!is.null(override) && any(grepl(i, override))) {
       ## If the fish is marked for manual mode
-      processing.type <- "Overridden"
+      attributes(movements[[i]])$p.type <- "Overridden"
       events <- overrideDefaults(i, movements[[i]], sections)
       ## Jump to updating movements and deploying values
     } else {
       if (movements[[i]][, any(Valid)]) {
         ## If there are any valid events (invalid could only be caused by upstream detection)
-        processing.type <- "Auto"
         ## Find the last events for each section If there is more than one detection event
         if (movements[[i]][(Valid), all(Array == "Unknown")]) {
           ## If all the events are in unknown arrays
@@ -71,21 +70,19 @@ assembleTimetable <- function(movements, sections, spatial, arrays, minimum.dete
             movements[[i]][(Array == "Unknown")]$Valid <- FALSE
           }
           recipient <- findLastEvents(i = i, movements = movements[[i]], 
-            sections = sections, minimum.detections = minimum.detections, 
-            processing.type = processing.type, cautious.assignment = cautious.assignment)
+            sections = sections, minimum.detections = minimum.detections,
+            cautious.assignment = cautious.assignment)
           last.events <- recipient[[1]]
-          processing.type <- recipient[[2]]
+          attributes(movements[[i]])$p.type <- recipient[[2]]
         }
       } else {
         ## If all the events are invalid
         last.events <- rep(NA, length(sections))
-        processing.type <- "Manual"
+        attributes(movements)$p.type <- "Manual"
       }      
-      recipient <- findFirstEvents(i = i, last.events = last.events, 
+      events <- findFirstEvents(i = i, last.events = last.events, 
         movements = movements[[i]], sections = sections, 
-        processing.type = processing.type, cautious.assignment = cautious.assignment)
-      events <- recipient[[1]]
-      processing.type <- recipient[[2]]
+        cautious.assignment = cautious.assignment)
     }
     ## First update movement validity based on selected events
     movements[[i]] <- updateMovementValidity(movements = movements[[i]], events = events, sections = sections)
@@ -93,7 +90,7 @@ assembleTimetable <- function(movements, sections, spatial, arrays, minimum.dete
     timetable <- deployValues(i = i, timetable = timetable, movements = movements[[i]], 
       events = events, sections = sections, spatial = spatial, arrays = arrays, dist.mat = dist.mat, 
       invalid.dist = invalid.dist, if.last.skip.section = if.last.skip.section, 
-      success.arrays = success.arrays, processing.type = processing.type, speed.method = speed.method)
+      success.arrays = success.arrays, speed.method = speed.method)
   }
   timetable$Transmitter <- rownames(timetable)
   appendTo("debug", "Terminating assembleTimetable.")
@@ -239,13 +236,12 @@ overrideEventCheck <- function(type, the.event, up.boundary, t, last.events, j, 
 #' @inheritParams actel
 #' @inheritParams simplifyMovements
 #' @inheritParams overrideDefaults
-#' @param processing.type the current processing type for the fish. Is supplied by the function assembleTimetable.
 #' 
 #' @return A vector of the movement numbers corresponding to each last event.
 #' 
 #' @keywords internal
 #' 
-findLastEvents <- function(i, movements, sections, minimum.detections, processing.type, cautious.assignment) {
+findLastEvents <- function(i, movements, sections, minimum.detections, cautious.assignment) {
   # NOTE: The NULL variables below are actually column names used by data.table.
   # This definition is just to prevent the package check from issuing a note due unknown variables.
   Array <- NULL
@@ -272,7 +268,7 @@ findLastEvents <- function(i, movements, sections, minimum.detections, processin
         }
       }
       if (trigger && is.na(last.events[l])) {
-        processing.type <- "Manual"
+        attributes(movements)$p.type <- "Manual"
         ## I used cat here because the appendTo will be used later on, when the findFirstEvents comes up
         cat(paste0("W: No ", sections[l], " detection events with more than one detection were found for fish ", i, ". Opening movements list for inspection.\n"))
         print(movements[(Valid), -c("Valid")], topn = nrow(movements[(Valid), -c("Valid")]))
@@ -310,9 +306,9 @@ findLastEvents <- function(i, movements, sections, minimum.detections, processin
       }
     }
     recipient <- eventOrderCheck(i = i, last.events = last.events, 
-      sections = sections, movements = movements, processing.type = processing.type)
+      sections = sections, movements = movements)
     last.events <- recipient[[1]]
-    processing.type <- recipient[[2]]
+    attributes(movements)$p.type <- recipient[[2]]
     rm(recipient)
   } else {
     # = there is only one detection event
@@ -326,7 +322,7 @@ findLastEvents <- function(i, movements, sections, minimum.detections, processin
     }
   }
   appendTo("debug", paste("Terminating findLastEvents for fish ", i, ".", sep = ""))
-  return(list(last.events = last.events, processing.type = processing.type))
+  return(list(last.events = last.events, p.type = attributes(movements)$p.type))
 }
 
 #' Check event order
@@ -342,7 +338,7 @@ findLastEvents <- function(i, movements, sections, minimum.detections, processin
 #' 
 #' @keywords internal
 #' 
-eventOrderCheck <- function(i, last.events, sections, movements, processing.type) {
+eventOrderCheck <- function(i, last.events, sections, movements) {
   # NOTE: The NULL variables below are actually column names used by data.table.
   # This definition is just to prevent the package check from issuing a note due unknown variables.
   Valid <- NULL
@@ -465,7 +461,7 @@ eventOrderCheck <- function(i, last.events, sections, movements, processing.type
           }
         }
         appendTo("Report", paste0("M: Last valid events for fish ", i, " were manually edited to: ", paste(last.events, collapse = ", "), "."))
-        processing.type <- "Manual"
+        attributes(movements)$p.type <- "Manual"
       } else {
         appendTo("Report", paste0("M: Default last valid events for fish ", i, " were kept upon inspection."))
       }
@@ -474,7 +470,7 @@ eventOrderCheck <- function(i, last.events, sections, movements, processing.type
     }
   }
   appendTo("debug", paste0("Terminating eventOrderCheck for fish ", i, "."))
-  return(list(last.events = last.events, processing.type = processing.type))
+  return(list(last.events = last.events, p.type = attributes(movements)$p.type))
 }
 
 #' Find starting row
@@ -534,7 +530,7 @@ findFirstRow <- function(l, last.events, movements, sections) {
 #' 
 #' @keywords internal
 #' 
-findFirstEvents <- function(i, last.events, movements, sections, processing.type, cautious.assignment) {
+findFirstEvents <- function(i, last.events, movements, sections, cautious.assignment) {
   # NOTE: The NULL variables below are actually column names used by data.table.
   # This definition is just to prevent the package check from issuing a note due unknown variables.
   Array <- NULL
@@ -600,8 +596,9 @@ findFirstEvents <- function(i, last.events, movements, sections, processing.type
     }
   }
   appendTo("debug", paste("Terminating findFirstEvents for fish ", i, ".", sep = ""))
-  return(list(events = list(first.events = first.events, last.events = last.events),
-        processing.type = processing.type))
+  return(list(first.events = first.events, last.events = last.events))
+}
+
 #' Update movement validity based on the chosen first and last events for each section
 #' 
 #' @inheritParams actel
@@ -646,6 +643,7 @@ updateMovementValidity <- function(movements, events, sections){
 #' @inheritParams loadDetections
 #' @inheritParams groupMovements
 #' @inheritParams findLastEvents
+#' @inheritParams assembleArrayCJS
 #' @param events A list containing both the first and last events. Supplied by findFirstEvents.
 #' 
 #' @return A list containing both the first and last events.
@@ -732,7 +730,7 @@ deployValues <- function(i, timetable, movements, events, sections, spatial, arr
     timetable[i, "Backwards.movements"] <- 0
     timetable[i, "Max.cons.back.moves"] <- 0
   }
-  timetable[i, "P.type"] <- processing.type
+  timetable[i, "P.type"] <- attributes(movements)$p.type
   testA <- !is.na(timetable[i, paste("Left", tail(sections, 1), sep = ".")])
   testB <- any(!is.na(match(success.arrays, movements[tail(events$last.events, 1), Array])))
   if (testA & testB) 
@@ -744,7 +742,7 @@ deployValues <- function(i, timetable, movements, events, sections, spatial, arr
 #' Count backwards movements
 #' 
 #' @inheritParams simplifyMovements
-#' @inheritParams loadDetections
+#' @inheritParams assembleArrayCJS
 #' 
 #' @keywords internal
 #' 

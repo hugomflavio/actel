@@ -90,6 +90,7 @@ groupMovements <- function(detections.list, bio, spatial, speed.method, maximum.
         
         movements[[length(movements) + 1]] <- recipient
         names(movements)[length(movements)] <- i
+        attributes(movements[[length(movements)]])$p.type <- "Auto"
       }
       rm(recipient)
     }

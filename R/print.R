@@ -718,7 +718,7 @@ printIndividuals <- function(redraw, detections.list, bio, status.df = NULL, tz.
       p <- ggplot2::ggplot(PlotData, ggplot2::aes(x = Timestamp, y = Standard.Name, colour = Array))
       # Choose background
       default.cols <- TRUE
-      if (!is.null(status.df) && status.df$P.type[status.row] == "Overridden") {
+      if (attributes(movements[[fish]])$p.type == "Overridden") {
         p <- p + ggplot2::theme(
           panel.background = ggplot2::element_rect(fill = "white"),
           panel.border = ggplot2::element_rect(fill = NA, colour = "#ef3b32" , size = 2),
@@ -728,7 +728,7 @@ printIndividuals <- function(redraw, detections.list, bio, status.df = NULL, tz.
           )
         default.cols <- FALSE
       } 
-      if (!is.null(status.df) && status.df$P.type[status.row] == "Manual") {
+      if (attributes(movements[[fish]])$p.type == "Manual") {
          p <- p + ggplot2::theme(
           panel.background = ggplot2::element_rect(fill = "white"),
           panel.border = ggplot2::element_rect(fill = NA, colour = "#ffd016" , size = 2),
