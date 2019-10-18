@@ -4,7 +4,7 @@
 #' 
 #' @return a matrix of distances between arrays
 #' 
-#' @keywords internal
+#' @export
 #' 
 dotMatrix <- function(input) {
   nodes <- unique(unlist(input[, c(1, 3)]))
