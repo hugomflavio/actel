@@ -48,7 +48,7 @@ Once everything is in place, actel will start by:
 2. Match the signals listed in the biometrics, 
 3. Keep only the detections useful for the study. 
 
-It is at this point that the argument [`exclude.tags`]() comes in:
+It is at this point that the argument [exclude.tags](b-0_explore.html#exclude.tags) comes in:
 
 Actel uses the tag's signal to find your fish. However, if two tags with the same signal but different code spaces show up at your study area, actel will not know which one to choose. Should this happen, you must specify which tag **should be excluded** in the `exclude.tags` argument and restart the analysis. You can [find an example here.](b-0_explore.html#exclude.tags)
 
