@@ -65,15 +65,15 @@ Now you can either install actel sourcing remotely or locally.
 
 **a) install directly from the repository:**
 
-    devtools::install_github("hugomflavio/actel", build_opts = c("--no-resave-data", "--no-manual"))
+    devtools::install_github("hugomflavio/actel", build_opts = c("--no-resave-data", "--no-manual"), ref = "devel")
 
 **b) install locally:**
 
-1. Download actel's source files here: [**actel-master.zip**](https://github.com/hugomflavio/actel/archive/master.zip)
+1. Download actel's source files here: [**actel-devel.zip**](https://github.com/hugomflavio/actel/archive/devel.zip)
 1. Unzip the file and move your R session into the newly created folder
 1. Run: 
 
-        devtools::install("actel-master", build_vignettes = TRUE)
+        devtools::install("actel-devel", build_vignettes = TRUE)
 
 After installing, you should read the package vignettes, which can be found by running:
 
