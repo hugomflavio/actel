@@ -69,6 +69,28 @@ Arrays
 
 By the end of this process, you will have a list containing the movement events for each of the target tags that were detected during the study.
 
+## Checking event continuity
+
+Upon finishing the movement event creation, actel checks if the fish moved between arrays as expected (i.e. sequential movement events are on adjacent events), or if the fish has been jumping around. Should the movement events look odd, actel will issue warnings and prompt user intervention, depending on [the values set for `jump.warning` and `jump.error`.](b-0_explore.html#jump.warning-and-jump.error)
+
+If the jump size is bigger than `jump.warning`, actel will issue a warning:
+
+````
+W: Fish R64K-1234 jumped through 2 arrays in events 1 -> 2 (A1 -> A4).
+````
+
+If the jump size is bigger than `jump.error`, actel will ask you if you want to render any movement event invalid
+
+````
+W: Fish R64K-1234 jumped through 3 arrays in events 1 -> 2 (A1 -> A5).
+M: Opening movement table of fish R64K-2791 for inspection:
+[...]
+Would you like to render any movement event invalid?(y/N/comment)
+````
+
+Note:
+  : Rendering a movement event invalid **does not make it disappear**. However, future analyses will know that the **event should not be considered** (hence the "Valid" column).
+
 
 ## Bonus: Time of first detection at each array
 

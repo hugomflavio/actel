@@ -59,6 +59,10 @@ The `spatial` list contains the stations, release sites and some more summary in
 
 The `deployments` data frame is similar to t deployments.csv file, with the exception that unique serial numbers have been created for receivers which were deployed more than once.
 
+### arrays
+
+The `arrays` list contains detailed information for each array: Which arrays are directly before, which arrays are direcly after, which arrays are valid efficiency peers, which arrays are directly OR indirectly after, and more.
+
 ### movements
 
 The `movements` list contains the movement events created during [the detection sorting process](b-1_explore_processes.html#from-detections-to-movements). These records can become very useful if you need to go back to a given fish and inspect its behaviour in more detail. Here is an example:
@@ -72,6 +76,9 @@ The `movements` list contains the movement events created during [the detection 
 |Bay1   |         52|St.16         |St.17        |2018-04-20 05:33:51 |2018-04-20 06:12:20 |25:51           |0:38          |
 |Bay1   |         69|St.17         |St.16        |2018-04-20 12:00:31 |2018-04-20 13:00:36 |5:48            |1:00          |
 
+### simple.movements
+
+The `simple.movements` represents a simplified version of the `movements` object, where all movements deemed invalid during the analysis were removed.
 
 ### times
 

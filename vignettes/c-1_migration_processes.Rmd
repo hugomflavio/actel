@@ -33,9 +33,29 @@ knitr::opts_chunk$set(
     1. [Inspecting the residency() results](d-2_residency_results.html)
 1. [Errors and messages](e-0_messages.html)
 
-## Compiling a timetable
+## Aditional movement processes
 
-The initial processes of migration() are the same as those from [the explore() function](b-1_explore_processes.html). 
+The initial processes of migration() are the same as those from [the explore() function](b-1_explore_processes.html). However, when it comes to movement validity, actel will now also check if the fish was detected behind its release site. Should this happen, the following warning will be issued:
+
+````
+W: Fish R64K-1234 was detected behind its release site! Opening relevant data for inspection.
+   Release site: Trap
+   Expected first array: River3
+
+[...]
+
+You may either:
+  a) Stop the analysis if the expected first array is wrong;
+  b) Continue as is (does not impact the results);
+  c) Render a movement event invalid, if you are confident it is a false detection.
+
+Decision:(a/b/c/comment)
+````
+
+Note:
+  : An array is considered "behind the release site" if it is not part of the arrays to which the release array connects directly or indirectly. You can find the arrays considered directly or indirectly after/below of each array by checking the [arrays object](b-2_explore_results.html#arrays).
+
+## Compiling a timetable
 
 Once the movement events have been defined, they will be used to fill in the timetable, which is the most important step of migration(). For each fish, actel will find out the first and last valid movement event for each of the [study area's sections](a-1_study_area.html#sections). Once actel determines when the fish entered and left the study area's sections, it becomes possible to determine the fish's fate.
 

@@ -38,10 +38,6 @@ knitr::opts_chunk$set(
 
 The results compiled by the migration() function include [those of the exclude() function](b-2_explore_results.html). To keep the vignettes shorter, I will only detail **new** outputs here:
 
-### simple.movements
-
-The `simple.movements` represents a simplified version of the `movements` object, where all movements deemed invalid during the analysis were removed. Note: While the `simple.movements` will not contain any backwards inter-section events, intra-section backwards movements may still be present.
-
 ### status.df
 
 The `status.df` is a data frame that combines [both the timetable data and your biometrics](c-1_migration_processes.html#combining-the-time-data-with-the-biometrics) into a single, organised table. If you have stored any comments during the analysis process, they will show up in a reserved column in this table. 

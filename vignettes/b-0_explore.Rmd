@@ -56,7 +56,8 @@ All the arguments of explore(), which also exist in migration() and residency(),
 
 ```r
 explore(path = NULL, maximum.time = 60, speed.method = c("last to first", "first to first"), 
-      tz.study.area, start.timestamp = NULL, end.timestamp = NULL, report = TRUE, exclude.tags = NULL)
+      tz.study.area, start.timestamp = NULL, end.timestamp = NULL, report = TRUE, 
+      exclude.tags = NULL, jump.warning = 2, jump.error = 3)
 ```
 
 ### path
@@ -150,8 +151,6 @@ Here are some examples:
 
 <img src="LaTeX_example_survival.svg" alt="drawing" width="330"/> <img src="R64K-4526.png" alt="drawing" width="330"/>
 
-<img src="mb_efficiency.svg" alt="drawing" width="680"/>
-
 Note:
   : Even if something fails during the report printing, your results will still be saved the *actel_results.RData* file in your working directory!
 
@@ -174,6 +173,36 @@ M: Excluding tag(s) A69-1601-1081 from the analysis per used command (detections
 ````
 
 If more than one tag causes trouble, you can list multiple tags to be excluded, like this: `exclude.tags = c("A69-1601-1081", "A69-1601-1220")`.
+
+
+### jump.warning and jump.error
+
+During the course of a study, fish can (hopefully not too often) pass through a receiver array undetected. However, if this happens consecutively for more than one array, then perhaps something fishy is going on. Was your fish eaten by a bird? Was there something wrong with the arrays? Whatever the cause, there is a point after which you get suspicious. The `jump.warning` and `jump.error` arguments control how suspicious you want to be.
+
+Let's have a look at the examples below:
+
+<img src="jump_examples.svg" alt="drawing" width="680"/>
+
+Assuming `jump.warning = 2` and `jump.error = 3`, examples **a** and **b** would pass through the analysis without raising any flags (**a** as a perfect situation and **b** showing an efficiency flaw in array A2). 
+
+However, in example **c**, the jump size is equal to `jump.warning`, but lower than `jump.error`. When this happens, actel will display a warning:
+
+````
+W: Fish R64K-1234 jumped through 2 arrays in events 1 -> 2 (A1 -> A4).
+````
+
+Then, actel would continue the analysis. This warning is issued whenever the jump size equals or is greater than `jump.warning`. Lastly, in example **d**, the jump size is equal to the `jump.error`. When this happens, actel issues a warning like the one above, and on top of that allows the user to intervene:
+
+````
+W: Fish R64K-1234 jumped through 3 arrays in events 1 -> 2 (A1 -> A5).
+M: Opening movement table of fish R64K-2791 for inspection:
+[...]
+Would you like to render any movement event invalid?(y/N/comment)
+````
+
+From here, you can inspect the movement table and find out if some events should be removed from the analysis.
+
+### All done!
 
 Now that you know how to run the explore analysis, you may want to:
 
