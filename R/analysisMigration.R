@@ -271,11 +271,11 @@ migration <- function(path = NULL, sections, success.arrays = NULL, minimum.dete
   deployments <- do.call(rbind.data.frame, deployments)
   matrices <- the.matrices
   if (invalid.dist)
-    save(detections, spatial, deployments, movements, simple.movements, status.df,
+    save(detections, spatial, deployments, arrays, movements, simple.movements, status.df,
       section.overview, array.overview, matrices, overall.CJS, 
       intra.array.CJS, times, file = resultsname)
   else
-    save(detections, spatial, deployments, movements, simple.movements, status.df,
+    save(detections, spatial, deployments, arrays, movements, simple.movements, status.df,
       section.overview, array.overview, matrices, overall.CJS,
       intra.array.CJS, times, dist.mat, file = resultsname)
 # ------------
@@ -335,13 +335,13 @@ migration <- function(path = NULL, sections, success.arrays = NULL, minimum.dete
     deleteHelpers()
 
   if (invalid.dist)
-    return(list(detections = detections, spatial = spatial, deployments = deployments,
+    return(list(detections = detections, spatial = spatial, deployments = deployments, arrays = arrays,
       movements = movements, simple.movements = simple.movements,
       status.df = status.df, section.overview = section.overview, array.overview = array.overview,
       matrices = matrices, overall.CJS = overall.CJS, 
       intra.array.CJS = intra.array.CJS, times = times))
   else
-    return(list(detections = detections, spatial = spatial, deployments = deployments,
+    return(list(detections = detections, spatial = spatial, deployments = deployments, arrays = arrays,
       movements = movements, simple.movements = simple.movements,
       status.df = status.df, section.overview = section.overview, array.overview = array.overview,
       matrices = matrices, overall.CJS = overall.CJS, 

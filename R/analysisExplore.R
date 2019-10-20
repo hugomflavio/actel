@@ -193,9 +193,9 @@ explore <- function(path = NULL, maximum.time = 60, speed.method = c("last to fi
   detections <- detections.list
   deployments <- do.call(rbind.data.frame, deployments)
   if (invalid.dist)
-    save(detections, spatial, deployments, movements, simple.movements, times, file = resultsname)
+    save(detections, spatial, deployments, arrays, movements, simple.movements, times, file = resultsname)
   else
-    save(detections, spatial, deployments, movements, simple.movements, times, dist.mat, file = resultsname)
+    save(detections, spatial, deployments, arrays, movements, simple.movements, times, dist.mat, file = resultsname)
 # ------------
 
 # Print graphics
@@ -244,10 +244,10 @@ explore <- function(path = NULL, maximum.time = 60, speed.method = c("last to fi
     deleteHelpers()
 
   if (invalid.dist) {
-    return(list(detections = detections, spatial = spatial, deployments = deployments, 
+    return(list(detections = detections, spatial = spatial, deployments = deployments, arrays = arrays,
       movements = movements, simple.movements = simple.movements, times = times))
   } else {
-    return(list(detections = detections, spatial = spatial, deployments = deployments, 
+    return(list(detections = detections, spatial = spatial, deployments = deployments, arrays = arrays,
       movements = movements, simple.movements = simple.movements, times = times, dist.mat = dist.mat))
   }
 }
