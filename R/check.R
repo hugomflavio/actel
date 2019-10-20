@@ -152,7 +152,7 @@ checkJumpDistance <- function(movements, bio, spatial, dotmat, jump.warning = 2,
     if (trigger.error) {
       appendTo("Screen", paste0("M: Opening movement table of fish ", fish, " for inspection:"))
       print(movements[[fish]])
-      decision <- commentCheck(line = "Would you like any movement event invalid?(y/N/comment) ", tag = fish)
+      decision <- commentCheck(line = "Would you like to render any movement event invalid?(y/N/comment) ", tag = fish)
       appendTo("UD", decision)
       if (decision == "y" | decision == "Y") {
         appendTo("Screen", "Note: You can select multiple events at once by separating them with a space.")
