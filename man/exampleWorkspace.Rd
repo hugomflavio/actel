@@ -4,10 +4,9 @@
 \alias{exampleWorkspace}
 \title{Create an example Workspace}
 \usage{
-exampleWorkspace(example.spatial = example.spatial,
-  example.biometrics = example.biometrics,
-  example.detections = example.detections,
-  example.deployments = example.deployments)
+exampleWorkspace(spatial = example.spatial,
+  biometrics = example.biometrics, detections = example.detections,
+  deployments = example.deployments)
 }
 \arguments{
 \item{example.spatial}{A dataset containing the positions of the deployed ALS and release site.}

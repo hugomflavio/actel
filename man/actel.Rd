@@ -4,12 +4,13 @@
 \alias{actel}
 \title{Actel: Acoustic telemetry data sorting}
 \usage{
-actel(path = NULL, sections, success.arrays, minimum.detections = 2,
-  maximum.time = 60, speed.method = c("last to first",
-  "first to first"), if.last.skip.section = TRUE, tz.study.area,
-  start.timestamp = NULL, end.timestamp = NULL, report = TRUE,
-  redraw = TRUE, override = NULL, exclude.tags = NULL,
-  debug = FALSE, cautious.assignment = TRUE, replicate = NULL)
+actel(path = NULL, sections = NULL, success.arrays = NULL,
+  minimum.detections = 2, maximum.time = 60,
+  speed.method = c("last to first", "first to first"),
+  if.last.skip.section = TRUE, tz.study.area, start.timestamp = NULL,
+  end.timestamp = NULL, report = TRUE, redraw = TRUE,
+  override = NULL, exclude.tags = NULL, debug = FALSE,
+  cautious.assignment = TRUE, replicate = NULL)
 }
 \arguments{
 \item{path}{Path to the folder containing the data. If the R session is already running in the target folder, path may be left as NA}
