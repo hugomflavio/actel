@@ -14,7 +14,7 @@ checkReport <- function(report){
       report <- FALSE
     } 
     if (!rmarkdown::pandoc_available()) {
-      appendTo(c("Screen", "Report", "Warning"), "W: 'report' can only be activated if pandoc is installed. You can install pandoc at: https://pandoc.org/installing.html\n   You can also check if pandoc is available to R by running rmarkdown::pandoc_available()")
+      appendTo(c("Screen", "Report", "Warning"), "W: 'report' can only be activated if pandoc is installed. You can find how to install pandoc at: https://pandoc.org/installing.html\n   You can also check if pandoc is available to R by running rmarkdown::pandoc_available()")
       cat("Would you like to:\n\n  a) Continue with 'report' set to FALSE\n  b) Stop the analysis and install pandoc.\n\n")
       check <- TRUE
       while (check) {
