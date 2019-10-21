@@ -44,10 +44,10 @@ createWorkspace <- function(dir = "actel_workspace") {
 #'
 #' Creates a ready-to-run workspace with example data.
 #' 
-#' @param example.spatial A dataset containing the positions of the deployed ALS and release site.
-#' @param example.biometrics A dataset containing the positions of the deployed ALS and release site.
-#' @param example.detections A dataset containing the detections of the deployed ALS, for the 60 fish.
-#' @param example.deployments A dataset containing the deployed receivers.
+#' @param spatial A dataset containing the positions of the deployed ALS and release site.
+#' @param biometrics A dataset containing the positions of the deployed ALS and release site.
+#' @param detections A dataset containing the detections of the deployed ALS, for the 60 fish.
+#' @param deployments A dataset containing the deployed receivers.
 #'
 #' @export
 #' 

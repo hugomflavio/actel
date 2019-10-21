@@ -9,13 +9,13 @@ exampleWorkspace(spatial = example.spatial,
   deployments = example.deployments)
 }
 \arguments{
-\item{example.spatial}{A dataset containing the positions of the deployed ALS and release site.}
+\item{spatial}{A dataset containing the positions of the deployed ALS and release site.}
 
-\item{example.biometrics}{A dataset containing the positions of the deployed ALS and release site.}
+\item{biometrics}{A dataset containing the positions of the deployed ALS and release site.}
 
-\item{example.detections}{A dataset containing the detections of the deployed ALS, for the 60 fish.}
+\item{detections}{A dataset containing the detections of the deployed ALS, for the 60 fish.}
 
-\item{example.deployments}{A dataset containing the deployed receivers.}
+\item{deployments}{A dataset containing the deployed receivers.}
 }
 \description{
 Creates a ready-to-run workspace with example data.
