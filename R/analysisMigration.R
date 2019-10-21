@@ -395,9 +395,9 @@ output:
 
 ### Summary
 
-Selected folder: ', stringr::str_extract(pattern = '(?<=M: Selected folder: )[^\r]*', string = report), '
+Selected folder: ', stringr::str_extract(pattern = '(?<=M: Selected folder: )[^\r|^\n]*', string = report), '
 
-Timestamp: **', stringr::str_extract(pattern = '(?<=Timestamp:)[^\r]*', string = report), '** 
+Timestamp: **', stringr::str_extract(pattern = '(?<=Timestamp:)[^\r|^\n]*', string = report), '** 
 
 Number of target tags: **`r I(nrow(status.df))`**
 
@@ -407,7 +407,7 @@ Number of listed receivers: **', stringr::str_extract(pattern = '(?<=Number of A
 
 ', unknown.fragment,'
 
-Data time range: ', stringr::str_extract(pattern = '(?<=Data time range: )[^\r]*', string = report), '
+Data time range: ', stringr::str_extract(pattern = '(?<=Data time range: )[^\r|^\n]*', string = report), '
 
 Found a bug? [**Report it here.**](https://github.com/hugomflavio/actel/issues)
 

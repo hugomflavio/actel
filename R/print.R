@@ -11,7 +11,7 @@ openReport <- function(file.name){
     if (.Platform$OS.type == "windows") 
       hide <- system(paste0('open "', file.name, '"'), show.output.on.console = FALSE)
     else
-      hide <- system(paste0('xdg-open "', file.name, '"'), show.output.on.console = FALSE)
+      hide <- system(paste0('xdg-open "', file.name, '"'))
   }  else {
     appendTo("Screen", "M: Skipping auto-opening of the report as R has been crashing when opening the html without an internet connection.")
   }
