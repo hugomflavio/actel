@@ -11,3 +11,5 @@
 	    packageStartupMessage(paste0("-------------------------------------------------------------\n!!! A NEW VERSION of actel is available! (v.", inst.ver.short, " -> v.", rep.ver.short, ")\n!!! You should update actel before continuing.\n!!! To learn how to update actel, run updateActel()\n-------------------------------------------------------------\n"))
 	}
 }
+
+utils::globalVariables(c("example.spatial", "example.biometrics", "example.detections", "example.deployments"))
