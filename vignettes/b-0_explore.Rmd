@@ -1,5 +1,5 @@
 ---
-title: "2.0) explore()"
+title: "2) explore()"
 author: "Hugo Flávio"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
