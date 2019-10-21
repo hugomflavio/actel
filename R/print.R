@@ -1,3 +1,25 @@
+#' Open HTML report
+#' 
+#' @param file.name the name of the html file
+#' 
+#' @keywords internal
+#' 
+openReport <- function(file.name){
+  # The internet connection check is made only because R was freezing when opening the html without internet in my pc.
+  if (havingIP()) {
+    if (.Platform$OS.type == "windows") 
+      hide <- system(paste0('open "', file.name, '"'), show.output.on.console = FALSE)
+    else
+      hide <- system(paste0('xdg-open "', file.name, '"'), show.output.on.console = FALSE)
+  }  else {
+    appendTo("Screen", "M: Skipping auto-opening of the report as R has been crashing when opening the html without an internet connection.")
+  }
+  appendTo("debug", "debug: Removing toc_menu_explore.html")
+  if(file.exists("Report/toc_menu_explore.html"))
+    file.remove("Report/toc_menu_explore.html")
+  return(NULL)
+}
+
 #' Print progression diagram
 #'
 #' @inheritParams migration

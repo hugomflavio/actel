@@ -226,13 +226,7 @@ explore <- function(path = NULL, maximum.time = 60, speed.method = c("last to fi
     appendTo("debug", "debug: Moving report")
     fs::file_move(sub("Rmd", "html", reportname), sub("Report/", "", sub("Rmd", "html", reportname)))
     appendTo("debug", "debug: Opening report if the pc has internet.")
-    if (havingIP())
-      hide <- system(paste0('open "', sub("Report/", "", sub("Rmd", "html", reportname)), '"'), show.output.on.console = FALSE)
-    else
-      appendTo("Screen", "M: Skipping auto-opening of the report as R has been crashing when opening the html without an internet connection.")
-    appendTo("debug", "debug: Removing toc_menu_explore.html")
-    if(file.exists("Report/toc_menu_explore.html"))
-      file.remove("Report/toc_menu_explore.html")
+    openReport(file.name = sub("Report/", "", sub("Rmd", "html", reportname)))
   }
   appendTo("Screen", "M: Process finished successfuly.")
 # ------------------
