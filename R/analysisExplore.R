@@ -95,7 +95,7 @@ explore <- function(path = NULL, maximum.time = 60, speed.method = c("last to fi
   if (!is.null(path))
     appendTo(c("Screen"), "M: Moving to selected work directory")
   
-  report <- folderCheck(report = report, redraw = TRUE)
+  report <- checkReport(report = report)
 # -----------------------------------
 
 # Load, structure and check the inputs

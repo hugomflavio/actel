@@ -1,3 +1,50 @@
+#' Check report compatibility
+#' 
+#' Creates a "Report" folder if necessary and silently activates ggplot2 and reshape2 to avoid startup messages
+#'
+#' @return A TRUE/FALSE decision
+#' 
+#' @keywords internal
+#' 
+checkReport <- function(report){
+  if (report) {
+    appendTo("Report", "M: 'report' option has been activated.")
+    if (length(setdiff(c("ggplot2", "reshape2"), rownames(installed.packages()))) > 0) {
+      appendTo(c("Screen", "Report", "Warning"), "W: 'report' can only be activated if 'ggplot2' and 'reshape2' are installed. Please install these. Deactivating 'Report' for the current job.")
+      report <- FALSE
+    } 
+    if (!rmarkdown::pandoc_available()) {
+      appendTo(c("Screen", "Report", "Warning"), "W: 'report' can only be activated if pandoc is installed. You can install pandoc at: https://pandoc.org/installing.html\n   You can also check if pandoc is available to R by running rmarkdown::pandoc_available()")
+      cat("Would you like to:\n\n  a) Continue with 'report' set to FALSE\n  b) Stop the analysis and install pandoc.\n\n")
+      check <- TRUE
+      while (check) {
+        decision <- readline("Decision:(a/b) ")
+        appendTo("UD", decision)
+        if (decision == "a" | decision == "A") {
+          appendTo(c("Screen", "Report", "Warning"), "W: Deactivating 'report' to prevent function failure.")
+          report <- FALSE
+          check <- FALSE
+        }
+        if (decision == "b" | decision == "B") {
+          emergencyBreak()
+          stop("Analysis stopped per user command.\n", call. = FALSE)        
+        }
+        if (check)
+          appendTo("Screen", "Option not recognised; please input either 'a' or 'b'.\n")
+      }
+    }
+    if (report) {
+      if (!dir.exists("Report")) {
+        appendTo("Screen", "M: Creating 'Report' subdirectory to store report files.")
+        dir.create("Report")
+      } else {
+        appendTo("Screen", "W: 'Report' directory already present. Overwriting files already present.")
+      }
+    }
+  }
+  return(report)
+}
+
 #' Check path validity
 #' 
 #' Confirms that the target directory exists.

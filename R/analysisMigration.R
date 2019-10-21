@@ -107,7 +107,7 @@ migration <- function(path = NULL, sections, success.arrays = NULL, minimum.dete
   if (!is.null(path))
     appendTo(c("Screen"), "M: Moving to selected work directory")
   
-  report <- folderCheck(report = report, redraw = TRUE)
+  report <- checkReport(report = report)
 # -----------------------------------
 
 # Load, structure and check the inputs
