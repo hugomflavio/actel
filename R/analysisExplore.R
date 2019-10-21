@@ -85,7 +85,7 @@ explore <- function(path = NULL, maximum.time = 60, speed.method = c("last to fi
 # Final arrangements before beginning
   appendTo("Report", "Acoustic telemetry data analysis report.\n") 
 
-  path <- pathCheck(my.home = my.home, path = path)  
+  path <- checkPath(my.home = my.home, path = path)  
 
   if (debug)
     appendTo("Report", "!!!--- Debug mode has been activated ---!!!\n")

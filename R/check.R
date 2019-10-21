@@ -1,3 +1,46 @@
+#' Check path validity
+#' 
+#' Confirms that the target directory exists.
+#' 
+#' @inheritParams actel
+#' 
+#' @keywords internal
+#' 
+checkPath <- function(my.home, path) {
+  appendTo("debug", "Starting pathCheck.")
+  if (!is.null(path)) {
+    if (dir.exists(path)) {
+      setwd(path)
+    } else {
+      appendTo(c("Screen", "Report"), paste0("Error: The selected path does not exist. Details:\n  Current directory: ", getwd(), "\n  Path: ", path, "\n\nYou may either:\n  a) continue the analysis in the current directory;\n  b) restart the function."))
+      unknown.input = TRUE
+      while (unknown.input) {
+        decision <- readline("Decision:(a/b) ")
+        if (decision == "a" | decision == "A") {
+          unknown.input = FALSE
+          path <- my.home
+        }
+        if (decision == "b" | decision == "B") {
+          unknown.input = FALSE
+          emergencyBreak()
+          stop("Analysis stopped per user command.\n", call. = FALSE)
+        }
+        if (unknown.input) {
+          cat("Option not recognised, please input either 'a' or 'b'.\n")
+        }
+      }
+    }
+  } else {
+    path <- my.home
+  }
+  if (my.home != getwd() )
+    deleteHelpers()
+  moveHelpers(my.home)
+  appendTo("debug", "Done.")
+  return(path)
+}
+
+
 #' Check for movements upstream of the release site.
 #'
 #' @inheritParams splitDetections
