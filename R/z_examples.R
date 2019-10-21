@@ -51,15 +51,15 @@ createWorkspace <- function(dir = "actel_workspace") {
 #'
 #' @export
 #' 
-exampleWorkspace <- function(example.spatial = example.spatial, example.biometrics = example.biometrics, example.detections = example.detections, example.deployments = example.deployments) {
+exampleWorkspace <- function(spatial = example.spatial, biometrics = example.biometrics, detections = example.detections, deployments = example.deployments) {
   if (!dir.exists("exampleWorkspace")) 
     dir.create("exampleWorkspace")
-  write.csv(example.spatial, "exampleWorkspace/spatial.csv", row.names = FALSE)
-  write.csv(example.biometrics, "exampleWorkspace/biometrics.csv", row.names = FALSE)
-  write.csv(example.deployments, "exampleWorkspace/deployments.csv", row.names = FALSE)
+  write.csv(spatial, "exampleWorkspace/spatial.csv", row.names = FALSE)
+  write.csv(biometrics, "exampleWorkspace/biometrics.csv", row.names = FALSE)
+  write.csv(deployments, "exampleWorkspace/deployments.csv", row.names = FALSE)
   if (!dir.exists("exampleWorkspace/detections")) 
     dir.create("exampleWorkspace/detections")
-  my.list <- split(example.detections, example.detections$Receiver)
+  my.list <- split(detections, detections$Receiver)
   for (i in names(my.list)) {
     write.csv(my.list[[i]], paste("exampleWorkspace/detections/", i, ".csv", sep = ""), row.names = FALSE)
   }
