@@ -359,48 +359,16 @@ clearWorkspace <- function(skip = NA){
   }
 }
 
-#' Check internet connection
-#'
-#' For an unknown reason, R will crash if it attempts to open the html report in a pc with no internet connection.
-#' The report opens, but the progress freezes and R eventually crashes. Can be removed once figured out why this
-#' is happening.
-#' 
-#' @keywords internal
-#' 
-havingIP <- function() {
-  if (.Platform$OS.type == "windows") {
-    ipmessage <- system("ipconfig", intern = TRUE)
-  } else {
-    ipmessage <- system("ifconfig", intern = TRUE)
-  }
-  validIP <- "((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)[.]){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)"
-  any(grep(validIP, ipmessage))
-}
-
-#' Compare installed version with GitHub version
-#' 
-#' @keywords internal
-#' 
-versionCheck <- function() {
-  rep.ver <- unlist(strsplit(readLines('https://raw.githubusercontent.com/hugomflavio/actel/master/DESCRIPTION')[3], " "))[2]
-  rep.ver.short <- substr(rep.ver, start = 1, stop = nchar(rep.ver) - 5)
-  rep.ver.num <- as.numeric(gsub(".", "", rep.ver.short))
-  inst.ver <- utils::packageVersion("actel")
-  inst.ver.short <- substr(inst.ver, start = 1, stop = nchar(as.character(inst.ver)) - 5) 
-  inst.ver.num <- as.numeric(gsub(".", "", inst.ver.short))
-  if (rep.ver.short > inst.ver.short)
-    cat(paste0("-------------------------------------------------------------\n!!! A NEW VERSION of actel is available! (v.", inst.ver.short, " -> v.", rep.ver.short, ")\n!!! You should update actel before continuing.\n!!! To learn how to update actel, run updateActel()\n-------------------------------------------------------------\n"))
-}
-
 #' Open actel installation instructions
 #' 
 #' @export
 #' 
 updateActel <- function() {
-  if (havingIP()) {
+  rep.ver <- tryCatch(unlist(strsplit(readLines('https://raw.githubusercontent.com/hugomflavio/actel/master/DESCRIPTION')[3], " "))[2], error = function(e) NULL, warning = function(w) NULL)
+  if (!is.null(rep.ver)) {
     cat("M: Opening actel's installation instructions.\n")
     browseURL("https://github.com/hugomflavio/actel#installing-actel")
   } else {
-    cat("M: Could not detect an internet connection. Find installation instructions in this page:\n   https://github.com/hugomflavio/actel#installing-actel\n")
+    cat("M: Could not detect an internet connection. Find installation instructions in this webpage:\n   https://github.com/hugomflavio/actel#installing-actel\n")
   }
 }

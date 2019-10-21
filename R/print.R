@@ -6,7 +6,8 @@
 #' 
 openReport <- function(file.name){
   # The internet connection check is made only because R was freezing when opening the html without internet in my pc.
-  if (havingIP()) {
+  rep.ver <- tryCatch(unlist(strsplit(readLines('https://raw.githubusercontent.com/hugomflavio/actel/master/DESCRIPTION')[3], " "))[2], error = function(e) NULL, warning = function(w) NULL)
+  if (!is.null(rep.ver)) {
     if (.Platform$OS.type == "windows") 
       hide <- system(paste0('open "', file.name, '"'), show.output.on.console = FALSE)
     else
