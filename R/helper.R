@@ -87,8 +87,6 @@ divisors <- function(x){
 
 #' Convert hh:mm:ss time to hh.hhh
 #'
-#' Wrapper for timeConverter
-#' 
 #' @param input Single string or a vector of strings containing hours:minutes or hours:minutes:seconds
 #' 
 #' @return Decimal hour equivalent (single value or vector)
@@ -96,33 +94,69 @@ divisors <- function(x){
 #' @export
 #' 
 decimalTime <- function(input) {
+  .converter <- function(input) {
+    x = as.character(input)
+    x = as.numeric(unlist(strsplit(x, ":")))
+    if (length(x) == 2) 
+      x = x[1] + x[2]/60
+    if (length(x) == 3) 
+      x = x[1] + x[2]/60 + x[3]/3600
+    return(x)
+  }
   if (length(input) < 1) 
     stop("Input appears to be empty.")
   if (length(input) == 1) 
-    output <- timeConverter(input)
+    output <- .converter(input)
   if (length(input) > 1) 
-    output <- unlist(lapply(input, timeConverter))
+    output <- unlist(lapply(input, .converter))
   return(output)
 }
 
-#' Convert hh:mm:ss time to hh.hhh
+#' Convert numeric time to hh:mm:ss
 #'
-#' Converts hour:minute:second text strings to decimal hours
-#' 
-#' @param input a string containing either hours:minutes or hours:minutes:seconds data.
+#' @param input Single string or a vector of strings containing hours:minutes or hours:minutes:seconds
 #' 
 #' @return Decimal hour equivalent (single value or vector)
-#'
-#' @keywords internal
 #' 
-timeConverter <- function(input) {
-  x = as.character(input)
-  x = as.numeric(unlist(strsplit(x, ":")))
-  if (length(x) == 2) 
-    x = x[1] + x[2]/60
-  if (length(x) == 3) 
-    x = x[1] + x[2]/60 + x[3]/3600
-  return(x)
+#' @export
+#' 
+minuteTime <- function(x, format = c("h", "m", "s"), seconds = TRUE) {
+  format <- match.arg(format)
+  .converter <- function(x) {
+    if(!is.na(x)){
+      if(x < 0){
+        x <- abs(x)
+        neg = TRUE
+      } else neg = FALSE
+      if(format == "h") 
+        x = x
+      if(format == "m") 
+        x = x/60
+      if(format == "s") 
+        x = x/3600
+      m = x %% 1
+      h = x - m
+      m = 60 * m
+      s = m %% 1
+      m = m - s
+      s = round(60 * s, 0)
+      if (h < 10) h <- paste(0, h, sep = "")
+      if (!seconds & s>30) m = m+1
+      if (m < 10) m <- paste(0,m,sep="")
+      if (s < 10) s <- paste(0,s,sep="")
+      if (seconds) 
+        x <- paste(h, m, s, sep = ":")
+      else 
+        x <- paste(h, m, sep = ":")
+      if (neg) x <- paste("-", x)
+    }
+    return(x)
+  }
+  if (length(x) < 1) stop("Input appears to be empty.")
+  if (!is.numeric(x)) stop("Input is not numeric.")
+  if (length(x) == 1) output <- .converter(x)
+  if (length(x) > 1) output <- unlist(lapply(x, .converter))
+  return(output)
 }
 
 #' Subset a character string counting from the right end
