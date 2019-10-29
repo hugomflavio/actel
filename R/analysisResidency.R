@@ -177,8 +177,6 @@ residency <- function(path = NULL, sections, minimum.detections = 2,
   names(movements) <- aux
   rm(aux)
 
-  movements <- checkUpstream(movements = movements, bio = bio, spatial = spatial, arrays = arrays)
-
   movements <- checkJumpDistance(movements = movements, bio = bio, dotmat = dotmat, 
                                  spatial = spatial, jump.warning = jump.warning, jump.error = jump.error)
 
