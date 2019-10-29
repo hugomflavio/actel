@@ -83,7 +83,7 @@ groupMovements <- function(detections.list, bio, spatial, speed.method, maximum.
         
         recipient <- data.table::as.data.table(recipient)
         recipient <- movementTimes(movements = recipient,
-            silent = FALSE)
+            silent = FALSE, type = "array")
         if (!invalid.dist)
           recipient <- movementSpeeds(movements = recipient, 
             speed.method = speed.method, dist.mat = dist.mat, silent = FALSE)
@@ -121,7 +121,7 @@ simplifyMovements <- function(movements, bio, speed.method, dist.mat, invalid.di
   simple.movements <- lapply(movements, function(x) x[(Valid), ])
   simple.movements <- simple.movements[unlist(lapply(simple.movements, nrow)) > 0]
   for(fish in names(simple.movements)){
-    aux <- movementTimes(movements = simple.movements[[fish]], silent = FALSE)
+    aux <- movementTimes(movements = simple.movements[[fish]], silent = FALSE, type = "array")
     if (!invalid.dist)
         aux <- movementSpeeds(movements = aux, speed.method = speed.method, dist.mat = dist.mat, silent = FALSE)
     simple.movements[[fish]] <- speedReleaseToFirst(fish = fish, bio = bio, movements = aux,
@@ -180,7 +180,9 @@ movementSpeeds <- function(movements, speed.method, dist.mat, silent = TRUE) {
 #' 
 #' @export
 #' 
-movementTimes <- function(movements, silent = TRUE){
+movementTimes <- function(movements, silent = TRUE, type = c("array", "section")){
+  type = match.arg(type)
+  time.in <- paste0("Time.in.", type)
   if (!silent) 
     appendTo("debug", "Starting movementTimes.")
   # Time travelling
@@ -191,21 +193,21 @@ movementTimes <- function(movements, silent = TRUE){
       m <- ((a%%1) * 60)%/%1
       if (m < 10) 
         m <- paste("0", m, sep = "")
-      movements[l, 7] <- paste(h, m, sep = ":")
+      movements$Time.travelling[l] <- paste(h, m, sep = ":")
     }
     rm(l)
   }
   # Time on array
   for (l in 1:nrow(movements)) {
-    if (movements[l, 2] == 1) {
-      movements[l, 8] <- "0:00"
+    if (movements$Detections[l] == 1) {
+      movements[l, time.in] <- "0:00"
     } else {
       a <- as.vector(difftime(movements$Last.time[l], movements$First.time[l], units = "hours"))
       h <- a%/%1
       m <- ((a%%1) * 60)%/%1
       if (m < 10) 
         m <- paste("0", m, sep = "")
-      movements[l, 8] <- paste(h, m, sep = ":")
+      movements[l, time.in] <- paste(h, m, sep = ":")
       rm(a, h, m)
     }
   }
