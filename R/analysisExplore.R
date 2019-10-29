@@ -123,17 +123,25 @@ explore <- function(path = NULL, maximum.time = 60, speed.method = c("last to fi
   detections <- createStandards(detections = detections, spatial = spatial, deployments = deployments) # get standardize station and receiver names, check for receivers with no detections
   checkUnknownReceivers(input = detections) # Check if there are detections from unknown detections
   
+  use.fakedot <- TRUE
   if (file.exists("spatial.dot")) {
     appendTo(c("Screen", "Report"), "M: A 'spatial.dot' file was detected, activating multi-branch analysis.")
     recipient <- loadDot(input = "spatial.dot", spatial = spatial, sections = NULL)
-  } else {
+    use.fakedot <- FALSE
+  } 
+  if (use.fakedot & file.exists("spatial.txt")) {
+    appendTo(c("Screen", "Report"), "M: A 'spatial.txt' file was detected, activating multi-branch analysis.")
+    recipient <- loadDot(input = "spatial.txt", spatial = spatial, sections = NULL)
+    use.fakedot <- FALSE
+  }
+  if (use.fakedot) {
     fakedot <- paste(unique(spatial$Array), collapse = "->")
     recipient <- loadDot(string = fakedot, spatial = spatial, sections = NULL)
   }
   dot <- recipient[[1]]
   arrays <- recipient[[2]]
   dotmat <- recipient[[3]]
-  rm(recipient)
+  rm(use.fakedot, recipient)
 
   # Check if there is a logical first array in the study area, should a replacement release site need to be created.
   if (sum(unlist(lapply(arrays, function(a) is.null(a$before)))) == 1)
