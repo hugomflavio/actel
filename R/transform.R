@@ -525,9 +525,7 @@ excludeTags <- function(input, exclude.tags, silent){
 #' @keywords internal
 #' 
 stripCodeSpaces <- function(input) {
-  output <- vector()
-  for (i in seq_len(length(input))) output[i] <- tail(unlist(strsplit(input[i], "-")), 1)
-  return(output)
+  unlist(lapply(input, function(x) tail(unlist(strsplit(x, "-")), 1)))
 }
 
 #' Match the detection's receiver to its respective array.
