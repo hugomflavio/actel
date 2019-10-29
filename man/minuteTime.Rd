@@ -2,16 +2,20 @@
 % Please edit documentation in R/helper.R
 \name{minuteTime}
 \alias{minuteTime}
-\title{Convert numeric time to hh:mm:ss}
+\title{Convert numeric time to HH:MM}
 \usage{
 minuteTime(x, format = c("h", "m", "s"), seconds = TRUE)
 }
 \arguments{
-\item{input}{Single string or a vector of strings containing hours:minutes or hours:minutes:seconds}
+\item{x}{Single string or a vector of strings containing hours:minutes or hours:minutes:seconds}
+
+\item{format}{the format of x, one of "h" (hours), "m", (minutes) or "s" (seconds)}
+
+\item{seconds}{Logical; If TRUE, output is returned in HH:MM:SS format.}
 }
 \value{
 Decimal hour equivalent (single value or vector)
 }
 \description{
-Convert numeric time to hh:mm:ss
+Convert numeric time to HH:MM
 }
