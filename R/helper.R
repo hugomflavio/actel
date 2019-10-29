@@ -88,33 +88,42 @@ divisors <- function(x){
 #' Convert hh:mm:ss time to hh.hhh
 #'
 #' @param input Single string or a vector of strings containing hours:minutes or hours:minutes:seconds
+#' @param unit the desired units of the output, one of "h" (hours), "m", (minutes) or "s" (seconds)
 #' 
 #' @return Decimal hour equivalent (single value or vector)
 #' 
 #' @export
 #' 
-decimalTime <- function(input) {
-  .converter <- function(input) {
+decimalTime <- function(input, unit = c("h", "m", "s")) {
+  unit <- match.arg(unit)
+  .converter <- function(input, unit) {
     x = as.character(input)
     x = as.numeric(unlist(strsplit(x, ":")))
     if (length(x) == 2) 
       x = x[1] + x[2]/60
     if (length(x) == 3) 
       x = x[1] + x[2]/60 + x[3]/3600
-    return(x)
+    if (unit == "h")
+      return(x)
+    if (unit == "m")
+      return(x * 60)
+    if (unit == "s")
+      return(x * 3600)
   }
   if (length(input) < 1) 
     stop("Input appears to be empty.")
   if (length(input) == 1) 
-    output <- .converter(input)
+    output <- .converter(input, unit = unit)
   if (length(input) > 1) 
-    output <- unlist(lapply(input, .converter))
+    output <- unlist(lapply(input, function(i) .converter(i, unit = unit)))
   return(output)
 }
 
-#' Convert numeric time to hh:mm:ss
+#' Convert numeric time to HH:MM
 #'
-#' @param input Single string or a vector of strings containing hours:minutes or hours:minutes:seconds
+#' @param x Single string or a vector of strings containing hours:minutes or hours:minutes:seconds
+#' @param format the format of x, one of "h" (hours), "m", (minutes) or "s" (seconds)
+#' @param seconds Logical; If TRUE, output is returned in HH:MM:SS format.
 #' 
 #' @return Decimal hour equivalent (single value or vector)
 #' 
