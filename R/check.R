@@ -1,3 +1,32 @@
+#' Verify number of detections in section movements
+#' 
+#' @param secmoves the section movements list
+#' 
+#' @return the section movements with valid/invalid notes
+#' 
+#' @keywords internal
+#' 
+checkSMovesN <- function(secmoves) {
+  output <- lapply(seq_along(secmoves), 
+    function(i) {
+      if (any(link <- secmoves[[i]]$Detections == 1)) {
+        appendTo(c("Screen", "Report"), paste0("M: Section movements with one detection are present for fish ", names(secmoves)[i], "."))
+        decision <- commentCheck(paste0("Would you like to inspect the section movements from fish ", names(secmoves)[i]," ?(y/N/comment) "), tag = names(secmoves)[i])
+        appendTo("UD", decision)
+        if (decision == "y" | decision == "Y") {
+          print(secmoves[[i]])
+          decision <- commentCheck(line = "Would you like to render any movement event invalid?(y/N/comment) ", tag = names(secmoves)[i])
+          appendTo("UD", decision)
+          if (decision == "y" | decision == "Y") 
+            return(invalidateEvents(movements = secmoves[[i]], fish = names(secmoves)[i]))
+        }
+      }
+      return(secmoves[[i]])
+    })
+  names(output) <- names(secmoves)
+  return(output)
+}
+
 #' Check report compatibility
 #' 
 #' Creates a "Report" folder if necessary and silently activates ggplot2 and reshape2 to avoid startup messages
