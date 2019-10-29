@@ -32,7 +32,7 @@ groupMovements <- function(detections.list, bio, spatial, speed.method, maximum.
           First.time = NA_character_, 
           Last.time = NA_character_, 
           Time.travelling = NA_character_, 
-          Time.on.array = NA_character_, 
+          Time.in.array = NA_character_, 
           Valid = NA,
           stringsAsFactors = FALSE
           )
@@ -45,7 +45,7 @@ groupMovements <- function(detections.list, bio, spatial, speed.method, maximum.
           First.time = NA_character_, 
           Last.time = NA_character_, 
           Time.travelling = NA_character_, 
-          Time.on.array = NA_character_, 
+          Time.in.array = NA_character_, 
           Average.speed.m.s = NA_real_,
           Valid = NA,
           stringsAsFactors = FALSE
@@ -175,6 +175,7 @@ movementSpeeds <- function(movements, speed.method, dist.mat, silent = TRUE) {
 #'
 #' @inheritParams simplifyMovements
 #' @inheritParams movementSpeeds
+#' @param type The type of movements being analysed. One of "array" or "section".
 #' 
 #' @return The movement data frame with time and speed calculations
 #' 

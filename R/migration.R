@@ -791,7 +791,7 @@ countBackMoves <- function(movements, arrays){
 #' 
 assembleOutput <- function(timetable, bio, movements, spatial, sections, dist.mat, invalid.dist, tz.study.area) {
   appendTo("debug", "Merging 'bio' and 'timetable'.")
-  status.df <- merge(bio, timetable, by = "Transmitter", all = T)
+  status.df <- merge(bio, timetable, by = "Transmitter", all = TRUE)
   
   appendTo("debug", "Completing entries for fish that were never detected.")
   status.df$Status[is.na(status.df$Status)] <- paste("Disap. in", sections[1])

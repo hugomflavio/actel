@@ -166,9 +166,10 @@ explore <- function(path = NULL, maximum.time = 60, speed.method = c("last to fi
 # Process the data
   appendTo(c("Screen", "Report"), "M: Creating movement records for the valid tags.")
   movements <- groupMovements(detections.list = detections.list, bio = bio, spatial = spatial,
-    speed.method = speed.method, maximum.time = maximum.time, tz.study.area = tz.study.area, dist.mat = dist.mat, invalid.dist = invalid.dist)
+    speed.method = speed.method, maximum.time = maximum.time, tz.study.area = tz.study.area, 
+    dist.mat = dist.mat, invalid.dist = invalid.dist)
   
-  for(fish in names(movements)){
+  for (fish in names(movements)) {
     movements[[fish]] <- speedReleaseToFirst(fish = fish, bio = bio, movements = movements[[fish]],
      dist.mat = dist.mat, invalid.dist = invalid.dist, silent = FALSE)
   }
