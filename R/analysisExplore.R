@@ -15,7 +15,9 @@
 #' @param debug If TRUE, temporary files are not deleted at the end of the analysis. Defaults to FALSE.
 #' @param jump.warning Integer value. If a fish crosses ´jump.warning´ arrays without being detected, a warning is issued.
 #' @param jump.error Integer value. If a fish crosses ´jump.error´ arrays without being detected, user intervention is suggested.
-#'  
+#' @param speed.warning Numeric value. If a fish moves at a speed greater or equal to this argument, a warning is issued.
+#' @param speed.error Numeric value. If a fish moves at a speed greater or equal to this argument, user intervention is suggested.
+#' 
 #' @return A list containing 1) the detections used during the analysis, 2) the movement events, 3) the status dataframe, 4) the survival overview per group, 5) the progression through the study area, 6) the ALS array/sections' efficiency, 7) the list of spatial objects used during the analysis.
 #' 
 #' @export
@@ -25,14 +27,22 @@
 #' @import graphics
 #' 
 explore <- function(path = NULL, maximum.time = 60, speed.method = c("last to first", "first to first"),
-    tz.study.area, start.timestamp = NULL, end.timestamp = NULL, report = TRUE,  
-    exclude.tags = NULL, jump.warning = 2, jump.error = 3, debug = FALSE) {
+    speed.warning = NULL, speed.error = NULL, tz.study.area, start.timestamp = NULL, end.timestamp = NULL, 
+    report = TRUE, exclude.tags = NULL, jump.warning = 2, jump.error = 3, debug = FALSE) {
 
 # check arguments quality
   my.home <- getwd()
   if (!is.numeric(maximum.time))
     stop("'maximum.time' must be numerical.\n", call. = FALSE)
   speed.method <- match.arg(speed.method)
+  if (!is.null(speed.warning) && !is.numeric(speed.warning))
+    stop("'speed.warning' must be numeric.\n", call. = FALSE)    
+  if (!is.null(speed.error) && !is.numeric(speed.error))
+    stop("'speed.error' must be numeric.\n", call. = FALSE)    
+  if (!is.null(speed.error) & is.null(speed.warning))
+    speed.error <- speed.warning
+  if (!is.null(speed.error) && speed.error < speed.warning)
+    stop("'speed.error' must not be lower than 'speed.error'.\n", call. = FALSE)
   if (!is.null(start.timestamp) && !grepl("^[1-2][0-9][0-9][0-9]-[0-1][0-9]-[0-3][0-9] [0-2][0-9]:[0-5][0-9]:[0-5][0-9]", start.timestamp))
     stop("'start.timestamp' must be in 'yyyy-mm-dd hh:mm:ss' format.\n", call. = FALSE)
   if (!is.null(end.timestamp) && !grepl("^[1-2][0-9][0-9][0-9]-[0-1][0-9]-[0-3][0-9] [0-2][0-9]:[0-5][0-9]:[0-5][0-9]", end.timestamp))
@@ -165,6 +175,10 @@ explore <- function(path = NULL, maximum.time = 60, speed.method = c("last to fi
 
   movements <- checkJumpDistance(movements = movements, bio = bio, dotmat = dotmat, 
     spatial = spatial, jump.warning = jump.warning, jump.error = jump.error)
+
+  # if (!invalid.dist & !is.null(jump.warning))
+  #   movements <- checkMovementSpeeds(movements = movements, speed.warning = speed.warning, 
+  #     speed.error = speed.error)
 
   simple.movements <- simplifyMovements(movements = movements, bio = bio, 
     speed.method = speed.method, dist.mat = dist.mat, invalid.dist = invalid.dist)
