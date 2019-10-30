@@ -49,7 +49,7 @@ readDot <- function (input = NULL, string = NULL) {
   if (is.null(string))
     lines <- readLines(input)
   else
-    lines <- string
+    lines <- unlist(strsplit(string, "\n|\t"))
   paths <- lines[grepl("-[->]", lines)]
   paths <- gsub("[ ;]", "", paths)
   paths <- gsub("\\[label=[^\\]]","", paths)
