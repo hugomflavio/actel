@@ -354,6 +354,37 @@ checkTagsInUnknownReceivers <- function(detections.list, deployments, spatial) {
   return(list(spatial = spatial, deployments = deployments))
 }
 
+#' Temporarily include missing receivers in the spatial object
+#' 
+#' @param unknown.receivers serial number of the receivers to be included
+#' @inheritParams loadDetections
+#' 
+#' @keywords internal
+#' 
+includeUnknownReceiver <- function(spatial, deployments, unknown.receivers){
+  appendTo("debug", "Starting includeUnknownReceiver.")
+  appendTo(c("Screen", "Report"), "M: Including missing receiver(s) in the deployments and stations. Assigning to array 'Unknown'.")
+  if (is.na(match("Unknown", levels(spatial$stations$Station.Name)))) {
+    levels(spatial$stations$Station.Name) <- c(levels(spatial$stations$Station.Name), "Unknown")
+    levels(spatial$stations$Array) <- c(levels(spatial$stations$Array), "Unknown")
+    spatial$stations[nrow(spatial$stations) + 1, "Station.Name"] <- "Unknown"
+    spatial$stations[nrow(spatial$stations), "Array"] <- "Unknown"
+    spatial$stations[nrow(spatial$stations), "Standard.Name"] <- "Ukn"
+  }
+  for (i in unknown.receivers) {
+    if (is.na(match(i, names(deployments)))) {
+      deployments[[length(deployments) + 1]] <- data.frame(
+        Receiver = i,
+        Station.Name = "Unknown",
+        Start = NA_real_,
+        Stop = NA_real_)
+      names(deployments)[length(deployments)] <- i
+    }
+  }
+  appendTo("debug", "Terminating includeUnknownReceiver.")
+  return(list(spatial = spatial, deployments = deployments))
+}
+
 #' Check if there are detections for the target tags before release.
 #'
 #' @param input list of detections
@@ -457,3 +488,61 @@ checkDupSignals <- function(input, bio, tag.list){
   }
   appendTo("debug", "Terminating dupSignalsCheck.")  
 }
+
+#' Allow the user to determine a given movement event invalid
+#' 
+#' @param movements te movement table being analysed
+#' @param fish The corresponding tag
+#' 
+#' @return the movement table with valid/invalid notes
+#' 
+#' @keywords internal
+#' 
+invalidateEvents <- function(movements, fish) {
+    appendTo("Screen", "Note: You can select multiple events at once by separating them with a space.")
+    check <- TRUE
+    while (check) {
+      the.string <- commentCheck(line = "Events to be rendered invalid: ", tag = fish)
+      the.rows <- suppressWarnings(as.integer(unlist(strsplit(the.string, "\ "))))
+      appendTo("UD", the.string)
+      if (all(is.na(the.rows))) {
+        decision <- readline("W: The input could not be recognised as row numbers, would you like to abort the process?(y/N) ")
+        appendTo("UD", decision)
+        if (decision == "y" | decision == "Y") {
+          appendTo("Screen", "Aborting.")                 
+          check <- FALSE
+        } else {
+          check <- TRUE
+        }
+      } else {
+        if (any(is.na(the.rows))) {
+          appendTo("Screen", "W: Part of the input could not be recognised as a row number.")
+          the.rows <- the.rows[!is.na(the.rows)]
+        }
+        if (all(the.rows > 0 & the.rows <= nrow(movements))) {
+          decision <- readline(paste0("Confirm: Would you like to render event(s) ", paste(the.rows, collapse = ", "), " invalid?(y/N) "))
+          appendTo("UD", decision)
+          if (decision == "y" | decision == "Y") {
+            movements$Valid[the.rows] <- FALSE
+            attributes(movements)$p.type <- "Manual"
+            appendTo(c("Screen", "Report"), paste0("M: Movement event(s) ", paste(the.rows, collapse = ", "), " from fish ", fish," rendered invalid per user command."))
+            decision <- readline("Would you like to render any more movements invalid?(y/N) ")
+            appendTo("UD", decision)
+            if (decision == "y" | decision == "Y") {
+              check <- TRUE
+              appendTo("Screen", paste0("M: Updated movement table of fish ", fish, ":"))
+              print(movements)
+              appendTo("Screen", "Note: You can select multiple events at once by separating them with a space.")
+            } else {
+              check <- FALSE
+            }
+          }
+        } else {
+          appendTo("Screen", paste0("Please select only events within the row limits (1-", nrow(movements),")."))
+          check <- TRUE
+        }
+      }
+    } # end while
+  return(movements)
+}
+

@@ -7,8 +7,6 @@
 mbPrintEfficiency(overall.CJS, intra.CJS)
 }
 \arguments{
-\item{overall.CJS}{a single CJS with all the groups and release sites merged}
-
 \item{intra.CJS}{The output of the getEstimate calculations.}
 }
 \description{

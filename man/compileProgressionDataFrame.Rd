@@ -8,8 +8,6 @@ compileProgressionDataFrame(status.df, group.CJS, detailed.absolutes, i,
   the.levels)
 }
 \arguments{
-\item{group.CJS}{a list of CJS's for each group, with release sites merged}
-
 \item{detailed.absolutes}{a list of absolutes extracted from split.CJS}
 
 \item{i}{the current iteration number}

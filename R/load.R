@@ -1,3 +1,73 @@
+#' Load, structure and check the inputs
+#' 
+#' @inheritParams explore
+#' @inheritParams migration
+#' 
+#' @return a list of objects to be used for data analysis
+#' 
+#' @keywords internal
+#' 
+loadStudyData <- function(tz.study.area, override = NULL, start.timestamp, end.timestamp, sections = NULL, exclude.tags) {
+  appendTo(c("Screen", "Report"), "M: Importing data. This process may take a while.")
+  bio <- loadBio(file = "biometrics.csv", tz.study.area = tz.study.area)
+  appendTo(c("Screen", "Report"), paste("M: Number of target tags: ", nrow(bio), ".", sep = ""))
+  
+  # Check that all the overriden fish are part of the study
+  if (!is.null(override) && any(link <- is.na(match(unlist(lapply(strsplit(override, "-"), function(x) tail(x, 1))), bio$Signal))))
+    stop("Some tag signals listed in 'override' ('", paste0(override[link], collapse = "', '"), "') are not listed in the biometrics file.\n")
+  deployments <- loadDeployments(file = "deployments.csv", tz.study.area = tz.study.area)
+  checkDeploymentTimes(input = deployments) # check that receivers are not deployed before being retrieved
+  spatial <- loadSpatial(file = "spatial.csv", verbose = TRUE)
+  deployments <- checkDeploymentStations(input = deployments, spatial = spatial) # match Station.Name in the deployments to Station.Name in spatial, and vice-versa
+  deployments <- createUniqueSerials(input = deployments) # Prepare serial numbers to overwrite the serials in detections
+
+  detections <- loadDetections(start.timestamp = start.timestamp, end.timestamp = end.timestamp, tz.study.area = tz.study.area)
+  detections <- createStandards(detections = detections, spatial = spatial, deployments = deployments) # get standardize station and receiver names, check for receivers with no detections
+  checkUnknownReceivers(input = detections) # Check if there are detections from unknown detections
+
+  if (file.exists("spatial.dot")) {
+    appendTo(c("Screen", "Report"), "M: A 'spatial.dot' file was detected, activating multi-branch analysis.")
+    recipient <- loadDot(input = "spatial.dot", spatial = spatial, sections = sections)
+  } else {
+    fakedot <- paste(unique(spatial$Array), collapse = "->")
+    recipient <- loadDot(string = fakedot, spatial = spatial, sections = sections)
+  }
+  dot <- recipient[[1]]
+  arrays <- recipient[[2]]
+  dotmat <- recipient[[3]]
+  rm(recipient)
+
+  # Check if there is a logical first array in the study area, should a replacement release site need to be created.
+  if (sum(unlist(lapply(arrays, function(a) is.null(a$before)))) == 1)
+    first.array <- names(arrays)[unlist(lapply(arrays, function(a) is.null(a$before)))]
+  else
+    first.array <- NULL
+  spatial <- transformSpatial(spatial = spatial, bio = bio, sections = sections, first.array = first.array) # Finish structuring the spatial file
+  arrays <- arrays[unlist(spatial$array.order)]
+
+  recipient <- loadDistances(spatial = spatial) # Load distances and check if they are valid
+  dist.mat <- recipient[[1]]
+  invalid.dist <- recipient[[2]]
+  rm(recipient)
+
+  recipient <- splitDetections(detections = detections, bio = bio, exclude.tags = exclude.tags) # Split the detections by tag, store full transmitter names in bio
+  detections.list <- recipient[[1]]
+  bio <- recipient[[2]]
+  rm(recipient)
+
+  recipient <- checkTagsInUnknownReceivers(detections.list = detections.list, deployments = deployments, spatial = spatial) # Check if there is any data loss due to unknown receivers
+  spatial <- recipient[[1]]
+  deployments <- recipient[[2]]
+  rm(recipient)
+
+  detections.list <- labelUnknowns(detections.list = detections.list)
+  detections.list <- checkDetectionsBeforeRelease(input = detections.list, bio = bio)
+  appendTo(c("Screen", "Report"), "M: Data successfully imported!")
+  return(list(bio = bio, deployments = deployments, spatial = spatial, dot = dot,
+   arrays = arrays, dotmat = dotmat, detections = detections, dist.mat = dist.mat,
+    invalid.dist = invalid.dist, detections.list = detections.list))
+}
+
 #' Load spatial.dot
 #' 
 #' @param input The name of the dot file
@@ -70,6 +140,147 @@ readDot <- function (input = NULL, string = NULL) {
     recipient <- rbind(recipient, aux)
   }
   return(recipient)
+}
+
+#' Create numerical distances between dot elements
+#' 
+#' @param input a dot data frame
+#' 
+#' @return a matrix of distances between arrays
+#' 
+#' @export
+#' 
+dotMatrix <- function(input) {
+  nodes <- unique(unlist(input[, c(1, 3)]))
+  graph <- matrix(0, length(nodes), length(nodes), dimnames = list(nodes, nodes))
+  for (i in 1:nrow(input)) {
+    graph[input$A[i], input$B[i]] <- 1
+    graph[input$B[i], input$A[i]] <- 1
+  }
+  for (i in 1:(length(nodes)-1)) {
+    for (A in nodes) {
+      for (B in nodes) {
+        if (graph[A, B] == i) {
+          candidates <- rownames(graph) != B & rownames(graph) != A & graph[, B] == 1
+          if (any(candidates)) {
+            to.change <- names(candidates)[candidates]
+            for (j in to.change) {
+              if (graph[A, j] == 0) 
+                graph[A, j] <- graph[A, j] + 1 + i
+            }
+          }
+        }
+      }
+    }
+  }
+  return(graph)
+}
+
+#' Break the dot data frame into a list
+#' 
+#' @param input a dot data frame
+#' @inheritParams migration
+#' 
+#' @return A list containing, for each array, the arrays that connect to it and to which it connects.
+#' 
+#' @keywords internal
+#' 
+dotList <- function(input, sections = NULL) {
+  input$SectionA <- rep(NA_character_, nrow(input))
+  input$SectionB <- rep(NA_character_, nrow(input))
+  if (!is.null(sections)) {
+    for (section in sections) {
+       input$SectionA[grepl(section, input$A)] <- section
+       input$SectionB[grepl(section, input$B)] <- section
+    }
+    input$Edge <- with(input, SectionA != SectionB)
+  }
+
+  arrays <- list()
+  for (a in unique(unlist(input[,c(1, 3)]))) {
+    auxA <- input[input$A == a, ]
+    auxB <- input[input$B == a, ]
+    recipient <- list(
+      before = if (nrow(auxB) == 0) { NULL  } else { unique(auxB$A) },
+      after  = if (nrow(auxA) == 0) { NULL  } else { unique(auxA$B) },
+      edge   = if (nrow(auxA) == 0) { FALSE } else { any(auxA$Edge) })
+    arrays[[length(arrays) + 1]] <- recipient
+    names(arrays)[length(arrays)] <- a
+  }
+  return(arrays)
+}
+
+#' Find arrays valid for efficiency calculation
+#' 
+#' @param input A dot list
+#' @param dotmat A dot distance matrix
+#' 
+#' @return The input list, with an extra element for each array with valid efficiency peers
+#' 
+#' @keywords internal
+#' 
+dotPaths <- function(input, dotmat) {
+  for (a in names(input)) {
+    # Get efficiency peers
+    peers <- NULL
+    to.check <- input[[a]]$after
+    while (!is.null(to.check)) {
+      new.check <- NULL
+      for (b in to.check) {
+        # If A and B are adjacent, check that there are no more paths leading to B
+        if (dotmat[a, b] == 1 && length(input[[b]]$before) == 1) {
+          if (is.null(peers) || !grepl(b, peers)) {
+            peers <- c(peers, b)
+            new.check <- c(new.check, input[[b]]$after)
+          }        
+        }
+        # If B is far away, check that the paths leading to B are in valid the peers list
+        if (dotmat[a, b] > 1 && all(!is.na(match(input[[b]]$before, peers)))) {
+          if (is.null(peers) || !grepl(b, peers)) {
+            peers <- c(peers, b)
+            new.check <- c(new.check, input[[b]]$after)
+          }
+        }
+        to.check <- unique(new.check)
+      }
+    }
+    input[[a]]$peers <- peers
+    # get all downstream
+    downstream <- NULL
+    to.check <- input[[a]]$after
+    while (!is.null(to.check)) {
+      new.check <- NULL
+      for (b in to.check) {
+          if (is.null(downstream) || !grepl(b, downstream)) {
+            downstream <- c(downstream, b)
+            new.check <- c(new.check, input[[b]]$after)
+          }        
+        to.check <- unique(new.check)
+      }
+    }
+    input[[a]]$downstream <- downstream
+  }
+  return(input)
+}
+
+#' Create Standard Names for spatial elements
+#' 
+#' Includes standard names and also reprints 'spatial.csv' 
+#' 
+#' @param input A data frame with spatial information.
+#'  
+#' @return A data frame with the same information as the input plus the Standard names.
+#' 
+#' @keywords internal
+#' 
+setSpatialStandards <- function(input){
+  appendTo("debug","Starting setSpatialStandards")
+  input$Standard.Name <- as.character(input$Station.Name)
+  link <- input$Type == "Hydrophone"
+  input$Standard.Name[link] <- paste("St.", seq_len(sum(input$Type == "Hydrophone")), sep = "")
+  write.csv(input, "spatial.csv", row.names = F)
+  appendTo("debug","Terminating setSpatialStandards")
+  return(input)
 }
 
 #' Load distances matrix
@@ -624,5 +835,342 @@ convertTimes <- function(input, start.timestamp, end.timestamp, tz.study.area) {
   input$Receiver <- droplevels(input$Receiver)
   input$Transmitter <- as.factor(paste(input$CodeSpace, input$Signal, sep = "-"))
   appendTo("debug", "Terminating convertTimes.")
+  return(input)
+}
+
+#' Include the deployment in the serial number of the receive
+#' 
+#' @param input A data frame with the deployments
+#' 
+#' @return A list of deployments, with unique serial numbers per deployment
+#' 
+#' @keywords internal
+#' 
+createUniqueSerials <- function(input) {
+  appendTo("debug","Terminating createUniqueSerials")
+  output <- split(input, input$Receiver)
+  for (i in 1:length(output)) {
+    if (nrow(output[[i]]) > 1) {
+      output[[i]]$Receiver <- paste0(output[[i]]$Receiver, ".dpl.", 1:nrow(output[[i]]))
+    }
+  }
+  appendTo("debug","Terminating createUniqueSerials")
+  return(output)
+}
+
+#' Split detections by tag
+#'
+#' Splits the detections' table by tags and selects only detections from target tags
+#' 
+#' @inheritParams actel
+#' @inheritParams loadDetections
+#' @param bio A table with the tags and biometrics of the studied fish.
+#' @param detections A data frame with all the detections. Supplied by loadDetections.
+#' @param silent logical: if TRUE, suppress messages.
+#' 
+#' @return A list of detections for each tag.
+#' 
+#' @keywords internal
+#' 
+splitDetections <- function(detections, bio, exclude.tags = NULL, silent = FALSE) {
+  appendTo("debug", "Starting splitDetections.")
+  my.list <- split(detections, detections$Transmitter)
+  my.list <- excludeTags(input = my.list, exclude.tags = exclude.tags, silent = silent)
+  
+  tags <- checkNoDetections(input = my.list, bio = bio)
+  checkDupSignals(input = my.list, bio = bio, tag.list = tags$list)
+  
+  appendTo("debug", "Debug: Creating 'trimmed.list'.")
+  bio$Transmitter <- names(my.list)[tags[["link"]]]
+  trimmed.list <- my.list[tags[["link"]]]
+  non.empty <- unlist(lapply(trimmed.list, function(x) length(x) != 0))
+  trimmed.list <- trimmed.list[non.empty]
+  if (!silent){
+    collectStrays(input = my.list[-na.exclude(tags[["link"]])])
+    storeStrays()
+  }
+
+  appendTo("debug", "Terminating splitDetections.")
+  return(list(trimmed.list = trimmed.list, bio = bio))
+}
+
+#' Collect summary information on the tags detected but that are not part of the study.
+#'
+#' @param input list of detections for the tags to be excluded.
+#' @param restart logical: if TRUE, remove file 'temp_strays.csv' from the working directory.
+#' 
+#' @keywords internal
+#' 
+collectStrays <- function(input, restart = FALSE){
+  appendTo("debug", "Starting collectStrays.")
+  if (restart && file.exists("temp_strays.csv")) {
+    file.remove("temp_strays.csv")
+  }
+  if (length(input) > 0) {
+    recipient <- data.frame(Transmitter = names(input), 
+      N.detections = unlist(lapply(input,nrow)), 
+      First.detection = unlist(lapply(input, function(x) as.character(head(x$Timestamp,1)))),
+      Last.detection = unlist(lapply(input, function(x) as.character(tail(x$Timestamp,1)))),
+      Receivers = unlist(lapply(input, function(x) paste(unique(x$Receiver), collapse = ", ")))
+      )
+    write.table(recipient, file = "temp_strays.csv", sep = ",", append = file.exists("temp_strays.csv"), row.names = FALSE, col.names = !file.exists("temp_strays.csv"))
+  }
+  appendTo("debug", "Terminating collectStrays.")
+}
+
+#' Store summary information on the stray tags detected in a permanent file.
+#'
+#' @keywords internal
+#'
+storeStrays <- function(){
+  appendTo("debug", "Starting storeStrays.")
+  if (file.exists("temp_strays.csv")) {
+    if (file.exists(newname <- "stray_tags.csv")) {
+      continue <- TRUE
+      index <- 1
+      while (continue) {
+        if (file.exists(newname <- paste("stray_tags", index, "csv", sep = "."))) {
+          index <- index + 1
+        } else {
+          continue <- FALSE
+        }
+      }
+    }
+    file.rename("temp_strays.csv", newname)
+  }
+  appendTo("debug", "Terminating storeStrays.")
+}
+
+#' Temporarily include unknown receivers with target detections in the study area
+#' 
+#' @param detections.list a list of the detections for each target tag
+#' 
+#' @return The detections.list with the unknown receivers labelled
+#' 
+#' @keywords internal
+#' 
+labelUnknowns <- function(detections.list) {
+  if (any(unlist(lapply(detections.list, function(x) any(is.na(x$Array)))))) {
+    tags <- NULL
+    receivers <- NULL
+    lapply(detections.list, function(x) {
+      if (any(is.na(x$Array))) {
+        tags <- c(tags, unique(x$Transmitter))
+        receivers <- c(receivers, unique(x$Transmitter[is.na(x$Array)]))
+      }})
+    appendTo(c("Screen", "Report", "Warning"), paste0("W: Fish ", paste(tags, collapse = ", ") , ifelse(length(tags) > 1, " were", " was"), " detected in one or more receivers that are not listed in the study area (receiver(s): ", paste(unique(receivers), collapse = ", "), ")!"))
+    cat("Possible options:\n   a) Stop and double check the data (recommended)\n   b) Temporary include the unknown hydrophone(s) in the analysis\n")
+    check <- TRUE
+    while (check) {
+      decision <- readline("Which option should be followed?(a/b) ")
+      if (decision == "a" | decision == "A" | decision == "b" | decision == "B") 
+        check <- FALSE else cat("Option not recognized, please try again.\n")
+      appendTo("UD", decision)
+    }
+    if (decision == "a" | decision == "A") {
+      emergencyBreak()
+      stop("Stopping analysis per user command.\n", call. = FALSE)
+    }
+    detections.list <- lapply(detections.list, function(x) {
+      levels(x$Standard.Name) <- c(levels(x$Standard.Name), "Unknown")
+      x$Standard.Name[is.na(x$Standard.Name)] <- "Unknown"
+      levels(x$Array) <- c(levels(x$Array), "Unknown")
+      x$Array[is.na(x$Array)] <- "Unknown"
+      return(x)
+    })
+  }
+  return(detections.list)
+}
+
+#' Standardize serial numbers, stations and arrays in the detections
+#' 
+#' Matches the ALS serial number to the deployments to rename the serial number.
+#' The corresponding deployment is then used to update the Standard Station name and the array based in the spatial object.
+#' 
+#' @param detections a data frame of detections
+#' @param spatial A list of spatial objects in the study area
+#' @param deployments a list of deployments
+#'
+#' @return A data frame with standardized station names.
+#'
+#' @keywords internal
+#' 
+createStandards <- function(detections, spatial, deployments) {
+  appendTo("debug","Terminating createStandards")
+  detections$Receiver <- as.character(detections$Receiver)
+  detections$Standard.Name <- NA_character_
+  detections$Array <- NA_character_
+  empty.receivers <- NULL
+  for (i in 1:length(deployments)) {
+    receiver.link <- detections$Receiver == names(deployments)[i]
+    if (all(!receiver.link)) {
+      empty.receivers <- c(empty.receivers, names(deployments)[i])
+    } else {
+      for (j in 1:nrow(deployments[[i]])) {
+        # find target rows in detections
+        deployment.link <- detections$Timestamp[receiver.link] >= deployments[[i]]$Start[j] & 
+          detections$Timestamp[receiver.link] < deployments[[i]]$Stop[j]
+        # rename receiver
+        detections$Receiver[receiver.link][deployment.link] <- deployments[[i]]$Receiver[j]
+        # find corresponding standard station name
+        the.station <- match(deployments[[i]]$Station.Name[j], spatial$Station.Name)
+        # include Standard.Name
+        detections$Standard.Name[receiver.link][deployment.link] <- spatial$Standard.Name[the.station]
+        # include Array
+        detections$Array[receiver.link][deployment.link] <- as.character(spatial$Array[the.station])
+      }
+      if (any(the.error <- is.na(detections$Standard.Name[receiver.link]))) {
+        appendTo(c("Screen", "Report"), paste0("Error: ", sum(the.error), " detections for receiver ", names(deployments)[i], " do not fall within deployment periods."))
+        cat("\n")
+        print(detections[receiver.link][the.error, -c(6, 7)])
+        cat("\n")
+        cat("Possible options:\n   a) Stop and double check the data (recommended)\n   b) Discard orphan detections.\n")
+        check <- TRUE
+        while (check) {
+          decision <- readline("Which option should be followed?(a/b) ")
+          if (decision == "a" | decision == "A" | decision == "b" | decision == "B") 
+            check <- FALSE else cat("Option not recognized, please try again.\n")
+          appendTo("UD", decision)
+        }
+        if (decision == "a" | decision == "A") {
+          emergencyBreak()
+          stop("Stopping analysis per user command.\n", call. = FALSE)
+        } else {
+          rows.to.remove <- detections[receiver.link, which = TRUE][the.error]
+          detections <- detections[-rows.to.remove]
+        }
+       }
+    }
+  }
+  appendTo(c("Screen", "Report"), paste0("M: Number of ALS: ", length(deployments), " (of which ", length(empty.receivers), " had no detections)"))
+  if (!is.null(empty.receivers))
+    appendTo(c("Screen", "Report", "Warning"), paste0("W: No detections were found for receiver(s) ", paste0(empty.receivers, collapse = ", "), "."))
+  appendTo("debug","Terminating createStandards")
+  aux <- spatial[spatial$Type == "Hydrophone", ]
+  detections$Receiver <- as.factor(detections$Receiver)
+  detections$Array <- factor(detections$Array, levels = unique(aux$Array))
+  detections$Standard.Name <- factor(detections$Standard.Name, levels = aux$Standard.Name)
+  return(detections)
+}
+
+#' Process spatial elements
+#' 
+#' Creates a list containing multiple spatial elements required throughout the analyses
+#' 
+#' @param file an input file with spatial data.
+#' @param first.array Either NULL or the top level array in the study area.
+#' @inheritParams splitDetections
+#' @inheritParams actel
+#' 
+#' @return A list of 1) stations, 2) release sites, 3) ALS columns in the spatial file, 4) the Number of ASL, 5) The ALS serial numbers and 6) the array order.
+#' 
+#' @keywords internal
+#' 
+transformSpatial <- function(spatial, bio, sections = NULL, first.array = NULL) {
+  appendTo("debug", "Starting transformSpatial.")
+  # Break the stations away
+  appendTo("debug", "Creating 'stations'.")
+  stations <- spatial[spatial$Type == "Hydrophone", -match("Type", colnames(spatial))]
+  stations$Array <- factor(stations$Array, levels = unique(stations$Array))
+  appendTo("debug", "Creating 'release.sites'.")
+  # If there is any release site in the spatial file
+  if (sum(spatial$Type == "Release") > 0) {
+    if (length(unique(bio$Release.site)) == 1 && unique(bio$Release.site) == "unspecified") {
+      appendTo(c("Screen", "Report", "Warning"), "W: At least one release site has been indicated in the spatial file, but no release sites were specified in the biometrics file.\n   Discarding release site information and assuming all fish were released at the top level array to avoid function failure.\n   Please doublecheck your data.")
+      if (is.null(first.array)) {
+        emergencyBreak()
+        stop("There is more than one top level array in the study area. Please specify release site(s) in the 'spatial.csv' file and in the 'biometrics.csv' file.\n", call. = FALSE)
+      }
+      release.sites <- data.frame(Station.Name = "unspecified", 
+                                  Longitude = NA_real_, 
+                                  Latitude = NA_real_, 
+                                  Array = first.array,
+                                  Standar.Name = "unspecified")
+    } else {
+      A <- spatial$Station.Name[spatial$Type == "Release"]
+      B <- unique(bio$Release.site)
+      if (any(is.na(match(B, A)))) {
+        appendTo(c("Screen", "Report", "Warning"), "Error: There is a mismatch between the release sites reported and the release locations for the smolts.")
+        cat("   Release sites listed in the spatial file:", paste(A, collapse = ", "), "\n")
+        cat("   Sites listed in the biometrics file 'Release.site' column:", paste(B, collapse = ", "), "\n")
+        emergencyBreak()
+        stop("The release names should be identical in the spatial objects file and in the biometrics file.\n", call. = FALSE)
+      } else {
+        from.row <- spatial$Type == "Release"
+        from.col <- colnames(spatial)[!grepl("Receiver", colnames(spatial))]
+        release.sites <- spatial[from.row, from.col]
+        row.names(release.sites) <- 1:nrow(release.sites)
+      }
+      A <- unique(stations$Array)
+      B <- unique(release.sites$Array)
+      if (any(is.na(match(B, A)))) {
+        appendTo(c("Screen", "Report", "Warning"), "Error: There is a mismatch between the expected first array of a release site and the list of arrays.")
+        cat("   Arrays listed in the spatial file:", paste(A, collapse = ", "), "\n")
+        cat("   Expected first arrays of the release sites:", paste(B, collapse = ", "), "\n")
+        emergencyBreak()
+        stop("The expected first arrays should match the arrays where stations where deployed in the spatial file.\n", call. = FALSE)
+      }
+    }
+  } else {
+    if (length(unique(bio$Release.site)) > 1){
+      appendTo("Screen", "M: Release sites were not specified in the spatial file but more than one release site is reported in the biometric data.\n   Assuming all released fish start at the top level array.")
+      if (is.null(first.array)) {
+        emergencyBreak()
+        stop("There is more than one top level array in the study area. Please specify release site(s) in the 'spatial.csv' file and in the 'biometrics.csv' file.\n", call. = FALSE)
+      }
+    }
+    release.sites <- data.frame(Station.Name = unique(bio$Release.site), 
+                                Longitude = NA_real_,
+                                Latitude = NA_real_, 
+                                Array = rep(first.array, length(unique(bio$Release.site))),
+                                Standard.Name = unique(bio$Release.site))
+  }
+  # Wrap up
+  if (!is.null(sections)) {
+    array.order <- list()  # Used to determine if the fish's last detection was in the last array of a given section
+    for (j in sections) {
+      array.order[[j]] <- levels(stations$Array)[grepl(j, levels(stations$Array))]
+    }
+    if (any(trigger <- unlist(lapply(array.order,length)) == 0)) {
+      appendTo(c("Screen", "Warning"), decision <- readline(paste("W: No arrays were found that match section(s) ",paste(names(array.order)[trigger], collapse = ", "), ". There could be a typing mistake!\n   Continue the analysis?(y/N) ", sep = "")))
+      if (decision != "y" | decision != "Y" ){
+        emergencyBreak()
+        stop("Stopping analysis per user command.\n", call. = FALSE)
+      }
+    }
+  } else {
+    array.order <- list(all = levels(stations$Array))
+  }
+  # Order release sites by entry point.
+  if (!is.ordered(match(release.sites$Array, unlist(array.order))))
+    release.sites <- release.sites[order(match(release.sites$Array, unlist(array.order))),]
+  # join everything
+  output <- list(stations = stations, 
+                 release.sites = release.sites, 
+                 array.order = array.order)
+  appendTo("debug", "Terminating transformSpatial")
+  return(output)
+}
+
+#' Collect summary information on the tags detected but that are not part of the study.
+#'
+#' @param input list of detections
+#' @inheritParams actel
+#' @inheritParams splitDetections
+#'
+#' @keywords internal
+#' 
+excludeTags <- function(input, exclude.tags, silent){
+  appendTo("debug", "Starting excludeTags.")  
+  if (length(exclude.tags) != 0) {
+    link <- match(exclude.tags, names(input))
+    if (!silent){
+      appendTo(c("Screen", "Report", "Warning"), paste("M: Excluding tag(s) ", paste(exclude.tags, collapse = ", "), " from the analysis per used command (detections removed: ", paste(unlist(lapply(input[link], nrow)), collapse = ", "), ", respectively).", sep = ""))
+      collectStrays(input = input[link], restart = TRUE)
+    }
+    appendTo("debug", "Terminating excludeTags.")  
+    return(input[-link])
+  }
+  appendTo("debug", "Terminating excludeTags.")  
   return(input)
 }

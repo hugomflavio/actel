@@ -6,9 +6,6 @@
 \usage{
 prepareTotals(group.CJS)
 }
-\arguments{
-\item{group.CJS}{a list of CJS's for each group, with release sites merged}
-}
 \value{
 the totals data frame
 }

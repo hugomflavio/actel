@@ -109,66 +109,19 @@ explore <- function(path = NULL, maximum.time = 60, speed.method = c("last to fi
 # -----------------------------------
 
 # Load, structure and check the inputs
-  appendTo(c("Screen", "Report"), "M: Importing data. This process may take a while.")
-  bio <- loadBio(file = "biometrics.csv",tz.study.area = tz.study.area)
-  appendTo(c("Screen", "Report"), paste("M: Number of target tags: ", nrow(bio), ".", sep = ""))
-  
-  deployments <- loadDeployments(file = "deployments.csv", tz.study.area = tz.study.area)
-  checkDeploymentTimes(input = deployments) # check that receivers are not deployed before being retrieved
-  spatial <- loadSpatial(file = "spatial.csv", verbose = TRUE)
-  deployments <- checkDeploymentStations(input = deployments, spatial = spatial) # match Station.Name in the deployments to Station.Name in spatial, and vice-versa
-  deployments <- createUniqueSerials(input = deployments) # Prepare serial numbers to overwrite the serials in detections
-  
-  detections <- loadDetections(start.timestamp = start.timestamp, end.timestamp = end.timestamp, tz.study.area = tz.study.area)
-  detections <- createStandards(detections = detections, spatial = spatial, deployments = deployments) # get standardize station and receiver names, check for receivers with no detections
-  checkUnknownReceivers(input = detections) # Check if there are detections from unknown detections
-  
-  use.fakedot <- TRUE
-  if (file.exists("spatial.dot")) {
-    appendTo(c("Screen", "Report"), "M: A 'spatial.dot' file was detected, activating multi-branch analysis.")
-    recipient <- loadDot(input = "spatial.dot", spatial = spatial, sections = NULL)
-    use.fakedot <- FALSE
-  } 
-  if (use.fakedot & file.exists("spatial.txt")) {
-    appendTo(c("Screen", "Report"), "M: A 'spatial.txt' file was detected, activating multi-branch analysis.")
-    recipient <- loadDot(input = "spatial.txt", spatial = spatial, sections = NULL)
-    use.fakedot <- FALSE
-  }
-  if (use.fakedot) {
-    fakedot <- paste(unique(spatial$Array), collapse = "->")
-    recipient <- loadDot(string = fakedot, spatial = spatial, sections = NULL)
-  }
-  dot <- recipient[[1]]
-  arrays <- recipient[[2]]
-  dotmat <- recipient[[3]]
-  rm(use.fakedot, recipient)
-
-  # Check if there is a logical first array in the study area, should a replacement release site need to be created.
-  if (sum(unlist(lapply(arrays, function(a) is.null(a$before)))) == 1)
-    first.array <- names(arrays)[unlist(lapply(arrays, function(a) is.null(a$before)))]
-  else
-    first.array <- NULL
-  spatial <- transformSpatial(spatial = spatial, bio = bio, sections = NULL, first.array = first.array) # Finish structuring the spatial file
-  arrays <- arrays[unlist(spatial$array.order)]
-
-  recipient <- loadDistances(spatial = spatial) # Load distances and check if they are valid
-  dist.mat <- recipient[[1]]
-  invalid.dist <- recipient[[2]]
-  rm(recipient)
-
-  recipient <- splitDetections(detections = detections, bio = bio, exclude.tags = exclude.tags) # Split the detections by tag, store full transmitter names in bio
-  detections.list <- recipient[[1]]
-  bio <- recipient[[2]]
-  rm(recipient)
-
-  recipient <- checkTagsInUnknownReceivers(detections.list = detections.list, deployments = deployments, spatial = spatial) # Check if there is any data loss due to unknown receivers
-  spatial <- recipient[[1]]
-  deployments <- recipient[[2]]
-  rm(recipient)
-
-  detections.list <- labelUnknowns(detections.list = detections.list)
-  detections.list <- checkDetectionsBeforeRelease(input = detections.list, bio = bio)
-  appendTo(c("Screen", "Report"), "M: Data successfully imported!")
+study.data <- loadStudyData(tz.study.area = tz.study.area, override = NULL, 
+                            start.timestamp = start.timestamp, end.timestamp = end.timestamp,
+                            sections = NULL, exclude.tags = exclude.tags)
+bio <- study.data$bio
+deployments <- study.data$deployments
+spatial <- study.data$spatial
+dot <- study.data$dot
+arrays <- study.data$arrays
+dotmat <- study.data$dotmat
+detections <- study.data$detections
+dist.mat <- study.data$dist.mat
+invalid.dist <- study.data$invalid.dist
+detections.list <- study.data$detections.list
 # -------------------------------------
   
 # Process the data

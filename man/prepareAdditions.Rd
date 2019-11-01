@@ -7,8 +7,6 @@
 prepareAdditions(group.CJS, progression)
 }
 \arguments{
-\item{group.CJS}{a list of CJS's for each group, with release sites merged}
-
 \item{progression}{the progression data frame, provided by compileProgressionDataFrame}
 }
 \value{

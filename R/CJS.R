@@ -198,8 +198,8 @@ assembleArrayCJS <- function(mat, CJS, arrays) {
 #' 
 #' @keywords internal 
 #'
-assembleMatrices <- function(spatial, simple.movements, minimum.detections, status.df) {
-  temp <- efficiencyMatrix(spatial = spatial, simple.movements = simple.movements, minimum.detections = minimum.detections)
+assembleMatrices <- function(spatial, simple.movements, status.df) {
+  temp <- efficiencyMatrix(spatial = spatial, simple.movements = simple.movements)
   mymatrix <- includeMissing(x = temp, status.df = status.df)
   link <- sapply(status.df$Signal, function(x) grep(paste0("^", x, "$"), rownames(mymatrix)))
   mymatrix <- mymatrix[link, ]  
@@ -462,7 +462,7 @@ mbGroupCJS <- function(m, status.df, fixed.efficiency = NULL) {
 #' 
 #' @keywords internal
 #' 
-efficiencyMatrix <- function(spatial, simple.movements, minimum.detections) {
+efficiencyMatrix <- function(spatial, simple.movements) {
   appendTo("debug", "Starting efficiencyMatrix.")
   efficiency <- as.data.frame(matrix(ncol = length(unlist(spatial$array.order)), nrow = length(simple.movements)))
   colnames(efficiency) <- unlist(spatial$array.order)
