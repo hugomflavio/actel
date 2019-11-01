@@ -220,45 +220,78 @@ dotList <- function(input, sections = NULL) {
 #' @keywords internal
 #' 
 dotPaths <- function(input, dotmat) {
+  recipient <- findPeers(input = input, type = "before")
+  recipient <- findDirectChains(input = recipient, type = "before")
+  recipient <- findPeers(input = recipient, type = "after")
+  recipient <- findDirectChains(input = recipient, type = "after")
+  return(recipient)
+}
+
+#' Find efficiency peers for each array
+#' 
+#' @param input An array list
+#' @param type The type of peers to be found ("before" or "after")
+#' 
+#' @return The array list with efficiency peers
+#' 
+#' @keywords internal
+#' 
+findPeers <- function(input, type = c("before", "after")) {
+  type <- match.arg(type)
+  opposite <- ifelse(type == "before", "after", "before")
   for (a in names(input)) {
-    # Get efficiency peers
     peers <- NULL
-    to.check <- input[[a]]$after
+    to.check <- input[[a]][[type]]
     while (!is.null(to.check)) {
       new.check <- NULL
       for (b in to.check) {
         # If A and B are adjacent, check that there are no more paths leading to B
-        if (dotmat[a, b] == 1 && length(input[[b]]$before) == 1) {
+        if (dotmat[a, b] == 1 && length(input[[b]][[opposite]]) == 1) {
           if (is.null(peers) || !grepl(b, peers)) {
             peers <- c(peers, b)
-            new.check <- c(new.check, input[[b]]$after)
+            new.check <- c(new.check, input[[b]][[type]])
           }        
         }
         # If B is far away, check that the paths leading to B are in valid the peers list
-        if (dotmat[a, b] > 1 && all(!is.na(match(input[[b]]$before, peers)))) {
+        if (dotmat[a, b] > 1 && all(!is.na(match(input[[b]][[opposite]], peers)))) {
           if (is.null(peers) || !grepl(b, peers)) {
             peers <- c(peers, b)
-            new.check <- c(new.check, input[[b]]$after)
+            new.check <- c(new.check, input[[b]][[type]])
           }
         }
         to.check <- unique(new.check)
       }
     }
-    input[[a]]$peers <- peers
-    # get all downstream
-    downstream <- NULL
-    to.check <- input[[a]]$after
+    input[[a]][[paste0(type, ".peers")]] <- peers
+  }
+  return(input)
+}
+
+#' Find all arrays linked to an array in a given direction
+#' 
+#' @param input An array list
+#' @param type The direction in which to expand the chain ("before" or "after")
+#' 
+#' @return The array list with all linked arrays
+#' 
+#' @keywords internal
+#' 
+findDirectChains <- function(input, type = c("before", "after")) {
+  type <- match.arg(type)
+  for(a in names(input)) {
+    chain <- NULL
+    to.check <- input[[a]][[type]]
     while (!is.null(to.check)) {
       new.check <- NULL
       for (b in to.check) {
-          if (is.null(downstream) || !grepl(b, downstream)) {
-            downstream <- c(downstream, b)
-            new.check <- c(new.check, input[[b]]$after)
+          if (is.null(chain) || !grepl(b, chain)) {
+            chain <- c(chain, b)
+            new.check <- c(new.check, input[[b]][[type]])
           }        
         to.check <- unique(new.check)
       }
     }
-    input[[a]]$downstream <- downstream
+    input[[a]][[paste0("all.", type)]] <- chain
   }
   return(input)
 }
