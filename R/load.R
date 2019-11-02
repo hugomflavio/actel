@@ -220,10 +220,10 @@ dotList <- function(input, sections = NULL) {
 #' @keywords internal
 #' 
 dotPaths <- function(input, dotmat) {
-  recipient <- findPeers(input = input, type = "before")
-  recipient <- findDirectChains(input = recipient, type = "before")
-  recipient <- findPeers(input = recipient, type = "after")
-  recipient <- findDirectChains(input = recipient, type = "after")
+  recipient <- findPeers(input = input, dotmat = dotmat, type = "before")
+  recipient <- findDirectChains(input = recipient, dotmat = dotmat,  type = "before")
+  recipient <- findPeers(input = recipient, dotmat = dotmat,  type = "after")
+  recipient <- findDirectChains(input = recipient, dotmat = dotmat,  type = "after")
   return(recipient)
 }
 
@@ -236,7 +236,7 @@ dotPaths <- function(input, dotmat) {
 #' 
 #' @keywords internal
 #' 
-findPeers <- function(input, type = c("before", "after")) {
+findPeers <- function(input, dotmat, type = c("before", "after")) {
   type <- match.arg(type)
   opposite <- ifelse(type == "before", "after", "before")
   for (a in names(input)) {
@@ -276,7 +276,7 @@ findPeers <- function(input, type = c("before", "after")) {
 #' 
 #' @keywords internal
 #' 
-findDirectChains <- function(input, type = c("before", "after")) {
+findDirectChains <- function(input, dotmat, type = c("before", "after")) {
   type <- match.arg(type)
   for(a in names(input)) {
     chain <- NULL
