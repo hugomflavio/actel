@@ -22,7 +22,7 @@ createWorkspace <- function(dir = "actel_workspace") {
     Signal = c(1, 1034, 301), 
     Length.mm = c(150, 160, 170), 
     Weight.g = c(40, 60, 50), 
-    Array = c("Wild", "Hatchery", "Wild"), 
+    Group = c("Wild", "Hatchery", "Wild"), 
     Release.site = c("Example release1", "Example release1", "Example release2"))
 
   deployments <- data.frame(
