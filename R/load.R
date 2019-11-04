@@ -29,7 +29,6 @@ loadStudyData <- function(tz.study.area, override = NULL, start.timestamp, end.t
   if (file.exists("spatial.dot")) {
     appendTo(c("Screen", "Report"), "M: A 'spatial.dot' file was detected, activating multi-branch analysis.")
     recipient <- loadDot(input = "spatial.dot", spatial = spatial, sections = NULL)
-  } else {
     use.fakedot <- FALSE
   } 
   if (use.fakedot & file.exists("spatial.txt")) {
