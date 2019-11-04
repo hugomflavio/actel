@@ -161,6 +161,9 @@ detections.list <- study.data$detections.list
   status.df <- res_assembleOutput(res.df = res.df, bio = bio, spatial = spatial, 
                                   sections = sections, tz.study.area = tz.study.area)
   
+  # Efficiency
+  efficiency <- res_efficiency(arrmoves = simple.movements, bio = bio, spatial = spatial, arrays = arrays, dotmat = dotmat)
+
   
   appendTo("Report", "M: Process finished successfuly.")
 # # ---------------
@@ -185,7 +188,7 @@ detections.list <- study.data$detections.list
   if (invalid.dist)
     return(list(detections = detections, spatial = spatial, deployments = deployments, arrays = arrays,
       movements = movements, simple.movements = simple.movements, section.movements = section.movements,
-      status.df = status.df 
+      status.df = status.df, efficiency = efficiency
       # section.overview = section.overview, array.overview = array.overview,
       # matrices = matrices, overall.CJS = overall.CJS, 
       # intra.array.CJS = intra.array.CJS, times = times
@@ -193,7 +196,7 @@ detections.list <- study.data$detections.list
   else
     return(list(detections = detections, spatial = spatial, deployments = deployments, arrays = arrays,
       movements = movements, simple.movements = simple.movements, section.movements = section.movements,
-      status.df = status.df, 
+      status.df = status.df, efficiency = efficiency,
       # section.overview = section.overview, array.overview = array.overview,
       # matrices = matrices, overall.CJS = overall.CJS, 
       # intra.array.CJS = intra.array.CJS, times = times, 
@@ -697,4 +700,127 @@ res_assembleOutput <- function(res.df, bio, spatial, sections, tz.study.area) {
   }
   appendTo("debug", "Done.")
   return(status.df)
+}
+
+
+firstArrayFailure <- function(fish, bio, spatial, first.array, arrays, dotmat) {
+  release <- as.character(bio$Release.site[na.as.false(bio$Transmitter == fish)])
+  release.array <- as.character(with(spatial, release.sites[release.sites$Standard.Name == release, "Array"]))
+  if (release.array == first.array) {
+    return(NULL)
+  } else {
+    if (dotmat[release.array, first.array] == 1) {
+      return(unlist(list(known = release.array)))
+    } else {
+      aux <- blameArrays(from = release.array, to = first.array, arrays = arrays)
+      return(unlist(list(known = c(release.array, aux[[1]]), unsure = aux[[2]])))
+    }
+  }
+}
+
+countArrayFailures <- function(moves, arrays, dotmat) {
+  x <- lapply(1:(nrow(moves) - 1), function(i) {
+    A <- moves$Array[i]
+    B <- moves$Array[i + 1]
+    if (dotmat[A, B] != 1)
+      blameArrays(from = A, to = B, arrays = arrays)
+    else
+      NULL
+  })
+  return(unlist(x))
+}
+
+blameArrays <- function(from, to, arrays) {
+  known <- NULL
+  unsure <- NULL
+  # moving forward
+  if (to %in% arrays[[from]]$all.after) {
+    # Find all arrays between 'from' and 'to'
+    candidates <- arrays[[from]]$all.after[arrays[[from]]$all.after %in% arrays[[to]]$all.before]
+    # If there is only one path between from and to, then all in between must have failed
+    one.path <- all(unlist(lapply(candidates, function(i) {
+      length(arrays[[i]]$after) == 1
+    })))
+    if (one.path) {
+      known <- candidates
+    } else {
+      # Find which of those have 'to' as a valid peer
+      results <- lapply(candidates, function(i) {
+        to %in% arrays[[i]]$after.peers
+      })
+      names(results) <- candidates
+      aux <- unlist(results)
+      # The ones which have 'to' as a valid peer have surely missed an event
+      known <- names(aux)[aux]
+      # The ones which DO NOT have 'to' as a valid peer could have missed an event
+      unsure <- names(aux)[!aux]
+    }
+  }
+  # moving backwards
+  if (to %in% arrays[[from]]$all.before) {
+    # Find all arrays between 'from' and 'to'
+    candidates <- arrays[[from]]$all.before[arrays[[from]]$all.before %in% arrays[[to]]$all.after]
+    # If there is only one path between from and to, then all in between must have failed
+    one.path <- all(unlist(lapply(candidates, function(i) {
+      length(arrays[[i]]$before) == 1
+    })))
+    if (one.path) {
+      known <- candidates
+    } else {
+      # Find which of those have 'to' as a valid peer
+      results <- lapply(candidates, function(i) {
+        to %in% arrays[[i]]$before.peers
+      })
+      names(results) <- candidates
+      aux <- unlist(results)
+      # The ones which have 'to' as a valid peer have surely missed an event
+      known <- names(aux)[aux]
+      # The ones which DO NOT have 'to' as a valid peer could have missed an event
+      unsure <- names(aux)[!aux]
+    }
+  }
+  return(list(known = known, unsure = unsure))
+}
+
+res_efficiency <- function(arrmoves, bio, spatial, arrays, dotmat) {
+  values.per.fish <- lapply(names(arrmoves), function(fish) {
+      first.array <- firstArrayFailure(fish = fish, bio = bio, spatial = spatial, first.array = arrmoves[[fish]]$Array[1], arrays = arrays, dotmat = dotmat)
+      if (nrow(arrmoves[[fish]]) > 1)
+        subsequent <- countArrayFailures(moves = arrmoves[[fish]], arrays = arrays, dotmat = dotmat)
+      else
+        subsequent <- NULL
+      return(c(first.array, subsequent))
+  })
+  names(values.per.fish) <- names(arrmoves)
+  aux <- unlist(values.per.fish)
+  knownMissEvents <- table(aux[grepl("known", names(aux))])
+  unsureMissEvents <- table(aux[grepl("unsure", names(aux))])
+
+  aux <- lapply(simple.movements, function(x) rle(x$Array)$values)
+  recEvents <- table(unlist(aux))
+
+  absolutes <- as.data.frame(matrix(ncol = length(arrays), nrow = 3))
+  colnames(absolutes) <- unlist(spatial$array.order)
+  rownames(absolutes) <- c("Recorded events", "Known missed events", "Potentially missed events")
+  absolutes[is.na(absolutes)] <- 0
+
+  absolutes[1, match(names(recEvents), colnames(absolutes))] <- recEvents
+  absolutes[2, match(names(knownMissEvents), colnames(absolutes))] <- knownMissEvents
+  absolutes[3, match(names(unsureMissEvents), colnames(absolutes))] <- unsureMissEvents
+
+  # do not calculate efficiency for arrays without peers
+  aux <- unlist(lapply(arrays, function(x) is.null(x$after.peers) & is.null(x$before.peers)))
+  no.peers <- names(aux)[aux]
+  absolutes[2, match(no.peers, colnames(absolutes))] <- NA
+
+  # do not calculate efficiency for arrays without before or after neighbours
+  aux <- unlist(lapply(arrays, function(x) is.null(x$after) | is.null(x$before)))
+  no.neighbours <- names(aux)[aux]
+  # exclude arrays which are connected to a release site
+  no.neighbours <- no.neighbours[!no.neighbours %in% spatial$release.sites$Array]
+  absolutes[2, match(no.neighbours, colnames(absolutes))] <- NA
+
+  max.efficiency <- apply(absolutes, 2, function(x) 1 - (x[2] / sum(x)))
+  min.efficiency <- apply(absolutes, 2, function(x) 1 - ((x[2] + x[3]) / sum(x)))
+  return(list(absolutes = absolutes, max.efficiency = max.efficiency, min.efficiency = min.efficiency, values.per.fish = values.per.fish))
 }
