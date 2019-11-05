@@ -5,7 +5,7 @@
 \title{Load, structure and check the inputs}
 \usage{
 loadStudyData(tz.study.area, override = NULL, start.timestamp,
-  end.timestamp, sections, exclude.tags)
+  end.timestamp, sections = NULL, exclude.tags)
 }
 \arguments{
 \item{tz.study.area}{The time-zone of the study area. Necessary to convert the ALS time data, which is in UTC.}
