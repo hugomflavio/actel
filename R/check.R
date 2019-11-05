@@ -1,3 +1,48 @@
+checkImpassables <- function(movements, dotmat){
+  Valid <- NULL
+  output <- lapply(names(movements), function(fish) {
+    restart <- TRUE
+    recipient <- movements[[fish]]
+    while (restart) {
+      restart <- FALSE
+      if (sum(recipient$Valid) > 1) {
+        valid.moves <- recipient[(Valid)]
+        shifts <- data.frame(
+          A = valid.moves$Array[-nrow(valid.moves)],
+          B = valid.moves$Array[-1])
+        distances <- apply(shifts, 1, function(x) dotmat[x[1], x[2]])
+        if (any(is.na(distances))) {
+          sapply(which(is.na(distances)), function(i) {
+            appendTo(c("Screen", "Warning", "Report"), paste0("W: Fish ", fish, " made an impassable jump: It is not possible to go from array ", shifts[i, 1], " to ", shifts[i, 2], "."))
+          })
+          cat("\nOpening movement table for inspection:\n\n")
+          print(recipient)
+          cat("\nYou may either:\n\na) Render movement events invalid to resolve the impassable exception.\nb) Stop the analysis and modify the spatial.txt file.\n\n")
+          check <- TRUE
+          while(check) {
+            decision <- commentCheck(line = "Decision:(a/b/comment) ", tag = fish)
+            appendTo("UD", decision)
+            if (decision == "b" | decision == "B") {
+              emergencyBreak()
+              stop("Analysis stopped per user command.\n", call. = FALSE)
+            }
+            if (decision == "a" | decision == "A") {
+              recipient <- invalidateEvents(movements = movements[[fish]], fish = fish)
+              restart <- TRUE
+              check <- FALSE
+            } else {
+              cat("Option not recognized, please choose either 'a' or 'b'.\n")
+            }
+          }
+        }
+      }
+    }
+    return(recipient)
+  })
+  names(output) <- names(movements)
+  return(output)
+}
+
 #' Verify number of detections in section movements
 #' 
 #' @param secmoves the section movements list

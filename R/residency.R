@@ -136,6 +136,8 @@ detections.list <- study.data$detections.list
   names(movements) <- aux
   rm(aux)
 
+  movements <- checkImpassables(movements = movements, dotmat = dotmat)
+
   movements <- checkJumpDistance(movements = movements, bio = bio, dotmat = dotmat, 
                                  spatial = spatial, jump.warning = jump.warning, jump.error = jump.error)
 
