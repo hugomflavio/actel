@@ -653,14 +653,18 @@ assembleResidency <- function(secmoves, movements, sections) {
 	# Convert time data
 	for (section in sections) {
 		for (the.col in c("Average.time.", "Total.time.")) {
-  		res.df[, paste0(the.col, section)] <- as.numeric(res.df[, paste0(the.col, section)])
+      # convert to numeric
+      res.df[, paste0(the.col, section)] <- as.numeric(res.df[, paste0(the.col, section)])
+      # grab the mean for later use
+      aux <- mean(res.df[, paste0(the.col, section)], na.rm = TRUE)
+  		# convert to difftime
+      res.df[, paste0(the.col, section)] <- as.difftime(res.df[, paste0(the.col, section)], units = "secs")
   		units(res.df[, paste0(the.col, section)]) <- "secs"
-  		aux <- mean(res.df[, paste0(the.col, section)], na.rm = TRUE)
-  		if (as.numeric(aux) > 86400)
+  		if (aux > 86400)
   			units(res.df[, paste0(the.col, section)]) <- "days"
-  		if (as.numeric(aux) <= 86400 & as.numeric(aux) > 3600)
+  		if (aux <= 86400 & aux > 3600)
   			units(res.df[, paste0(the.col, section)]) <- "hours"
-  		if (as.numeric(aux) <= 3600)
+  		if (aux <= 3600)
   			units(res.df[, paste0(the.col, section)]) <- "minutes"
   		res.df[, paste0(the.col, section)] <- round(res.df[, paste0(the.col, section)], 2)
   	}
