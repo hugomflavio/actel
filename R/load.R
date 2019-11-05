@@ -163,10 +163,18 @@ readDot <- function (input = NULL, string = NULL) {
 dotMatrix <- function(input) {
   nodes <- unique(unlist(input[, c(1, 3)]))
   graph <- matrix(0, length(nodes), length(nodes), dimnames = list(nodes, nodes))
+  if (any(input$to != "--" & input$to != "<-" & input$to != "->"))
+    stop("Unrecognized connectors. Only use '--', '->' or '<-' to connect nodes.\n")
   for (i in 1:nrow(input)) {
-    graph[input$A[i], input$B[i]] <- 1
-    graph[input$B[i], input$A[i]] <- 1
-  }
+    if (input$to[i] == "--") {
+      graph[input$A[i], input$B[i]] <- 1
+      graph[input$B[i], input$A[i]] <- 1
+    }
+    if (input$to[i] == "->")
+      graph[input$A[i], input$B[i]] <- 1
+    if (input$to[i] == "<-")
+      graph[input$B[i], input$A[i]] <- 1
+    }
   for (i in 1:(length(nodes)-1)) {
     for (A in nodes) {
       for (B in nodes) {
@@ -183,6 +191,9 @@ dotMatrix <- function(input) {
       }
     }
   }
+  graph[graph == 0] <- NA
+  for(i in 1:nrow(graph)) 
+    graph[i, i] <- 0
   return(graph)
 }
 
@@ -209,7 +220,9 @@ dotList <- function(input, sections = NULL) {
   arrays <- list()
   for (a in unique(unlist(input[,c(1, 3)]))) {
     auxA <- input[input$A == a, ]
+    auxA <- auxA[auxA$to != "<-", ]
     auxB <- input[input$B == a, ]
+    auxB <- auxB[auxB$to != "->", ]
     recipient <- list(
       before = if (nrow(auxB) == 0) { NULL  } else { unique(auxB$A) },
       after  = if (nrow(auxA) == 0) { NULL  } else { unique(auxA$B) },
