@@ -144,7 +144,7 @@ detections.list <- study.data$detections.list
   # Residency-exclusive area
 
   # Compress array movements into section movements
-  section.movements <- sectionMovements(movements = simple.movements, sections = sections)
+  section.movements <- sectionMovements(movements = simple.movements, sections = sections, invalid.dist = invalid.dist)
   # Look for isolated section movements
   section.movements <- checkSMovesN(secmoves = section.movements)
   # Update array movements based on secmove validity
@@ -153,7 +153,7 @@ detections.list <- study.data$detections.list
   # Resimplify array moves and calculate simple section moves
   simple.movements <- simplifyMovements(movements = movements, bio = bio, 
     speed.method = speed.method, dist.mat = dist.mat, invalid.dist = invalid.dist)
-  simple.secmoves <- sectionMovements(movements = simple.movements, sections = sections)
+  simple.secmoves <- sectionMovements(movements = simple.movements, sections = sections, invalid.dist = invalid.dist)
 
   # Grab summary information
   res.df <- assembleResidency(secmoves = section.movements, movements = movements, sections = sections)
@@ -528,7 +528,7 @@ updateAMValidity <- function(arrmoves, secmoves) {
 #' 
 #' @keywords internal
 #' 
-sectionMovements <- function(movements, sections) {
+sectionMovements <- function(movements, sections, invalid.dist) {
 	Valid <- NULL
 	output <- list()
 	for (fish in names(movements)) {
@@ -545,20 +545,36 @@ sectionMovements <- function(movements, sections) {
 			last.events <- cumsum(aux$lengths)
 			first.events <- c(1, last.events[-length(last.events)] + 1)
 			
-			recipient <- data.frame(
-				Section = aux$values,
-				Events = aux$lengths,
-				Detections = unlist(lapply(seq_along(aux$values), function(i) sum(valid.movements$Detections[first.events[i]:last.events[i]]))),
-				First.array = valid.movements$Array[first.events],
-				Last.array = valid.movements$Array[last.events],
-				First.time = valid.movements$First.time[first.events],
-				Last.time = valid.movements$Last.time[last.events],
-				Time.travelling = c(valid.movements$Time.travelling[1], rep(NA_character_, length(aux$values) - 1)),
-				Time.in.section = rep(NA_character_, length(aux$values)),
-				Speed.in.section.m.s = unlist(lapply(seq_along(aux$values), function(i) mean(valid.movements$Average.speed.m.s[first.events[i]:last.events[i]], na.rm = TRUE))),
-				Valid = rep(TRUE, length(aux$values)),
-				stringsAsFactors = FALSE
-				)
+      if (invalid.dist) {
+        recipient <- data.frame(
+          Section = aux$values,
+          Events = aux$lengths,
+          Detections = unlist(lapply(seq_along(aux$values), function(i) sum(valid.movements$Detections[first.events[i]:last.events[i]]))),
+          First.array = valid.movements$Array[first.events],
+          Last.array = valid.movements$Array[last.events],
+          First.time = valid.movements$First.time[first.events],
+          Last.time = valid.movements$Last.time[last.events],
+          Time.travelling = c(valid.movements$Time.travelling[1], rep(NA_character_, length(aux$values) - 1)),
+          Time.in.section = rep(NA_character_, length(aux$values)),
+          Valid = rep(TRUE, length(aux$values)),
+          stringsAsFactors = FALSE
+          )
+      } else {
+        recipient <- data.frame(
+          Section = aux$values,
+          Events = aux$lengths,
+          Detections = unlist(lapply(seq_along(aux$values), function(i) sum(valid.movements$Detections[first.events[i]:last.events[i]]))),
+          First.array = valid.movements$Array[first.events],
+          Last.array = valid.movements$Array[last.events],
+          First.time = valid.movements$First.time[first.events],
+          Last.time = valid.movements$Last.time[last.events],
+          Time.travelling = c(valid.movements$Time.travelling[1], rep(NA_character_, length(aux$values) - 1)),
+          Time.in.section = rep(NA_character_, length(aux$values)),
+          Speed.in.section.m.s = unlist(lapply(seq_along(aux$values), function(i) mean(valid.movements$Average.speed.m.s[first.events[i]:last.events[i]], na.rm = TRUE))),
+          Valid = rep(TRUE, length(aux$values)),
+          stringsAsFactors = FALSE
+          )
+      }
 			output[[length(output) + 1]] <- as.data.table(movementTimes(movements = recipient, type = "section"))
 			names(output)[length(output)] <- fish
 			attributes(output[[length(output)]])$p.type <- attributes(movements[[fish]])$p.type
