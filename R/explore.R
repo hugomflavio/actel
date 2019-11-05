@@ -183,13 +183,13 @@ detections.list <- study.data$detections.list
     circular.plots <- printCircular(times = convertTimesToCircular(times), bio = bio)
   }
   
-  appendTo("Report", "M: Process finished successfuly.")
+  appendTo("Report", "M: Process finished successfully.")
 # ---------------
   
 # wrap up the txt report
   appendTo("Report", "\n-------------------")
   if (file.exists("temp_UD.txt")) 
-    appendTo("Report", paste0("User inverventions:\n-------------------\n", gsub("\r", "", readr::read_file("temp_UD.txt")), "-------------------"))
+    appendTo("Report", paste0("User interventions:\n-------------------\n", gsub("\r", "", readr::read_file("temp_UD.txt")), "-------------------"))
   
   appendTo("Report", paste0("Function call:\n-------------------\n", the.function.call, "\n-------------------"))
 # ------------------
@@ -204,7 +204,7 @@ detections.list <- study.data$detections.list
     appendTo("debug", "debug: Opening report if the pc has internet.")
     openReport(file.name = sub("Report/", "", sub("Rmd", "html", reportname)))
   }
-  appendTo("Screen", "M: Process finished successfuly.")
+  appendTo("Screen", "M: Process finished successfully.")
 # ------------------
   
   appendTo("Screen", paste("M: Saving job log as '", paste(gsub(":", ".", sub(" ", ".", as.character(Sys.time()))), "actel.log.txt", sep = "."), "'.", sep = ""))

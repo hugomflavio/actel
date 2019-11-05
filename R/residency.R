@@ -1,9 +1,9 @@
-#' Actel: Acoustic telemetry data sorting
+#' Residency analysis
 #' 
-#' The actel package provides a systematic way of analysing fish migration data.
-#' Its main function, actel, collects the input present in the target folder and analyses the telemetry data.
+#' The actel package provides a systematic way of analysing fish residency data.
+#' residency() collects the input present in the target folder and analyses the telemetry data, extracting residency-related metrics.
 #' It is strongly recommended to read the package vignettes before attempting to run the analyses. You can find the vignettes by running browseVignettes('actel') .
-#' 
+#'  
 #' @inheritParams migration
 #' @inheritParams explore
 #' 
@@ -66,7 +66,7 @@ residency <- function(path = NULL, sections, minimum.detections = 2,
 # --------------------------------------
 
 # Store function call
-  the.function.call <- paste0("migration(path = ", ifelse(is.null(path), "NULL", paste0("'", path, "'")), 
+  the.function.call <- paste0("residency(path = ", ifelse(is.null(path), "NULL", paste0("'", path, "'")), 
       ", sections = ", paste0("c('", paste(sections, collapse = "', '"), "')"), 
       # ", success.arrays = ", paste0("c('", paste(success.arrays, collapse = "', '"), "')"), 
       ", minimum.detections = ", minimum.detections,
@@ -163,6 +163,7 @@ detections.list <- study.data$detections.list
   appendTo(c("Screen", "Report"), "M: Timetable successfully filled. Fitting in the remaining variables.")
   status.df <- res_assembleOutput(res.df = res.df, bio = bio, spatial = spatial, 
                                   sections = sections, tz.study.area = tz.study.area)
+# ---------------
   
   # Efficiency
   efficiency <- res_efficiency(arrmoves = simple.movements, bio = bio, spatial = spatial, arrays = arrays, paths = paths, dotmat = dotmat)

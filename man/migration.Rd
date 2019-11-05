@@ -2,7 +2,7 @@
 % Please edit documentation in R/migration.R
 \name{migration}
 \alias{migration}
-\title{Actel: Acoustic telemetry data sorting}
+\title{Migration analysis}
 \usage{
 migration(path = NULL, sections, success.arrays = NULL,
   minimum.detections = 2, maximum.time = 60,
@@ -54,6 +54,6 @@ A list containing 1) the detections used during the analysis, 2) the movement ev
 }
 \description{
 The actel package provides a systematic way of analysing fish migration data.
-Its main function, actel, collects the input present in the target folder and analyses the telemetry data.
+migration() collects the input present in the target folder and analyses the telemetry data, extracting migration-related metrics.
 It is strongly recommended to read the package vignettes before attempting to run the analyses. You can find the vignettes by running browseVignettes('actel') .
 }

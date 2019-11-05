@@ -2,7 +2,7 @@
 % Please edit documentation in R/residency.R
 \name{residency}
 \alias{residency}
-\title{Actel: Acoustic telemetry data sorting}
+\title{Residency analysis}
 \usage{
 residency(path = NULL, sections, minimum.detections = 2,
   maximum.time = 60, speed.method = c("last to first",
@@ -51,7 +51,7 @@ residency(path = NULL, sections, minimum.detections = 2,
 A list containing 1) the detections used during the analysis, 2) the movement events, 3) the status dataframe, 4) the survival overview per group, 5) the progression through the study area, 6) the ALS array/sections' efficiency, 7) the list of spatial objects used during the analysis.
 }
 \description{
-The actel package provides a systematic way of analysing fish migration data.
-Its main function, actel, collects the input present in the target folder and analyses the telemetry data.
+The actel package provides a systematic way of analysing fish residency data.
+residency() collects the input present in the target folder and analyses the telemetry data, extracting residency-related metrics.
 It is strongly recommended to read the package vignettes before attempting to run the analyses. You can find the vignettes by running browseVignettes('actel') .
 }
