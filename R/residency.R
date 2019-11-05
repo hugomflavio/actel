@@ -725,6 +725,20 @@ res_assembleOutput <- function(res.df, bio, spatial, sections, tz.study.area) {
   return(status.df)
 }
 
+#' Calculate array efficiency for residency analysis
+#' 
+#' @inheritParams updateAMValidity
+#' @inheritParams splitDetections
+#' @inheritParams createStandards
+#' @param arrays a list containing information for each array
+#' @param paths a list containing the shortest paths between arrays with distance > 1
+#' @inheritParams dotPaths
+#' 
+#' @return An efficiency list, containing a table of absolutes, min and max efficiency 
+#' and detailed information of where the arrays failed.
+#' 
+#' @keywords internal
+#'  
 res_efficiency <- function(arrmoves, bio, spatial, arrays, paths, dotmat) {
   values.per.fish <- lapply(names(arrmoves), function(fish) {
       first.array <- firstArrayFailure(fish = fish, bio = bio, spatial = spatial, first.array = arrmoves[[fish]]$Array[1], paths = paths, dotmat = dotmat)
@@ -768,6 +782,19 @@ res_efficiency <- function(arrmoves, bio, spatial, arrays, paths, dotmat) {
   return(list(absolutes = absolutes, max.efficiency = max.efficiency, min.efficiency = min.efficiency, values.per.fish = values.per.fish))
 }
 
+#' Determine if the first array after release has failed
+#' 
+#' @param fish The fish being analysed
+#' @inheritParams splitDetections
+#' @inheritParams createStandards
+#' @param first.array The array of the first valid movement
+#' @inheritParams res_efficiency
+#' @inheritParams dotPaths
+#' 
+#' @return NULL if no arrays failed, or a list of arrays which failed.
+#' 
+#' @keywords internal
+#' 
 firstArrayFailure <- function(fish, bio, spatial, first.array, paths, dotmat) {
   release <- as.character(bio$Release.site[na.as.false(bio$Transmitter == fish)])
   release.array <- as.character(with(spatial, release.sites[release.sites$Standard.Name == release, "Array"]))
@@ -783,6 +810,16 @@ firstArrayFailure <- function(fish, bio, spatial, first.array, paths, dotmat) {
   }
 }
 
+#' Find and list arrays which failed during the movements of the fish
+#' 
+#' @param moves the simplified array movements
+#' @inheritParams res_efficiency
+#' @inheritParams dotPaths
+#' 
+#' @return NULL if no arrays failed, or a list of arrays which failed
+#' 
+#' @keywords internal
+#' 
 countArrayFailures <- function(moves, paths, dotmat) {
   x <- lapply(1:(nrow(moves) - 1), function(i) {
     A <- moves$Array[i]
@@ -795,6 +832,16 @@ countArrayFailures <- function(moves, paths, dotmat) {
   return(unlist(x))
 }
 
+#' Find which arrays to blame for a jump in movement events
+#' 
+#' @param from The array where the fish started
+#' @param to The array where the fish was next detected
+#' @inheritParams res_efficiency
+#' 
+#' @return A list of arrays which failed
+#' 
+#' @keywords internal
+#' 
 blameArrays <- function(from, to, paths) {
   the.paths <- paths[[paste0(from, "_to_", to)]]
   if (is.null(the.paths))

@@ -396,7 +396,7 @@ printArrayOverview <- function(array.overview) {
 #'
 #' Prints the ALS inter-array efficiency for inclusion in printRmd.
 #' 
-#' @inheritParams printProgression
+#' @param overall.CJS a single CJS with all the groups and release sites merged
 #' @param intra.CJS The output of the getEstimate calculations.
 #' 
 #' @keywords internal

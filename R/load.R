@@ -431,7 +431,7 @@ loadDistances <- function(spatial) {
 
 #' Load deployments file and Check the structure
 #' 
-#' @inheritParams assembleSpatial
+#' @param file an input file with spatial data.
 #' 
 #' @return The deployments dataframe
 #' 
@@ -478,7 +478,7 @@ loadDeployments <- function(file, tz.study.area){
 
 #' Load Spatial file and Check the structure
 #' 
-#' @inheritParams assembleSpatial
+#' @param file an input file with spatial data.
 #' @param verbose Logical: If TRUE, the appendTo function is enabled.
 #' 
 #' @return The spatial dataframe

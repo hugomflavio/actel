@@ -418,7 +418,7 @@ mbSplitCJS <- function(m, fixed.efficiency = NULL) {
 
 #' Calculate CJS for each group for each array
 #' 
-#' @inheritParams getSplitCJS
+#' @param n A list of detection matrices
 #' @inheritParams simplifyMovements
 #' @inheritParams simpleCJS
 #' 

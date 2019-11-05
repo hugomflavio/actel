@@ -6,6 +6,9 @@
 \usage{
 loadDeployments(file, tz.study.area)
 }
+\arguments{
+\item{file}{an input file with spatial data.}
+}
 \value{
 The deployments dataframe
 }

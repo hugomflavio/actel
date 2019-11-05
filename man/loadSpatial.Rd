@@ -7,6 +7,8 @@
 loadSpatial(file = "spatial.csv", verbose = FALSE)
 }
 \arguments{
+\item{file}{an input file with spatial data.}
+
 \item{verbose}{Logical: If TRUE, the appendTo function is enabled.}
 }
 \value{
