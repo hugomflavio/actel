@@ -165,23 +165,87 @@ detections.list <- study.data$detections.list
                                   sections = sections, tz.study.area = tz.study.area)
 # ---------------
   
-  # Efficiency
+# Efficiency
   efficiency <- res_efficiency(arrmoves = simple.movements, bio = bio, spatial = spatial, arrays = arrays, paths = paths, dotmat = dotmat)
+# ----------
 
   
-  appendTo("Report", "M: Process finished successfuly.")
-# # ---------------
+  appendTo("Report", "M: Process finished successfully.")
+# ---------------
+
+# wrap up in-R objects
+  # if (!is.null(override)) {
+  #   header.fragment <- paste('<span style="color:red">Manual mode has been triggered for **', length(override),'** fish.</span>\n', sep = "")
+  #   name.fragment <- "_corrected"
+  # } else {
+  #   header.fragment <- name.fragment <- ""
+  # }
+
+  if (file.exists(resultsname <- paste("actel_residency_results.RData", sep = ""))) {
+    continue <- TRUE
+    index <- 1
+    while (continue) {
+      if (file.exists(resultsname <- paste("actel_residency_results.", index, ".RData", sep = ""))) {
+        index <- index + 1
+      } else {
+        continue <- FALSE
+      }
+    }
+    appendTo("Screen", paste("M: An actel residency results file is already present in the present directory, saving new results as '", resultsname,"'.", sep = ""))
+    rm(continue, index)
+  } else {
+    appendTo(c("Screen", "Report"), paste("M: Saving results to '", resultsname, "'.", sep = ""))
+  }
+
+  detections <- detections.list
+  deployments <- do.call(rbind.data.frame, deployments)
+  if (invalid.dist)
+    save(detections, spatial, deployments, arrays, movements, simple.movements, 
+      section.movements, status.df, file = resultsname)
+  else
+    save(detections, spatial, deployments, arrays, movements, simple.movements, 
+      section.movements, dist.mat, file = resultsname)
+# ------------
+
+# Print graphics
+  if (report) {
+    biometric.fragment <- printBiometrics(bio = bio)
+    # efficiency.fragment <- mbPrintEfficiency(overall.CJS = overall.CJS, intra.CJS = intra.array.CJS)
+    # printDotplots(status.df = status.df, invalid.dist = invalid.dist)
+    # printSurvivalGraphic(section.overview = section.overview)
+    printDot(dot = dot, sections = sections, spatial = spatial)
+    # mbPrintProgression(dot = dot,  sections = sections, overall.CJS = overall.CJS, spatial = spatial, status.df = status.df)
+    individual.plots <- printIndividuals(redraw = TRUE, detections.list = detections.list, bio = bio, 
+        tz.study.area = tz.study.area, movements = movements, simple.movements = simple.movements)
+    # circular.plots <- printCircular(times = convertTimesToCircular(times), bio = bio)
+    # array.overview.fragment <- printArrayOverview(array.overview)
+    # if (nrow(section.overview) > 3) 
+      # survival.graph.size <- "width=90%" else survival.graph.size <- "height=4in"
+  }
+  
+  appendTo("Report", "M: Process finished successfully.")
+# ---------------
 
 # wrap up the txt report
   appendTo("Report", "\n-------------------")
   if (file.exists("temp_UD.txt")) 
-    appendTo("Report", paste0("User inverventions:\n-------------------\n", gsub("\r", "", readr::read_file("temp_UD.txt")), "-------------------"))
+    appendTo("Report", paste0("User interventions:\n-------------------\n", gsub("\r", "", readr::read_file("temp_UD.txt")), "-------------------"))
   
   appendTo("Report", paste0("Function call:\n-------------------\n", the.function.call, "\n-------------------"))
 # ------------------
 
-  appendTo("Screen", "M: Process finished successfuly.")
-# # ------------------
+# print html report
+  if (report) {
+    appendTo("debug", "debug: Printing report")
+    rmarkdown::render(reportname <- printResidencyRmd(biometric.fragment = biometric.fragment,
+        individual.plots = individual.plots, spatial = spatial), quiet = TRUE)
+    appendTo("debug", "debug: Moving report")
+    fs::file_move(sub("Rmd", "html", reportname), sub("Report/", "", sub("Rmd", "html", reportname)))
+    appendTo("debug", "debug: Opening report if the pc has internet.")
+    openReport(file.name = sub("Report/", "", sub("Rmd", "html", reportname)))
+  }
+  appendTo("Screen", "M: Process finished successfully.")
+# ------------------
 
   appendTo("Screen", paste("M: Saving job log as '", paste(gsub(":", ".", sub(" ", ".", as.character(Sys.time()))), "actel.log.txt", sep = "."), "'.", sep = ""))
   file.rename("temp_log.txt", paste(gsub(":", ".", sub(" ", ".", as.character(Sys.time()))), "actel.log.txt", sep = "."))
@@ -192,54 +256,38 @@ detections.list <- study.data$detections.list
   if (invalid.dist)
     return(list(detections = detections, spatial = spatial, deployments = deployments, arrays = arrays,
       movements = movements, simple.movements = simple.movements, section.movements = section.movements,
-      status.df = status.df, efficiency = efficiency
-      # section.overview = section.overview, array.overview = array.overview,
-      # matrices = matrices, overall.CJS = overall.CJS, 
-      # intra.array.CJS = intra.array.CJS, times = times
-  ))
+      status.df = status.df, efficiency = efficiency))
   else
     return(list(detections = detections, spatial = spatial, deployments = deployments, arrays = arrays,
       movements = movements, simple.movements = simple.movements, section.movements = section.movements,
-      status.df = status.df, efficiency = efficiency,
-      # section.overview = section.overview, array.overview = array.overview,
-      # matrices = matrices, overall.CJS = overall.CJS, 
-      # intra.array.CJS = intra.array.CJS, times = times, 
-      dist.mat = dist.mat))
+      status.df = status.df, efficiency = efficiency, dist.mat = dist.mat))
 }
 
 #' Print Rmd report
 #'
 #' Creates a Rmd report and converts it to hmtl.
 #' 
-#' @param name.fragment Rmarkdown string specifying the type of report for the title.
-#' @param header.fragment Rmarkdown string specifying the type of report for the header.
-#' @param biometric.fragment Rmarkdown string specifying the biometric graphics drawn.
-#' @param efficiency.fragment Rmarkdown string specifying the efficiency results.
-#' @param array.overview.fragment Rmarkdown string specifying the array overview results.
-#' @param survival.graph.size Rmarkdown string specifying the type size of the survival graphics.
-#' @param individual.plots Rmarkdown string specifying the name of the individual plots.
-#' @param circular.plots Rmarkdown string specifying the name of the circular plots.
+#' @inheritParams printMigrationRmd
 #' @inheritParams loadDetections
 #' 
 #' @keywords internal
 #' 
-printResidencyRmd <- function(name.fragment, header.fragment, biometric.fragment, efficiency.fragment, array.overview.fragment,
-  survival.graph.size, individual.plots, circular.plots, spatial, deployments){
+printResidencyRmd <- function(biometric.fragment, individual.plots, spatial, deployments){
   appendTo("Screen", "M: Producing final report.")
-  if (file.exists(reportname <- paste("Report/actel_migration_report", name.fragment, ".Rmd", sep = ""))) {
+  if (file.exists(reportname <- paste("Report/actel_residency_report.Rmd", sep = ""))) {
     continue <- TRUE
     index <- 1
     while (continue) {
-      if(file.exists(reportname <- paste("Report/actel_migration_report", name.fragment, ".", index, ".Rmd", sep = ""))) {
+      if(file.exists(reportname <- paste("Report/actel_residency_report.", index, ".Rmd", sep = ""))) {
         index <- index + 1
       } else {
         continue <- FALSE
       }
     }
-    appendTo("Screen",paste("M: An actel report is already present in the present directory, saving new report as 'actel_migration_report", name.fragment, ".", index, ".html'.", sep = ""))
+    appendTo("Screen",paste("M: An actel report is already present in the present directory, saving new report as 'actel_residency_report.", index, ".html'.", sep = ""))
     rm(continue,index)
   } else {
-    appendTo("Screen",paste("M: Saving actel report as 'actel_migration_report", name.fragment, ".html'.", sep = ""))
+    appendTo("Screen",paste("M: Saving actel report as 'actel_residency_report.html'.", sep = ""))
   }
   if (any(grepl("Unknown", spatial$stations$Standard.Name))) {
     unknown.fragment <- paste('<span style="color:red"> Number of relevant unknown receivers: **', sum(grepl("Unknown", spatial$stations$Standard.Name)), '**</span>\n', sep = "")
@@ -265,8 +313,6 @@ Selected folder: ', stringr::str_extract(pattern = '(?<=M: Selected folder: )[^\
 Timestamp: **', stringr::str_extract(pattern = '(?<=Timestamp:)[^\r|^\n]*', string = report), '** 
 
 Number of target tags: **`r I(nrow(status.df))`**
-
-', header.fragment,' 
 
 Number of listed receivers: **', stringr::str_extract(pattern = '(?<=Number of ALS: )[0-9]*', string = report), '** (of which **', stringr::str_extract(pattern = '(?<=of which )[0-9]*', string = report), '** had no detections)
 
@@ -300,23 +346,17 @@ knitr::kable(deployments, row.names = FALSE)
 knitr::kable(spatial$release.sites, row.names = FALSE)
 ```
 
-### Array forward efficiency
-
-', efficiency.fragment,'
-
 ### Warning messages
 
 ```{r warnings, echo = FALSE, comment = NA}
 if(file.exists("../temp_warnings.txt")) cat(gsub("\\r", "", readr::read_file("../temp_warnings.txt"))) else cat("No warnings were raised during the analysis.")
 ```
 
-
 ### User comments
 
 ```{r comments, echo = FALSE, comment = NA}
  if(file.exists("../temp_comments.txt")) cat(gsub("\\r", "", readr::read_file("../temp_comments.txt"))) else cat("No comments were included during the analysis.")
 ```
-
 
 ### Biometric graphics
 
@@ -325,56 +365,12 @@ if(file.exists("../temp_warnings.txt")) cat(gsub("\\r", "", readr::read_file("..
 </center>
 
 
-### Survival
-
-```{r survival, echo = FALSE}
-knitr::kable(section.overview)
-```
-
-<center>
-![](survival.png){ ',survival.graph.size ,' }
-</center>
-
-
-### Progression
-
-Zoom in or open the figure in a new tab to clearly read the text within each circle.
-
-Note:
-  : The progression calculations **do not account for** intra-section backwards movements. This implies that the total number of fish to have been **last seen** at a given array **may be lower** than the displayed below. Please refer to the [section survival overview](#survival) to find out how many fish were considered to have disappeared per section.
-
-<img src="mb_efficiency.svg" alt="Missing file" style="padding-top: 15px; padding-bottom: 15px;"/>
-
-', array.overview.fragment, '
-
-
-### Time of arrival at each Array
-
-Note:
-  : Coloured lines on the outer circle indicate the mean value for each group and the respective ranges show the standard error of the mean. Each group\'s bars sum to 100%. The number of data points in each group is presented between brackets in the legend of each pannel. 
-
-<center>
-', circular.plots,'
-</center>
-
-
-### Dotplots
-
-Note:
-  : The **top** 10% of the values for each panel are marked in **red**.
-  : The **bottom** 10% of the values for each panel are marked in **orange**.
-
-<center>
-![](dotplots.png){ width=95% }
-</center>
-
 
 ### Full log
 
 ```{r log, echo = FALSE, comment = NA}
 cat(gsub("\\r", "", readr::read_file("../temp_log.txt")))
 ```
-
 
 ### Individual plots
 
@@ -391,9 +387,9 @@ Note:
 ', sep = ""), fill = TRUE)
 sink()
 
-if(file.exists("Report/toc_menu_migration.html"))
-  file.remove("Report/toc_menu_migration.html")
-sink("Report/toc_menu_migration.html")
+if(file.exists("Report/toc_menu_residency.html"))
+  file.remove("Report/toc_menu_residency.html")
+sink("Report/toc_menu_residency.html")
 cat(
 '<style>
 h3 {
@@ -476,14 +472,9 @@ img[src*="#diagram"] {
   <a href="#receiver-stations">Stations</a>
   <a href="#deployments">Deployments</a>
   <a href="#release-sites">Release sites</a>
-  <a href="#array-forward-efficiency">Efficiency</a>
   <a href="#warning-messages">Warnings</a>
   <a href="#user-comments">Comments</a>
   <a href="#biometric-graphics">Biometrics</a>
-  <a href="#survival">Survival</a>
-  <a href="#progression">Progression</a>
-  <a href="#time-of-arrival-at-each-array">Arrival times</a>
-  <a href="#dotplots">Dotplots</a>
   <a href="#full-log">Full log</a>
   <a href="#individual-plots">Individuals</a>
 </div>
