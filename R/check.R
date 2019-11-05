@@ -235,50 +235,58 @@ checkJumpDistance <- function(movements, bio, spatial, dotmat, jump.warning = 2,
   # This definition is just to prevent the package check from issuing a note due unknown variables.
   Valid <- NULL
   for (fish in names(movements)) {
-    # Check release-to-first
-    release <- as.character(bio$Release.site[na.as.false(bio$Transmitter == fish)])
-    release.array <- with(spatial, release.sites[release.sites$Standard.Name == release, "Array"])
-    release.jump <- dotmat[as.character(release.array), as.character(movements[[fish]]$Array[1])] + 1
-    if (release.jump > jump.warning) {
-      # Trigger warning
-      appendTo(c("Report", "Warning", "Screen"), 
-        paste0("W: Fish ", fish, " jumped through ", release.jump - 1, 
-          ifelse(release.jump > 2, " arrays ", " array "), 
-          "from release to first event (Release -> ", movements[[fish]]$Array[1], ")."))
-    }
-    if (release.jump > jump.error)
-      trigger.error <- TRUE
-    else
-      trigger.error <- FALSE
-    # Check event-to-event
-    if (nrow(movements[[fish]]) > 1) {
-      A <- movements[[fish]]$Array[-nrow(movements[[fish]])]
-      B <- movements[[fish]]$Array[-1]
-      aux <- cbind(A, B)
-      jumps <- apply(aux, 1, function(x) dotmat[x[1], x[2]])
-      names(jumps) <- paste(A, "->", B)
-      if (any(link <- which(jumps > jump.warning))) {
-        for (i in 1:length(link)) {
-          # Trigger warning
-          appendTo(c("Report", "Warning", "Screen"), 
-            paste0("W: Fish ", fish, " jumped through ", jumps[link[i]] - 1, 
-              ifelse(jumps[link[i]] > 2, " arrays ", " array "), 
-              "in events ", link[i], " -> ", link[i] + 1, " (", names(jumps)[link[i]], ")."))
+    if (any(movements[[fish]]$Valid)) {
+      moves <- movements[[fish]][(Valid)]
+      # Check release-to-first
+      release <- as.character(bio$Release.site[na.as.false(bio$Transmitter == fish)])
+      release.array <- with(spatial, release.sites[release.sites$Standard.Name == release, "Array"])
+      release.jump <- dotmat[as.character(release.array), as.character(moves$Array[1])] + 1
+      if (release.jump > jump.warning) {
+        # Trigger warning
+        appendTo(c("Report", "Warning", "Screen"), 
+          paste0("W: Fish ", fish, " jumped through ", release.jump - 1, 
+            ifelse(release.jump > 2, " arrays ", " array "), 
+            "from release to first event (Release -> ", moves$Array[1], ")."))
+      }
+      if (release.jump > jump.error)
+        trigger.error <- TRUE
+      else
+        trigger.error <- FALSE
+      # Check event-to-event
+      if (nrow(moves) > 1) {
+        A <- moves$Array[-nrow(moves)]
+        B <- moves$Array[-1]
+        aux <- cbind(A, B)
+        jumps <- apply(aux, 1, function(x) dotmat[x[1], x[2]])
+        names(jumps) <- paste(A, "->", B)
+        if (any(is.na(jumps))) {
+          emergencyBreak()
+          stop("There are unresolved impassable jumps in the movements.\n")
+        }
+        if (any(jumps > jump.warning)) {
+          link <- which(jumps > jump.warning)
+          for (i in 1:length(link)) {
+            # Trigger warning
+            appendTo(c("Report", "Warning", "Screen"), 
+              paste0("W: Fish ", fish, " jumped through ", jumps[link[i]] - 1, 
+                ifelse(jumps[link[i]] > 2, " arrays ", " array "), 
+                "in events ", link[i], " -> ", link[i] + 1, " (", names(jumps)[link[i]], ")."))
+          }
+        if (any(jumps[link] > jump.error))
+          trigger.error <- TRUE
         }
       }
-      if (any(jumps[link] > jump.error))
-        trigger.error <- TRUE
+      # Trigger user interaction
+      if (trigger.error) {
+        appendTo("Screen", paste0("M: Opening movement table of fish ", fish, " for inspection:"))
+        print(movements[[fish]])
+        decision <- commentCheck(line = "Would you like to render any movement event invalid?(y/N/comment) ", tag = fish)
+        appendTo("UD", decision)
+        if (decision == "y" | decision == "Y") {
+          movements[[fish]] <- invalidateEvents(movements = movements[[fish]], fish = fish)
+        }
+      } # end trigger error
     }
-    # Trigger user interaction
-    if (trigger.error) {
-      appendTo("Screen", paste0("M: Opening movement table of fish ", fish, " for inspection:"))
-      print(movements[[fish]])
-      decision <- commentCheck(line = "Would you like to render any movement event invalid?(y/N/comment) ", tag = fish)
-      appendTo("UD", decision)
-      if (decision == "y" | decision == "Y") {
-        movements[[fish]] <- invalidateEvents(movements = movements[[fish]], fish = fish)
-      }
-    } # end trigger error
   }
   return(movements)
 }
