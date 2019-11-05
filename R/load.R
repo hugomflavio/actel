@@ -224,6 +224,7 @@ dotList <- function(input, sections = NULL) {
     auxB <- input[input$B == a, ]
     auxB <- auxB[auxB$to != "->", ]
     recipient <- list(
+      neighbours = unique(c(auxA$B, auxB$A)),
       before = if (nrow(auxB) == 0) { NULL  } else { unique(auxB$A) },
       after  = if (nrow(auxA) == 0) { NULL  } else { unique(auxA$B) },
       edge   = if (nrow(auxA) == 0) { FALSE } else { any(auxA$Edge) })
