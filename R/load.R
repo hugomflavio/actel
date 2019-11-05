@@ -43,7 +43,7 @@ loadStudyData <- function(tz.study.area, override = NULL, start.timestamp, end.t
   dot <- recipient[[1]]
   arrays <- recipient[[2]]
   dotmat <- recipient[[3]]
-  rm(recipient)
+  paths <- recipient[[4]]
   rm(use.fakedot, recipient)
 
   # Check if there is a logical first array in the study area, should a replacement release site need to be created.
@@ -74,7 +74,7 @@ loadStudyData <- function(tz.study.area, override = NULL, start.timestamp, end.t
   appendTo(c("Screen", "Report"), "M: Data successfully imported!")
   return(list(bio = bio, deployments = deployments, spatial = spatial, dot = dot,
    arrays = arrays, dotmat = dotmat, detections = detections, dist.mat = dist.mat,
-    invalid.dist = invalid.dist, detections.list = detections.list))
+    invalid.dist = invalid.dist, detections.list = detections.list, paths = paths))
 }
 
 #' Load spatial.dot
@@ -111,7 +111,8 @@ loadDot <- function(string = NULL, input = NULL, spatial, sections = NULL) {
   }
   arrays <- dotList(input = dot, sections = sections)
   arrays <- dotPaths(input = arrays, dotmat = mat)
-  return(list(dot = dot, arrays = arrays, dotmat = mat))
+  shortest.paths <- findShortestChains(input = arrays)
+  return(list(dot = dot, arrays = arrays, dotmat = mat, paths = shortest.paths))
 }
 
 #' Read dot file
@@ -129,10 +130,10 @@ readDot <- function (input = NULL, string = NULL) {
     lines <- readLines(input)
   else
     lines <- unlist(strsplit(string, "\n|\t"))
-  paths <- lines[grepl("-[->]", lines)]
+  paths <- lines[grepl("[<-][->]", lines)]
   paths <- gsub("[ ;]", "", paths)
   paths <- gsub("\\[label=[^\\]]","", paths)
-  nodes <- strsplit(paths,"-[->]")
+  nodes <- strsplit(paths,"[<-][->]")
   recipient <- data.frame(
     A = character(), 
     to = character(),
@@ -271,7 +272,7 @@ findPeers <- function(input, dotmat, type = c("before", "after")) {
         to.check <- unique(new.check)
       }
     }
-    input[[a]][[paste0(type, ".peers")]] <- peers
+    input[[a]][[paste0(type, ".peers")]] <- unique(peers)
   }
   return(input)
 }
@@ -300,9 +301,56 @@ findDirectChains <- function(input, dotmat, type = c("before", "after")) {
         to.check <- unique(new.check)
       }
     }
-    input[[a]][[paste0("all.", type)]] <- chain
+    input[[a]][[paste0("all.", type)]] <- unique(chain)
   }
   return(input)
+}
+
+#' Find the shortest paths between arrays
+#' 
+#' @param input An array list
+#' 
+#' @return The array list with all paths between arrays with distance > 1
+#' 
+#' @keywords internal
+#' 
+findShortestChains <- function(input) {
+  # List to store the paths
+  the.paths <- list()
+  for (A in names(input)) {
+    # make list of arrays to look for
+    look.for <- rep(NA, length(input))
+    names(look.for) <- names(input)
+    # Don't look for the own array
+    look.for[A] <- 0
+    # Set neighbours with distance 1, to start
+    look.for[input[[A]]$neighbours] <- 1
+    # begin
+    iteration <- 1
+    while(any(na.as.false(look.for == iteration)) & any(is.na(look.for))) {
+      to.check <- names(look.for)[na.as.false(look.for == iteration)]
+      to.look <- names(look.for)[is.na(look.for)]
+      test <- lapply(to.check, function(i) {
+        aux <- match(to.look, input[[i]]$neighbours)
+        if (any(!is.na(aux))) {
+          aux <- input[[i]]$neighbours[na.as.false(aux)]
+          for (found in aux) {
+            if (is.null(the.paths[[paste0(A, "_to_", i)]]))
+              to.add <- i
+            else
+              to.add <- paste(the.paths[[paste0(A, "_to_", i)]], i, sep = " -> ")                      
+            if (is.null(the.paths[[paste0(A,"_to_",found)]]))
+              the.paths[[paste0(A,"_to_",found)]] <<- to.add
+            else
+              the.paths[[paste0(A,"_to_",found)]] <<- c(the.paths[[paste0(A,"_to_",found)]], to.add)
+            look.for[found] <<- iteration + 1
+          }
+        }
+      })
+      iteration <- iteration + 1
+    }
+  }
+  return(the.paths)
 }
 
 #' Create Standard Names for spatial elements
