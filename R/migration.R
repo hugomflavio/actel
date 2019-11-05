@@ -139,8 +139,10 @@ detections.list <- study.data$detections.list
   
   movements <- checkUpstream(movements = movements, bio = bio, spatial = spatial, arrays = arrays)
 
+  movements <- checkImpassables(movements = movements, dotmat = dotmat)
+
   movements <- checkJumpDistance(movements = movements, bio = bio, dotmat = dotmat, 
-    spatial = spatial, jump.warning = jump.warning, jump.error = jump.error)
+                                 spatial = spatial, jump.warning = jump.warning, jump.error = jump.error)
 
   recipient <- assembleTimetable(movements = movements, sections = sections, spatial = spatial, arrays = arrays,
     minimum.detections = minimum.detections, dist.mat = dist.mat, invalid.dist = invalid.dist, 

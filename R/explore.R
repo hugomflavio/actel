@@ -135,8 +135,10 @@ detections.list <- study.data$detections.list
      dist.mat = dist.mat, invalid.dist = invalid.dist, silent = FALSE)
   }
 
+  movements <- checkImpassables(movements = movements, dotmat = dotmat)
+
   movements <- checkJumpDistance(movements = movements, bio = bio, dotmat = dotmat, 
-    spatial = spatial, jump.warning = jump.warning, jump.error = jump.error)
+                                 spatial = spatial, jump.warning = jump.warning, jump.error = jump.error)
 
   # if (!invalid.dist & !is.null(jump.warning))
   #   movements <- checkMovementSpeeds(movements = movements, speed.warning = speed.warning, 
