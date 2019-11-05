@@ -37,7 +37,7 @@ loadStudyData <- function(tz.study.area, override = NULL, start.timestamp, end.t
     use.fakedot <- FALSE
   }
   if (use.fakedot) {
-    fakedot <- paste(unique(spatial$Array), collapse = "->")
+    fakedot <- paste(unique(spatial$Array), collapse = "--")
     recipient <- loadDot(string = fakedot, spatial = spatial, sections = NULL)
   }
   dot <- recipient[[1]]
@@ -174,17 +174,20 @@ dotMatrix <- function(input) {
       graph[input$A[i], input$B[i]] <- 1
     if (input$to[i] == "<-")
       graph[input$B[i], input$A[i]] <- 1
-    }
+  }
   for (i in 1:(length(nodes)-1)) {
     for (A in nodes) {
       for (B in nodes) {
         if (graph[A, B] == i) {
-          candidates <- rownames(graph) != B & rownames(graph) != A & graph[, B] == 1
+          # cat(B, "\n")
+          candidates <- rownames(graph) != B & rownames(graph) != A & graph[B, ] == 1
           if (any(candidates)) {
             to.change <- names(candidates)[candidates]
             for (j in to.change) {
-              if (graph[A, j] == 0) 
+              if (graph[A, j] == 0) {
+                # cat(" - ", j, "\n")
                 graph[A, j] <- graph[A, j] + 1 + i
+              }
             }
           }
         }
