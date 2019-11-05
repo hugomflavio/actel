@@ -179,8 +179,8 @@ checkUpstream <- function(movements, bio, spatial, arrays) {
     appendTo("debug", paste("Starting checkUpstream for fish ", fish, ".", sep = ""))
     release.site <- as.character(bio$Release.site[na.as.false(bio$Transmitter == fish)])
     release.array <- as.character(with(spatial, release.sites[release.sites$Standard.Name == release.site, "Array"]))
-    downstream.arrays <- c(release.array, arrays[[release.array]]$downstream)
-    if (any(is.na(match(movements[[fish]][Array != "Unknown"]$Array, downstream.arrays)))) {
+    after.arrays <- c(release.array, arrays[[release.array]]$all.after)
+    if (any(is.na(match(movements[[fish]][Array != "Unknown"]$Array, after.arrays)))) {
       cat("\n")
       appendTo(c("Screen", "Report", "Warning"), paste0("W: Fish ", fish, " was detected behind its release site! Opening relevant data for inspection."))
       appendTo("Screen", paste("   Release site:", release.site))
