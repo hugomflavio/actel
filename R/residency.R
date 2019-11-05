@@ -725,45 +725,6 @@ res_assembleOutput <- function(res.df, bio, spatial, sections, tz.study.area) {
   return(status.df)
 }
 
-
-firstArrayFailure <- function(fish, bio, spatial, first.array, paths, dotmat) {
-  release <- as.character(bio$Release.site[na.as.false(bio$Transmitter == fish)])
-  release.array <- as.character(with(spatial, release.sites[release.sites$Standard.Name == release, "Array"]))
-  if (release.array == first.array) {
-    return(NULL)
-  } else {
-    if (dotmat[release.array, first.array] == 1) {
-      return(unlist(list(known = release.array)))
-    } else {
-      aux <- blameArrays(from = release.array, to = first.array, paths = paths)
-      return(unlist(list(known = c(release.array, aux[[1]]), unsure = aux[[2]])))
-    }
-  }
-}
-
-countArrayFailures <- function(moves, paths, dotmat) {
-  x <- lapply(1:(nrow(moves) - 1), function(i) {
-    A <- moves$Array[i]
-    B <- moves$Array[i + 1]
-    if (A != B & dotmat[A, B] != 1)
-      blameArrays(from = A, to = B, paths = paths)
-    else
-      NULL
-  })
-  return(unlist(x))
-}
-
-blameArrays <- function(from, to, paths) {
-  the.paths <- paths[[paste0(from, "_to_", to)]]
-  if (is.null(the.paths))
-    stop("Either 'from' is not connected to 'to', or both are neighbours.\n")
-  output <- unique(unlist(strsplit(the.paths, " -> ")))
-  if (length(the.paths) == 1)
-    return(list(known = output))
-  else
-    return(list(unsure = output))
-}
-
 res_efficiency <- function(arrmoves, bio, spatial, arrays, paths, dotmat) {
   values.per.fish <- lapply(names(arrmoves), function(fish) {
       first.array <- firstArrayFailure(fish = fish, bio = bio, spatial = spatial, first.array = arrmoves[[fish]]$Array[1], paths = paths, dotmat = dotmat)
@@ -805,4 +766,42 @@ res_efficiency <- function(arrmoves, bio, spatial, arrays, paths, dotmat) {
   max.efficiency <- apply(absolutes, 2, function(x) 1 - (x[2] / sum(x)))
   min.efficiency <- apply(absolutes, 2, function(x) 1 - ((x[2] + x[3]) / sum(x)))
   return(list(absolutes = absolutes, max.efficiency = max.efficiency, min.efficiency = min.efficiency, values.per.fish = values.per.fish))
+}
+
+firstArrayFailure <- function(fish, bio, spatial, first.array, paths, dotmat) {
+  release <- as.character(bio$Release.site[na.as.false(bio$Transmitter == fish)])
+  release.array <- as.character(with(spatial, release.sites[release.sites$Standard.Name == release, "Array"]))
+  if (release.array == first.array) {
+    return(NULL)
+  } else {
+    if (dotmat[release.array, first.array] == 1) {
+      return(unlist(list(known = release.array)))
+    } else {
+      aux <- blameArrays(from = release.array, to = first.array, paths = paths)
+      return(unlist(list(known = c(release.array, aux[[1]]), unsure = aux[[2]])))
+    }
+  }
+}
+
+countArrayFailures <- function(moves, paths, dotmat) {
+  x <- lapply(1:(nrow(moves) - 1), function(i) {
+    A <- moves$Array[i]
+    B <- moves$Array[i + 1]
+    if (A != B & dotmat[A, B] != 1)
+      blameArrays(from = A, to = B, paths = paths)
+    else
+      NULL
+  })
+  return(unlist(x))
+}
+
+blameArrays <- function(from, to, paths) {
+  the.paths <- paths[[paste0(from, "_to_", to)]]
+  if (is.null(the.paths))
+    stop("Either 'from' is not connected to 'to', or both are neighbours.\n")
+  output <- unique(unlist(strsplit(the.paths, " -> ")))
+  if (length(the.paths) == 1)
+    return(list(known = output))
+  else
+    return(list(unsure = output))
 }
