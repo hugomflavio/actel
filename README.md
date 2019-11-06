@@ -1,6 +1,6 @@
 Jump to [**installation instructions**](#installing-actel)
 
-## Actel: Acoustic telemetry data sorting
+## Actel: Acoustic telemetry data sorting (development version)
 
 If you are tracking animals during their migration using acoustic telemetry, actel is the package for you. 
 By bringing together the study area configuration and the recorded detections, actel provides a systematic way of analysing fish migration data.
@@ -22,7 +22,7 @@ By bringing together the study area configuration and the recorded detections, a
  
 **3. residency()**
 
-  The residency() analysis is still under construction. Keep an eye out for updates!
+  The first version of the residency() analysis is already out in the development version. Try it out!
 
 ## Unlock actel's full potential
 
@@ -54,7 +54,11 @@ Here are some examples:
 <img src="vignettes/mb_efficiency.svg" alt="drawing" width="870"/>
 
 
-## Installing actel
+## Installing actel (development version)
+
+NOTE: THIS IS THE DEVELOPMENT VERSION
+
+While the development version has the newest upgrades and features, it is also more prone to have bugs hidden around. If you would like to help me out, try this version out and let me know if you find any bug :)
 
 To install actel, you will need to have the devtools package installed.
 
