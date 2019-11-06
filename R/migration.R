@@ -173,34 +173,48 @@ detections.list <- study.data$detections.list
   the.matrices <- assembleMatrices(spatial = spatial, simple.movements = valid.movements, status.df = status.df)
 
   m.by.array <- breakMatricesByArray(m = the.matrices, arrays = arrays)
-  CJS.list <- lapply(m.by.array, function(m) {
-    if (length(m) == 1)
-      simpleCJS(m[[1]])
-    else
-      combineCJS(m)
-    })
 
-  overall.CJS <- assembleArrayCJS(mat = the.matrices, CJS = CJS.list, arrays = arrays)
-
-  if (!is.null(replicates)) {
-    intra.array.matrices <- getDualMatrices(replicates = replicates, CJS = overall.CJS, spatial = spatial, detections.list = detections.list)
-    recipient <- includeIntraArrayEstimates(m = intra.array.matrices, CJS = overall.CJS)
-    overall.CJS <- recipient[[1]]
-    intra.array.CJS <- recipient[[2]]
-    rm(recipient)
+  if (is.null(m.by.array)) {
+    calculate.efficiency <- FALSE
+    appendTo(c("Screen", "Report", "Warning"), "W: Aborting efficiency calculations (will limit the report's output).")
   } else {
-    intra.array.CJS <- NULL
+    calculate.efficiency <- TRUE
   }
 
-  aux <- mbSplitCJS(m = m.by.array, fixed.efficiency = overall.CJS$efficiency)
-  aux <- aux[names(the.matrices)]
-  split.CJS <- assembleSplitCJS(mat = the.matrices, CJS = aux, arrays = arrays)
-  rm(aux)
+  if (calculate.efficiency) {
+    CJS.list <- lapply(m.by.array, function(m) {
+      if (length(m) == 1)
+        simpleCJS(m[[1]])
+      else
+        combineCJS(m)
+      })
 
-  aux <- mbGroupCJS(m = m.by.array, status.df = status.df, fixed.efficiency = overall.CJS$efficiency)
-  group.CJS <- assembleGroupCJS(mat = the.matrices, CJS = aux, arrays = arrays)
-  array.overview <- mbAssembleArrayOverview(input = group.CJS)
-  rm(aux)
+    overall.CJS <- assembleArrayCJS(mat = the.matrices, CJS = CJS.list, arrays = arrays)
+
+    if (!is.null(replicates)) {
+      intra.array.matrices <- getDualMatrices(replicates = replicates, CJS = overall.CJS, spatial = spatial, detections.list = detections.list)
+      recipient <- includeIntraArrayEstimates(m = intra.array.matrices, CJS = overall.CJS)
+      overall.CJS <- recipient[[1]]
+      intra.array.CJS <- recipient[[2]]
+      rm(recipient)
+    } else {
+      intra.array.CJS <- NULL
+    }
+
+    aux <- mbSplitCJS(m = m.by.array, fixed.efficiency = overall.CJS$efficiency)
+    aux <- aux[names(the.matrices)]
+    split.CJS <- assembleSplitCJS(mat = the.matrices, CJS = aux, arrays = arrays)
+    rm(aux)
+
+    aux <- mbGroupCJS(m = m.by.array, status.df = status.df, fixed.efficiency = overall.CJS$efficiency)
+    group.CJS <- assembleGroupCJS(mat = the.matrices, CJS = aux, arrays = arrays)
+    array.overview <- mbAssembleArrayOverview(input = group.CJS)
+    rm(aux)
+} else {
+  overall.CJS <- NULL
+  intra.array.CJS <- NULL
+  array.overview <- NULL
+}
 # -------------------------------------
 
 # wrap up in-R objects
@@ -243,15 +257,24 @@ detections.list <- study.data$detections.list
 # Print graphics
   if (report) {
     biometric.fragment <- printBiometrics(bio = bio)
-    efficiency.fragment <- mbPrintEfficiency(overall.CJS = overall.CJS, intra.CJS = intra.array.CJS)
+    if (calculate.efficiency)
+      efficiency.fragment <- mbPrintEfficiency(overall.CJS = overall.CJS, intra.CJS = intra.array.CJS)
+    else
+      efficiency.fragment <- "Array efficiency could not be calculated. See full log for more details.\n"
     printDotplots(status.df = status.df, invalid.dist = invalid.dist)
     printSurvivalGraphic(section.overview = section.overview)
     printDot(dot = dot, sections = sections, spatial = spatial)
-    mbPrintProgression(dot = dot,  sections = sections, overall.CJS = overall.CJS, spatial = spatial, status.df = status.df)
+    if (calculate.efficiency) {
+      mbPrintProgression(dot = dot,  sections = sections, overall.CJS = overall.CJS, spatial = spatial, status.df = status.df)
+      display.progression <- TRUE
+      array.overview.fragment <- printArrayOverview(array.overview)
+    } else {
+      display.progression <- FALSE
+      array.overview.fragment <- ""
+    }
     individual.plots <- printIndividuals(redraw = TRUE, detections.list = detections.list, bio = bio, 
         status.df = status.df, tz.study.area = tz.study.area, movements = movements, simple.movements = valid.movements)
     circular.plots <- printCircular(times = convertTimesToCircular(times), bio = bio)
-    array.overview.fragment <- printArrayOverview(array.overview)
     if (nrow(section.overview) > 3) 
       survival.graph.size <- "width=90%" else survival.graph.size <- "height=4in"
   }
@@ -272,7 +295,7 @@ detections.list <- study.data$detections.list
     appendTo("debug", "debug: Printing report")
     rmarkdown::render(reportname <- printMigrationRmd(name.fragment = name.fragment, header.fragment = header.fragment, 
         biometric.fragment = biometric.fragment, survival.graph.size = survival.graph.size, circular.plots = circular.plots,
-        individual.plots = individual.plots, spatial = spatial, efficiency.fragment = efficiency.fragment, array.overview.fragment = array.overview.fragment), quiet = TRUE)
+        individual.plots = individual.plots, spatial = spatial, efficiency.fragment = efficiency.fragment, display.progression = display.progression, array.overview.fragment = array.overview.fragment), quiet = TRUE)
     appendTo("debug", "debug: Moving report")
     fs::file_move(sub("Rmd", "html", reportname), sub("Report/", "", sub("Rmd", "html", reportname)))
     appendTo("debug", "debug: Opening report if the pc has internet.")
@@ -309,6 +332,7 @@ detections.list <- study.data$detections.list
 #' @param header.fragment Rmarkdown string specifying the type of report for the header.
 #' @param biometric.fragment Rmarkdown string specifying the biometric graphics drawn.
 #' @param efficiency.fragment Rmarkdown string specifying the efficiency results.
+#' @param display.progression Logical. If TRUE, the progression plot has been created and can be displayed.
 #' @param array.overview.fragment Rmarkdown string specifying the array overview results.
 #' @param survival.graph.size Rmarkdown string specifying the type size of the survival graphics.
 #' @param individual.plots Rmarkdown string specifying the name of the individual plots.
@@ -317,7 +341,7 @@ detections.list <- study.data$detections.list
 #' 
 #' @keywords internal
 #' 
-printMigrationRmd <- function(name.fragment, header.fragment, biometric.fragment, efficiency.fragment, array.overview.fragment,
+printMigrationRmd <- function(name.fragment, header.fragment, biometric.fragment, efficiency.fragment, display.progression, array.overview.fragment,
   survival.graph.size, individual.plots, circular.plots, spatial, deployments){
   appendTo("Screen", "M: Producing final report.")
   if (file.exists(reportname <- paste("Report/actel_migration_report", name.fragment, ".Rmd", sep = ""))) {
@@ -432,14 +456,14 @@ knitr::kable(section.overview)
 
 ### Progression
 
-Zoom in or open the figure in a new tab to clearly read the text within each circle.
+', ifelse(display.progression, 'Zoom in or open the figure in a new tab to clearly read the text within each circle.
 
 Note:
   : The progression calculations **do not account for** intra-section backwards movements. This implies that the total number of fish to have been **last seen** at a given array **may be lower** than the displayed below. Please refer to the [section survival overview](#survival) to find out how many fish were considered to have disappeared per section.
 
 <img src="mb_efficiency.svg" alt="Missing file" style="padding-top: 15px; padding-bottom: 15px;"/>
 
-', array.overview.fragment, '
+', 'Progression cannot be displayed if efficiencies are not calculated. See full log for more details.'), array.overview.fragment, '
 
 
 ### Time of arrival at each Array
