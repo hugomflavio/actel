@@ -413,16 +413,27 @@ loadDistances <- function(spatial) {
       appendTo(c("Screen", "Report", "Warning"), "Error: The distance matrix appears to be missing data (ncol != nrow). Deactivating speed calculation to avoid function failure.")
       invalid.dist <- TRUE
     }
+    if (!invalid.dist && any(link <- is.na(match(rownames(dist.mat), colnames(dist.mat))))) {
+      appendTo(c("Screen", "Report", "Warning"), "Error: The column and row names in the distance matrix do not match each other. Deactivating speed calculation to avoid function failure.")
+      cat(paste0("       Row names missing in the columns: '", paste(rownames(dist.mat)[link], collapse = "', '"), "'.\n"))
+      if (any(link <- is.na(match(colnames(dist.mat), rownames(dist.mat))))) 
+        cat(paste0("       Column names missing in the rows: '", paste(colnames(dist.mat)[link], collapse = "', '"), "'.\n"))
+      invalid.dist <- TRUE
+    }
     if (!invalid.dist && sum(nrow(spatial$stations), nrow(spatial$release.sites)) != nrow(dist.mat)) {
       appendTo(c("Screen", "Report", "Warning"), "Error: The number of spatial points does not match the number of rows in the distance matrix. Deactivating speed calculation to avoid function failure.")
+      cat("       Number of stations and release sites listed:", sum(nrow(spatial$stations), nrow(spatial$release.sites)), "\n")
+      cat("       Number of rows/columns in the distance matrix:", nrow(dist.mat), "\n")
       invalid.dist <- TRUE
     }
     if (!invalid.dist && (any(!matchl(spatial$stations$Standard.Name, colnames(dist.mat))) | any(!matchl(spatial$release.sites$Standard.Name, colnames(dist.mat))))) {
       appendTo(c("Screen", "Report", "Warning"), "Error: Some stations and/or release sites are not present in the distance matrix. Deactivating speed calculation to avoid function failure.")
-      invalid.dist <- TRUE
-    }    
-    if (!invalid.dist && any(rownames(dist.mat) != colnames(dist.mat))) {
-      appendTo(c("Screen", "Report", "Warning"), "Error: Some stations and/or release sites are not present in the distance matrix. Deactivating speed calculation to avoid function failure.")
+      missing.releases <- spatial$release.sites$Standard.Name[!matchl(spatial$release.sites$Standard.Name, colnames(dist.mat))]
+      missing.stations <- spatial$stations$Standard.Name[!matchl(spatial$stations$Standard.Name, colnames(dist.mat))]
+      if (length(missing.releases) > 0)
+        cat(paste0("       Release sites missing: '", paste(missing.releases, collapse = "', '"), "'\n"))
+      if (length(missing.stations) > 0)
+        cat(paste0("       Stations missing: '", paste(missing.stations, collapse = "', '"), "'\n"))
       invalid.dist <- TRUE
     }    
   } else {
