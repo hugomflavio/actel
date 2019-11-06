@@ -446,5 +446,30 @@ return(reportname)
 }
 
 
+#' Compare original detections with the valid movements and exclude invalid detections
+#' 
+#' @param detections.list the list of detections per fish
+#' @param movements the list of movements to be matched
+#' 
+#' @return A list of valid detections per fish
+#' 
+#' @keywords internal
+#' 
+validateDetections <- function(detections.list, movements) {
+  output <- lapply(names(movements), function(i) {
+    cat(i, "\n")
+    aux <- detections.list[[i]]
+    valid.rows <- unlist(lapply(1:nrow(movements[[i]]), function(j) {
+      start <- which(aux$Timestamp == movements[[i]]$First.time[j] & aux$Standard.Name == movements[[i]]$First.station[j])
+      stop <- start + (movements[[i]]$Detections[j] - 1)
+      cat(start, ":", stop, "\n")
+      return(start:stop)
+    }))
+    return(aux[valid.rows, ])
+  })
+  names(output) <- names(movements)
+  attributes(output)$actel <- "valid.detections"
+  return(output)
+}
 
 
