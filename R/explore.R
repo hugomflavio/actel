@@ -459,12 +459,12 @@ return(reportname)
 #' 
 validateDetections <- function(detections.list, movements) {
   output <- lapply(names(movements), function(i) {
-    cat(i, "\n")
+    # cat(i, "\n")
     aux <- detections.list[[i]]
     valid.rows <- unlist(lapply(1:nrow(movements[[i]]), function(j) {
-      start <- which(aux$Timestamp == movements[[i]]$First.time[j] & aux$Standard.Name == movements[[i]]$First.station[j])
+      start <- min(which(aux$Timestamp == movements[[i]]$First.time[j] & aux$Standard.Name == movements[[i]]$First.station[j]))
       stop <- start + (movements[[i]]$Detections[j] - 1)
-      cat(start, ":", stop, "\n")
+      # cat(start, ":", stop, "\n")
       return(start:stop)
     }))
     return(aux[valid.rows, ])
