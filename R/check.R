@@ -578,15 +578,20 @@ invalidateEvents <- function(movements, fish) {
           if (decision == "y" | decision == "Y") {
             movements$Valid[the.rows] <- FALSE
             attributes(movements)$p.type <- "Manual"
-            appendTo(c("Screen", "Report"), paste0("M: Movement event(s) ", paste(the.rows, collapse = ", "), " from fish ", fish," rendered invalid per user command."))
-            decision <- readline("Would you like to render any more movements invalid?(y/N) ")
-            appendTo("UD", decision)
-            if (decision == "y" | decision == "Y") {
-              check <- TRUE
-              appendTo("Screen", paste0("M: Updated movement table of fish ", fish, ":"))
-              print(movements)
-              appendTo("Screen", "Note: You can select multiple events at once by separating them with a space.")
+            if (any(movements$Valid)) {
+              appendTo(c("Screen", "Report"), paste0("M: Movement event(s) ", paste(the.rows, collapse = ", "), " from fish ", fish," rendered invalid per user command."))
+              decision <- readline("Would you like to render any more movements invalid?(y/N) ")
+              appendTo("UD", decision)
+              if (decision == "y" | decision == "Y") {
+                check <- TRUE
+                appendTo("Screen", paste0("M: Updated movement table of fish ", fish, ":"))
+                print(movements)
+                appendTo("Screen", "Note: You can select multiple events at once by separating them with a space.")
+              } else {
+                check <- FALSE
+              }
             } else {
+              appendTo(c("Screen", "Report"), paste0("M: ALL movement events from fish ", fish," were rendered invalid per user command."))
               check <- FALSE
             }
           }
