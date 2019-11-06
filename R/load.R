@@ -383,6 +383,7 @@ findShortestChains <- function(input) {
 setSpatialStandards <- function(input){
   appendTo("debug","Starting setSpatialStandards")
   input$Standard.Name <- as.character(input$Station.Name)
+  input$Standard.Name <- gsub(" ", "", input$Standard.Name)
   link <- input$Type == "Hydrophone"
   input$Standard.Name[link] <- paste("St.", seq_len(sum(input$Type == "Hydrophone")), sep = "")
   write.csv(input, "spatial.csv", row.names = F)
@@ -405,6 +406,8 @@ loadDistances <- function(spatial) {
   if (file.exists("distances.csv")) {
     appendTo(c("Screen", "Report"), "M: A distances matrix file is present, activating speed calculations.")
     dist.mat <- read.csv("distances.csv", row.names = 1)
+    rownames(dist.mat) <- gsub(" ", "", rownames(dist.mat))
+    colnames(dist.mat) <- gsub(" ", "", colnames(dist.mat))
     invalid.dist <- FALSE
     if (nrow(dist.mat) != ncol(dist.mat)){
       appendTo(c("Screen", "Report", "Warning"), "Error: The distance matrix appears to be missing data (ncol != nrow). Deactivating speed calculation to avoid function failure.")
