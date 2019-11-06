@@ -8,6 +8,32 @@ stripCodeSpaces <- function(input) {
   unlist(lapply(input, function(x) tail(unlist(strsplit(x, "-")), 1)))
 }
 
+#' Convert a list of data frames with identical columns into a single data frame
+#' 
+#' @param input a list of data frames
+#' 
+#' @return a data frame with all lists combined
+#' 
+#' @export
+#' 
+listToTable <- function(input) {
+  if (!is.list(input))
+    stop("input must be a list.\n")
+  the.columns <- lapply(input, colnames)
+  presence.check <- unlist(lapply(seq_along(the.columns), function(i) {
+    lapply(the.columns, function(x) match(the.columns[[i]], x))
+  }))
+  if (any(is.na(presence.check)))
+    stop("The column names in the elements of input are not identical.\n")
+  aux <- lapply(seq_along(input), function(i) {
+    input[[i]]$list.source.name <- names(input)[i]
+    return(input[[i]])
+  })
+  output <- do.call(rbind.data.frame, aux)
+  rownames(output) <- 1:nrow(output)
+  return(data.table::as.data.table(output))
+}
+
 #' Update study area for actel v.0.0.4
 #' 
 #' Converts the spatial.csv in itself + a deployments.csv file.
