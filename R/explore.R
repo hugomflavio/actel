@@ -203,7 +203,8 @@ detections.list <- study.data$detections.list
   if (report) {
     appendTo("debug", "debug: Printing report")
     rmarkdown::render(reportname <- printExploreRmd(biometric.fragment = biometric.fragment, 
-      circular.plots = circular.plots, individual.plots = individual.plots, spatial = spatial), quiet = TRUE)
+      circular.plots = circular.plots, individual.plots = individual.plots, spatial = spatial,
+      detections = detections, valid.detections = valid.detections), quiet = TRUE)
     appendTo("debug", "debug: Moving report")
     fs::file_move(sub("Rmd", "html", reportname), sub("Report/", "", sub("Rmd", "html", reportname)))
     appendTo("debug", "debug: Opening report if the pc has internet.")
@@ -235,11 +236,13 @@ detections.list <- study.data$detections.list
 #' @param biometric.fragment Rmarkdown string specifying the biometric graphics drawn.
 #' @param individual.plots Rmarkdown string specifying the name of the individual plots.
 #' @param circular.plots Rmarkdown string specifying the name of the circular plots.
+#' @param detections All the detections used in the study
+#' @param valid.detectiosn The valid detections used in the study
 #' @inheritParams loadDetections
 #' 
 #' @keywords internal
 #' 
-printExploreRmd <- function(biometric.fragment, individual.plots, circular.plots, spatial){
+printExploreRmd <- function(biometric.fragment, individual.plots, circular.plots, spatial, detections, valid.detections){
   appendTo("Screen", "M: Producing final report.")
   if (file.exists(reportname <- "Report/actel_explore_report.Rmd")) {
     continue <- TRUE
@@ -286,6 +289,8 @@ Number of listed receivers: **', stringr::str_extract(pattern = '(?<=Number of A
 ', unknown.fragment,'
 
 Data time range: ', stringr::str_extract(pattern = '(?<=Data time range: )[^\r]*', string = report), '
+
+Percentage of valid detections: ', round(sum(unlist(lapply(valid.detections, nrow))) / sum(unlist(lapply(detections, nrow))) * 100, 2), '%
 
 Found a bug? [**Report it here.**](https://github.com/hugomflavio/actel/issues)
 

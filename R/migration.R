@@ -295,7 +295,9 @@ detections.list <- study.data$detections.list
     appendTo("debug", "debug: Printing report")
     rmarkdown::render(reportname <- printMigrationRmd(name.fragment = name.fragment, header.fragment = header.fragment, 
         biometric.fragment = biometric.fragment, survival.graph.size = survival.graph.size, circular.plots = circular.plots,
-        individual.plots = individual.plots, spatial = spatial, efficiency.fragment = efficiency.fragment, display.progression = display.progression, array.overview.fragment = array.overview.fragment), quiet = TRUE)
+        individual.plots = individual.plots, spatial = spatial, efficiency.fragment = efficiency.fragment, 
+        display.progression = display.progression, array.overview.fragment = array.overview.fragment, 
+        detections = detections, valid.detections = valid.detections), quiet = TRUE)
     appendTo("debug", "debug: Moving report")
     fs::file_move(sub("Rmd", "html", reportname), sub("Report/", "", sub("Rmd", "html", reportname)))
     appendTo("debug", "debug: Opening report if the pc has internet.")
@@ -342,7 +344,7 @@ detections.list <- study.data$detections.list
 #' @keywords internal
 #' 
 printMigrationRmd <- function(name.fragment, header.fragment, biometric.fragment, efficiency.fragment, display.progression, array.overview.fragment,
-  survival.graph.size, individual.plots, circular.plots, spatial, deployments){
+  survival.graph.size, individual.plots, circular.plots, spatial, deployments, valid.detections, detections){
   appendTo("Screen", "M: Producing final report.")
   if (file.exists(reportname <- paste("Report/actel_migration_report", name.fragment, ".Rmd", sep = ""))) {
     continue <- TRUE
@@ -391,6 +393,8 @@ Number of listed receivers: **', stringr::str_extract(pattern = '(?<=Number of A
 ', unknown.fragment,'
 
 Data time range: ', stringr::str_extract(pattern = '(?<=Data time range: )[^\r|^\n]*', string = report), '
+
+Percentage of valid detections: ', round(sum(unlist(lapply(valid.detections, nrow))) / sum(unlist(lapply(detections, nrow))) * 100, 2), '%
 
 Found a bug? [**Report it here.**](https://github.com/hugomflavio/actel/issues)
 

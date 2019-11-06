@@ -240,7 +240,7 @@ detections.list <- study.data$detections.list
   if (report) {
     appendTo("debug", "debug: Printing report")
     rmarkdown::render(reportname <- printResidencyRmd(biometric.fragment = biometric.fragment,
-        individual.plots = individual.plots, spatial = spatial), quiet = TRUE)
+        individual.plots = individual.plots, spatial = spatial, detections = detections, valid.detections = valid.detections), quiet = TRUE)
     appendTo("debug", "debug: Moving report")
     fs::file_move(sub("Rmd", "html", reportname), sub("Report/", "", sub("Rmd", "html", reportname)))
     appendTo("debug", "debug: Opening report if the pc has internet.")
@@ -274,7 +274,7 @@ detections.list <- study.data$detections.list
 #' 
 #' @keywords internal
 #' 
-printResidencyRmd <- function(biometric.fragment, individual.plots, spatial, deployments){
+printResidencyRmd <- function(biometric.fragment, individual.plots, spatial, deployments, detections, valid.detections){
   appendTo("Screen", "M: Producing final report.")
   if (file.exists(reportname <- paste("Report/actel_residency_report.Rmd", sep = ""))) {
     continue <- TRUE
@@ -321,6 +321,8 @@ Number of listed receivers: **', stringr::str_extract(pattern = '(?<=Number of A
 ', unknown.fragment,'
 
 Data time range: ', stringr::str_extract(pattern = '(?<=Data time range: )[^\r|^\n]*', string = report), '
+
+Percentage of valid detections: ', round(sum(unlist(lapply(valid.detections, nrow))) / sum(unlist(lapply(detections, nrow))) * 100, 2), '%
 
 Found a bug? [**Report it here.**](https://github.com/hugomflavio/actel/issues)
 
