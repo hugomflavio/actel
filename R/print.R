@@ -262,6 +262,7 @@ printDotplots <- function(status.df, invalid.dist) {
   appendTo("debug", "Starting printDotplots.")
   t1 <- status.df[status.df$Detections > 0, c("Transmitter", "Detections", colnames(status.df)[grepl("Time.until", colnames(status.df)) | grepl("Speed.to", colnames(status.df)) | grepl("Time.in", 
     colnames(status.df))])]
+  t1 <- t1[, apply(t1, 2, function(x) !all(is.na(x)))]
   t1$Transmitter <- factor(t1$Transmitter, levels = rev(t1$Transmitter))
   largest <- c(-1, -1, 
     unlist(
@@ -376,8 +377,8 @@ printSurvivalGraphic <- function(section.overview) {
   p <- p + ggplot2::theme_bw()
   p <- p + ggplot2::ylim(0, 1)
   p <- p + ggplot2::labs(x = "", y = "Survival")
-  # ggplot2::ggsave(paste("Report/survival.pdf", sep = ""), width = nrow(section.overview) * 2, height = 4)
-  ggplot2::ggsave(paste("Report/survival.png", sep = ""), width = nrow(section.overview) * 2, height = 4)
+  the.width <- max(2, sum(grepl("Disap.", colnames(section.overview))) * nrow(section.overview))
+  ggplot2::ggsave(paste("Report/survival.png", sep = ""), width = the.width, height = 4)
   appendTo("debug", "Terminating printSurvivalGraphic.")
 }
 
