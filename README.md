@@ -1,4 +1,4 @@
-Jump to [**installation instructions**](#installing-actel)
+Jump to [**installation instructions**](#installing-actel-development-version)
 
 ## Actel: Acoustic telemetry data sorting (development version)
 
