@@ -156,19 +156,21 @@ detections.list <- study.data$detections.list
   status.df <- assembleOutput(timetable = timetable, bio = bio, movements = movements, spatial = spatial, 
     sections = sections, dist.mat = dist.mat, invalid.dist = invalid.dist, tz.study.area = tz.study.area)
   
-  simple.movements <- simplifyMovements(movements = movements, bio = bio, 
+  valid.movements <- simplifyMovements(movements = movements, bio = bio, 
     speed.method = speed.method, dist.mat = dist.mat, invalid.dist = invalid.dist)
+
+  valid.detections <- validateDetections(detections.list = detections.list, movements = valid.movements)
 
   appendTo(c("Screen", "Report"), "M: Getting summary information tables.")
   
   section.overview <- assembleSectionOverview(status.df = status.df, sections = sections)
 
-  times <- getTimes(simple.movements = simple.movements, spatial = spatial, 
+  times <- getTimes(simple.movements = valid.movements, spatial = spatial, 
     tz.study.area = tz.study.area, type = "Arrival")
 # -------------------------------------
 
 # CJS stuff
-  the.matrices <- assembleMatrices(spatial = spatial, simple.movements = simple.movements, status.df = status.df)
+  the.matrices <- assembleMatrices(spatial = spatial, simple.movements = valid.movements, status.df = status.df)
 
   m.by.array <- breakMatricesByArray(m = the.matrices, arrays = arrays)
   CJS.list <- lapply(m.by.array, function(m) {
@@ -229,11 +231,11 @@ detections.list <- study.data$detections.list
   deployments <- do.call(rbind.data.frame, deployments)
   matrices <- the.matrices
   if (invalid.dist)
-    save(detections, spatial, deployments, arrays, movements, simple.movements, status.df,
+    save(detections, valid.detections, spatial, deployments, arrays, movements, valid.movements, status.df,
       section.overview, array.overview, matrices, overall.CJS, 
       intra.array.CJS, times, file = resultsname)
   else
-    save(detections, spatial, deployments, arrays, movements, simple.movements, status.df,
+    save(detections, valid.detections, spatial, deployments, arrays, movements, valid.movements, status.df,
       section.overview, array.overview, matrices, overall.CJS,
       intra.array.CJS, times, dist.mat, file = resultsname)
 # ------------
@@ -247,7 +249,7 @@ detections.list <- study.data$detections.list
     printDot(dot = dot, sections = sections, spatial = spatial)
     mbPrintProgression(dot = dot,  sections = sections, overall.CJS = overall.CJS, spatial = spatial, status.df = status.df)
     individual.plots <- printIndividuals(redraw = TRUE, detections.list = detections.list, bio = bio, 
-        status.df = status.df, tz.study.area = tz.study.area, movements = movements, simple.movements = simple.movements)
+        status.df = status.df, tz.study.area = tz.study.area, movements = movements, simple.movements = valid.movements)
     circular.plots <- printCircular(times = convertTimesToCircular(times), bio = bio)
     array.overview.fragment <- printArrayOverview(array.overview)
     if (nrow(section.overview) > 3) 
@@ -286,14 +288,14 @@ detections.list <- study.data$detections.list
     deleteHelpers()
 
   if (invalid.dist)
-    return(list(detections = detections, spatial = spatial, deployments = deployments, arrays = arrays,
-      movements = movements, simple.movements = simple.movements,
+    return(list(detections = detections, valid.detections = valid.detections, spatial = spatial, deployments = deployments, arrays = arrays,
+      movements = movements, valid.movements = valid.movements,
       status.df = status.df, section.overview = section.overview, array.overview = array.overview,
       matrices = matrices, overall.CJS = overall.CJS, 
       intra.array.CJS = intra.array.CJS, times = times))
   else
-    return(list(detections = detections, spatial = spatial, deployments = deployments, arrays = arrays,
-      movements = movements, simple.movements = simple.movements,
+    return(list(detections = detections, valid.detections = valid.detections, spatial = spatial, deployments = deployments, arrays = arrays,
+      movements = movements, valid.movements = valid.movements,
       status.df = status.df, section.overview = section.overview, array.overview = array.overview,
       matrices = matrices, overall.CJS = overall.CJS, 
       intra.array.CJS = intra.array.CJS, times = times, dist.mat = dist.mat))

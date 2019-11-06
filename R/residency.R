@@ -141,32 +141,34 @@ detections.list <- study.data$detections.list
   movements <- checkJumpDistance(movements = movements, bio = bio, dotmat = dotmat, 
                                  spatial = spatial, jump.warning = jump.warning, jump.error = jump.error)
 
-  simple.movements <- simplifyMovements(movements = movements, bio = bio, 
+  valid.movements <- simplifyMovements(movements = movements, bio = bio, 
     speed.method = speed.method, dist.mat = dist.mat, invalid.dist = invalid.dist)
 
   # Residency-exclusive area
 
   # Compress array movements into section movements
-  section.movements <- sectionMovements(movements = simple.movements, sections = sections, invalid.dist = invalid.dist)
+  section.movements <- sectionMovements(movements = valid.movements, sections = sections, invalid.dist = invalid.dist)
   # Look for isolated section movements
   section.movements <- checkSMovesN(secmoves = section.movements)
   # Update array movements based on secmove validity
   movements <- updateAMValidity(arrmoves = movements, secmoves = section.movements)
 
   # Resimplify array moves and calculate simple section moves
-  simple.movements <- simplifyMovements(movements = movements, bio = bio, 
+  valid.movements <- simplifyMovements(movements = movements, bio = bio, 
     speed.method = speed.method, dist.mat = dist.mat, invalid.dist = invalid.dist)
-  simple.secmoves <- sectionMovements(movements = simple.movements, sections = sections, invalid.dist = invalid.dist)
+  valid.section.movements <- sectionMovements(movements = valid.movements, sections = sections, invalid.dist = invalid.dist)
+
+  valid.detections <- validateDetections(detections.list = detections.list, movements = valid.movements)
 
   # Grab summary information
-  res.df <- assembleResidency(secmoves = section.movements, movements = movements, sections = sections)
+  res.df <- assembleResidency(secmoves = valid.section.movements, movements = valid.movements, sections = sections)
   appendTo(c("Screen", "Report"), "M: Timetable successfully filled. Fitting in the remaining variables.")
   status.df <- res_assembleOutput(res.df = res.df, bio = bio, spatial = spatial, 
                                   sections = sections, tz.study.area = tz.study.area)
 # ---------------
   
 # Efficiency
-  efficiency <- res_efficiency(arrmoves = simple.movements, bio = bio, spatial = spatial, arrays = arrays, paths = paths, dotmat = dotmat)
+  efficiency <- res_efficiency(arrmoves = valid.movements, bio = bio, spatial = spatial, arrays = arrays, paths = paths, dotmat = dotmat)
 # ----------
 
   
@@ -200,11 +202,11 @@ detections.list <- study.data$detections.list
   detections <- detections.list
   deployments <- do.call(rbind.data.frame, deployments)
   if (invalid.dist)
-    save(detections, spatial, deployments, arrays, movements, simple.movements, 
-      section.movements, status.df, file = resultsname)
+    save(detections, valid.detections, spatial, deployments, arrays, movements, valid.movements, 
+      section.movements, valid.section.movements, status.df, file = resultsname)
   else
-    save(detections, spatial, deployments, arrays, movements, simple.movements, 
-      section.movements, dist.mat, file = resultsname)
+    save(detections, valid.detections, spatial, deployments, arrays, movements, valid.movements, 
+      section.movements, valid.section.movements, status.df, dist.mat, file = resultsname)
 # ------------
 
 # Print graphics
@@ -216,7 +218,7 @@ detections.list <- study.data$detections.list
     printDot(dot = dot, sections = sections, spatial = spatial)
     # mbPrintProgression(dot = dot,  sections = sections, overall.CJS = overall.CJS, spatial = spatial, status.df = status.df)
     individual.plots <- printIndividuals(redraw = TRUE, detections.list = detections.list, bio = bio, 
-        tz.study.area = tz.study.area, movements = movements, simple.movements = simple.movements)
+        tz.study.area = tz.study.area, movements = movements, simple.movements = valid.movements)
     # circular.plots <- printCircular(times = convertTimesToCircular(times), bio = bio)
     # array.overview.fragment <- printArrayOverview(array.overview)
     # if (nrow(section.overview) > 3) 
@@ -254,12 +256,12 @@ detections.list <- study.data$detections.list
     deleteHelpers()
 
   if (invalid.dist)
-    return(list(detections = detections, spatial = spatial, deployments = deployments, arrays = arrays,
-      movements = movements, simple.movements = simple.movements, section.movements = section.movements,
+    return(list(detections = detections, valid.detections = valid.detections, spatial = spatial, deployments = deployments, arrays = arrays,
+      movements = movements, valid.movements = valid.movements, section.movements = section.movements, valid.section.movements = valid.section.movements,
       status.df = status.df, efficiency = efficiency))
   else
-    return(list(detections = detections, spatial = spatial, deployments = deployments, arrays = arrays,
-      movements = movements, simple.movements = simple.movements, section.movements = section.movements,
+    return(list(detections = detections, valid.detections = valid.detections, spatial = spatial, deployments = deployments, arrays = arrays,
+      movements = movements, valid.movements = valid.movements, section.movements = section.movements, valid.section.movements = valid.section.movements,
       status.df = status.df, efficiency = efficiency, dist.mat = dist.mat))
 }
 

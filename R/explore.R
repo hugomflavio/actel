@@ -144,11 +144,14 @@ detections.list <- study.data$detections.list
   #   movements <- checkMovementSpeeds(movements = movements, speed.warning = speed.warning, 
   #     speed.error = speed.error)
 
-  simple.movements <- simplifyMovements(movements = movements, bio = bio, 
+  valid.movements <- simplifyMovements(movements = movements, bio = bio, 
     speed.method = speed.method, dist.mat = dist.mat, invalid.dist = invalid.dist)
 
-  times <- getTimes(simple.movements = simple.movements, spatial = spatial, 
+  times <- getTimes(simple.movements = valid.movements, spatial = spatial, 
     tz.study.area = tz.study.area, type = "Arrival")
+
+  valid.detections <- validateDetections(detections.list = detections.list, movements = valid.movements)
+
 # -------------------------------------
 
 # wrap up in-R objects
@@ -171,9 +174,9 @@ detections.list <- study.data$detections.list
   detections <- detections.list
   deployments <- do.call(rbind.data.frame, deployments)
   if (invalid.dist)
-    save(detections, spatial, deployments, arrays, movements, simple.movements, times, file = resultsname)
+    save(detections, valid.detections, spatial, deployments, arrays, movements, valid.movements, times, file = resultsname)
   else
-    save(detections, spatial, deployments, arrays, movements, simple.movements, times, dist.mat, file = resultsname)
+    save(detections, valid.detections, spatial, deployments, arrays, movements, valid.movements, times, dist.mat, file = resultsname)
 # ------------
 
 # Print graphics
@@ -216,11 +219,11 @@ detections.list <- study.data$detections.list
     deleteHelpers()
 
   if (invalid.dist) {
-    return(list(detections = detections, spatial = spatial, deployments = deployments, arrays = arrays,
-      movements = movements, simple.movements = simple.movements, times = times))
+    return(list(detections = detections, valid.detectiosn = valid.detections, spatial = spatial, deployments = deployments, arrays = arrays,
+      movements = movements, valid.movements = valid.movements, times = times))
   } else {
-    return(list(detections = detections, spatial = spatial, deployments = deployments, arrays = arrays,
-      movements = movements, simple.movements = simple.movements, times = times, dist.mat = dist.mat))
+    return(list(detections = detections, valid.detectiosn = valid.detections, spatial = spatial, deployments = deployments, arrays = arrays,
+      movements = movements, valid.movements = valid.movements, times = times, dist.mat = dist.mat))
   }
 }
 
@@ -444,7 +447,6 @@ h4 {
 sink()
 return(reportname)
 }
-
 
 #' Compare original detections with the valid movements and exclude invalid detections
 #' 
