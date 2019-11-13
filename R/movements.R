@@ -29,8 +29,8 @@ groupMovements <- function(detections.list, bio, spatial, speed.method, maximum.
           Detections = NA_integer_, 
           First.station = NA_character_, 
           Last.station = NA_character_, 
-          First.time = NA_character_, 
-          Last.time = NA_character_, 
+          First.time = as.POSIXct(NA_character_, tz = tz.study.area, format = "%y-%m-%d %H:%M:%S"), 
+          Last.time = as.POSIXct(NA_character_, tz = tz.study.area, format = "%y-%m-%d %H:%M:%S"), 
           Time.travelling = NA_character_, 
           Time.in.array = NA_character_, 
           Valid = NA,
@@ -42,8 +42,8 @@ groupMovements <- function(detections.list, bio, spatial, speed.method, maximum.
           Detections = NA_integer_, 
           First.station = NA_character_, 
           Last.station = NA_character_, 
-          First.time = NA_character_, 
-          Last.time = NA_character_, 
+          First.time = as.POSIXct(NA_character_, tz = tz.study.area, format = "%y-%m-%d %H:%M:%S"), 
+          Last.time = as.POSIXct(NA_character_, tz = tz.study.area, format = "%y-%m-%d %H:%M:%S"), 
           Time.travelling = NA_character_, 
           Time.in.array = NA_character_, 
           Average.speed.m.s = NA_real_,
@@ -64,9 +64,9 @@ groupMovements <- function(detections.list, bio, spatial, speed.method, maximum.
         recipient[z, "Array"] = paste(detections.list[[i]]$Array[start])
         recipient[z, "Detections"] = stop - start + 1
         recipient[z, "First.station"] = paste(detections.list[[i]]$Standard.Name[start])
-        recipient[z, "First.time"] = paste(detections.list[[i]]$Timestamp[start])
+        recipient[z, "First.time"] = detections.list[[i]]$Timestamp[start]
         recipient[z, "Last.station"] = paste(detections.list[[i]]$Standard.Name[stop])
-        recipient[z, "Last.time"] = paste(detections.list[[i]]$Timestamp[stop])
+        recipient[z, "Last.time"] = detections.list[[i]]$Timestamp[stop]
         z = z + 1
         counter <- counter + stop - start + 1
         if (i == tail(names(detections.list), 1)) 
@@ -78,9 +78,6 @@ groupMovements <- function(detections.list, bio, spatial, speed.method, maximum.
       recipient$Valid <- TRUE
       
       if (!is.null(recipient)) {
-        recipient[, "First.time"] <- as.POSIXct(recipient[, "First.time"], tz = tz.study.area)
-        recipient[, "Last.time"] <- as.POSIXct(recipient[, "Last.time"], tz = tz.study.area)
-        
         recipient <- data.table::as.data.table(recipient)
         recipient <- movementTimes(movements = recipient,
             silent = FALSE, type = "array")
