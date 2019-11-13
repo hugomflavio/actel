@@ -187,8 +187,9 @@ detections.list <- study.data$detections.list
   valid.movements <- simplifyMovements(movements = movements, bio = bio, 
     speed.method = speed.method, dist.mat = dist.mat, invalid.dist = invalid.dist)
 
-  times <- getTimes(simple.movements = valid.movements, spatial = spatial, 
-    tz.study.area = tz.study.area, type = "Arrival")
+  times <- getTimes(movements = valid.movements, spatial = spatial, type = "arrival", events = "all")
+
+  appendTo("Screen", "M: Validating detections...")
 
   valid.detections <- validateDetections(detections.list = detections.list, movements = valid.movements)
 

@@ -221,16 +221,17 @@ detections.list <- study.data$detections.list
   
   section.overview <- assembleSectionOverview(status.df = status.df, sections = sections)
 
-  times <- getTimes(simple.movements = valid.movements, spatial = spatial, 
-    tz.study.area = tz.study.area, type = "Arrival")
+  times <- getTimes(movements = valid.movements, spatial = spatial, type = "arrival", events = "one")
+
 # -------------------------------------
 
 # CJS stuff
-  the.matrices <- assembleMatrices(spatial = spatial, simple.movements = valid.movements, status.df = status.df)
+  the.matrices <- assembleMatrices(spatial = spatial, movements = valid.movements, status.df = status.df,
+    arrays = arrays, paths = paths, dotmat = dotmat)[[2]] # extract only the minimum matrix
 
-  m.by.array <- breakMatricesByArray(m = the.matrices, arrays = arrays)
+  m.by.array <- breakMatricesByArray(m = the.matrices, arrays = arrays, type = "peers")
 
-  if (is.null(m.by.array)) {
+  if (is.null(m.by.array[[1]])) {
     calculate.efficiency <- FALSE
     appendTo(c("Screen", "Report", "Warning"), "W: Aborting efficiency calculations (will limit the report's output).")
   } else {
@@ -314,7 +315,7 @@ detections.list <- study.data$detections.list
   if (report) {
     biometric.fragment <- printBiometrics(bio = bio)
     if (calculate.efficiency)
-      efficiency.fragment <- mbPrintEfficiency(overall.CJS = overall.CJS, intra.CJS = intra.array.CJS)
+      efficiency.fragment <- printEfficiency(intra.CJS = intra.array.CJS, type = "migration")
     else
       efficiency.fragment <- "Array efficiency could not be calculated. See full log for more details.\n"
     printDotplots(status.df = status.df, invalid.dist = invalid.dist)
