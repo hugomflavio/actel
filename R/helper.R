@@ -11,27 +11,45 @@ stripCodeSpaces <- function(input) {
 #' Convert a list of data frames with identical columns into a single data frame
 #' 
 #' @param input a list of data frames
+#' @param type the type of output, one of table (for data tables) or frame (for data frames)
+#' @param row.names wether or not row names should be kept in the output
+#' @param source wether or not the source list name should be added as a new column.
 #' 
 #' @return a data frame with all lists combined
 #' 
 #' @export
 #' 
-listToTable <- function(input) {
+listToTable <- function(input, type = c("table", "frame"), row.names = FALSE, source = TRUE) {
+  type <- match.arg(type)
+  if (type == "table" & row.names)
+    warning("When type = 'table', row names cannot be returned. To keep row names, use type = 'frame' instead.")
   if (!is.list(input))
     stop("input must be a list.\n")
+  input <- input[!unlist(lapply(input, is.null))]
+  input <- input[!unlist(lapply(input, nrow)) == 0]
   the.columns <- lapply(input, colnames)
   presence.check <- unlist(lapply(seq_along(the.columns), function(i) {
     lapply(the.columns, function(x) match(the.columns[[i]], x))
   }))
   if (any(is.na(presence.check)))
     stop("The column names in the elements of input are not identical.\n")
-  aux <- lapply(seq_along(input), function(i) {
-    input[[i]]$list.source.name <- names(input)[i]
-    return(input[[i]])
-  })
+  if (source) {
+    aux <- lapply(seq_along(input), function(i) {
+      input[[i]]$list.source.name <- names(input)[i]
+      return(input[[i]])
+    })
+  } else {
+    aux <- input
+  }
   output <- do.call(rbind.data.frame, aux)
-  rownames(output) <- 1:nrow(output)
-  return(data.table::as.data.table(output))
+  if (row.names)
+    rownames(output) <- unlist(lapply(aux, row.names))
+  else
+    rownames(output) <- 1:nrow(output)
+  if (type == "table")
+    return(data.table::as.data.table(output))
+  else
+    return(as.data.frame(output))
 }
 
 #' Update study area for actel v.0.0.4
