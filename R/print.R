@@ -378,7 +378,7 @@ printSurvivalGraphic <- function(section.overview) {
   p <- p + ggplot2::geom_bar(stat = "identity", fill = cbPalette[[2]], colour = cbPalette[[2]])
   p <- p + ggplot2::facet_grid(. ~ group)
   p <- p + ggplot2::theme_bw()
-  p <- p + ggplot2::ylim(0, 1)
+  p <- p + ggplot2::scale_y_continuous(limits = c(0, 1), expand = c(0, 0, 0.05, 0))
   p <- p + ggplot2::labs(x = "", y = "Survival")
   the.width <- max(2, sum(grepl("Disap.", colnames(section.overview))) * nrow(section.overview))
   ggplot2::ggsave(paste("Report/survival.png", sep = ""), width = the.width, height = 4)
