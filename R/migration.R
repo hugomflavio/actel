@@ -156,6 +156,9 @@ detections <- study.data$detections
 dist.mat <- study.data$dist.mat
 invalid.dist <- study.data$invalid.dist
 detections.list <- study.data$detections.list
+
+if (is.null(success.arrays)) 
+  success.arrays <- names(arrays)[unlist(lapply(arrays, function(x) is.null(x$after)))]
 # -------------------------------------
   
 # Process the data
