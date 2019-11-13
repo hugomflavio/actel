@@ -411,7 +411,6 @@ printArrayOverview <- function(array.overview) {
 #'
 #' Prints the ALS inter-array efficiency for inclusion in printRmd.
 #' 
-#' @param overall.CJS a single CJS with all the groups and release sites merged
 #' @param intra.CJS The output of the getEstimate calculations.
 #' 
 #' @keywords internal
@@ -512,7 +511,7 @@ printIndividuals <- function(redraw, detections.list, bio, status.df = NULL, tz.
 
   cbPalette <- c("#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7", "#999999")
   names(cbPalette) <- c("Orange", "Blue", "Green", "Yellow", "Darkblue", "Darkorange", "Pink", "Grey")
-  appendTo(c("Screen", "Report"), "M: Drawing individual graphics for the report.")
+  appendTo(c("Screen", "Report"), "M: Drawing individual detection graphics.")
   if (exists("redraw") && redraw == FALSE) {
     appendTo(c("Screen", "Report"), "M: 'redraw' is set to FALSE, only drawing new graphics.")
   }
