@@ -214,11 +214,9 @@ if (is.null(success.arrays))
   
   status.df <- assembleOutput(timetable = timetable, bio = bio, spatial = spatial, 
     sections = sections, dist.mat = dist.mat, invalid.dist = invalid.dist, tz.study.area = tz.study.area)
-  
+
   valid.movements <- simplifyMovements(movements = movements, bio = bio, 
     speed.method = speed.method, dist.mat = dist.mat, invalid.dist = invalid.dist)
-
-  valid.detections <- validateDetections(detections.list = detections.list, movements = valid.movements)
 
   appendTo(c("Screen", "Report"), "M: Getting summary information tables.")
   
@@ -227,6 +225,8 @@ if (is.null(success.arrays))
   times <- getTimes(movements = valid.movements, spatial = spatial, type = "arrival", events = "one")
 
   appendTo("Screen", "M: Validating detections...")
+
+  valid.detections <- validateDetections(detections.list = detections.list, movements = valid.movements)
 
 # -------------------------------------
 
@@ -695,7 +695,6 @@ return(reportname)
 assembleTimetable <- function(movements, sections, spatial, arrays, minimum.detections, 
   dist.mat, invalid.dist, speed.method, if.last.skip.section, success.arrays, override, cautious.assignment) {
   appendTo("debug", "Starting assembleTimetable.")
-  appendTo(c("Screen", "Report"), "M: Initiating timetable development. Your assistance may be needed during the process.")
 
   # NOTE: The NULL variables below are actually column names used by data.table.
   # This definition is just to prevent the package check from issuing a note due unknown variables.
