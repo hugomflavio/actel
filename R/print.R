@@ -156,7 +156,10 @@ printDot <- function(dot, sections = NULL, spatial) {
     paste0(release_nodes$id, " [label = 'R.S.: ", release_nodes$label, "']", collapse = "\n"), "\n"))
 
   # prepare edge data frame
-  diagram_edges <- as.data.frame(apply(dot[, c(1, 3)], 2, function(x) match(x, diagram_nodes$label)))
+  if (nrow(dot) == 1)
+    diagram_edges <- as.data.frame(t(apply(dot[, c(1, 3), drop = FALSE], 2, function(x) match(x, diagram_nodes$label))))
+  else 
+    diagram_edges <- as.data.frame(apply(dot[, c(1, 3), drop = FALSE], 2, function(x) match(x, diagram_nodes$label)))
   diagram_edges$type <- NA_character_
   diagram_edges$type[dot$to == "--"] <- "[dir = none]"
   diagram_edges$type[dot$to == "->"] <- "[arrowtail = tee, arrowhead = normal, dir = both]"
