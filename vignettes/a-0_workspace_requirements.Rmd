@@ -166,21 +166,62 @@ A distances matrix is a table that contains information on  the distance (in met
 
 **[You can learn more about creating distances matrices in this page.](a-2_distances_matrix.html)**
 
-## Optional: Spatial.dot file
+## Optional: spatial.dot or spatial.txt file
 
 If your study area has multiple branches, then you need to tell actel how these branches connect with each other. This file is optional because, if ommitted, actel will assume that your study area is composed by a single branch and that the array order is the one listed in the spatial.csv file.
 
-The spatial.dot file is very simple; all you need to do is connect your arrays with arrows. Here is an example:
+The spatial.dot file is very simple; all you need to do is connect your arrays with either dashes or arrows (find out the difference below). You can connect your arrays in pairs or make longer strings. For example, both this file:
 
 ```
-River1 -> River2 -> River3 -> Fjord -> Sea1 -> Sea2 -> Sea3
-River1 -> River4 -> River5 -> Fjord
-River4 -> River6 -> Fjord
+River1 -- River2
+River2 -- River3
+River3 -- Fjord
+Fjord -- Sea1
+Sea1 -- Sea2
+Sea2 -- Sea3
+River1 -- River4
+River4 -- River5
+River5 -- Fjord
+River4 -- River6
+River6 -- Fjord
 ```
 
-Note that, for each branch, you will need a new line, that starts and ends in an array that is part of the main branch. The study area listed above looks like this:
+and this file:
+
+```
+River1 -- River2 -- River3 -- Fjord -- Sea1 -- Sea2 -- Sea3
+River1 -- River4 -- River5 -- Fjord
+River4 -- River6 -- Fjord
+```
+
+Would code this study area:
 
 <img src="multi-branch.svg" alt="drawing" width="680"/>
+
+<span style="color:red">Note:</span>
+  : This file can be called either "spatial.dot" or "spatial.txt", and you can create it using a simple text editor such as notepad, kate, VIM, etc.
+
+#### Array direction
+
+In the migration analysis, array direction is relevant. That means that writing `A -- B` is not the same as writing `B -- A`. In the first case, array B comes after array A (i.e. the fish are expected to reach A before reaching B), while in the second case the situation is reversed.
+
+This has implications for array efficiency calculations, so be sure to encode your study area carefully.
+
+If you intend to run an explore or residency analysis, array direction is irrelevant.
+
+
+#### Barriers
+
+Sometimes it is possible for your fish to go from A to B, but not from B to A. In actel, you can include this information to further refine the analysis. In total, there are three symbols you can use to connect your arrays: `--`, `->` or `<-`.
+
+If the fish can move from A to B and vice-versa, use `A -- B`.
+
+If the fish can only move from A to B, use either `A -> B` or `B <- A`.
+
+If a fish then actually moves from B to A, actel will try to find an alternative route that the fish could have taken. If there are no alternative routes from B to A, actel will call this situation to your attention.
+
+This has implications for array efficiency calculations, so be sure to encode your study area carefully.
+
 
 ## Running the analysis
 
@@ -197,13 +238,17 @@ Now that you have prepared your workspace, it is time to start the analysis. The
 
   The migration() analysis runs the same initial checks as explore(), but on top of it, it analyses
   the fish behaviour. By selecting the arrays that lead to success, you can define whether or not
-  your fish survived the study. Multiple options allow you to tweak the analysis to fit your study perfectly.
+  your fish survived the study. Additional plots help you find out if some fish has been acting odd.
+  Multiple options allow you to tweak the analysis to fit your study perfectly.
 
   [Learn more about the migration function.](c-0_migration.html)
  
 **3. residency()**
 
-  The residency() analysis is still under construction. Keep an eye out for updates!
+  The residency() analysis runs the same initial checks as explore(), but, similarly to migration, explores
+  particular points of the fish behaviour. If you want to know where your fish were in each day of the study,
+  how many fish were in each section each day, and other residency-focused variables, this is the analysis
+  you are looking for!
 
   [Learn more about the residency function.](d-0_residency.html)
 
