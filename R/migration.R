@@ -212,7 +212,7 @@ if (is.null(success.arrays))
   rm(recipient)
   appendTo(c("Screen", "Report"), "M: Timetable successfully filled. Fitting in the remaining variables.")
   
-  status.df <- assembleOutput(timetable = timetable, bio = bio, movements = movements, spatial = spatial, 
+  status.df <- assembleOutput(timetable = timetable, bio = bio, spatial = spatial, 
     sections = sections, dist.mat = dist.mat, invalid.dist = invalid.dist, tz.study.area = tz.study.area)
   
   valid.movements <- simplifyMovements(movements = movements, bio = bio, 
@@ -1468,7 +1468,7 @@ countBackMoves <- function(movements, arrays){
 #' 
 #' @keywords internal
 #' 
-assembleOutput <- function(timetable, bio, movements, spatial, sections, dist.mat, invalid.dist, tz.study.area) {
+assembleOutput <- function(timetable, bio, spatial, sections, dist.mat, invalid.dist, tz.study.area) {
   appendTo("debug", "Merging 'bio' and 'timetable'.")
   status.df <- merge(bio, timetable, by = "Transmitter", all = TRUE)
   
