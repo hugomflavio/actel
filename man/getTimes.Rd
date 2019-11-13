@@ -4,15 +4,16 @@
 \alias{getTimes}
 \title{Extract time stamp of valid entry or exit in each array}
 \usage{
-getTimes(simple.movements, spatial, tz.study.area, type = c("Arrival",
-  "Departure"))
+getTimes(movements, spatial, type = c("arrival", "departure"),
+  events = c("one", "all"))
 }
 \arguments{
-\item{simple.movements}{A list of valid-only movements for each fish}
+\item{movements}{A list of movements for each target tag, created by groupMovements.}
 
-\item{tz.study.area}{The time-zone of the study area. Necessary to convert the ALS time data, which is in UTC.}
+\item{type}{The point to be recorded: one of "arrival" or "departure".}
 
-\item{type}{The point to be recorded: one of "Arrival" or "Departure".}
+\item{events}{The number of events to record. if "one" and type is "arrival", the very first arrival is returned;
+if "one" and type is "departure", the very last departure is returned.}
 }
 \value{
 A data frame with the timestamps for each fish (rows) and array (columns)

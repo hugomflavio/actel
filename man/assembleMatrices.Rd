@@ -4,9 +4,11 @@
 \alias{assembleMatrices}
 \title{Assemble detection matrices}
 \usage{
-assembleMatrices(spatial, simple.movements, status.df)
+assembleMatrices(spatial, movements, status.df, arrays, paths, dotmat)
 }
 \arguments{
+\item{movements}{A list of movements for each target tag, created by groupMovements.}
+
 \item{simple.movements}{A list of valid-only movements for each fish}
 }
 \value{

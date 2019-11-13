@@ -4,7 +4,7 @@
 \alias{getDualMatrices}
 \title{Prepare intra-array matrices for selected arrays}
 \usage{
-getDualMatrices(replicates, CJS, spatial, detections.list)
+getDualMatrices(replicates, CJS = NULL, spatial, detections.list)
 }
 \arguments{
 \item{replicates}{A list of arrays containing the respective replicate stations}

@@ -4,10 +4,10 @@
 \alias{efficiencyMatrix}
 \title{Compile inter-array detection matrix}
 \usage{
-efficiencyMatrix(spatial, simple.movements)
+efficiencyMatrix(movements, arrays, paths, dotmat)
 }
 \arguments{
-\item{simple.movements}{A list of valid-only movements for each fish}
+\item{movements}{A list of movements for each target tag, created by groupMovements.}
 }
 \value{
 a matrix of detection histories per fish.

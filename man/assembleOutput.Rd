@@ -4,15 +4,13 @@
 \alias{assembleOutput}
 \title{Create status.df}
 \usage{
-assembleOutput(timetable, bio, movements, spatial, sections, dist.mat,
-  invalid.dist, tz.study.area)
+assembleOutput(timetable, bio, spatial, sections, dist.mat, invalid.dist,
+  tz.study.area)
 }
 \arguments{
 \item{timetable}{A table of the entering and leaving points for each section per target tag, created by assembleTimetable.}
 
 \item{bio}{A table with the tags and biometrics of the studied fish.}
-
-\item{movements}{A list of movements for each target tag, created by groupMovements.}
 
 \item{sections}{The sections in which the study was divided. Must be coincident with the names given to the ALS arrays. (i.e. if an array is 'River1', then the respective section is 'River')}
 

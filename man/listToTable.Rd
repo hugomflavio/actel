@@ -4,10 +4,17 @@
 \alias{listToTable}
 \title{Convert a list of data frames with identical columns into a single data frame}
 \usage{
-listToTable(input)
+listToTable(input, type = c("table", "frame"), row.names = FALSE,
+  source = TRUE)
 }
 \arguments{
 \item{input}{a list of data frames}
+
+\item{type}{the type of output, one of table (for data tables) or frame (for data frames)}
+
+\item{row.names}{wether or not row names should be kept in the output}
+
+\item{source}{wether or not the source list name should be added as a new column.}
 }
 \value{
 a data frame with all lists combined

@@ -6,11 +6,11 @@
 \usage{
 residency(path = NULL, sections, minimum.detections = 2,
   maximum.time = 60, speed.method = c("last to first",
-  "first to first"), if.last.skip.section = TRUE, tz.study.area,
-  start.timestamp = NULL, end.timestamp = NULL, report = TRUE,
-  override = NULL, exclude.tags = NULL, cautious.assignment = TRUE,
+  "first to first"), speed.warning = NULL, speed.error = NULL,
+  if.last.skip.section = TRUE, tz.study.area, start.timestamp = NULL,
+  end.timestamp = NULL, report = TRUE, exclude.tags = NULL,
   replicates = NULL, jump.warning = 2, jump.error = 3,
-  debug = FALSE)
+  inactive.warning = NULL, inactive.error = NULL, debug = FALSE)
 }
 \arguments{
 \item{path}{Path to the folder containing the data. If the R session is already running in the target folder, path may be left as NA}
@@ -23,6 +23,10 @@ residency(path = NULL, sections, minimum.detections = 2,
 
 \item{speed.method}{One of 'last to first' or 'first to first'. In the former, the last detection on a given array/section is matched to the first detection on the next array/section (default). If changed to 'first to first', the first detection on two consecutive arrays/sections are used to perform the calculations.}
 
+\item{speed.warning}{Numeric value. If a fish moves at a speed greater or equal to this argument, a warning is issued. Defaults to NULL (i.e. no speed checks are performed, with a message)}
+
+\item{speed.error}{Numeric value. If a fish moves at a speed greater or equal to this argument, user intervention is suggested. Defaults to NULL (i.e. no errors are issued)}
+
 \item{if.last.skip.section}{Indicates whether a fish detected at the last array of a given section should be considered to have disappeared in the next section. Defaults to TRUE. I.e.: In a study with sections 'River' and 'Fjord', where 'River3' is the last river array, a fish last detected at River3 will be considered as 'disappeared in the Fjord'.}
 
 \item{tz.study.area}{The time-zone of the study area. Necessary to convert the ALS time data, which is in UTC.}
@@ -33,17 +37,17 @@ residency(path = NULL, sections, minimum.detections = 2,
 
 \item{report}{Whether graphics, tables and LaTeX report files should be created. Defaults to TRUE. Allows automatic compiling of a PDF report after the analysis.}
 
-\item{override}{A list of tags for which the user intends to manually define entering and leaving points for each study section.}
-
 \item{exclude.tags}{A list of tags that should be excluded from the detection data before any analyses are performed. Intended to be used if stray tags from a different code space but with the same signal as a target tag are detected in the study area.}
-
-\item{cautious.assignment}{If TRUE, actel avoids assigning events with one detection as first and/or last events of a section.}
 
 \item{replicates}{A list containing, for each desired array, the standard names of the stations to be used as a replicate, for efficiency estimations.}
 
 \item{jump.warning}{Integer value. If a fish crosses ´jump.warning´ arrays without being detected, a warning is issued.}
 
 \item{jump.error}{Integer value. If a fish crosses ´jump.error´ arrays without being detected, user intervention is suggested.}
+
+\item{inactive.warning}{Numeric value. If a fish spends a number of days greater or equal to this argument in a given place, a warning is issued. Defaults to NULL (i.e. no speed checks are performed, with a message)}
+
+\item{inactive.error}{Numeric value. If a fish spends a number of days greater or equal to this argument in a given place, user intervention is suggested. Defaults to NULL (i.e. no errors are issued)}
 
 \item{debug}{If TRUE, temporary files are not deleted at the end of the analysis. Defaults to FALSE.}
 }

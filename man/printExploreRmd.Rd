@@ -5,7 +5,7 @@
 \title{Print Rmd report}
 \usage{
 printExploreRmd(biometric.fragment, individual.plots, circular.plots,
-  spatial)
+  spatial, detections, valid.detections)
 }
 \arguments{
 \item{biometric.fragment}{Rmarkdown string specifying the biometric graphics drawn.}
@@ -13,6 +13,10 @@ printExploreRmd(biometric.fragment, individual.plots, circular.plots,
 \item{individual.plots}{Rmarkdown string specifying the name of the individual plots.}
 
 \item{circular.plots}{Rmarkdown string specifying the name of the circular plots.}
+
+\item{detections}{All the detections used in the study}
+
+\item{valid.detectiosn}{The valid detections used in the study}
 }
 \description{
 Creates a Rmd report and converts it to hmtl.

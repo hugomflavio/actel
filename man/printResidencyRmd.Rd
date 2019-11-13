@@ -4,13 +4,16 @@
 \alias{printResidencyRmd}
 \title{Print Rmd report}
 \usage{
-printResidencyRmd(biometric.fragment, individual.plots, spatial,
-  deployments)
+printResidencyRmd(biometric.fragment, efficiency.fragment,
+  individual.detection.plots, individual.residency.plots,
+  array.circular.plots, section.arrival.circular.plots,
+  section.departure.circular.plots, spatial, deployments, detections,
+  valid.detections, last.seen, last.seen.graph.size)
 }
 \arguments{
 \item{biometric.fragment}{Rmarkdown string specifying the biometric graphics drawn.}
 
-\item{individual.plots}{Rmarkdown string specifying the name of the individual plots.}
+\item{efficiency.fragment}{Rmarkdown string specifying the efficiency results.}
 }
 \description{
 Creates a Rmd report and converts it to hmtl.
