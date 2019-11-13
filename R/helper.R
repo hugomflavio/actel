@@ -426,34 +426,83 @@ updateActel <- function() {
 #' @inheritParams assembleMatrices
 #' @inheritParams loadDetections
 #' @inheritParams actel
-#' @param type The point to be recorded: one of "Arrival" or "Departure".
+#' @param type The point to be recorded: one of "arrival" or "departure".
+#' @param events The number of events to record. if "one" and type is "arrival", the very first arrival is returned;
+#' if "one" and type is "departure", the very last departure is returned.
 #' 
 #' @keywords internal
 #' 
 #' @return A data frame with the timestamps for each fish (rows) and array (columns)
 #' 
-getTimes <- function(simple.movements, spatial, tz.study.area, type = c("Arrival", "Departure")){
-  appendTo("Debug", "Starting getTimes.")
+getTimes <- function(movements, spatial, type = c("arrival", "departure"), events = c("one", "all")){
+  # appendTo("Debug", "Starting getTimes.")
   type <- match.arg(type)
-  output <- matrix(nrow = length(simple.movements), ncol = length(unlist(spatial$array.order)) + 1)
-  colnames(output) <- c("Transmitter", unlist(spatial$array.order))
-  output <- as.data.frame(output)
-  output$Transmitter <- names(simple.movements)
-  for (i in 1:length(simple.movements)) {
-    for (j in 2:ncol(output)) {
-      if (type == "Arrival") the.row <- head(which(grepl(colnames(output)[j], simple.movements[[i]]$Array)), 1)
-      if (type == "Departure") the.row <- tail(which(grepl(colnames(output)[j], simple.movements[[i]]$Array)), 1)
-      if (length(the.row) != 0) {
-        if (type == "Arrival") output[i,j] <- as.character(simple.movements[[i]]$First.time[the.row])
-        if (type == "Departure") output[i,j] <- as.character(simple.movements[[i]]$Last.time[the.row])
+  events <- match.arg(events)
+
+  the.times <- list()
+
+  if (type == "arrival")
+    the.column <- "First.time"
+  else
+    the.column <- "Last.time"
+
+  # extrat arrivals or departures
+  capture.output <- lapply(movements, function(x) {
+    # cat(".\n")
+    aux <- x[[the.column]] # data.table syntax
+    names(aux) <- x[[1]] # data.table syntax
+    the.times[[length(the.times) + 1]] <<- aux
+    return(NULL)
+  })
+  names(the.times) <- names(movements)
+
+  # allow array/section movement flexibility
+  if (colnames(movements[[1]])[1] == "Array")
+    col.order <- unlist(spatial$array.order)
+  else
+    col.order <- names(spatial$array.order)
+
+  # shuffle data into the right format
+  aux <- lapply(col.order, function(i) {
+    aux <- lapply(names(the.times), function(j) {
+      # cat(j, "\n")
+      output <- data.frame(V1 = the.times[[j]][names(the.times[[j]]) == i])
+      colnames(output) <- i
+      if (nrow(output) > 0) {
+        rownames(output) <- paste(j, 1:nrow(output), sep = "_")
+        if (events == "one") {
+          if (type == "arrival")
+            return(output[1, , drop = FALSE])
+          else
+            return(output[nrow(output), , drop = FALSE])
+        } else {
+          return(output)
+        }
+      } else {
+        return(NULL)
       }
-      if (i == nrow(output))
-        output[,j] <- as.POSIXct(output[,j], tz = tz.study.area)
-    }
-  }
-  appendTo("Debug", "Terminating getTimes.")
+    })
+    names(aux) <- names(the.times)
+    output <- listToTable(aux, type = "frame", row.names = TRUE, source = FALSE)
+    if (events == "one")
+      rownames(output) <- gsub("_[0-9]*$", "", rownames(output))
+    return(output)
+  })
+  # Ensure all data frames contain the same rows, by the same order
+  the.rows <- sort(unique(unlist(lapply(aux, row.names))))
+  aux <- lapply(aux, function(x) {
+    rows.to.add <- the.rows[!the.rows %in% row.names(x)]
+    x[rows.to.add, ] <- NA
+    x <- x[the.rows, , drop = FALSE]
+    return(x)
+  })
+  output <- do.call(cbind, aux)
+  output$Transmitter <- gsub("_[0-9]*$", "", rownames(output))
+  output <- output[, c(ncol(output), 1:(ncol(output) - 1))]
+  # appendTo("Debug", "Terminating getTimes.")
   return(output)
 }
+
 
 #' Convert times data frame into a list of circular objects
 #' 
