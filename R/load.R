@@ -23,6 +23,8 @@ loadStudyData <- function(tz.study.area, override = NULL, start.timestamp, end.t
 
   detections <- loadDetections(start.timestamp = start.timestamp, end.timestamp = end.timestamp, tz.study.area = tz.study.area)
   detections <- createStandards(detections = detections, spatial = spatial, deployments = deployments) # get standardize station and receiver names, check for receivers with no detections
+  appendTo(c("Screen","Report"), paste("M: Data time range: ", as.character(head(detections$Timestamp, 1)), " to ", as.character(tail(detections$Timestamp, 1)), " (", tz.study.area, ").", sep = ""))
+
   checkUnknownReceivers(input = detections) # Check if there are detections from unknown detections
 
   use.fakedot <- TRUE
@@ -677,11 +679,10 @@ loadDetections <- function(start.timestamp = NULL, end.timestamp = NULL, tz.stud
     }
     appendTo("UD", decision)
     if (decision != "N" & decision != "n"){
-      appendTo(c("Screen","Report"), paste("M: Using detections previously compiled on ", actel.detections$timestamp, ".", sep = ""))
+      appendTo(c("Screen","Report"), paste("M: Using detections previously compiled on ", actel.detections$timestamp, "...", sep = ""))
       detections <- actel.detections$detections
       attributes(detections$Timestamp)$tzone <- "UTC"
       detections <- convertTimes(input = detections, start.timestamp = start.timestamp, end.timestamp = end.timestamp, tz.study.area = tz.study.area)
-      appendTo(c("Screen","Report"), paste("M: Data time range: ", as.character(head(detections$Timestamp, 1)), " to ", as.character(tail(detections$Timestamp, 1)), " (", tz.study.area, ").", sep = ""))
       recompile <- FALSE
     } else {
       appendTo("Screen", "M: Reprocessing the detections.")
@@ -771,7 +772,6 @@ compileDetections <- function(path = "detections", start.timestamp = NULL, end.t
   actel.detections <- list(detections = output, timestamp = Sys.time())
     save(actel.detections, file = ifelse(file_test("-d", path), paste0(path, "/actel.detections.RData"), "actel.detections.RData"))
   
-  appendTo(c("Screen", "Report"), paste("M: Data time range: ", as.character(head(output$Timestamp, 1)), " to ", as.character(tail(output$Timestamp, 1)), " (", tz.study.area, ").", sep = ""))
   appendTo("debug", "Terminating loadDetections.")
   return(output)
 }
