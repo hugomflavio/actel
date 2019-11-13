@@ -260,10 +260,10 @@ detections.list <- study.data$detections.list
     deleteHelpers()
 
   if (invalid.dist) {
-    return(list(detections = detections, valid.detectiosn = valid.detections, spatial = spatial, deployments = deployments, arrays = arrays,
+    return(list(detections = detections, valid.detections = valid.detections, spatial = spatial, deployments = deployments, arrays = arrays,
       movements = movements, valid.movements = valid.movements, times = times))
   } else {
-    return(list(detections = detections, valid.detectiosn = valid.detections, spatial = spatial, deployments = deployments, arrays = arrays,
+    return(list(detections = detections, valid.detections = valid.detections, spatial = spatial, deployments = deployments, arrays = arrays,
       movements = movements, valid.movements = valid.movements, times = times, dist.mat = dist.mat))
   }
 }
