@@ -1,3 +1,57 @@
+#' check fish speeds against defined thresholds (in m/s)
+#' 
+#' @param movements the movements list
+#' @param valid.movements a temporary valid.movements list, with updated speeds
+#' @inheritParams explore
+#' 
+#' @return The valid movements list with valid/invalid rows
+#' 
+#' @keywords internal
+#' 
+checkSpeeds <- function(movements, valid.movements, speed.warning, speed.error) {
+  capture <- lapply(names(valid.movements), function(fish) {
+    # cat(fish,"\n")
+    the.warning <- NULL
+    vm <- valid.movements[[fish]]
+    if (any(na.as.false(vm$Average.speed.m.s >= speed.warning))) {
+      link <- which(vm$Average.speed.m.s >= speed.warning)
+      if (link[1] == 1) {
+        appendTo(c("Report", "Warning", "Screen"), 
+          the.warning <- paste0("W: Fish ", fish, " had an average speed of ", round(vm$Average.speed.m.s[1], 2),
+            " m/s from release to first valid event (Release -> ", vm$Array[1], ")."))
+        link <- link[-1]
+      }
+      if (length(link) > 0) {
+        for (i in 1:length(link)) {
+          appendTo(c("Report", "Warning", "Screen"), 
+            other.warning <- paste0("W: Fish ", fish, " had an average speed of ", round(vm$Average.speed.m.s[link[i]], 2),
+              " m/s from valid event ", link[i], " to ", link[i] + 1, " (",vm$Array[i], " -> ", vm$Array[i + 1], ")."))
+          the.warning <- c(the.warning, other.warning)
+        }
+      }
+    }
+    # Trigger user interaction
+    if (any(na.as.false(vm$Average.speed.m.s >= speed.error))) {
+      appendTo("Screen", paste0("M: Opening valid movements table of fish ", fish, " for inspection:"))
+      print(vm, topn = nrow(vm))
+      if (nrow(vm) > 200 & length(the.warning) <= 10)
+        cat(paste0("\nM: Long table detected, repeating warning(s) that triggered the interaction:\n-----\n", the.warning, "\n-----\n"))
+      if (nrow(vm) > 200 & length(the.warning) < 10)
+        cat(paste0("\nM: Long table detected, but the number of related warnings is higher than 10, so they will not be pasted again. Please check them above the table.\n"))
+      decision <- commentCheck(line = "Would you like to render any movement event invalid?(y/N/comment) ", tag = fish)
+      appendTo("UD", decision)
+      if (decision == "y" | decision == "Y") {
+        aux <- invalidateEvents(movements = vm, fish = fish)
+        if (any(!aux$Valid)) {
+          aux <- aux[!(Valid)]
+          link <- apply(aux, 1, function(x) which(movements[[fish]]$Array == x["Array"] & grepl(x["First.time"], movements[[fish]]$First.time, fixed = TRUE)))
+          movements[[fish]]$Valid[link] <<- FALSE
+        }
+      }
+    } # end trigger error
+  })
+  return(movements)   
+}
 checkImpassables <- function(movements, dotmat){
   Valid <- NULL
   output <- lapply(names(movements), function(fish) {
