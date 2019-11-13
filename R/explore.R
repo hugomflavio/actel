@@ -503,17 +503,22 @@ return(reportname)
 #' @keywords internal
 #' 
 validateDetections <- function(detections.list, movements) {
+  counter <- 0
+  pb <- txtProgressBar(min = 0, max = sum(unlist(lapply(movements, nrow))), style = 3, width = 60)
   output <- lapply(names(movements), function(i) {
     # cat(i, "\n")
+    counter <<- counter + nrow(movements[[i]])    
     aux <- detections.list[[i]]
     valid.rows <- unlist(lapply(1:nrow(movements[[i]]), function(j) {
       start <- min(which(aux$Timestamp == movements[[i]]$First.time[j] & aux$Standard.Name == movements[[i]]$First.station[j]))
       stop <- start + (movements[[i]]$Detections[j] - 1)
-      # cat(start, ":", stop, "\n")
+      # cat(j, ":", start, ":", stop, "\n"); flush.console()
       return(start:stop)
     }))
+    setTxtProgressBar(pb, counter)    
     return(aux[valid.rows, ])
   })
+  close(pb)
   names(output) <- names(movements)
   attributes(output)$actel <- "valid.detections"
   return(output)
