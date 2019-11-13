@@ -416,7 +416,9 @@ printArrayOverview <- function(array.overview) {
 #' 
 #' @keywords internal
 #' 
-mbPrintEfficiency <- function(overall.CJS, intra.CJS){
+printEfficiency <- function(intra.CJS, type = c("migration", "residency")){
+  type <- match.arg(type)
+  if (type == "migration") {
     efficiency.fragment <- paste('
 **Individuals detected and estimated**
 
@@ -436,6 +438,35 @@ knitr::kable(to.print)
 
 #### Intra array efficiency estimates
 ')
+  } else {
+    efficiency.fragment <- paste('
+**Events recorded and missed**
+
+```{r efficiency1, echo = FALSE}
+to.print <- as.data.frame(apply(efficiency$absolutes, c(1, 2), function(x) ifelse(is.na(x), "-", x)))
+knitr::kable(to.print)
+```
+
+**Array efficiency**
+
+```{r efficiency2, echo = FALSE}
+to.print <- t(paste(round(efficiency$max.efficiency * 100, 1), "%", sep = ""))
+to.print[grepl("NA", to.print)] <- "-"
+to.print <- as.data.frame(to.print)
+colnames(to.print) <- names(efficiency$max.efficiency)
+
+aux <- t(paste(round(efficiency$min.efficiency * 100, 1), "%", sep = ""))
+aux[grepl("NA", aux)] <- "-"
+to.print[2, ] <- aux
+
+rownames(to.print) <- c("Maximum efficiency", "Minimum efficiency")
+
+knitr::kable(to.print)
+```
+
+#### Intra array efficiency estimates
+')    
+  }
   if (!is.null(intra.CJS)){
     for (i in 1:length(intra.CJS)) {
     efficiency.fragment <- paste0(efficiency.fragment, '
