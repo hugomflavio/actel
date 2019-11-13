@@ -52,6 +52,104 @@ checkSpeeds <- function(movements, valid.movements, speed.warning, speed.error) 
   })
   return(movements)   
 }
+
+#' Find if a fish is standing still in an array
+#' 
+#' @param movements the movements list
+#' @param valid.movements a temporary valid.movements list
+#' @inheritParams explore
+#' @inheritParams groupMovements
+#' 
+#' @return The valid movements list with valid/invalid rows
+#' 
+#' @keywords internal
+#' 
+checkInactiveness <- function(movements, detections.list, inactive.warning, inactive.error, invalid.dist, dist.mat) {
+  Valid <- NULL
+  if (invalid.dist)
+    appendTo(c("Report", "Screen"), "M: Running inactiveness checks without a distance matrix. Performance may be limited.")
+  capture <- lapply(names(movements), function(fish) {
+    if (sum(movements[[fish]]$Valid) >= 1) {
+      valid.moves <- movements[[fish]][(Valid)]
+      # Find first and last potentially inactive movement
+      breaks <- rle(valid.moves$Array)
+      if(length(breaks$lengths) > 1) {
+        start <- sum(breaks$lengths[1:(length(breaks$lengths) - 1)])
+      } else {
+        start <- 1
+      }
+      stop <- nrow(valid.moves)
+      # Fetch respective detection rows
+      aux <- detections.list[[fish]]
+      valid.row.list <- lapply(start:stop, function(j) {
+        start <- min(which(aux$Timestamp == valid.moves$First.time[j] & aux$Standard.Name == valid.moves$First.station[j]))
+        stop <- start + (valid.moves$Detections[j] - 1)
+        return(start:stop)
+      })
+      # start trimming from the start to see if a period of inactiveness is present
+      continue <- TRUE
+      iteration <- 1
+      while (continue) {
+        # cat(iteration, "\n")
+        the.warning <- NULL
+        # count days spent to compare with arguments
+        start_i <- start + iteration - 1
+        # stop if we have reached the end of the possible iterations
+        if (start_i > stop)
+          break()
+        days.spent <- round(as.numeric(difftime(valid.moves$Last.time[stop], valid.moves$First.time[start_i], units = "days")), 2)
+        # stop if the days.spent are lesser than enough to trigger a warning
+        if (days.spent < inactive.warning)
+          break()
+        valid.rows <- unlist(valid.row.list[iteration:length(valid.row.list)])
+        the.detections <- aux[valid.rows, ]
+        # find all stations
+        the.stations <- as.character(sort(unique(the.detections$Standard.Name)))
+        trigger.error <- FALSE
+        if (invalid.dist) {
+          # Trigger warning
+          if (length(the.stations) <= 3) {
+            n.detections <- sum(valid.moves$Detections[start_i:stop])
+            appendTo(c("Report", "Warning", "Screen"), 
+              the.warning <- paste0("W: Fish ", fish, " was detected ", n.detections, " times at three or less stations of array '", tail(breaks$values, 1), "' (",paste(the.stations, collapse = ", "), ") over ", days.spent, " days and then disappeared. Could it be inactive?"))
+            continue <- FALSE
+          }
+          if (length(the.stations) <= 3 & days.spent >= inactive.error)
+            trigger.error <- TRUE        
+        } else {
+          aux <- dist.mat[the.stations, the.stations]
+          if (all(aux <= 1500)) {
+            n.detections <- sum(valid.moves$Detections[start_i:stop])
+            appendTo(c("Report", "Warning", "Screen"), 
+              the.warning <- paste0("W: Fish ", fish, " was detected ", n.detections, " times at stations less than 1.5 km apart in array '", tail(breaks$values, 1), "' (",paste(the.stations, collapse = ", "), "), over ", days.spent, " days and then disappeared. Could it be inactive?"))
+            continue <- FALSE
+          }
+          if (all(aux <= 1500) & days.spent >= inactive.error)
+            trigger.error <- TRUE
+        }
+        # Trigger user interaction
+        if (trigger.error) {
+          appendTo("Screen", paste0("M: Opening valid movement table of fish ", fish, " for inspection (inactiveness started on ", as.Date(valid.moves$First.time[start_i]),"):"))
+          print(valid.moves, topn = nrow(valid.moves))
+          if (nrow(valid.moves) > 200)
+            cat(paste0("\nM: Long table detected, repeating warning that triggered the interaction:\n-----\n", the.warning, "\n  (inactiveness started on ", as.Date(valid.moves$First.time[start_i]),")\n-----\n"))
+          decision <- commentCheck(line = "Would you like to render any movement event invalid?(y/N/comment) ", tag = fish)
+          appendTo("UD", decision)
+          if (decision == "y" | decision == "Y") {
+            aux <- invalidateEvents(movements = valid.moves, fish = fish)
+            if (any(!aux$Valid)) {
+              aux <- aux[!(Valid)]
+              link <- apply(aux, 1, function(x) which(movements[[fish]]$Array == x["Array"] & grepl(x["First.time"], movements[[fish]]$First.time, fixed = TRUE)))
+              movements[[fish]]$Valid[link] <<- FALSE
+            }
+          }
+        }
+        iteration <- iteration + 1
+      }
+    }
+  })
+  return(movements)
+}
 checkImpassables <- function(movements, dotmat){
   Valid <- NULL
   output <- lapply(names(movements), function(fish) {
