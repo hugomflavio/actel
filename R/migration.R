@@ -18,11 +18,11 @@
 #' @export
 #' 
 migration <- function(path = NULL, sections, success.arrays = NULL, minimum.detections = 2, 
-  maximum.time = 60, speed.method = c("last to first", "first to first"), 
-  if.last.skip.section = TRUE, tz.study.area, start.timestamp = NULL, 
+  maximum.time = 60, speed.method = c("last to first", "first to first"), speed.warning = NULL,
+  speed.error = NULL, if.last.skip.section = TRUE, tz.study.area, start.timestamp = NULL, 
   end.timestamp = NULL, report = TRUE, override = NULL, 
   exclude.tags = NULL, cautious.assignment = TRUE, replicates = NULL,
-  jump.warning = 2, jump.error = 3, debug = FALSE) {
+  jump.warning = 2, jump.error = 3, inactive.warning = NULL, inactive.error = NULL, debug = FALSE) {
   
 # check argument quality
   my.home <- getwd()
@@ -30,19 +30,34 @@ migration <- function(path = NULL, sections, success.arrays = NULL, minimum.dete
     stop("'minimum.detections' must be numeric.\n", call. = FALSE)
   if (!is.numeric(maximum.time))
     stop("'maximum.time' must be numeric.\n", call. = FALSE)
+
   speed.method <- match.arg(speed.method)
+  if (!is.null(speed.warning) && !is.numeric(speed.warning))
+    stop("'speed.warning' must be numeric.\n", call. = FALSE)    
+  if (!is.null(speed.error) && !is.numeric(speed.error))
+    stop("'speed.error' must be numeric.\n", call. = FALSE)    
+  if (!is.null(speed.error) & is.null(speed.warning))
+    speed.warning <- speed.error
+  if (!is.null(speed.error) && speed.error < speed.warning)
+    stop("'speed.error' must not be lower than 'speed.warning'.\n", call. = FALSE)
+
   if (!is.logical(if.last.skip.section))
     stop("'if.last.skip.section' must be logical.\n", call. = FALSE)
+
   if (!is.null(start.timestamp) && !grepl("^[1-2][0-9][0-9][0-9]-[0-1][0-9]-[0-3][0-9] [0-2][0-9]:[0-5][0-9]:[0-5][0-9]", start.timestamp))
     stop("'start.timestamp' must be in 'yyyy-mm-dd hh:mm:ss' format.\n", call. = FALSE)
   if (!is.null(end.timestamp) && !grepl("^[1-2][0-9][0-9][0-9]-[0-1][0-9]-[0-3][0-9] [0-2][0-9]:[0-5][0-9]:[0-5][0-9]", end.timestamp))
     stop("'end.timestamp' must be in 'yyyy-mm-dd hh:mm:ss' format.\n", call. = FALSE)
+
   if (!is.logical(report))
     stop("'report' must be logical.\n", call. = FALSE)
+
   if (!is.logical(cautious.assignment))
     stop("'cautious.assignment' must be logical.\n", call. = FALSE)
+
   if (!is.null(replicates) && !is.list(replicates))
     stop("'replicates' must be a list.\n", call. = FALSE)
+
   if (!is.numeric(jump.warning))
     stop("'jump.warning' must be numeric.\n", call. = FALSE)
   if (jump.warning < 1)
@@ -53,6 +68,16 @@ migration <- function(path = NULL, sections, success.arrays = NULL, minimum.dete
     stop("'jump.error' must not be lower than 1.\n", call. = FALSE)
   if (jump.error < jump.warning)
     stop("'jump.error' must not be lower than 'jump.warning'.\n", call. = FALSE)
+  
+  if (!is.null(inactive.warning) && !is.numeric(inactive.warning))
+    stop("'inactive.warning' must be numeric.\n", call. = FALSE)    
+  if (!is.null(inactive.error) && !is.numeric(inactive.error))
+    stop("'inactive.error' must be numeric.\n", call. = FALSE)    
+  if (!is.null(inactive.error) & is.null(inactive.warning))
+    inactive.warning <- inactive.error
+  if (!is.null(inactive.error) && inactive.error < inactive.warning)
+    stop("'inactive.error' must not be lower than 'inactive.warning'.\n", call. = FALSE)
+  
   if (!is.logical(debug))
     stop("'debug' must be logical.\n", call. = FALSE)
 # ------------------------
@@ -78,19 +103,22 @@ migration <- function(path = NULL, sections, success.arrays = NULL, minimum.dete
       ", minimum.detections = ", minimum.detections,
       ", maximum.time = ", maximum.time,
       ", speed.method = ", paste0("c('", speed.method, "')"),
+      ", speed.warning = ", ifelse(is.null(speed.warning), "NULL", speed.warning), 
+      ", speed.error = ", ifelse(is.null(speed.error), "NULL", speed.error), 
       ", if.last.skip.section = ", ifelse(if.last.skip.section, "TRUE", "FALSE"),
       ", tz.study.area = ", ifelse(is.null(tz.study.area), "NULL", paste0("'", tz.study.area, "'")), 
       ", start.timestamp = ", ifelse(is.null(start.timestamp), "NULL", paste0("'", start.timestamp, "'")),
       ", end.timestamp = ", ifelse(is.null(end.timestamp), "NULL", paste0("'", end.timestamp, "'")),
       ", report = ", ifelse(report, "TRUE", "FALSE"), 
-      # ", redraw = ", ifelse(redraw, "TRUE", "FALSE"),
       ", override = ", ifelse(is.null(override), "NULL", paste0("c('", paste(override, collapse = "', '"), "')")),
       ", exclude.tags = ", ifelse(is.null(exclude.tags), "NULL", paste0("c('", paste(exclude.tags, collapse = "', '"), "')")), 
-      ", debug = ", ifelse(debug, "TRUE", "FALSE"), 
       ", cautious.assignment = ", ifelse(cautious.assignment, "TRUE", "FALSE"), 
       ", replicates = ", ifelse(is.null(replicates),"NULL", paste0("c('", paste(replicates, collapse = "', '"), "')")),
       ", jump.warning = ", jump.warning,
       ", jump.error = ", jump.error,
+      ", inactive.warning = ", ifelse(is.null(inactive.warning), "NULL", inactive.warning), 
+      ", inactive.error = ", ifelse(is.null(inactive.error), "NULL", inactive.error), 
+      ", debug = ", ifelse(debug, "TRUE", "FALSE"), 
       ")")
 # --------------------
 
@@ -102,7 +130,10 @@ migration <- function(path = NULL, sections, success.arrays = NULL, minimum.dete
   if (debug)
     appendTo("Report", "!!!--- Debug mode has been activated ---!!!\n")
 
-  appendTo(c("Report"), paste0("Timestamp:", Sys.time(), "\n\nM: Selected folder: ", getwd(), "\nM: Success has been defined as last detection in: ", paste(success.arrays, collapse = ", "), "."))
+  if (is.null(success.arrays))
+    appendTo(c("Report"), paste0("Timestamp:", Sys.time(), "\n\nM: Selected folder: ", getwd(), "\nM: Success has not been defined. Assuming last arrays are success arrays."))
+  else
+    appendTo(c("Report"), paste0("Timestamp:", Sys.time(), "\n\nM: Selected folder: ", getwd(), "\nM: Success has been defined as last detection in: ", paste(success.arrays, collapse = ", "), "."))
 
   if (!is.null(path))
     appendTo(c("Screen"), "M: Moving to selected work directory")
@@ -120,6 +151,7 @@ spatial <- study.data$spatial
 dot <- study.data$dot
 arrays <- study.data$arrays
 dotmat <- study.data$dotmat
+paths <- study.data$paths
 detections <- study.data$detections
 dist.mat <- study.data$dist.mat
 invalid.dist <- study.data$invalid.dist
@@ -136,6 +168,7 @@ detections.list <- study.data$detections.list
     movements[[fish]] <- speedReleaseToFirst(fish = fish, bio = bio, movements = movements[[fish]],
      dist.mat = dist.mat, invalid.dist = invalid.dist, silent = FALSE)
   }
+  appendTo(c("Screen", "Report"), "M: Checking movement events quality.")
   
   movements <- checkUpstream(movements = movements, bio = bio, spatial = spatial, arrays = arrays)
 
@@ -143,6 +176,29 @@ detections.list <- study.data$detections.list
 
   movements <- checkJumpDistance(movements = movements, bio = bio, dotmat = dotmat, 
                                  spatial = spatial, jump.warning = jump.warning, jump.error = jump.error)
+
+  if (is.null(speed.warning)) {
+    appendTo(c("Screen", "Report", "Warning"), "M: 'speed.warning'/'speed.error' were not set, skipping speed checks.")
+  } else {
+    if(invalid.dist) {
+      appendTo(c("Screen", "Report", "Warning"), "W: 'speed.warning'/'speed.error' were set, but a valid distance matrix is not present. Aborting speed checks.")
+    } else {
+       temp.valid.movements <- simplifyMovements(movements = movements, bio = bio, 
+         speed.method = speed.method, dist.mat = dist.mat, invalid.dist = invalid.dist)
+      movements <- checkSpeeds(movements = movements, valid.movements = temp.valid.movements, 
+        speed.warning = speed.warning, speed.error = speed.error)
+       rm(temp.valid.movements)
+     }
+  }
+  
+  if (is.null(inactive.warning))
+    appendTo(c("Screen", "Report", "Warning"), "M: 'inactive.warning'/'inactive.error' were not set, skipping inactivity checks.")
+  else
+    movements <- checkInactiveness(movements = movements, detections.list = detections.list, 
+      inactive.warning = inactive.warning, inactive.error = inactive.error, 
+      dist.mat = dist.mat, invalid.dist = invalid.dist)
+
+  appendTo(c("Screen", "Report"), "M: Initiating timetable development. Your assistance may be needed during the process.")
 
   recipient <- assembleTimetable(movements = movements, sections = sections, spatial = spatial, arrays = arrays,
     minimum.detections = minimum.detections, dist.mat = dist.mat, invalid.dist = invalid.dist, 

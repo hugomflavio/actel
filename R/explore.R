@@ -15,8 +15,10 @@
 #' @param debug If TRUE, temporary files are not deleted at the end of the analysis. Defaults to FALSE.
 #' @param jump.warning Integer value. If a fish crosses ´jump.warning´ arrays without being detected, a warning is issued.
 #' @param jump.error Integer value. If a fish crosses ´jump.error´ arrays without being detected, user intervention is suggested.
-#' @param speed.warning Numeric value. If a fish moves at a speed greater or equal to this argument, a warning is issued.
-#' @param speed.error Numeric value. If a fish moves at a speed greater or equal to this argument, user intervention is suggested.
+#' @param speed.warning Numeric value (m/s). If a fish moves at a speed greater or equal to this argument, a warning is issued. Defaults to NULL (i.e. no speed checks are performed, with a message)
+#' @param speed.error Numeric value (m/s). If a fish moves at a speed greater or equal to this argument, user intervention is suggested. Defaults to NULL (i.e. no errors are issued)
+#' @param inactive.warning Numeric value (days). If a fish spends a number of days greater or equal to this argument in a given place, a warning is issued. Defaults to NULL (i.e. no speed checks are performed, with a message)
+#' @param inactive.error Numeric value (days). If a fish spends a number of days greater or equal to this argument in a given place, user intervention is suggested. Defaults to NULL (i.e. no errors are issued)
 #' 
 #' @return A list containing 1) the detections used during the analysis, 2) the movement events, 3) the status dataframe, 4) the survival overview per group, 5) the progression through the study area, 6) the ALS array/sections' efficiency, 7) the list of spatial objects used during the analysis.
 #' 
@@ -28,27 +30,32 @@
 #' 
 explore <- function(path = NULL, maximum.time = 60, speed.method = c("last to first", "first to first"),
     speed.warning = NULL, speed.error = NULL, tz.study.area, start.timestamp = NULL, end.timestamp = NULL, 
-    report = TRUE, exclude.tags = NULL, jump.warning = 2, jump.error = 3, debug = FALSE) {
+    report = TRUE, exclude.tags = NULL, jump.warning = 2, jump.error = 3, inactive.warning = NULL, 
+    inactive.error = NULL,  debug = FALSE) {
 
 # check arguments quality
   my.home <- getwd()
   if (!is.numeric(maximum.time))
     stop("'maximum.time' must be numerical.\n", call. = FALSE)
+
   speed.method <- match.arg(speed.method)
   if (!is.null(speed.warning) && !is.numeric(speed.warning))
     stop("'speed.warning' must be numeric.\n", call. = FALSE)    
   if (!is.null(speed.error) && !is.numeric(speed.error))
     stop("'speed.error' must be numeric.\n", call. = FALSE)    
   if (!is.null(speed.error) & is.null(speed.warning))
-    speed.error <- speed.warning
+    speed.warning <- speed.error
   if (!is.null(speed.error) && speed.error < speed.warning)
-    stop("'speed.error' must not be lower than 'speed.error'.\n", call. = FALSE)
+    stop("'speed.error' must not be lower than 'speed.warning'.\n", call. = FALSE)
+  
   if (!is.null(start.timestamp) && !grepl("^[1-2][0-9][0-9][0-9]-[0-1][0-9]-[0-3][0-9] [0-2][0-9]:[0-5][0-9]:[0-5][0-9]", start.timestamp))
     stop("'start.timestamp' must be in 'yyyy-mm-dd hh:mm:ss' format.\n", call. = FALSE)
   if (!is.null(end.timestamp) && !grepl("^[1-2][0-9][0-9][0-9]-[0-1][0-9]-[0-3][0-9] [0-2][0-9]:[0-5][0-9]:[0-5][0-9]", end.timestamp))
     stop("'end.timestamp' must be in 'yyyy-mm-dd hh:mm:ss' format.\n", call. = FALSE)
+  
   if (!is.logical(report))
     stop("'report' must be logical.\n", call. = FALSE)
+  
   if (!is.numeric(jump.warning))
     stop("'jump.warning' must be numeric.\n", call. = FALSE)
   if (jump.warning < 1)
@@ -59,6 +66,16 @@ explore <- function(path = NULL, maximum.time = 60, speed.method = c("last to fi
     stop("'jump.error' must not be lower than 1.\n", call. = FALSE)
   if (jump.error < jump.warning)
     stop("'jump.error' must not be lower than 'jump.warning'.\n", call. = FALSE)
+  
+  if (!is.null(inactive.warning) && !is.numeric(inactive.warning))
+    stop("'inactive.warning' must be numeric.\n", call. = FALSE)    
+  if (!is.null(inactive.error) && !is.numeric(inactive.error))
+    stop("'inactive.error' must be numeric.\n", call. = FALSE)    
+  if (!is.null(inactive.error) & is.null(inactive.warning))
+    inactive.warning <- inactive.error
+  if (!is.null(inactive.error) && inactive.error < inactive.warning)
+    stop("'inactive.error' must not be lower than 'inactive.warning'.\n", call. = FALSE)
+  
   if (!is.logical(debug))
     stop("'debug' must be logical.\n", call. = FALSE)
 # ------------------------
@@ -81,6 +98,8 @@ explore <- function(path = NULL, maximum.time = 60, speed.method = c("last to fi
   the.function.call <- paste0("explore(path = ", ifelse(is.null(path), "NULL", paste0("'", path, "'")), 
       ", maximum.time = ", maximum.time,
       ", speed.method = ", paste0("c('", speed.method, "')"),
+      ", speed.warning = ", ifelse(is.null(speed.warning), "NULL", speed.warning), 
+      ", speed.error = ", ifelse(is.null(speed.error), "NULL", speed.error), 
       ", tz.study.area = ", ifelse(is.null(tz.study.area), "NULL", paste0("'", tz.study.area, "'")), 
       ", start.timestamp = ", ifelse(is.null(start.timestamp), "NULL", paste0("'", start.timestamp, "'")),
       ", end.timestamp = ", ifelse(is.null(end.timestamp), "NULL", paste0("'", end.timestamp, "'")),
@@ -88,6 +107,8 @@ explore <- function(path = NULL, maximum.time = 60, speed.method = c("last to fi
       ", exclude.tags = ", ifelse(is.null(exclude.tags), "NULL", paste0("c('", paste(exclude.tags, collapse = "', '"), "')")), 
       ", jump.warning = ", jump.warning,
       ", jump.error = ", jump.error,
+      ", inactive.warning = ", ifelse(is.null(inactive.warning), "NULL", inactive.warning), 
+      ", inactive.error = ", ifelse(is.null(inactive.error), "NULL", inactive.error), 
       ", debug = ", ifelse(debug, "TRUE", "FALSE"), 
       ")")
 # --------------------
@@ -129,20 +150,39 @@ detections.list <- study.data$detections.list
   movements <- groupMovements(detections.list = detections.list, bio = bio, spatial = spatial,
     speed.method = speed.method, maximum.time = maximum.time, tz.study.area = tz.study.area, 
     dist.mat = dist.mat, invalid.dist = invalid.dist)
-  
+
   for (fish in names(movements)) {
     movements[[fish]] <- speedReleaseToFirst(fish = fish, bio = bio, movements = movements[[fish]],
      dist.mat = dist.mat, invalid.dist = invalid.dist, silent = FALSE)
   }
+
+  appendTo(c("Screen", "Report"), "M: Checking movement events quality.")
 
   movements <- checkImpassables(movements = movements, dotmat = dotmat)
 
   movements <- checkJumpDistance(movements = movements, bio = bio, dotmat = dotmat, 
                                  spatial = spatial, jump.warning = jump.warning, jump.error = jump.error)
 
-  # if (!invalid.dist & !is.null(jump.warning))
-  #   movements <- checkMovementSpeeds(movements = movements, speed.warning = speed.warning, 
-  #     speed.error = speed.error)
+  if (is.null(speed.warning)) {
+    appendTo(c("Screen", "Report", "Warning"), "M: 'speed.warning'/'speed.error' were not set, skipping speed checks.")
+  } else {
+    if(invalid.dist) {
+      appendTo(c("Screen", "Report", "Warning"), "W: 'speed.warning'/'speed.error' were set, but a valid distance matrix is not present. Aborting speed checks.")
+    } else {
+       temp.valid.movements <- simplifyMovements(movements = movements, bio = bio, 
+         speed.method = speed.method, dist.mat = dist.mat, invalid.dist = invalid.dist)
+      movements <- checkSpeeds(movements = movements, valid.movements = temp.valid.movements, 
+        speed.warning = speed.warning, speed.error = speed.error)
+       rm(temp.valid.movements)
+     }
+  }
+
+  if (is.null(inactive.warning))
+    appendTo(c("Screen", "Report", "Warning"), "M: 'inactive.warning'/'inactive.error' were not set, skipping inactivity checks.")
+  else
+    movements <- checkInactiveness(movements = movements, detections.list = detections.list, 
+      inactive.warning = inactive.warning, inactive.error = inactive.error, 
+      dist.mat = dist.mat, invalid.dist = invalid.dist)
 
   valid.movements <- simplifyMovements(movements = movements, bio = bio, 
     speed.method = speed.method, dist.mat = dist.mat, invalid.dist = invalid.dist)
