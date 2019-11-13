@@ -726,14 +726,32 @@ checkDupSignals <- function(input, bio, tag.list){
 #' @keywords internal
 #' 
 invalidateEvents <- function(movements, fish) {
-    appendTo("Screen", "Note: You can select multiple events at once by separating them with a space.")
+    appendTo("Screen", "Note: You can select event ranges by separating them with a ':' and/or multiple events at once by separating them with a space.")
     check <- TRUE
     while (check) {
       the.string <- commentCheck(line = "Events to be rendered invalid: ", tag = fish)
-      the.rows <- suppressWarnings(as.integer(unlist(strsplit(the.string, "\ "))))
+      the.inputs <- unlist(strsplit(the.string, "\ "))
+      the.rows <- the.inputs[grepl("^[0-9]*$", the.inputs)]
+      n.rows <- length(the.rows)
+      if (length(the.rows) > 0)
+        the.rows <- as.integer(the.rows)
+      else
+        the.rows <- NULL
+      the.ranges <- the.inputs[grepl("^[0-9]*[0-9]:[0-9][0-9]*$", the.inputs)]
+      n.ranges <- length(the.ranges)
+      if (length(the.ranges) > 0) {
+        the.ranges <- strsplit(the.ranges, ":")
+        the.ranges <- unlist(lapply(the.ranges, function(x) {
+          r <- as.integer(x)
+          r[1]:r[2]
+        }))
+      } else {
+        the.ranges <- NULL
+      }
+      the.rows <- sort(unique(c(the.rows, the.ranges)))
       appendTo("UD", the.string)
-      if (all(is.na(the.rows))) {
-        decision <- readline("W: The input could not be recognised as row numbers, would you like to abort the process?(y/N) ")
+      if (is.null(the.rows)) {
+        decision <- readline("W: The input could not be recognised as row numbers, would you like to abort invalidation the process?(y/N) ")
         appendTo("UD", decision)
         if (decision == "y" | decision == "Y") {
           appendTo("Screen", "Aborting.")                 
@@ -742,24 +760,28 @@ invalidateEvents <- function(movements, fish) {
           check <- TRUE
         }
       } else {
-        if (any(is.na(the.rows))) {
+        if (sum(n.rows, n.ranges) < length(the.inputs))
           appendTo("Screen", "W: Part of the input could not be recognised as a row number.")
-          the.rows <- the.rows[!is.na(the.rows)]
-        }
         if (all(the.rows > 0 & the.rows <= nrow(movements))) {
-          decision <- readline(paste0("Confirm: Would you like to render event(s) ", paste(the.rows, collapse = ", "), " invalid?(y/N) "))
+          if (length(the.rows) <= 10)
+            decision <- readline(paste0("Confirm: Would you like to render event(s) ", paste(the.rows, collapse = ", "), " invalid?(y/N) "))
+          else
+            decision <- readline(paste0("Confirm: Would you like to render ", length(the.rows), " events invalid?(y/N) "))
           appendTo("UD", decision)
           if (decision == "y" | decision == "Y") {
             movements$Valid[the.rows] <- FALSE
             attributes(movements)$p.type <- "Manual"
             if (any(movements$Valid)) {
-              appendTo(c("Screen", "Report"), paste0("M: Movement event(s) ", paste(the.rows, collapse = ", "), " from fish ", fish," rendered invalid per user command."))
+              if (length(the.rows) <= 10)
+                appendTo(c("Screen", "Report"), paste0("M: Movement event(s) ", paste(the.rows, collapse = ", "), " from fish ", fish," rendered invalid per user command."))
+              else
+                appendTo(c("Screen", "Report"), paste0("M: ", length(the.rows), " movement event(s) from fish ", fish," rendered invalid per user command."))
               decision <- readline("Would you like to render any more movements invalid?(y/N) ")
               appendTo("UD", decision)
               if (decision == "y" | decision == "Y") {
                 check <- TRUE
                 appendTo("Screen", paste0("M: Updated movement table of fish ", fish, ":"))
-                print(movements)
+                print(movements, topn = nrow(movements))
                 appendTo("Screen", "Note: You can select multiple events at once by separating them with a space.")
               } else {
                 check <- FALSE
