@@ -340,17 +340,21 @@ checkUpstream <- function(movements, bio, spatial, arrays) {
   # This definition is just to prevent the package check from issuing a note due unknown variables.
   Array <- NULL
   for (fish in names(movements)) {
+    the.warning <- NULL
     appendTo("debug", paste("Starting checkUpstream for fish ", fish, ".", sep = ""))
     release.site <- as.character(bio$Release.site[na.as.false(bio$Transmitter == fish)])
     release.array <- as.character(with(spatial, release.sites[release.sites$Standard.Name == release.site, "Array"]))
     after.arrays <- c(release.array, arrays[[release.array]]$all.after)
     if (any(is.na(match(movements[[fish]][Array != "Unknown"]$Array, after.arrays)))) {
       cat("\n")
-      appendTo(c("Screen", "Report", "Warning"), paste0("W: Fish ", fish, " was detected behind its release site! Opening relevant data for inspection."))
+      appendTo(c("Screen", "Report", "Warning"), the.warning <- paste0("W: Fish ", fish, " was detected behind its release site! Opening relevant data for inspection."))
       appendTo("Screen", paste("   Release site:", release.site))
       appendTo("Screen", paste("   Expected first array:", release.array))
       cat(paste("\n   Movement table for fish ", fish, ":\n", sep =""))
-      print(movements[[fish]])
+      print(movements[[fish]], topn = nrow(movements[[fish]]))
+      if (nrow(moves) > 200)
+        cat(paste0("\nM: Long table detected, repeating warning that triggered the interaction:\n-----\n", 
+          the.warning, "\n", paste("   Release site:", release.site), "\n", paste("   Expected first array:", release.array), "\n-----\n"))
       cat("\n")
       appendTo("Screen", "You may either:\n  a) Stop the analysis if the expected first array is wrong;\n  b) Continue as is (does not impact the results);\n  c) Render a movement event invalid, if you are confident it is a false detection.")
       cat("\n")
@@ -399,6 +403,7 @@ checkJumpDistance <- function(movements, bio, spatial, dotmat, jump.warning = 2,
   # This definition is just to prevent the package check from issuing a note due unknown variables.
   Valid <- NULL
   for (fish in names(movements)) {
+    the.warning <- NULL
     if (any(movements[[fish]]$Valid)) {
       moves <- movements[[fish]][(Valid)]
       # Check release-to-first
@@ -408,7 +413,7 @@ checkJumpDistance <- function(movements, bio, spatial, dotmat, jump.warning = 2,
       if (release.jump > jump.warning) {
         # Trigger warning
         appendTo(c("Report", "Warning", "Screen"), 
-          paste0("W: Fish ", fish, " jumped through ", release.jump - 1, 
+          the.warning <- paste0("W: Fish ", fish, " jumped through ", release.jump - 1, 
             ifelse(release.jump > 2, " arrays ", " array "), 
             "from release to first event (Release -> ", moves$Array[1], ")."))
       }
@@ -432,9 +437,10 @@ checkJumpDistance <- function(movements, bio, spatial, dotmat, jump.warning = 2,
           for (i in 1:length(link)) {
             # Trigger warning
             appendTo(c("Report", "Warning", "Screen"), 
-              paste0("W: Fish ", fish, " jumped through ", jumps[link[i]] - 1, 
+              other.warning <- paste0("W: Fish ", fish, " jumped through ", jumps[link[i]] - 1, 
                 ifelse(jumps[link[i]] > 2, " arrays ", " array "), 
                 "in events ", link[i], " -> ", link[i] + 1, " (", names(jumps)[link[i]], ")."))
+            the.warning <- c(the.warning, other.warning)
           }
         if (any(jumps[link] > jump.error))
           trigger.error <- TRUE
@@ -443,7 +449,11 @@ checkJumpDistance <- function(movements, bio, spatial, dotmat, jump.warning = 2,
       # Trigger user interaction
       if (trigger.error) {
         appendTo("Screen", paste0("M: Opening movement table of fish ", fish, " for inspection:"))
-        print(movements[[fish]])
+        print(movements[[fish]], topn = nrow(movements[[fish]]))
+        if (nrow(moves) > 200 & length(the.warning) <= 10)
+          cat(paste0("\nM: Long table detected, repeating warning(s) that triggered the interaction:\n-----\n", the.warning, "\n-----\n"))
+        if (nrow(moves) > 200 & length(the.warning) < 10)
+          cat(paste0("\nM: Long table detected, but the number of related warnings is higher than 10, so they will not be pasted again. Please check them above the table.\n"))
         decision <- commentCheck(line = "Would you like to render any movement event invalid?(y/N/comment) ", tag = fish)
         appendTo("UD", decision)
         if (decision == "y" | decision == "Y") {
