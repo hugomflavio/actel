@@ -1409,9 +1409,10 @@ deployValues <- function(i, timetable, movements, events, sections, spatial, arr
     timetable[i, "Max.cons.back.moves"] <- 0
   }
   timetable[i, "P.type"] <- attributes(movements)$p.type
-  testA <- !is.na(timetable[i, paste("Left", tail(sections, 1), sep = ".")])
+  # testA <- !is.na(timetable[i, paste("Left", tail(sections, 1), sep = ".")])
   testB <- any(!is.na(match(success.arrays, movements[tail(events$last.events, 1), Array])))
-  if (testA & testB) 
+  # if (testA & testB)
+  if (testB) 
     timetable[i, "Status"] <- "Succeeded"
   appendTo("debug", paste("Terminating deployValues for fish ", i, ".", sep = ""))
   return(timetable)
