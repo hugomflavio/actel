@@ -206,10 +206,10 @@ detections.list <- study.data$detections.list
         continue <- FALSE
       }
     }
-    appendTo("Screen", paste0("M: An actel results file is already present in the present directory, saving new results as '", resultsname,"'."))
+    appendTo("Screen", paste0("M: An actel explore results file is already present in the current directory.\n   Saving new results as '", resultsname,"'."))
     rm(continue, index)
   } else {
-    appendTo(c("Screen", "Report"), paste0("M: Saving results to '", resultsname, "'."))
+    appendTo(c("Screen", "Report"), paste0("M: Saving results as '", resultsname, "'."))
   }
 
   detections <- detections.list
@@ -222,6 +222,7 @@ detections.list <- study.data$detections.list
 
 # Print graphics
   if (report) {
+    appendTo(c("Screen", "Report"), "M: Producing the report.")
     biometric.fragment <- printBiometrics(bio = bio)
     printDot(dot = dot, sections = NULL, spatial = spatial)
     individual.plots <- printIndividuals(redraw = TRUE, detections.list = detections.list, 
@@ -284,7 +285,6 @@ detections.list <- study.data$detections.list
 #' @keywords internal
 #' 
 printExploreRmd <- function(biometric.fragment, individual.plots, circular.plots, spatial, detections, valid.detections){
-  appendTo("Screen", "M: Producing final report.")
   if (file.exists(reportname <- "Report/actel_explore_report.Rmd")) {
     continue <- TRUE
     index <- 1
@@ -295,7 +295,7 @@ printExploreRmd <- function(biometric.fragment, individual.plots, circular.plots
         continue <- FALSE
       }
     }
-    appendTo("Screen", paste0("M: An actel report is already present in the present directory, saving new report as 'actel_explore_report.", index, ".html'."))
+    appendTo("Screen", paste0("M: An actel report is already present in the current directory.\n   Saving new report as 'actel_explore_report.", index, ".html'."))
     rm(continue,index)
   } else {
     appendTo("Screen", "M: Saving actel report as 'actel_explore_report.html'.")
@@ -331,13 +331,13 @@ Number of listed receivers: **', stringr::str_extract(pattern = '(?<=Number of A
 
 Data time range: ', stringr::str_extract(pattern = '(?<=Data time range: )[^\r]*', string = report), '
 
-Percentage of valid detections: ', round(sum(unlist(lapply(valid.detections, nrow))) / sum(unlist(lapply(detections, nrow))) * 100, 2), '%
+Percentage of post-release valid detections: ', round(sum(unlist(lapply(valid.detections, nrow))) / sum(unlist(lapply(detections, nrow))) * 100, 2), '%
 
 Found a bug? [**Report it here.**](https://github.com/hugomflavio/actel/issues)
 
 ### Study area
 
-Release sites are marked with "R.S."
+Release sites are marked with "R.S.". Arrays connected with an arrow indicate that the fish can only pass in one direction.
 
 <img src="mb_arrays.svg" alt="Missing file" style="padding-top: 15px;"/>
 
@@ -372,7 +372,7 @@ if(file.exists("../temp_warnings.txt")) cat(gsub("\\r", "", readr::read_file("..
 </center>
 
 
-### Time of first arrival at each Array
+### Average time of arrival at each Array
 
 Note:
   : Coloured lines on the outer circle indicate the mean value for each group and the respective ranges show the standard error of the mean. Each group\'s bars sum to 100%. The number of data points in each group is presented between brackets in the legend of each pannel. 
@@ -380,13 +380,6 @@ Note:
 <center>
 ', circular.plots,'
 </center>
-
-
-### Full log
-
-```{r log, echo = FALSE, comment = NA}
-cat(gsub("\\r", "", readr::read_file("../temp_log.txt")))
-```
 
 
 ### Individual plots
@@ -400,6 +393,12 @@ Note:
 <center>
 ', individual.plots,'
 </center>
+
+### Full log
+
+```{r log, echo = FALSE, comment = NA}
+cat(gsub("\\r", "", readr::read_file("../temp_log.txt")))
+```
 
 ', sep = ""), fill = TRUE)
 sink()
@@ -485,9 +484,9 @@ h4 {
   <a href="#release-sites">Release sites</a>
   <a href="#warning-messages">Warnings</a>
   <a href="#biometric-graphics">Biometrics</a>
-  <a href="#time-of-first-arrival-at-each-array">Arrival times</a>
-  <a href="#full-log">Full log</a>
+  <a href="#average-time-of-arrival-at-each-array">Arrival times</a>
   <a href="#individual-plots">Individuals</a>
+  <a href="#full-log">Full log</a>
 </div>
 ', fill = TRUE)
 sink()

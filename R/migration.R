@@ -223,6 +223,8 @@ detections.list <- study.data$detections.list
 
   times <- getTimes(movements = valid.movements, spatial = spatial, type = "arrival", events = "one")
 
+  appendTo("Screen", "M: Validating detections...")
+
 # -------------------------------------
 
 # CJS stuff
@@ -239,6 +241,8 @@ detections.list <- study.data$detections.list
   }
 
   if (calculate.efficiency) {
+    appendTo(c("Screen", "Report"), "M: Calculating array efficiency.")
+
     CJS.list <- lapply(m.by.array, function(m) {
       if (length(m) == 1)
         simpleCJS(m[[1]])
@@ -292,10 +296,10 @@ detections.list <- study.data$detections.list
         continue <- FALSE
       }
     }
-    appendTo("Screen", paste("M: An actel migration results file is already present in the present directory, saving new results as '", resultsname,"'.", sep = ""))
+    appendTo("Screen", paste("M: An actel migration results file is already present in the current directory.\n   Saving new results as '", resultsname,"'.", sep = ""))
     rm(continue, index)
   } else {
-    appendTo(c("Screen", "Report"), paste("M: Saving results to '", resultsname, "'.", sep = ""))
+    appendTo(c("Screen", "Report"), paste("M: Saving results as '", resultsname, "'.", sep = ""))
   }
 
   detections <- detections.list
@@ -313,6 +317,7 @@ detections.list <- study.data$detections.list
 
 # Print graphics
   if (report) {
+    appendTo(c("Screen", "Report"), "M: Producing the report.")
     biometric.fragment <- printBiometrics(bio = bio)
     if (calculate.efficiency)
       efficiency.fragment <- printEfficiency(intra.CJS = intra.array.CJS, type = "migration")
@@ -402,7 +407,6 @@ detections.list <- study.data$detections.list
 #' 
 printMigrationRmd <- function(name.fragment, header.fragment, biometric.fragment, efficiency.fragment, display.progression, array.overview.fragment,
   survival.graph.size, individual.plots, circular.plots, spatial, deployments, valid.detections, detections){
-  appendTo("Screen", "M: Producing final report.")
   if (file.exists(reportname <- paste("Report/actel_migration_report", name.fragment, ".Rmd", sep = ""))) {
     continue <- TRUE
     index <- 1
@@ -413,7 +417,7 @@ printMigrationRmd <- function(name.fragment, header.fragment, biometric.fragment
         continue <- FALSE
       }
     }
-    appendTo("Screen",paste("M: An actel report is already present in the present directory, saving new report as 'actel_migration_report", name.fragment, ".", index, ".html'.", sep = ""))
+    appendTo("Screen",paste("M: An actel report is already present in the current directory\n   Saving new report as 'actel_migration_report", name.fragment, ".", index, ".html'.", sep = ""))
     rm(continue,index)
   } else {
     appendTo("Screen",paste("M: Saving actel report as 'actel_migration_report", name.fragment, ".html'.", sep = ""))
@@ -451,13 +455,13 @@ Number of listed receivers: **', stringr::str_extract(pattern = '(?<=Number of A
 
 Data time range: ', stringr::str_extract(pattern = '(?<=Data time range: )[^\r|^\n]*', string = report), '
 
-Percentage of valid detections: ', round(sum(unlist(lapply(valid.detections, nrow))) / sum(unlist(lapply(detections, nrow))) * 100, 2), '%
+Percentage of post-release valid detections: ', round(sum(unlist(lapply(valid.detections, nrow))) / sum(unlist(lapply(detections, nrow))) * 100, 2), '%
 
 Found a bug? [**Report it here.**](https://github.com/hugomflavio/actel/issues)
 
 ### Study area
 
-Arrays with the same background belong to the same section. Release sites are marked with "R.S."
+Arrays with the same background belong to the same section. Release sites are marked with "R.S.". Arrays connected with an arrow indicate that the fish can only pass in one direction.
 
 <img src="mb_arrays.svg" alt="Missing file" style="padding-top: 15px;"/>
 
@@ -548,13 +552,6 @@ Note:
 </center>
 
 
-### Full log
-
-```{r log, echo = FALSE, comment = NA}
-cat(gsub("\\r", "", readr::read_file("../temp_log.txt")))
-```
-
-
 ### Individual plots
 
 Note:
@@ -566,6 +563,12 @@ Note:
 <center>
 ', individual.plots,'
 </center>
+
+### Full log
+
+```{r log, echo = FALSE, comment = NA}
+cat(gsub("\\r", "", readr::read_file("../temp_log.txt")))
+```
 
 ', sep = ""), fill = TRUE)
 sink()
@@ -663,8 +666,8 @@ img[src*="#diagram"] {
   <a href="#progression">Progression</a>
   <a href="#time-of-arrival-at-each-array">Arrival times</a>
   <a href="#dotplots">Dotplots</a>
-  <a href="#full-log">Full log</a>
   <a href="#individual-plots">Individuals</a>
+  <a href="#full-log">Full log</a>
 </div>
 ', fill = TRUE)
 sink()
