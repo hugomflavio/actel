@@ -631,10 +631,10 @@ loadBio <- function(file, tz.study.area){
     appendTo("Screen", "M: No 'Group' column found in the biometrics file. Assigning all fish to group 'All'.")
     bio$Group <- "All"
   } else {
-    if (any(is.na(bio$Group))) {
+    if (any(is.na(bio$Group) | bio$Group == "")) {
       appendTo(c("Screen","Report","Warning"),"W: Some fish contain no group information. You may want to doublecheck the data.\n   Filling the blanks with 'unspecified'.")
       levels(bio$Group) <- c(levels(bio$Group), "unspecified")
-      bio$Group[is.na(bio$Group)] <- "unspecified"
+      bio$Group[is.na(bio$Group) | bio$Group == ""] <- "unspecified"
     }
   }
   bio <- bio[order(bio$Signal),]
