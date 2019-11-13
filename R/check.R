@@ -150,15 +150,24 @@ checkInactiveness <- function(movements, detections.list, inactive.warning, inac
   })
   return(movements)
 }
+
+#' Find out if a fish moved in an impossible direction
+#' 
+#' @param movements the movements list
+#' @param dotmat the matrix of distances between arrays
+#' 
+#' @return the movements list with valid/invalid rows
+#' 
+#' @keywords internal
+#' 
 checkImpassables <- function(movements, dotmat){
   Valid <- NULL
   output <- lapply(names(movements), function(fish) {
     restart <- TRUE
-    recipient <- movements[[fish]]
     while (restart) {
       restart <- FALSE
-      if (sum(recipient$Valid) > 1) {
-        valid.moves <- recipient[(Valid)]
+      if (sum(movements[[fish]]$Valid) > 1) {
+        valid.moves <- movements[[fish]][(Valid)]
         shifts <- data.frame(
           A = valid.moves$Array[-nrow(valid.moves)],
           B = valid.moves$Array[-1])
@@ -167,8 +176,8 @@ checkImpassables <- function(movements, dotmat){
           sapply(which(is.na(distances)), function(i) {
             appendTo(c("Screen", "Warning", "Report"), paste0("W: Fish ", fish, " made an impassable jump: It is not possible to go from array ", shifts[i, 1], " to ", shifts[i, 2], "."))
           })
-          cat("\nOpening movement table for inspection:\n\n")
-          print(recipient)
+          cat("\nOpening valid movement table for inspection:\n\n")
+          print(valid.moves)
           cat("\nYou may either:\n\na) Render movement events invalid to resolve the impassable exception.\nb) Stop the analysis and modify the spatial.txt file.\n\n")
           check <- TRUE
           while(check) {
@@ -179,7 +188,12 @@ checkImpassables <- function(movements, dotmat){
               stop("Analysis stopped per user command.\n", call. = FALSE)
             }
             if (decision == "a" | decision == "A") {
-              recipient <- invalidateEvents(movements = movements[[fish]], fish = fish)
+              aux <- invalidateEvents(movements = valid.moves, fish = fish)
+              if (any(!aux$Valid)) {
+                aux <- aux[!(Valid)]
+                link <- apply(aux, 1, function(x) which(movements[[fish]]$Array == x["Array"] & grepl(x["First.time"], movements[[fish]]$First.time, fixed = TRUE)))
+                movements[[fish]]$Valid[link] <<- FALSE
+              }
               restart <- TRUE
               check <- FALSE
             } else {
@@ -189,10 +203,8 @@ checkImpassables <- function(movements, dotmat){
         }
       }
     }
-    return(recipient)
   })
-  names(output) <- names(movements)
-  return(output)
+  return(movements)
 }
 
 #' Verify number of detections in section movements
