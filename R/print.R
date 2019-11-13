@@ -1049,3 +1049,138 @@ copyOfRosediagRad <- function (x, zero, rotation, bins, upper, radii.scale, prop
         }
     }
 }
+
+#' Print arrival and departure times per section
+#' 
+#' @param section.times A list of entry and exit times for each section
+#' @inheritParams splitDetections
+#' @param detections A valid detections list
+#' 
+#' @keywords internal
+#' 
+printSectionTimes <- function(section.times, bio, detections) {
+  cbPalette <- c("#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7", "#999999")
+  names(cbPalette) <- c("Orange", "Blue", "Green", "Yellow", "Darkblue", "Darkorange", "Pink", "Grey")
+  time.range <- c(min(bio$Release.date), max(do.call(c, lapply(detections, function(x) x$Timestamp))))
+  dayrange <- as.Date(time.range)
+  dayrange[1] <- dayrange[1] - 1
+  dayrange[2] <- dayrange[2] + 1
+  capture.output <- lapply(names(section.times), function(i) {
+    plotdata <- suppressMessages(reshape2::melt(section.times[[i]]))
+    plotdata <- plotdata[complete.cases(plotdata), ]
+    link <- match(plotdata$Transmitter, bio$Transmitter)
+    plotdata$Group <- bio$Group[link]
+    plotdata$Date <- as.Date(substring(as.character(plotdata$value), 1, 10))
+    p <- ggplot2::ggplot(data = plotdata, ggplot2::aes(x = Date, fill = Group))
+    p <- p + ggplot2::geom_bar(width = 0.9)
+    p <- p + ggplot2::theme_bw()
+    p <- p + ggplot2::facet_wrap(variable ~ ., ncol = 1, scales = "free")
+    p <- p + ggplot2::scale_y_continuous(expand = c(0, 0, 0.05, 0))
+    p <- p + ggplot2::scale_x_date(limits = dayrange)
+    p <- p + ggplot2::labs(x = "", y = "n")
+    if (length(unique(plotdata$Group)) <= 8) {
+      p <- p + ggplot2::scale_fill_manual(values = as.vector(cbPalette)[1:length(unique(plotdata$Group))], drop = FALSE)
+    } 
+    ggplot2::ggsave(paste0("Report/", i,"_days.png"), width = 10, height = length(unique(plotdata$variable)) * 2)
+  })
+}
+
+#' print the distribution of fish per location
+#' 
+#' @param ratios the global ratios
+#' 
+#' @keywords internal
+#' 
+printGlobalRatios <- function(ratios) {
+  cbPalette <- c("#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7", "#999999")
+  names(cbPalette) <- c("Orange", "Blue", "Green", "Yellow", "Darkblue", "Darkorange", "Pink", "Grey")
+  capture <- lapply(names(ratios), function(i) {
+    plotdata <- suppressMessages(reshape2::melt(ratios[[i]][, -ncol(ratios[[i]])]))
+    colnames(plotdata) <- c("Date", "Location", "n")
+    plotdata$Date <- as.Date(plotdata$Date)
+    p <- ggplot2::ggplot(data = plotdata, ggplot2::aes(x = Date, y = n, fill = Location))
+    p <- p + ggplot2::geom_bar(width = 1, stat = "identity")
+    p <- p + ggplot2::theme_bw()
+    if (i == "absolutes") {
+      p <- p + ggplot2::scale_y_continuous(limits = c(0,  max(apply(ratios[[i]][, c(-1, -ncol(ratios[[i]]))], 1, sum)) * 1.05), expand = c(0, 0))
+      p <- p + ggplot2::labs(x = "", y = "n")
+    } else {
+      p <- p + ggplot2::scale_y_continuous(limits = c(0,  max(apply(ratios[[i]][, c(-1, -ncol(ratios[[i]]))], 1, sum))), expand = c(0, 0))
+      p <- p + ggplot2::labs(x = "", y = "% fish")
+    }
+    if (length(unique(plotdata$Location)) <= 8)
+      p <- p + ggplot2::scale_fill_manual(values = as.vector(cbPalette)[1:length(unique(plotdata$Location))], drop = FALSE)
+    ggplot2::ggsave(paste0("Report/global_ratios_", i,".png"), width = 10, height = 4)
+    ggplot2::ggsave(paste0("Report/global_ratios_", i,".svg"), width = 10, height = 4)
+  })
+}
+
+#' print the individual locations per day
+#' 
+#' @param ratios the daily ratios
+#' @param dayrange the overall first and last detection dates
+#' 
+#' @return a Rmarkdown string to be included in the report
+#' 
+#' @keywords internal
+#' 
+printIndividualResidency <- function(ratios, dayrange) {
+  cbPalette <- c("#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7", "#999999")
+  names(cbPalette) <- c("Orange", "Blue", "Green", "Yellow", "Darkblue", "Darkorange", "Pink", "Grey")
+  counter <- 0
+  individual.plots <- NULL
+  pb <- txtProgressBar(min = 0, max = length(ratios), style = 3, width = 60)
+  capture <- lapply(names(ratios), function(i) {
+    counter <<- counter + 1
+    x <- ratios[[i]]
+    aux <- which(grepl("^p", colnames(x)))
+    aux <- aux[!is.na(match(colnames(x)[aux - 1], sub("p", "", colnames(x)[aux])))]
+    new.colnames <-colnames(x)[c(1, aux - 1)]
+    x <- x[ c(1, aux)]
+    colnames(x) <- new.colnames
+    plotdata <- suppressMessages(reshape2::melt(x))
+    colnames(plotdata) <- c("Date", "Location", "n")
+    plotdata$Date <- as.Date(plotdata$Date)
+    p <- ggplot2::ggplot(data = plotdata, ggplot2::aes(x = Date, y = n, fill = Location))
+    p <- p + ggplot2::geom_bar(width = 1, stat = "identity")
+    p <- p + ggplot2::theme_bw()
+    p <- p + ggplot2::scale_y_continuous(limits = c(0,  max(apply(ratios[[i]][, aux, drop = FALSE], 1, sum))), expand = c(0, 0))
+    p <- p + ggplot2::labs(title = paste0(i, " (", substring(x$Date[1], 1, 10), " to ", substring(x$Date[nrow(x)], 1, 10), ")") , x = "", y = "% time per day")
+    p <- p + ggplot2::scale_x_date(limits = dayrange)
+    if (length(unique(plotdata$Location)) <= 8)
+      p <- p + ggplot2::scale_fill_manual(values = as.vector(cbPalette)[1:length(unique(plotdata$Location))], drop = FALSE)
+    if (length(unique(plotdata$Location)) > 5)
+      p <- p + ggplot2::guides(fill = ggplot2::guide_legend(ncol = 2))
+    if (length(unique(plotdata$Location)) > 10)
+      p <- p + ggplot2::guides(fill = ggplot2::guide_legend(ncol = 3))
+    ggplot2::ggsave(paste0("Report/", i,"_residency.png"), width = 10, height = 1.5)
+    individual.plots <<- paste0(individual.plots, "![](", i, "_residency.png){ width=95% }\n")
+    setTxtProgressBar(pb, counter)
+  })
+  close(pb)
+  return(individual.plots)
+}
+
+#' Print a simple barplot with the number of fish last seen at each section
+#' 
+#' @param input a table with the last seen data
+#' @param sections the order of the sections
+#' 
+#' @keywords internal
+#' 
+printLastSeen <- function(input, sections) {
+  cbPalette <- c("#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7", "#999999")
+  names(cbPalette) <- c("Orange", "Blue", "Green", "Yellow", "Darkblue", "Darkorange", "Pink", "Grey")
+  input$Group <- rownames(input)
+  plotdata <- reshape2::melt(input)
+  colnames(plotdata) <- c("Group", "Section", "n")
+  plotdata$Section <- factor(gsub("Disap. in |Disap. at ", "", plotdata$Section), levels = c(sections, "Release"))
+  p <- ggplot2::ggplot(plotdata, ggplot2::aes(x = Section, y = n))
+  p <- p + ggplot2::geom_bar(stat = "identity", fill = cbPalette[[2]], colour = "transparent")
+  p <- p + ggplot2::facet_grid(. ~ Group)
+  p <- p + ggplot2::theme_bw()
+  p <- p + ggplot2::labs(x = "", y = "n")
+  p <- p + ggplot2::scale_y_continuous(expand = c(0, 0, 0.05, 0))
+  the.width <- max(2, (ncol(input) - 1) * nrow(input) * 0.7)
+  ggplot2::ggsave("Report/last_seen.png", width = the.width, height = 4)
+}
