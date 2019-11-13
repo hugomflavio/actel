@@ -12,11 +12,10 @@
 #' @export
 #' 
 residency <- function(path = NULL, sections, minimum.detections = 2, 
-  maximum.time = 60, speed.method = c("last to first", "first to first"), 
-  if.last.skip.section = TRUE, tz.study.area, start.timestamp = NULL, 
-  end.timestamp = NULL, report = TRUE, override = NULL, 
-  exclude.tags = NULL, cautious.assignment = TRUE, replicates = NULL,
-  jump.warning = 2, jump.error = 3, debug = FALSE) {
+  maximum.time = 60, speed.method = c("last to first", "first to first"), speed.warning = NULL,
+  speed.error = NULL, if.last.skip.section = TRUE, tz.study.area, start.timestamp = NULL, 
+  end.timestamp = NULL, report = TRUE, exclude.tags = NULL, replicates = NULL,
+  jump.warning = 2, jump.error = 3, inactive.warning = NULL, inactive.error = NULL, debug = FALSE) {
   
 # check argument quality
   my.home <- getwd()
@@ -24,19 +23,31 @@ residency <- function(path = NULL, sections, minimum.detections = 2,
     stop("'minimum.detections' must be numeric.\n", call. = FALSE)
   if (!is.numeric(maximum.time))
     stop("'maximum.time' must be numeric.\n", call. = FALSE)
+
   speed.method <- match.arg(speed.method)
+  if (!is.null(speed.warning) && !is.numeric(speed.warning))
+    stop("'speed.warning' must be numeric.\n", call. = FALSE)    
+  if (!is.null(speed.error) && !is.numeric(speed.error))
+    stop("'speed.error' must be numeric.\n", call. = FALSE)    
+  if (!is.null(speed.error) & is.null(speed.warning))
+    speed.warning <- speed.error
+  if (!is.null(speed.error) && speed.error < speed.warning)
+    stop("'speed.error' must not be lower than 'speed.warning'.\n", call. = FALSE)
+
   if (!is.logical(if.last.skip.section))
     stop("'if.last.skip.section' must be logical.\n", call. = FALSE)
+
   if (!is.null(start.timestamp) && !grepl("^[1-2][0-9][0-9][0-9]-[0-1][0-9]-[0-3][0-9] [0-2][0-9]:[0-5][0-9]:[0-5][0-9]", start.timestamp))
     stop("'start.timestamp' must be in 'yyyy-mm-dd hh:mm:ss' format.\n", call. = FALSE)
   if (!is.null(end.timestamp) && !grepl("^[1-2][0-9][0-9][0-9]-[0-1][0-9]-[0-3][0-9] [0-2][0-9]:[0-5][0-9]:[0-5][0-9]", end.timestamp))
     stop("'end.timestamp' must be in 'yyyy-mm-dd hh:mm:ss' format.\n", call. = FALSE)
+  
   if (!is.logical(report))
     stop("'report' must be logical.\n", call. = FALSE)
-  if (!is.logical(cautious.assignment))
-    stop("'cautious.assignment' must be logical.\n", call. = FALSE)
+
   if (!is.null(replicates) && !is.list(replicates))
     stop("'replicates' must be a list.\n", call. = FALSE)
+
   if (!is.numeric(jump.warning))
     stop("'jump.warning' must be numeric.\n", call. = FALSE)
   if (jump.warning < 1)
@@ -47,6 +58,16 @@ residency <- function(path = NULL, sections, minimum.detections = 2,
     stop("'jump.error' must not be lower than 1.\n", call. = FALSE)
   if (jump.error < jump.warning)
     stop("'jump.error' must not be lower than 'jump.warning'.\n", call. = FALSE)
+  
+  if (!is.null(inactive.warning) && !is.numeric(inactive.warning))
+    stop("'inactive.warning' must be numeric.\n", call. = FALSE)    
+  if (!is.null(inactive.error) && !is.numeric(inactive.error))
+    stop("'inactive.error' must be numeric.\n", call. = FALSE)    
+  if (!is.null(inactive.error) & is.null(inactive.warning))
+    inactive.warning <- inactive.error
+  if (!is.null(inactive.error) && inactive.error < inactive.warning)
+    stop("'inactive.error' must not be lower than 'inactive.warning'.\n", call. = FALSE)
+
   if (!is.logical(debug))
     stop("'debug' must be logical.\n", call. = FALSE)
 # ------------------------
@@ -68,23 +89,23 @@ residency <- function(path = NULL, sections, minimum.detections = 2,
 # Store function call
   the.function.call <- paste0("residency(path = ", ifelse(is.null(path), "NULL", paste0("'", path, "'")), 
       ", sections = ", paste0("c('", paste(sections, collapse = "', '"), "')"), 
-      # ", success.arrays = ", paste0("c('", paste(success.arrays, collapse = "', '"), "')"), 
       ", minimum.detections = ", minimum.detections,
       ", maximum.time = ", maximum.time,
       ", speed.method = ", paste0("c('", speed.method, "')"),
+      ", speed.warning = ", ifelse(is.null(speed.warning), "NULL", speed.warning), 
+      ", speed.error = ", ifelse(is.null(speed.error), "NULL", speed.error), 
       ", if.last.skip.section = ", ifelse(if.last.skip.section, "TRUE", "FALSE"),
       ", tz.study.area = ", ifelse(is.null(tz.study.area), "NULL", paste0("'", tz.study.area, "'")), 
       ", start.timestamp = ", ifelse(is.null(start.timestamp), "NULL", paste0("'", start.timestamp, "'")),
       ", end.timestamp = ", ifelse(is.null(end.timestamp), "NULL", paste0("'", end.timestamp, "'")),
       ", report = ", ifelse(report, "TRUE", "FALSE"), 
-      # ", redraw = ", ifelse(redraw, "TRUE", "FALSE"),
-      ", override = ", ifelse(is.null(override), "NULL", paste0("c('", paste(override, collapse = "', '"), "')")),
       ", exclude.tags = ", ifelse(is.null(exclude.tags), "NULL", paste0("c('", paste(exclude.tags, collapse = "', '"), "')")), 
-      ", debug = ", ifelse(debug, "TRUE", "FALSE"), 
-      ", cautious.assignment = ", ifelse(cautious.assignment, "TRUE", "FALSE"), 
       ", replicates = ", ifelse(is.null(replicates),"NULL", paste0("c('", paste(replicates, collapse = "', '"), "')")),
       ", jump.warning = ", jump.warning,
       ", jump.error = ", jump.error,
+      ", inactive.warning = ", ifelse(is.null(inactive.warning), "NULL", inactive.warning), 
+      ", inactive.error = ", ifelse(is.null(inactive.error), "NULL", inactive.error), 
+      ", debug = ", ifelse(debug, "TRUE", "FALSE"), 
       ")")
 # --------------------
 
@@ -105,7 +126,7 @@ residency <- function(path = NULL, sections, minimum.detections = 2,
 # -----------------------------------
 
 # Load, structure and check the inputs
-study.data <- loadStudyData(tz.study.area = tz.study.area, override = override, 
+study.data <- loadStudyData(tz.study.area = tz.study.area, override = NULL,
                             start.timestamp = start.timestamp, end.timestamp = end.timestamp,
                             sections = sections, exclude.tags = exclude.tags)
 bio <- study.data$bio
@@ -136,10 +157,33 @@ detections.list <- study.data$detections.list
   names(movements) <- aux
   rm(aux)
 
+  appendTo(c("Screen", "Report"), "M: Checking movement events quality.")
+
   movements <- checkImpassables(movements = movements, dotmat = dotmat)
 
   movements <- checkJumpDistance(movements = movements, bio = bio, dotmat = dotmat, 
                                  spatial = spatial, jump.warning = jump.warning, jump.error = jump.error)
+
+  if (is.null(speed.warning)) {
+    appendTo(c("Screen", "Report", "Warning"), "M: 'speed.warning'/'speed.error' were not set, skipping speed checks.")
+  } else {
+    if(invalid.dist) {
+      appendTo(c("Screen", "Report", "Warning"), "W: 'speed.warning'/'speed.error' were set, but a valid distance matrix is not present. Aborting speed checks.")
+    } else {
+       temp.valid.movements <- simplifyMovements(movements = movements, bio = bio, 
+         speed.method = speed.method, dist.mat = dist.mat, invalid.dist = invalid.dist)
+      movements <- checkSpeeds(movements = movements, valid.movements = temp.valid.movements, 
+        speed.warning = speed.warning, speed.error = speed.error)
+       rm(temp.valid.movements)
+     }
+  }
+  
+  if (is.null(inactive.warning))
+    appendTo(c("Screen", "Report", "Warning"), "M: 'inactive.warning'/'inactive.error' were not set, skipping inactivity checks.")
+  else
+    movements <- checkInactiveness(movements = movements, detections.list = detections.list, 
+      inactive.warning = inactive.warning, inactive.error = inactive.error, 
+      dist.mat = dist.mat, invalid.dist = invalid.dist)
 
   valid.movements <- simplifyMovements(movements = movements, bio = bio, 
     speed.method = speed.method, dist.mat = dist.mat, invalid.dist = invalid.dist)
@@ -156,19 +200,54 @@ detections.list <- study.data$detections.list
   # Resimplify array moves and calculate simple section moves
   valid.movements <- simplifyMovements(movements = movements, bio = bio, 
     speed.method = speed.method, dist.mat = dist.mat, invalid.dist = invalid.dist)
-  valid.section.movements <- sectionMovements(movements = valid.movements, sections = sections, invalid.dist = invalid.dist)
 
-  valid.detections <- validateDetections(detections.list = detections.list, movements = valid.movements)
+  valid.section.movements <- sectionMovements(movements = valid.movements, sections = sections, invalid.dist = invalid.dist)
 
   # Grab summary information
   res.df <- assembleResidency(secmoves = valid.section.movements, movements = valid.movements, sections = sections)
+  
   appendTo(c("Screen", "Report"), "M: Timetable successfully filled. Fitting in the remaining variables.")
+  
   status.df <- res_assembleOutput(res.df = res.df, bio = bio, spatial = spatial, 
                                   sections = sections, tz.study.area = tz.study.area)
+
+  last.seen <- as.data.frame.matrix(with(status.df, table(Group, Status)))
+
+  array.times <- getTimes(movements = valid.movements, spatial = spatial, type = "arrival", events = "all")
+
+  section.times <- list(
+    arrival = getTimes(movements = valid.section.movements, spatial = spatial, type = "arrival", events = "all"),
+    departure = getTimes(movements = valid.section.movements, spatial = spatial, type = "departure", events = "all"))
+
+  residency.list <- getResidency(movements = valid.section.movements, spatial = spatial)
+  
+  appendTo(c("Screen", "Report"), "M: Calculating daily locations for each fish.")
+
+  daily.ratios <- dailyRatios(res = residency.list)
+
+  daily.positions <- dailyPositions(ratios = daily.ratios)
+
+  global.ratios <- globalRatios(positions = daily.positions)
+
+  appendTo("Screen", "M: Validating detections...")
+
+  valid.detections <- validateDetections(detections.list = detections.list, movements = valid.movements)
+
 # ---------------
   
 # Efficiency
+  appendTo(c("Screen", "Report"), "M: Calculating array efficiency.")
   efficiency <- res_efficiency(arrmoves = valid.movements, bio = bio, spatial = spatial, arrays = arrays, paths = paths, dotmat = dotmat)
+  if (!is.null(replicates)) {
+    intra.array.matrices <- getDualMatrices(replicates = replicates, CJS = NULL, spatial = spatial, detections.list = detections.list)
+    recipient <- includeIntraArrayEstimates(m = intra.array.matrices, efficiency = efficiency, CJS = NULL)
+    efficiency <- recipient[[1]]
+    intra.array.CJS <- recipient[[2]]
+    rm(recipient)
+  } else {
+    intra.array.CJS <- NULL
+  }
+
 # ----------
 
   
@@ -176,13 +255,6 @@ detections.list <- study.data$detections.list
 # ---------------
 
 # wrap up in-R objects
-  # if (!is.null(override)) {
-  #   header.fragment <- paste('<span style="color:red">Manual mode has been triggered for **', length(override),'** fish.</span>\n', sep = "")
-  #   name.fragment <- "_corrected"
-  # } else {
-  #   header.fragment <- name.fragment <- ""
-  # }
-
   if (file.exists(resultsname <- paste("actel_residency_results.RData", sep = ""))) {
     continue <- TRUE
     index <- 1
@@ -193,7 +265,7 @@ detections.list <- study.data$detections.list
         continue <- FALSE
       }
     }
-    appendTo("Screen", paste("M: An actel residency results file is already present in the present directory, saving new results as '", resultsname,"'.", sep = ""))
+    appendTo("Screen", paste("M: An actel residency results file is already present in the current directory.\n   Saving new results as '", resultsname,"'.", sep = ""))
     rm(continue, index)
   } else {
     appendTo(c("Screen", "Report"), paste("M: Saving results to '", resultsname, "'.", sep = ""))
@@ -203,26 +275,35 @@ detections.list <- study.data$detections.list
   deployments <- do.call(rbind.data.frame, deployments)
   if (invalid.dist)
     save(detections, valid.detections, spatial, deployments, arrays, movements, valid.movements, 
-      section.movements, valid.section.movements, status.df, file = resultsname)
+      section.movements, valid.section.movements, status.df, last.seen, array.times, section.times,
+      residency.list, daily.ratios, daily.positions, global.ratios, file = resultsname)
   else
     save(detections, valid.detections, spatial, deployments, arrays, movements, valid.movements, 
-      section.movements, valid.section.movements, status.df, dist.mat, file = resultsname)
+      section.movements, valid.section.movements, status.df, last.seen, array.times, section.times,
+      residency.list, daily.ratios, daily.positions, global.ratios, dist.mat, file = resultsname)
 # ------------
 
 # Print graphics
   if (report) {
+    appendTo(c("Screen", "Report"), "M: Producing the report.")
     biometric.fragment <- printBiometrics(bio = bio)
-    # efficiency.fragment <- mbPrintEfficiency(overall.CJS = overall.CJS, intra.CJS = intra.array.CJS)
-    # printDotplots(status.df = status.df, invalid.dist = invalid.dist)
-    # printSurvivalGraphic(section.overview = section.overview)
     printDot(dot = dot, sections = sections, spatial = spatial)
-    # mbPrintProgression(dot = dot,  sections = sections, overall.CJS = overall.CJS, spatial = spatial, status.df = status.df)
-    individual.plots <- printIndividuals(redraw = TRUE, detections.list = detections.list, bio = bio, 
+    printSectionTimes(section.times = section.times, bio = bio, detections = valid.detections)
+    printGlobalRatios(ratios = global.ratios)
+    individual.detection.plots <- printIndividuals(redraw = TRUE, detections.list = detections.list, bio = bio, 
         tz.study.area = tz.study.area, movements = movements, simple.movements = valid.movements)
-    # circular.plots <- printCircular(times = convertTimesToCircular(times), bio = bio)
-    # array.overview.fragment <- printArrayOverview(array.overview)
-    # if (nrow(section.overview) > 3) 
-      # survival.graph.size <- "width=90%" else survival.graph.size <- "height=4in"
+    array.circular.plots <- printCircular(times = convertTimesToCircular(array.times), bio = bio, suffix = "_array")
+    section.arrival.circular.plots <- printCircular(times = convertTimesToCircular(section.times$arrival), bio = bio, suffix = "_array")
+    section.departure.circular.plots <- printCircular(times = convertTimesToCircular(section.times$departure), bio = bio, suffix = "_array")
+    appendTo(c("Screen", "Report"), "M: Drawing individual residency graphics.")
+    dayrange <- range(as.Date(global.ratios[[1]]$Date))
+    dayrange[1] <- dayrange[1] - 1
+    dayrange[2] <- dayrange[2] + 1
+    individual.residency.plots <- printIndividualResidency(ratios = daily.ratios, dayrange = dayrange)
+    efficiency.fragment <- printEfficiency(intra.CJS = intra.array.CJS, type = "residency")
+    printLastSeen(input = last.seen, sections = sections)
+    if (nrow(last.seen) > 3) 
+      last.seen.graph.size <- "width=90%" else last.seen.graph.size <- "height=4in"
   }
   
   appendTo("Report", "M: Process finished successfully.")
@@ -239,8 +320,11 @@ detections.list <- study.data$detections.list
 # print html report
   if (report) {
     appendTo("debug", "debug: Printing report")
-    rmarkdown::render(reportname <- printResidencyRmd(biometric.fragment = biometric.fragment,
-        individual.plots = individual.plots, spatial = spatial, detections = detections, valid.detections = valid.detections), quiet = TRUE)
+    rmarkdown::render(reportname <- printResidencyRmd(biometric.fragment = biometric.fragment, efficiency.fragment = efficiency.fragment,
+        array.circular.plots = array.circular.plots, section.arrival.circular.plots = section.arrival.circular.plots, 
+        section.departure.circular.plots = section.departure.circular.plots, individual.detection.plots = individual.detection.plots, 
+        individual.residency.plots = individual.residency.plots, spatial = spatial, detections = detections, valid.detections = valid.detections,
+        last.seen = last.seen, last.seen.graph.size = last.seen.graph.size), quiet = TRUE)
     appendTo("debug", "debug: Moving report")
     fs::file_move(sub("Rmd", "html", reportname), sub("Report/", "", sub("Rmd", "html", reportname)))
     appendTo("debug", "debug: Opening report if the pc has internet.")
@@ -258,11 +342,13 @@ detections.list <- study.data$detections.list
   if (invalid.dist)
     return(list(detections = detections, valid.detections = valid.detections, spatial = spatial, deployments = deployments, arrays = arrays,
       movements = movements, valid.movements = valid.movements, section.movements = section.movements, valid.section.movements = valid.section.movements,
-      status.df = status.df, efficiency = efficiency))
+      status.df = status.df, efficiency = efficiency, array.times = array.times, section.times = section.times, residency.list = residency.list, 
+      daily.ratios = daily.ratios, daily.positions = daily.positions, global.ratios = global.ratios))
   else
     return(list(detections = detections, valid.detections = valid.detections, spatial = spatial, deployments = deployments, arrays = arrays,
       movements = movements, valid.movements = valid.movements, section.movements = section.movements, valid.section.movements = valid.section.movements,
-      status.df = status.df, efficiency = efficiency, dist.mat = dist.mat))
+      status.df = status.df, efficiency = efficiency, array.times = array.times, section.times = section.times, residency.list = residency.list, 
+      daily.ratios = daily.ratios, daily.positions = daily.positions, global.ratios = global.ratios, dist.mat = dist.mat))
 }
 
 #' Print Rmd report
@@ -274,8 +360,8 @@ detections.list <- study.data$detections.list
 #' 
 #' @keywords internal
 #' 
-printResidencyRmd <- function(biometric.fragment, individual.plots, spatial, deployments, detections, valid.detections){
-  appendTo("Screen", "M: Producing final report.")
+printResidencyRmd <- function(biometric.fragment, efficiency.fragment, individual.detection.plots, individual.residency.plots, array.circular.plots, 
+  section.arrival.circular.plots, section.departure.circular.plots, spatial, deployments, detections, valid.detections, last.seen, last.seen.graph.size){
   if (file.exists(reportname <- paste("Report/actel_residency_report.Rmd", sep = ""))) {
     continue <- TRUE
     index <- 1
@@ -286,7 +372,7 @@ printResidencyRmd <- function(biometric.fragment, individual.plots, spatial, dep
         continue <- FALSE
       }
     }
-    appendTo("Screen",paste("M: An actel report is already present in the present directory, saving new report as 'actel_residency_report.", index, ".html'.", sep = ""))
+    appendTo("Screen",paste("M: An actel report is already present in the current directory\n   Saving new report as 'actel_residency_report.", index, ".html'.", sep = ""))
     rm(continue,index)
   } else {
     appendTo("Screen",paste("M: Saving actel report as 'actel_residency_report.html'.", sep = ""))
@@ -322,13 +408,13 @@ Number of listed receivers: **', stringr::str_extract(pattern = '(?<=Number of A
 
 Data time range: ', stringr::str_extract(pattern = '(?<=Data time range: )[^\r|^\n]*', string = report), '
 
-Percentage of valid detections: ', round(sum(unlist(lapply(valid.detections, nrow))) / sum(unlist(lapply(detections, nrow))) * 100, 2), '%
+Percentage of post-release valid detections: ', round(sum(unlist(lapply(valid.detections, nrow))) / sum(unlist(lapply(detections, nrow))) * 100, 2), '%
 
 Found a bug? [**Report it here.**](https://github.com/hugomflavio/actel/issues)
 
 ### Study area
 
-Arrays with the same background belong to the same section. Release sites are marked with "R.S."
+Arrays with the same background belong to the same section. Release sites are marked with "R.S.". Arrays connected with an arrow indicate that the fish can only pass in one direction.
 
 <img src="mb_arrays.svg" alt="Missing file" style="padding-top: 15px;"/>
 
@@ -350,6 +436,12 @@ knitr::kable(deployments, row.names = FALSE)
 knitr::kable(spatial$release.sites, row.names = FALSE)
 ```
 
+### Array efficiency
+
+More information on the differences between "Known missed events" and "Potentially missed events" can be found in the package vignettes.
+
+', efficiency.fragment,'
+
 ### Warning messages
 
 ```{r warnings, echo = FALSE, comment = NA}
@@ -369,24 +461,102 @@ if(file.exists("../temp_warnings.txt")) cat(gsub("\\r", "", readr::read_file("..
 </center>
 
 
+### Last seen
+
+```{r survival, echo = FALSE}
+knitr::kable(last.seen)
+```
+
+<center>
+![](last_seen.png){ ',last.seen.graph.size ,' }
+</center>
+
+
+### Average time of arrival at each Array
+
+Note:
+  : Coloured lines on the outer circle indicate the mean value for each group and the respective ranges show the standard error of the mean. Each group\'s bars sum to 100%. The number of data points in each group is presented between brackets in the legend of each pannel. 
+  : These graphics have been saved in vectorial format (svg) in the "Results" folder, so you may edit them as needed.
+
+<center>
+', array.circular.plots,'
+</center>
+
+### Time details for each section
+
+#### Arrival days at each section
+
+<center>
+![](arrival_days.png){ width=95% }
+</center>
+
+#### Arrival times at each section
+
+Note:
+  : Coloured lines on the outer circle indicate the mean value for each group and the respective ranges show the standard error of the mean. Each group\'s bars sum to 100%. The number of data points in each group is presented between brackets in the legend of each pannel. 
+  : These graphics have been saved in vectorial format (svg) in the "Results" folder, so you may edit them as needed.
+
+<center>
+', section.arrival.circular.plots,'
+</center>
+
+#### Departure days at each section
+
+<center>
+![](departure_days.png){ width=95% }
+</center>
+
+#### Departure times at each section
+
+Note:
+  : Coloured lines on the outer circle indicate the mean value for each group and the respective ranges show the standard error of the mean. Each group\'s bars sum to 100%. The number of data points in each group is presented between brackets in the legend of each pannel. 
+  : These graphics have been saved in vectorial format (svg) in the "Results" folder, so you may edit them as needed.
+
+<center>
+', section.departure.circular.plots,'
+</center>
+
+### Section progression
+
+Note:
+  : These graphics have been saved in vectorial format (svg) in the "Results" folder, so you may edit them as needed.
+
+#### Absolutes
+
+<center>
+![](global_ratios_absolutes.png){ width=95% }
+</center>
+
+
+#### Percentages
+
+<center>
+![](global_ratios_percentages.png){ width=95% }
+</center>
+
+
+### Individual residency plots
+
+<center>
+', individual.residency.plots,'
+</center>
+
+### Individual detection plots
+
+Note:
+  : The detections are coloured by array. The vertical black dashed line shows the time of release. The vertical grey dashed lines show the assigned moments of entry and exit for each study area section. The full dark-grey line shows the movement events considered valid, while the dashed dark-grey line shows the movement events considered invalid.
+  : The movement event lines move straight between the first and last station of each event (i.e. in-between detections will not be individually linked by the line).
+  : Manually **edited** fish are highlighted with **yellow** graphic borders.
+
+<center>
+', individual.detection.plots,'
+</center>
 
 ### Full log
 
 ```{r log, echo = FALSE, comment = NA}
 cat(gsub("\\r", "", readr::read_file("../temp_log.txt")))
 ```
-
-### Individual plots
-
-Note:
-  : The detections are coloured by array. The vertical black dashed line shows the time of release. The vertical grey dashed lines show the assigned moments of entry and exit for each study area section. The full dark-grey line shows the movement events considered valid, while the dashed dark-grey line shows the movement events considered invalid.
-  : The movement event lines move straight between the first and last station of each event (i.e. in-between detections will not be individually linked by the line).
-  : Manually **edited** fish are highlighted with **yellow** graphic borders.
-  : Manually **overridden** fish are highlighted with **red** graphic borders.
-
-<center>
-', individual.plots,'
-</center>
 
 ', sep = ""), fill = TRUE)
 sink()
@@ -415,7 +585,7 @@ img[src*="#diagram"] {
 /* The sidebar menu */
 .sidenav {
   height: 100%; 
-  width: 110px; 
+  width: 130px; 
   position: fixed; 
   z-index: 1; 
   top: 0; 
@@ -476,11 +646,17 @@ img[src*="#diagram"] {
   <a href="#receiver-stations">Stations</a>
   <a href="#deployments">Deployments</a>
   <a href="#release-sites">Release sites</a>
+  <a href="#array-efficiency">Array efficiency</a>
   <a href="#warning-messages">Warnings</a>
   <a href="#user-comments">Comments</a>
   <a href="#biometric-graphics">Biometrics</a>
+  <a href="#last-seen">Last seen</a>
+  <a href="#average-time-of-arrival-at-each-array">Arrival days</a>
+  <a href="#time-details-for-each-section">Section times</a>
+  <a href="#section-progression">Section progression</a>
+  <a href="#individual-residency-plots">Individual residency</a>
+  <a href="#individual-detection-plots">Individual detections</a>
   <a href="#full-log">Full log</a>
-  <a href="#individual-plots">Individuals</a>
 </div>
 ', fill = TRUE)
 sink()
@@ -499,9 +675,9 @@ return(reportname)
 #' 
 updateAMValidity <- function(arrmoves, secmoves) {
   Valid <- NULL
-  output <- lapply(names(secmoves), 
+  output <- lapply(names(arrmoves), 
     function(i) {
-      if (any(!secmoves[[i]]$Valid)) {
+      if (!is.null(secmoves[[i]]) && any(!secmoves[[i]]$Valid)) {
         aux <- secmoves[[i]][(!Valid)]
         to.change <- unlist(lapply(1:nrow(aux),
           function(j) {
@@ -509,12 +685,12 @@ updateAMValidity <- function(arrmoves, secmoves) {
             B <- A + (aux$Events - 1)
             return(A:B)
           }))
-        appendTo(c("Screen", "Report"), paste0("M: Rendering ", length(to.change), " array movements invalid for fish ", i ," as the respective section movements were discarded by the user."))
+        appendTo(c("Screen", "Report"), paste0("M: Rendering ", length(to.change), " array movement(s) invalid for fish ", i ," as the respective section movements were discarded by the user."))
         arrmoves[[i]]$Valid[to.change] <- FALSE
       }
       return(arrmoves[[i]])
     })
-  names(output) <- names(secmoves)
+  names(output) <- names(arrmoves)
   return(output)
 }
 
@@ -611,9 +787,12 @@ assembleResidency <- function(secmoves, movements, sections) {
   rm(recipient)
   rownames(res.df) <- names(secmoves)
 	  
-  for (fish in names(secmoves)) {
+  # for (fish in names(secmoves)) {
+  capture <- lapply(names(secmoves), function(fish) {
+    # cat(fish, "\n")
   	aux <- split(secmoves[[fish]], secmoves[[fish]]$Section)
   	recipient <- lapply(seq_along(aux), function(i) {
+      # cat(i, "\n")
   		recipient <- rep(NA, ncol(res.df))
   		names(recipient) <- colnames(res.df)
   		recipient <- t(as.data.frame(recipient))
@@ -645,9 +824,8 @@ assembleResidency <- function(secmoves, movements, sections) {
   		recipient$Invalid.events <- 0
   	}
   	recipient$P.type <- attributes(secmoves[[fish]])$p.type
-  	res.df[fish, ] <- recipient
-  	rm(recipient)
-  }
+  	res.df[fish, ] <<- recipient
+  })
 	# Convert time data
 	for (section in sections) {
 		for (the.col in c("Average.time.", "Total.time.")) {
@@ -772,6 +950,7 @@ res_efficiency <- function(arrmoves, bio, spatial, arrays, paths, dotmat) {
   # exclude arrays which are connected to a release site from the list above
   no.neighbours <- no.neighbours[!no.neighbours %in% spatial$release.sites$Array]
   absolutes[2, match(no.neighbours, colnames(absolutes))] <- NA
+  absolutes[3, match(no.neighbours, colnames(absolutes))] <- NA
 
   max.efficiency <- apply(absolutes, 2, function(x) 1 - (x[2] / sum(x)))
   min.efficiency <- apply(absolutes, 2, function(x) 1 - ((x[2] + x[3]) / sum(x)))
@@ -847,4 +1026,291 @@ blameArrays <- function(from, to, paths) {
     return(list(known = output))
   else
     return(list(unsure = output))
+}
+
+#' Assemble residency tables per fish
+#' 
+#' @param movements the movements list
+#' @inheritParams loadDistances
+#' 
+#' @return a list of residency tables
+#' 
+#' @keywords internal
+#' 
+getResidency <- function(movements, spatial){
+  output <- lapply(movements, function(x) {
+      recipient <- as.data.frame(x)[, c("Section", "First.time", "Last.time")]
+      if (nrow(recipient) > 1) {
+        to.add <- data.frame(
+          A = match(recipient$Section[-nrow(recipient)], names(spatial$array.order)),
+          B = match(recipient$Section[-1], names(spatial$array.order)),
+          First.time = recipient$Last.time[-nrow(recipient)],
+          Last.time = recipient$First.time[-1])
+        to.add$Section <- apply(to.add, 1, function(xi) {
+          if (xi[1] < xi[2]) {
+            return(paste0(names(spatial$array.order)[as.numeric(xi[1])], "-", names(spatial$array.order)[as.numeric(xi[2])]))
+          } else
+            return(paste0(names(spatial$array.order)[as.numeric(xi[2])], "-", names(spatial$array.order)[as.numeric(xi[1])]))
+        })
+        to.add <- to.add[, c("Section", "First.time", "Last.time")]
+        output <- rbind(recipient, to.add)
+        output <- output[order(output$First.time), ]
+      } else {
+        output <- recipient
+      }
+      return(output)
+    })
+  return(output)
+}
+
+#' calculate daily ratios per fish
+#' 
+#' @param res a residency list
+#' 
+#' @return the daily ratios
+#' 
+#' @keywords internal
+#' 
+dailyRatios <- function(res) {
+  counter <- 0
+  pb <- txtProgressBar(min = 0, max = length(res), style = 3, width = 60)
+  output <- lapply(res, function(x) {
+    counter <<- counter + 1
+    dayrange <- seq(from = round.POSIXt(x$First.time[1] - 43200, units = "days"), 
+      to =  round.POSIXt(x$Last.time[nrow(x)] - 43200, units = "days"), by = 86400)
+    days.list <- lapply(dayrange, function(d) {
+      # cat(as.character(d), "\n")
+      findSecondsPerSection(res = x, day = d, the.range = range(dayrange))
+    })
+    setTxtProgressBar(pb, counter)
+    names(days.list) <- dayrange
+    dailyRatiosIndOut(input = days.list)
+  })
+  close(pb)
+  return(output)
+}
+
+#' Calculate number of seconds at each location per day
+#' 
+#' @inheritParams dailyRatios
+#' @param day the day being analysed (a Date object)
+#' @param the.range the first and last day for the specific fish
+#' 
+#' @return the number of seconds spent at each location
+#' 
+#' @keywords internal
+#' 
+findSecondsPerSection <- function(res, day, the.range) {
+  aux <- c()
+  candidate.events <- which(res$First.time <= day + 86400)
+  potential.events <- which(res$First.time[candidate.events] >= day)
+  # IF potential events returns 0, then the only valid event is the very last candidate
+  if (length(potential.events) == 0)
+    e <- tail(candidate.events, 1)
+  else
+    e <- potential.events
+  # IF there is only one event
+  if (length(e) == 1) {
+    # and that event is the very first one
+    if (e == 1) {
+      # Exception for if the fish was only detected one day, calculates difference between event start and stop.
+      if (the.range[2] == the.range[1]) {
+        aux[[length(aux) + 1]] <- difftime(res$Last.time[e], res$First.time[e], units = "secs")
+        names(aux)[length(aux)] <- res$Section[e]        
+        aux[[length(aux) + 1]] <- 0
+        names(aux)[length(aux)] <- "Changes"
+      } else {
+        # Exception for if the day being analysed is the last day, calculates difference between day start and event stop.
+        if (day == the.range[2]) {
+          aux[[length(aux) + 1]] <- difftime(res$Last.time[e], day, units = "secs")
+          names(aux)[length(aux)] <- res$Section[e]
+        # Otherwise calculate difference between event start and day end, and trim at a full day.
+        } else {
+          aux[[length(aux) + 1]] <- min(86400, as.numeric(difftime(day + 86400, res$First.time[e], units = "secs")))
+          names(aux)[length(aux)] <- res$Section[e]
+        }
+        # Regardless of path, if length(e) == 1 and the event is the first one, the number of changes is 0
+        aux[[length(aux) + 1]] <- 0
+        names(aux)[length(aux)] <- "Changes"
+      }
+    # If there is only one event but that event is not the very first one
+    } else {
+      # If the start time of the event is previous to the day itself
+      if (res$First.time[e] < day) {
+        # Exception for the last day, calculates difference between day start and event stop.
+        if (day == the.range[2]) {
+          aux[[length(aux) + 1]] <- difftime(res$Last.time[e], day, units = "secs")
+          names(aux)[length(aux)] <- res$Section[e]
+        # otherwise, since there are no more 'e', the fish has stayed the whole day in the event
+        } else {
+          aux[[length(aux) + 1]] <- 86400
+          names(aux)[length(aux)] <- res$Section[e]        
+        }
+        # In either case above the fish spends the whole time in the event, so changes = 0
+        aux[[length(aux) + 1]] <- 0
+        names(aux)[length(aux)] <- "Changes"
+      # If the start time of the event is already in the day itself
+      } else {
+        # Start by storing the time spent in previous event (i.e. difference between day start and event start)
+        aux[[length(aux) + 1]] <- difftime(res$First.time[e], day, units = "secs")
+        names(aux)[length(aux)] <- res$Section[e - 1]
+        # Then, since there are no more events, calculate difference between event start and day end.
+        aux[[length(aux) + 1]] <- difftime(day + 86400, res$First.time[e], units = "secs")
+        names(aux)[length(aux)] <- res$Section[e]
+        # Since the day is split in two events, there is 1 change
+        aux[[length(aux) + 1]] <- 1
+        names(aux)[length(aux)] <- "Changes"
+      }
+    }
+  # IF there is more than one 'e'
+  } else {
+    n <- length(e)
+    # calculate difference between day start and first time
+    aux[[length(aux) + 1]] <- difftime(res$First.time[e[1]], day, units = "secs")
+    # Exception for if the day being analysed is the first day (in which case this fragment should be excluded at the end)
+    if (day == the.range[1])
+      names(aux)[length(aux)] <- "TO.EXCLUDE"
+    else
+      names(aux)[length(aux)] <- res$Section[e[1] - 1]
+    # For all events except the last, calculate the difference between first and last time of the event.
+    for (i in e[-n]) {
+      aux[[length(aux) + 1]] <- difftime(res$Last.time[i], res$First.time[i], units = "secs")
+      names(aux)[length(aux)] <- res$Section[i]
+    }
+    # For the very last day
+    # exception for if the day being analysed is the last day, where the behaviour should be the same as the above
+    if (day == the.range[2]) {
+      aux[[length(aux) + 1]] <- difftime(res$Last.time[e[n]], res$First.time[e[n]], units = "secs")
+      names(aux)[length(aux)] <- res$Section[e[n]]
+    # otherwise, remove the seconds already accounted for to a full day, and store the result
+    } else {
+      aux[[length(aux) + 1]] <- 86400 - sum(aux)
+      names(aux)[length(aux)] <- res$Section[e[n]]        
+    }
+    # The number of changes will be the number of events - 1
+    aux[[length(aux) + 1]] <- length(e) - 1
+    names(aux)[length(aux)] <- "Changes"
+  }
+  # Conclude the exception started above, where the first fragment must be excluded
+  if (any(link <- names(aux) == "TO.EXCLUDE")) {
+    aux <- aux[!link]
+    aux["Changes"] <- aux["Changes"] - 1
+  }
+  return(aux)
+}
+
+#' compile output of dailyRatios
+#' 
+#' @param input a list containing the output of findSecondsPerSection for each day
+#' 
+#' @return the daily ratios table for the fish
+#' 
+#' @keywords internal
+#' 
+dailyRatiosIndOut <- function(input) {
+  # sort out all column names
+  the.cols <- sort(unique(unlist(lapply(input, names))))
+  the.cols <- the.cols[-match("Changes", the.cols)]
+  the.cols <- data.frame(V1 = the.cols, V2 = paste0("p", the.cols))
+  the.cols <- c(as.matrix(t(the.cols)))
+  the.cols <- c(the.cols, "Changes")
+  # turn vectors into tables
+  days.tables <- vectorsIntoTables(input = input, columns = the.cols)
+  # merge all tables
+  if (is.data.frame(days.tables)) {
+    output <- days.tables
+    output$one.last.col <- names(input)
+  } else {
+    output <- listToTable(days.tables, type = "frame", source = TRUE)
+  }
+  output <- output[, c(ncol(output), 1:(ncol(output) - 1)), drop = FALSE]
+  colnames(output)[1] <- "Date"
+  output[is.na(output)] <- 0
+  aux <- which(grepl("^p", colnames(output)))
+  aux <- aux[!is.na(match(colnames(output)[aux - 1], sub("p", "", colnames(output)[aux])))]
+  if (length(aux) == 1)
+    output[, aux] <- apply(output[, aux - 1, drop = FALSE], 1, function(x) x / sum(x))
+  else 
+    output[, aux] <- t(apply(output[, aux - 1, drop = FALSE], 1, function(x) x / sum(x)))
+  the.zone <- apply(output[, aux, drop = FALSE], 1, function(x) which(x == max(x)))
+  output$Most.time <- colnames(output)[aux - 1][the.zone]
+  output[, aux] <- round(output[, aux, drop = FALSE], 3)
+  return(output)
+}
+
+#' Find the location where the fish spent most time per day
+#' 
+#' @param ratios the daily ratios
+#' 
+#' @return a data frame with the transmitters as columns and the days as rows
+#' 
+#' @keywords internal
+#' 
+dailyPositions <- function(ratios) {
+  aux <- range(unlist(lapply(ratios, function(x) x$Date)))
+  dayrange <- seq(from = as.Date(aux[1]), to = as.Date(aux[2]), by = 1) 
+  output <- matrix(ncol=length(ratios), nrow = length(dayrange)) 
+  rownames(output) <- as.character(dayrange)
+  colnames(output) <- names(ratios)
+  capture <- lapply(names(ratios), function(i) {
+    link <- match(substring(ratios[[i]]$Date, 1, 10), rownames(output))
+    if (any(is.na(link)))
+      stop("Something went wrong when creating the recipient for the global ratios.")
+    output[link, i] <<- ratios[[i]]$Most.time
+  })
+  return(output)
+}
+
+#' Transform vectors into data frams with specific columns
+#' 
+#' Used to prepare lists of vectors with partially matching names for combination with do.call(rbind.data.frame, x)
+#' 
+#' @param input the list of vectors
+#' @param columns the columns that should be present in every element
+#' 
+#' @return a list of tables with matching columns
+#' 
+#' @keywords internal
+#' 
+vectorsIntoTables <- function(input, columns) {
+  counter <- 0
+  output <- lapply(input, function(x) {
+    counter <<- counter + 1
+    recipient <- matrix(ncol = length(columns), nrow = 1)
+    colnames(recipient) <- columns
+    recipient <- as.data.frame(recipient)
+    link <- colnames(recipient)[match(unique(names(x)), colnames(recipient))]
+    for (i in link) {
+      recipient[1, i] <- sum(x[grepl(paste0("^", i, "$"), names(x))])
+    }
+    return(recipient)
+  })
+  if (length(output) == 1)
+    return(output[[1]])
+  else
+    return(output)
+}
+
+#' Calculate number/percentage of fish at each location for each day
+#' 
+#' @param positions a positions table, supplied by dailyPositions
+#'
+#' @return A list with 1) a table containing the absolute number of fish at each location per day,
+#'  and 2) the respective percentage table.
+#' 
+#' @keywords internal
+#' 
+globalRatios <- function(positions) {
+  aux <- apply(positions, 1, table)
+  the.cols <- sort(unique(unlist(lapply(aux, names))))
+  the.tables <- vectorsIntoTables(input = aux, columns = the.cols)
+  absolutes <- do.call(rbind.data.frame, the.tables)
+  absolutes$Date <- rownames(absolutes)
+  absolutes <- absolutes[, c(ncol(absolutes), 1:(ncol(absolutes) - 1))]
+  rownames(absolutes) <- 1:nrow(absolutes)
+  absolutes[is.na(absolutes)] <- 0
+  absolutes$Total <- apply(absolutes[, -1], 1, sum)
+  percentages <- absolutes
+  percentages[, -1] <- round(percentages[, -1] / percentages[, ncol(percentages)], 3)
+  return(list(absolutes = absolutes, percentages = percentages))
 }
