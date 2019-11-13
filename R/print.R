@@ -642,7 +642,7 @@ printIndividuals <- function(redraw, detections.list, bio, status.df = NULL, tz.
 #' 
 #' @return A rmd string to be attached to the report.
 #' 
-printCircular <- function(times, bio){
+printCircular <- function(times, bio, suffix = NULL){
   cbPalette <- c("#56B4E9", "#c0ff3e", "#E69F00", "#F0E442", "#0072B2", "#D55E00", "#CC79A7", "#999999")
   circular.plots <- ""
   colours <- paste(cbPalette[c(1:length(unique(bio$Group)))], 80, sep = "")
@@ -659,7 +659,7 @@ printCircular <- function(times, bio){
       ylegend <- -0.97
     }
     prop <- roundDown(1 / max(unlist(lapply(trim.times, function(x) table(roundUp(x, to = 1)) / sum(!is.na(x))))), to = 1)
-    {grDevices::svg(paste0("Report/times_", names(times)[i], ".svg"), height = 5, width = 5, bg = "transparent")
+    {grDevices::svg(paste0("Report/times_", names(times)[i], suffix, ".svg"), height = 5, width = 5, bg = "transparent")
     par(mar = c(1, 2, 2, 1))
     copyOfCirclePlotRad(main = names(times)[i], shrink = 1.05)
     # circularSection(from = sunset, 
@@ -678,9 +678,9 @@ printCircular <- function(times, bio){
       fill = params$col, bty = "n", x.intersp = 0.3, cex = 0.8)
     grDevices::dev.off()}
     if (i %% 2 == 0)
-      circular.plots <- paste0(circular.plots, "![](times_", names(times)[i], ".svg){ width=50% }\n")
+      circular.plots <- paste0(circular.plots, "![](times_", names(times)[i], suffix, ".svg){ width=50% }\n")
     else
-      circular.plots <- paste0(circular.plots, "![](times_", names(times)[i], ".svg){ width=50% }")
+      circular.plots <- paste0(circular.plots, "![](times_", names(times)[i], suffix, ".svg){ width=50% }")
   }
   return(circular.plots)
 }
