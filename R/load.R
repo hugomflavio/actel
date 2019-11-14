@@ -105,11 +105,11 @@ loadDot <- function(string = NULL, input = NULL, spatial, sections = NULL) {
   mat <- dotMatrix(input = dot)
   if (any(is.na(match(unique(spatial$Array), colnames(mat))))) {
     emergencyBreak()
-    stop("Not all the arrays listed in the 'spatial.csv' file are present in the 'spatial.dot' file.\n", call. = FALSE)
+    stop("Not all the arrays listed in the 'spatial.csv' file are present in the 'spatial.txt' file.\n", call. = FALSE)
   }
   if (any(is.na(match(unique(spatial$Array), colnames(mat))))) {
     emergencyBreak()
-    stop("Not all the arrays listed in the 'spatial.dot' file are present in the 'spatial.csv' file.\n", call. = FALSE)
+    stop("Not all the arrays listed in the 'spatial.txt' file are present in the 'spatial.csv' file.\n", call. = FALSE)
   }
   arrays <- dotList(input = dot, sections = sections)
   arrays <- dotPaths(input = arrays, dotmat = mat)
