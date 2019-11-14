@@ -6,12 +6,13 @@
 #'  
 #' @inheritParams migration
 #' @inheritParams explore
+#' @param section.minimum threshold consecutive number of detections in a section that awards confidence in the results. If the number of detections is lower than this argument, a warning is issued and user interaction is allowed.
 #' 
 #' @return A list containing 1) the detections used during the analysis, 2) the movement events, 3) the status dataframe, 4) the survival overview per group, 5) the progression through the study area, 6) the ALS array/sections' efficiency, 7) the list of spatial objects used during the analysis.
 #' 
 #' @export
 #' 
-residency <- function(path = NULL, sections, minimum.detections = 2, 
+residency <- function(path = NULL, sections, section.minimum = 2, 
   maximum.time = 60, speed.method = c("last to first", "first to first"), speed.warning = NULL,
   speed.error = NULL, if.last.skip.section = TRUE, tz.study.area, start.timestamp = NULL, 
   end.timestamp = NULL, report = TRUE, exclude.tags = NULL, replicates = NULL,
@@ -19,8 +20,8 @@ residency <- function(path = NULL, sections, minimum.detections = 2,
   
 # check argument quality
   my.home <- getwd()
-  if (!is.numeric(minimum.detections))
-    stop("'minimum.detections' must be numeric.\n", call. = FALSE)
+  if (!is.numeric(section.minimum))
+    stop("'section.minimum' must be numeric.\n", call. = FALSE)
   if (!is.numeric(maximum.time))
     stop("'maximum.time' must be numeric.\n", call. = FALSE)
 
@@ -89,7 +90,7 @@ residency <- function(path = NULL, sections, minimum.detections = 2,
 # Store function call
   the.function.call <- paste0("residency(path = ", ifelse(is.null(path), "NULL", paste0("'", path, "'")), 
       ", sections = ", paste0("c('", paste(sections, collapse = "', '"), "')"), 
-      ", minimum.detections = ", minimum.detections,
+      ", section.minimum = ", section.minimum,
       ", maximum.time = ", maximum.time,
       ", speed.method = ", paste0("c('", speed.method, "')"),
       ", speed.warning = ", ifelse(is.null(speed.warning), "NULL", speed.warning), 
@@ -193,7 +194,7 @@ detections.list <- study.data$detections.list
   # Compress array movements into section movements
   section.movements <- sectionMovements(movements = valid.movements, sections = sections, invalid.dist = invalid.dist)
   # Look for isolated section movements
-  section.movements <- checkSMovesN(secmoves = section.movements)
+  section.movements <- checkSMovesN(secmoves = section.movements, section.minimum = section.minimum)
   # Update array movements based on secmove validity
   movements <- updateAMValidity(arrmoves = movements, secmoves = section.movements)
 

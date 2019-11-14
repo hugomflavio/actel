@@ -210,16 +210,17 @@ checkImpassables <- function(movements, dotmat){
 #' Verify number of detections in section movements
 #' 
 #' @param secmoves the section movements list
+#' @inheritParams residency
 #' 
 #' @return the section movements with valid/invalid notes
 #' 
 #' @keywords internal
 #' 
-checkSMovesN <- function(secmoves) {
+checkSMovesN <- function(secmoves, section.minimum) {
   output <- lapply(seq_along(secmoves), 
     function(i) {
-      if (any(link <- secmoves[[i]]$Detections == 1)) {
-        appendTo(c("Screen", "Report"), paste0("M: Section movements with one detection are present for fish ", names(secmoves)[i], "."))
+      if (any(link <- secmoves[[i]]$Detections < section.minimum)) {
+        appendTo(c("Screen", "Report"), paste0("M: Section movements with less than ",section.minimum, " detections are present for fish ", names(secmoves)[i], "."))
         decision <- commentCheck(paste0("Would you like to inspect the section movements from fish ", names(secmoves)[i]," ?(y/N/comment) "), tag = names(secmoves)[i])
         appendTo("UD", decision)
         if (decision == "y" | decision == "Y") {
