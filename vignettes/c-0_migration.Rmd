@@ -49,10 +49,12 @@ migration(sections = c("River", "Fjord", "Sea"), tz.study.area = "Europe/Copenha
 Study areas can differ considerably. The arguments within migration() allow you to capture that diversity!
 
 ```r
-migration(path = NULL, sections, success.arrays = NULL, minimum.detections = 2, maximum.time = 60, 
-      speed.method = c("last to first", "first to first"), if.last.skip.section = TRUE, 
-      tz.study.area, start.timestamp = NULL, end.timestamp = NULL, report = TRUE, 
-      override = NULL, exclude.tags = NULL, cautious.assignment = TRUE, replicate = NULL)
+migration(path = NULL, sections, success.arrays = NULL, minimum.detections = 2, 
+  maximum.time = 60, speed.method = c("last to first", "first to first"), speed.warning = NULL,
+  speed.error = NULL, if.last.skip.section = TRUE, tz.study.area, start.timestamp = NULL, 
+  end.timestamp = NULL, report = TRUE, override = NULL, exclude.tags = NULL, 
+  cautious.assignment = TRUE, replicates = NULL,jump.warning = 2, jump.error = 3, 
+  inactive.warning = NULL, inactive.error = NULL)
 ```
 
 Below are listed the new arguments, which do not exist in explore:

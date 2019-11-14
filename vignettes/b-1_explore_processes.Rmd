@@ -69,17 +69,63 @@ Arrays
 
 By the end of this process, you will have a list containing the movement events for each of the target tags that were detected during the study.
 
-## Checking event continuity
+## Checking event quality
 
-Upon finishing the movement event creation, actel checks if the fish moved between arrays as expected (i.e. sequential movement events are on adjacent events), or if the fish has been jumping around. Should the movement events look odd, actel will issue warnings and prompt user intervention, depending on [the values set for `jump.warning` and `jump.error`.](b-0_explore.html#jump.warning-and-jump.error)
+Upon finishing the movement event creation, actel checks the movement events to look out for strange behaviour. If something looks odd, you are given a chance to invalidate specific movement events, so that invalid detections can be discarded.
 
-If the jump size is bigger than `jump.warning`, actel will issue a warning:
+Note:
+  : Rendering a movement event invalid **does not make it disappear**. However, subsequent steps in the analysis will know that the **event should not be considered** (hence the "Valid" column).
+
+### Impassables
+
+As you probably know by now, you can define unidirectional connections between arrays. This means that something (e.g. a weir or dam) prevents the fish from moving in a particular direction. Let's see the examples below, with arrays A, B and C:
+
+<img src="impassables_a.svg" alt="drawing" width="330"/> <img src="impassables_b.svg" alt="drawing" width="330"/>
+
+In example 1, fish can pass from A to C and C to A freely. However, they can only pass from B to C, as the way in the opposite direction (C to B) is blocked by a weir. If a fish has a detection in C and then in B, actel will assume it passed through A undetected.
+
+On the other hand, in example 2, the way from C to A is also blocked by a weir. If a fish is detected in C and afterwards either in A or B, actel will complain, as there is no viable way between both arrays.
+
+This is the respective warning:
+
+```
+W: Fish R64K-1234 made an impassable jump: It is not possible to go from array C to A.
+
+Opening valid movement table for inspection:
+
+[...]
+
+You may either:
+
+a) Render movement events invalid to resolve the impassable exception.
+b) Stop the analysis and modify the spatial.txt file.
+
+Decision:(a/b/comment) 
+
+```
+
+As the warning says, you then have two options: Invalidate events until the impassable exception is resolved, or re-structure your spatial.txt file.
+
+
+### Jumping arrays
+
+
+If the fish has been jumping around (i.e. passing through multiple arrays undetected), actel will issue warnings and prompt user intervention, depending on [the values set for `jump.warning` and `jump.error`.](b-0_explore.html#jump.warning-and-jump.error)
+
+
+Let's have a look at the examples below:
+
+<img src="jump_examples.svg" alt="drawing" width="680"/>
+
+Assuming `jump.warning = 2` and `jump.error = 3`, examples **a** and **b** would pass through the analysis without raising any flags (**a** as a perfect situation and **b** showing an efficiency flaw in array A2). 
+
+However, in example **c**, the jump size is equal to `jump.warning`, but lower than `jump.error`. When this happens, actel will display a warning:
 
 ````
 W: Fish R64K-1234 jumped through 2 arrays in events 1 -> 2 (A1 -> A4).
 ````
 
-If the jump size is bigger than `jump.error`, actel will ask you if you want to render any movement event invalid
+Then, actel would continue the analysis. This warning is issued whenever the jump size equals or is greater than `jump.warning`. Lastly, in example **d**, the jump size is equal to the `jump.error`. When this happens, actel issues a warning like the one above, and on top of that allows the user to intervene:
 
 ````
 W: Fish R64K-1234 jumped through 3 arrays in events 1 -> 2 (A1 -> A5).
@@ -88,8 +134,84 @@ M: Opening movement table of fish R64K-2791 for inspection:
 Would you like to render any movement event invalid?(y/N/comment)
 ````
 
-Note:
-  : Rendering a movement event invalid **does not make it disappear**. However, future analyses will know that the **event should not be considered** (hence the "Valid" column).
+From here, you can inspect the movement table and find out if some events should be removed from the analysis.
+
+
+### Average speed
+
+If you include a [distance matrix](a-0_workspace_requirements.html#optional-distances-matrix) in the analysis, you can specify the maximum expected speed for your fish using [speed.warning and speed.error](b-0_explore.html#speed.warning-and-speed.error). Doing so will trigger the speed checks, where the average speed between each movement event is compared to the specified arguments.
+
+If the average speed is higher than `speed.warning`, a warning is triggered:
+
+````
+W: Fish R64K-1234 had an average speed of 1.3 m/s from valid event 3 to 4 (Array1 -> Array2).
+````
+
+If, on top of this, any of the average speeds is higher than `speed.error`, user interaction is suggested:
+
+````
+W: Fish R64K-1234 had an average speed of 1.3 m/s from valid event 5 to 6 (Array4 -> Array5).
+M: Opening valid movements table of fish R64K-1234 for inspection:
+
+[...]
+
+Would you like to render any movement event invalid?(y/N/comment) 
+````
+
+From here you can then decide whether or not some movement events should be excluded.
+
+
+### Inactiveness
+
+Specifying a value for [inactive.warning and/or inactive.error](b-0_explore.html#inactive.warning-and-inactive.error) will trigger the inactiveness checks. These differ depending on whether or not you included a distance matrix in the analysis.
+
+Inactiveness checks are performed in the tail of the movement events. That is, actel grabs the events in the last array and analyses those. Let's have a look at the example below, and assume `inactive.warning` and `inactive.error` were both set to 3 days.
+
+|Array  | Detections|First station |Last station |First time          |Last time           |Time travelling |Time on array |
+|:------|----------:|:-------------|:------------|:-------------------|:-------------------|:---------------|:-------------|
+|A      |          4|St.1          |St.2         |2019-05-15 12:00:00 |2019-05-15 13:00:00 |NA              |1:00          |
+|B      |          3|St.3          |St.4         |2019-05-16 13:50:00 |2019-05-16 14:40:00 |24:50           |0:50          |
+|**C**  |          2|St.5          |St.6         |2019-05-17 16:00:00 |2019-05-17 16:20:00 |25:20           |0:20          |
+|**C**  |          4|St.6          |St.5         |2019-05-17 17:10:00 |2019-05-17 18:00:00 |0:50            |0:50          |
+|**C**  |          1|St.5          |St.5         |2019-05-20 19:45:00 |2019-05-20 19:45:00 |73:45           |0:00          |
+
+In this case, the last three events are valid candidates for inactiveness. Actel will then check the time difference between the first detection at event 3 and the last detection at event 5. Should this difference be larger than `inactive.warning`, actel will proceed to the next step, which depends on whether the distances.matrix is present.
+
+#### If a distances matrix is present
+
+Actel will gather all the stations where these last detections occurred and check if they are less than 1500 metres a part. If this is true, then there is a valid case for inactivity, and a warning will be issued:
+
+````
+W: Fish R64K-1234 was detected 7 times at stations less than 1.5 km apart in array 'C' (St.5, St.6), over 3.07 days and then disappeared. Could it be inactive?
+````
+
+#### If a distances matrix is NOT present
+
+Actel will count the number of individual stations in which the fish was detected. If there are three or less individual stations, there is a valid case for inactivity, and a similar warning will be issued:
+
+````
+W: Fish R64K-1234 was detected 7 times at three or less stations of array 'C' (St.5, St.6) over 3.07 days and then disappeared. Could it be inactive?
+````
+
+Since `inactive.error` was also set to three, this situation would trigger the possibility for user interaction:
+
+````
+M: Opening valid movement table of fish R64K-1234 for inspection (inactiveness started on 2019-05-17):
+
+[...]
+
+Would you like to render any movement event invalid?(y/N/comment) 
+````
+
+From here you could then decide if some events should be removed.
+
+
+#### What if the fish reached the array, moved about a bit, and only then stopped moving?
+
+If the fish was active in array C, then it is possible that the initial detections will be in receivers located further away than 1500 metres, or in more than three unique receivers. To search for this cases, actel iterates the process above, removing one event from the top at a time, for as long as the period of residency at the array is higher than `inactive.warning`.
+
+This means that, even if there are detections at many stations at the first events under scrutiny, potential inactiveness can still be detected at the trailing events.
+
 
 
 ## Bonus: Time of first detection at each array

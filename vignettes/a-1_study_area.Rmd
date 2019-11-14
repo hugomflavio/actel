@@ -52,7 +52,7 @@ If you are running a `residency()` analysis, the order of the sections is not re
 
 ### Arrays
 
-The receiver arrays are tightly linked to the study sections. An array called "River1" is expected to belong to section "River", an array called "Fjord3" is expected to belong to section "Fjord", and so forth. Array names **must** be an exact copy of the section they belong to, plus the number of the array. The connectivity between the arrays is determined either by their order of appearance in the _spatial.csv_ file, __or__ by a _spatial.dot/spatial.txt_ file. Therefore, it is **very important** that you structure your arrays correctly.
+The receiver arrays are tightly linked to the study sections. An array called "River1" is expected to belong to section "River", an array called "Fjord3" is expected to belong to section "Fjord", and so forth. Array names **must** be an exact copy of the section they belong to, plus the number of the array. The connectivity between the arrays is determined either by their order of appearance in the _spatial.csv_ file, __or__ by a _spatial.txt_ file. Therefore, it is **very important** that you structure your arrays correctly.
 
 #### Avoid overlapping arrays
 
@@ -71,7 +71,7 @@ As a rule of thumb, if two receivers' ranges are likely to overlap, you should c
 
 #### Rivers with multiple parallel channels
 
-If your study area includes multiple pathways that the fish may take, you must tell actel how to connect the arrays. By default, arrays are sorted in a linear order according to the spatial.csv file. To instruct actel to act otherwise, you must create a '**spatial.dot**' file. The spatial.dot file is very simple; all you need to do is connect your arrays with arrows. Here is an example:
+If your study area includes multiple pathways that the fish may take, you must tell actel how to connect the arrays. By default, arrays are sorted in a linear order according to the spatial.csv file. To instruct actel to act otherwise, you must create a '**spatial.txt**' file. The spatial.txt file is very simple; all you need to do is connect your arrays with arrows. Here is an example:
 
 ```
 River1 -- River2 -- River3 -- Fjord -- Sea1 -- Sea2 -- Sea3
@@ -81,7 +81,7 @@ River4 -- River6 -- Fjord
 
 This will allow actel to properly structure your study area, and correctly estimate efficiency values for each array.
 
-[You can learn more about spatial.dot/spatial.txt files here](#a-0_workspace_requirements.html#optional-spatial.dot-or-spatial.txt-file)
+[You can learn more about spatial.txt files here](#a-0_workspace_requirements.html#optional-spatial.txt-file)
 
 Now you know how to organise your study area in a way that actel will understand!
 

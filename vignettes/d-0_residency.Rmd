@@ -37,9 +37,69 @@ knitr::opts_chunk$set(
 
 The residency() functions builds on the same principles as the explore function and, in addition, computes metrics aiming to show the fish behaviour over time.
 
-residency() has the same arguments as explore(), and includes a set of new arguments aimed to fine tune the migration-related metrics. Like with explore, you *do not need to start working with all arguments right away.* Defining the `sections`, and `tz.study.area` is enough to get you going!
+residency() has the same arguments as explore(), and includes a set of new arguments aimed to control the residency-related metrics. Like with explore, you *do not need to start working with all arguments right away.* Defining the `sections`, and `tz.study.area` is enough to get you going!
 
 ```r
-migration(sections = c("River", "Fjord", "Sea"), tz.study.area = "Europe/Copenhagen")
+residency(sections = c("River", "Fjord", "Sea"), tz.study.area = "Europe/Copenhagen")
 ```
 
+## Residency arguments
+
+The arguments within residency() allow you thoroughly analyse the fish behaviour.
+
+```r
+residency(path = NULL, sections, section.minimum = 2, 
+  maximum.time = 60, speed.method = c("last to first", "first to first"), speed.warning = NULL,
+  speed.error = NULL, if.last.skip.section = TRUE, tz.study.area, start.timestamp = NULL, 
+  end.timestamp = NULL, report = TRUE, exclude.tags = NULL, replicates = NULL,
+  jump.warning = 2, jump.error = 3, inactive.warning = NULL, inactive.error = NULL)
+```
+
+Below are listed the new arguments, which do not exist in explore:
+
+(i.e. if you are looking for an argument which is not listed here, try the [explore list.](b-0_explore.html#explore-arguments))
+
+### sections
+
+For the `residency()` analysis, the study area sections may be typed in in any order, only affecting their positioning in the output plots. To learn more about how to organise your study area in an actel-friendly way, have a look at [this manual page.](a-1_study_area.html)
+
+
+### section.minimum
+
+This argument controls how many times a fish must be registered at a section for it to be considered reliable. As part of the analysis, residency() will crunch the array events into section level events. Should there be section events with less overall detections than those listed in `section.minimum`, a warning is raised, and you are given the chance to render events invalid.
+
+You can find more about the [creation and validation of section movements here](d-1_residency_processes.html#section-movements).
+
+
+### replicates
+
+Inter-array efficiency estimate can be tricky to calculate in study areas with multiple channels and pathsways. However, if these "isolated" arrays are composed of two lines of receivers, one line can be used as a replicate of the other, which in turn allows for the estimation of intra-array efficiency. If this is your case, then you should make use of the `replicates` argument.
+
+Note:
+  : Array replication should only be performed if the replicate stations cover the same extent of the migration route section as the opposite stations, and only if the two lines of receivers are close to each other (i.e. one can assume 0% mortality between them). Have a look at the figures below for some examples.
+
+<img src="replicates_A.svg" alt="drawing" width="330"/> <img src="replicates_B.svg" alt="drawing" width="330"/>
+
+<img src="replicates_C.svg" alt="drawing" width="330"/> <img src="replicates_D.svg" alt="drawing" width="330"/>
+
+
+#### Setting up the replicates argument
+
+You **must use the stations standard names** (i.e. St.10, St.12) when referring to replicates. If you are not sure what the Standard names are, you can run `loadSpatial()` in the same folder as your spatial.csv file or `loadSpatial(file = "path/to/spatial.csv")` to check them out (look at the last column).
+
+Once you know which replicates you want to list for your array(s), you can include them in the analysis. Lets imagine you want to use stations St.1 and St.2 as replicates for the array River1, and St.3 as a replicate for array River3. This is how they should be listed:
+
+```r
+residency([...], estimates = list(River1 = c("St.1", "St.2"), River3 = "St.3"))
+```
+Where [...] stands for other arguments you want to specify in the function.
+
+It is important that you list replicates using the `list(Array = "Replicate")` construction. Keep this in mind while you prepare the code.
+
+Now that you know how to run the residency analysis, you may want to:
+
+__[Learn more about what residency() is doing](d-1_residency_processes.html)__
+
+__[Learn more about the results of residency()](d-2_residency_results.html)__
+
+[Back to top.](#)
