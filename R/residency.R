@@ -292,7 +292,7 @@ detections.list <- study.data$detections.list
     printSectionTimes(section.times = section.times, bio = bio, detections = valid.detections)
     printGlobalRatios(ratios = global.ratios)
     individual.detection.plots <- printIndividuals(redraw = TRUE, detections.list = detections.list, bio = bio, 
-        tz.study.area = tz.study.area, movements = movements, simple.movements = valid.movements)
+        tz.study.area = tz.study.area, movements = movements, valid.movements = valid.movements)
     array.circular.plots <- printCircular(times = convertTimesToCircular(array.times), bio = bio, suffix = "_array")
     section.arrival.circular.plots <- printCircular(times = convertTimesToCircular(section.times$arrival), bio = bio, suffix = "_array")
     section.departure.circular.plots <- printCircular(times = convertTimesToCircular(section.times$departure), bio = bio, suffix = "_array")

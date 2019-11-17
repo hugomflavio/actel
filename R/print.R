@@ -501,7 +501,7 @@ cat("No intra-array replicates were indicated.")
 #' @keywords internal
 #' 
 printIndividuals <- function(redraw, detections.list, bio, status.df = NULL, tz.study.area, 
-  movements, simple.movements = NULL, extension = "png") {
+  movements, valid.movements = NULL, extension = "png") {
   # NOTE: The NULL variables below are actually column names used by ggplot.
   # This definition is just to prevent the package check from issuing a note due unknown variables.
   Timestamp <- NULL
@@ -527,12 +527,12 @@ printIndividuals <- function(redraw, detections.list, bio, status.df = NULL, tz.
       )
       all.moves.line$Station <- factor(all.moves.line$Station, levels = levels(PlotData$Standard.Name))
       all.moves.line$Timestamp <- as.POSIXct(all.moves.line$Timestamp, tz = tz.study.area)
-      add.simple.movements <- FALSE
-      if (!is.null(simple.movements[[fish]])) {
-        add.simple.movements <- TRUE
+      add.valid.movements <- FALSE
+      if (!is.null(valid.movements[[fish]])) {
+        add.valid.movements <- TRUE
         simple.moves.line <- data.frame(
-          Station = as.vector(t(simple.movements[[fish]][, c("First.station", "Last.station")])),
-          Timestamp = as.vector(t(simple.movements[[fish]][, c("First.time", "Last.time")]))
+          Station = as.vector(t(valid.movements[[fish]][, c("First.station", "Last.station")])),
+          Timestamp = as.vector(t(valid.movements[[fish]][, c("First.time", "Last.time")]))
           )
         simple.moves.line$Station <- factor(simple.moves.line$Station, levels = levels(PlotData$Standard.Name))
         simple.moves.line$Timestamp <- as.POSIXct(simple.moves.line$Timestamp, tz = tz.study.area)
@@ -588,7 +588,7 @@ printIndividuals <- function(redraw, detections.list, bio, status.df = NULL, tz.
       }
       # Plot movements
       p <- p + ggplot2::geom_path(data = all.moves.line, ggplot2::aes(x = Timestamp, y = Station, group = 1), col = "grey40", linetype = "dashed")
-      if (add.simple.movements) {
+      if (add.valid.movements) {
         p <- p + ggplot2::geom_path(data = simple.moves.line, ggplot2::aes(x = Timestamp, y = Station, group = 1), col = "grey40")
       }
       # Trim graphic

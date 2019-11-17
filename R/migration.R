@@ -338,7 +338,7 @@ if (is.null(success.arrays))
       array.overview.fragment <- ""
     }
     individual.plots <- printIndividuals(redraw = TRUE, detections.list = detections.list, bio = bio, 
-        status.df = status.df, tz.study.area = tz.study.area, movements = movements, simple.movements = valid.movements)
+        status.df = status.df, tz.study.area = tz.study.area, movements = movements, valid.movements = valid.movements)
     circular.plots <- printCircular(times = convertTimesToCircular(times), bio = bio)
     if (nrow(section.overview) > 3) 
       survival.graph.size <- "width=90%" else survival.graph.size <- "height=4in"

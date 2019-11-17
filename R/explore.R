@@ -226,7 +226,7 @@ detections.list <- study.data$detections.list
     biometric.fragment <- printBiometrics(bio = bio)
     printDot(dot = dot, sections = NULL, spatial = spatial)
     individual.plots <- printIndividuals(redraw = TRUE, detections.list = detections.list, 
-      tz.study.area = tz.study.area, movements = movements, bio = bio)
+      tz.study.area = tz.study.area, movements = movements, valid.movements = valid.movements, bio = bio)
     circular.plots <- printCircular(times = convertTimesToCircular(times), bio = bio)
   }
   
