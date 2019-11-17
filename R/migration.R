@@ -1511,13 +1511,13 @@ assembleOutput <- function(timetable, bio, spatial, sections, dist.mat, invalid.
   
   if (file.exists("temp_comments.txt")) {
     temp <- read.table("temp_comments.txt", header = F, sep = "\t")
-    status.df[, "Script.comments"] <- NA
+    status.df[, "Comments"] <- NA
     for (i in seq_len(nrow(temp))) {
       link <- match(temp[i, 1], status.df$Transmitter)
-      if (is.na(status.df$Script.comments[link])) {
-        status.df$Script.comments[link] <- paste(temp[i, 2])
+      if (is.na(status.df$Comments[link])) {
+        status.df$Comments[link] <- paste(temp[i, 2])
       } else {
-        status.df$Script.comments[link] <- paste(status.df$Script.comments[link], temp[i, 2], sep = "// ")
+        status.df$Comments[link] <- paste(status.df$Comments[link], temp[i, 2], sep = "// ")
       }
     }
   }
