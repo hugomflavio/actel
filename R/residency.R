@@ -274,14 +274,18 @@ detections.list <- study.data$detections.list
 
   detections <- detections.list
   deployments <- do.call(rbind.data.frame, deployments)
+
+  if (!debug)
+    efficiency <- efficiency[1:3]
+
   if (invalid.dist)
     save(detections, valid.detections, spatial, deployments, arrays, movements, valid.movements, 
       section.movements, valid.section.movements, status.df, last.seen, array.times, section.times,
-      residency.list, daily.ratios, daily.positions, global.ratios, file = resultsname)
+      residency.list, daily.ratios, daily.positions, global.ratios, efficiency, intra.array.CJS, file = resultsname)
   else
     save(detections, valid.detections, spatial, deployments, arrays, movements, valid.movements, 
       section.movements, valid.section.movements, status.df, last.seen, array.times, section.times,
-      residency.list, daily.ratios, daily.positions, global.ratios, dist.mat, file = resultsname)
+      residency.list, daily.ratios, daily.positions, global.ratios, efficiency, intra.array.CJS, dist.mat, file = resultsname)
 # ------------
 
 # Print graphics
@@ -343,13 +347,13 @@ detections.list <- study.data$detections.list
   if (invalid.dist)
     return(list(detections = detections, valid.detections = valid.detections, spatial = spatial, deployments = deployments, arrays = arrays,
       movements = movements, valid.movements = valid.movements, section.movements = section.movements, valid.section.movements = valid.section.movements,
-      status.df = status.df, efficiency = efficiency, array.times = array.times, section.times = section.times, residency.list = residency.list, 
-      daily.ratios = daily.ratios, daily.positions = daily.positions, global.ratios = global.ratios))
+      status.df = status.df, efficiency = efficiency, intra.array.CJS = intra.array.CJS, array.times = array.times, section.times = section.times, 
+      residency.list = residency.list, daily.ratios = daily.ratios, daily.positions = daily.positions, global.ratios = global.ratios, last.seen = last.seen))
   else
     return(list(detections = detections, valid.detections = valid.detections, spatial = spatial, deployments = deployments, arrays = arrays,
       movements = movements, valid.movements = valid.movements, section.movements = section.movements, valid.section.movements = valid.section.movements,
-      status.df = status.df, efficiency = efficiency, array.times = array.times, section.times = section.times, residency.list = residency.list, 
-      daily.ratios = daily.ratios, daily.positions = daily.positions, global.ratios = global.ratios, dist.mat = dist.mat))
+      status.df = status.df, efficiency = efficiency, intra.array.CJS = intra.array.CJS, array.times = array.times, section.times = section.times, 
+      residency.list = residency.list, daily.ratios = daily.ratios, daily.positions = daily.positions, global.ratios = global.ratios, last.seen = last.seen, dist.mat = dist.mat))
 }
 
 #' Print Rmd report
@@ -777,7 +781,7 @@ assembleResidency <- function(secmoves, movements, sections) {
   
   recipient <- vector()
   for (i in seq_along(sections)) {
-    recipient <- c(recipient, paste(c("Total.time", "Times.entered", "Average.entry", "Average.time", "Average.departure"), sections[i], sep = "."))
+    recipient <- c(recipient, paste(c("Times.entered", "Average.entry", "Average.time", "Average.departure", "Total.time"), sections[i], sep = "."))
   }
   recipient <- c(recipient, "Very.last.array", "Very.last.time", "Status", "Valid.detections", "Invalid.detections", "Valid.events", "Invalid.events", "P.type")
 
@@ -812,6 +816,10 @@ assembleResidency <- function(secmoves, movements, sections) {
   		return(recipient)
   	})
   	recipient <- as.data.frame(combine(recipient), stringsAsFactors = FALSE)
+    # replace NAs
+    the.cols <- which(grepl("Total.time|Times.entered|Average.time", colnames(recipient)))
+    recipient[, the.cols[which(is.na(recipient[, the.cols]))]] <- 0
+    # --
   	recipient$Very.last.array <- secmoves[[fish]][.N, Last.array]
   	recipient$Very.last.time <- as.character(secmoves[[fish]][.N, Last.time])
   	recipient$Status <- paste0("Disap. in ", secmoves[[fish]][.N, Section])
