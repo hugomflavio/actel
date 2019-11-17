@@ -1,0 +1,75 @@
+---
+title: "3.4) One-way efficiency estimations"
+author: "Hugo Flávio"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{3.4) One-way efficiency estimations}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+## Index
+
+1. [Preparing your data](a-0_workspace_requirements.html)
+    1. [Structuring the study area](a-1_study_area.html)
+    1. [Creating a distances matrix](a-2_distances_matrix.html)
+1. [explore()](b-0_explore.html)
+    1. [From raw to movements](b-1_explore_processes.html)
+    1. [Inspecting the explore() results](b-2_explore_results.html)
+1. [migration()](c-0_migration.html)
+    1. [Processes behind migration()](c-1_migration_processes.html)
+    1. [Inspecting the migration() results](c-2_migration_results.html)
+    1. [Manual mode in migration()](c-3_migration_manual_mode.html)
+    1. [__One-way efficiency estimations__](c-4_migration_efficiency.html)
+1. [residency()](d-0_residency.html)
+    1. [Processes behind residency()](d-1_residency_processes.html)
+    1. [Inspecting the residency() results](d-2_residency_results.html)
+    1. [Multi-way efficiency estimations](d-3_residency_efficiency.html)
+1. [Errors and messages](e-0_messages.html)
+
+
+## Forward efficiency
+
+During the migration analysis, actel calculates forward efficiency only, to improve the accuracy of the efficiency measurement. This means that, for each fish, only the first forward movement is considered. Let's have a look at these examples:
+
+<img src="efficiency_a.svg" alt="drawing" width="330"/> <img src="efficiency_b.svg" alt="drawing" width="330"/>
+
+In example **A**, the fish moved out to sea, and was detected at the array River1 and Fjord2, but not at Fjord1. This is considered a missed event for Fjord1. Even if the fish then moved backwards and ended up being detected at Fjord1 at a later time (example **B**), since the first expected detection was missed, this fish will still be considered as missed by Fjord1, as far as efficiency calculations are concerned.
+
+These efficiency calculations are dependant on the way how you organise your receivers, so it is important that you [organise your study area in an actel-friendly way.](a-1_study_area.html)
+
+
+## CJS and multiple branches
+
+Actel calculates array efficiency through CJS modelling, based in the equations provided by <a href="https://www.researchgate.net/publication/256443823_Using_mark-recapture_models_to_estimate_survival_from_telemetry_data" target="_blank">Perry et al. (2012)</a>. In short, this implies comparing the individual fish detected at an array with those detected at the arrays that come after said array.
+
+One of the caveats of the CJS calculations is that if, say, we have arrays A and B, and B is after A, then a fish that is detected at B must have passed through A as well. However, this may not be the case, if there are multiple water channels that the fish can go through.
+
+To compensate for this, actel finds the valid peers for each array. That is, arrays that are directly or indirectly after a given array, and to which it is not possible to get to without passing through said array (assuming the fish does not move backwards).
+
+Let's have a look at an example:
+
+<img src="one_way_efficiency_a.svg" alt="drawing" width="330"/> <img src="one_way_efficiency_b.svg" alt="drawing" width="330"/>
+
+In this study area, there are up to three branches. If we take array __D__ as an example, arrays __E__, __F__ and __G__ are all after it. However, only __E__ and __F__ are valid efficiency peers, as fish may reach array __G__ coming from __C__. By comparison, all arrays in the study area are valid efficiency peers for array __A__, as there are no other parallel branches at this point.
+
+This implies that arrays __C__, __E__, __F__ and __G__ do not have any valid efficiency peers. As such, inter-array efficiency cannot be calculated for them using a CJS model. However, you have the chance to [calculate intra-array efficiency](c-0_migration.html#replicates), if an array is composed by two lines of receivers. You can find the efficiency peers of each array in the [`arrays` object](c-2_migration_results.html#arrays).
+
+To simplify the calculation process, actel combines the unique fish detected at all of the efficiency peers of a given array, and uses these combined detections as a single array subsequent to the one being analysed. The individual CJS models are then combined to create the `overall.CJS` object.
+
+
+## Intra-array efficiency
+
+Intra array efficiency calculations are also performed following the equations provided by <a href="https://www.researchgate.net/publication/256443823_Using_mark-recapture_models_to_estimate_survival_from_telemetry_data" target="_blank">Perry et al. (2012)</a>. Specifically, actel splits the array's receivers in "original" and "replicates" (depending on what you specified in the [replicates argument](c-0_migration.html#replicates)), and compares the fish detected at both of these elements. The results of the intra-array calculations for each array are then stored in the [`intra.array.CJS` list](c-2_migration_results.html#intra.array.cjs).
+
+**<a href="javascript:history.back()">Return to previous page</a>**
+
+[Back to top.](#)

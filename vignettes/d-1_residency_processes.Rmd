@@ -28,9 +28,56 @@ knitr::opts_chunk$set(
     1. [Processes behind migration()](c-1_migration_processes.html)
     1. [Inspecting the migration() results](c-2_migration_results.html)
     1. [Manual mode in migration()](c-3_migration_manual_mode.html)
+    1. [One-way efficiency estimations](c-4_migration_efficiency.html)
 1. [residency()](d-0_residency.html)
     1. [__Processes behind residency()__](d-1_residency_processes.html)
     1. [Inspecting the residency() results](d-2_residency_results.html)
+    1. [Multi-way efficiency estimations](d-3_residency_efficiency.html)
 1. [Errors and messages](e-0_messages.html)
 
-The residency analysis is still under construction. Stay tunned for updates!
+
+Note: 
+  : The processes behind multi-way efficiency estimations are [explained in this manual page.](d-3_residency_efficiency.html)
+
+## Section movements
+
+The initial processes of residency() are the same as those from [the explore() function](b-1_explore_processes.html).
+
+Upon validating the movement events, the residency analysis proceeds to compressing these array-level events into section-level events. [You can find an example here](d-2_residency_results.html#section.movements). This shows how many times a fish entered and left each section. It is here that the argument `section.minimum` comes in. If the number of consecutive detections at a given section are lower than the value stipulated, a warning will be issued, and user interaction is suggested:
+
+````
+M: Section movements with less than 2 detections are present for fish R64K-3.
+Would you like to inspect the section movements from fish R64K-3 ?(y/N/comment)
+````
+
+You can then decide whether or not something should be considered invalid. Once all fish have been validated, if any section movement has been deemed invalid, the respective array movements will also be invalidated. Actel will let you know this happened by issuing a message:
+
+````
+M: Rendering 1 array movement(s) invalid for fish R64K-3 as the respective section movements were discarded by the user.
+````
+
+## Residency lists
+
+Once the section movements have been validated, actel fills in the gaps between movements using the departure timestamp of a given section and the arrival timestamp of the next. These middle locations are labelled using both sections' names, separated with a dash (e.g. Down-Right). [You can find an example here](d-2_residency_results.html#residency.list).
+
+
+## Compiling a timetable
+
+Using the residency table above, actel compiles a summary timetable containing the following information for each section: total time in the section, number of times the fish entered the section, average entry time, average time spent per stay and average departure time. A few more summary columns are added to this table before it is bound to the information provided in the biometrics table.
+
+
+## Daily locations
+
+Based on the table above, actel will proceed to calculate the amount of time spent per day (in seconds) at each location. This leads to a very long table displaying both the number of seconds and the percentage relative to the day spent in each location, with an additional column showing the location where the fish spent the most time each day. [You can find an example here](d-2_residency_results.html#daily.ratios).
+
+
+## Global ratios
+
+Using the "Most.time" column as a reference for each fish, actel is then able to calculate how many of your fish were at each location during each passing day. Actel calculates two similar tables, one with absolute numbers, and one with percentages. [You can find an example here](d-2_residency_results.html#global.ratios).
+
+
+## Wrapping up
+
+After all this information has been compiled and stored, actel will wrap up by collecting the valid detections and storing them in the `valid.detections` object, which you can then use for other analyses. One last table is also stored containing a summary of the place of last detection for each group of fish. It is time to [have a look at the results!](d-2_residency_results.html)
+
+[Back to top.](#)
