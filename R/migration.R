@@ -548,7 +548,8 @@ Note:
 
 Note:
   : The **top** 10% of the values for each panel are marked in **red**.
-  : The **bottom** 10% of the values for each panel are marked in **orange**.
+  : The **bottom** 10% of the values for each panel are marked in **blue**.
+  : The columns starting with "To" should be read as either "Time to ..." or "Speed to ...", depending on the unit used. The columns starting with "In" should be read as "Time in ...". These reductions were made to keep the column headers as short as possible.
 
 <center>
 ![](dotplots.png){ width=95% }

@@ -303,19 +303,18 @@ printDotplots <- function(status.df, invalid.dist) {
   colnames(t2) <- sub("Time.u", "U", colnames(t2))
   colnames(t2) <- sub("Speed.t", "T", colnames(t2))
   PlotData <- suppressMessages(reshape2::melt(t2))
-  PlotData$Colour <- "Orange"
+  PlotData$Colour <- "#ba009e" # purple, for bugs
   for (j in colnames(t2)[-1]) {
     limits <- quantile(t2[, j], probs = c(0.1, 0.9), na.rm = T)
     toadd <- vector()
     for (i in 1:nrow(t2)) {
       if (!is.na(t2[i, j]) && t2[i, j] <= limits[1]) {
-        toadd[i] <- "Orange"
+        toadd[i] <- "#56B4E9" # blue
       } else {
-        if (!is.na(t2[i, j]) && t2[i, j] >= limits[2]) {
-          toadd[i] <- "Red"
-        } else {
-          toadd[i] <- "Black"
-        }
+        if (!is.na(t2[i, j]) && t2[i, j] >= limits[2])
+          toadd[i] <- "#f20000" # red
+        else
+          toadd[i] <- "#000000" # black
       }
     }
     rm(i)
