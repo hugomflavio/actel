@@ -1170,7 +1170,7 @@ printLastSeen <- function(input, sections) {
   cbPalette <- c("#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7", "#999999")
   names(cbPalette) <- c("Orange", "Blue", "Green", "Yellow", "Darkblue", "Darkorange", "Pink", "Grey")
   input$Group <- rownames(input)
-  plotdata <- reshape2::melt(input)
+  plotdata <- suppressMessages(reshape2::melt(input))
   colnames(plotdata) <- c("Group", "Section", "n")
   plotdata$Section <- factor(gsub("Disap. in |Disap. at ", "", plotdata$Section), levels = c(sections, "Release"))
   p <- ggplot2::ggplot(plotdata, ggplot2::aes(x = Section, y = n))
