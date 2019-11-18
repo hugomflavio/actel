@@ -139,18 +139,18 @@ Station.Name
   : The name of the station where the receiver was deployed. It **must** match one of the station names in the spatial file.
 
 Start and Stop
-  : The times when the receiver was deployed and when the receiver was retrieved, respectively. Must be in a **yyyy-mm-dd hh:mm:ss** format. Note that these time stamps **must** be in the local time zone of the study area, which you will later supply in the `tz.study.area` argument.
+  : The times when the receiver was deployed and when the receiver was retrieved, respectively. Must be in a **yyyy-mm-dd hh:mm:ss** format. Note that these timestamps **must** be in the local time zone of the study area, which you will later supply in the `tz.study.area` argument.
 
 ## Detections
 
-Including your detections is the easiest part. Copy the *.csv* files offloaded from your receivers to the *detections* folder that was created by the *createWorkspace()* function and actel will know they are to be imported. Right now actel can upload files generated from VEMCO and THELMA manufactured receivers. If you have an receiver from a different manufacturer, or if you are using one of the supported manufacturers and get the warning displayed below, please to contact us so we can solve the issue.
+Including your detections is the easiest part. Copy the *.csv* files offloaded from your receivers to the *detections* folder that was created by the *createWorkspace()* function and actel will know they are to be imported. Right now actel can upload files generated from VEMCO and THELMA manufactured receivers. If you have an receiver from a different manufacturer, or if you are using one of the supported manufacturers and get the warning displayed below, please to contact me so we can solve the issue.
 
 ```
 W: File 'filename' does not match to any of the supported hydrophone file formats! If your file corresponds to a hydrophone log and actel did not recognize it, please contact the developer team through www.github.com/hugomflavio/actel/issues/new
 ```
 
 Note:
-  : **The detection time stamps must be in UTC**. This is the default time zone used by the receivers, so as long as you did not edit the raw files, all should be ready to go.
+  : **The detection timestamps must be in UTC**. This is the default time zone used by the receivers, so as long as you did not edit the raw files, all should be ready to go.
   
 ## Optional: Distances matrix
 
