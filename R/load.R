@@ -7,7 +7,8 @@
 #' 
 #' @keywords internal
 #' 
-loadStudyData <- function(tz.study.area, override = NULL, start.timestamp, end.timestamp, sections = NULL, exclude.tags) {
+loadStudyData <- function(tz.study.area, override = NULL, start.timestamp, end.timestamp, 
+  sections = NULL, exclude.tags, disregard.parallels = TRUE) {
   appendTo(c("Screen", "Report"), "M: Importing data. This process may take a while.")
   bio <- loadBio(file = "biometrics.csv", tz.study.area = tz.study.area)
   appendTo(c("Screen", "Report"), paste("M: Number of target tags: ", nrow(bio), ".", sep = ""))
@@ -30,17 +31,18 @@ loadStudyData <- function(tz.study.area, override = NULL, start.timestamp, end.t
   use.fakedot <- TRUE
   if (file.exists("spatial.dot")) {
     appendTo(c("Screen", "Report"), "M: A 'spatial.dot' file was detected, activating multi-branch analysis.")
-    recipient <- loadDot(input = "spatial.dot", spatial = spatial, sections = NULL)
+    recipient <- loadDot(input = "spatial.dot", spatial = spatial, sections = NULL, disregard.parallels = disregard.parallels)
     use.fakedot <- FALSE
   } 
   if (use.fakedot & file.exists("spatial.txt")) {
     appendTo(c("Screen", "Report"), "M: A 'spatial.txt' file was detected, activating multi-branch analysis.")
     recipient <- loadDot(input = "spatial.txt", spatial = spatial, sections = NULL)
+    recipient <- loadDot(input = "spatial.txt", spatial = spatial, sections = NULL, disregard.parallels = disregard.parallels)
     use.fakedot <- FALSE
   }
   if (use.fakedot) {
     fakedot <- paste(unique(spatial$Array), collapse = "--")
-    recipient <- loadDot(string = fakedot, spatial = spatial, sections = NULL)
+    recipient <- loadDot(string = fakedot, spatial = spatial, sections = NULL, disregard.parallels = disregard.parallels)
   }
   dot <- recipient[[1]]
   arrays <- recipient[[2]]
@@ -90,7 +92,7 @@ loadStudyData <- function(tz.study.area, override = NULL, start.timestamp, end.t
 #' 
 #' @keywords internal
 #' 
-loadDot <- function(string = NULL, input = NULL, spatial, sections = NULL) {
+loadDot <- function(string = NULL, input = NULL, spatial, sections = NULL, disregard.parallels) {
   if (is.null(string) & is.null(input))
     stop("No dot file or dot string were specified.")
   if (is.null(string)) {
@@ -112,7 +114,7 @@ loadDot <- function(string = NULL, input = NULL, spatial, sections = NULL) {
     stop("Not all the arrays listed in the 'spatial.txt' file are present in the 'spatial.csv' file.\n", call. = FALSE)
   }
   arrays <- dotList(input = dot, sections = sections)
-  arrays <- dotPaths(input = arrays, dotmat = mat)
+  arrays <- dotPaths(input = arrays, dotmat = mat, disregard.parallels = disregard.parallels)
   shortest.paths <- findShortestChains(input = arrays)
   return(list(dot = dot, arrays = arrays, dotmat = mat, paths = shortest.paths))
 }
@@ -228,11 +230,21 @@ dotList <- function(input, sections = NULL) {
     auxA <- auxA[auxA$to != "<-", ]
     auxB <- input[input$B == a, ]
     auxB <- auxB[auxB$to != "->", ]
+    # find parallel arrays (i.e. both before and after)
+    par.trigger <- FALSE
+    parallel <- sapply(auxA[, 3], function(x) match(x, auxB[, 1]))
+    if (any(!is.na(parallel))) {
+      # discount those from the before and after, and trigger parallel inclusion
+      auxA <- auxA[-which(!is.na(parallel)), , drop = FALSE]
+      auxB <- auxB[-parallel[!is.na(parallel)], , drop = FALSE]
+      par.trigger <- TRUE
+    }
     recipient <- list(
-      neighbours = unique(c(auxA$B, auxB$A)),
-      before = if (nrow(auxB) == 0) { NULL  } else { unique(auxB$A) },
-      after  = if (nrow(auxA) == 0) { NULL  } else { unique(auxA$B) },
-      edge   = if (nrow(auxA) == 0) { FALSE } else { any(auxA$Edge) })
+      neighbours = unique(c(auxA$B, auxB$A, names(parallel)[!is.na(parallel)])),
+      before     = if (nrow(auxB) == 0) { NULL  } else { unique(auxB$A) },
+      after      = if (nrow(auxA) == 0) { NULL  } else { unique(auxA$B) },
+      parallel   = if ( !par.trigger  ) { NULL  } else { unique(names(parallel)[!is.na(parallel)]) },
+      edge       = if (nrow(auxA) == 0) { FALSE } else { any(auxA$Edge) })
     arrays[[length(arrays) + 1]] <- recipient
     names(arrays)[length(arrays)] <- a
   }
@@ -243,15 +255,16 @@ dotList <- function(input, sections = NULL) {
 #' 
 #' @param input A dot list
 #' @param dotmat A dot distance matrix
+#' @inheritParams migration
 #' 
 #' @return The input list, with an extra element for each array with valid efficiency peers
 #' 
 #' @keywords internal
 #' 
-dotPaths <- function(input, dotmat) {
-  recipient <- findPeers(input = input, dotmat = dotmat, type = "before")
+dotPaths <- function(input, dotmat, disregard.parallels) {
+  recipient <- findPeers(input = input, dotmat = dotmat, type = "before", disregard.parallels = disregard.parallels)
   recipient <- findDirectChains(input = recipient, dotmat = dotmat,  type = "before")
-  recipient <- findPeers(input = recipient, dotmat = dotmat,  type = "after")
+  recipient <- findPeers(input = recipient, dotmat = dotmat,  type = "after", disregard.parallels = disregard.parallels)
   recipient <- findDirectChains(input = recipient, dotmat = dotmat,  type = "after")
   return(recipient)
 }
@@ -265,7 +278,7 @@ dotPaths <- function(input, dotmat) {
 #' 
 #' @keywords internal
 #' 
-findPeers <- function(input, dotmat, type = c("before", "after")) {
+findPeers <- function(input, dotmat, type = c("before", "after"), disregard.parallels) {
   type <- match.arg(type)
   opposite <- ifelse(type == "before", "after", "before")
   for (a in names(input)) {
@@ -276,20 +289,42 @@ findPeers <- function(input, dotmat, type = c("before", "after")) {
       for (b in to.check) {
         # If A and B are adjacent, check that there are no more paths leading to B
         if (dotmat[a, b] == 1 && length(input[[b]][[opposite]]) == 1) {
-          if (is.null(peers) || !grepl(b, peers)) {
-            peers <- c(peers, b)
-            new.check <- c(new.check, input[[b]][[type]])
-          }        
-        }
-        # If B is far away, check that the paths leading to B are in valid the peers list
-        if (dotmat[a, b] > 1 && all(!is.na(match(input[[b]][[opposite]], peers)))) {
-          if (is.null(peers) || !grepl(b, peers)) {
-            peers <- c(peers, b)
-            new.check <- c(new.check, input[[b]][[type]])
+          # IF B has no parallel arrays, or disregard parallels is set to TRUE
+          if (is.null(input[[b]]$parallel) || disregard.parallels) {
+            if (is.null(peers) || !grepl(b, peers)) {
+              peers <- c(peers, b)
+              new.check <- c(new.check, input[[b]][[type]])
+            }
+          } else {
+            # Else find out which arrays lead to the parallels
+            leading.to.parallels <- unique(unlist(sapply(input[[b]]$parallel, function(x) input[[x]][[opposite]])))
+            # as this is a distance 1 case, verify that only array A leads ot the parallels.
+            if (all(!is.na(match(leading.to.parallels, a)))) {
+              peers <- c(peers, b)
+              new.check <- c(new.check, input[[b]][[type]])              
+            }
           }
         }
-        to.check <- unique(new.check)
+        # If B is far away, check that the paths leading to B are in the valid peers list
+        if (dotmat[a, b] > 1 && all(!is.na(match(input[[b]][[opposite]], peers)))) {
+          # IF B has no parallel arrays, or disregard parallels is set to TRUE
+          if (is.null(input[[b]]$parallel) || disregard.parallels) {
+            if (is.null(peers) || !grepl(b, peers)) {
+              peers <- c(peers, b)
+              new.check <- c(new.check, input[[b]][[type]])
+            }
+          } else {
+            # Else find out which arrays lead to the parallels
+            leading.to.parallels <- unique(unlist(sapply(input[[b]]$parallel, function(x) input[[x]][[opposite]])))
+            # as this is a distance >1 case, verify that all arrays leading to the parallels are contained in the peers
+            if (all(!is.na(match(leading.to.parallels, peers)))) {
+              peers <- c(peers, b)
+              new.check <- c(new.check, input[[b]][[type]])              
+            }
+          }
+        }
       }
+      to.check <- unique(new.check)
     }
     input[[a]][[paste0(type, ".peers")]] <- unique(peers)
   }
@@ -309,18 +344,21 @@ findDirectChains <- function(input, dotmat, type = c("before", "after")) {
   type <- match.arg(type)
   for(a in names(input)) {
     chain <- NULL
+    parallel.aux <- input[[a]]$parallel
     to.check <- input[[a]][[type]]
     while (!is.null(to.check)) {
       new.check <- NULL
       for (b in to.check) {
           if (is.null(chain) || !grepl(b, chain)) {
             chain <- c(chain, b)
+            parallel.aux <- c(parallel.aux, input[[b]]$parallel)
             new.check <- c(new.check, input[[b]][[type]])
-          }        
+          }
         to.check <- unique(new.check)
       }
     }
     input[[a]][[paste0("all.", type)]] <- unique(chain)
+    input[[a]][[paste0("all.", type, ".and.par")]] <- unique(c(chain, parallel.aux))
   }
   return(input)
 }

@@ -10,6 +10,7 @@
 #' @param if.last.skip.section Indicates whether a fish detected at the last array of a given section should be considered to have disappeared in the next section. Defaults to TRUE. I.e.: In a study with sections 'River' and 'Fjord', where 'River3' is the last river array, a fish last detected at River3 will be considered as 'disappeared in the Fjord'.
 #' @param override A list of tags for which the user intends to manually define entering and leaving points for each study section.
 #' @param cautious.assignment If TRUE, actel avoids assigning events with one detection as first and/or last events of a section.
+#' @param disregard.parallels Logical. If TRUE, the presence of parallel arrays does not invalidate potential efficiency peers. For more details on this, have a look at the vignettes.
 #' @param replicates A list containing, for each desired array, the standard names of the stations to be used as a replicate, for efficiency estimations.
 #' @inheritParams explore
 #' 
@@ -21,7 +22,7 @@ migration <- function(path = NULL, sections, success.arrays = NULL, minimum.dete
   maximum.time = 60, speed.method = c("last to first", "first to first"), speed.warning = NULL,
   speed.error = NULL, if.last.skip.section = TRUE, tz.study.area, start.timestamp = NULL, 
   end.timestamp = NULL, report = TRUE, override = NULL, 
-  exclude.tags = NULL, cautious.assignment = TRUE, replicates = NULL,
+  exclude.tags = NULL, cautious.assignment = TRUE, replicates = NULL, disregard.parallels = TRUE,
   jump.warning = 2, jump.error = 3, inactive.warning = NULL, inactive.error = NULL, debug = FALSE) {
   
 # check argument quality
@@ -114,6 +115,7 @@ migration <- function(path = NULL, sections, success.arrays = NULL, minimum.dete
       ", exclude.tags = ", ifelse(is.null(exclude.tags), "NULL", paste0("c('", paste(exclude.tags, collapse = "', '"), "')")), 
       ", cautious.assignment = ", ifelse(cautious.assignment, "TRUE", "FALSE"), 
       ", replicates = ", ifelse(is.null(replicates),"NULL", paste0("c('", paste(replicates, collapse = "', '"), "')")),
+      ", disregard.parallels = ", ifelse(disregard.parallels, "TRUE", "FALSE"), 
       ", jump.warning = ", jump.warning,
       ", jump.error = ", jump.error,
       ", inactive.warning = ", ifelse(is.null(inactive.warning), "NULL", inactive.warning), 
@@ -142,23 +144,28 @@ migration <- function(path = NULL, sections, success.arrays = NULL, minimum.dete
 # -----------------------------------
 
 # Load, structure and check the inputs
-study.data <- loadStudyData(tz.study.area = tz.study.area, override = override, 
-                            start.timestamp = start.timestamp, end.timestamp = end.timestamp,
-                            sections = sections, exclude.tags = exclude.tags)
-bio <- study.data$bio
-deployments <- study.data$deployments
-spatial <- study.data$spatial
-dot <- study.data$dot
-arrays <- study.data$arrays
-dotmat <- study.data$dotmat
-paths <- study.data$paths
-detections <- study.data$detections
-dist.mat <- study.data$dist.mat
-invalid.dist <- study.data$invalid.dist
-detections.list <- study.data$detections.list
+  if (disregard.parallels)
+    appendTo("Screen", "M: 'disregard.parallels' is set to TRUE; the presence of parallel arrays will not invalidate efficiency peers.")
+  else
+    appendTo("Screen", "M: 'disregard.parallels' is set to FALSE; the presence of parallel arrays can potentially invalidate efficiency peers.")
+  
+  study.data <- loadStudyData(tz.study.area = tz.study.area, override = override, 
+                              start.timestamp = start.timestamp, end.timestamp = end.timestamp,
+                              sections = sections, exclude.tags = exclude.tags, disregard.parallels = disregard.parallels)
+  bio <- study.data$bio
+  deployments <- study.data$deployments
+  spatial <- study.data$spatial
+  dot <- study.data$dot
+  arrays <- study.data$arrays
+  dotmat <- study.data$dotmat
+  paths <- study.data$paths
+  detections <- study.data$detections
+  dist.mat <- study.data$dist.mat
+  invalid.dist <- study.data$invalid.dist
+  detections.list <- study.data$detections.list
 
-if (is.null(success.arrays)) 
-  success.arrays <- names(arrays)[unlist(lapply(arrays, function(x) is.null(x$after)))]
+  if (is.null(success.arrays)) 
+    success.arrays <- names(arrays)[unlist(lapply(arrays, function(x) is.null(x$after)))]
 # -------------------------------------
   
 # Process the data
