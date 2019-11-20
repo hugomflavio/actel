@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<meta name="author" content="Hugo Flávio" />
+
+<meta name="date" content="2019-11-20" />
+
+<title>3.2) Multi-way efficiency estimations</title>
+
+
+
+
+
+
+<style type="text/css">body {
+background-color: #fff;
+margin: 1em auto;
+max-width: 700px;
+overflow: visible;
+padding-left: 2em;
+padding-right: 2em;
+font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+font-size: 14px;
+line-height: 1.35;
+}
+#header {
+text-align: center;
+}
+#TOC {
+clear: both;
+margin: 0 0 10px 10px;
+padding: 4px;
+width: 400px;
+border: 1px solid #CCCCCC;
+border-radius: 5px;
+background-color: #f6f6f6;
+font-size: 13px;
+line-height: 1.3;
+}
+#TOC .toctitle {
+font-weight: bold;
+font-size: 15px;
+margin-left: 5px;
+}
+#TOC ul {
+padding-left: 40px;
+margin-left: -1.5em;
+margin-top: 5px;
+margin-bottom: 5px;
+}
+#TOC ul ul {
+margin-left: -2em;
+}
+#TOC li {
+line-height: 16px;
+}
+table {
+margin: 1em auto;
+border-width: 1px;
+border-color: #DDDDDD;
+border-style: outset;
+border-collapse: collapse;
+}
+table th {
+border-width: 2px;
+padding: 5px;
+border-style: inset;
+}
+table td {
+border-width: 1px;
+border-style: inset;
+line-height: 18px;
+padding: 5px 5px;
+}
+table, table th, table td {
+border-left-style: none;
+border-right-style: none;
+}
+table thead, table tr.even {
+background-color: #f7f7f7;
+}
+p {
+margin: 0.5em 0;
+}
+blockquote {
+background-color: #f6f6f6;
+padding: 0.25em 0.75em;
+}
+hr {
+border-style: solid;
+border: none;
+border-top: 1px solid #777;
+margin: 28px 0;
+}
+dl {
+margin-left: 0;
+}
+dl dd {
+margin-bottom: 13px;
+margin-left: 13px;
+}
+dl dt {
+font-weight: bold;
+}
+ul {
+margin-top: 0;
+}
+ul li {
+list-style: circle outside;
+}
+ul ul {
+margin-bottom: 0;
+}
+pre, code {
+background-color: #f7f7f7;
+border-radius: 3px;
+color: #333;
+white-space: pre-wrap; 
+}
+pre {
+border-radius: 3px;
+margin: 5px 0px 10px 0px;
+padding: 10px;
+}
+pre:not([class]) {
+background-color: #f7f7f7;
+}
+code {
+font-family: Consolas, Monaco, 'Courier New', monospace;
+font-size: 85%;
+}
+p > code, li > code {
+padding: 2px 0px;
+}
+div.figure {
+text-align: center;
+}
+img {
+background-color: #FFFFFF;
+padding: 2px;
+border: 1px solid #DDDDDD;
+border-radius: 3px;
+border: 1px solid #CCCCCC;
+margin: 0 5px;
+}
+h1 {
+margin-top: 0;
+font-size: 35px;
+line-height: 40px;
+}
+h2 {
+border-bottom: 4px solid #f7f7f7;
+padding-top: 10px;
+padding-bottom: 2px;
+font-size: 145%;
+}
+h3 {
+border-bottom: 2px solid #f7f7f7;
+padding-top: 10px;
+font-size: 120%;
+}
+h4 {
+border-bottom: 1px solid #f7f7f7;
+margin-left: 8px;
+font-size: 105%;
+}
+h5, h6 {
+border-bottom: 1px solid #ccc;
+font-size: 105%;
+}
+a {
+color: #0033dd;
+text-decoration: none;
+}
+a:hover {
+color: #6666ff; }
+a:visited {
+color: #800080; }
+a:visited:hover {
+color: #BB00BB; }
+a[href^="http:"] {
+text-decoration: underline; }
+a[href^="https:"] {
+text-decoration: underline; }
+
+code > span.kw { color: #555; font-weight: bold; } 
+code > span.dt { color: #902000; } 
+code > span.dv { color: #40a070; } 
+code > span.bn { color: #d14; } 
+code > span.fl { color: #d14; } 
+code > span.ch { color: #d14; } 
+code > span.st { color: #d14; } 
+code > span.co { color: #888888; font-style: italic; } 
+code > span.ot { color: #007020; } 
+code > span.al { color: #ff0000; font-weight: bold; } 
+code > span.fu { color: #900; font-weight: bold; }  code > span.er { color: #a61717; background-color: #e3d2d2; } 
+</style>
+
+
+
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">3.2) Multi-way efficiency estimations</h1>
+<h4 class="author">Hugo Flávio</h4>
+<h4 class="date">2019-11-20</h4>
+
+
+
+<div id="index" class="section level2">
+<h2>Index</h2>
+<ol style="list-style-type: decimal">
+<li><a href="a-0_workspace_requirements.html">Preparing your data</a>
+<ol style="list-style-type: decimal">
+<li><a href="a-1_study_area.html">Structuring the study area</a></li>
+<li><a href="a-2_distances_matrix.html">Creating a distances matrix</a></li>
+</ol></li>
+<li><a href="b-0_explore.html">explore()</a>
+<ol style="list-style-type: decimal">
+<li><a href="b-1_explore_processes.html">From raw to movements</a></li>
+<li><a href="b-2_explore_results.html">Inspecting the explore() results</a></li>
+</ol></li>
+<li><a href="c-0_migration.html">migration()</a>
+<ol style="list-style-type: decimal">
+<li><a href="c-1_migration_processes.html">Processes behind migration()</a></li>
+<li><a href="c-2_migration_results.html">Inspecting the migration() results</a></li>
+<li><a href="c-3_migration_manual_mode.html">Manual mode in migration()</a></li>
+<li><a href="c-4_migration_efficiency.html">One-way efficiency estimations</a></li>
+</ol></li>
+<li><a href="d-0_residency.html">residency()</a>
+<ol style="list-style-type: decimal">
+<li><a href="d-1_residency_processes.html">Processes behind residency()</a></li>
+<li><a href="d-2_residency_results.html">Inspecting the residency() results</a></li>
+<li><a href="d-3_residency_efficiency.html"><strong>Multi-way efficiency estimations</strong></a></li>
+</ol></li>
+<li><a href="e-0_messages.html">Errors and messages</a></li>
+</ol>
+</div>
+<div id="multi-way-efficiency" class="section level2">
+<h2>Multi-way efficiency</h2>
+<p>Before starting efficiency estimations, actel gathers detailed information on the array structure of your study area. Let’s use the study area below as an example.</p>
+<center>
+<img src="data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiIHN0YW5kYWxvbmU9Im5vIj8+CjwhLS0gQ3JlYXRlZCB3aXRoIElua3NjYXBlIChodHRwOi8vd3d3Lmlua3NjYXBlLm9yZy8pIC0tPgoKPHN2ZwogICB4bWxuczpkYz0iaHR0cDovL3B1cmwub3JnL2RjL2VsZW1lbnRzLzEuMS8iCiAgIHhtbG5zOmNjPSJodHRwOi8vY3JlYXRpdmVjb21tb25zLm9yZy9ucyMiCiAgIHhtbG5zOnJkZj0iaHR0cDovL3d3dy53My5vcmcvMTk5OS8wMi8yMi1yZGYtc3ludGF4LW5zIyIKICAgeG1sbnM6c3ZnPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIKICAgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIgogICB4bWxuczpzb2RpcG9kaT0iaHR0cDovL3NvZGlwb2RpLnNvdXJjZWZvcmdlLm5ldC9EVEQvc29kaXBvZGktMC5kdGQiCiAgIHhtbG5zOmlua3NjYXBlPSJodHRwOi8vd3d3Lmlua3NjYXBlLm9yZy9uYW1lc3BhY2VzL2lua3NjYXBlIgogICB3aWR0aD0iMTY1LjM5OTk2bW0iCiAgIGhlaWdodD0iMTA4LjUwMjY5bW0iCiAgIHZpZXdCb3g9IjAgMCAxNjUuMzk5OTYgMTA4LjUwMjY5IgogICB2ZXJzaW9uPSIxLjEiCiAgIGlkPSJzdmc1MjE5IgogICBpbmtzY2FwZTp2ZXJzaW9uPSIwLjkyLjQgKDVkYTY4OWMzMTMsIDIwMTktMDEtMTQpIgogICBzb2RpcG9kaTpkb2NuYW1lPSJtdWxsdGlfd2F5X2VmZmljaWVuY3kuc3ZnIj4KICA8ZGVmcwogICAgIGlkPSJkZWZzNTIxMyI+CiAgICA8bWFya2VyCiAgICAgICBpbmtzY2FwZTpzdG9ja2lkPSJBcnJvdzJTZW5kIgogICAgICAgb3JpZW50PSJhdXRvIgogICAgICAgcmVmWT0iMCIKICAgICAgIHJlZlg9IjAiCiAgICAgICBpZD0ibWFya2VyMjE2NSIKICAgICAgIHN0eWxlPSJvdmVyZmxvdzp2aXNpYmxlIgogICAgICAgaW5rc2NhcGU6aXNzdG9jaz0idHJ1ZSI+CiAgICAgIDxwYXRoCiAgICAgICAgIGlua3NjYXBlOmNvbm5lY3Rvci1jdXJ2YXR1cmU9IjAiCiAgICAgICAgIGlkPSJwYXRoMjE2MyIKICAgICAgICAgc3R5bGU9ImZpbGw6IzMyMzIzMjtmaWxsLW9wYWNpdHk6MTtmaWxsLXJ1bGU6ZXZlbm9kZDtzdHJva2U6IzMyMzIzMjtzdHJva2Utd2lkdGg6MC42MjU7c3Ryb2tlLWxpbmVqb2luOnJvdW5kO3N0cm9rZS1vcGFjaXR5OjEiCiAgICAgICAgIGQ9Ik0gOC43MTg1ODc4LDQuMDMzNzM1MiAtMi4yMDcyODk1LDAuMDE2MDEzMjYgOC43MTg1ODg0LC00LjAwMTcwNzggYyAtMS43NDU0OTg0LDIuMzcyMDYwOSAtMS43MzU0NDA4LDUuNjE3NDUxOSAtNmUtNyw4LjAzNTQ0MyB6IgogICAgICAgICB0cmFuc2Zvcm09Im1hdHJpeCgtMC4zLDAsMCwtMC4zLDAuNjksMCkiIC8+CiAgICA8L21hcmtlcj4KICAgIDxtYXJrZXIKICAgICAgIGlua3NjYXBlOmlzc3RvY2s9InRydWUiCiAgICAgICBzdHlsZT0ib3ZlcmZsb3c6dmlzaWJsZSIKICAgICAgIGlkPSJtYXJrZXI5NzAiCiAgICAgICByZWZYPSIwIgogICAgICAgcmVmWT0iMCIKICAgICAgIG9yaWVudD0iYXV0byIKICAgICAgIGlua3NjYXBlOnN0b2NraWQ9IkFycm93MlNlbmQiPgogICAgICA8cGF0aAogICAgICAgICB0cmFuc2Zvcm09Im1hdHJpeCgtMC4zLDAsMCwtMC4zLDAuNjksMCkiCiAgICAgICAgIGQ9Ik0gOC43MTg1ODc4LDQuMDMzNzM1MiAtMi4yMDcyODk1LDAuMDE2MDEzMjYgOC43MTg1ODg0LC00LjAwMTcwNzggYyAtMS43NDU0OTg0LDIuMzcyMDYwOSAtMS43MzU0NDA4LDUuNjE3NDUxOSAtNmUtNyw4LjAzNTQ0MyB6IgogICAgICAgICBzdHlsZT0iZmlsbDojMzIzMjMyO2ZpbGwtb3BhY2l0eToxO2ZpbGwtcnVsZTpldmVub2RkO3N0cm9rZTojMzIzMjMyO3N0cm9rZS13aWR0aDowLjYyNTtzdHJva2UtbGluZWpvaW46cm91bmQ7c3Ryb2tlLW9wYWNpdHk6MSIKICAgICAgICAgaWQ9InBhdGg5NjgiCiAgICAgICAgIGlua3NjYXBlOmNvbm5lY3Rvci1jdXJ2YXR1cmU9IjAiIC8+CiAgICA8L21hcmtlcj4KICAgIDxtYXJrZXIKICAgICAgIGlua3NjYXBlOmlzc3RvY2s9InRydWUiCiAgICAgICBzdHlsZT0ib3ZlcmZsb3c6dmlzaWJsZSIKICAgICAgIGlkPSJtYXJrZXIzNDgwIgogICAgICAgcmVmWD0iMCIKICAgICAgIHJlZlk9IjAiCiAgICAgICBvcmllbnQ9ImF1dG8iCiAgICAgICBpbmtzY2FwZTpzdG9ja2lkPSJBcnJvdzJTZW5kIj4KICAgICAgPHBhdGgKICAgICAgICAgaW5rc2NhcGU6Y29ubmVjdG9yLWN1cnZhdHVyZT0iMCIKICAgICAgICAgdHJhbnNmb3JtPSJtYXRyaXgoLTAuMywwLDAsLTAuMywwLjY5LDApIgogICAgICAgICBkPSJNIDguNzE4NTg3OCw0LjAzMzczNTIgLTIuMjA3Mjg5NSwwLjAxNjAxMzI2IDguNzE4NTg4NCwtNC4wMDE3MDc4IGMgLTEuNzQ1NDk4NCwyLjM3MjA2MDkgLTEuNzM1NDQwOCw1LjYxNzQ1MTkgLTZlLTcsOC4wMzU0NDMgeiIKICAgICAgICAgc3R5bGU9ImZpbGw6IzM4OTYxNTtmaWxsLW9wYWNpdHk6MTtmaWxsLXJ1bGU6ZXZlbm9kZDtzdHJva2U6IzM4OTYxNTtzdHJva2Utd2lkdGg6MC42MjU7c3Ryb2tlLWxpbmVqb2luOnJvdW5kO3N0cm9rZS1vcGFjaXR5OjEiCiAgICAgICAgIGlkPSJwYXRoMzQ3OCIgLz4KICAgIDwvbWFya2VyPgogICAgPGZpbHRlcgogICAgICAgaW5rc2NhcGU6Y29sbGVjdD0iYWx3YXlzIgogICAgICAgc3R5bGU9ImNvbG9yLWludGVycG9sYXRpb24tZmlsdGVyczpzUkdCIgogICAgICAgaWQ9ImZpbHRlcjkyMSIKICAgICAgIHg9Ii0wLjAzNjM0OTY5MSIKICAgICAgIHdpZHRoPSIxLjA3MjY5OTQiCiAgICAgICB5PSItMC4wMzU2NTY5NyIKICAgICAgIGhlaWdodD0iMS4wNzEzMTM5Ij4KICAgICAgPGZlR2F1c3NpYW5CbHVyCiAgICAgICAgIGlua3NjYXBlOmNvbGxlY3Q9ImFsd2F5cyIKICAgICAgICAgc3RkRGV2aWF0aW9uPSIyLjc5OTM4NjEiCiAgICAgICAgIGlkPSJmZUdhdXNzaWFuQmx1cjkyMyIgLz4KICAgIDwvZmlsdGVyPgogIDwvZGVmcz4KICA8c29kaXBvZGk6bmFtZWR2aWV3CiAgICAgaWQ9ImJhc2UiCiAgICAgcGFnZWNvbG9yPSIjZmZmZmZmIgogICAgIGJvcmRlcmNvbG9yPSIjNjY2NjY2IgogICAgIGJvcmRlcm9wYWNpdHk9IjEuMCIKICAgICBpbmtzY2FwZTpwYWdlb3BhY2l0eT0iMC4wIgogICAgIGlua3NjYXBlOnBhZ2VzaGFkb3c9IjIiCiAgICAgaW5rc2NhcGU6em9vbT0iMS40MTQyMTM2IgogICAgIGlua3NjYXBlOmN4PSIzNjcuNDg2NjYiCiAgICAgaW5rc2NhcGU6Y3k9IjIwMy4xMzQ5OSIKICAgICBpbmtzY2FwZTpkb2N1bWVudC11bml0cz0ibW0iCiAgICAgaW5rc2NhcGU6Y3VycmVudC1sYXllcj0ibGF5ZXIxIgogICAgIHNob3dncmlkPSJmYWxzZSIKICAgICBmaXQtbWFyZ2luLXRvcD0iMCIKICAgICBmaXQtbWFyZ2luLWxlZnQ9IjAiCiAgICAgZml0LW1hcmdpbi1yaWdodD0iMCIKICAgICBmaXQtbWFyZ2luLWJvdHRvbT0iMCIKICAgICBpbmtzY2FwZTp3aW5kb3ctd2lkdGg9IjE5MjAiCiAgICAgaW5rc2NhcGU6d2luZG93LWhlaWdodD0iMTAwMSIKICAgICBpbmtzY2FwZTp3aW5kb3cteD0iLTkiCiAgICAgaW5rc2NhcGU6d2luZG93LXk9Ii05IgogICAgIGlua3NjYXBlOndpbmRvdy1tYXhpbWl6ZWQ9IjEiIC8+CiAgPG1ldGFkYXRhCiAgICAgaWQ9Im1ldGFkYXRhNTIxNiI+CiAgICA8cmRmOlJERj4KICAgICAgPGNjOldvcmsKICAgICAgICAgcmRmOmFib3V0PSIiPgogICAgICAgIDxkYzpmb3JtYXQ+aW1hZ2Uvc3ZnK3htbDwvZGM6Zm9ybWF0PgogICAgICAgIDxkYzp0eXBlCiAgICAgICAgICAgcmRmOnJlc291cmNlPSJodHRwOi8vcHVybC5vcmcvZGMvZGNtaXR5cGUvU3RpbGxJbWFnZSIgLz4KICAgICAgICA8ZGM6dGl0bGU+PC9kYzp0aXRsZT4KICAgICAgPC9jYzpXb3JrPgogICAgPC9yZGY6UkRGPgogIDwvbWV0YWRhdGE+CiAgPGcKICAgICBpbmtzY2FwZTpsYWJlbD0iTGF5ZXIgMSIKICAgICBpbmtzY2FwZTpncm91cG1vZGU9ImxheWVyIgogICAgIGlkPSJsYXllcjEiCiAgICAgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoLTEwNC4xMzQ2NSwtOTcuOTgwMzIpIj4KICAgIDxwYXRoCiAgICAgICBzdHlsZT0iZGlzcGxheTppbmxpbmU7b3BhY2l0eToxO3ZlY3Rvci1lZmZlY3Q6bm9uZTtmaWxsOiNlNmYxYmE7ZmlsbC1vcGFjaXR5OjE7c3Ryb2tlOm5vbmU7c3Ryb2tlLXdpZHRoOjE7c3Ryb2tlLWxpbmVjYXA6YnV0dDtzdHJva2UtbGluZWpvaW46bWl0ZXI7c3Ryb2tlLW1pdGVybGltaXQ6NDtzdHJva2UtZGFzaGFycmF5Om5vbmU7c3Ryb2tlLWRhc2hvZmZzZXQ6MDtzdHJva2Utb3BhY2l0eToxO2ZpbHRlcjp1cmwoI2ZpbHRlcjkyMSkiCiAgICAgICBkPSJtIDc0Ljg2MDg1NywxMDIuNTgyNzUgYyA1LjQwODQwNywyOC44OTYwNCAxMS4wMjUzMjMsMzEuNDMwNDUgNDEuMjcyMzIzLDMwLjA5MjEgMzAuMDA4NTMsLTEuMzI3OCA0My4xODQ1NCwtMjAuMzIyMzggNDMuMzcyNzcsLTI1LjQxODg5IDEuMzI5ODMsLTM2LjAwNjIzNyAtNTEuMDI2NzksLTI4LjcyNjE5OSAtNTEuMDI2NzksLTI4LjcyNjE5OSAtMzAuNTg3ODMsMC43MzY0MTYgLTM4LjAzMDkyNSwwLjQ3NzIzMiAtMzMuNjE4MzAzLDI0LjA1Mjk4OSB6IgogICAgICAgaWQ9InBhdGg5MTMiCiAgICAgICBpbmtzY2FwZTpjb25uZWN0b3ItY3VydmF0dXJlPSIwIgogICAgICAgc29kaXBvZGk6bm9kZXR5cGVzPSJzc3NjcyIKICAgICAgIHRyYW5zZm9ybT0ibWF0cml4KDEuNzk2MzExLDAsMCwxLjU4OTQwMTcsLTIyLjYzNzIxMywtMTMuMjUxMTU3KSIgLz4KICAgIDxwYXRoCiAgICAgICBzb2RpcG9kaTpub2RldHlwZXM9ImNzc3NzY2NjYXNjY3NjY3NjY2NjcyIKICAgICAgIGlua3NjYXBlOmNvbm5lY3Rvci1jdXJ2YXR1cmU9IjAiCiAgICAgICBkPSJtIDI2Ny40NTM5NSwxNDcuNjM3MDIgYyAtMC44MzA1NSwtMC4wODc3IC01Ljk0MzkxLDEuNTE1NjggLTYuNzM0ODksMS40NDEzOCAtMjAuNzQ1NDksLTEuOTQ4MTUgLTI4LjE4NjAxLDAuMzI5OTMgLTM4LjMyMjY2LC0xMy44NDA1MiAtNy40MzAxOSwtMTAuMzg2OTkgLTMzLjQ2ODMzLC05LjQxMTQ0IC00Ni4xNTcwNCwtNy45NjQzNiAtMTMuMTQ3MzksMS40OTkzOSAtMjQuNTM2MzksNS45NzA4MSAtMzcuOTUyMjgsMTEuNzU5ODUgLTQuMTE1ODksMS43NzYwMyAtMTEuMDAwODEsLTE5LjM4MDg5IC0yMC4wNDUyMiwtMjUuMTIzMzMgbCAtOC45MzAwOCw4LjU3NjYxIGMgMTAuMDkyOTgsNC44MDk1MiAxNC40ODI5NiwxNy4wMzkwNiAyMS45MTYxLDI1LjM5MDYgNy4wODU2NSw0MC40NjcxNyA1NS41NDgzOSwyNy43NzIgODQuODAwMjEsMjQuNTU2MjggOS4wNTEzOCwtMC45OTUwNCAxNS40NjQzNiwtMTIuNTk1NjYgMjMuOTYyMzgsLTEzLjExNzI3IDcuNTQ0MzMsLTAuNDYzMDcgMjAuOTc3NTEsLTIuMjM0MTUgMjcuNzgxMjUsMS4wNTgzNCBtIC03NC4yNDIyMiwtMy41NzEyMyBjIC01LjI1MDYxLDEuMTE2NDIgLTE4LjY0NjY1LDE0LjAyMTU2IC05LjE0NzAzLDEzLjQ5MzczIDIuODM0NzksLTAuMTU3NTEgMTYuNzE5NTEsLTMuNTg1NzggMjYuMTU1OTUsLTQuODAwMjkgMjAuNzYxOTEsLTcuMzY2OCAtMy4xNzUzMSwtMTIuNDM5NyAtMTcuMDA4OTIsLTguNjkzNDQgeiBtIC00MC41ODg5OSwtMTMuOTQ1MyBjIC01LjkwMDgxLDIuNjYwNDUgLTE1LjQ3MzQ1LDE0LjI4ODY2IC0xLjE2MjE5LDE4LjEzMTUxIDUuNTMxODEsMS40MTkwNSAxNC42NjMzNiw1Ljc5NzgxIDE4LjI5Nzg0LDIuNTc3NjUgNC44MDI2NSwtNC4yNTUxNSAxNy41MDcwMiwtMTMuMzU2NzQgMjIuODg2MzcsLTE0LjMyMzQgMTUuOTU3MjgsLTEuMDg3NDMgMzIuMzYwNDIsNS4zNTc2MyAyNS44OTEzNywtNi44MDM1NiAtNC44NzEwOSwtMTEuMTk3NjUgLTQ1Ljg4MzUxLC04LjYxMjkxIC02NS45MTMzOSwwLjQxNzggeiIKICAgICAgIHN0eWxlPSJvcGFjaXR5OjE7dmVjdG9yLWVmZmVjdDpub25lO2ZpbGw6I2E0ZWZlZjtmaWxsLW9wYWNpdHk6MTtmaWxsLXJ1bGU6ZXZlbm9kZDtzdHJva2U6bm9uZTtzdHJva2Utd2lkdGg6MTtzdHJva2UtbGluZWNhcDpidXR0O3N0cm9rZS1saW5lam9pbjptaXRlcjtzdHJva2UtbWl0ZXJsaW1pdDo0O3N0cm9rZS1kYXNoYXJyYXk6bm9uZTtzdHJva2UtZGFzaG9mZnNldDowO3N0cm9rZS1vcGFjaXR5OjEiCiAgICAgICBpZD0icGF0aDk0NCIgLz4KICAgIDxwYXRoCiAgICAgICBzdHlsZT0iZGlzcGxheTppbmxpbmU7b3BhY2l0eToxO3ZlY3Rvci1lZmZlY3Q6bm9uZTtmaWxsOiNmZmZmZmY7ZmlsbC1vcGFjaXR5OjE7ZmlsbC1ydWxlOmV2ZW5vZGQ7c3Ryb2tlOiMwMDAwMDA7c3Ryb2tlLXdpZHRoOjE7c3Ryb2tlLWxpbmVjYXA6YnV0dDtzdHJva2UtbGluZWpvaW46bWl0ZXI7c3Ryb2tlLW1pdGVybGltaXQ6NDtzdHJva2UtZGFzaGFycmF5Om5vbmU7c3Ryb2tlLWRhc2hvZmZzZXQ6MDtzdHJva2Utb3BhY2l0eToxIgogICAgICAgZD0ibSAxMTUuODMzNDMsMTM5LjY2MzY1IGggNC4xNDI2NyBjIDEuMDM2NDgsMCAxLjg3MDg5LDAuODM0NDIgMS44NzA4OSwxLjg3MDg5IHYgNC4xNDI2NyBjIDAsMS4wMzY0OCAtMC44MzQ0MSwxLjg3MDg5IC0xLjg3MDg5LDEuODcwODkgaCAtNC4xNDI2NyBjIC0xLjAzNjQ3LDAgLTEuODcwODksLTAuODM0NDEgLTEuODcwODksLTEuODcwODkgdiAtNC4xNDI2NyBjIDAsLTEuMDM2NDcgMC44MzQ0MiwtMS44NzA4OSAxLjg3MDg5LC0xLjg3MDg5IHoiCiAgICAgICBpZD0icmVjdDM1OTQiIC8+CiAgICA8ZwogICAgICAgYXJpYS1sYWJlbD0iQSIKICAgICAgIHN0eWxlPSJmb250LXN0eWxlOm5vcm1hbDtmb250LXdlaWdodDpub3JtYWw7Zm9udC1zaXplOjEwLjU4MzMzMzAycHg7bGluZS1oZWlnaHQ6MS4yNTtmb250LWZhbWlseTpzYW5zLXNlcmlmO2xldHRlci1zcGFjaW5nOjBweDt3b3JkLXNwYWNpbmc6MHB4O2Rpc3BsYXk6aW5saW5lO2ZpbGw6IzAwMDAwMDtmaWxsLW9wYWNpdHk6MTtzdHJva2U6bm9uZTtzdHJva2Utd2lkdGg6MC4yNjQ1ODMzMiIKICAgICAgIGlkPSJ0ZXh0MzU5MiI+CiAgICAgIDxwYXRoCiAgICAgICAgIGQ9Im0gMTE3Ljg3MDIxLDE0MS45MzIzMyAtMC44NDk1NiwyLjMwMzc0IGggMS43MDIyMiB6IG0gLTAuMzUzNDcsLTAuNjE3MDIgaCAwLjcxMDA0IGwgMS43NjQyMyw0LjYyOTE4IGggLTAuNjUxMTIgbCAtMC40MjE2OCwtMS4xODc1MyBoIC0yLjA4NjcgbCAtMC40MjE2OCwxLjE4NzUzIGggLTAuNjYwNDIgeiIKICAgICAgICAgc3R5bGU9ImZvbnQtc2l6ZTo2LjM0OTk5OTlweDtzdHJva2Utd2lkdGg6MC4yNjQ1ODMzMiIKICAgICAgICAgaWQ9InBhdGgxMDMxIiAvPgogICAgPC9nPgogICAgPHBhdGgKICAgICAgIHN0eWxlPSJkaXNwbGF5OmlubGluZTtvcGFjaXR5OjE7dmVjdG9yLWVmZmVjdDpub25lO2ZpbGw6I2ZmZmZmZjtmaWxsLW9wYWNpdHk6MTtmaWxsLXJ1bGU6ZXZlbm9kZDtzdHJva2U6IzAwMDAwMDtzdHJva2Utd2lkdGg6MTtzdHJva2UtbGluZWNhcDpidXR0O3N0cm9rZS1saW5lam9pbjptaXRlcjtzdHJva2UtbWl0ZXJsaW1pdDo0O3N0cm9rZS1kYXNoYXJyYXk6bm9uZTtzdHJva2UtZGFzaG9mZnNldDowO3N0cm9rZS1vcGFjaXR5OjEiCiAgICAgICBkPSJtIDE0NS4wMzk0NSwxMjQuMzg3NTIgaCA0LjE0MjY4IGMgMS4wMzY0NywwIDEuODcwODgsMC44MzQ0MiAxLjg3MDg4LDEuODcwODkgdiA0LjE0MjY3IGMgMCwxLjAzNjQ4IC0wLjgzNDQxLDEuODcwODkgLTEuODcwODgsMS44NzA4OSBoIC00LjE0MjY4IGMgLTEuMDM2NDcsMCAtMS44NzA4OSwtMC44MzQ0MSAtMS44NzA4OSwtMS44NzA4OSB2IC00LjE0MjY3IGMgMCwtMS4wMzY0NyAwLjgzNDQyLC0xLjg3MDg5IDEuODcwODksLTEuODcwODkgeiIKICAgICAgIGlkPSJyZWN0MzU5OSIgLz4KICAgIDxnCiAgICAgICBhcmlhLWxhYmVsPSJCIgogICAgICAgc3R5bGU9ImZvbnQtc3R5bGU6bm9ybWFsO2ZvbnQtd2VpZ2h0Om5vcm1hbDtmb250LXNpemU6MTAuNTgzMzMzMDJweDtsaW5lLWhlaWdodDoxLjI1O2ZvbnQtZmFtaWx5OnNhbnMtc2VyaWY7bGV0dGVyLXNwYWNpbmc6MHB4O3dvcmQtc3BhY2luZzowcHg7ZGlzcGxheTppbmxpbmU7ZmlsbDojMDAwMDAwO2ZpbGwtb3BhY2l0eToxO3N0cm9rZTpub25lO3N0cm9rZS13aWR0aDowLjI2NDU4MzMyIgogICAgICAgaWQ9InRleHQzNjAzIj4KICAgICAgPHBhdGgKICAgICAgICAgZD0ibSAxNDYuMTU1MzYsMTI4LjQ1NzY1IHYgMS42OTYwMiBoIDEuMDA0NTkgcSAwLjUwNTM5LDAgMC43NDcyNCwtMC4yMDc3NCAwLjI0NDk1LC0wLjIxMDg0IDAuMjQ0OTUsLTAuNjQxODIgMCwtMC40MzQwOCAtMC4yNDQ5NSwtMC42Mzg3MiAtMC4yNDE4NSwtMC4yMDc3NCAtMC43NDcyNCwtMC4yMDc3NCB6IG0gMCwtMS45MDM3NiB2IDEuMzk1MjYgaCAwLjkyNzA3IHEgMC40NTg4OSwwIDAuNjgyMTMsLTAuMTcwNTMgMC4yMjYzNSwtMC4xNzM2MyAwLjIyNjM1LC0wLjUyNzEgMCwtMC4zNTAzNyAtMC4yMjYzNSwtMC41MjQgLTAuMjIzMjQsLTAuMTczNjMgLTAuNjgyMTMsLTAuMTczNjMgeiBtIC0wLjYyNjMyLC0wLjUxNDcgaCAxLjU5OTkgcSAwLjcxNjI0LDAgMS4xMDM4MSwwLjI5NzY2IDAuMzg3NTcsMC4yOTc2NSAwLjM4NzU3LDAuODQ2NDYgMCwwLjQyNDc4IC0wLjE5ODQzLDAuNjc1OTIgLTAuMTk4NDQsMC4yNTExNSAtMC41ODI5MSwwLjMxMzE2IDAuNDYxOTgsMC4wOTkyIDAuNzE2MjMsMC40MTU0OCAwLjI1NzM1LDAuMzEzMTYgMC4yNTczNSwwLjc4NDQ1IDAsMC42MjAxMiAtMC40MjE2OCwwLjk1ODA4IC0wLjQyMTY4LDAuMzM3OTcgLTEuMTk5OTMsMC4zMzc5NyBoIC0xLjY2MTkxIHoiCiAgICAgICAgIHN0eWxlPSJmb250LXNpemU6Ni4zNDk5OTk5cHg7c3Ryb2tlLXdpZHRoOjAuMjY0NTgzMzIiCiAgICAgICAgIGlkPSJwYXRoMTAyNyIgLz4KICAgIDwvZz4KICAgIDxwYXRoCiAgICAgICBzdHlsZT0iZGlzcGxheTppbmxpbmU7b3BhY2l0eToxO3ZlY3Rvci1lZmZlY3Q6bm9uZTtmaWxsOiNmZmZmZmY7ZmlsbC1vcGFjaXR5OjE7ZmlsbC1ydWxlOmV2ZW5vZGQ7c3Ryb2tlOiMwMDAwMDA7c3Ryb2tlLXdpZHRoOjE7c3Ryb2tlLWxpbmVjYXA6YnV0dDtzdHJva2UtbGluZWpvaW46bWl0ZXI7c3Ryb2tlLW1pdGVybGltaXQ6NDtzdHJva2UtZGFzaGFycmF5Om5vbmU7c3Ryb2tlLWRhc2hvZmZzZXQ6MDtzdHJva2Utb3BhY2l0eToxIgogICAgICAgZD0ibSAyMjQuMzkwMjcsMTIzLjQ4MDk1IGggNC4xNDI2NyBjIDEuMDM2NDcsMCAxLjg3MDg5LDAuODM0NDEgMS44NzA4OSwxLjg3MDg5IHYgNC4xNDI2NyBjIDAsMS4wMzY0NyAtMC44MzQ0MiwxLjg3MDg5IC0xLjg3MDg5LDEuODcwODkgaCAtNC4xNDI2NyBjIC0xLjAzNjQ4LDAgLTEuODcwODksLTAuODM0NDIgLTEuODcwODksLTEuODcwODkgdiAtNC4xNDI2NyBjIDAsLTEuMDM2NDggMC44MzQ0MSwtMS44NzA4OSAxLjg3MDg5LC0xLjg3MDg5IHoiCiAgICAgICBpZD0icmVjdDM2MDUiIC8+CiAgICA8ZwogICAgICAgYXJpYS1sYWJlbD0iQyIKICAgICAgIHN0eWxlPSJmb250LXN0eWxlOm5vcm1hbDtmb250LXdlaWdodDpub3JtYWw7Zm9udC1zaXplOjEwLjU4MzMzMzAycHg7bGluZS1oZWlnaHQ6MS4yNTtmb250LWZhbWlseTpzYW5zLXNlcmlmO2xldHRlci1zcGFjaW5nOjBweDt3b3JkLXNwYWNpbmc6MHB4O2Rpc3BsYXk6aW5saW5lO2ZpbGw6IzAwMDAwMDtmaWxsLW9wYWNpdHk6MTtzdHJva2U6bm9uZTtzdHJva2Utd2lkdGg6MC4yNjQ1ODMzMiIKICAgICAgIGlkPSJ0ZXh0MzYwOSI+CiAgICAgIDxwYXRoCiAgICAgICAgIGQ9Im0gMjI4LjM0NjMxLDEyNS40ODkxNyB2IDAuNjYwNDMgcSAtMC4zMTYyNiwtMC4yOTQ1NiAtMC42NzU5MywtMC40NDAyOSAtMC4zNTY1NiwtMC4xNDU3MiAtMC43NTk2NCwtMC4xNDU3MiAtMC43OTM3NSwwIC0xLjIxNTQzLDAuNDg2NzkgLTAuNDIxNjgsMC40ODM2OSAtMC40MjE2OCwxLjQwMTQ2IDAsMC45MTQ2OCAwLjQyMTY4LDEuNDAxNDcgMC40MjE2OCwwLjQ4MzY5IDEuMjE1NDMsMC40ODM2OSAwLjQwMzA4LDAgMC43NTk2NCwtMC4xNDU3MyAwLjM1OTY3LC0wLjE0NTczIDAuNjc1OTMsLTAuNDQwMjggdiAwLjY1NDIyIHEgLTAuMzI4NjYsMC4yMjMyNCAtMC42OTc2MywwLjMzNDg3IC0wLjM2NTg3LDAuMTExNjIgLTAuNzc1MTUsMC4xMTE2MiAtMS4wNTExLDAgLTEuNjU1NzEsLTAuNjQxODIgLTAuNjA0NjIsLTAuNjQ0OTMgLTAuNjA0NjIsLTEuNzU4MDQgMCwtMS4xMTYyMSAwLjYwNDYyLC0xLjc1ODAzIDAuNjA0NjEsLTAuNjQ0OTIgMS42NTU3MSwtMC42NDQ5MiAwLjQxNTQ4LDAgMC43ODEzNSwwLjExMTYyIDAuMzY4OTcsMC4xMDg1MiAwLjY5MTQzLDAuMzI4NjYgeiIKICAgICAgICAgc3R5bGU9ImZvbnQtc2l6ZTo2LjM0OTk5OTlweDtzdHJva2Utd2lkdGg6MC4yNjQ1ODMzMiIKICAgICAgICAgaWQ9InBhdGgxMDIzIiAvPgogICAgPC9nPgogICAgPHBhdGgKICAgICAgIGlkPSJwYXRoOTAyIgogICAgICAgc3R5bGU9Im9wYWNpdHk6MTt2ZWN0b3ItZWZmZWN0Om5vbmU7ZmlsbDpub25lO2ZpbGwtb3BhY2l0eToxO3N0cm9rZTojMzIzMjMyO3N0cm9rZS13aWR0aDoxO3N0cm9rZS1saW5lY2FwOmJ1dHQ7c3Ryb2tlLWxpbmVqb2luOm1pdGVyO3N0cm9rZS1taXRlcmxpbWl0OjQ7c3Ryb2tlLWRhc2hhcnJheTpub25lO3N0cm9rZS1kYXNob2Zmc2V0OjA7c3Ryb2tlLW9wYWNpdHk6MSIKICAgICAgIGQ9Im0gMTE4LjI0MTg2LDExMy45MTAwNCBjIDkuMDQ0NDEsNS43NDI0NCAxNS45MjkzMywyNi44OTkzNiAyMC4wNDUyMiwyNS4xMjMzMyAxMy40MTU4OSwtNS43ODkwNCAyNC44MDQ4OSwtMTAuMjYwNDYgMzcuOTUyMjgsLTExLjc1OTg1IDEyLjY4ODcxLC0xLjQ0NzA4IDM4LjcyNjg1LC0yLjQyMjYzIDQ2LjE1NzA0LDcuOTY0MzYgMTAuMTM2NjUsMTQuMTcwNDUgMTcuNTc3MTcsMTEuODkyMzcgMzguMzIyNjYsMTMuODQwNTIgMC43OTA5OCwwLjA3NDMgNS45MDQzNCwtMS41MjkxIDYuNzM0ODksLTEuNDQxMzggbSAtNzMuOTI0NDUsOS4xNjYzNSBjIC01LjI1MDYxLDEuMTE2NDIgLTE4LjY0NjY1LDE0LjAyMTU2IC05LjE0NzAzLDEzLjQ5MzczIDIuODM0NzksLTAuMTU3NTEgMTYuNzE5NTEsLTMuNTg1NzggMjYuMTU1OTUsLTQuODAwMjkgMjAuNzYxOTEsLTcuMzY2OCAtMy4xNzUzMSwtMTIuNDM5NyAtMTcuMDA4OTIsLTguNjkzNDQgeiBtIC00MC41ODg5OSwtMTMuOTQ1MyBjIC01LjkwMDgxLDIuNjYwNDUgLTE1LjQ3MzQ1LDE0LjI4ODY2IC0xLjE2MjE5LDE4LjEzMTUxIDUuNTMxODEsMS40MTkwNSAxNC42NjMzNiw1Ljc5NzgxIDE4LjI5Nzg0LDIuNTc3NjUgNC44MDI2NSwtNC4yNTUxNSAxNy41MDcwMiwtMTMuMzU2NzQgMjIuODg2MzcsLTE0LjMyMzQgMTUuOTU3MjgsLTEuMDg3NDMgMzIuMzYwNDIsNS4zNTc2MyAyNS44OTEzNywtNi44MDM1NiAtNC44NzEwOSwtMTEuMTk3NjUgLTQ1Ljg4MzUxLC04LjYxMjkxIC02NS45MTMzOSwwLjQxNzggeiBtIC00My42Mjg3MywtMjAuMzcxNDIgYyAxMC4wOTI5OCw0LjgwOTUyIDE0LjQ4Mjk2LDE3LjAzOTA2IDIxLjkxNjEsMjUuMzkwNiA3LjA4NTY1LDQwLjQ2NzE3IDU1LjU0ODM5LDI3Ljc3MiA4NC44MDAyMSwyNC41NTYyOCA5LjA1MTM4LC0wLjk5NTA0IDE1LjQ2NDM2LC0xMi41OTU2NiAyMy45NjIzOCwtMTMuMTE3MjcgNy41NDQzMywtMC40NjMwNyAyMC45Nzc1MSwtMi4yMzQxNSAyNy43ODEyNSwxLjA1ODM0IgogICAgICAgaW5rc2NhcGU6Y29ubmVjdG9yLWN1cnZhdHVyZT0iMCIKICAgICAgIHNvZGlwb2RpOm5vZGV0eXBlcz0iY3Nzc3NjY3NjY3NjY2Njc2NjYXNjIiAvPgogICAgPHBhdGgKICAgICAgIHNvZGlwb2RpOm5vZGV0eXBlcz0iY2MiCiAgICAgICBpbmtzY2FwZTpjb25uZWN0b3ItY3VydmF0dXJlPSIwIgogICAgICAgaWQ9InBhdGgyMDcxIgogICAgICAgZD0ibSAxMzIuNTY1ODEsMTMyLjE4MDk1IC04Ljg2Njc0LDYuMTU5NzgiCiAgICAgICBzdHlsZT0iZGlzcGxheTppbmxpbmU7b3BhY2l0eToxO3ZlY3Rvci1lZmZlY3Q6bm9uZTtmaWxsOm5vbmU7ZmlsbC1vcGFjaXR5OjE7c3Ryb2tlOiNmZjAwMDA7c3Ryb2tlLXdpZHRoOjE7c3Ryb2tlLWxpbmVjYXA6cm91bmQ7c3Ryb2tlLWxpbmVqb2luOm1pdGVyO3N0cm9rZS1taXRlcmxpbWl0OjQ7c3Ryb2tlLWRhc2hhcnJheTpub25lO3N0cm9rZS1kYXNob2Zmc2V0OjA7c3Ryb2tlLW9wYWNpdHk6MSIgLz4KICAgIDxwYXRoCiAgICAgICBzdHlsZT0iZGlzcGxheTppbmxpbmU7b3BhY2l0eToxO3ZlY3Rvci1lZmZlY3Q6bm9uZTtmaWxsOm5vbmU7ZmlsbC1vcGFjaXR5OjE7c3Ryb2tlOiNmZjAwMDA7c3Ryb2tlLXdpZHRoOjE7c3Ryb2tlLWxpbmVjYXA6cm91bmQ7c3Ryb2tlLWxpbmVqb2luOm1pdGVyO3N0cm9rZS1taXRlcmxpbWl0OjQ7c3Ryb2tlLWRhc2hhcnJheTpub25lO3N0cm9rZS1kYXNob2Zmc2V0OjA7c3Ryb2tlLW9wYWNpdHk6MSIKICAgICAgIGQ9Im0gMTQ3LjgxODA3LDEzNC42NjA5IDMuODEyODIsOS41MDY3OSIKICAgICAgIGlkPSJwYXRoOTA3IgogICAgICAgaW5rc2NhcGU6Y29ubmVjdG9yLWN1cnZhdHVyZT0iMCIKICAgICAgIHNvZGlwb2RpOm5vZGV0eXBlcz0iY2MiIC8+CiAgICA8cGF0aAogICAgICAgc29kaXBvZGk6bm9kZXR5cGVzPSJjYyIKICAgICAgIGlua3NjYXBlOmNvbm5lY3Rvci1jdXJ2YXR1cmU9IjAiCiAgICAgICBpZD0icGF0aDkwOSIKICAgICAgIGQ9Im0gMjIxLjM1NTQyLDEzMi44MjgwMiAtNS4yODg1Nyw3LjI5NTkzIgogICAgICAgc3R5bGU9ImRpc3BsYXk6aW5saW5lO29wYWNpdHk6MTt2ZWN0b3ItZWZmZWN0Om5vbmU7ZmlsbDpub25lO2ZpbGwtb3BhY2l0eToxO3N0cm9rZTojZmYwMDAwO3N0cm9rZS13aWR0aDoxO3N0cm9rZS1saW5lY2FwOnJvdW5kO3N0cm9rZS1saW5lam9pbjptaXRlcjtzdHJva2UtbWl0ZXJsaW1pdDo0O3N0cm9rZS1kYXNoYXJyYXk6bm9uZTtzdHJva2UtZGFzaG9mZnNldDowO3N0cm9rZS1vcGFjaXR5OjEiIC8+CiAgICA8cGF0aAogICAgICAgc3R5bGU9ImRpc3BsYXk6aW5saW5lO29wYWNpdHk6MTt2ZWN0b3ItZWZmZWN0Om5vbmU7ZmlsbDpub25lO2ZpbGwtb3BhY2l0eToxO3N0cm9rZTojZmYwMDAwO3N0cm9rZS13aWR0aDoxO3N0cm9rZS1saW5lY2FwOnJvdW5kO3N0cm9rZS1saW5lam9pbjptaXRlcjtzdHJva2UtbWl0ZXJsaW1pdDo0O3N0cm9rZS1kYXNoYXJyYXk6bm9uZTtzdHJva2UtZGFzaG9mZnNldDowO3N0cm9rZS1vcGFjaXR5OjEiCiAgICAgICBkPSJtIDE0Ni4yMTc1OSwxNTcuNDU3NTggLTcuODM2OTYsOC4yNTk3NSIKICAgICAgIGlkPSJwYXRoOTEyIgogICAgICAgaW5rc2NhcGU6Y29ubmVjdG9yLWN1cnZhdHVyZT0iMCIKICAgICAgIHNvZGlwb2RpOm5vZGV0eXBlcz0iY2MiIC8+CiAgICA8cGF0aAogICAgICAgc29kaXBvZGk6bm9kZXR5cGVzPSJjYyIKICAgICAgIGlua3NjYXBlOmNvbm5lY3Rvci1jdXJ2YXR1cmU9IjAiCiAgICAgICBpZD0icGF0aDkxNCIKICAgICAgIGQ9Im0gMjA5LjQxODM3LDE0OS4wMTY4NiAtMC43ODIzOSw3LjUwODQ3IgogICAgICAgc3R5bGU9ImRpc3BsYXk6aW5saW5lO29wYWNpdHk6MTt2ZWN0b3ItZWZmZWN0Om5vbmU7ZmlsbDpub25lO2ZpbGwtb3BhY2l0eToxO3N0cm9rZTojZmYwMDAwO3N0cm9rZS13aWR0aDoxO3N0cm9rZS1saW5lY2FwOnJvdW5kO3N0cm9rZS1saW5lam9pbjptaXRlcjtzdHJva2UtbWl0ZXJsaW1pdDo0O3N0cm9rZS1kYXNoYXJyYXk6bm9uZTtzdHJva2UtZGFzaG9mZnNldDowO3N0cm9rZS1vcGFjaXR5OjEiIC8+CiAgICA8cGF0aAogICAgICAgc3R5bGU9ImRpc3BsYXk6aW5saW5lO29wYWNpdHk6MTt2ZWN0b3ItZWZmZWN0Om5vbmU7ZmlsbDpub25lO2ZpbGwtb3BhY2l0eToxO3N0cm9rZTojZmYwMDAwO3N0cm9rZS13aWR0aDoxO3N0cm9rZS1saW5lY2FwOnJvdW5kO3N0cm9rZS1saW5lam9pbjptaXRlcjtzdHJva2UtbWl0ZXJsaW1pdDo0O3N0cm9rZS1kYXNoYXJyYXk6bm9uZTtzdHJva2UtZGFzaG9mZnNldDowO3N0cm9rZS1vcGFjaXR5OjEiCiAgICAgICBkPSJtIDIxMy42NjMwNSwxNjMuNTU0OTggMi4yOTY5NSw5LjUwMTI4IgogICAgICAgaWQ9InBhdGg5MTYiCiAgICAgICBpbmtzY2FwZTpjb25uZWN0b3ItY3VydmF0dXJlPSIwIgogICAgICAgc29kaXBvZGk6bm9kZXR5cGVzPSJjYyIgLz4KICAgIDxwYXRoCiAgICAgICBzdHlsZT0iZGlzcGxheTppbmxpbmU7b3BhY2l0eToxO3ZlY3Rvci1lZmZlY3Q6bm9uZTtmaWxsOm5vbmU7ZmlsbC1vcGFjaXR5OjE7c3Ryb2tlOiNmZjAwMDA7c3Ryb2tlLXdpZHRoOjE7c3Ryb2tlLWxpbmVjYXA6cm91bmQ7c3Ryb2tlLWxpbmVqb2luOm1pdGVyO3N0cm9rZS1taXRlcmxpbWl0OjQ7c3Ryb2tlLWRhc2hhcnJheTpub25lO3N0cm9rZS1kYXNob2Zmc2V0OjA7c3Ryb2tlLW9wYWNpdHk6MSIKICAgICAgIGQ9Im0gMjU1Ljk5OTksMTQ4LjA4MjM5IDAuMDUzOSwxMC45NTI1OSIKICAgICAgIGlkPSJwYXRoOTE4IgogICAgICAgaW5rc2NhcGU6Y29ubmVjdG9yLWN1cnZhdHVyZT0iMCIKICAgICAgIHNvZGlwb2RpOm5vZGV0eXBlcz0iY2MiIC8+CiAgICA8cGF0aAogICAgICAgc3R5bGU9ImRpc3BsYXk6aW5saW5lO29wYWNpdHk6MTt2ZWN0b3ItZWZmZWN0Om5vbmU7ZmlsbDojZmZmZmZmO2ZpbGwtb3BhY2l0eToxO2ZpbGwtcnVsZTpldmVub2RkO3N0cm9rZTojMDAwMDAwO3N0cm9rZS13aWR0aDoxO3N0cm9rZS1saW5lY2FwOmJ1dHQ7c3Ryb2tlLWxpbmVqb2luOm1pdGVyO3N0cm9rZS1taXRlcmxpbWl0OjQ7c3Ryb2tlLWRhc2hhcnJheTpub25lO3N0cm9rZS1kYXNob2Zmc2V0OjA7c3Ryb2tlLW9wYWNpdHk6MSIKICAgICAgIGQ9Im0gMTMyLjg5NjIzLDE2Ny44MzQgaCA0LjE0MjY4IGMgMS4wMzY0NywwIDEuODcwODksMC44MzQ0MiAxLjg3MDg5LDEuODcwODkgdiA0LjE0MjY3IGMgMCwxLjAzNjQ4IC0wLjgzNDQyLDEuODcwODkgLTEuODcwODksMS44NzA4OSBoIC00LjE0MjY4IGMgLTEuMDM2NDcsMCAtMS44NzA4OSwtMC44MzQ0MSAtMS44NzA4OSwtMS44NzA4OSB2IC00LjE0MjY3IGMgMCwtMS4wMzY0NyAwLjgzNDQyLC0xLjg3MDg5IDEuODcwODksLTEuODcwODkgeiIKICAgICAgIGlkPSJyZWN0OTIwIiAvPgogICAgPGcKICAgICAgIGFyaWEtbGFiZWw9IkQiCiAgICAgICBzdHlsZT0iZm9udC1zdHlsZTpub3JtYWw7Zm9udC13ZWlnaHQ6bm9ybWFsO2ZvbnQtc2l6ZToxMC41ODMzMzMwMnB4O2xpbmUtaGVpZ2h0OjEuMjU7Zm9udC1mYW1pbHk6c2Fucy1zZXJpZjtsZXR0ZXItc3BhY2luZzowcHg7d29yZC1zcGFjaW5nOjBweDtkaXNwbGF5OmlubGluZTtmaWxsOiMwMDAwMDA7ZmlsbC1vcGFjaXR5OjE7c3Ryb2tlOm5vbmU7c3Ryb2tlLXdpZHRoOjAuMjY0NTgzMzIiCiAgICAgICBpZD0idGV4dDkyNCI+CiAgICAgIDxwYXRoCiAgICAgICAgIGQ9Im0gMTM0LjAxMjE0LDE3MC4wMDAzNCB2IDMuNTk5NzkgaCAwLjc1NjU0IHEgMC45NTgwOCwwIDEuNDAxNDcsLTAuNDM0MDkgMC40NDY0OCwtMC40MzQwOCAwLjQ0NjQ4LC0xLjM3MDQ2IDAsLTAuOTMwMTcgLTAuNDQ2NDgsLTEuMzYxMTUgLTAuNDQzMzksLTAuNDM0MDkgLTEuNDAxNDcsLTAuNDM0MDkgeiBtIC0wLjYyNjMyLC0wLjUxNDY5IGggMS4yODY3NCBxIDEuMzQ1NjYsMCAxLjk3NTA4LDAuNTYxMiAwLjYyOTQyLDAuNTU4MTEgMC42Mjk0MiwxLjc0ODczIDAsMS4xOTY4MyAtMC42MzI1MiwxLjc1ODA0IC0wLjYzMjUyLDAuNTYxMiAtMS45NzE5OCwwLjU2MTIgaCAtMS4yODY3NCB6IgogICAgICAgICBzdHlsZT0iZm9udC1zaXplOjYuMzQ5OTk5OXB4O3N0cm9rZS13aWR0aDowLjI2NDU4MzMyIgogICAgICAgICBpZD0icGF0aDk4MiIgLz4KICAgIDwvZz4KICAgIDxwYXRoCiAgICAgICBzdHlsZT0iZGlzcGxheTppbmxpbmU7b3BhY2l0eToxO3ZlY3Rvci1lZmZlY3Q6bm9uZTtmaWxsOiNmZmZmZmY7ZmlsbC1vcGFjaXR5OjE7ZmlsbC1ydWxlOmV2ZW5vZGQ7c3Ryb2tlOiMwMDAwMDA7c3Ryb2tlLXdpZHRoOjE7c3Ryb2tlLWxpbmVjYXA6YnV0dDtzdHJva2UtbGluZWpvaW46bWl0ZXI7c3Ryb2tlLW1pdGVybGltaXQ6NDtzdHJva2UtZGFzaGFycmF5Om5vbmU7c3Ryb2tlLWRhc2hvZmZzZXQ6MDtzdHJva2Utb3BhY2l0eToxIgogICAgICAgZD0ibSAyMDIuNjEzOTQsMTM5LjUyMzU3IGggNC4xNDI2OCBjIDEuMDM2NDcsMCAxLjg3MDg5LDAuODM0NDIgMS44NzA4OSwxLjg3MDg5IHYgNC4xNDI2OCBjIDAsMS4wMzY0NyAtMC44MzQ0MiwxLjg3MDg5IC0xLjg3MDg5LDEuODcwODkgaCAtNC4xNDI2OCBjIC0xLjAzNjQ3LDAgLTEuODcwODgsLTAuODM0NDIgLTEuODcwODgsLTEuODcwODkgdiAtNC4xNDI2OCBjIDAsLTEuMDM2NDcgMC44MzQ0MSwtMS44NzA4OSAxLjg3MDg4LC0xLjg3MDg5IHoiCiAgICAgICBpZD0icmVjdDkyNiIgLz4KICAgIDxnCiAgICAgICBhcmlhLWxhYmVsPSJFIgogICAgICAgc3R5bGU9ImZvbnQtc3R5bGU6bm9ybWFsO2ZvbnQtd2VpZ2h0Om5vcm1hbDtmb250LXNpemU6MTAuNTgzMzMzMDJweDtsaW5lLWhlaWdodDoxLjI1O2ZvbnQtZmFtaWx5OnNhbnMtc2VyaWY7bGV0dGVyLXNwYWNpbmc6MHB4O3dvcmQtc3BhY2luZzowcHg7ZGlzcGxheTppbmxpbmU7ZmlsbDojMDAwMDAwO2ZpbGwtb3BhY2l0eToxO3N0cm9rZTpub25lO3N0cm9rZS13aWR0aDowLjI2NDU4MzMyIgogICAgICAgaWQ9InRleHQ5MzAiPgogICAgICA8cGF0aAogICAgICAgICBkPSJtIDIwMy4xMDM1MywxNDEuMTc1MjIgaCAyLjkyNjk2IHYgMC41MjcxIGggLTIuMzAwNjQgdiAxLjM3MDQ2IGggMi4yMDQ1MiB2IDAuNTI3MSBoIC0yLjIwNDUyIHYgMS42Nzc0MiBoIDIuMzU2NDUgdiAwLjUyNzEgaCAtMi45ODI3NyB6IgogICAgICAgICBzdHlsZT0iZm9udC1zaXplOjYuMzQ5OTk5OXB4O3N0cm9rZS13aWR0aDowLjI2NDU4MzMyIgogICAgICAgICBpZD0icGF0aDk3OCIgLz4KICAgIDwvZz4KICAgIDxwYXRoCiAgICAgICBzdHlsZT0iZGlzcGxheTppbmxpbmU7b3BhY2l0eToxO3ZlY3Rvci1lZmZlY3Q6bm9uZTtmaWxsOiNmZmZmZmY7ZmlsbC1vcGFjaXR5OjE7ZmlsbC1ydWxlOmV2ZW5vZGQ7c3Ryb2tlOiMwMDAwMDA7c3Ryb2tlLXdpZHRoOjE7c3Ryb2tlLWxpbmVjYXA6YnV0dDtzdHJva2UtbGluZWpvaW46bWl0ZXI7c3Ryb2tlLW1pdGVybGltaXQ6NDtzdHJva2UtZGFzaGFycmF5Om5vbmU7c3Ryb2tlLWRhc2hvZmZzZXQ6MDtzdHJva2Utb3BhY2l0eToxIgogICAgICAgZD0ibSAyMTMuMzI5NTcsMTc0LjU4MDg3IGggNC4xNDI2NyBjIDEuMDM2NDcsMCAxLjg3MDg5LDAuODM0NDIgMS44NzA4OSwxLjg3MDg5IHYgNC4xNDI2OCBjIDAsMS4wMzY0NyAtMC44MzQ0MiwxLjg3MDg4IC0xLjg3MDg5LDEuODcwODggaCAtNC4xNDI2NyBjIC0xLjAzNjQ4LDAgLTEuODcwODksLTAuODM0NDEgLTEuODcwODksLTEuODcwODggdiAtNC4xNDI2OCBjIDAsLTEuMDM2NDcgMC44MzQ0MSwtMS44NzA4OSAxLjg3MDg5LC0xLjg3MDg5IHoiCiAgICAgICBpZD0icmVjdDkzMiIgLz4KICAgIDxnCiAgICAgICBhcmlhLWxhYmVsPSJGIgogICAgICAgc3R5bGU9ImZvbnQtc3R5bGU6bm9ybWFsO2ZvbnQtd2VpZ2h0Om5vcm1hbDtmb250LXNpemU6MTAuNTgzMzMzMDJweDtsaW5lLWhlaWdodDoxLjI1O2ZvbnQtZmFtaWx5OnNhbnMtc2VyaWY7bGV0dGVyLXNwYWNpbmc6MHB4O3dvcmQtc3BhY2luZzowcHg7ZGlzcGxheTppbmxpbmU7ZmlsbDojMDAwMDAwO2ZpbGwtb3BhY2l0eToxO3N0cm9rZTpub25lO3N0cm9rZS13aWR0aDowLjI2NDU4MzMyIgogICAgICAgaWQ9InRleHQ5MzYiPgogICAgICA8cGF0aAogICAgICAgICBkPSJtIDIxMy44MTkxNiwxNzYuMjMyNTIgaCAyLjY2MDMgdiAwLjUyNzEgaCAtMi4wMzM5OSB2IDEuMzY0MjYgaCAxLjgzNTU1IHYgMC41MjcxIGggLTEuODM1NTUgdiAyLjIxMDcxIGggLTAuNjI2MzEgeiIKICAgICAgICAgc3R5bGU9ImZvbnQtc2l6ZTo2LjM0OTk5OTlweDtzdHJva2Utd2lkdGg6MC4yNjQ1ODMzMiIKICAgICAgICAgaWQ9InBhdGg5NzQiIC8+CiAgICA8L2c+CiAgICA8cGF0aAogICAgICAgc3R5bGU9ImRpc3BsYXk6aW5saW5lO29wYWNpdHk6MTt2ZWN0b3ItZWZmZWN0Om5vbmU7ZmlsbDojZmZmZmZmO2ZpbGwtb3BhY2l0eToxO2ZpbGwtcnVsZTpldmVub2RkO3N0cm9rZTojMDAwMDAwO3N0cm9rZS13aWR0aDoxO3N0cm9rZS1saW5lY2FwOmJ1dHQ7c3Ryb2tlLWxpbmVqb2luOm1pdGVyO3N0cm9rZS1taXRlcmxpbWl0OjQ7c3Ryb2tlLWRhc2hhcnJheTpub25lO3N0cm9rZS1kYXNob2Zmc2V0OjA7c3Ryb2tlLW9wYWNpdHk6MSIKICAgICAgIGQ9Im0gMjU3LjI1MDQsMTYxLjIxOTQyIGggNC4xNDI2OCBjIDEuMDM2NDcsMCAxLjg3MDg5LDAuODM0NDIgMS44NzA4OSwxLjg3MDg5IHYgNC4xNDI2OCBjIDAsMS4wMzY0NyAtMC44MzQ0MiwxLjg3MDg4IC0xLjg3MDg5LDEuODcwODggaCAtNC4xNDI2OCBjIC0xLjAzNjQ3LDAgLTEuODcwODgsLTAuODM0NDEgLTEuODcwODgsLTEuODcwODggdiAtNC4xNDI2OCBjIDAsLTEuMDM2NDcgMC44MzQ0MSwtMS44NzA4OSAxLjg3MDg4LC0xLjg3MDg5IHoiCiAgICAgICBpZD0icmVjdDkzOCIgLz4KICAgIDxnCiAgICAgICBhcmlhLWxhYmVsPSJHIgogICAgICAgc3R5bGU9ImZvbnQtc3R5bGU6bm9ybWFsO2ZvbnQtd2VpZ2h0Om5vcm1hbDtmb250LXNpemU6MTAuNTgzMzMzMDJweDtsaW5lLWhlaWdodDoxLjI1O2ZvbnQtZmFtaWx5OnNhbnMtc2VyaWY7bGV0dGVyLXNwYWNpbmc6MHB4O3dvcmQtc3BhY2luZzowcHg7ZGlzcGxheTppbmxpbmU7ZmlsbDojMDAwMDAwO2ZpbGwtb3BhY2l0eToxO3N0cm9rZTpub25lO3N0cm9rZS13aWR0aDowLjI2NDU4MzMyIgogICAgICAgaWQ9InRleHQ5NDIiPgogICAgICA8cGF0aAogICAgICAgICBkPSJtIDI2MC44OTYzNywxNjYuODM5ODIgdiAtMS4yNDMzNCBoIC0xLjAyMzE5IHYgLTAuNTE0NjkgaCAxLjY0MzMxIHYgMS45ODc0NyBxIC0wLjM2Mjc3LDAuMjU3MzUgLTAuNzk5OTUsMC4zOTA2OCAtMC40MzcxOCwwLjEzMDIyIC0wLjkzMzI4LDAuMTMwMjIgLTEuMDg1MiwwIC0xLjY5OTEyLC0wLjYzMjUyIC0wLjYxMDgxLC0wLjYzNTYyIC0wLjYxMDgxLC0xLjc2NzMzIDAsLTEuMTM0ODIgMC42MTA4MSwtMS43NjczNCAwLjYxMzkyLC0wLjYzNTYyIDEuNjk5MTIsLTAuNjM1NjIgMC40NTI2OSwwIDAuODU4ODcsMC4xMTE2MiAwLjQwOTI3LDAuMTExNjMgMC43NTM0NCwwLjMyODY3IHYgMC42NjY2MiBxIC0wLjM0NzI3LC0wLjI5NDU1IC0wLjczNzk0LC0wLjQ0MzM4IC0wLjM5MDY3LC0wLjE0ODgzIC0wLjgyMTY2LC0wLjE0ODgzIC0wLjg0OTU2LDAgLTEuMjc3NDQsMC40NzQzOSAtMC40MjQ3OCwwLjQ3NDM5IC0wLjQyNDc4LDEuNDEzODcgMCwwLjkzNjM3IDAuNDI0NzgsMS40MTA3NiAwLjQyNzg4LDAuNDc0MzkgMS4yNzc0NCwwLjQ3NDM5IDAuMzMxNzcsMCAwLjU5MjIyLC0wLjA1NTggMC4yNjA0NSwtMC4wNTg5IDAuNDY4MTgsLTAuMTc5ODMgeiIKICAgICAgICAgc3R5bGU9ImZvbnQtc2l6ZTo2LjM0OTk5OTlweDtzdHJva2Utd2lkdGg6MC4yNjQ1ODMzMiIKICAgICAgICAgaWQ9InBhdGg5NzAiIC8+CiAgICA8L2c+CiAgICA8dGV4dAogICAgICAgeG1sOnNwYWNlPSJwcmVzZXJ2ZSIKICAgICAgIHN0eWxlPSJmb250LXN0eWxlOm5vcm1hbDtmb250LXdlaWdodDpub3JtYWw7Zm9udC1zaXplOjEwLjU4MzMzMzAycHg7bGluZS1oZWlnaHQ6MS4yNTtmb250LWZhbWlseTpzYW5zLXNlcmlmO2xldHRlci1zcGFjaW5nOjBweDt3b3JkLXNwYWNpbmc6MHB4O2Rpc3BsYXk6aW5saW5lO2ZpbGw6IzAwMDAwMDtmaWxsLW9wYWNpdHk6MTtzdHJva2U6bm9uZTtzdHJva2Utd2lkdGg6MC4yNjQ1ODMzMiIKICAgICAgIHg9IjMyMC42NzA5IgogICAgICAgeT0iMTAzLjc1MDYzIgogICAgICAgaWQ9InRleHQyMjI5Ij48dHNwYW4KICAgICAgICAgc29kaXBvZGk6cm9sZT0ibGluZSIKICAgICAgICAgaWQ9InRzcGFuMjIyNyIKICAgICAgICAgeD0iMzIwLjY3MDkiCiAgICAgICAgIHk9IjExMy4xMTQ0IgogICAgICAgICBzdHlsZT0iZm9udC1zaXplOjYuMzQ5OTk5OXB4O3N0cm9rZS13aWR0aDowLjI2NDU4MzMyIiAvPjwvdGV4dD4KICA8L2c+Cjwvc3ZnPgo=" alt="drawing" width="330" />
+</center>
+<p>With this spatial.txt file:</p>
+<pre><code>A -- B -- C -- G
+A -- D -- E -- G
+D -- F -- G
+D -- B
+C -- E
+C -- F
+E -- F</code></pre>
+<p>Using array B as an example, actel finds out which arrays are directly connected to B, and which would be the shortest path (in number of arrays) between B and the remaining arrays. If there are multiple paths with the same number of array jumps, actel stores them all. Let’s have a look in more detail:</p>
+<ol style="list-style-type: decimal">
+<li><p>B is connected directly to A, C and D.</p></li>
+<li><p>There are two equally long paths between B and E:</p>
+<p>B -&gt; C -&gt; E</p>
+<p>B -&gt; D -&gt; E</p></li>
+<li><p>The same applies between B and F:</p>
+<p>B -&gt; C -&gt; F</p>
+<p>B -&gt; D -&gt; F</p></li>
+<li><p>However, there is only one shortest path between B and G:</p>
+<p>B -&gt; C -&gt; G</p>
+<p>(the fish could go through D and E/F, but that would require one more jump)</p></li>
+</ol>
+<p>Now, why is this relevant? If a fish is detected at B and then, for example, at F, the fish is equally likely to have gone through C or D. This means we cannot choose a most likely path. However, if a fish is detected at B and then at G, we can assume it is more likely that array C failed, than that the fish passed through two arrays undetected (i.e. D and E or F).</p>
+</div>
+<div id="assigning-successful-events" class="section level2">
+<h2>Assigning successful events</h2>
+<p>To count the number of successful events, actel assigns one point for every time the fish shifts positions. This means that, if a fish has multiple detection events in one single array, it counts as a single point, but if a fish goes somewhere else and returns to the initial array, it will count as two points in the initial array. Let’s see some movement tables as examples:</p>
+<table>
+<thead>
+<tr class="header">
+<th align="left">Array</th>
+<th align="right">Detections</th>
+<th align="left">First.station</th>
+<th align="left">Last.station</th>
+<th align="left">First.time</th>
+<th align="left">Last.time</th>
+<th align="left">…</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">A</td>
+<td align="right">1</td>
+<td align="left">St.1</td>
+<td align="left">St.1</td>
+<td align="left">2019-06-13 22:26:37</td>
+<td align="left">2019-06-13 22:26:37</td>
+<td align="left">…</td>
+</tr>
+<tr class="even">
+<td align="left">D</td>
+<td align="right">1</td>
+<td align="left">St.4</td>
+<td align="left">St.4</td>
+<td align="left">2019-07-13 22:26:38</td>
+<td align="left">2019-07-13 22:26:38</td>
+<td align="left">…</td>
+</tr>
+<tr class="odd">
+<td align="left">D</td>
+<td align="right">1</td>
+<td align="left">St.4</td>
+<td align="left">St.4</td>
+<td align="left">2019-07-14 13:26:39</td>
+<td align="left">2019-07-14 13:26:39</td>
+<td align="left">…</td>
+</tr>
+<tr class="even">
+<td align="left">D</td>
+<td align="right">1</td>
+<td align="left">St.4</td>
+<td align="left">St.4</td>
+<td align="left">2019-07-14 20:26:40</td>
+<td align="left">2019-07-14 20:26:40</td>
+<td align="left">…</td>
+</tr>
+<tr class="odd">
+<td align="left">E</td>
+<td align="right">1</td>
+<td align="left">St.5</td>
+<td align="left">St.5</td>
+<td align="left">2019-07-15 10:26:41</td>
+<td align="left">2019-07-15 10:26:41</td>
+<td align="left">…</td>
+</tr>
+<tr class="even">
+<td align="left">C</td>
+<td align="right">1</td>
+<td align="left">St.3</td>
+<td align="left">St.3</td>
+<td align="left">2019-08-30 22:26:42</td>
+<td align="left">2019-08-30 22:26:42</td>
+<td align="left">…</td>
+</tr>
+</tbody>
+</table>
+<p>In this example, the fish was detected at A, D, E and C. Even though there are three movement events at D, since they are sequential, they will count as a single successful detection.</p>
+<table>
+<thead>
+<tr class="header">
+<th align="left">Array</th>
+<th align="right">Detections</th>
+<th align="left">First.station</th>
+<th align="left">Last.station</th>
+<th align="left">First.time</th>
+<th align="left">Last.time</th>
+<th align="left">…</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">A</td>
+<td align="right">1</td>
+<td align="left">St.1</td>
+<td align="left">St.1</td>
+<td align="left">2019-06-13 22:26:37</td>
+<td align="left">2019-06-13 22:26:37</td>
+<td align="left">…</td>
+</tr>
+<tr class="even">
+<td align="left">D</td>
+<td align="right">1</td>
+<td align="left">St.4</td>
+<td align="left">St.4</td>
+<td align="left">2019-07-13 22:26:38</td>
+<td align="left">2019-07-13 22:26:38</td>
+<td align="left">…</td>
+</tr>
+<tr class="odd">
+<td align="left">E</td>
+<td align="right">1</td>
+<td align="left">St.5</td>
+<td align="left">St.5</td>
+<td align="left">2019-07-14 13:26:39</td>
+<td align="left">2019-07-14 13:26:39</td>
+<td align="left">…</td>
+</tr>
+<tr class="even">
+<td align="left">D</td>
+<td align="right">1</td>
+<td align="left">St.4</td>
+<td align="left">St.4</td>
+<td align="left">2019-07-14 20:26:40</td>
+<td align="left">2019-07-14 20:26:40</td>
+<td align="left">…</td>
+</tr>
+<tr class="odd">
+<td align="left">A</td>
+<td align="right">1</td>
+<td align="left">St.1</td>
+<td align="left">St.1</td>
+<td align="left">2019-07-15 10:26:41</td>
+<td align="left">2019-07-15 10:26:41</td>
+<td align="left">…</td>
+</tr>
+<tr class="even">
+<td align="left">A</td>
+<td align="right">1</td>
+<td align="left">St.1</td>
+<td align="left">St.1</td>
+<td align="left">2019-08-30 22:26:42</td>
+<td align="left">2019-08-30 22:26:42</td>
+<td align="left">…</td>
+</tr>
+</tbody>
+</table>
+<p>In this case, the fish is detected at A, D and E. However, unlike the example above, there are multiple occasions when the fish was detected at A and D (i.e., the fish was elsewhere in between). As such, this fish would award one point to array E and two points to arrays A and D.</p>
+</div>
+<div id="assigning-failed-events" class="section level2">
+<h2>Assigning failed events</h2>
+<p>When a fish is detected at more than one array, actel checks if consecutive events are at neighbouring arrays or not. If the two consecutive arrays are neighbours, everything is in order, but if not, actel proceeds to finding out which arrays have failed. If there is one single shortest path between the two arrays, actel attributes a “surely missed” point to the arrays constituting that path. If there are more than one equally short paths between the two arrays, actel attributes a “potentially missed” point to all the arrays involved in those paths. Here is an example:</p>
+<table>
+<thead>
+<tr class="header">
+<th align="left">Array</th>
+<th align="right">Detections</th>
+<th align="left">First.station</th>
+<th align="left">Last.station</th>
+<th align="left">First.time</th>
+<th align="left">Last.time</th>
+<th align="left">…</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">A</td>
+<td align="right">1</td>
+<td align="left">St.1</td>
+<td align="left">St.1</td>
+<td align="left">2019-06-13 22:26:37</td>
+<td align="left">2019-06-13 22:26:37</td>
+<td align="left">…</td>
+</tr>
+<tr class="even">
+<td align="left">D</td>
+<td align="right">1</td>
+<td align="left">St.4</td>
+<td align="left">St.4</td>
+<td align="left">2019-07-13 22:26:38</td>
+<td align="left">2019-07-13 22:26:38</td>
+<td align="left">…</td>
+</tr>
+<tr class="odd">
+<td align="left">G</td>
+<td align="right">1</td>
+<td align="left">St.7</td>
+<td align="left">St.7</td>
+<td align="left">2019-07-14 13:26:39</td>
+<td align="left">2019-07-14 13:26:39</td>
+<td align="left">…</td>
+</tr>
+<tr class="even">
+<td align="left">C</td>
+<td align="right">1</td>
+<td align="left">St.3</td>
+<td align="left">St.3</td>
+<td align="left">2019-07-14 20:26:40</td>
+<td align="left">2019-07-14 20:26:40</td>
+<td align="left">…</td>
+</tr>
+<tr class="odd">
+<td align="left">A</td>
+<td align="right">1</td>
+<td align="left">St.1</td>
+<td align="left">St.1</td>
+<td align="left">2019-07-15 10:26:41</td>
+<td align="left">2019-07-15 10:26:41</td>
+<td align="left">…</td>
+</tr>
+</tbody>
+</table>
+<p>Let’s go by events:</p>
+<ol style="list-style-type: decimal">
+<li><p>The fish moved from A to D.</p>
+<p>These two arrays are neighbours, so everything is ok.</p></li>
+<li><p>The fish moved from D to G.</p>
+<p>These two arrays are not neighbours, and there are two equally long paths between them. As such, actel will attribute one “potentially missed” point to arrays E and F.</p></li>
+<li><p>The fish moved from G to C.</p>
+<p>These two arrays are neighbours, so everything is ok.</p></li>
+<li><p>The fish moved from C to A.</p>
+<p>These two arrays are not neighbours, and there is only one shortest path between them. As such, actel will attribute one “surely missed” point to array B.</p></li>
+</ol>
+<p>The process for this fish is then finished.</p>
+</div>
+<div id="minimum-and-maximum-efficiency" class="section level2">
+<h2>Minimum and maximum efficiency</h2>
+<p>Actel repeats the processes above for all fish, and compiles a table of successful, surely missed and potentially missed events. Then, we have what we need to calculate efficiency:</p>
+<p><code>max_efficiency = 1 - (s / (r + s + p))</code></p>
+<p><code>min_efficiency = 1 - ((s + p) / (r + s + p))</code></p>
+<p>Where:</p>
+<p><code>r</code> = recorded events</p>
+<p><code>s</code> = surely missed events</p>
+<p><code>p</code> = potentially missed events</p>
+<p>All the information used to calculate the efficiency is stored in the <a href="d-2_residency_results.html#efficiency"><code>efficiency</code> object</a>.</p>
+</div>
+<div id="intra-array-efficiency" class="section level2">
+<h2>Intra-array efficiency</h2>
+<p>Intra array efficiency calculations are performed following the equations provided by <a href="https://www.researchgate.net/publication/256443823_Using_mark-recapture_models_to_estimate_survival_from_telemetry_data" target="_blank">Perry et al. (2012)</a>. Specifically, actel splits the array’s receivers in “original” and “replicates” (depending on what you specified in the <a href="d-0_residency.html#replicates">replicates argument</a>), and compares the fish detected at both of these elements. The results of the intra-array calculations for each array are then stored in the <a href="d-2_residency_results.html#intra.array.cjs"><code>intra.array.CJS</code> list</a>.</p>
+<p><strong><a href="javascript:history.back()">Return to previous page</a></strong></p>
+<p><a href="#">Back to top.</a></p>
+</div>
+
+
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
