@@ -4,15 +4,17 @@
 \alias{checkInactiveness}
 \title{Find if a fish is standing still in an array}
 \usage{
-checkInactiveness(movements, inactive.warning, inactive.error,
-  invalid.dist, dist.mat)
+checkInactiveness(movements, detections.list, inactive.warning,
+  inactive.error, invalid.dist, dist.mat)
 }
 \arguments{
 \item{movements}{the movements list}
 
-\item{inactive.warning}{Numeric value. If a fish spends a number of days greater or equal to this argument in a given place, a warning is issued. Defaults to NULL (i.e. no speed checks are performed, with a message)}
+\item{detections.list}{A list of the detections split by each target tag, created by splitDetections.}
 
-\item{inactive.error}{Numeric value. If a fish spends a number of days greater or equal to this argument in a given place, user intervention is suggested. Defaults to NULL (i.e. no errors are issued)}
+\item{inactive.warning}{Numeric value (days). If a fish spends a number of days greater or equal to this argument in a given place, a warning is issued. Defaults to NULL (i.e. no speed checks are performed, with a message)}
+
+\item{inactive.error}{Numeric value (days). If a fish spends a number of days greater or equal to this argument in a given place, user intervention is suggested. Defaults to NULL (i.e. no errors are issued)}
 
 \item{invalid.dist}{Whether or not the distance matrix supplied is valid for the study area.}
 

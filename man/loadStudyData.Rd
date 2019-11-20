@@ -5,7 +5,8 @@
 \title{Load, structure and check the inputs}
 \usage{
 loadStudyData(tz.study.area, override = NULL, start.timestamp,
-  end.timestamp, sections = NULL, exclude.tags)
+  end.timestamp, sections = NULL, exclude.tags,
+  disregard.parallels = TRUE)
 }
 \arguments{
 \item{tz.study.area}{The time-zone of the study area. Necessary to convert the ALS time data, which is in UTC.}
@@ -19,6 +20,8 @@ loadStudyData(tz.study.area, override = NULL, start.timestamp,
 \item{sections}{The sections in which the study was divided. Must be coincident with the names given to the ALS arrays. (i.e. if an array is 'River1', then the respective section is 'River')}
 
 \item{exclude.tags}{A list of tags that should be excluded from the detection data before any analyses are performed. Intended to be used if stray tags from a different code space but with the same signal as a target tag are detected in the study area.}
+
+\item{disregard.parallels}{Logical. If TRUE, the presence of parallel arrays does not invalidate potential efficiency peers. For more details on this, have a look at the vignettes.}
 }
 \value{
 a list of objects to be used for data analysis

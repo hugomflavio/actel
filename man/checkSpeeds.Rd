@@ -2,7 +2,7 @@
 % Please edit documentation in R/check.R
 \name{checkSpeeds}
 \alias{checkSpeeds}
-\title{check fish speeds against defined thresholds (in bl/s)}
+\title{check fish speeds against defined thresholds (in m/s)}
 \usage{
 checkSpeeds(movements, valid.movements, speed.warning, speed.error)
 }
@@ -11,14 +11,14 @@ checkSpeeds(movements, valid.movements, speed.warning, speed.error)
 
 \item{valid.movements}{a temporary valid.movements list, with updated speeds}
 
-\item{speed.warning}{Numeric value. If a fish moves at a speed greater or equal to this argument, a warning is issued. Defaults to NULL (i.e. no speed checks are performed, with a message)}
+\item{speed.warning}{Numeric value (m/s). If a fish moves at a speed greater or equal to this argument, a warning is issued. Defaults to NULL (i.e. no speed checks are performed, with a message)}
 
-\item{speed.error}{Numeric value. If a fish moves at a speed greater or equal to this argument, user intervention is suggested. Defaults to NULL (i.e. no errors are issued)}
+\item{speed.error}{Numeric value (m/s). If a fish moves at a speed greater or equal to this argument, user intervention is suggested. Defaults to NULL (i.e. no errors are issued)}
 }
 \value{
 The valid movements list with valid/invalid rows
 }
 \description{
-check fish speeds against defined thresholds (in bl/s)
+check fish speeds against defined thresholds (in m/s)
 }
 \keyword{internal}

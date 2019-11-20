@@ -4,7 +4,8 @@
 \alias{loadDot}
 \title{Load spatial.dot}
 \usage{
-loadDot(string = NULL, input = NULL, spatial, sections = NULL)
+loadDot(string = NULL, input = NULL, spatial, sections = NULL,
+  disregard.parallels)
 }
 \arguments{
 \item{string}{A dot string}
@@ -14,6 +15,8 @@ loadDot(string = NULL, input = NULL, spatial, sections = NULL)
 \item{spatial}{A spatial data frame}
 
 \item{sections}{The sections in which the study was divided. Must be coincident with the names given to the ALS arrays. (i.e. if an array is 'River1', then the respective section is 'River')}
+
+\item{disregard.parallels}{Logical. If TRUE, the presence of parallel arrays does not invalidate potential efficiency peers. For more details on this, have a look at the vignettes.}
 }
 \value{
 The dot list
