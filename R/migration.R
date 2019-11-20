@@ -427,10 +427,10 @@ printMigrationRmd <- function(name.fragment, header.fragment, biometric.fragment
         continue <- FALSE
       }
     }
-    appendTo("Screen",paste("M: An actel report is already present in the current directory\n   Saving new report as 'actel_migration_report", name.fragment, ".", index, ".html'.", sep = ""))
+    appendTo("Screen", paste("M: An actel report is already present in the current directory\n   Saving new report as 'actel_migration_report", name.fragment, ".", index, ".html'.", sep = ""))
     rm(continue,index)
   } else {
-    appendTo("Screen",paste("M: Saving actel report as 'actel_migration_report", name.fragment, ".html'.", sep = ""))
+    appendTo("Screen", paste("M: Saving actel report as 'actel_migration_report", name.fragment, ".html'.", sep = ""))
   }
   if (any(grepl("Unknown", spatial$stations$Standard.Name))) {
     unknown.fragment <- paste('<span style="color:red"> Number of relevant unknown receivers: **', sum(grepl("Unknown", spatial$stations$Standard.Name)), '**</span>\n', sep = "")
@@ -1058,7 +1058,7 @@ eventOrderCheck <- function(i, last.events, sections, movements) {
       appendTo("Screen", paste("Current last events: ", paste(last.events, collapse = ", "), " (", paste(sections, collapse = ", "), ").", sep = ""))
       cat("\n")
       if (not.ordered.trigger) {
-        appendTo(c("Screen"), "The last movement event of a section must NOT precede the last movement event of a \nprevious section (i.e. the migration analysis cannot cope with inter-section U turns).\nPlease edit the last valid events so this is not the case anymore.\n")
+        appendTo(c("Screen"), "The last movement event of a section must NOT precede the last movement event of a \nprevious section (i.e. the migration analysis cannot cope with inter-section U turns).\nPlease edit the last valid events so this is not the case any more.\n")
         decision <- "Y"
       } else {
         decision <- commentCheck(line = "Would you like to edit the last valid events?(y/N/comment) ", tag = i)

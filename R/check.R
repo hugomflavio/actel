@@ -348,6 +348,7 @@ checkUpstream <- function(movements, bio, spatial, arrays) {
     after.arrays <- c(release.array, arrays[[release.array]]$all.after.and.par)
     if (any(is.na(match(movements[[fish]][Array != "Unknown"]$Array, after.arrays)))) {
       cat("\n")
+      appendTo(c("Screen", "Report", "Warning"), the.warning <- paste0("W: Fish ", fish, " was detected in an array that is not after its release site! Opening relevant data for inspection."))
       appendTo("Screen", paste("   Release site:", release.site))
       appendTo("Screen", paste("   Expected first array:", release.array))
       cat(paste("\n   Movement table for fish ", fish, ":\n", sep =""))
@@ -530,7 +531,7 @@ checkUnknownReceivers <- function(input) {
   appendTo("debug","Terminating unknownReceivers")
   unknown <- is.na(input$Standard.Name)
   if (any(unknown)) {
-    appendTo(c("Screen", "Report", "Warning"), paste0("W: Detections from receivers ", paste(unique(input$Receiver[unknown]), collapse = ", "), " are present in the data, but these receivers are not part of the study's stations. Doublecheck potential errors."))
+    appendTo(c("Screen", "Report", "Warning"), paste0("W: Detections from receivers ", paste(unique(input$Receiver[unknown]), collapse = ", "), " are present in the data, but these receivers are not part of the study's stations. Double-check potential errors."))
   }
   appendTo("debug","Terminating unknownReceivers")
 }
@@ -556,7 +557,7 @@ checkTagsInUnknownReceivers <- function(detections.list, deployments, spatial) {
       B <- names(deployments)
       unknown.receivers <- unique(detections.list[[i]][is.na(match(A, B)), Receiver])
       appendTo(c("Screen", "Report", "Warning"), paste("W: Fish ", i, " was detected in one or more receivers that are not listed in the study area (receiver(s): ", paste(unknown.receivers, collapse = ", "), ")!", sep = ""))
-      cat("Possible options:\n   a) Stop and doublecheck the data (recommended)\n   b) Temporary include the hydrophone(s) to the stations list\n")
+      cat("Possible options:\n   a) Stop and double-check the data (recommended)\n   b) Temporary include the hydrophone(s) to the stations list\n")
       check <- TRUE
       while (check) {
         decision <- commentCheck(line = "Which option should be followed?(a/b/comment) ", tag = i)
