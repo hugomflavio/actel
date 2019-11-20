@@ -354,7 +354,7 @@ checkUpstream <- function(movements, bio, spatial, arrays) {
       appendTo("Screen", paste("   Expected first array:", release.array))
       cat(paste("\n   Movement table for fish ", fish, ":\n", sep =""))
       print(movements[[fish]], topn = nrow(movements[[fish]]))
-      if (nrow(moves) > 200)
+      if (nrow(movements) > 200)
         cat(paste0("\nM: Long table detected, repeating warning that triggered the interaction:\n-----\n", 
           the.warning, "\n", paste("   Release site:", release.site), "\n", paste("   Expected first array:", release.array), "\n-----\n"))
       cat("\n")
