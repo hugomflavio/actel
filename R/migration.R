@@ -337,7 +337,7 @@ migration <- function(path = NULL, sections, success.arrays = NULL, minimum.dete
     printSurvivalGraphic(section.overview = section.overview)
     printDot(dot = dot, sections = sections, spatial = spatial)
     if (calculate.efficiency) {
-      mbPrintProgression(dot = dot,  sections = sections, overall.CJS = overall.CJS, spatial = spatial, status.df = status.df)
+      printProgression(dot = dot,  sections = sections, overall.CJS = overall.CJS, spatial = spatial, status.df = status.df)
       display.progression <- TRUE
       array.overview.fragment <- printArrayOverview(array.overview)
     } else {

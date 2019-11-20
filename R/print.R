@@ -31,7 +31,7 @@ openReport <- function(file.name){
 #'  
 #' @keywords internal
 #' 
-mbPrintProgression <- function(dot, sections, overall.CJS, spatial, status.df) {
+printProgression <- function(dot, sections, overall.CJS, spatial, status.df) {
   cbPalette <- c("#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7", "#999999")
   names(cbPalette) <- c("Orange", "Blue", "Green", "Yellow", "Darkblue", "Darkorange", "Pink", "Grey")
 
@@ -78,16 +78,30 @@ mbPrintProgression <- function(dot, sections, overall.CJS, spatial, status.df) {
     paste0(release_nodes$id, " [label = 'R.S.: ", release_nodes$label, "']", collapse = "\n"), "\n"))
 
   # prepare edge data frame
-  diagram_edges <- as.data.frame(apply(dot[, c(1, 3)], 2, function(x) match(x, diagram_nodes$original.label)))
-  colnames(diagram_edges) <- c("from", "to")
+  if (nrow(dot) == 1)
+    diagram_edges <- as.data.frame(t(apply(dot[, c(1, 3), drop = FALSE], 2, function(x) match(x, diagram_nodes$original.label))))
+  else 
+    diagram_edges <- as.data.frame(apply(dot[, c(1, 3), drop = FALSE], 2, function(x) match(x, diagram_nodes$original.label)))
+  diagram_edges$type <- NA_character_
+  diagram_edges$type[dot$to == "--"] <- "[dir = none]"
+  diagram_edges$type[dot$to == "->"] <- "[arrowtail = tee, arrowhead = normal, dir = both]"
+  diagram_edges$type[dot$to == "<-"] <- "[arrowtail = normal, arrowhead = tee, dir = both]"
+  colnames(diagram_edges) <- c("from", "to", "type")
 
   # Release edges
   release_edges <- data.frame(from = release_nodes$id,
-    to = diagram_nodes$id[match(release_nodes$Array, diagram_nodes$original.label)])
+    to = diagram_nodes$id[match(release_nodes$Array, diagram_nodes$original.label)],
+    type = rep("[arrowtype='normal']", nrow(release_nodes)))
 
   # edge string
   combined_edges <- rbind(diagram_edges, release_edges)
-  edge_fragment <- paste0(apply(combined_edges, 1, function(x) paste0(x, collapse = "->")), collapse = "\n")
+
+  edge_list <- split(combined_edges, combined_edges$type)
+
+  edge_fragment <- paste0(unlist(lapply(edge_list, function(n) {
+    s <- paste0("edge ", n$type[1], "\n")
+    s <- paste0(s, paste0(apply(n, 1, function(x) paste0(x[1:2], collapse = "->")), collapse = "\n"), "\n")
+  })), collapse = "\n")
 
   x <- paste0("digraph {
   rankdir = LR
