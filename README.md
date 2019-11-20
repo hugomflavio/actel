@@ -1,4 +1,4 @@
-Jump to [**installation instructions**](#installing-actel-development-version)
+Jump to [**installation instructions**](#installing-actel-v.0.1.0)
 
 ## Actel: Acoustic telemetry data analysis (v.0.1.0)
 
@@ -58,7 +58,7 @@ Here are some examples:
 
 <img src="vignettes/readme_global_residency.png" alt="drawing" width="870"/>
 
-## Installing actel (development version)
+## Installing actel (v.0.1.0)
 
 To install actel, you will need to have the devtools package installed.
 
@@ -79,7 +79,9 @@ Now you can either install actel sourcing remotely or locally.
 
         devtools::install("actel-devel", build_vignettes = TRUE)
 
-After installing, you should read the package vignettes, which can be found by running:
+**Have a look at the manual:**
+
+After installing, you should read the package vignettes (i.e. the manual), which can be found by running:
 
     browseVignettes('actel')
 
