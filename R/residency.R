@@ -850,7 +850,7 @@ assembleResidency <- function(secmoves, movements, sections) {
   		if (aux <= 86400 & aux > 3600)
   			units(res.df[, paste0(the.col, section)]) <- "hours"
   		if (aux <= 3600)
-  			units(res.df[, paste0(the.col, section)]) <- "minutes"
+  			units(res.df[, paste0(the.col, section)]) <- "mins"
   		res.df[, paste0(the.col, section)] <- round(res.df[, paste0(the.col, section)], 3)
   	}
 	}

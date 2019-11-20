@@ -1531,7 +1531,7 @@ assembleOutput <- function(timetable, bio, spatial, sections, dist.mat, invalid.
       if (aux <= 86400 & aux > 3600)
         units(status.df[, paste0(the.col, section)]) <- "hours"
       if (aux <= 3600)
-        units(status.df[, paste0(the.col, section)]) <- "minutes"
+        units(status.df[, paste0(the.col, section)]) <- "mins"
       status.df[, paste0(the.col, section)] <- round(status.df[, paste0(the.col, section)], 3)
     }
   }  
