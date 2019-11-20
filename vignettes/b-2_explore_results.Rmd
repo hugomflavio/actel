@@ -53,6 +53,10 @@ The `detections` list contains the detections found in your detections file whic
 |2018-04-18 20:13:43 |126324   |R64K      |4701   |R64K-4701   |St.5          |River1 |
 |2018-04-18 20:15:11 |126324   |R64K      |4701   |R64K-4701   |St.5          |River1 |
 
+### valid.detections
+
+The `valid.detections` object only contains the detections that were deemed valid during the analysis.
+
 ### spatial
 
 The `spatial` list contains the stations, release sites and some more summary information. This object may come in handy if you have to go back to your results some time after you completed the analysis, so you can verify the study area design and match the stations names to their locations.
@@ -82,10 +86,6 @@ The `movements` list contains the movement events created during [the detection 
 
 The `valid.movements` represents a refined version of the `movements` object, where all movements deemed invalid during the analysis were removed.
 
-### valid.detections
-
-The `valid.detections` object only contains the detections that were deemed valid during the movement quality checks.
-
 ### times
 
 The `times` data frame contains the timestamps of first valid detection in each array, for each fish. These are used to draw the circular plots in the report (like the ones below), but you can also use them to test for differences between groups!
@@ -103,7 +103,7 @@ On top of the results stored in your R session, actel saves some additional info
 
 ### actel_explore_results.RData
 
-To make sure that you don't accidentally loose your results, actel stores them right away in the target folder. The results present in this file are the same as the ones you obtain directly in your R console (see above).
+To make sure that you don't accidentally lose your results, actel stores them right away in the target folder. The results present in this file are the same as the ones you obtain directly in your R console (see above).
 
 ### actel.log.txt
 
@@ -117,7 +117,7 @@ Deployed receivers may pick up stray tags that came in range during the study pe
 
 ### actel_explore_report.html (if report = TRUE)
 
-This is the main non-R output. If you activated the `report` option, actel will compile a html report for you. For the explore function, this report contains the following sections:
+This is the main non-R output. If you activated the `report` option, actel will compile an html report for you. For the explore function, this report contains the following sections:
 
 1. **Summary**
 
@@ -133,7 +133,7 @@ This is the main non-R output. If you activated the `report` option, actel will 
 
 4. **User comments**
 
-  Should you type in any comments during the analysis, they will be displayed here, so you can quickly remember that lingering detail that you wrote while looking at the fish's movement table.
+  Should you type in any [comments during the analysis](b-1_explore_processes.html#leaving-comments-for-later), they will be displayed here, so you can quickly remember that lingering detail you didn't want to forget while looking at the fish's movement table.
 
 5. **Biometrics**
 
@@ -153,7 +153,7 @@ This is the main non-R output. If you activated the `report` option, actel will 
 
 8. **Actel log**
 
-  This section contains the same information as the actel log saved in your target folder. It is useful to have a look at a few things. The number of target tags, the detection data range or the number of ALS (i.e. receivers) can help you spot any missing data (i.e. if you tagged 100 fish and had only 80 target tags, some tags are missing from your input files!).
+  This section contains the same information as the actel log saved in your target folder. It is useful to have a look at a few things. For example, the number of target tags, the detection data range or the number of ALS (i.e. receivers) can help you spot any missing data (i.e. if you tagged 100 fish and had only 80 target tags, some tags are missing from your input files!).
 
 ### 'Report' folder (if report = TRUE)
 

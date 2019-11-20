@@ -41,12 +41,12 @@ To be able to process your data, actel must understand how your study area works
 
 Here is a visual example of a study area with an overlay of the respective arrays and sections:
 
-<img src="study_area.png" alt="drawing" width="680"/>
+<img src="study_area.svg" alt="drawing" width="680"/>
 
 
 ### Sections
 
-The sections divide your study area in big blocks, for which you would like specific metrics to be calculated. For example, if your fish must cross a river and a fjord before reaching the end of the study area, then your sections will likely be "River" and "Fjord". In the example above, there are three sections: River, Fjord and Sea.
+The sections divide your study area in big blocks, for which you would like specific metrics to be calculated. In the example above, there are three sections: River, Fjord and Sea.
 
 When you type the sections argument into the `migration()` function, you should order them in the order that you expect your fish will cross the sections. For example, if you expect your fish to move from the river to a fjord and ultimately to the sea (and you have receiver  arrays in all these sections), then `sections = c("River", "Fjord", "Sea")`. In the other hand, if you expect your fish to migrate upstream, then `sections = c("Sea", "Fjord", "River")`.
 

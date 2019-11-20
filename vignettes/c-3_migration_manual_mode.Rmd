@@ -37,9 +37,9 @@ knitr::opts_chunk$set(
 
 ## Refining the results
 
-As you [inspect your results](c-2_migration_results.html), you may find out that you would rather change a specific outcome. For example, perhaps a detection was discarded that is actually relevant, or there are detections that clearly match a predator's behaviour rather than your fish and actel didn't pick that up.
+As you inspect your results, you may find out that you would rather change a specific outcome. For example, perhaps a detection was discarded that is actually relevant, or there are detections that clearly match a predator's behaviour rather than your fish and actel didn't pick that up.
 
-When this happens, it is time to take the lead and tell actel what you want to do, by triggering the manual processing mode. To do this, simply add the transmitters that you want to deal with manually in the `override` argument of the migration function (e.g. `override = c("R64K-1234", "R64K-1405")`).
+When this happens, it is time to take the lead and tell actel what you want to do, by triggering the manual processing mode. To do this, simply add the transmitters that you want to deal with manually in the [`override` argument](c-0_migration.html#override) of the migration function (e.g. `override = c("R64K-1234", "R64K-1405")`).
 
 When you list tags in `override`, actel will recognise them and enter manual mode. You will know this is happening when you see the following message:
 

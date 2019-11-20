@@ -53,11 +53,12 @@ D -- F -- G
 D -- B
 C -- E
 C -- F
+E -- F
 ```
 
 Using array B as an example, actel finds out which arrays are directly connected to B, and which would be the shortest path (in number of arrays) between B and the remaining arrays. If there are multiple paths with the same number of array jumps, actel stores them all. Let's have a look in more detail:
 
-1. D is connected directly to A, C and D.
+1. B is connected directly to A, C and D.
 
 2. There are two equally long paths between B and E:
 
@@ -108,7 +109,7 @@ In this case, the fish is detected at A, D and E. However, unlike the example ab
 
 ## Assigning failed events
 
-When a fish is detected at more than one array, actel checks if consecutive events are at neighbouring arrays or not. IF the two consecutive arrays are neighbours, everything is in order, but if not, actel proceeds to finding out which arrays have failed. If there is one single shortest path between the two arrays, actel attributes a "surely missed" point to the arrays constituting that path. If there are more than one equally short path between the two arrays, actel attributes a "potentially missed" point to all the arrays involved in those paths. Here is an example:
+When a fish is detected at more than one array, actel checks if consecutive events are at neighbouring arrays or not. If the two consecutive arrays are neighbours, everything is in order, but if not, actel proceeds to finding out which arrays have failed. If there is one single shortest path between the two arrays, actel attributes a "surely missed" point to the arrays constituting that path. If there are more than one equally short paths between the two arrays, actel attributes a "potentially missed" point to all the arrays involved in those paths. Here is an example:
 
 
 |Array  | Detections|First.station |Last.station |First.time          |Last.time           |... |

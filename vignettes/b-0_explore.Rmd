@@ -38,7 +38,7 @@ knitr::opts_chunk$set(
 
 ## The explore() function
 
-The arguments in the `explore()` function are transversal to all functions.
+The arguments in the `explore()` function are transversal to the [migration()](c-0_migration.html) and [residency()](d-0_residency.html) functions.
 
 Although there are many arguments available, *you do not need to start working with all of them right away*. This is because many of these arguments have default values. If you want to make a quick check of your study, just run explore() with a `tz.study.area` argument in the same directory as your data and you will be ready to get some results!
 
@@ -126,7 +126,7 @@ W: 'speed.warning'/'speed.error' were set, but a valid distance matrix is not pr
 
 ### tz.study.area
 
-Receivers usually work in Coordinated Universal Time (UTC). Although this is nice to integrate data from multiple receivers, depending on where you are working, it may mean that the receivers' time is actually displaced from the daytime in your study area. To correct for this, you must include your time zone in this field. For example, when we have study areas in Denmark, we must use `tz.study.area = "Europe/Copenhagen"`.
+Receivers usually work in Coordinated Universal Time (UTC). Although this is nice to integrate data from multiple receivers, depending on where you are working, it may mean that the receivers' time is actually displaced from the daytime in your study area. To correct for this, you must include your time zone in this field. For example, to analyse a study performed in Denmark, we must use `tz.study.area = "Europe/Copenhagen"`.
 
 Time zones can be complicated business, so to help you out, you can search <a href="https://en.wikipedia.org/wiki/List_of_tz_database_time_zones" target="_blank">this wiki page</a> for the time zone code which you should use.
 
@@ -162,7 +162,7 @@ Note:
 
 ### report
 
-The `report` option activates a series of print functions that draw tables and figures for later integration in a html report. When you activate this option, a new *Report* subdirectory is created, where all the relevant files are stored. Before finishing, actel assembles the [html report](c-2_explore_processes.html#actel_explore_report.html-if-report-true) and stores it in your working directory. If you already have a report in your working directory, actel will create a new file with a different name.
+The `report` option activates a series of print functions that draw tables and figures for later integration in an html report. When you activate this option, a new *Report* subdirectory is created, where all the relevant files are stored. Before finishing, actel assembles the [html report](c-2_explore_processes.html#actel_explore_report.html-if-report-true) and stores it in your working directory. If you already have a report in your working directory, actel will create a new file with a different name.
 
 You can also inspect each graphic individually in the *Report* subdirectory.
 
@@ -171,7 +171,7 @@ Here are some examples:
 <img src="LaTeX_example_survival.svg" alt="drawing" width="330"/> <img src="R64K-4526.png" alt="drawing" width="330"/>
 
 Note:
-  : Even if something fails during the report printing, your results will still be saved the *actel_results.RData* file in your working directory!
+  : Even if something fails during the report printing, your results will still be saved the *actel_explore_results.RData* file in your working directory!
 
 
 ### exclude.tags
@@ -203,7 +203,7 @@ You can have a look at [these arguments in action here.](b-1_explore_processes.h
 
 ### inactive.warning and inactive.error
 
-These two variables control the inactiveness checks.`inactive.warning` and `inactive.error` must be set in days. That is, if `inactive.warning = 2`, any fish that is deemed inactive for two days or more will trigger a warning. By default, they are NULL, and no inactiveness checks are performed. Actel will let you know this happened with the following message:
+These two variables control the inactiveness checks. `inactive.warning` and `inactive.error` must be set in days. That is, if `inactive.warning = 2`, any fish that is deemed inactive for two days or more will trigger a warning. By default, they are NULL, and no inactiveness checks are performed. Actel will let you know this happened with the following message:
 
 ````
 M: 'inactive.warning'/'inactive.error' were not set, skipping inactivity checks.
@@ -215,8 +215,7 @@ Altough it is not a requirement, inactiveness checks work best if a distances ma
 M: Running inactiveness checks without a distance matrix. Performance may be limited.
 ````
 
-You can learn more about [how the inactiveness checks operate here.](b-1_explore_processes#inactiveness)
-
+You can learn more about [how the inactiveness checks operate here.](b-1_explore_processes.html#inactiveness)
 
 ### All done!
 

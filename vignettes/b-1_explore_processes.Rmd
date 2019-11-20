@@ -38,9 +38,7 @@ knitr::opts_chunk$set(
 
 ## Making sure everything checks out
 
-The first thing actel does is import your data. This also includes all of your detection files, which can take a bit of time. Then, actel performs many verifications to make sure everything is all right. As the list of checks is long, I won't explore each one of them in detail here. Should something be out of the ordinary, actel will let you know with a warning or an error message, depending on the severity of the issue. 
-
-If you need help with any messages, warnings or errors, you can find more about them in the [list of errors and messages](e-0_messages.html).
+The first thing actel does is import your data. This also includes all of your detection files, which can take a bit of time. Then, actel performs many verifications to make sure everything is all right. As the list of checks is long, I won't explore each one of them in detail here. Should something be out of the ordinary, actel will let you know with a warning or an error message, depending on the severity of the issue. You can find more about the possible exceptions in this [list of errors and messages](e-0_messages.html).
 
 ## Organising the detections
 
@@ -80,7 +78,7 @@ Note:
 
 ### Impassables
 
-As you probably know by now, you can define unidirectional connections between arrays. This means that something (e.g. a weir or dam) prevents the fish from moving in a particular direction. Let's see the examples below, with arrays A, B and C:
+As you probably know by now, you can [define unidirectional connections between arrays](a-0_workspace_requirements.html#barriers). This tells actel that something (e.g. a weir or dam) prevents the fish from moving in a particular direction. Let's see the examples below, with arrays A, B and C:
 
 <img src="impassables_a.svg" alt="drawing" width="330"/> <img src="impassables_b.svg" alt="drawing" width="330"/>
 
@@ -119,18 +117,18 @@ Let's have a look at the examples below:
 
 <img src="jump_examples.svg" alt="drawing" width="680"/>
 
-Assuming `jump.warning = 2` and `jump.error = 3`, examples **a** and **b** would pass through the analysis without raising any flags (**a** as a perfect situation and **b** showing an efficiency flaw in array A2). 
+Assuming `jump.warning = 2` and `jump.error = 3`, examples **1** and **2** would pass through the analysis without raising any flags (**1** as a perfect situation and **2** showing an efficiency flaw in array C). 
 
-However, in example **c**, the jump size is equal to `jump.warning`, but lower than `jump.error`. When this happens, actel will display a warning:
-
-````
-W: Fish R64K-1234 jumped through 2 arrays in events 1 -> 2 (A1 -> A4).
-````
-
-Then, actel would continue the analysis. This warning is issued whenever the jump size equals or is greater than `jump.warning`. Lastly, in example **d**, the jump size is equal to the `jump.error`. When this happens, actel issues a warning like the one above, and on top of that allows the user to intervene:
+However, in example **3**, the jump size is equal to `jump.warning`, but lower than `jump.error`. When this happens, actel will display a warning:
 
 ````
-W: Fish R64K-1234 jumped through 3 arrays in events 1 -> 2 (A1 -> A5).
+W: Fish R64K-1234 jumped through 2 arrays in events 1 -> 2 (A -> D).
+````
+
+Then, actel would continue the analysis. This warning is issued whenever the jump size equals or is greater than `jump.warning`. Lastly, in example **4**, the jump size is equal to the `jump.error`. When this happens, actel issues a warning like the one above, and on top of that allows the user to intervene:
+
+````
+W: Fish R64K-1234 jumped through 3 arrays in events 1 -> 2 (A -> E).
 M: Opening movement table of fish R64K-2791 for inspection:
 [...]
 Would you like to render any movement event invalid?(y/N/comment)
@@ -215,17 +213,30 @@ If the fish was active in array C, then it is possible that the initial detectio
 This means that, even if there are detections at many stations at the first events under scrutiny, potential inactiveness can still be detected at the trailing events.
 
 
+### Leaving comments for later
 
-## Bonus: Time of first detection at each array
+If a fish is causing doubts, you can attach a comment to it at any time. Just reply "comment" to a question when the word "comment" shows up between brackets and the comment dialogue will be triggered:
+
+````
+Continue editing last valid events?(y/N/comment) comment
+New comment on fish R64K-4456: Was this fish eaten?
+M: Comment successfully stored, returning to the previous interaction.
+Continue editing last valid events?(y/N/comment) 
+````
+
+You can then find all your comments in the [html report](b-2_explore_results.html#actel_explore_report.html-if-report-true)! Additionally, when you run migration() or residency(), the comments are also stored in the `status.df` object.
+
+
+## Time of first detection at each array
 
 The last thing explore() does is find out the time of first detection at each array, for each fish. This information is then used to plot [circular graphics in the report](b-2_explore_results.html#times), and is also returned within R as an output of the function.
 
 
 ## The explore() analysis ends here
 
-This movement events list is the main output of the explore() analysis. This, together with the html report generated, will give you an idea of what your data looks like. To advance into more detailed analyses, you can proceed either to the __[migration()](c-0_migration.html)__ analysis or to the __[residency()](d-0_residency.html)__ analysis. These will use the movement events created here to extract more complex metrics!
+Upon finishing the analysis, if you `report = TRUE`, the html report generated will give you an idea of what your data looks like. You may now be interested in having a more __[detailed look at the outputs of the explore().](b-2_explore_results.html)__
 
-Alternatively, you can also have a more __[detailed look at the outputs of the explore().](b-2_explore_results.html)__
+To advance into more detailed analyses, you can proceed either to the __[migration()](c-0_migration.html)__ analysis or to the __[residency()](d-0_residency.html)__ analysis. These will use the movement events created here to extract more complex metrics!
 
 [Back to top.](#)
 

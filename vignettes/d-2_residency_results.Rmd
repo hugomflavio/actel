@@ -42,11 +42,11 @@ The results compiled by the residency() function include [those of the explore()
 
 ### status.df
 
-The `status.df` is a data frame that combines [both the timetable data and your biometrics](d-1_migration_processes.html#compiling-a-timetable) into a single, organised table. If you have stored any comments during the analysis process, they will show up in a reserved column in this table. The `status.df` also contains some more summary information for each fish. This table can be quite big, so it may be a good idea to use `head(status.df)`  the first time you look at it.
+The `status.df` is a data frame that combines [both the timetable data and your biometrics](d-1_residency_processes.html#compiling-a-timetable) into a single, organised table. If you have stored any comments during the analysis process, they will show up in a reserved column in this table. The `status.df` also contains some more summary information for each fish. This table can be quite big, so it may be a good idea to use `head(status.df)`  the first time you look at it.
 
 ### section.movements
 
-The `section.movements` list contains the section-level movement events created during [the movement compressing process](b-1_explore_processes.html#section-movements). Here is an example:
+The `section.movements` list contains the section-level movement events created during [the movement compressing process](d-1_residency_processes.html#section-movements). Here is an example:
 
 |Section | Events| Detections|First.array |Last.array |First.time |Last.time |Time.travelling |Time.in.section |
 |:-------|------:|----------:|:-----------|:----------|:----------|:---------|:---------------|:---------------|
@@ -91,7 +91,7 @@ This table contains information on the all arrival times for each fish, at each 
 
 ### section.times
 
-`section.times` is a list, containing two tables. The first one has all the arrival times for each fish, at each section, and the second has all the departure times, sorted in the same fashion. These are used to produce circular graphics in the report.
+`section.times` is a list that contains two tables. The first one has all the arrival times for each fish, at each section, and the second has all the departure times, sorted in the same fashion. These are used to produce circular graphics in the report.
 
 
 ### daily.ratios
@@ -113,7 +113,7 @@ The daily.ratios contains detailed information on the time spent at each locatio
 
 ### daily.locations
 
-The `daily.locations` is a single dataframe showing the place where each fish spent the most time during each day. It is a crucial middle step between the daily ratios and the global ratios.
+The `daily.locations` is a data frame showing the place where each fish spent the most time during each day. It is a crucial middle step between the daily ratios and the global ratios.
 
 
 ### global.ratios
@@ -177,12 +177,12 @@ The residency function saves [outputs similar to those saved by explore](b-2_exp
 
 ### actel_residency_results.RData
 
-To make sure that you don't accidentally loose your results, actel stores them right away in the target folder. The results present in this file are the same as the ones you obtain directly in your R console (see above). It differs from the explore() output both in name and content.
+To make sure that you don't accidentally lose your results, actel stores them right away in the target folder. The results present in this file are the same as the ones you obtain directly in your R console (see above). It differs from the explore() output both in name and content.
 
 
 ### actel_residency_report.html (if report = TRUE)
 
-This is the main non-R output. If you activated the `report` option, actel will compile a html report for you. The residency report contains the same sections as the explore report, plus the following:
+This is the main non-R output. If you activated the `report` option, actel will compile an html report for you. The residency report contains the same sections as the explore report, plus the following:
 
 1. **Array efficiency**
 
@@ -199,12 +199,12 @@ This is the main non-R output. If you activated the `report` option, actel will 
 
 4. **Time details per section**
 
-  This section is divided in two main subsections: Arrivals, and departures. A plot with the days when fish arrived/departed each of the sections is made, as well as circular plots with all the times-of-day recorded for each fish arriving/departing each section. These graphics are all based in the `section.times` object.
+  This section is divided in two main subsections: arrivals and departures. A plot with the days when fish arrived/departed each of the sections is made, as well as circular plots with all the times-of-day recorded for each fish arriving/departing each section. These graphics are all based in the `section.times` object.
 
 
 5. **Section progression**
 
-  This section has a graphic representation of the data present in the `global.ratios` object. It shows how the fish have distributed across your study area as the time progresses.
+  This section has a graphic representation of the data present in the `global.ratios` object. It shows how the fish have distributed across your study area as the days pass by.
 
 
 6. **Individual residency plots**

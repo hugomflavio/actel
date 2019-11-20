@@ -37,7 +37,7 @@ knitr::opts_chunk$set(
 
 ## The migration() function
 
-The migration() functions builds on the same principles as the explore function and, in addition, computes metrics under the assumption that the fish will move in a predictable direction.
+The migration() functions builds on the same principles as the explore() function and, in addition, computes metrics under the assumption that the fish will move in a predictable direction.
 
 migration() has the same arguments as explore(), and includes a set of new arguments aimed to fine tune the migration-related metrics. Like with explore, you *do not need to start working with all arguments right away.* Defining the `sections`, and `tz.study.area` is enough to get you going!
 
@@ -55,11 +55,11 @@ migration(path = NULL, sections, success.arrays = NULL, minimum.detections = 2,
   maximum.time = 60, speed.method = c("last to first", "first to first"), speed.warning = NULL,
   speed.error = NULL, if.last.skip.section = TRUE, tz.study.area, start.timestamp = NULL, 
   end.timestamp = NULL, report = TRUE, override = NULL, exclude.tags = NULL, 
-  cautious.assignment = TRUE, replicates = NULL,jump.warning = 2, jump.error = 3, 
-  inactive.warning = NULL, inactive.error = NULL)
+  cautious.assignment = TRUE, replicates = NULL, disregard.parallels = TRUE, jump.warning = 2, 
+  jump.error = 3, inactive.warning = NULL, inactive.error = NULL)
 ```
 
-Below are listed the new arguments, which do not exist in explore:
+Below are listed the new arguments, which do not exist in explore. If you cannot find a description of an argument here, [have a look at the explore() page](b-0_explore.html#general-arguments).
 
 ### minimum.detections
 
@@ -91,7 +91,7 @@ When you list tags in `override`, actel will recognise them and enter full manua
 M: Override has been triggered for fish R64K-1234. Entering full manual mode.
 ```
 
-You can find more information on [how to operate full manual mode here](f-0_refining_results.html).
+You can find more information on [how to operate full manual mode here](c-3_migration_manual_mode.html).
 
 ### cautious.assignment
 
@@ -102,7 +102,7 @@ If you set `cautious.assignment` to `FALSE`, actel will consider all movement ev
 
 ### replicates
 
-One of the main drawbacks of array efficiency calculations is that it can be tricky to estimate efficiency for arrays which have no valid efficiency peers (i.e. no other arrays that can be used as quality checks). However, if these "isolated" arrays are composed of two lines of receivers, one line can be used as a replicate of the other, which in turn allows for the estimation of intra-array efficiency. If this is your case, then you should make use of the `replicates` argument.
+One of the main drawbacks of array efficiency calculations is that it can be tricky to estimate efficiency for arrays which have no valid efficiency peers (i.e. no other arrays that can be used as quality checks). However, if these "isolated" arrays are composed by two lines of receivers, one line can be used as a replicate of the other, which in turn allows for the estimation of intra-array efficiency. If this is your case, then you should make use of the `replicates` argument.
 
 Note:
   : Array replication should only be performed if the replicate stations cover the same extent of the migration route section as the opposite stations, and only if the two lines of receivers are close to each other (i.e. one can assume 0% mortality between them). Have a look at the figures below for some examples.
@@ -124,10 +124,13 @@ Where [...] stands for other arguments you want to specify in the function.
 
 It is important that you list replicates using the `list(Array = "Replicate")` construction. Keep this in mind while you prepare the code.
 
+### disregard.parallels
+
+This argument controls wether or not the presence of parallel arrays (in multi-branch analyses) should potentially lead to the invalidation of efficiency peers. This argument is a bit tough to explain in few words, so I recommend that you [have a look at how efficiency is calculated in migration()](c-4_migration_efficiency.html#cjs-and-multiple-branches).
 
 ### success.arrays
 
-If a fish is last detected at an array listed in `success.arrays`, it will be considered as having successfully crossed the study area. By default, the last array of your study area is considered a success.array. However, if you are not sure about your last array's efficiency, you can define multiple success arrays (e.g. `success.arrays = c("Sea1", "Sea2")` ).
+If a fish is last detected at an array listed in `success.arrays`, it will be considered as having successfully crossed the study area. By default, the last array of your study area is considered a success array. However, if you are not sure about your last array's efficiency, you can define multiple success arrays (e.g. `success.arrays = c("Sea1", "Sea2")` ).
 
 Note:
   : In multi-branch study areas with multiple endings, the last array of each ending is, by default, considered a success array.

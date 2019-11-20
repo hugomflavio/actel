@@ -42,7 +42,7 @@ The results compiled by the migration() function include [those of the explore()
 
 ### status.df
 
-The `status.df` is a data frame that combines [both the timetable data and your biometrics](c-1_migration_processes.html#combining-the-time-data-with-the-biometrics) into a single, organised table. If you have stored any comments during the analysis process, they will show up in a reserved column in this table. 
+The `status.df` is a data frame that combines both the timetable data and your biometrics into a single, organised table. If you have stored any comments during the analysis process, they will show up in a reserved column in this table. 
 
 The `status.df` also contains the recorded fate for each fish (i.e. disappeared somewhere or succeeded at crossing the study area), and summary information on the number and length of the recorded backwards movements. This table can be quite big, so it may be a good idea to use `head(status.df)`  the first time you look at it.
 
@@ -69,7 +69,7 @@ If you activated the [report option](b-0_explore.html#report), this table is the
 
 ### matrices
 
-In this object you will find the matrix/matrices that were used for efficiency estimations during CJS modelling. Notet hat these matrices only represent the forward movements. You can read more about it below, in the description of the `overall.CJS`.
+In this object you will find the matrix/matrices that were used for efficiency estimations during CJS modelling. Note that these matrices only represent the forward movements. You can read more about it below, in the description of the `overall.CJS`.
 
 
 ### overall.CJS
@@ -94,7 +94,7 @@ To make sure that you don't accidentally loose your results, actel stores them r
 
 ### actel_migration_report.html (if report = TRUE)
 
-This is the main non-R output. If you activated the `report` option, actel will compile a html report for you. The migration report contains the same sections as the explore report, plus the following:
+This is the main non-R output. If you activated the `report` option, actel will compile an html report for you. The migration report contains the same sections as the explore report, plus the following:
 
 1. **Array forward efficiency**
 
@@ -112,7 +112,7 @@ This is the main non-R output. If you activated the `report` option, actel will 
 
 4. **Fish comparisons (Dotplots)**
 
-  As the name suggests, this plot compares variables across all your fish: The total number of detections, and the time until/time in each of your study area sections. To simplify the visualisation, for each variable, the **top 10%** of the data is painted in **red**, and the **bottom 10%** of the data is painted in **blue**.
+  As the name suggests, this plot compares variables across all your fish: The total number of detections, and the time to/time in each of your study area sections. To simplify the visualisation, for each variable, the **top 10%** of the data is painted in **red**, and the **bottom 10%** of the data is painted in **blue**.
 
   This plot is meant to help you find fish with uncommon behaviour. Fish with a lot of detections are likely staying for a very long time within receiver range; a fish that moves too fast in comparison to the remaining may have been carried by a predator. It is up to you to look at these graphics and decide if anything looks odd. If it does, then note down the tag number, so you can have a closer look at the respective plot of detections.
 
@@ -123,7 +123,7 @@ This is the main non-R output. If you activated the `report` option, actel will 
 
   It is a good idea to have a good look at all of these graphics and verify that everything is looking correct (i.e. actel has assigned fates and entry/exit points correctly). This is also a good chance to have a closer look at the tags you flagged as suspicious during the analysis.
 
-  Note that fish where you had to manually intervene during the analysis will be highlighted with a yellow border, and fish that were manually overridden through the `override` argument will be highlighted with a red border.
+  Note that fish where you had to manually intervene during the analysis will be highlighted with a yellow border, and fish that were manually overridden through the [`override` argument](c-0_migration.html#override) will be highlighted with a red border.
 
 
 ## What if actel has miss-assigned something?

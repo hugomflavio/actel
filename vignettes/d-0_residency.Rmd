@@ -57,9 +57,7 @@ residency(path = NULL, sections, section.minimum = 2,
   jump.warning = 2, jump.error = 3, inactive.warning = NULL, inactive.error = NULL)
 ```
 
-Below are listed the new arguments, which do not exist in explore:
-
-(i.e. if you are looking for an argument which is not listed here, try the [explore list.](b-0_explore.html#explore-arguments))
+Below are listed the new arguments, which do not exist in explore. If you cannot find a description of an argument here, [have a look at the explore() page](b-0_explore.html#general-arguments).
 
 ### sections
 
@@ -68,14 +66,14 @@ For the `residency()` analysis, the study area sections may be typed in in any o
 
 ### section.minimum
 
-This argument controls how many times a fish must be registered at a section for it to be considered reliable. As part of the analysis, residency() will crunch the array events into section level events. Should there be section events with less overall detections than those listed in `section.minimum`, a warning is raised, and you are given the chance to render events invalid.
+This argument controls how many times a fish must be registered at a section for the event to be considered reliable. As part of the analysis, residency() will crunch the array level movement events into section level events. Should there be section events with less overall detections than those listed in `section.minimum`, a warning is raised, and you are given the chance to render events invalid.
 
 You can find more about the [creation and validation of section movements here](d-1_residency_processes.html#section-movements).
 
 
 ### replicates
 
-Inter-array efficiency estimate can be tricky to calculate in study areas with multiple channels and pathsways. However, if these "isolated" arrays are composed of two lines of receivers, one line can be used as a replicate of the other, which in turn allows for the estimation of intra-array efficiency. If this is your case, then you should make use of the `replicates` argument.
+Estimating inter-array efficiency can be tricky in study areas with multiple channels and pathsways. However, if these "isolated" arrays are composed by two lines of receivers, one line can be used as a replicate of the other, which in turn allows for the estimation of intra-array efficiency. If this is your case, then you should make use of the `replicates` argument.
 
 Note:
   : Array replication should only be performed if the replicate stations cover the same extent of the migration route section as the opposite stations, and only if the two lines of receivers are close to each other (i.e. one can assume 0% mortality between them). Have a look at the figures below for some examples.
@@ -87,7 +85,7 @@ Note:
 
 #### Setting up the replicates argument
 
-You **must use the stations standard names** (i.e. St.10, St.12) when referring to replicates. If you are not sure what the Standard names are, you can run `loadSpatial()` in the same folder as your spatial.csv file or `loadSpatial(file = "path/to/spatial.csv")` to check them out (look at the last column).
+You **must use the stations standard names** (i.e. St.10, St.12) when referring to replicates. If you are not sure what the standard names of your stations are, you can run `loadSpatial()` in the same folder as your spatial.csv file or `loadSpatial(file = "path/to/spatial.csv")` to check them out (look at the last column).
 
 Once you know which replicates you want to list for your array(s), you can include them in the analysis. Lets imagine you want to use stations St.1 and St.2 as replicates for the array River1, and St.3 as a replicate for array River3. This is how they should be listed:
 
