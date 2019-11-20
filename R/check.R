@@ -9,6 +9,7 @@
 #' @keywords internal
 #' 
 checkSpeeds <- function(movements, valid.movements, speed.warning, speed.error) {
+  Valid <- NULL
   capture <- lapply(names(valid.movements), function(fish) {
     # cat(fish,"\n")
     the.warning <- NULL

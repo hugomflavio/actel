@@ -1057,6 +1057,8 @@ copyOfRosediagRad <- function (x, zero, rotation, bins, upper, radii.scale, prop
 #' @keywords internal
 #' 
 printSectionTimes <- function(section.times, bio, detections) {
+  Date <- NULL
+  Group <- NULL
   cbPalette <- c("#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7", "#999999")
   names(cbPalette) <- c("Orange", "Blue", "Green", "Yellow", "Darkblue", "Darkorange", "Pink", "Grey")
   time.range <- c(min(bio$Release.date), max(do.call(c, lapply(detections, function(x) x$Timestamp))))
@@ -1090,6 +1092,9 @@ printSectionTimes <- function(section.times, bio, detections) {
 #' @keywords internal
 #' 
 printGlobalRatios <- function(ratios) {
+  Date <- NULL
+  Location <- NULL
+  n <- NULL
   cbPalette <- c("#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7", "#999999")
   names(cbPalette) <- c("Orange", "Blue", "Green", "Yellow", "Darkblue", "Darkorange", "Pink", "Grey")
   capture <- lapply(names(ratios), function(i) {
@@ -1123,6 +1128,9 @@ printGlobalRatios <- function(ratios) {
 #' @keywords internal
 #' 
 printIndividualResidency <- function(ratios, dayrange) {
+  Date <- NULL
+  Location <- NULL
+  n <- NULL
   cbPalette <- c("#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7", "#999999")
   names(cbPalette) <- c("Orange", "Blue", "Green", "Yellow", "Darkblue", "Darkorange", "Pink", "Grey")
   counter <- 0
@@ -1167,6 +1175,8 @@ printIndividualResidency <- function(ratios, dayrange) {
 #' @keywords internal
 #' 
 printLastSeen <- function(input, sections) {
+  Section <- NULL
+  n <- NULL
   cbPalette <- c("#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7", "#999999")
   names(cbPalette) <- c("Orange", "Blue", "Green", "Yellow", "Darkblue", "Darkorange", "Pink", "Grey")
   input$Group <- rownames(input)
