@@ -851,7 +851,7 @@ assembleResidency <- function(secmoves, movements, sections) {
   			units(res.df[, paste0(the.col, section)]) <- "hours"
   		if (aux <= 3600)
   			units(res.df[, paste0(the.col, section)]) <- "minutes"
-  		res.df[, paste0(the.col, section)] <- round(res.df[, paste0(the.col, section)], 2)
+  		res.df[, paste0(the.col, section)] <- round(res.df[, paste0(the.col, section)], 3)
   	}
 	}
   res.df$Transmitter <- row.names(res.df)
