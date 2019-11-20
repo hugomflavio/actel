@@ -1,9 +1,9 @@
 Jump to [**installation instructions**](#installing-actel-development-version)
 
-## Actel: Acoustic telemetry data sorting (development version)
+## Actel: Acoustic telemetry data analysis (v.0.1.0)
 
-If you are tracking animals during their migration using acoustic telemetry, actel is the package for you. 
-By bringing together the study area configuration and the recorded detections, actel provides a systematic way of analysing fish migration data.
+If you are using acoustic telemetry to track animals as they move inside a study area or as they migrate somewhere, actel is the package for you. 
+By bringing together the study area configuration and the recorded detections, actel provides a systematic way of analysing fish migration and residency data.
 
 <img src="vignettes/mb_arrays.svg" alt="drawing" width="870"/>
 
@@ -11,18 +11,15 @@ By bringing together the study area configuration and the recorded detections, a
 
 **1. explore()**
 
-  explore() allows you to quickly get a summary of your data. You can use explore() to get
-  a general feel for the study results, and check if the input files are behaving as expected
+ explore() allows you to quickly get a summary of your data. You can use explore() to get a general feel for the study results, and check if the input files are behaving as expected. It is also a good candidate if you just want to validate your detections for later use in other analyses.
  
 **2. migration()**
 
-  The migration() analysis runs the same initial checks as explore(), but on top of it, it analyses
-  the fish behaviour. By selecting the arrays that lead to success, you can define whether or not
-  your fish survived the study. Multiple options allow you to tweak the analysis to fit your study perfectly.
+  The migration() analysis runs the same initial checks as explore(), but on top of it, it analyses the fish behaviour. By selecting the arrays that lead to success, you can define whether or not your fish survived the migration. Additional plots help you find out if some fish has been acting odd. Multiple options allow you to tweak the analysis to fit your study perfectly.
  
 **3. residency()**
 
-  The first version of the residency() analysis is already out in the development version. Try it out!
+  The residency() analysis runs the same initial checks as explore(), but, similarly to migration, explores particular points of the fish behaviour. If you want to know where your fish were in each day of the study, how many fish were in each section each day, and other residency-focused variables, this is the analysis you are looking for!
 
 ## Unlock actel's full potential
 
@@ -53,12 +50,15 @@ Here are some examples:
 
 <img src="vignettes/mb_efficiency.svg" alt="drawing" width="870"/>
 
+**Individual residency**
+
+<img src="vignettes/readme_individual_residency.png" alt="drawing" width="870"/>
+
+**Global residency**
+
+<img src="vignettes/readme_global_residency.png" alt="drawing" width="870"/>
 
 ## Installing actel (development version)
-
-NOTE: THIS IS THE DEVELOPMENT VERSION
-
-While the development version has the newest upgrades and features, it is also more prone to have bugs hidden around. If you would like to help me out, try this version out and let me know if you find any bug :)
 
 To install actel, you will need to have the devtools package installed.
 
@@ -69,11 +69,11 @@ Now you can either install actel sourcing remotely or locally.
 
 **a) install directly from the repository:**
 
-    devtools::install_github("hugomflavio/actel", build_opts = c("--no-resave-data", "--no-manual"), ref = "devel")
+    devtools::install_github("hugomflavio/actel", build_opts = c("--no-resave-data", "--no-manual"))
 
 **b) install locally:**
 
-1. Download actel's source files here: [**actel-devel.zip**](https://github.com/hugomflavio/actel/archive/devel.zip)
+1. Download actel's source files here: [**actel-master.zip**](https://github.com/hugomflavio/actel/archive/master.zip)
 1. Unzip the file and move your R session into the newly created folder
 1. Run: 
 
@@ -85,6 +85,6 @@ After installing, you should read the package vignettes, which can be found by r
 
 <span style="color:red">**Note:**</span> 
 
-1. There have been some reports that the **vignettes are not being installed** through option A. If you installed actel remotely and the vignettes are not showing up, **try using the second installation method**.
+1. If the vignettes are not showing up with the command above, you can download them directly here: [**compiled_vignettes.zip**](https://github.com/hugomflavio/actel/raw/devel/compiled_vignettes.zip)
 1. If you are getting "pandoc document conversion" errors during the package installation, try installing the [newest version of pandoc](https://pandoc.org/installing.html), restarting R and trying again.
 
