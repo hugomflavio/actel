@@ -267,42 +267,44 @@ printDotplots <- function(status.df, invalid.dist) {
     colnames(status.df))])]
   t1 <- t1[, apply(t1, 2, function(x) !all(is.na(x)))]
   t1$Transmitter <- factor(t1$Transmitter, levels = rev(t1$Transmitter))
-  largest <- c(-1, -1, 
-    unlist(
-      apply(t1[, c(-1, -2)], 2, 
-        function(x) 
-        if (!all(is.na(x))) {
-          max(x, na.rm = T)
-        } else {
-          NA
-        }
-      )
-    )
-  )
-  largest[grepl("Speed.to", colnames(t1))] <- -1
-  keep.seconds <- largest <= 600 & largest >= 0
-  to.minutes <- largest <= 36000 & largest > 600
-  to.hours <- largest <= 172800 & largest > 36000
-  to.days <- largest > 172800
-  t1[, to.minutes] <- t1[, to.minutes]/60
-  t1[, to.hours] <- t1[, to.hours]/3600
-  t1[, to.days] <- t1[, to.days]/86400
-  colnames(t1)[keep.seconds] <- paste(colnames(t1)[keep.seconds], ".\n(Secs)", sep = "")
-  colnames(t1)[to.minutes] <- paste(colnames(t1)[to.minutes], ".\n(Mins)", sep = "")
-  colnames(t1)[to.hours] <- paste(colnames(t1)[to.hours], ".\n(Hours)", sep = "")
-  colnames(t1)[to.days] <- paste(colnames(t1)[to.days], ".\n(Days)", sep = "")
-  colnames(t1)[grepl("Speed.to", colnames(t1))] <- paste(colnames(t1)[grepl("Speed.to", colnames(t1))], ".\n(m/s)", sep = "")
+  # largest <- c(-1, -1, 
+  #   unlist(
+  #     apply(t1[, c(-1, -2)], 2, 
+  #       function(x) 
+  #       if (!all(is.na(x))) {
+  #         max(x, na.rm = TRUE)
+  #       } else {
+  #         NA
+  #       }
+  #     )
+  #   )
+  # )
+  # largest[grepl("Speed.to", colnames(t1))] <- -1
+  # keep.seconds <- largest <= 600 & largest >= 0
+  # to.minutes <- largest <= 36000 & largest > 600
+  # to.hours <- largest <= 172800 & largest > 36000
+  # to.days <- largest > 172800
+  # t1[, to.minutes] <- t1[, to.minutes]/60
+  # t1[, to.hours] <- t1[, to.hours]/3600
+  # t1[, to.days] <- t1[, to.days]/86400
+  # colnames(t1)[keep.seconds] <- paste(colnames(t1)[keep.seconds], ".\n(Secs)", sep = "")
+  # colnames(t1)[to.minutes] <- paste(colnames(t1)[to.minutes], ".\n(Mins)", sep = "")
+  # colnames(t1)[to.hours] <- paste(colnames(t1)[to.hours], ".\n(Hours)", sep = "")
+  # colnames(t1)[to.days] <- paste(colnames(t1)[to.days], ".\n(Days)", sep = "")
+
+  link <- unlist(sapply(colnames(t1), function(x) attributes(t1[,x])$units))
+  colnames(t1)[match(names(link), colnames(t1))] <- paste0(names(link), "\n(", link, ")")
+  colnames(t1)[grepl("Speed.to", colnames(t1))] <- paste(colnames(t1)[grepl("Speed.to", colnames(t1))], "\n(m/s)", sep = "")
   colnames(t1)[2] <- "Detections\n(n)"
-  rm(keep.seconds, to.minutes, to.hours, to.days, largest)
   if (!invalid.dist) {
     t2 <- t1[, !grepl("Time.until", colnames(t1))]
   } else {
     t2 <- t1[, !grepl("Speed.to", colnames(t1))]
   }
   colnames(t2) <- sub("Time.i", "I", colnames(t2))
-  colnames(t2) <- sub("Time.u", "U", colnames(t2))
+  colnames(t2) <- sub("Time.until", "To", colnames(t2))
   colnames(t2) <- sub("Speed.t", "T", colnames(t2))
-  PlotData <- suppressMessages(reshape2::melt(t2))
+  PlotData <- suppressWarnings(suppressMessages(reshape2::melt(t2)))
   PlotData$Colour <- "#ba009e" # purple, for bugs
   for (j in colnames(t2)[-1]) {
     limits <- quantile(t2[, j], probs = c(0.1, 0.9), na.rm = T)

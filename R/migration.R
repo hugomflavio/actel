@@ -1515,7 +1515,27 @@ assembleOutput <- function(timetable, bio, spatial, sections, dist.mat, invalid.
     }
   }
   rm(i)
-  
+
+  # Convert time data
+  for (section in sections) {
+    for (the.col in c("Time.in.", "Time.until.")) {
+      # convert to numeric
+      status.df[, paste0(the.col, section)] <- as.numeric(status.df[, paste0(the.col, section)])
+      # grab the mean for later use
+      aux <- mean(status.df[, paste0(the.col, section)], na.rm = TRUE)
+      # convert to difftime
+      status.df[, paste0(the.col, section)] <- as.difftime(status.df[, paste0(the.col, section)], units = "secs")
+      units(status.df[, paste0(the.col, section)]) <- "secs"
+      if (aux > 86400)
+        units(status.df[, paste0(the.col, section)]) <- "days"
+      if (aux <= 86400 & aux > 3600)
+        units(status.df[, paste0(the.col, section)]) <- "hours"
+      if (aux <= 3600)
+        units(status.df[, paste0(the.col, section)]) <- "minutes"
+      status.df[, paste0(the.col, section)] <- round(status.df[, paste0(the.col, section)], 3)
+    }
+  }  
+
   if (file.exists("temp_comments.txt")) {
     temp <- read.table("temp_comments.txt", header = F, sep = "\t")
     status.df[, "Comments"] <- NA
