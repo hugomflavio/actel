@@ -466,7 +466,7 @@ knitr::kable(to.print)
 ```{r efficiency2, echo = FALSE}
 to.print <- t(paste(round(efficiency$max.efficiency * 100, 1), "%", sep = ""))
 to.print[grepl("NA", to.print)] <- "-"
-to.print <- as.data.frame(to.print)
+to.print <- as.data.frame(to.print, stringsAsFactors = FALSE)
 colnames(to.print) <- names(efficiency$max.efficiency)
 
 aux <- t(paste(round(efficiency$min.efficiency * 100, 1), "%", sep = ""))
