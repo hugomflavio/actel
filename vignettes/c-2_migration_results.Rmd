@@ -28,23 +28,21 @@ knitr::opts_chunk$set(
     1. [Processes behind migration()](c-1_migration_processes.html)
     1. [__Inspecting the migration() results__](c-2_migration_results.html)
     1. [Manual mode in migration()](c-3_migration_manual_mode.html)
+    1. [One-way efficiency estimations](c-4_migration_efficiency.html)
 1. [residency()](d-0_residency.html)
     1. [Processes behind residency()](d-1_residency_processes.html)
     1. [Inspecting the residency() results](d-2_residency_results.html)
+    1. [Multi-way efficiency estimations](d-3_residency_efficiency.html)
 1. [Errors and messages](e-0_messages.html)
 
 
 ## Results within R
 
-The results compiled by the migration() function include [those of the exclude() function](b-2_explore_results.html). To keep the vignettes shorter, I will only detail **new** outputs here:
-
-### simple.movements
-
-The `simple.movements` represents a simplified version of the `movements` object, where all movements deemed invalid during the analysis were removed. Note: While the `simple.movements` will not contain any backwards inter-section events, intra-section backwards movements may still be present.
+The results compiled by the migration() function include [those of the explore() function](b-2_explore_results.html). To keep the vignettes shorter, I will only detail **new** outputs here:
 
 ### status.df
 
-The `status.df` is a data frame that combines [both the timetable data and your biometrics](c-1_migration_processes.html#combining-the-time-data-with-the-biometrics) into a single, organised table. If you have stored any comments during the analysis process, they will show up in a reserved column in this table. 
+The `status.df` is a data frame that combines both the timetable data and your biometrics into a single, organised table. If you have stored any comments during the analysis process, they will show up in a reserved column in this table. 
 
 The `status.df` also contains the recorded fate for each fish (i.e. disappeared somewhere or succeeded at crossing the study area), and summary information on the number and length of the recorded backwards movements. This table can be quite big, so it may be a good idea to use `head(status.df)`  the first time you look at it.
 
@@ -71,20 +69,12 @@ If you activated the [report option](b-0_explore.html#report), this table is the
 
 ### matrices
 
-In this object you will find the matrix/matrices that were used for efficiency estimations during CJS modelling. Notet hat these matrices only represent the forward movements. You can read more about it below, in the description of the `overall.CJS`.
+In this object you will find the matrix/matrices that were used for efficiency estimations during CJS modelling. Note that these matrices only represent the forward movements. You can read more about it below, in the description of the `overall.CJS`.
 
 
 ### overall.CJS
 
-Actel calculates array efficiency through CJS modelling, based in the equations provided by <a href="https://www.researchgate.net/publication/256443823_Using_mark-recapture_models_to_estimate_survival_from_telemetry_data" target="_blank">Perry et al. (2012)</a>. The results of these calculations are provided in the object `overall.CJS`. 
-
-During the migration analysis, actel calculates forward efficiency only to improve the accuracy of the efficiency measurement. This means that, for each fish, only the first forward movement is considered. Let's have a look at these examples:
-
-<img src="efficiency_a.svg" alt="drawing" width="330"/> <img src="efficiency_b.svg" alt="drawing" width="330"/>
-
-In example **A**, the fish moved out to sea, and was detected at the array River1 and Fjord2, but not at Fjord1. This is considered a missed event for Fjord1. Even if the fish then moved backwards and ended up being detected at Fjord1 at a later time (example **B**), since the first expected detection was missed, this fish will still be considered as missed by Fjord1, as far as efficiency calculations are concerned.
-
-These efficiency calculations are dependant on the way how you organise your receivers, so it is important that you [organise your study area in an actel-friendly way.](a-1_study_area.html)
+This object contains the results of the efficiency estimations performed by actel. During the migration analysis, actel calculates forward efficiency only to improve the accuracy of the efficiency measurement. You can learn more about how these one-way efficiency estimations are made in [this manual page.](c-4_migration_efficiency.html)
 
 
 ### intra.array.CJS
@@ -94,7 +84,7 @@ If you provided intra-array estimates in the [replicates argument](c-0_migration
 
 ## Results in your working directory
 
-The migration function saves [outputs similar to those saved by explore](b-2_explore_results.html#results-in-your-working-directory). The main differences are in the two listed below.
+The migration function saves [outputs similar to those saved by explore](b-2_explore_results.html#results-in-your-working-directory). The main differences are in the two elements listed below.
 
 
 ### actel_migration_results.RData
@@ -104,7 +94,7 @@ To make sure that you don't accidentally loose your results, actel stores them r
 
 ### actel_migration_report.html (if report = TRUE)
 
-This is the main non-R output. If you activated the `report` option, actel will compile a html report for you. The migration report contains the same sections as the explore report, plus the following:
+This is the main non-R output. If you activated the `report` option, actel will compile an html report for you. The migration report contains the same sections as the explore report, plus the following:
 
 1. **Array forward efficiency**
 
@@ -122,18 +112,18 @@ This is the main non-R output. If you activated the `report` option, actel will 
 
 4. **Fish comparisons (Dotplots)**
 
-  As the name suggests, this plot compares variables across all your fish: The total number of detections, and the time until/time in each of your study area sections. To simplify the visualisation, for each variable, the **top 10%** of the data is painted in **Red**, and the **bottom 10%** of the data is painted in **Orange**.
+  As the name suggests, this plot compares variables across all your fish: The total number of detections, and the time to/time in each of your study area sections. To simplify the visualisation, for each variable, the **top 10%** of the data is painted in **red**, and the **bottom 10%** of the data is painted in **blue**.
 
   This plot is meant to help you find fish with uncommon behaviour. Fish with a lot of detections are likely staying for a very long time within receiver range; a fish that moves too fast in comparison to the remaining may have been carried by a predator. It is up to you to look at these graphics and decide if anything looks odd. If it does, then note down the tag number, so you can have a closer look at the respective plot of detections.
 
 
 5. **Graphics of detected tags**
 
-  These graphics contain more information than those created by the explore function. The vertical grey dashed lines show the assigned moments of entry and exit for each study area section. The full dark-grey line shows the movement events considered valid, while the dashed dark-grey line shows the movement events considered invalid.
+  These graphics contain more information than those created by the explore function: the vertical grey dashed lines show the assigned moments of entry and exit for each study area section, and the assigned fate of the fish is shown in the header.
 
   It is a good idea to have a good look at all of these graphics and verify that everything is looking correct (i.e. actel has assigned fates and entry/exit points correctly). This is also a good chance to have a closer look at the tags you flagged as suspicious during the analysis.
 
-  Note that fish where you had to manually intervene during the analysis will be highlighted with a yellow border, and fish that were manually overridden through the `override` argument will be highlighted with a red border.
+  Note that fish where you had to manually intervene during the analysis will be highlighted with a yellow border, and fish that were manually overridden through the [`override` argument](c-0_migration.html#override) will be highlighted with a red border.
 
 
 ## What if actel has miss-assigned something?

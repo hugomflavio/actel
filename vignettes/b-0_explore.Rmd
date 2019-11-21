@@ -1,5 +1,5 @@
 ---
-title: "2.0) explore()"
+title: "2) explore()"
 author: "Hugo Flávio"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
@@ -28,15 +28,17 @@ knitr::opts_chunk$set(
     1. [Processes behind migration()](c-1_migration_processes.html)
     1. [Inspecting the migration() results](c-2_migration_results.html)
     1. [Manual mode in migration()](c-3_migration_manual_mode.html)
+    1. [One-way efficiency estimations](c-4_migration_efficiency.html)
 1. [residency()](d-0_residency.html)
     1. [Processes behind residency()](d-1_residency_processes.html)
     1. [Inspecting the residency() results](d-2_residency_results.html)
+    1. [Multi-way efficiency estimations](d-3_residency_efficiency.html)
 1. [Errors and messages](e-0_messages.html)
 
 
 ## The explore() function
 
-The arguments in the `explore()` function are transversal to all functions.
+The arguments in the `explore()` function are transversal to the [migration()](c-0_migration.html) and [residency()](d-0_residency.html) functions.
 
 Although there are many arguments available, *you do not need to start working with all of them right away*. This is because many of these arguments have default values. If you want to make a quick check of your study, just run explore() with a `tz.study.area` argument in the same directory as your data and you will be ready to get some results!
 
@@ -55,8 +57,10 @@ Need help going through the output of explore()? [Find more details here.](b-2_e
 All the arguments of explore(), which also exist in migration() and residency(), are explained below.
 
 ```r
-explore(path = NULL, maximum.time = 60, speed.method = c("last to first", "first to first"), 
-      tz.study.area, start.timestamp = NULL, end.timestamp = NULL, report = TRUE, exclude.tags = NULL)
+explore(path = NULL, maximum.time = 60, speed.method = c("last to first", "first to first"),
+    speed.warning = NULL, speed.error = NULL, tz.study.area, start.timestamp = NULL, end.timestamp = NULL, 
+    report = TRUE, exclude.tags = NULL, jump.warning = 2, jump.error = 3, inactive.warning = NULL, 
+    inactive.error = NULL)
 ```
 
 ### path
@@ -104,9 +108,25 @@ When calculating movement speeds from one array to the next, it is important to 
 Note:
   : If you do not supply a distance matrix, speeds cannot be calculated. Instead, the time difference will be displayed.
 
+### speed.warning and speed.error
+
+These two variables control the speed checks. By default, they are NULL, and no speed checks are performed. actel will let you know this happened with the following message:
+
+````
+M: 'speed.warning'/'speed.error' were not set, skipping speed checks.
+````
+
+However, if you include a distances matrix in the analysis, you can specify the maximum espected speed for your fish, in metres per second. If a fish goes over these values, [warnings and user interaction will be activated, as necessary.](b-1_explore_processes.html#average-speed)
+
+Speed checks cannot be performed without a distance matrix. If you attempt to do this, actel will complain:
+
+````
+W: 'speed.warning'/'speed.error' were set, but a valid distance matrix is not present. Aborting speed checks.
+````
+
 ### tz.study.area
 
-Receivers usually work in Coordinated Universal Time (UTC). Although this is nice to integrate data from multiple receivers, depending on where you are working, it may mean that the receivers' time is actually displaced from the daytime in your study area. To correct for this, you must include your time zone in this field. For example, when we have study areas in Denmark, we must use `tz.study.area = "Europe/Copenhagen"`.
+Receivers usually work in Coordinated Universal Time (UTC). Although this is nice to integrate data from multiple receivers, depending on where you are working, it may mean that the receivers' time is actually displaced from the daytime in your study area. To correct for this, you must include your time zone in this field. For example, to analyse a study performed in Denmark, we must use `tz.study.area = "Europe/Copenhagen"`.
 
 Time zones can be complicated business, so to help you out, you can search <a href="https://en.wikipedia.org/wiki/List_of_tz_database_time_zones" target="_blank">this wiki page</a> for the time zone code which you should use.
 
@@ -142,7 +162,7 @@ Note:
 
 ### report
 
-The `report` option activates a series of print functions that draw tables and figures for later integration in a html report. When you activate this option, a new *Report* subdirectory is created, where all the relevant files are stored. Before finishing, actel assembles the [html report](c-2_explore_processes.html#actel_explore_report.html-if-report-true) and stores it in your working directory. If you already have a report in your working directory, actel will create a new file with a different name.
+The `report` option activates a series of print functions that draw tables and figures for later integration in an html report. When you activate this option, a new *Report* subdirectory is created, where all the relevant files are stored. Before finishing, actel assembles the [html report](c-2_explore_processes.html#actel_explore_report.html-if-report-true) and stores it in your working directory. If you already have a report in your working directory, actel will create a new file with a different name.
 
 You can also inspect each graphic individually in the *Report* subdirectory.
 
@@ -150,10 +170,8 @@ Here are some examples:
 
 <img src="LaTeX_example_survival.svg" alt="drawing" width="330"/> <img src="R64K-4526.png" alt="drawing" width="330"/>
 
-<img src="mb_efficiency.svg" alt="drawing" width="680"/>
-
 Note:
-  : Even if something fails during the report printing, your results will still be saved the *actel_results.RData* file in your working directory!
+  : Even if something fails during the report printing, your results will still be saved the *actel_explore_results.RData* file in your working directory!
 
 
 ### exclude.tags
@@ -174,6 +192,32 @@ M: Excluding tag(s) A69-1601-1081 from the analysis per used command (detections
 ````
 
 If more than one tag causes trouble, you can list multiple tags to be excluded, like this: `exclude.tags = c("A69-1601-1081", "A69-1601-1220")`.
+
+
+### jump.warning and jump.error
+
+During the course of a study, fish can (hopefully not too often) pass through a receiver array undetected. However, if this happens consecutively for more than one array, then perhaps something fishy is going on. Was your fish eaten by a bird? Was there something wrong with the arrays? Whatever the cause, there is a point after which you get suspicious. The `jump.warning` and `jump.error` arguments control how suspicious you want to be.
+
+You can have a look at [these arguments in action here.](b-1_explore_processes.html#jumping-arrays)
+
+
+### inactive.warning and inactive.error
+
+These two variables control the inactiveness checks. `inactive.warning` and `inactive.error` must be set in days. That is, if `inactive.warning = 2`, any fish that is deemed inactive for two days or more will trigger a warning. By default, they are NULL, and no inactiveness checks are performed. Actel will let you know this happened with the following message:
+
+````
+M: 'inactive.warning'/'inactive.error' were not set, skipping inactivity checks.
+````
+
+Altough it is not a requirement, inactiveness checks work best if a distances matrix is present. If you choose to run inactiveness checks without a distances matrix, actel will remind you of this with the following message:
+
+````
+M: Running inactiveness checks without a distance matrix. Performance may be limited.
+````
+
+You can learn more about [how the inactiveness checks operate here.](b-1_explore_processes.html#inactiveness)
+
+### All done!
 
 Now that you know how to run the explore analysis, you may want to:
 

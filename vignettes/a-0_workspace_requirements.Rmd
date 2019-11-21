@@ -4,7 +4,7 @@ author: "Hugo Flávio"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{1) Preparing your data}
+  %\VignetteIndexEntry{1.0) Preparing your data}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -28,16 +28,18 @@ knitr::opts_chunk$set(
     1. [Processes behind migration()](c-1_migration_processes.html)
     1. [Inspecting the migration() results](c-2_migration_results.html)
     1. [Manual mode in migration()](c-3_migration_manual_mode.html)
+    1. [One-way efficiency estimations](c-4_migration_efficiency.html)
 1. [residency()](d-0_residency.html)
     1. [Processes behind residency()](d-1_residency_processes.html)
     1. [Inspecting the residency() results](d-2_residency_results.html)
+    1. [Multi-way efficiency estimations](d-3_residency_efficiency.html)
 1. [Errors and messages](e-0_messages.html)
 
 ## Preparing your data
 
 Actel requires that you organise your input files in a specific fashion. Critically, you should have a file named **biometrics.csv**, one named **spatial.csv**, and one named **deployments.csv** (we will look into the file contents in detail soon). Finally, you also need a **detections directory**, containing all your detection files in *.csv*  format. 
 
-To create a blank workspace ready to be used, run `createWorkspace()`, and a template will be generated automatically in your current work directory (remember to delete the example rows before including your data).
+To create a blank workspace ready to be used, run `createWorkspace()`, and a template will be generated automatically in your a newly created "actel_workspace" directory. If you would like to, you can change the name of the target directory by using the argument `dir`. Remember to delete the example rows before including your data!
 
 ## Biometrics file
 
@@ -95,9 +97,12 @@ Station.Name
 
 Array
   : If you are listing a station: 
-    The array to which the station belongs. Arrays from a given study section must differ only in number. I.e. arrays **must** have this format: *section#*.
+    The array to which the station belongs. 
   : If you are listing a release site: 
     The first array that the fish is expected to cross after being released.
+  : Note:
+      - If you are only going to run an `explore()` analysis, you can name your arrays freely. 
+      - If you are going to run `migration()` or `residency()`, the names of arrays from a given study section must differ only in number. I.e. arrays **must** have this format: *section#*.
 
 Type
   : The nature of the item you are listing. You **must** choose between "Hydrophone" or "Release".
@@ -137,18 +142,18 @@ Station.Name
   : The name of the station where the receiver was deployed. It **must** match one of the station names in the spatial file.
 
 Start and Stop
-  : The times when the receiver was deployed and when the receiver was retrieved, respectively. Must be in a **yyyy-mm-dd hh:mm:ss** format. Note that these time stamps **must** be in the local time zone of the study area, which you will later supply in the `tz.study.area` argument.
+  : The times when the receiver was deployed and when the receiver was retrieved, respectively. Must be in a **yyyy-mm-dd hh:mm:ss** format. Note that these timestamps **must** be in the local time zone of the study area, which you will later supply in the `tz.study.area` argument.
 
 ## Detections
 
-Including your detections is the easiest part. Copy the *.csv* files offloaded from your receivers to the *detections* folder that was created by the *createWorkspace()* function and actel will know they are to be imported. Right now actel can upload files generated from VEMCO and THELMA manufactured receivers. If you have an receiver from a different manufacturer, or if you are using one of the supported manufacturers and get the warning displayed below, please to contact us so we can solve the issue.
+Including your detections is the easiest part. Copy the *.csv* files offloaded from your receivers to the *detections* folder that was created by the *createWorkspace()* function and actel will know they are to be imported. Right now actel can upload files generated from VEMCO and THELMA manufactured receivers. If you have an receiver from a different manufacturer, or if you are using one of the supported manufacturers and get the warning displayed below, please to contact me so we can solve the issue.
 
 ```
-W: File 'filename' does not match to any of the supported hydrophone file formats! If your file corresponds to a hydrophone log and actel did not recognize it, please contact the developer team through www.github.com/hugomflavio/actel/issues/new
+W: File 'filename' does not match to any of the supported hydrophone file formats! If your file corresponds to a hydrophone log and actel did not recognize it, please get in contact through www.github.com/hugomflavio/actel/issues/new
 ```
 
 Note:
-  : **The detection time stamps must be in UTC**. This is the default time zone used by the receivers, so as long as you did not edit the raw files, all should be ready to go.
+  : **The detection timestamps must be in UTC**. This is the default time zone used by the receivers, so as long as you did not edit the raw files, all should be ready to go.
   
 ## Optional: Distances matrix
 
@@ -166,21 +171,125 @@ A distances matrix is a table that contains information on  the distance (in met
 
 **[You can learn more about creating distances matrices in this page.](a-2_distances_matrix.html)**
 
-## Optional: Spatial.dot file
+## Optional: spatial.txt file
 
 If your study area has multiple branches, then you need to tell actel how these branches connect with each other. This file is optional because, if ommitted, actel will assume that your study area is composed by a single branch and that the array order is the one listed in the spatial.csv file.
 
-The spatial.dot file is very simple; all you need to do is connect your arrays with arrows. Here is an example:
+The spatial.txt file is very simple; all you need to do is connect your arrays with either dashes or arrows (find out the difference below). You can connect your arrays in pairs or make longer strings. For example, both this file:
 
 ```
-River1 -> River2 -> River3 -> Fjord -> Sea1 -> Sea2 -> Sea3
-River1 -> River4 -> River5 -> Fjord
-River4 -> River6 -> Fjord
+River1 -- River2
+River2 -- River3
+River3 -- Fjord
+Fjord -- Sea1
+Sea1 -- Sea2
+Sea2 -- Sea3
+River1 -- River4
+River4 -- River5
+River5 -- Fjord
+River4 -- River6
+River6 -- Fjord
 ```
 
-Note that, for each branch, you will need a new line, that starts and ends in an array that is part of the main branch. The study area listed above looks like this:
+and this file:
+
+```
+River1 -- River2 -- River3 -- Fjord -- Sea1 -- Sea2 -- Sea3
+River1 -- River4 -- River5 -- Fjord
+River4 -- River6 -- Fjord
+```
+
+Would code this study area:
 
 <img src="multi-branch.svg" alt="drawing" width="680"/>
+
+<span style="color:red">Note:</span>
+  : This file can be called either "spatial.dot" or "spatial.txt", and you can create it using a simple text editor such as notepad, kate, VIM, etc.
+
+#### Array direction
+
+In the migration analysis, array direction is relevant. That means that writing `A -- B` is not the same as writing `B -- A`. In the first case, array B comes after array A (i.e. the fish are expected to reach A before reaching B), while in the second case the situation is reversed.
+
+This has implications for array efficiency calculations, so be sure to encode your study area carefully.
+
+If you intend to run an explore or residency analysis, array direction is irrelevant.
+
+#### explore()/residency() vs migration()
+
+An optimal spatial.txt may differ depending on whether you want to run a migration or an explore/residency analysis. This is because actel interprets the spatial.txt file depending on the analysis:
+
+In a explore/residency analyses, `A -- B` should be read as:
+  
+    It is possible to move from array A to array B and vice-versa
+
+In a migration analysis, `A -- B` should be read as:
+  
+    It is possible to move from array A to array B and vice-versa, AND the fish are expected to pass through array A before reaching array B
+
+Let's have a look at this example.
+
+<center>
+<img src="multi_way_efficiency.svg" alt="drawing" width="330"/>
+</center>
+
+In this case, the spatial.txt for a residency analysis would look like this:
+
+```
+A -- B -- C -- G
+A -- D -- E -- G
+D -- F -- G
+D -- B
+C -- E
+C -- F
+E -- F
+```
+
+But a spatial.txt for a migration analysis would look like this:
+
+```
+A -- B -- C -- G
+A -- D -- E -- G
+D -- F -- G
+D -- B -- D
+C -- E -- C
+C -- F -- C
+E -- F -- E
+```
+
+The difference here is that, in the spatial.txt for migration, actel expects arrays to connected in a directional way. That means that connecting `D -- B` and `B -- D` does not mean the same thing, and it is important that you explicitly state that the fish are as likely to reach B coming from D as they are to reach D coming from B. In other words, you are saying that neither of the movements would be an explicit upstream movement. This will inform actel that D and B are parallel arrays, and special that rules should be applied to them. The same applies to C, E and F.
+
+<!--
+However, if the study area looked more like this:
+ 
+<center>
+<img src="multi_way_efficiency_alt.svg" alt="drawing" width="330"/>
+</center>
+
+Then perhaps it would no longer make sense to connect C to E and F, as it would be unlikely for fish passing through C to move all the way back to E and F. In that case, the spatial.txt file would instead look like this:
+
+```
+A -- B -- C -- G
+A -- D -- E -- G
+D -- F -- G
+D -- B -- D
+E -- F -- E
+```
+
+The main disadvantage here is that if a fish was to actually move from C to E, actel would assume that array G had failed to detect the fish on its way. What I am trying to convey with these examples is that organizing your study area is context dependent, and it is up to you to decide how to best represent it. Remember, you can always run the analysis with `jump.warning = 1` to highlight all instances where an array was assumed to have failed. This could prove useful should you choose to omit lateral connections, as in the last example.
+-->
+
+#### Barriers
+
+Sometimes it is possible for your fish to go from A to B, but not from B to A. In actel, you can include this information to further refine the analysis. In total, there are three symbols you can use to connect your arrays: `--`, `->` or `<-`.
+
+If the fish can move from A to B and vice-versa, use `A -- B`.
+
+If the fish can only move from A to B, use either `A -> B` or `B <- A`.
+
+If a fish then actually moves from B to A, actel will try to find an alternative route that the fish could have taken. If there are no alternative routes from B to A, actel will call this situation to your attention.
+
+This has implications for array efficiency calculations, so be sure to encode your study area carefully.
+
 
 ## Running the analysis
 
@@ -188,8 +297,8 @@ Now that you have prepared your workspace, it is time to start the analysis. The
 
 **1. explore()**
 
-  explore() allows you to quickly go get a summary of your data. You can use explore() to get
-  a general feel for the study results, and check if the input files are behaving as expected. 
+  explore() allows you to quickly get a summary of your data. You can use explore() to get
+  a general feel for the study results, and check if the input files are behaving as expected. It is also a good candidate if you just want to validate your detections for later use in other analyses.
 
   [Learn more about the explore function.](b-0_explore.html)
  
@@ -197,13 +306,17 @@ Now that you have prepared your workspace, it is time to start the analysis. The
 
   The migration() analysis runs the same initial checks as explore(), but on top of it, it analyses
   the fish behaviour. By selecting the arrays that lead to success, you can define whether or not
-  your fish survived the study. Multiple options allow you to tweak the analysis to fit your study perfectly.
+  your fish survived the migration. Additional plots help you find out if some fish has been acting odd.
+  Multiple options allow you to tweak the analysis to fit your study perfectly.
 
   [Learn more about the migration function.](c-0_migration.html)
  
 **3. residency()**
 
-  The residency() analysis is still under construction. Keep an eye out for updates!
+  The residency() analysis runs the same initial checks as explore(), but, similarly to migration, explores
+  particular points of the fish behaviour. If you want to know where your fish were in each day of the study,
+  how many fish were in each section each day, and other residency-focused variables, this is the analysis
+  you are looking for!
 
   [Learn more about the residency function.](d-0_residency.html)
 

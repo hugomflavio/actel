@@ -1,3 +1,690 @@
+#' Migration analysis
+#' 
+#' The actel package provides a systematic way of analysing fish migration data.
+#' migration() collects the input present in the target folder and analyses the telemetry data, extracting migration-related metrics.
+#' It is strongly recommended to read the package vignettes before attempting to run the analyses. You can find the vignettes by running browseVignettes('actel') .
+#' 
+#' @param sections The sections in which the study was divided. Must be coincident with the names given to the ALS arrays. (i.e. if an array is 'River1', then the respective section is 'River') 
+#' @param success.arrays The ALS arrays mark the end of the study area. If a fish crosses one of these arrays, it is considered to have successfully migrated through the area.
+#' @param minimum.detections The minimum number of times a tag must have been recorded during the study period for it to be considered a true tag and not random noise.
+#' @param if.last.skip.section Indicates whether a fish detected at the last array of a given section should be considered to have disappeared in the next section. Defaults to TRUE. I.e.: In a study with sections 'River' and 'Fjord', where 'River3' is the last river array, a fish last detected at River3 will be considered as 'disappeared in the Fjord'.
+#' @param override A list of tags for which the user intends to manually define entering and leaving points for each study section.
+#' @param cautious.assignment If TRUE, actel avoids assigning events with one detection as first and/or last events of a section.
+#' @param disregard.parallels Logical. If TRUE, the presence of parallel arrays does not invalidate potential efficiency peers. For more details on this, have a look at the vignettes.
+#' @param replicates A list containing, for each desired array, the standard names of the stations to be used as a replicate, for efficiency estimations.
+#' @inheritParams explore
+#' 
+#' @return A list containing 1) the detections used during the analysis, 2) the movement events, 3) the status dataframe, 4) the survival overview per group, 5) the progression through the study area, 6) the ALS array/sections' efficiency, 7) the list of spatial objects used during the analysis.
+#' 
+#' @export
+#' 
+migration <- function(path = NULL, sections, success.arrays = NULL, minimum.detections = 2, 
+  maximum.time = 60, speed.method = c("last to first", "first to first"), speed.warning = NULL,
+  speed.error = NULL, if.last.skip.section = TRUE, tz.study.area, start.timestamp = NULL, 
+  end.timestamp = NULL, report = TRUE, override = NULL, 
+  exclude.tags = NULL, cautious.assignment = TRUE, replicates = NULL, disregard.parallels = TRUE,
+  jump.warning = 2, jump.error = 3, inactive.warning = NULL, inactive.error = NULL, debug = FALSE) {
+  
+# check argument quality
+  my.home <- getwd()
+  if (!is.numeric(minimum.detections))
+    stop("'minimum.detections' must be numeric.\n", call. = FALSE)
+  if (!is.numeric(maximum.time))
+    stop("'maximum.time' must be numeric.\n", call. = FALSE)
+
+  speed.method <- match.arg(speed.method)
+  if (!is.null(speed.warning) && !is.numeric(speed.warning))
+    stop("'speed.warning' must be numeric.\n", call. = FALSE)    
+  if (!is.null(speed.error) && !is.numeric(speed.error))
+    stop("'speed.error' must be numeric.\n", call. = FALSE)    
+  if (!is.null(speed.error) & is.null(speed.warning))
+    speed.warning <- speed.error
+  if (!is.null(speed.error) && speed.error < speed.warning)
+    stop("'speed.error' must not be lower than 'speed.warning'.\n", call. = FALSE)
+
+  if (!is.logical(if.last.skip.section))
+    stop("'if.last.skip.section' must be logical.\n", call. = FALSE)
+
+  if (!is.null(start.timestamp) && !grepl("^[1-2][0-9][0-9][0-9]-[0-1][0-9]-[0-3][0-9] [0-2][0-9]:[0-5][0-9]:[0-5][0-9]", start.timestamp))
+    stop("'start.timestamp' must be in 'yyyy-mm-dd hh:mm:ss' format.\n", call. = FALSE)
+  if (!is.null(end.timestamp) && !grepl("^[1-2][0-9][0-9][0-9]-[0-1][0-9]-[0-3][0-9] [0-2][0-9]:[0-5][0-9]:[0-5][0-9]", end.timestamp))
+    stop("'end.timestamp' must be in 'yyyy-mm-dd hh:mm:ss' format.\n", call. = FALSE)
+
+  if (!is.logical(report))
+    stop("'report' must be logical.\n", call. = FALSE)
+
+  if (!is.logical(cautious.assignment))
+    stop("'cautious.assignment' must be logical.\n", call. = FALSE)
+
+  if (!is.null(replicates) && !is.list(replicates))
+    stop("'replicates' must be a list.\n", call. = FALSE)
+
+  if (!is.numeric(jump.warning))
+    stop("'jump.warning' must be numeric.\n", call. = FALSE)
+  if (jump.warning < 1)
+    stop("'jump.warning' must not be lower than 1.\n", call. = FALSE)
+  if (!is.numeric(jump.error))
+    stop("'jump.error' must be numeric.\n", call. = FALSE)
+  if (jump.error < 1)
+    stop("'jump.error' must not be lower than 1.\n", call. = FALSE)
+  if (jump.error < jump.warning)
+    stop("'jump.error' must not be lower than 'jump.warning'.\n", call. = FALSE)
+  
+  if (!is.null(inactive.warning) && !is.numeric(inactive.warning))
+    stop("'inactive.warning' must be numeric.\n", call. = FALSE)    
+  if (!is.null(inactive.error) && !is.numeric(inactive.error))
+    stop("'inactive.error' must be numeric.\n", call. = FALSE)    
+  if (!is.null(inactive.error) & is.null(inactive.warning))
+    inactive.warning <- inactive.error
+  if (!is.null(inactive.error) && inactive.error < inactive.warning)
+    stop("'inactive.error' must not be lower than 'inactive.warning'.\n", call. = FALSE)
+  
+  if (!is.logical(debug))
+    stop("'debug' must be logical.\n", call. = FALSE)
+# ------------------------
+
+# Prepare clean-up before function ends
+  if (debug) {
+    on.exit(save(list = ls(), file = "migration_debug.RData"), add = TRUE)
+    appendTo("Screen", "!!!--- Debug mode has been activated ---!!!")
+  } else {
+    on.exit(deleteHelpers(), add = TRUE)
+  }
+  on.exit(setwd(my.home), add = TRUE)
+  on.exit(tryCatch(sink(), warning = function(w) {hide <- NA}), add = TRUE)
+  if (!debug)
+    on.exit(deleteHelpers(), add = TRUE)
+  deleteHelpers()
+# --------------------------------------
+
+# Store function call
+  the.function.call <- paste0("migration(path = ", ifelse(is.null(path), "NULL", paste0("'", path, "'")), 
+      ", sections = ", paste0("c('", paste(sections, collapse = "', '"), "')"), 
+      ", success.arrays = ", paste0("c('", paste(success.arrays, collapse = "', '"), "')"), 
+      ", minimum.detections = ", minimum.detections,
+      ", maximum.time = ", maximum.time,
+      ", speed.method = ", paste0("c('", speed.method, "')"),
+      ", speed.warning = ", ifelse(is.null(speed.warning), "NULL", speed.warning), 
+      ", speed.error = ", ifelse(is.null(speed.error), "NULL", speed.error), 
+      ", if.last.skip.section = ", ifelse(if.last.skip.section, "TRUE", "FALSE"),
+      ", tz.study.area = ", ifelse(is.null(tz.study.area), "NULL", paste0("'", tz.study.area, "'")), 
+      ", start.timestamp = ", ifelse(is.null(start.timestamp), "NULL", paste0("'", start.timestamp, "'")),
+      ", end.timestamp = ", ifelse(is.null(end.timestamp), "NULL", paste0("'", end.timestamp, "'")),
+      ", report = ", ifelse(report, "TRUE", "FALSE"), 
+      ", override = ", ifelse(is.null(override), "NULL", paste0("c('", paste(override, collapse = "', '"), "')")),
+      ", exclude.tags = ", ifelse(is.null(exclude.tags), "NULL", paste0("c('", paste(exclude.tags, collapse = "', '"), "')")), 
+      ", cautious.assignment = ", ifelse(cautious.assignment, "TRUE", "FALSE"), 
+      ", replicates = ", ifelse(is.null(replicates),"NULL", paste0("c('", paste(replicates, collapse = "', '"), "')")),
+      ", disregard.parallels = ", ifelse(disregard.parallels, "TRUE", "FALSE"), 
+      ", jump.warning = ", jump.warning,
+      ", jump.error = ", jump.error,
+      ", inactive.warning = ", ifelse(is.null(inactive.warning), "NULL", inactive.warning), 
+      ", inactive.error = ", ifelse(is.null(inactive.error), "NULL", inactive.error), 
+      ", debug = ", ifelse(debug, "TRUE", "FALSE"), 
+      ")")
+# --------------------
+
+# Final arrangements before beginning
+  appendTo("Report", "Acoustic telemetry data analysis report.\n") 
+
+  path <- checkPath(my.home = my.home, path = path)  
+
+  if (debug)
+    appendTo("Report", "!!!--- Debug mode has been activated ---!!!\n")
+
+  if (is.null(success.arrays))
+    appendTo(c("Report"), paste0("Timestamp:", Sys.time(), "\n\nM: Selected folder: ", getwd(), "\nM: Success has not been defined. Assuming last arrays are success arrays."))
+  else
+    appendTo(c("Report"), paste0("Timestamp:", Sys.time(), "\n\nM: Selected folder: ", getwd(), "\nM: Success has been defined as last detection in: ", paste(success.arrays, collapse = ", "), "."))
+
+  if (!is.null(path))
+    appendTo(c("Screen"), "M: Moving to selected work directory")
+  
+  report <- checkReport(report = report)
+# -----------------------------------
+
+# Load, structure and check the inputs
+  if (disregard.parallels)
+    appendTo("Screen", "M: 'disregard.parallels' is set to TRUE; the presence of parallel arrays will not invalidate efficiency peers.")
+  else
+    appendTo("Screen", "M: 'disregard.parallels' is set to FALSE; the presence of parallel arrays can potentially invalidate efficiency peers.")
+  
+  study.data <- loadStudyData(tz.study.area = tz.study.area, override = override, 
+                              start.timestamp = start.timestamp, end.timestamp = end.timestamp,
+                              sections = sections, exclude.tags = exclude.tags, disregard.parallels = disregard.parallels)
+  bio <- study.data$bio
+  deployments <- study.data$deployments
+  spatial <- study.data$spatial
+  dot <- study.data$dot
+  arrays <- study.data$arrays
+  dotmat <- study.data$dotmat
+  paths <- study.data$paths
+  detections <- study.data$detections
+  dist.mat <- study.data$dist.mat
+  invalid.dist <- study.data$invalid.dist
+  detections.list <- study.data$detections.list
+
+  if (is.null(success.arrays)) 
+    success.arrays <- names(arrays)[unlist(lapply(arrays, function(x) is.null(x$after)))]
+# -------------------------------------
+  
+# Process the data
+  appendTo(c("Screen", "Report"), "M: Creating movement records for the valid tags.")
+  movements <- groupMovements(detections.list = detections.list, bio = bio, spatial = spatial,
+    speed.method = speed.method, maximum.time = maximum.time, tz.study.area = tz.study.area, 
+    dist.mat = dist.mat, invalid.dist = invalid.dist)
+
+  for(fish in names(movements)){
+    movements[[fish]] <- speedReleaseToFirst(fish = fish, bio = bio, movements = movements[[fish]],
+     dist.mat = dist.mat, invalid.dist = invalid.dist, silent = FALSE)
+  }
+  appendTo(c("Screen", "Report"), "M: Checking movement events quality.")
+  
+  movements <- checkUpstream(movements = movements, bio = bio, spatial = spatial, arrays = arrays)
+
+  movements <- checkImpassables(movements = movements, dotmat = dotmat)
+
+  movements <- checkJumpDistance(movements = movements, bio = bio, dotmat = dotmat, 
+                                 spatial = spatial, jump.warning = jump.warning, jump.error = jump.error)
+
+  if (is.null(speed.warning)) {
+    appendTo(c("Screen", "Report", "Warning"), "M: 'speed.warning'/'speed.error' were not set, skipping speed checks.")
+  } else {
+    if(invalid.dist) {
+      appendTo(c("Screen", "Report", "Warning"), "W: 'speed.warning'/'speed.error' were set, but a valid distance matrix is not present. Aborting speed checks.")
+    } else {
+       temp.valid.movements <- simplifyMovements(movements = movements, bio = bio, 
+         speed.method = speed.method, dist.mat = dist.mat, invalid.dist = invalid.dist)
+      movements <- checkSpeeds(movements = movements, valid.movements = temp.valid.movements, 
+        speed.warning = speed.warning, speed.error = speed.error)
+       rm(temp.valid.movements)
+     }
+  }
+  
+  if (is.null(inactive.warning))
+    appendTo(c("Screen", "Report", "Warning"), "M: 'inactive.warning'/'inactive.error' were not set, skipping inactivity checks.")
+  else
+    movements <- checkInactiveness(movements = movements, detections.list = detections.list, 
+      inactive.warning = inactive.warning, inactive.error = inactive.error, 
+      dist.mat = dist.mat, invalid.dist = invalid.dist)
+
+  appendTo(c("Screen", "Report"), "M: Initiating timetable development. Your assistance may be needed during the process.")
+
+  recipient <- assembleTimetable(movements = movements, sections = sections, spatial = spatial, arrays = arrays,
+    minimum.detections = minimum.detections, dist.mat = dist.mat, invalid.dist = invalid.dist, 
+    speed.method = speed.method, if.last.skip.section = if.last.skip.section, success.arrays = success.arrays, 
+    override = override, cautious.assignment = cautious.assignment)
+  timetable <- recipient[[1]]
+  movements <- recipient[[2]]
+  rm(recipient)
+  appendTo(c("Screen", "Report"), "M: Timetable successfully filled. Fitting in the remaining variables.")
+  
+  status.df <- assembleOutput(timetable = timetable, bio = bio, spatial = spatial, 
+    sections = sections, dist.mat = dist.mat, invalid.dist = invalid.dist, tz.study.area = tz.study.area)
+
+  valid.movements <- simplifyMovements(movements = movements, bio = bio, 
+    speed.method = speed.method, dist.mat = dist.mat, invalid.dist = invalid.dist)
+
+  appendTo(c("Screen", "Report"), "M: Getting summary information tables.")
+  
+  section.overview <- assembleSectionOverview(status.df = status.df, sections = sections)
+
+  times <- getTimes(movements = valid.movements, spatial = spatial, type = "arrival", events = "one")
+
+  appendTo("Screen", "M: Validating detections...")
+
+  valid.detections <- validateDetections(detections.list = detections.list, movements = valid.movements)
+
+# -------------------------------------
+
+# CJS stuff
+  the.matrices <- assembleMatrices(spatial = spatial, movements = valid.movements, status.df = status.df,
+    arrays = arrays, paths = paths, dotmat = dotmat)[[2]] # extract only the minimum matrix
+
+  m.by.array <- breakMatricesByArray(m = the.matrices, arrays = arrays, type = "peers")
+
+  if (is.null(m.by.array[[1]])) {
+    calculate.efficiency <- FALSE
+    appendTo(c("Screen", "Report", "Warning"), "W: Aborting efficiency calculations (will limit the report's output).")
+  } else {
+    calculate.efficiency <- TRUE
+  }
+
+  if (calculate.efficiency) {
+    appendTo(c("Screen", "Report"), "M: Calculating array efficiency.")
+
+    CJS.list <- lapply(m.by.array, function(m) {
+      if (length(m) == 1)
+        simpleCJS(m[[1]])
+      else
+        combineCJS(m)
+      })
+
+    overall.CJS <- assembleArrayCJS(mat = the.matrices, CJS = CJS.list, arrays = arrays)
+
+    if (!is.null(replicates)) {
+      intra.array.matrices <- getDualMatrices(replicates = replicates, CJS = overall.CJS, spatial = spatial, detections.list = detections.list)
+      recipient <- includeIntraArrayEstimates(m = intra.array.matrices, CJS = overall.CJS)
+      overall.CJS <- recipient[[1]]
+      intra.array.CJS <- recipient[[2]]
+      rm(recipient)
+    } else {
+      intra.array.CJS <- NULL
+    }
+
+    aux <- mbSplitCJS(m = m.by.array, fixed.efficiency = overall.CJS$efficiency)
+    aux <- aux[names(the.matrices)]
+    split.CJS <- assembleSplitCJS(mat = the.matrices, CJS = aux, arrays = arrays)
+    rm(aux)
+
+    aux <- mbGroupCJS(m = m.by.array, status.df = status.df, fixed.efficiency = overall.CJS$efficiency)
+    group.CJS <- assembleGroupCJS(mat = the.matrices, CJS = aux, arrays = arrays)
+    array.overview <- mbAssembleArrayOverview(input = group.CJS)
+    rm(aux)
+} else {
+  overall.CJS <- NULL
+  intra.array.CJS <- NULL
+  array.overview <- NULL
+}
+# -------------------------------------
+
+# wrap up in-R objects
+  if (!is.null(override)) {
+    header.fragment <- paste('<span style="color:red">Manual mode has been triggered for **', length(override),'** fish.</span>\n', sep = "")
+    name.fragment <- "_corrected"
+  } else {
+    header.fragment <- name.fragment <- ""
+  }
+
+  if (file.exists(resultsname <- paste("actel_migration_results", name.fragment, ".RData", sep = ""))) {
+    continue <- TRUE
+    index <- 1
+    while (continue) {
+      if (file.exists(resultsname <- paste("actel_migration_results", name.fragment, ".", index, ".RData", sep = ""))) {
+        index <- index + 1
+      } else {
+        continue <- FALSE
+      }
+    }
+    appendTo("Screen", paste("M: An actel migration results file is already present in the current directory.\n   Saving new results as '", resultsname,"'.", sep = ""))
+    rm(continue, index)
+  } else {
+    appendTo(c("Screen", "Report"), paste("M: Saving results as '", resultsname, "'.", sep = ""))
+  }
+
+  detections <- detections.list
+  deployments <- do.call(rbind.data.frame, deployments)
+  matrices <- the.matrices
+  if (invalid.dist)
+    save(detections, valid.detections, spatial, deployments, arrays, movements, valid.movements, status.df,
+      section.overview, array.overview, matrices, overall.CJS, 
+      intra.array.CJS, times, file = resultsname)
+  else
+    save(detections, valid.detections, spatial, deployments, arrays, movements, valid.movements, status.df,
+      section.overview, array.overview, matrices, overall.CJS,
+      intra.array.CJS, times, dist.mat, file = resultsname)
+# ------------
+
+# Print graphics
+  if (report) {
+    appendTo(c("Screen", "Report"), "M: Producing the report.")
+    biometric.fragment <- printBiometrics(bio = bio)
+    if (calculate.efficiency)
+      efficiency.fragment <- printEfficiency(intra.CJS = intra.array.CJS, type = "migration")
+    else
+      efficiency.fragment <- "Array efficiency could not be calculated. See full log for more details.\n"
+    printDotplots(status.df = status.df, invalid.dist = invalid.dist)
+    printSurvivalGraphic(section.overview = section.overview)
+    printDot(dot = dot, sections = sections, spatial = spatial)
+    if (calculate.efficiency) {
+      printProgression(dot = dot,  sections = sections, overall.CJS = overall.CJS, spatial = spatial, status.df = status.df)
+      display.progression <- TRUE
+      array.overview.fragment <- printArrayOverview(array.overview)
+    } else {
+      display.progression <- FALSE
+      array.overview.fragment <- ""
+    }
+    individual.plots <- printIndividuals(redraw = TRUE, detections.list = detections.list, bio = bio, 
+        status.df = status.df, tz.study.area = tz.study.area, movements = movements, valid.movements = valid.movements)
+    circular.plots <- printCircular(times = convertTimesToCircular(times), bio = bio)
+    if (nrow(section.overview) > 3) 
+      survival.graph.size <- "width=90%" else survival.graph.size <- "height=4in"
+  }
+  
+  appendTo("Report", "M: Process finished successfully.")
+# ---------------
+
+# wrap up the txt report
+  appendTo("Report", "\n-------------------")
+  if (file.exists("temp_UD.txt")) 
+    appendTo("Report", paste0("User interventions:\n-------------------\n", gsub("\r", "", readr::read_file("temp_UD.txt")), "-------------------"))
+  
+  appendTo("Report", paste0("Function call:\n-------------------\n", the.function.call, "\n-------------------"))
+# ------------------
+
+# print html report
+  if (report) {
+    appendTo("debug", "debug: Printing report")
+    rmarkdown::render(reportname <- printMigrationRmd(name.fragment = name.fragment, header.fragment = header.fragment, 
+        biometric.fragment = biometric.fragment, survival.graph.size = survival.graph.size, circular.plots = circular.plots,
+        individual.plots = individual.plots, spatial = spatial, efficiency.fragment = efficiency.fragment, 
+        display.progression = display.progression, array.overview.fragment = array.overview.fragment, 
+        detections = detections, valid.detections = valid.detections), quiet = TRUE)
+    appendTo("debug", "debug: Moving report")
+    fs::file_move(sub("Rmd", "html", reportname), sub("Report/", "", sub("Rmd", "html", reportname)))
+    appendTo("debug", "debug: Opening report if the pc has internet.")
+    openReport(file.name = sub("Report/", "", sub("Rmd", "html", reportname)))
+  }
+  appendTo("Screen", "M: Process finished successfully.")
+# ------------------
+
+  appendTo("Screen", paste("M: Saving job log as '", paste(gsub(":", ".", sub(" ", ".", as.character(Sys.time()))), "actel.log.txt", sep = "."), "'.", sep = ""))
+  file.rename("temp_log.txt", paste(gsub(":", ".", sub(" ", ".", as.character(Sys.time()))), "actel.log.txt", sep = "."))
+  
+  if (!debug)
+    deleteHelpers()
+
+  if (invalid.dist)
+    return(list(detections = detections, valid.detections = valid.detections, spatial = spatial, deployments = deployments, arrays = arrays,
+      movements = movements, valid.movements = valid.movements,
+      status.df = status.df, section.overview = section.overview, array.overview = array.overview,
+      matrices = matrices, overall.CJS = overall.CJS, 
+      intra.array.CJS = intra.array.CJS, times = times))
+  else
+    return(list(detections = detections, valid.detections = valid.detections, spatial = spatial, deployments = deployments, arrays = arrays,
+      movements = movements, valid.movements = valid.movements,
+      status.df = status.df, section.overview = section.overview, array.overview = array.overview,
+      matrices = matrices, overall.CJS = overall.CJS, 
+      intra.array.CJS = intra.array.CJS, times = times, dist.mat = dist.mat))
+}
+
+#' Print Rmd report
+#'
+#' Creates a Rmd report and converts it to hmtl.
+#' 
+#' @param name.fragment Rmarkdown string specifying the type of report for the title.
+#' @param header.fragment Rmarkdown string specifying the type of report for the header.
+#' @param biometric.fragment Rmarkdown string specifying the biometric graphics drawn.
+#' @param efficiency.fragment Rmarkdown string specifying the efficiency results.
+#' @param display.progression Logical. If TRUE, the progression plot has been created and can be displayed.
+#' @param array.overview.fragment Rmarkdown string specifying the array overview results.
+#' @param survival.graph.size Rmarkdown string specifying the type size of the survival graphics.
+#' @param individual.plots Rmarkdown string specifying the name of the individual plots.
+#' @param circular.plots Rmarkdown string specifying the name of the circular plots.
+#' @inheritParams loadDetections
+#' 
+#' @keywords internal
+#' 
+printMigrationRmd <- function(name.fragment, header.fragment, biometric.fragment, efficiency.fragment, display.progression, array.overview.fragment,
+  survival.graph.size, individual.plots, circular.plots, spatial, deployments, valid.detections, detections){
+  if (file.exists(reportname <- paste("Report/actel_migration_report", name.fragment, ".Rmd", sep = ""))) {
+    continue <- TRUE
+    index <- 1
+    while (continue) {
+      if(file.exists(reportname <- paste("Report/actel_migration_report", name.fragment, ".", index, ".Rmd", sep = ""))) {
+        index <- index + 1
+      } else {
+        continue <- FALSE
+      }
+    }
+    appendTo("Screen", paste("M: An actel report is already present in the current directory\n   Saving new report as 'actel_migration_report", name.fragment, ".", index, ".html'.", sep = ""))
+    rm(continue,index)
+  } else {
+    appendTo("Screen", paste("M: Saving actel report as 'actel_migration_report", name.fragment, ".html'.", sep = ""))
+  }
+  if (any(grepl("Unknown", spatial$stations$Standard.Name))) {
+    unknown.fragment <- paste('<span style="color:red"> Number of relevant unknown receivers: **', sum(grepl("Unknown", spatial$stations$Standard.Name)), '**</span>\n', sep = "")
+  } else {
+    unknown.fragment <- ""
+  } 
+  report <- readr::read_file("temp_log.txt")
+  sink(reportname)
+  cat(paste(
+'---
+title: "Acoustic telemetry migration analysis"
+author: "Actel package"
+output: 
+  html_document:
+    includes:
+      after_body: toc_menu_migration.html
+---
+
+### Summary
+
+Selected folder: ', stringr::str_extract(pattern = '(?<=M: Selected folder: )[^\r|^\n]*', string = report), '
+
+Timestamp: **', stringr::str_extract(pattern = '(?<=Timestamp:)[^\r|^\n]*', string = report), '** 
+
+Number of target tags: **`r I(nrow(status.df))`**
+
+', header.fragment,' 
+
+Number of listed receivers: **', stringr::str_extract(pattern = '(?<=Number of ALS: )[0-9]*', string = report), '** (of which **', stringr::str_extract(pattern = '(?<=of which )[0-9]*', string = report), '** had no detections)
+
+', unknown.fragment,'
+
+Data time range: ', stringr::str_extract(pattern = '(?<=Data time range: )[^\r|^\n]*', string = report), '
+
+Percentage of post-release valid detections: ', round(sum(unlist(lapply(valid.detections, nrow))) / sum(unlist(lapply(detections, nrow))) * 100, 2), '%
+
+Found a bug? [**Report it here.**](https://github.com/hugomflavio/actel/issues)
+
+### Study area
+
+Arrays with the same background belong to the same section. Release sites are marked with "R.S.". Arrays connected with an arrow indicate that the fish can only pass in one direction.
+
+<img src="mb_arrays.svg" alt="Missing file" style="padding-top: 15px;"/>
+
+### Receiver stations
+
+```{r stations, echo = FALSE}
+knitr::kable(spatial$stations, row.names = FALSE)
+```
+
+### Deployments
+
+```{r deployments, echo = FALSE}
+knitr::kable(deployments, row.names = FALSE)
+```
+
+### Release sites
+
+```{r releases, echo = FALSE}
+knitr::kable(spatial$release.sites, row.names = FALSE)
+```
+
+### Array forward efficiency
+
+', efficiency.fragment,'
+
+### Warning messages
+
+```{r warnings, echo = FALSE, comment = NA}
+if(file.exists("../temp_warnings.txt")) cat(gsub("\\r", "", readr::read_file("../temp_warnings.txt"))) else cat("No warnings were raised during the analysis.")
+```
+
+
+### User comments
+
+```{r comments, echo = FALSE, comment = NA}
+ if(file.exists("../temp_comments.txt")) cat(gsub("\\r", "", readr::read_file("../temp_comments.txt"))) else cat("No comments were included during the analysis.")
+```
+
+
+### Biometric graphics
+
+<center>
+', biometric.fragment,'
+</center>
+
+
+### Survival
+
+```{r survival, echo = FALSE}
+knitr::kable(section.overview)
+```
+
+<center>
+![](survival.png){ ',survival.graph.size ,' }
+</center>
+
+
+### Progression
+
+', ifelse(display.progression, 'Zoom in or open the figure in a new tab to clearly read the text within each circle.
+
+Note:
+  : The progression calculations **do not account for** intra-section backwards movements. This implies that the total number of fish to have been **last seen** at a given array **may be lower** than the displayed below. Please refer to the [section survival overview](#survival) to find out how many fish were considered to have disappeared per section.
+
+<img src="mb_efficiency.svg" alt="Missing file" style="padding-top: 15px; padding-bottom: 15px;"/>
+
+', 'Progression cannot be displayed if efficiencies are not calculated. See full log for more details.'), array.overview.fragment, '
+
+
+### Time of arrival at each Array
+
+Note:
+  : Coloured lines on the outer circle indicate the mean value for each group and the respective ranges show the standard error of the mean. Each group\'s bars sum to 100%. The number of data points in each group is presented between brackets in the legend of each pannel. 
+
+<center>
+', circular.plots,'
+</center>
+
+
+### Dotplots
+
+Note:
+  : The **top** 10% of the values for each panel are marked in **red**.
+  : The **bottom** 10% of the values for each panel are marked in **blue**.
+  : The columns starting with "To" should be read as either "Time to ..." or "Speed to ...", depending on the unit used. The columns starting with "In" should be read as "Time in ...". These reductions were made to keep the column headers as short as possible.
+
+<center>
+![](dotplots.png){ width=95% }
+</center>
+
+
+### Individual plots
+
+Note:
+  : The detections are coloured by array. The vertical black dashed line shows the time of release. The vertical grey dashed lines show the assigned moments of entry and exit for each study area section. The full dark-grey line shows the movement events considered valid, while the dashed dark-grey line shows the movement events considered invalid.
+  : The movement event lines move straight between the first and last station of each event (i.e. in-between detections will not be individually linked by the line).
+  : Manually **edited** fish are highlighted with **yellow** graphic borders.
+  : Manually **overridden** fish are highlighted with **red** graphic borders.
+
+<center>
+', individual.plots,'
+</center>
+
+### Full log
+
+```{r log, echo = FALSE, comment = NA}
+cat(gsub("\\r", "", readr::read_file("../temp_log.txt")))
+```
+
+', sep = ""), fill = TRUE)
+sink()
+
+if(file.exists("Report/toc_menu_migration.html"))
+  file.remove("Report/toc_menu_migration.html")
+sink("Report/toc_menu_migration.html")
+cat(
+'<style>
+h3 {
+  padding-top: 25px;
+  padding-bottom: 15px;
+}
+
+h4 {
+  padding-top: 25px;
+  padding-bottom: 15px;
+}
+
+img[src*="#diagram"] {
+  width = 100%;
+  padding-top = 200px; 
+  padding-bottom = 15px;
+}
+
+/* The sidebar menu */
+.sidenav {
+  height: 100%; 
+  width: 110px; 
+  position: fixed; 
+  z-index: 1; 
+  top: 0; 
+  left: 0;
+  background-color: #fcfcfc;
+  overflow-x: hidden; 
+  padding-top: 20px;
+}
+
+/* The navigation menu links */
+.sidenav a {
+  padding: 6px 8px 6px 16px;
+  text-decoration: none;
+  /*font-size: 25px;*/
+  color: #818181;
+  display: block;
+}
+
+.sidenav p {
+  padding: 6px 8px 6px 16px;
+  text-decoration: none;
+  font-size: 25px;
+  color: #818181;
+  display: block;
+}
+
+.sidenav a:hover {
+  background-color: #52a548;
+  color: #f1f1f1;
+}
+
+.fluid-row {
+  margin-left: 110px; /* Same as the width of the sidebar */
+  padding: 0px 10px;
+}
+
+.section {
+  margin-left: 110px; /* Same as the width of the sidebar */
+  padding: 0px 10px;
+}
+
+.level4 {
+  margin-left: 0px; /* Same as the width of the sidebar */
+  padding: 0px 0px;
+}
+
+/* On smaller screens, where height is less than 450px, change the style of the sidebar (less padding and a smaller font size) */
+@media screen and (max-height: 450px) {
+  .sidenav {padding-top: 15px;}
+  .sidenav a {font-size: 18px;}
+}
+</style>
+  
+<div class="sidenav">
+  <p>Index:</p>
+  <a href="#summary">Summary</a>
+  <a href="#study-area">Study area</a>
+  <a href="#receiver-stations">Stations</a>
+  <a href="#deployments">Deployments</a>
+  <a href="#release-sites">Release sites</a>
+  <a href="#array-forward-efficiency">Efficiency</a>
+  <a href="#warning-messages">Warnings</a>
+  <a href="#user-comments">Comments</a>
+  <a href="#biometric-graphics">Biometrics</a>
+  <a href="#survival">Survival</a>
+  <a href="#progression">Progression</a>
+  <a href="#time-of-arrival-at-each-array">Arrival times</a>
+  <a href="#dotplots">Dotplots</a>
+  <a href="#individual-plots">Individuals</a>
+  <a href="#full-log">Full log</a>
+</div>
+', fill = TRUE)
+sink()
+return(reportname)
+}
+
 #' Create the timetable
 #'
 #' Crawls trough the movement events of each fish to find when it entered and left each section of the study area.
@@ -6,16 +693,16 @@
 #' @inheritParams simplifyMovements
 #' @inheritParams loadDetections
 #' @inheritParams groupMovements
+#' @inheritParams assembleArrayCJS
 #' @param movements A list of movements for each target tag, created by groupMovements.
 #' 
 #' @return A table of the entering and leaving points for each section per target tag
 #' 
 #' @keywords internal
 #' 
-assembleTimetable <- function(movements, sections, spatial, minimum.detections, 
+assembleTimetable <- function(movements, sections, spatial, arrays, minimum.detections, 
   dist.mat, invalid.dist, speed.method, if.last.skip.section, success.arrays, override, cautious.assignment) {
   appendTo("debug", "Starting assembleTimetable.")
-  appendTo(c("Screen", "Report"), "M: Initiating timetable development. Your assistance may be needed during the process.")
 
   # NOTE: The NULL variables below are actually column names used by data.table.
   # This definition is just to prevent the package check from issuing a note due unknown variables.
@@ -48,13 +735,12 @@ assembleTimetable <- function(movements, sections, spatial, minimum.detections,
   for (i in names(movements)) {
     if (!is.null(override) && any(grepl(i, override))) {
       ## If the fish is marked for manual mode
-      processing.type <- "Overridden"
+      attributes(movements[[i]])$p.type <- "Overridden"
       events <- overrideDefaults(i, movements[[i]], sections)
       ## Jump to updating movements and deploying values
     } else {
       if (movements[[i]][, any(Valid)]) {
         ## If there are any valid events (invalid could only be caused by upstream detection)
-        processing.type <- "Auto"
         ## Find the last events for each section If there is more than one detection event
         if (movements[[i]][(Valid), all(Array == "Unknown")]) {
           ## If all the events are in unknown arrays
@@ -70,66 +756,31 @@ assembleTimetable <- function(movements, sections, spatial, minimum.detections,
             movements[[i]][(Array == "Unknown")]$Valid <- FALSE
           }
           recipient <- findLastEvents(i = i, movements = movements[[i]], 
-            sections = sections, minimum.detections = minimum.detections, 
-            processing.type = processing.type, cautious.assignment = cautious.assignment)
+            sections = sections, minimum.detections = minimum.detections,
+            cautious.assignment = cautious.assignment)
           last.events <- recipient[[1]]
-          processing.type <- recipient[[2]]
+          attributes(movements[[i]])$p.type <- recipient[[2]]
         }
       } else {
         ## If all the events are invalid
         last.events <- rep(NA, length(sections))
-        processing.type <- "Manual"
+        attributes(movements)$p.type <- "Manual"
       }      
-      recipient <- findFirstEvents(i = i, last.events = last.events, 
+      events <- findFirstEvents(i = i, last.events = last.events, 
         movements = movements[[i]], sections = sections, 
-        processing.type = processing.type, cautious.assignment = cautious.assignment)
-      events <- recipient[[1]]
-      processing.type <- recipient[[2]]
+        cautious.assignment = cautious.assignment)
     }
     ## First update movement validity based on selected events
     movements[[i]] <- updateMovementValidity(movements = movements[[i]], events = events, sections = sections)
     ## Second, deploy the values
     timetable <- deployValues(i = i, timetable = timetable, movements = movements[[i]], 
-      events = events, sections = sections, spatial = spatial, dist.mat = dist.mat, 
+      events = events, sections = sections, spatial = spatial, arrays = arrays, dist.mat = dist.mat, 
       invalid.dist = invalid.dist, if.last.skip.section = if.last.skip.section, 
-      success.arrays = success.arrays, processing.type = processing.type, speed.method = speed.method)
+      success.arrays = success.arrays, speed.method = speed.method)
   }
   timetable$Transmitter <- rownames(timetable)
   appendTo("debug", "Terminating assembleTimetable.")
   return(list(timetable = timetable, movements = movements))
-}
-
-#' Update movement validity based on the chosen first and last events for each section
-#' 
-#' @inheritParams actel
-#' @inheritParams deployValues
-#' @inheritParams assembleTimetable
-#' 
-#' @keywords internal
-#' 
-#' @return the updated movement's table
-#' 
-updateMovementValidity <- function(movements, events, sections){
-  # NOTE: The NULL variables below are actually column names used by data.table.
-  # This definition is just to prevent the package check from issuing a note due unknown variables.
-  Array <- NULL
-    
-  appendTo("Debug", "Starting updateMovementValidity.")
-  for (j in seq_len(length(sections))) {
-    link <- movements[, grepl(sections[j], Array)]
-    if (is.na(events$last.events[j])) {
-      if (any(link))
-        movements[link, "Valid"] <- FALSE
-    } else {
-      if (any(which(link) > events$last.events[j]))
-        movements[which(link)[which(link) > events$last.events[j]]]$Valid <- FALSE
-      if (any(which(link) < events$first.events[j]))
-        movements[which(link)[which(link) < events$first.events[j]]]$Valid <- FALSE
-    }
-    rm(link)
-  }
-  appendTo("Debug", "Terminating updateMovementValidity.")
-  return(movements)
 }
 
 #' Override automated logics
@@ -271,13 +922,12 @@ overrideEventCheck <- function(type, the.event, up.boundary, t, last.events, j, 
 #' @inheritParams actel
 #' @inheritParams simplifyMovements
 #' @inheritParams overrideDefaults
-#' @param processing.type the current processing type for the fish. Is supplied by the function assembleTimetable.
 #' 
 #' @return A vector of the movement numbers corresponding to each last event.
 #' 
 #' @keywords internal
 #' 
-findLastEvents <- function(i, movements, sections, minimum.detections, processing.type, cautious.assignment) {
+findLastEvents <- function(i, movements, sections, minimum.detections, cautious.assignment) {
   # NOTE: The NULL variables below are actually column names used by data.table.
   # This definition is just to prevent the package check from issuing a note due unknown variables.
   Array <- NULL
@@ -304,7 +954,7 @@ findLastEvents <- function(i, movements, sections, minimum.detections, processin
         }
       }
       if (trigger && is.na(last.events[l])) {
-        processing.type <- "Manual"
+        attributes(movements)$p.type <- "Manual"
         ## I used cat here because the appendTo will be used later on, when the findFirstEvents comes up
         cat(paste0("W: No ", sections[l], " detection events with more than one detection were found for fish ", i, ". Opening movements list for inspection.\n"))
         print(movements[(Valid), -c("Valid")], topn = nrow(movements[(Valid), -c("Valid")]))
@@ -342,9 +992,9 @@ findLastEvents <- function(i, movements, sections, minimum.detections, processin
       }
     }
     recipient <- eventOrderCheck(i = i, last.events = last.events, 
-      sections = sections, movements = movements, processing.type = processing.type)
+      sections = sections, movements = movements)
     last.events <- recipient[[1]]
-    processing.type <- recipient[[2]]
+    attributes(movements)$p.type <- recipient[[2]]
     rm(recipient)
   } else {
     # = there is only one detection event
@@ -358,7 +1008,7 @@ findLastEvents <- function(i, movements, sections, minimum.detections, processin
     }
   }
   appendTo("debug", paste("Terminating findLastEvents for fish ", i, ".", sep = ""))
-  return(list(last.events = last.events, processing.type = processing.type))
+  return(list(last.events = last.events, p.type = attributes(movements)$p.type))
 }
 
 #' Check event order
@@ -374,7 +1024,7 @@ findLastEvents <- function(i, movements, sections, minimum.detections, processin
 #' 
 #' @keywords internal
 #' 
-eventOrderCheck <- function(i, last.events, sections, movements, processing.type) {
+eventOrderCheck <- function(i, last.events, sections, movements) {
   # NOTE: The NULL variables below are actually column names used by data.table.
   # This definition is just to prevent the package check from issuing a note due unknown variables.
   Valid <- NULL
@@ -408,7 +1058,7 @@ eventOrderCheck <- function(i, last.events, sections, movements, processing.type
       appendTo("Screen", paste("Current last events: ", paste(last.events, collapse = ", "), " (", paste(sections, collapse = ", "), ").", sep = ""))
       cat("\n")
       if (not.ordered.trigger) {
-        appendTo(c("Screen"), "The last movement event of a section must NOT precede the last movement event of a \nprevious section (i.e. the migration analysis cannot cope with inter-section U turns).\nPlease edit the last valid events so this is not the case anymore.\n")
+        appendTo(c("Screen"), "The last movement event of a section must NOT precede the last movement event of a \nprevious section (i.e. the migration analysis cannot cope with inter-section U turns).\nPlease edit the last valid events so this is not the case any more.\n")
         decision <- "Y"
       } else {
         decision <- commentCheck(line = "Would you like to edit the last valid events?(y/N/comment) ", tag = i)
@@ -497,7 +1147,7 @@ eventOrderCheck <- function(i, last.events, sections, movements, processing.type
           }
         }
         appendTo("Report", paste0("M: Last valid events for fish ", i, " were manually edited to: ", paste(last.events, collapse = ", "), "."))
-        processing.type <- "Manual"
+        attributes(movements)$p.type <- "Manual"
       } else {
         appendTo("Report", paste0("M: Default last valid events for fish ", i, " were kept upon inspection."))
       }
@@ -506,7 +1156,7 @@ eventOrderCheck <- function(i, last.events, sections, movements, processing.type
     }
   }
   appendTo("debug", paste0("Terminating eventOrderCheck for fish ", i, "."))
-  return(list(last.events = last.events, processing.type = processing.type))
+  return(list(last.events = last.events, p.type = attributes(movements)$p.type))
 }
 
 #' Find starting row
@@ -566,7 +1216,7 @@ findFirstRow <- function(l, last.events, movements, sections) {
 #' 
 #' @keywords internal
 #' 
-findFirstEvents <- function(i, last.events, movements, sections, processing.type, cautious.assignment) {
+findFirstEvents <- function(i, last.events, movements, sections, cautious.assignment) {
   # NOTE: The NULL variables below are actually column names used by data.table.
   # This definition is just to prevent the package check from issuing a note due unknown variables.
   Array <- NULL
@@ -632,8 +1282,40 @@ findFirstEvents <- function(i, last.events, movements, sections, processing.type
     }
   }
   appendTo("debug", paste("Terminating findFirstEvents for fish ", i, ".", sep = ""))
-  return(list(events = list(first.events = first.events, last.events = last.events),
-        processing.type = processing.type))
+  return(list(first.events = first.events, last.events = last.events))
+}
+
+#' Update movement validity based on the chosen first and last events for each section
+#' 
+#' @inheritParams actel
+#' @inheritParams deployValues
+#' @inheritParams assembleTimetable
+#' 
+#' @keywords internal
+#' 
+#' @return the updated movement's table
+#' 
+updateMovementValidity <- function(movements, events, sections){
+  # NOTE: The NULL variables below are actually column names used by data.table.
+  # This definition is just to prevent the package check from issuing a note due unknown variables.
+  Array <- NULL
+    
+  appendTo("Debug", "Starting updateMovementValidity.")
+  for (j in seq_len(length(sections))) {
+    link <- movements[, grepl(sections[j], Array)]
+    if (is.na(events$last.events[j])) {
+      if (any(link))
+        movements[link, "Valid"] <- FALSE
+    } else {
+      if (any(which(link) > events$last.events[j]))
+        movements[which(link)[which(link) > events$last.events[j]]]$Valid <- FALSE
+      if (any(which(link) < events$first.events[j]))
+        movements[which(link)[which(link) < events$first.events[j]]]$Valid <- FALSE
+    }
+    rm(link)
+  }
+  appendTo("Debug", "Terminating updateMovementValidity.")
+  return(movements)
 }
 
 #' Deploy chosen values
@@ -647,14 +1329,15 @@ findFirstEvents <- function(i, last.events, movements, sections, processing.type
 #' @inheritParams loadDetections
 #' @inheritParams groupMovements
 #' @inheritParams findLastEvents
+#' @inheritParams assembleArrayCJS
 #' @param events A list containing both the first and last events. Supplied by findFirstEvents.
 #' 
 #' @return A list containing both the first and last events.
 #' 
 #' @keywords internal
 #' 
-deployValues <- function(i, timetable, movements, events, sections, spatial, 
-  dist.mat, invalid.dist, if.last.skip.section, success.arrays, processing.type, speed.method) {
+deployValues <- function(i, timetable, movements, events, sections, spatial, arrays,
+  dist.mat, invalid.dist, if.last.skip.section, success.arrays, speed.method) {
   # NOTE: The NULL variables below are actually column names used by data.table.
   # This definition is just to prevent the package check from issuing a note due unknown variables.
   Detections <- NULL
@@ -726,17 +1409,18 @@ deployValues <- function(i, timetable, movements, events, sections, spatial,
 
   if (movements[, any(Array != "Unknown")]) {
     temp <- movements[Array != "Unknown", ]
-    recipient <- countUpMoves(movements = temp, spatial = spatial)
+    recipient <- countBackMoves(movements = temp, arrays = arrays)
     timetable[i, "Backwards.movements"] <- recipient[[1]]
     timetable[i, "Max.cons.back.moves"] <- recipient[[2]]
   } else {
     timetable[i, "Backwards.movements"] <- 0
     timetable[i, "Max.cons.back.moves"] <- 0
   }
-  timetable[i, "P.type"] <- processing.type
-  testA <- !is.na(timetable[i, paste("Left", tail(sections, 1), sep = ".")])
+  timetable[i, "P.type"] <- attributes(movements)$p.type
+  # testA <- !is.na(timetable[i, paste("Left", tail(sections, 1), sep = ".")])
   testB <- any(!is.na(match(success.arrays, movements[tail(events$last.events, 1), Array])))
-  if (testA & testB) 
+  # if (testA & testB)
+  if (testB) 
     timetable[i, "Status"] <- "Succeeded"
   appendTo("debug", paste("Terminating deployValues for fish ", i, ".", sep = ""))
   return(timetable)
@@ -745,72 +1429,36 @@ deployValues <- function(i, timetable, movements, events, sections, spatial,
 #' Count backwards movements
 #' 
 #' @inheritParams simplifyMovements
-#' @inheritParams loadDetections
+#' @inheritParams assembleArrayCJS
 #' 
 #' @keywords internal
 #' 
 #' @return The number of backwards movements and the maximum consecutive backwards movements
 #' 
-countUpMoves <- function(movements, spatial){
-  # NOTE: The NULL variables below are actually column names used by data.table.
-  # This definition is just to prevent the package check from issuing a note due unknown variables.
-  Array <- NULL
-
-  appendTo("debug", "Starting countUpMoves.")
+countBackMoves <- function(movements, arrays){
+  appendTo("debug", "Starting countBackMoves.")
   if (nrow(movements) > 1) {# Determine number of backwards movements
-    array.sequence <- vector()
-    for (i in seq_len(length(unlist(spatial$array.order)))) {
-      array.sequence[grep(unlist(spatial$array.order)[i], movements[, Array])] <- i
-    }
-    backwards.movement <- vector()
-    for (i in 2:length(array.sequence)) {
-      backwards.movement[i - 1] <- array.sequence[i] < array.sequence[i - 1]
-    }
-    up.moves <- sum(backwards.movement)
-    # Find out maximum consecutive backwards movements
-    recipient <- vector()
-    restart <- TRUE
-    if (length(backwards.movement) > 1) {
-      for (i in 2:length(backwards.movement)) {
-        if (restart) {
-          counter <- 1
-          store <- FALSE
-        }
-        if (backwards.movement[i]) {
-          store <- TRUE
-          if (backwards.movement[i - 1]) {
-            restart <- FALSE
-            counter <- counter + 1
-          } else {
-            restart <- TRUE
-          }
-        }
-        if (store) {
-          recipient[length(recipient) + 1] <- counter
-        }
-      }
-      if (length(recipient) == 0) {
-        if (up.moves == 0) {
-          Max.back.moves <- 0
-        } else {
-          Max.back.moves <- 1
-        }
-      } else {
-        Max.back.moves <- max(recipient)
-      }
-    } else {
-      if (backwards.movement) {
-        Max.back.moves <- 1
-      } else {
-        Max.back.moves <- 0
-      }
-    }
+    direction <- NULL
+    A <- movements$Array[-nrow(movements)]
+    B <- movements$Array[-1]
+    aux <- cbind(A, B)
+    backwards.movements <- apply(aux, 1, function(x)
+      if(x[1] != x[2]) 
+        is.na(match(x[2], arrays[[x[1]]]$downstream))
+      else
+        FALSE
+      )
+    sum.back.moves <- sum(backwards.movements)
+    if (sum.back.moves > 0) 
+      max.back.moves <- max(rle(backwards.movements)$lengths[which(rle(backwards.movements)$values == TRUE)])
+    else
+      max.back.moves <- 0
   } else {
-    up.moves <- 0
-    Max.back.moves <- 0
+    sum.back.moves <- 0
+    max.back.moves <- 0
   }
-  appendTo("debug", "Terminating countUpMoves.")
-  return(list(up.moves = up.moves, Max.back.moves = Max.back.moves))
+  appendTo("debug", "Terminating countBackMoves.")
+  return(list(sum.back.moves = sum.back.moves, max.back.moves = max.back.moves))
 }
 
 #' Create status.df
@@ -828,9 +1476,9 @@ countUpMoves <- function(movements, spatial){
 #' 
 #' @keywords internal
 #' 
-assembleOutput <- function(timetable, bio, movements, spatial, sections, dist.mat, invalid.dist, tz.study.area) {
+assembleOutput <- function(timetable, bio, spatial, sections, dist.mat, invalid.dist, tz.study.area) {
   appendTo("debug", "Merging 'bio' and 'timetable'.")
-  status.df <- merge(bio, timetable, by = "Transmitter", all = T)
+  status.df <- merge(bio, timetable, by = "Transmitter", all = TRUE)
   
   appendTo("debug", "Completing entries for fish that were never detected.")
   status.df$Status[is.na(status.df$Status)] <- paste("Disap. in", sections[1])
@@ -867,16 +1515,36 @@ assembleOutput <- function(timetable, bio, movements, spatial, sections, dist.ma
     }
   }
   rm(i)
-  
+
+  # Convert time data
+  for (section in sections) {
+    for (the.col in c("Time.in.", "Time.until.")) {
+      # convert to numeric
+      status.df[, paste0(the.col, section)] <- as.numeric(status.df[, paste0(the.col, section)])
+      # grab the mean for later use
+      aux <- mean(status.df[, paste0(the.col, section)], na.rm = TRUE)
+      # convert to difftime
+      status.df[, paste0(the.col, section)] <- as.difftime(status.df[, paste0(the.col, section)], units = "secs")
+      units(status.df[, paste0(the.col, section)]) <- "secs"
+      if (aux > 86400)
+        units(status.df[, paste0(the.col, section)]) <- "days"
+      if (aux <= 86400 & aux > 3600)
+        units(status.df[, paste0(the.col, section)]) <- "hours"
+      if (aux <= 3600)
+        units(status.df[, paste0(the.col, section)]) <- "mins"
+      status.df[, paste0(the.col, section)] <- round(status.df[, paste0(the.col, section)], 3)
+    }
+  }  
+
   if (file.exists("temp_comments.txt")) {
     temp <- read.table("temp_comments.txt", header = F, sep = "\t")
-    status.df[, "Script.comments"] <- NA
+    status.df[, "Comments"] <- NA
     for (i in seq_len(nrow(temp))) {
       link <- match(temp[i, 1], status.df$Transmitter)
-      if (is.na(status.df$Script.comments[link])) {
-        status.df$Script.comments[link] <- paste(temp[i, 2])
+      if (is.na(status.df$Comments[link])) {
+        status.df$Comments[link] <- paste(temp[i, 2])
       } else {
-        status.df$Script.comments[link] <- paste(status.df$Script.comments[link], temp[i, 2], sep = "// ")
+        status.df$Comments[link] <- paste(status.df$Comments[link], temp[i, 2], sep = "// ")
       }
     }
   }
@@ -925,26 +1593,6 @@ assembleSectionOverview <- function(status.df, sections) {
 }
 
 
-#' Create array.overview
-#'
-#' @return A data frame containing the progression per group of fish present in the biometrics.
-#' 
-#' @keywords internal
-#' 
-assembleArrayOverview <- function(group.CJS) {
-  appendTo("debug", "Starting assembleArrayOverview.")
-  recipient <- lapply(group.CJS, function(x) x$absolutes)
-
-  for (i in 1:length(recipient)) {
-    recipient[[i]][1, ] <- apply(recipient[[i]][c(1,3), ], 2, sum, na.rm = TRUE)
-    recipient[[i]][2, ] <- recipient[[i]][4, ]
-    recipient[[i]][3, ] <- recipient[[i]][2, ] - recipient[[i]][1, ]
-    recipient[[i]] <- recipient[[i]][1:3, ]
-    rownames(recipient[[i]]) <- c("Known", "Estimated", "Difference")
-  }
-  appendTo("debug", "Terminating assembleArrayOverview.")  
-  return(recipient)
-}
 
 #' Create array.overview
 #'

@@ -1,3 +1,26 @@
+#' Open HTML report
+#' 
+#' @param file.name the name of the html file
+#' 
+#' @keywords internal
+#' 
+openReport <- function(file.name){
+  # The internet connection check is made only because R was freezing when opening the html without internet in my pc.
+  rep.ver <- tryCatch(unlist(strsplit(readLines('https://raw.githubusercontent.com/hugomflavio/actel/master/DESCRIPTION')[3], " "))[2], error = function(e) NULL, warning = function(w) NULL)
+  if (!is.null(rep.ver)) {
+    if (.Platform$OS.type == "windows") 
+      hide <- system(paste0('open "', file.name, '"'), show.output.on.console = FALSE)
+    else
+      hide <- system(paste0('xdg-open "', file.name, '"'))
+  }  else {
+    appendTo("Screen", "M: Skipping auto-opening of the report as R has been crashing when opening the html without an internet connection.")
+  }
+  appendTo("debug", "debug: Removing toc_menu_explore.html")
+  if(file.exists("Report/toc_menu_explore.html"))
+    file.remove("Report/toc_menu_explore.html")
+  return(NULL)
+}
+
 #' Print progression diagram
 #'
 #' @inheritParams migration
@@ -8,7 +31,7 @@
 #'  
 #' @keywords internal
 #' 
-mbPrintProgression <- function(dot, sections, overall.CJS, spatial, status.df) {
+printProgression <- function(dot, sections, overall.CJS, spatial, status.df) {
   cbPalette <- c("#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7", "#999999")
   names(cbPalette) <- c("Orange", "Blue", "Green", "Yellow", "Darkblue", "Darkorange", "Pink", "Grey")
 
@@ -55,16 +78,30 @@ mbPrintProgression <- function(dot, sections, overall.CJS, spatial, status.df) {
     paste0(release_nodes$id, " [label = 'R.S.: ", release_nodes$label, "']", collapse = "\n"), "\n"))
 
   # prepare edge data frame
-  diagram_edges <- as.data.frame(apply(dot[, c(1, 3)], 2, function(x) match(x, diagram_nodes$original.label)))
-  colnames(diagram_edges) <- c("from", "to")
+  if (nrow(dot) == 1)
+    diagram_edges <- as.data.frame(t(apply(dot[, c(1, 3), drop = FALSE], 2, function(x) match(x, diagram_nodes$original.label))))
+  else 
+    diagram_edges <- as.data.frame(apply(dot[, c(1, 3), drop = FALSE], 2, function(x) match(x, diagram_nodes$original.label)))
+  diagram_edges$type <- NA_character_
+  diagram_edges$type[dot$to == "--"] <- "[dir = none]"
+  diagram_edges$type[dot$to == "->"] <- "[arrowtail = tee, arrowhead = normal, dir = both]"
+  diagram_edges$type[dot$to == "<-"] <- "[arrowtail = normal, arrowhead = tee, dir = both]"
+  colnames(diagram_edges) <- c("from", "to", "type")
 
   # Release edges
   release_edges <- data.frame(from = release_nodes$id,
-    to = diagram_nodes$id[match(release_nodes$Array, diagram_nodes$original.label)])
+    to = diagram_nodes$id[match(release_nodes$Array, diagram_nodes$original.label)],
+    type = rep("[arrowtype='normal']", nrow(release_nodes)))
 
   # edge string
   combined_edges <- rbind(diagram_edges, release_edges)
-  edge_fragment <- paste0(apply(combined_edges, 1, function(x) paste0(x, collapse = "->")), collapse = "\n")
+
+  edge_list <- split(combined_edges, combined_edges$type)
+
+  edge_fragment <- paste0(unlist(lapply(edge_list, function(n) {
+    s <- paste0("edge ", n$type[1], "\n")
+    s <- paste0(s, paste0(apply(n, 1, function(x) paste0(x[1:2], collapse = "->")), collapse = "\n"), "\n")
+  })), collapse = "\n")
 
   x <- paste0("digraph {
   rankdir = LR
@@ -133,16 +170,30 @@ printDot <- function(dot, sections = NULL, spatial) {
     paste0(release_nodes$id, " [label = 'R.S.: ", release_nodes$label, "']", collapse = "\n"), "\n"))
 
   # prepare edge data frame
-  diagram_edges <- as.data.frame(apply(dot[, c(1, 3)], 2, function(x) match(x, diagram_nodes$label)))
-  colnames(diagram_edges) <- c("from", "to")
+  if (nrow(dot) == 1)
+    diagram_edges <- as.data.frame(t(apply(dot[, c(1, 3), drop = FALSE], 2, function(x) match(x, diagram_nodes$label))))
+  else 
+    diagram_edges <- as.data.frame(apply(dot[, c(1, 3), drop = FALSE], 2, function(x) match(x, diagram_nodes$label)))
+  diagram_edges$type <- NA_character_
+  diagram_edges$type[dot$to == "--"] <- "[dir = none]"
+  diagram_edges$type[dot$to == "->"] <- "[arrowtail = tee, arrowhead = normal, dir = both]"
+  diagram_edges$type[dot$to == "<-"] <- "[arrowtail = normal, arrowhead = tee, dir = both]"
+  colnames(diagram_edges) <- c("from", "to", "type")
 
   # Release edges
   release_edges <- data.frame(from = release_nodes$id,
-    to = diagram_nodes$id[match(release_nodes$Array, diagram_nodes$label)])
+    to = diagram_nodes$id[match(release_nodes$Array, diagram_nodes$label)],
+    type = rep("[arrowtype='normal']", nrow(release_nodes)))
 
   # edge string
   combined_edges <- rbind(diagram_edges, release_edges)
-  edge_fragment <- paste0(apply(combined_edges, 1, function(x) paste0(x, collapse = "->")), collapse = "\n")
+
+  edge_list <- split(combined_edges, combined_edges$type)
+
+  edge_fragment <- paste0(unlist(lapply(edge_list, function(n) {
+    s <- paste0("edge ", n$type[1], "\n")
+    s <- paste0(s, paste0(apply(n, 1, function(x) paste0(x[1:2], collapse = "->")), collapse = "\n"), "\n")
+  })), collapse = "\n")
 
   x <- paste0("digraph {
   rankdir = LR
@@ -162,53 +213,6 @@ printDot <- function(dot, sections = NULL, spatial) {
   plot_string <- DiagrammeRsvg::export_svg(plot)
   plot_raw <- charToRaw(plot_string)
   rsvg::rsvg_svg(svg = plot_raw, file = "Report/mb_arrays.svg")
-}
-
-#' Collect summary information on the tags detected but that are not part of the study.
-#'
-#' @param input list of detections for the tags to be excluded.
-#' @param restart logical: if TRUE, remove file 'temp_strays.csv' from the working directory.
-#' 
-#' @keywords internal
-#' 
-collectStrays <- function(input, restart = FALSE){
-  appendTo("debug", "Starting collectStrays.")
-  if (restart && file.exists("temp_strays.csv")) {
-    file.remove("temp_strays.csv")
-  }
-  if (length(input) > 0) {
-    recipient <- data.frame(Transmitter = names(input), 
-      N.detections = unlist(lapply(input,nrow)), 
-      First.detection = unlist(lapply(input, function(x) as.character(head(x$Timestamp,1)))),
-      Last.detection = unlist(lapply(input, function(x) as.character(tail(x$Timestamp,1)))),
-      Receivers = unlist(lapply(input, function(x) paste(unique(x$Receiver), collapse = ", ")))
-      )
-    write.table(recipient, file = "temp_strays.csv", sep = ",", append = file.exists("temp_strays.csv"), row.names = FALSE, col.names = !file.exists("temp_strays.csv"))
-  }
-  appendTo("debug", "Terminating collectStrays.")
-}
-
-#' Store summary information on the stray tags detected in a permanent file.
-#'
-#' @keywords internal
-#'
-storeStrays <- function(){
-  appendTo("debug", "Starting storeStrays.")
-  if (file.exists("temp_strays.csv")) {
-    if (file.exists(newname <- "stray_tags.csv")) {
-      continue <- TRUE
-      index <- 1
-      while (continue) {
-        if (file.exists(newname <- paste("stray_tags", index, "csv", sep = "."))) {
-          index <- index + 1
-        } else {
-          continue <- FALSE
-        }
-      }
-    }
-    file.rename("temp_strays.csv", newname)
-  }
-  appendTo("debug", "Terminating storeStrays.")
 }
 
 #' Print biometric graphics 
@@ -275,56 +279,58 @@ printDotplots <- function(status.df, invalid.dist) {
   appendTo("debug", "Starting printDotplots.")
   t1 <- status.df[status.df$Detections > 0, c("Transmitter", "Detections", colnames(status.df)[grepl("Time.until", colnames(status.df)) | grepl("Speed.to", colnames(status.df)) | grepl("Time.in", 
     colnames(status.df))])]
+  t1 <- t1[, apply(t1, 2, function(x) !all(is.na(x)))]
   t1$Transmitter <- factor(t1$Transmitter, levels = rev(t1$Transmitter))
-  largest <- c(-1, -1, 
-    unlist(
-      apply(t1[, c(-1, -2)], 2, 
-        function(x) 
-        if (!all(is.na(x))) {
-          max(x, na.rm = T)
-        } else {
-          NA
-        }
-      )
-    )
-  )
-  largest[grepl("Speed.to", colnames(t1))] <- -1
-  keep.seconds <- largest <= 600 & largest >= 0
-  to.minutes <- largest <= 36000 & largest > 600
-  to.hours <- largest <= 172800 & largest > 36000
-  to.days <- largest > 172800
-  t1[, to.minutes] <- t1[, to.minutes]/60
-  t1[, to.hours] <- t1[, to.hours]/3600
-  t1[, to.days] <- t1[, to.days]/86400
-  colnames(t1)[keep.seconds] <- paste(colnames(t1)[keep.seconds], ".\n(Secs)", sep = "")
-  colnames(t1)[to.minutes] <- paste(colnames(t1)[to.minutes], ".\n(Mins)", sep = "")
-  colnames(t1)[to.hours] <- paste(colnames(t1)[to.hours], ".\n(Hours)", sep = "")
-  colnames(t1)[to.days] <- paste(colnames(t1)[to.days], ".\n(Days)", sep = "")
-  colnames(t1)[grepl("Speed.to", colnames(t1))] <- paste(colnames(t1)[grepl("Speed.to", colnames(t1))], ".\n(m/s)", sep = "")
+  # largest <- c(-1, -1, 
+  #   unlist(
+  #     apply(t1[, c(-1, -2)], 2, 
+  #       function(x) 
+  #       if (!all(is.na(x))) {
+  #         max(x, na.rm = TRUE)
+  #       } else {
+  #         NA
+  #       }
+  #     )
+  #   )
+  # )
+  # largest[grepl("Speed.to", colnames(t1))] <- -1
+  # keep.seconds <- largest <= 600 & largest >= 0
+  # to.minutes <- largest <= 36000 & largest > 600
+  # to.hours <- largest <= 172800 & largest > 36000
+  # to.days <- largest > 172800
+  # t1[, to.minutes] <- t1[, to.minutes]/60
+  # t1[, to.hours] <- t1[, to.hours]/3600
+  # t1[, to.days] <- t1[, to.days]/86400
+  # colnames(t1)[keep.seconds] <- paste(colnames(t1)[keep.seconds], ".\n(Secs)", sep = "")
+  # colnames(t1)[to.minutes] <- paste(colnames(t1)[to.minutes], ".\n(Mins)", sep = "")
+  # colnames(t1)[to.hours] <- paste(colnames(t1)[to.hours], ".\n(Hours)", sep = "")
+  # colnames(t1)[to.days] <- paste(colnames(t1)[to.days], ".\n(Days)", sep = "")
+
+  link <- unlist(sapply(colnames(t1), function(x) attributes(t1[,x])$units))
+  colnames(t1)[match(names(link), colnames(t1))] <- paste0(names(link), "\n(", link, ")")
+  colnames(t1)[grepl("Speed.to", colnames(t1))] <- paste(colnames(t1)[grepl("Speed.to", colnames(t1))], "\n(m/s)", sep = "")
   colnames(t1)[2] <- "Detections\n(n)"
-  rm(keep.seconds, to.minutes, to.hours, to.days, largest)
   if (!invalid.dist) {
     t2 <- t1[, !grepl("Time.until", colnames(t1))]
   } else {
     t2 <- t1[, !grepl("Speed.to", colnames(t1))]
   }
   colnames(t2) <- sub("Time.i", "I", colnames(t2))
-  colnames(t2) <- sub("Time.u", "U", colnames(t2))
+  colnames(t2) <- sub("Time.until", "To", colnames(t2))
   colnames(t2) <- sub("Speed.t", "T", colnames(t2))
-  PlotData <- suppressMessages(reshape2::melt(t2))
-  PlotData$Colour <- "Orange"
+  PlotData <- suppressWarnings(suppressMessages(reshape2::melt(t2)))
+  PlotData$Colour <- "#ba009e" # purple, for bugs
   for (j in colnames(t2)[-1]) {
     limits <- quantile(t2[, j], probs = c(0.1, 0.9), na.rm = T)
     toadd <- vector()
     for (i in 1:nrow(t2)) {
       if (!is.na(t2[i, j]) && t2[i, j] <= limits[1]) {
-        toadd[i] <- "Orange"
+        toadd[i] <- "#56B4E9" # blue
       } else {
-        if (!is.na(t2[i, j]) && t2[i, j] >= limits[2]) {
-          toadd[i] <- "Red"
-        } else {
-          toadd[i] <- "Black"
-        }
+        if (!is.na(t2[i, j]) && t2[i, j] >= limits[2])
+          toadd[i] <- "#f20000" # red
+        else
+          toadd[i] <- "#000000" # black
       }
     }
     rm(i)
@@ -387,150 +393,13 @@ printSurvivalGraphic <- function(section.overview) {
   p <- p + ggplot2::geom_bar(stat = "identity", fill = cbPalette[[2]], colour = cbPalette[[2]])
   p <- p + ggplot2::facet_grid(. ~ group)
   p <- p + ggplot2::theme_bw()
-  p <- p + ggplot2::ylim(0, 1)
+  p <- p + ggplot2::scale_y_continuous(limits = c(0, 1), expand = c(0, 0, 0.05, 0))
   p <- p + ggplot2::labs(x = "", y = "Survival")
-  # ggplot2::ggsave(paste("Report/survival.pdf", sep = ""), width = nrow(section.overview) * 2, height = 4)
-  ggplot2::ggsave(paste("Report/survival.png", sep = ""), width = nrow(section.overview) * 2, height = 4)
+  the.width <- max(2, sum(grepl("Disap.", colnames(section.overview))) * nrow(section.overview))
+  ggplot2::ggsave(paste("Report/survival.png", sep = ""), width = the.width, height = 4)
   appendTo("debug", "Terminating printSurvivalGraphic.")
 }
 
-#' Compile Progression in a ggplot-friendly fashion
-#' 
-#' Used within printProgression
-#' 
-#' @inheritParams printProgression
-#' @inheritParams simplifyMovements
-#' @param detailed.absolutes a list of absolutes extracted from split.CJS
-#' @param the.levels a vector containing levels for later use in ggplot
-#' @param i the current iteration number
-#' 
-#' @keywords internal
-#' 
-#' @return An updated progression data frame and an updated the.levels
-#' 
-compileProgressionDataFrame <- function(status.df, group.CJS, detailed.absolutes, i, the.levels){
-  known.overall <- apply(group.CJS[[i]]$absolutes[c(1,3),], 2, sum, na.rm = TRUE)
-  link <- grepl(paste0("^", unique(status.df$Group)[i]), names(detailed.absolutes))
-  originals <- names(detailed.absolutes)[link]
-  new <- sub(paste0("^", unique(status.df$Group)[i], "."), "Known-", originals)
-  the.levels <- c(the.levels, new)
-
-  the.array <- c()
-  the.value <- c()
-  the.group <- c()
-  the.fill  <- c()
-  for (j in 1:length(originals)) {
-    the.array <- c(the.array, colnames(detailed.absolutes[[originals[j]]]))
-    the.value <- c(the.value, apply(detailed.absolutes[[originals[j]]][c(1,3), ], 2, sum, na.rm = TRUE))
-    the.group <- c(the.group, rep(names(group.CJS)[i], ncol(detailed.absolutes[[originals[j]]])))
-    the.fill  <- c(the.fill, rep(new[j], ncol(detailed.absolutes[[originals[j]]])))
-  }
-  rm(new)
-
-  output <- data.frame(
-    Array = c(the.array, colnames(group.CJS[[i]]$absolutes)),
-    Value = c(the.value, group.CJS[[i]]$absolutes[4, ] - known.overall),
-    Group = c(the.group, rep(names(group.CJS)[i], ncol(group.CJS[[i]]$absolutes))),
-    Fill  = c(the.fill, rep("Estimated", ncol(group.CJS[[i]]$absolutes))),
-    stringsAsFactors = FALSE
-    )
-  return(list(output, the.levels))
-}
-
-#' Summarise places were more fish were released
-#' 
-#' The "additions" will give the labels
-#' 
-#' @inheritParams printProgression
-#' @param progression the progression data frame, provided by compileProgressionDataFrame
-#' 
-#' @keywords internal
-#' 
-#' @return The additions data frame, or NULL if additions should be aborted.
-#' 
-prepareAdditions <- function(group.CJS, progression) {
-  if (sum(unlist(lapply(group.CJS, function(x) length(x$additions)))) > 0) {
-    additions <- as.data.frame(matrix(ncol = 2, nrow = sum(unlist(lapply(group.CJS, function(x) length(x$additions))))))
-    colnames(additions) <- c("Array","n")
-    rownames(additions) <- names(group.CJS)
-    for (i in 1:length(group.CJS)) {
-      if(any(names(group.CJS[[i]]) == "additions")) {
-        additions$Array[i] <- names(group.CJS[[i]]$additions)
-        additions$n[i] <- group.CJS[[i]]$additions
-      }
-    }
-    additions <- additions[!is.na(additions$Array), ]
-    additions$Array <- factor(additions$Array, levels = unique(progression$Array))
-    additions$Group <- rownames(additions)
-  } else {
-    additions <- NULL
-  }
-  return(additions)
-}
-
-#' Compile the totals at each entry point per group
-#' 
-#' @inheritParams printProgression
-#' 
-#' @return the totals data frame
-#' 
-#' @keywords internal
-#' 
-prepareTotals <- function(group.CJS) {
-  totals <- as.data.frame(matrix(ncol = 2, nrow = 0))
-  colnames(totals) <- c("Array","n")
-  for (i in 1:length(group.CJS)) {
-    totals[nrow(totals) + 1, "Array"] <- "Release"
-    totals[nrow(totals), "n"] <- group.CJS[[i]]$absolutes[1, 1]
-    totals[nrow(totals), "Group"] <- names(group.CJS)[i]
-    if(any(names(group.CJS[[i]]) == "additions")) {
-      for (j in length(group.CJS[[i]]$additions)) {
-        totals[nrow(totals) + 1, "Array"] <- names(group.CJS[[i]]$additions)
-        totals[nrow(totals), "n"] <- sum(totals$n[totals$Group == names(group.CJS[i])], group.CJS[[i]]$additions, na.rm = TRUE)
-        totals[nrow(totals), "Group"] <- names(group.CJS)[i]
-      }
-    }
-  }
-  return(totals)
-}
-
-#' Prepare final totals in ggplot-friendly style
-#' 
-#' the "the.final.totals" will provide the data for the red dashed line
-#' 
-#' @inheritParams printProgression
-#' @inheritParams prepareAdditions
-#' @param totals the totals data frame, provided by prepareTotals
-#' 
-#' @keywords internal
-#' 
-#' @return the final total data frame
-#' 
-prepareFinalTotals <- function(group.CJS, totals, progression){
-  for(i in names(group.CJS)){
-    temp <- totals[totals$Group == i, ]
-    recipient <- temp
-    for(j in 1:nrow(temp)) {
-      recipient[j * 2 - 1, ] <- temp[j, ]
-      recipient[j * 2, ] <- temp[j, ]
-      if (j < nrow(temp))
-        recipient[j * 2, "Array"] <- temp[j + 1, "Array"]
-      else 
-        recipient[j * 2, "Array"] <- paste(tail(progression$Array, 1))
-    }
-    recipient$Array <- factor(recipient$Array, levels = unique(progression$Array))
-    recipient$nArray <- NA
-    recipient$nArray[1:(nrow(recipient) - 1 )] <- as.numeric(recipient$Array[1:(nrow(recipient) - 1)]) - 0.5
-    recipient$nArray[nrow(recipient)] <- as.numeric(recipient$Array[nrow(recipient)]) + 0.5
-
-    if(exists("the.final.totals")) {
-      the.final.totals <- rbind(the.final.totals, recipient)
-    } else {
-      the.final.totals <- recipient
-    }
-  }
-  return(the.final.totals)
-}
 
 #' print Rmd fragment for inclusion in the report
 #' 
@@ -557,62 +426,13 @@ printArrayOverview <- function(array.overview) {
 #'
 #' Prints the ALS inter-array efficiency for inclusion in printRmd.
 #' 
-#' @inheritParams printProgression
-#' @param last.array.results The output of the getEstimate calculations.
-#' 
-#' @keywords internal
-#' 
-printEfficiency <- function(overall.CJS, last.array.results){
-    efficiency.fragment <- paste('
-**Individuals detected and estimated**
-
-```{r efficiency1, echo = FALSE}
-knitr::kable(overall.CJS$absolutes)
-```
-
-**Array efficiency**
-
-```{r efficiency2, echo = FALSE}
-to.print <- t(paste(round(overall.CJS$efficiency * 100, 1), "%", sep = ""))
-to.print[grepl("NA", to.print)] <- "-"
-colnames(to.print) <- names(overall.CJS$efficiency)
-rownames(to.print) <- "efficiency"
-knitr::kable(to.print)
-```
-
-**Lambda:** `r I(overall.CJS$lambda)`
-
-')
-  if (is.list(last.array.results)){
-    efficiency.fragment <- paste(efficiency.fragment, '
-#### Last array efficiency estimate
-
-```{r efficiency3, echo = FALSE,  comment = NA}
-knitr::kable(last.array.results$results$absolutes)
-```
-
-**Last array estimated efficiency: **', round(last.array.results$results$combined.efficiency * 100, 2), "%", sep = "")
-  } else {
-    efficiency.fragment <- paste(efficiency.fragment, '
-#### Last array efficiency estimate
-
-```{r efficiency3, echo = FALSE,  comment = NA}
-cat(last.array.results)
-```', sep = "")
-  }
-  return(efficiency.fragment)
-}
-
-#' Print efficiency fragment
-#'
-#' Prints the ALS inter-array efficiency for inclusion in printRmd.
-#' 
-#' @inheritParams printProgression
 #' @param intra.CJS The output of the getEstimate calculations.
 #' 
 #' @keywords internal
 #' 
-mbPrintEfficiency <- function(overall.CJS, intra.CJS){
+printEfficiency <- function(intra.CJS, type = c("migration", "residency")){
+  type <- match.arg(type)
+  if (type == "migration") {
     efficiency.fragment <- paste('
 **Individuals detected and estimated**
 
@@ -632,6 +452,35 @@ knitr::kable(to.print)
 
 #### Intra array efficiency estimates
 ')
+  } else {
+    efficiency.fragment <- paste('
+**Events recorded and missed**
+
+```{r efficiency1, echo = FALSE}
+to.print <- as.data.frame(apply(efficiency$absolutes, c(1, 2), function(x) ifelse(is.na(x), "-", x)))
+knitr::kable(to.print)
+```
+
+**Array efficiency**
+
+```{r efficiency2, echo = FALSE}
+to.print <- t(paste(round(efficiency$max.efficiency * 100, 1), "%", sep = ""))
+to.print[grepl("NA", to.print)] <- "-"
+to.print <- as.data.frame(to.print)
+colnames(to.print) <- names(efficiency$max.efficiency)
+
+aux <- t(paste(round(efficiency$min.efficiency * 100, 1), "%", sep = ""))
+aux[grepl("NA", aux)] <- "-"
+to.print[2, ] <- aux
+
+rownames(to.print) <- c("Maximum efficiency", "Minimum efficiency")
+
+knitr::kable(to.print)
+```
+
+#### Intra array efficiency estimates
+')    
+  }
   if (!is.null(intra.CJS)){
     for (i in 1:length(intra.CJS)) {
     efficiency.fragment <- paste0(efficiency.fragment, '
@@ -667,7 +516,7 @@ cat("No intra-array replicates were indicated.")
 #' @keywords internal
 #' 
 printIndividuals <- function(redraw, detections.list, bio, status.df = NULL, tz.study.area, 
-  movements, simple.movements = NULL, extension = "png") {
+  movements, valid.movements = NULL, extension = "png") {
   # NOTE: The NULL variables below are actually column names used by ggplot.
   # This definition is just to prevent the package check from issuing a note due unknown variables.
   Timestamp <- NULL
@@ -677,7 +526,7 @@ printIndividuals <- function(redraw, detections.list, bio, status.df = NULL, tz.
 
   cbPalette <- c("#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7", "#999999")
   names(cbPalette) <- c("Orange", "Blue", "Green", "Yellow", "Darkblue", "Darkorange", "Pink", "Grey")
-  appendTo(c("Screen", "Report"), "M: Drawing individual graphics for the report.")
+  appendTo(c("Screen", "Report"), "M: Drawing individual detection graphics.")
   if (exists("redraw") && redraw == FALSE) {
     appendTo(c("Screen", "Report"), "M: 'redraw' is set to FALSE, only drawing new graphics.")
   }
@@ -693,12 +542,12 @@ printIndividuals <- function(redraw, detections.list, bio, status.df = NULL, tz.
       )
       all.moves.line$Station <- factor(all.moves.line$Station, levels = levels(PlotData$Standard.Name))
       all.moves.line$Timestamp <- as.POSIXct(all.moves.line$Timestamp, tz = tz.study.area)
-      add.simple.movements <- FALSE
-      if (!is.null(simple.movements[[fish]])) {
-        add.simple.movements <- TRUE
+      add.valid.movements <- FALSE
+      if (!is.null(valid.movements[[fish]])) {
+        add.valid.movements <- TRUE
         simple.moves.line <- data.frame(
-          Station = as.vector(t(simple.movements[[fish]][, c("First.station", "Last.station")])),
-          Timestamp = as.vector(t(simple.movements[[fish]][, c("First.time", "Last.time")]))
+          Station = as.vector(t(valid.movements[[fish]][, c("First.station", "Last.station")])),
+          Timestamp = as.vector(t(valid.movements[[fish]][, c("First.time", "Last.time")]))
           )
         simple.moves.line$Station <- factor(simple.moves.line$Station, levels = levels(PlotData$Standard.Name))
         simple.moves.line$Timestamp <- as.POSIXct(simple.moves.line$Timestamp, tz = tz.study.area)
@@ -718,7 +567,7 @@ printIndividuals <- function(redraw, detections.list, bio, status.df = NULL, tz.
       p <- ggplot2::ggplot(PlotData, ggplot2::aes(x = Timestamp, y = Standard.Name, colour = Array))
       # Choose background
       default.cols <- TRUE
-      if (!is.null(status.df) && status.df$P.type[status.row] == "Overridden") {
+      if (attributes(movements[[fish]])$p.type == "Overridden") {
         p <- p + ggplot2::theme(
           panel.background = ggplot2::element_rect(fill = "white"),
           panel.border = ggplot2::element_rect(fill = NA, colour = "#ef3b32" , size = 2),
@@ -728,7 +577,7 @@ printIndividuals <- function(redraw, detections.list, bio, status.df = NULL, tz.
           )
         default.cols <- FALSE
       } 
-      if (!is.null(status.df) && status.df$P.type[status.row] == "Manual") {
+      if (attributes(movements[[fish]])$p.type == "Manual") {
          p <- p + ggplot2::theme(
           panel.background = ggplot2::element_rect(fill = "white"),
           panel.border = ggplot2::element_rect(fill = NA, colour = "#ffd016" , size = 2),
@@ -754,7 +603,7 @@ printIndividuals <- function(redraw, detections.list, bio, status.df = NULL, tz.
       }
       # Plot movements
       p <- p + ggplot2::geom_path(data = all.moves.line, ggplot2::aes(x = Timestamp, y = Station, group = 1), col = "grey40", linetype = "dashed")
-      if (add.simple.movements) {
+      if (add.valid.movements) {
         p <- p + ggplot2::geom_path(data = simple.moves.line, ggplot2::aes(x = Timestamp, y = Station, group = 1), col = "grey40")
       }
       # Trim graphic
@@ -807,7 +656,7 @@ printIndividuals <- function(redraw, detections.list, bio, status.df = NULL, tz.
 #' 
 #' @return A rmd string to be attached to the report.
 #' 
-printCircular <- function(times, bio){
+printCircular <- function(times, bio, suffix = NULL){
   cbPalette <- c("#56B4E9", "#c0ff3e", "#E69F00", "#F0E442", "#0072B2", "#D55E00", "#CC79A7", "#999999")
   circular.plots <- ""
   colours <- paste(cbPalette[c(1:length(unique(bio$Group)))], 80, sep = "")
@@ -824,7 +673,7 @@ printCircular <- function(times, bio){
       ylegend <- -0.97
     }
     prop <- roundDown(1 / max(unlist(lapply(trim.times, function(x) table(roundUp(x, to = 1)) / sum(!is.na(x))))), to = 1)
-    {grDevices::svg(paste0("Report/times_", names(times)[i], ".svg"), height = 5, width = 5, bg = "transparent")
+    {grDevices::svg(paste0("Report/times_", names(times)[i], suffix, ".svg"), height = 5, width = 5, bg = "transparent")
     par(mar = c(1, 2, 2, 1))
     copyOfCirclePlotRad(main = names(times)[i], shrink = 1.05)
     # circularSection(from = sunset, 
@@ -843,9 +692,9 @@ printCircular <- function(times, bio){
       fill = params$col, bty = "n", x.intersp = 0.3, cex = 0.8)
     grDevices::dev.off()}
     if (i %% 2 == 0)
-      circular.plots <- paste0(circular.plots, "![](times_", names(times)[i], ".svg){ width=50% }\n")
+      circular.plots <- paste0(circular.plots, "![](times_", names(times)[i], suffix, ".svg){ width=50% }\n")
     else
-      circular.plots <- paste0(circular.plots, "![](times_", names(times)[i], ".svg){ width=50% }")
+      circular.plots <- paste0(circular.plots, "![](times_", names(times)[i], suffix, ".svg){ width=50% }")
   }
   return(circular.plots)
 }
@@ -1019,48 +868,6 @@ myRoseDiag <- function (x, pch = 16, cex = 1, axes = TRUE, shrink = 1, bins = 24
     radii.scale = radii.scale, prop = prop, col = col)))
 }
 
-#' Draw rings at absolute points
-#' 
-#' Adapted from RosediagRad (from the circular package) to draw rings inside the circular plot. Called if rings = TRUE in myRoseDiag
-#' 
-#' For more details about the circular package, visit its homepage at https://github.com/cran/circular
-#' 
-#' @inheritParams myRoseDiag
-#' 
-#' @keywords internal
-#'  
-ringsAbs <- function(plot.params, border, rings.lty, 
-  ring.text, ring.text.pos, ring.text.cex){
-  n <- length(plot.params$x)
-  freq <- rep(plot.params$x, plot.params$bins)
-  arc <- (2 * pi)/plot.params$bins
-  breaks <- seq(0, 2 * pi, length.out = (plot.params$bins + 1))
-  freq <- hist.default(plot.params$x, breaks = breaks, plot = FALSE)$counts   
-  my.max <- range(freq)[2]
-  my.breaks <- my.max / divisors(my.max)
-    while(length(my.breaks) < 3){
-      my.max <- my.max + 1
-      my.breaks <- divisors(my.max)
-    } 
-  clean.breaks <- my.breaks[-c(1, length(my.breaks))]
-  nlines <- my.max / clean.breaks
-  breaker <- clean.breaks[which.min(abs(nlines - 4))]
-  line.values <- seq(from = breaker, to = my.max, by = breaker)
-  rel.values <- line.values / n
-  if (plot.params$radii.scale == "sqrt") {
-     radius <- sqrt(rel.values)*plot.params$prop
-  } else {
-     radius <- rel.values*plot.params$prop
-  }
-  for (i in 1:length(radius)) {
-    xx <- c(radius[i] * cos(seq(0, 2 * pi, length = 1000) + plot.params$zero))
-    yy <- c(radius[i] * sin(seq(0, 2 * pi, length = 1000) + plot.params$zero))
-    polygon(xx, yy, border = border, lty = rings.lty)
-  }
-  if(ring.text){
-    text(x = rep(0, length(radius)), y = (radius * -1) + ring.text.pos, line.values, cex = ring.text.cex)
-  }
-}
 
 #' Draw rings at relative points
 #' 
@@ -1255,4 +1062,149 @@ copyOfRosediagRad <- function (x, zero, rotation, bins, upper, radii.scale, prop
             polygon(xx, yy, border = border, col = col, ...)
         }
     }
+}
+
+#' Print arrival and departure times per section
+#' 
+#' @param section.times A list of entry and exit times for each section
+#' @inheritParams splitDetections
+#' @param detections A valid detections list
+#' 
+#' @keywords internal
+#' 
+printSectionTimes <- function(section.times, bio, detections) {
+  Date <- NULL
+  Group <- NULL
+  cbPalette <- c("#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7", "#999999")
+  names(cbPalette) <- c("Orange", "Blue", "Green", "Yellow", "Darkblue", "Darkorange", "Pink", "Grey")
+  time.range <- c(min(bio$Release.date), max(do.call(c, lapply(detections, function(x) x$Timestamp))))
+  dayrange <- as.Date(time.range)
+  dayrange[1] <- dayrange[1] - 1
+  dayrange[2] <- dayrange[2] + 1
+  capture.output <- lapply(names(section.times), function(i) {
+    plotdata <- suppressMessages(reshape2::melt(section.times[[i]]))
+    plotdata <- plotdata[complete.cases(plotdata), ]
+    link <- match(plotdata$Transmitter, bio$Transmitter)
+    plotdata$Group <- bio$Group[link]
+    plotdata$Date <- as.Date(substring(as.character(plotdata$value), 1, 10))
+    p <- ggplot2::ggplot(data = plotdata, ggplot2::aes(x = Date, fill = Group))
+    p <- p + ggplot2::geom_bar(width = 0.9)
+    p <- p + ggplot2::theme_bw()
+    p <- p + ggplot2::facet_wrap(variable ~ ., ncol = 1, scales = "free")
+    p <- p + ggplot2::scale_y_continuous(expand = c(0, 0, 0.05, 0))
+    p <- p + ggplot2::scale_x_date(limits = dayrange)
+    p <- p + ggplot2::labs(x = "", y = "n")
+    if (length(unique(plotdata$Group)) <= 8) {
+      p <- p + ggplot2::scale_fill_manual(values = as.vector(cbPalette)[1:length(unique(plotdata$Group))], drop = FALSE)
+    } 
+    ggplot2::ggsave(paste0("Report/", i,"_days.png"), width = 10, height = length(unique(plotdata$variable)) * 2)
+  })
+}
+
+#' print the distribution of fish per location
+#' 
+#' @param ratios the global ratios
+#' 
+#' @keywords internal
+#' 
+printGlobalRatios <- function(ratios) {
+  Date <- NULL
+  Location <- NULL
+  n <- NULL
+  cbPalette <- c("#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7", "#999999")
+  names(cbPalette) <- c("Orange", "Blue", "Green", "Yellow", "Darkblue", "Darkorange", "Pink", "Grey")
+  capture <- lapply(names(ratios), function(i) {
+    plotdata <- suppressMessages(reshape2::melt(ratios[[i]][, -ncol(ratios[[i]])]))
+    colnames(plotdata) <- c("Date", "Location", "n")
+    plotdata$Date <- as.Date(plotdata$Date)
+    p <- ggplot2::ggplot(data = plotdata, ggplot2::aes(x = Date, y = n, fill = Location))
+    p <- p + ggplot2::geom_bar(width = 1, stat = "identity")
+    p <- p + ggplot2::theme_bw()
+    if (i == "absolutes") {
+      p <- p + ggplot2::scale_y_continuous(limits = c(0,  max(apply(ratios[[i]][, c(-1, -ncol(ratios[[i]]))], 1, sum)) * 1.05), expand = c(0, 0))
+      p <- p + ggplot2::labs(x = "", y = "n")
+    } else {
+      p <- p + ggplot2::scale_y_continuous(limits = c(0,  max(apply(ratios[[i]][, c(-1, -ncol(ratios[[i]]))], 1, sum))), expand = c(0, 0))
+      p <- p + ggplot2::labs(x = "", y = "% fish")
+    }
+    if (length(unique(plotdata$Location)) <= 8)
+      p <- p + ggplot2::scale_fill_manual(values = as.vector(cbPalette)[1:length(unique(plotdata$Location))], drop = FALSE)
+    ggplot2::ggsave(paste0("Report/global_ratios_", i,".png"), width = 10, height = 4)
+    ggplot2::ggsave(paste0("Report/global_ratios_", i,".svg"), width = 10, height = 4)
+  })
+}
+
+#' print the individual locations per day
+#' 
+#' @param ratios the daily ratios
+#' @param dayrange the overall first and last detection dates
+#' 
+#' @return a Rmarkdown string to be included in the report
+#' 
+#' @keywords internal
+#' 
+printIndividualResidency <- function(ratios, dayrange) {
+  Date <- NULL
+  Location <- NULL
+  n <- NULL
+  cbPalette <- c("#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7", "#999999")
+  names(cbPalette) <- c("Orange", "Blue", "Green", "Yellow", "Darkblue", "Darkorange", "Pink", "Grey")
+  counter <- 0
+  individual.plots <- NULL
+  pb <- txtProgressBar(min = 0, max = length(ratios), style = 3, width = 60)
+  capture <- lapply(names(ratios), function(i) {
+    counter <<- counter + 1
+    x <- ratios[[i]]
+    aux <- which(grepl("^p", colnames(x)))
+    aux <- aux[!is.na(match(colnames(x)[aux - 1], sub("p", "", colnames(x)[aux])))]
+    new.colnames <-colnames(x)[c(1, aux - 1)]
+    x <- x[ c(1, aux)]
+    colnames(x) <- new.colnames
+    plotdata <- suppressMessages(reshape2::melt(x))
+    colnames(plotdata) <- c("Date", "Location", "n")
+    plotdata$Date <- as.Date(plotdata$Date)
+    p <- ggplot2::ggplot(data = plotdata, ggplot2::aes(x = Date, y = n, fill = Location))
+    p <- p + ggplot2::geom_bar(width = 1, stat = "identity")
+    p <- p + ggplot2::theme_bw()
+    p <- p + ggplot2::scale_y_continuous(limits = c(0,  max(apply(ratios[[i]][, aux, drop = FALSE], 1, sum))), expand = c(0, 0))
+    p <- p + ggplot2::labs(title = paste0(i, " (", substring(x$Date[1], 1, 10), " to ", substring(x$Date[nrow(x)], 1, 10), ")") , x = "", y = "% time per day")
+    p <- p + ggplot2::scale_x_date(limits = dayrange)
+    if (length(unique(plotdata$Location)) <= 8)
+      p <- p + ggplot2::scale_fill_manual(values = as.vector(cbPalette)[1:length(unique(plotdata$Location))], drop = FALSE)
+    if (length(unique(plotdata$Location)) > 5)
+      p <- p + ggplot2::guides(fill = ggplot2::guide_legend(ncol = 2))
+    if (length(unique(plotdata$Location)) > 10)
+      p <- p + ggplot2::guides(fill = ggplot2::guide_legend(ncol = 3))
+    ggplot2::ggsave(paste0("Report/", i,"_residency.png"), width = 10, height = 1.5)
+    individual.plots <<- paste0(individual.plots, "![](", i, "_residency.png){ width=95% }\n")
+    setTxtProgressBar(pb, counter)
+  })
+  close(pb)
+  return(individual.plots)
+}
+
+#' Print a simple barplot with the number of fish last seen at each section
+#' 
+#' @param input a table with the last seen data
+#' @param sections the order of the sections
+#' 
+#' @keywords internal
+#' 
+printLastSeen <- function(input, sections) {
+  Section <- NULL
+  n <- NULL
+  cbPalette <- c("#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7", "#999999")
+  names(cbPalette) <- c("Orange", "Blue", "Green", "Yellow", "Darkblue", "Darkorange", "Pink", "Grey")
+  input$Group <- rownames(input)
+  plotdata <- suppressMessages(reshape2::melt(input))
+  colnames(plotdata) <- c("Group", "Section", "n")
+  plotdata$Section <- factor(gsub("Disap. in |Disap. at ", "", plotdata$Section), levels = c(sections, "Release"))
+  p <- ggplot2::ggplot(plotdata, ggplot2::aes(x = Section, y = n))
+  p <- p + ggplot2::geom_bar(stat = "identity", fill = cbPalette[[2]], colour = "transparent")
+  p <- p + ggplot2::facet_grid(. ~ Group)
+  p <- p + ggplot2::theme_bw()
+  p <- p + ggplot2::labs(x = "", y = "n")
+  p <- p + ggplot2::scale_y_continuous(expand = c(0, 0, 0.05, 0))
+  the.width <- max(2, (ncol(input) - 1) * nrow(input) * 0.7)
+  ggplot2::ggsave("Report/last_seen.png", width = the.width, height = 4)
 }

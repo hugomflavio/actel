@@ -5,7 +5,7 @@
 \title{Print individual graphics}
 \usage{
 printIndividuals(redraw, detections.list, bio, status.df = NULL,
-  tz.study.area, movements, simple.movements = NULL, extension = "png")
+  tz.study.area, movements, valid.movements = NULL, extension = "png")
 }
 \arguments{
 \item{redraw}{When report is set to TRUE, controls if files created in a previous run of the function should be overridden.}
@@ -17,8 +17,6 @@ printIndividuals(redraw, detections.list, bio, status.df = NULL,
 \item{tz.study.area}{The time-zone of the study area. Necessary to convert the ALS time data, which is in UTC.}
 
 \item{movements}{A list of movements for each target tag, created by groupMovements.}
-
-\item{simple.movements}{A list of valid-only movements for each fish}
 
 \item{extension}{the format of the generated graphics}
 }

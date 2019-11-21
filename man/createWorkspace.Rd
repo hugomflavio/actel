@@ -6,6 +6,11 @@
 \usage{
 createWorkspace(dir = "actel_workspace")
 }
+\arguments{
+\item{dir}{The name of the target directory. Will be created if not present
+
+Produces the files and folders required to run the package, which the user can use as a template.}
+}
 \description{
-Produces the files and folders required to run the package, which the user can use as a template.
+Create a default Workspace
 }

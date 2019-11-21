@@ -28,9 +28,188 @@ knitr::opts_chunk$set(
     1. [Processes behind migration()](c-1_migration_processes.html)
     1. [Inspecting the migration() results](c-2_migration_results.html)
     1. [Manual mode in migration()](c-3_migration_manual_mode.html)
+    1. [One-way efficiency estimations](c-4_migration_efficiency.html)
 1. [residency()](d-0_residency.html)
     1. [Processes behind residency()](d-1_residency_processes.html)
     1. [__Inspecting the residency() results__](d-2_residency_results.html)
+    1. [Multi-way efficiency estimations](d-3_residency_efficiency.html)
 1. [Errors and messages](e-0_messages.html)
 
-The residency analysis is still under construction. Stay tunned for updates!
+
+## Results within R
+
+The results compiled by the residency() function include [those of the explore() function](b-2_explore_results.html). To keep the vignettes shorter, I will only detail **new** outputs here:
+
+### status.df
+
+The `status.df` is a data frame that combines [both the timetable data and your biometrics](d-1_residency_processes.html#compiling-a-timetable) into a single, organised table. If you have stored any comments during the analysis process, they will show up in a reserved column in this table. The `status.df` also contains some more summary information for each fish. This table can be quite big, so it may be a good idea to use `head(status.df)`  the first time you look at it.
+
+### section.movements
+
+The `section.movements` list contains the section-level movement events created during [the movement compressing process](d-1_residency_processes.html#section-movements). Here is an example:
+
+|Section | Events| Detections|First.array |Last.array |First.time |Last.time |Time.travelling |Time.in.section |
+|:-------|------:|----------:|:-----------|:----------|:----------|:---------|:---------------|:---------------|
+|Down    |      1|          1|Down1       |Down1      |...        |...       |11:45           |0:00            |
+|Right   |      2|          2|Right1      |Right2     |...        |...       |44:00           |563:32          |
+|Left    |      2|          2|Left4       |Left4      |...        |...       |56:27           |295:59          |
+|Right   |      2|          2|Right2      |Right1     |...        |...       |101:00          |626:12          |
+|Down    |      1|          1|Down2       |Down2      |...        |...       |462:47          |0:00            |
+|Left    |      1|          1|Left3       |Left3      |...        |...       |54:59           |0:00            |
+
+(Timestamps were trimmed so the table fits better in the page)
+
+
+### valid.section.movements
+
+This list is similar to the one above, except that all movements deemed invalid have been removed.
+
+
+### residency.list
+
+The `residency.list` contains a table for each of your fish, detailing where it was since its first valid detection to its last. Here is an example of the residency list produced based on the section movements above:
+
+|Section    |First.time          |Last.time           |
+|:----------|:-------------------|:-------------------|
+|Down       |2019-06-06 00:00:15 |2019-06-06 00:00:15 |
+|Down-Right |2019-06-06 00:00:15 |2019-06-07 20:00:20 |
+|Right      |2019-06-07 20:00:20 |2019-07-01 07:33:00 |
+|Left-Right |2019-07-01 07:33:00 |2019-07-03 16:00:53 |
+|Left       |2019-07-03 16:00:53 |2019-07-16 00:00:16 |
+|Left-Right |2019-07-16 00:00:16 |2019-07-20 05:00:35 |
+|Right      |2019-07-20 05:00:35 |2019-08-15 07:13:00 |
+|Down-Right |2019-08-15 07:13:00 |2019-09-03 14:00:10 |
+|Down       |2019-09-03 14:00:10 |2019-09-03 14:00:10 |
+|Down-Left  |2019-09-03 14:00:10 |2019-09-05 21:00:05 |
+|Left       |2019-09-05 21:00:05 |2019-09-05 21:00:05 |
+
+
+### array.times
+
+This table contains information on the all arrival times for each fish, at each array. It is used to produce circular graphics in the report.
+
+
+### section.times
+
+`section.times` is a list that contains two tables. The first one has all the arrival times for each fish, at each section, and the second has all the departure times, sorted in the same fashion. These are used to produce circular graphics in the report.
+
+
+### daily.ratios
+
+The daily.ratios contains detailed information on the time spent at each location, per day, for each of your fish. These tables can be quite long. Here is an example:
+
+|Date       | Down| pDown| Down-Right| pDown-Right| Right| pRight| ... | Changes|Most.time  |
+|:----------|----:|-----:|----------:|-----------:|-----:|------:|-----|-------:|:----------|
+|2019-06-06 |    0|     0|      86385|       1.000|     0|  0.000| ... |       0|Down-Right |
+|2019-06-07 |    0|     0|      72020|       0.834| 14380|  0.166| ... |       1|Down-Right |
+|2019-06-08 |    0|     0|          0|       0.000| 86400|  1.000| ... |       0|Right      |
+|2019-06-09 |    0|     0|          0|       0.000| 86400|  1.000| ... |       0|Right      |
+|2019-06-10 |    0|     0|          0|       0.000| 86400|  1.000| ... |       0|Right      |
+|2019-06-11 |    0|     0|          0|       0.000| 86400|  1.000| ... |       0|Right      |
+|...        |  ...|   ...|        ...|         ...|   ...|    ...| ... |     ...|...        |
+
+(Columns and rows were hidden so the table fits better in the page)
+
+
+### daily.locations
+
+The `daily.locations` is a data frame showing the place where each fish spent the most time during each day. It is a crucial middle step between the daily ratios and the global ratios.
+
+
+### global.ratios
+
+The global ratios is a list containing two elements:
+
+1. The absolute number of fish at each location in each day:
+
+|Date       | Down| Down-Left| Down-Right| Left| Left-Right| Right| Total|
+|:----------|----:|---------:|----------:|----:|----------:|-----:|-----:|
+|2019-06-05 |    0|         0|          0|    2|          0|     0|     2|
+|2019-06-06 |    0|         0|          1|    2|          0|     0|     3|
+|2019-06-07 |    1|         0|          2|    1|          0|     0|     4|
+|2019-06-08 |    3|         0|          1|    1|          0|     1|     6|
+|2019-06-09 |    3|         0|          1|    1|          0|     1|     6|
+|2019-06-10 |    2|         1|          1|    1|          0|     1|     6|
+|...        |  ...|       ...|        ...|  ...|        ...|   ...|   ...|
+
+
+2. The percentage of fish at each location in each day:
+
+|Date       |  Down| Down-Left| Down-Right|  Left| Left-Right| Right| Total|
+|:----------|-----:|---------:|----------:|-----:|----------:|-----:|-----:|
+|2019-06-05 | 0.000|     0.000|      0.000| 1.000|          0| 0.000|     1|
+|2019-06-06 | 0.000|     0.000|      0.333| 0.667|          0| 0.000|     1|
+|2019-06-07 | 0.250|     0.000|      0.500| 0.250|          0| 0.000|     1|
+|2019-06-08 | 0.500|     0.000|      0.167| 0.167|          0| 0.167|     1|
+|2019-06-09 | 0.500|     0.000|      0.167| 0.167|          0| 0.167|     1|
+|2019-06-10 | 0.333|     0.167|      0.167| 0.167|          0| 0.167|     1|
+|...        |   ...|       ...|        ...|   ...|        ...|   ...|   ...|
+
+
+### last.seen
+
+The `last.seen` is a simple summary table, showing how many fish from each group were last seen at each section, with an extra column for fish that were never detected:
+
+|         | Disap. in Down| Disap. in Left| Disap. in Right| Disap. at Release|
+|:--------|--------------:|--------------:|---------------:|-----------------:|
+|Hatchery |              2|              1|               0|                 0|
+|Wild     |              2|              2|               3|                 0|
+
+
+### efficiency
+
+The `efficiency` is a list containing three elements.
+
+1. A table of absolute events used to calculate the efficiency
+2. The maximum efficiency estimates for each array, using the data in the absolutes table.
+3. The minimum efficiency estimates, using the same table.
+
+You can find more about how efficiency estimations are made in the residency analysis [in this manual page.](d-3_residency_efficiency.html)
+
+### intra.array.CJS
+
+If you provided intra-array estimates in the [replicates argument](d-0_residency.html#replicates), actel will estimate intra-array efficiencies for the target arrays. These results are stored in the object `intra.array.CJS`, and the combined efficiency estimate is used to complement the overall efficiency results.
+
+## Results in your working directory
+
+The residency function saves [outputs similar to those saved by explore](b-2_explore_results.html#results-in-your-working-directory). The main differences are in the two elements listed below.
+
+
+### actel_residency_results.RData
+
+To make sure that you don't accidentally lose your results, actel stores them right away in the target folder. The results present in this file are the same as the ones you obtain directly in your R console (see above). It differs from the explore() output both in name and content.
+
+
+### actel_residency_report.html (if report = TRUE)
+
+This is the main non-R output. If you activated the `report` option, actel will compile an html report for you. The residency report contains the same sections as the explore report, plus the following:
+
+1. **Array efficiency**
+
+  Here you can see how efficient your receiver arrays were at detecting the fish that moved past them. These results can also be found in the `efficiency` object, which is in your results in R. If you supplied replicates, the results of the intra-array estimations will also show up here.
+
+2. **Last seen**
+
+  The sections where the fish were last seen is displayed both as a table and a figure, both of which use the content of the `last.seen` object, which is in your results in R.
+
+3. **Average array arrival times**
+
+  For each of your study area's arrays, a circular plot will be drawn with all the arrival times of each fish. The fish are grouped by the groups listed in the *biometrics.csv* file. These plots are saved in .svg format in the Report folder, so you can easily use them elsewhere, if needed.
+
+
+4. **Time details per section**
+
+  This section is divided in two main subsections: arrivals and departures. A plot with the days when fish arrived/departed each of the sections is made, as well as circular plots with all the times-of-day recorded for each fish arriving/departing each section. These graphics are all based in the `section.times` object.
+
+
+5. **Section progression**
+
+  This section has a graphic representation of the data present in the `global.ratios` object. It shows how the fish have distributed across your study area as the days pass by.
+
+
+6. **Individual residency plots**
+
+  Here you can find a graphic representation of the data present in the `daily.ratios` object. It shows, for each fish, how much time they spent at each location at each day. All plots start and end in the same day, so it is easy to compare the behaviour of each fish to the remaining.
+
+
+[Back to top.](#)

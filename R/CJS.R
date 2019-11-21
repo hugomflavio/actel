@@ -9,11 +9,11 @@
 #' 
 #' @keywords internal
 #' 
-getDualMatrices <- function(replicates, CJS, spatial, detections.list) {
+getDualMatrices <- function(replicates, CJS = NULL, spatial, detections.list) {
 output <- list()
   for(i in 1:length(replicates)) {
     continue <- TRUE
-    if (!is.na(CJS$efficiency[names(replicates)[i]])) {
+    if (!is.null(CJS) && !is.na(CJS$efficiency[names(replicates)[i]])) {
       appendTo(c("Screen", "Warning", "Report"), paste0("W: An inter-array efficiency has already been calculated for array ", names(replicates)[i],"."))
       decision <- readline("   Do you want to replace this with an intra-array efficiency estimate?(y/N) ")
       if (decision == "y" | decision == "Y") {
@@ -36,23 +36,38 @@ output <- list()
 #' Incorporate intra-array estimates in the overall CJS object
 #' 
 #' @param m A list of dual matrices
-#' @param CJS The overall CJS results
+#' @param efficiency The efficiency results (from a residency analysis)
+#' @param CJS The overall CJS results (from a migration analysis)
 #' 
 #' @return A list containing the updated overall CJS and the intra-array CJS results
 #' 
 #' @keywords internal
 #' 
-includeIntraArrayEstimates <- function(m, CJS) {
-  if(length(m) > 0) {
+includeIntraArrayEstimates <- function(m, efficiency = NULL, CJS = NULL) {
+  if (!is.null(efficiency) & !is.null(CJS))
+    stop("Use only one of 'efficiency' or 'CJS' at a time.\n")
+  if (is.null(efficiency) & is.null(CJS))
+    stop("Include a 'efficiency' or 'CJS' argument.\n")
+  if (length(m) > 0) {
     intra.CJS <- lapply(m, dualArrayCJS)
-    for (i in names(intra.CJS)) {
-      CJS$absolutes[4, i] <- round(CJS$absolutes[1, i] * intra.CJS[[i]]$combined.efficiency, 0)
-      CJS$efficiency[i] <- intra.CJS[[i]]$combined.efficiency
+    if (!is.null(CJS)) {
+      for (i in names(intra.CJS)) {
+        CJS$absolutes[4, i] <- round(CJS$absolutes[1, i] * intra.CJS[[i]]$combined.efficiency, 0)
+        CJS$efficiency[i] <- intra.CJS[[i]]$combined.efficiency
+      }
+    } else {
+      for (i in names(intra.CJS)) {
+        efficiency$max.efficiency[i] <- intra.CJS[[i]]$combined.efficiency
+        efficiency$min.efficiency[i] <- intra.CJS[[i]]$combined.efficiency
+      }
     }
   } else {
     intra.CJS <- NULL
   }
-  return(list(CJS = CJS, intra.CJS = intra.CJS))
+  if (!is.null(CJS))
+    return(list(CJS = CJS, intra.CJS = intra.CJS))
+  else
+    return(list(efficiency = efficiency, intra.CJS = intra.CJS))
 }
 
 
@@ -104,17 +119,21 @@ assembleGroupCJS <- function(mat, CJS, arrays) {
 #' 
 #' @keywords internal
 #' 
-breakMatricesByArray <- function(m, arrays) {
+breakMatricesByArray <- function(m, arrays, type = c("peers", "all"), verbose = TRUE) {
+  type <- match.arg(type)
   recipient <- list()
   for (i in 1:length(arrays)) {
-    if (!is.null(arrays[[i]]$downstream)) {
+    if ((type == "peers" & !is.null(arrays[[i]]$after.peers)) | (type == "all" & !is.null(arrays[[i]]$all.after))) {
       # grab only relevant arrays
-      a.regex <- paste(c(names(arrays)[i], arrays[[i]]$downstream), collapse = "|")
+      if (type == "peers")
+        a.regex <- paste(c(names(arrays)[i], arrays[[i]]$after.peers), collapse = "|")
+      else
+        a.regex <- paste(c(names(arrays)[i], arrays[[i]]$all.after), collapse = "|")
       aux  <- lapply(m, function(m) m[, which(grepl(a.regex, colnames(m)))])
       # Failsafe in case some fish are released at one of the peers
       keep <- unlist(lapply(m, function(m) any(grepl(names(arrays)[i], colnames(m)))))
       aux  <- aux[keep]
-      # Convert peers to single function and add fake start
+      # Convert peers to single column and add fake start
       aux  <- lapply(aux, function(m) {
         if (ncol(m) > 2) {
           m[, 2:ncol(m)] <- apply(m[, 2:ncol(m)], 2, as.logical)
@@ -131,9 +150,9 @@ breakMatricesByArray <- function(m, arrays) {
       peer.zero.check <- unlist(lapply(aux, function(x) sum(x$AnyPeer) == 0))
       zero.check <- own.zero.check | peer.zero.check
       if (all(zero.check)) {
-        if (all(own.zero.check))
+        if (all(own.zero.check) & verbose)
           appendTo(c("Screen", "Warning", "Report"), paste0("W: No fish passed through array ", names(arrays)[i], "."))
-        if (all(peer.zero.check))
+        if (all(peer.zero.check) & verbose)
           appendTo(c("Screen", "Warning", "Report"), paste0("W: No fish passed through any of the efficiency peers of array ", names(arrays)[i], "."))
       } else {
         recipient[[length(recipient) + 1]] <- aux[!zero.check]
@@ -141,7 +160,7 @@ breakMatricesByArray <- function(m, arrays) {
       }
     }
   }
-  if (length(recipient) == 0) {
+  if (length(recipient) == 0 & verbose) {
     appendTo(c("Screen", "Warning", "Report"), "W: None of the arrays has valid efficiency peers.")
     return(NULL)
   } else {
@@ -198,28 +217,34 @@ assembleArrayCJS <- function(mat, CJS, arrays) {
 #' 
 #' @keywords internal 
 #'
-assembleMatrices <- function(spatial, simple.movements, minimum.detections, status.df) {
-  temp <- efficiencyMatrix(spatial = spatial, simple.movements = simple.movements, minimum.detections = minimum.detections)
-  mymatrix <- includeMissing(x = temp, status.df = status.df)
-  link <- sapply(status.df$Signal, function(x) grep(paste0("^", x, "$"), rownames(mymatrix)))
-  mymatrix <- mymatrix[link, ]  
-
-  recipient <- split(mymatrix, paste0(status.df$Group, ".", status.df$Release.site))
-  the.order <- c()
-  for (i in unique(status.df$Group)) {
-    the.order <- c(the.order, paste0(i, ".", unique(spatial$release.sites$Standard.Name)))
-  }
-  recipient <- recipient[order(match(names(recipient), the.order))]
-  if (length(unique(spatial$release.sites$Array)) > 1) {
-    for(i in 1:length(recipient)){
-      r <- sapply(spatial$release.sites$Standard.Name, function(x) grepl(x, names(recipient)[i]))
-      if(sum(r) > 1)
-        stop("Multiple release sites match the matrix name. Make sure that the release sites' names are not contained within the fish groups or within themselves.\n")
-      the.col <- which(grepl(spatial$release.sites$Array[r], colnames(recipient[[i]])))
-      recipient[[i]] <- recipient[[i]][,c(1, the.col:ncol(recipient[[i]]))]
+assembleMatrices <- function(spatial, movements, status.df, arrays, paths, dotmat) {
+  temp <- efficiencyMatrix(movements = movements, arrays = arrays, paths = paths, dotmat = dotmat)
+  output <- lapply(temp, function(x) {
+    # sort the rows by the same order as status.df
+    x <- includeMissing(x = x, status.df = status.df)
+    link <- sapply(status.df$Signal, function(i) grep(paste0("^", i, "$"), rownames(x)))
+    x <- x[link, ]  
+    # split by group*release site combinations
+    aux <- split(x, paste0(status.df$Group, ".", status.df$Release.site))
+    # Re-order
+    the.order <- c()
+    for (i in unique(status.df$Group)) {
+      the.order <- c(the.order, paste0(i, ".", unique(spatial$release.sites$Standard.Name)))
     }
-  }
-  return(recipient)
+    aux <- aux[order(match(names(aux), the.order))]
+    # If the release sites start in different arrays
+    if (length(unique(spatial$release.sites$Array)) > 1) {
+      for(i in 1:length(aux)){
+        r <- sapply(spatial$release.sites$Standard.Name, function(x) grepl(x, names(aux)[i]))
+        if(sum(r) > 1)
+          stop("Multiple release sites match the matrix name. Make sure that the release sites' names are not contained within the fish groups or within themselves.\n")
+        the.col <- which(grepl(spatial$release.sites$Array[r], colnames(aux[[i]])))
+        aux[[i]] <- aux[[i]][, c(1, the.col:ncol(aux[[i]]))]
+      }
+    }
+    return(aux)
+  })
+  return(output)
 }
 
 #' Compute simple CJS model
@@ -418,7 +443,7 @@ mbSplitCJS <- function(m, fixed.efficiency = NULL) {
 
 #' Calculate CJS for each group for each array
 #' 
-#' @inheritParams getSplitCJS
+#' @param n A list of detection matrices
 #' @inheritParams simplifyMovements
 #' @inheritParams simpleCJS
 #' 
@@ -462,29 +487,67 @@ mbGroupCJS <- function(m, status.df, fixed.efficiency = NULL) {
 #' 
 #' @keywords internal
 #' 
-efficiencyMatrix <- function(spatial, simple.movements, minimum.detections) {
+efficiencyMatrix <- function(movements, arrays, paths, dotmat) {
   appendTo("debug", "Starting efficiencyMatrix.")
-  efficiency <- as.data.frame(matrix(ncol = length(unlist(spatial$array.order)), nrow = length(simple.movements)))
-  colnames(efficiency) <- unlist(spatial$array.order)
-  rownames(efficiency) <- stripCodeSpaces(names(simple.movements))
-  efficiency[is.na(efficiency)] = 0
-  for (i in 1:length(simple.movements)) {
-    submoves <- simple.movements[[i]]
-    A <- match(submoves$Array,unlist(spatial$array.order))
-    B1 <- unique(A)
-    B2 <- order(A)[!duplicated(sort(A))] 
-    if (is.unsorted(B2)) {
-      temp <- matrix(ncol = length(B1), nrow = length(B1))
-      for (j in 1:length(B1)) {
-          temp[j,] <- c(rep(FALSE, j - 1), B1[j] > B1[j:length(B1)])
+  max.ef <- as.data.frame(matrix(ncol = length(arrays) + 1, nrow = length(movements)))
+  colnames(max.ef) <- c("Release", names(arrays))
+  rownames(max.ef) <- stripCodeSpaces(names(movements))
+  max.ef[is.na(max.ef)] = 0
+  min.ef <- max.ef
+
+  capture <- lapply(names(movements), function(fish) {
+    max.aux <- c(1, rep(0, length(arrays)))
+    names(max.aux) <- c("Release", names(arrays))
+    one.way <- oneWayMoves(movements = movements[[fish]], arrays = arrays)
+    if (!is.null(one.way)) {
+      max.aux[match(one.way$Array, names(max.aux))] <- 1
+      min.aux <- max.aux
+      if (nrow(one.way) > 1) {
+        aux <- countArrayFailures(moves = one.way, paths = paths, dotmat = dotmat)
+        aux <- unique(aux[grepl("unsure", names(aux))])
+        if (!is.null(aux))
+          max.aux[match(aux, names(max.aux))] <- 1
       }
-      B1 <- B1[!apply(temp,2,any)]
+      max.ef[stripCodeSpaces(fish), ] <<- max.aux
+      min.ef[stripCodeSpaces(fish), ] <<- min.aux
     }
-    efficiency[i, B1] <- 1
+  })
+  return(list(maxmat = max.ef, minmat = min.ef))
+}
+
+#' Trim movements table to contain only uni-directional movements
+#' 
+#' @param movements a table of movements
+#' @param arrays a list of array information
+#' 
+#' @return the uni-directional movement table
+#' 
+#' @keywords internal
+#' 
+oneWayMoves <- function(movements, arrays) {
+  check <- TRUE
+  abort <- FALSE
+  if (nrow(movements) > 1) {
+    while (check) {
+      aux <- data.frame(from = movements$Array[-nrow(movements)], to = movements$Array[-1])
+      link <- apply(aux, 1, function(x) x[2] %in% arrays[[x[1]]]$all.after)
+      if (any(link)) {
+        if (all(link))
+          check <- FALSE
+        else
+          movements <- movements[c(TRUE, link), ]
+      } else {
+        check <- FALSE
+        abort <- TRUE
+      }
+    }
+  } else {
+    abort <- TRUE
   }
-  efficiency$Release <- 1
-  appendTo("debug", "Terminating efficiencyMatrix.")
-  return(efficiency[,c(ncol(efficiency), 1:(ncol(efficiency)-1))])
+  if (abort)
+    return(NULL)
+  else
+    return(movements)
 }
 
 #' Include fish that were never detected

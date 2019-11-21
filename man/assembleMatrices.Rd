@@ -4,12 +4,12 @@
 \alias{assembleMatrices}
 \title{Assemble detection matrices}
 \usage{
-assembleMatrices(spatial, simple.movements, minimum.detections, status.df)
+assembleMatrices(spatial, movements, status.df, arrays, paths, dotmat)
 }
 \arguments{
-\item{simple.movements}{A list of valid-only movements for each fish}
+\item{movements}{A list of movements for each target tag, created by groupMovements.}
 
-\item{minimum.detections}{The minimum number of times a tag must have been recorded during the study period for it to be considered a true tag and not random noise.}
+\item{simple.movements}{A list of valid-only movements for each fish}
 }
 \value{
 A list of detection matrices split by groups and release sites

@@ -4,7 +4,7 @@
 \alias{assembleTimetable}
 \title{Create the timetable}
 \usage{
-assembleTimetable(movements, sections, spatial, minimum.detections,
+assembleTimetable(movements, sections, spatial, arrays, minimum.detections,
   dist.mat, invalid.dist, speed.method, if.last.skip.section,
   success.arrays, override, cautious.assignment)
 }
@@ -12,6 +12,8 @@ assembleTimetable(movements, sections, spatial, minimum.detections,
 \item{movements}{A list of movements for each target tag, created by groupMovements.}
 
 \item{sections}{The sections in which the study was divided. Must be coincident with the names given to the ALS arrays. (i.e. if an array is 'River1', then the respective section is 'River')}
+
+\item{arrays}{a list of arrays}
 
 \item{minimum.detections}{The minimum number of times a tag must have been recorded during the study period for it to be considered a true tag and not random noise.}
 

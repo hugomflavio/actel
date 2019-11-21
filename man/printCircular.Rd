@@ -4,7 +4,7 @@
 \alias{printCircular}
 \title{Print circular graphics for each array}
 \usage{
-printCircular(times, bio)
+printCircular(times, bio, suffix = NULL)
 }
 \arguments{
 \item{times}{a (list of) circular object(s)}

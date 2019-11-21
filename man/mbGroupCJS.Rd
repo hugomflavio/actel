@@ -8,6 +8,8 @@ mbGroupCJS(m, status.df, fixed.efficiency = NULL)
 }
 \arguments{
 \item{fixed.efficiency}{A vector of fixed efficiency estimates from a more complete CJS model.}
+
+\item{n}{A list of detection matrices}
 }
 \value{
 A list of CJS results

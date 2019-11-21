@@ -1,6 +1,6 @@
 Package: actel
 Title: Acoustic Telemetry Data Sorting
-Version: 0.0.4.9000
+Version: 0.1.0.9000
 Authors@R: person("Hugo", "Flávio", role = c("aut", "cre"), email = "hdmfla@aqua.dtu.dk")
 Description: Designed for studies where fish tagged with acoustic tags are expected
     to migrate linearly through a pre-defined set of receiver arrays. Actel combines the

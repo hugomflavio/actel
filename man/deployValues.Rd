@@ -4,8 +4,8 @@
 \alias{deployValues}
 \title{Deploy chosen values}
 \usage{
-deployValues(i, timetable, movements, events, sections, spatial, dist.mat,
-  invalid.dist, if.last.skip.section, success.arrays, processing.type,
+deployValues(i, timetable, movements, events, sections, spatial, arrays,
+  dist.mat, invalid.dist, if.last.skip.section, success.arrays,
   speed.method)
 }
 \arguments{
@@ -19,6 +19,8 @@ deployValues(i, timetable, movements, events, sections, spatial, dist.mat,
 
 \item{sections}{The sections in which the study was divided. Must be coincident with the names given to the ALS arrays. (i.e. if an array is 'River1', then the respective section is 'River')}
 
+\item{arrays}{a list of arrays}
+
 \item{dist.mat}{A matrix of the distances between the deployed ALS.}
 
 \item{invalid.dist}{Whether or not the distance matrix supplied is valid for the study area.}
@@ -26,8 +28,6 @@ deployValues(i, timetable, movements, events, sections, spatial, dist.mat,
 \item{if.last.skip.section}{Indicates whether a fish detected at the last array of a given section should be considered to have disappeared in the next section. Defaults to TRUE. I.e.: In a study with sections 'River' and 'Fjord', where 'River3' is the last river array, a fish last detected at River3 will be considered as 'disappeared in the Fjord'.}
 
 \item{success.arrays}{The ALS arrays mark the end of the study area. If a fish crosses one of these arrays, it is considered to have successfully migrated through the area.}
-
-\item{processing.type}{the current processing type for the fish. Is supplied by the function assembleTimetable.}
 
 \item{speed.method}{One of 'last to first' or 'first to first'. In the former, the last detection on a given array/section is matched to the first detection on the next array/section (default). If changed to 'first to first', the first detection on two consecutive arrays/sections are used to perform the calculations.}
 }

@@ -4,12 +4,14 @@
 \alias{movementTimes}
 \title{Calculate movement times}
 \usage{
-movementTimes(movements, silent = TRUE)
+movementTimes(movements, silent = TRUE, type = c("array", "section"))
 }
 \arguments{
 \item{movements}{A list of movements for each target tag, created by groupMovements.}
 
 \item{silent}{logical: If TRUE, debug messages are issued (only works within actel)}
+
+\item{type}{The type of movements being analysed. One of "array" or "section".}
 }
 \value{
 The movement data frame with time and speed calculations

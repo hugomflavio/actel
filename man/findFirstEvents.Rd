@@ -4,8 +4,7 @@
 \alias{findFirstEvents}
 \title{Find first events}
 \usage{
-findFirstEvents(i, last.events, movements, sections, processing.type,
-  cautious.assignment)
+findFirstEvents(i, last.events, movements, sections, cautious.assignment)
 }
 \arguments{
 \item{i}{The tag number currently under scrutiny. Only used for messaging purposes.}
@@ -15,8 +14,6 @@ findFirstEvents(i, last.events, movements, sections, processing.type,
 \item{movements}{A list of movements for each target tag, created by groupMovements.}
 
 \item{sections}{The sections in which the study was divided. Must be coincident with the names given to the ALS arrays. (i.e. if an array is 'River1', then the respective section is 'River')}
-
-\item{processing.type}{the current processing type for the fish. Is supplied by the function assembleTimetable.}
 
 \item{cautious.assignment}{If TRUE, actel avoids assigning events with one detection as first and/or last events of a section.}
 }

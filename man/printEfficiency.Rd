@@ -4,12 +4,10 @@
 \alias{printEfficiency}
 \title{Print efficiency fragment}
 \usage{
-printEfficiency(overall.CJS, last.array.results)
+printEfficiency(intra.CJS, type = c("migration", "residency"))
 }
 \arguments{
-\item{overall.CJS}{a single CJS with all the groups and release sites merged}
-
-\item{last.array.results}{The output of the getEstimate calculations.}
+\item{intra.CJS}{The output of the getEstimate calculations.}
 }
 \description{
 Prints the ALS inter-array efficiency for inclusion in printRmd.

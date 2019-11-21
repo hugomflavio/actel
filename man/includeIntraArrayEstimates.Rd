@@ -4,12 +4,14 @@
 \alias{includeIntraArrayEstimates}
 \title{Incorporate intra-array estimates in the overall CJS object}
 \usage{
-includeIntraArrayEstimates(m, CJS)
+includeIntraArrayEstimates(m, efficiency = NULL, CJS = NULL)
 }
 \arguments{
 \item{m}{A list of dual matrices}
 
-\item{CJS}{The overall CJS results}
+\item{efficiency}{The efficiency results (from a residency analysis)}
+
+\item{CJS}{The overall CJS results (from a migration analysis)}
 }
 \value{
 A list containing the updated overall CJS and the intra-array CJS results

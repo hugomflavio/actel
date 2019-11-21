@@ -1,5 +1,7 @@
 #' Create a default Workspace
 #'
+#' @param dir The name of the target directory. Will be created if not present
+#' 
 #' Produces the files and folders required to run the package, which the user can use as a template.
 #'
 #' @export
@@ -20,7 +22,7 @@ createWorkspace <- function(dir = "actel_workspace") {
     Signal = c(1, 1034, 301), 
     Length.mm = c(150, 160, 170), 
     Weight.g = c(40, 60, 50), 
-    Array = c("Wild", "Hatchery", "Wild"), 
+    Group = c("Wild", "Hatchery", "Wild"), 
     Release.site = c("Example release1", "Example release1", "Example release2"))
 
   deployments <- data.frame(
@@ -74,7 +76,6 @@ And follow the instructions as they come. Once finished, explore the object 'res
 #' @format A data frame with 18 rows and 6 variables:
 #' \describe{
 #'   \item{Station.Name}{The name of the ALS or release site}
-#'   \item{Receiver}{The ALS deployed (leave empty if the row is a release site)}
 #'   \item{Latitude}{The latitude of the ALS or release site}
 #'   \item{Longitude}{The longitude of the ALS or release site}
 #'   \item{Array}{The Array to which the ALS belongs, or the first ALS array downstream of the release site.}

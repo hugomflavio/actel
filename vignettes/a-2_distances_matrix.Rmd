@@ -28,14 +28,16 @@ knitr::opts_chunk$set(
     1. [Processes behind migration()](c-1_migration_processes.html)
     1. [Inspecting the migration() results](c-2_migration_results.html)
     1. [Manual mode in migration()](c-3_migration_manual_mode.html)
+    1. [One-way efficiency estimations](c-4_migration_efficiency.html)
 1. [residency()](d-0_residency.html)
     1. [Processes behind residency()](d-1_residency_processes.html)
     1. [Inspecting the residency() results](d-2_residency_results.html)
+    1. [Multi-way efficiency estimations](d-3_residency_efficiency.html)
 1. [Errors and messages](e-0_messages.html)
 
 ## What is the distances matrix?
 
-A distances matrix is a table that contains information on  the distance (in metres) between every pair of spatial elements in your study area (i.e. your receivers and your release sites). It looks like the table below:
+A distances matrix is a table that contains information on  the distance (in metres) between every pair of spatial elements in your study area (i.e. your receiver stations and your release sites). It looks like the table below:
 
 |        |     St.1|     St.2|     St.3|     St.4|       St.5|       St.6|   Release|
 |:-------|--------:|--------:|--------:|--------:|----------:|----------:|---------:|
@@ -50,7 +52,7 @@ A distances matrix is a table that contains information on  the distance (in met
 Note:
   : The matrix is simetric (i.e. the entries of the matrix are symmetric with respect to the main diagonal).
   : The diagonal line is composed of 0's as it represents the distance between an element and itself.
-  : You **must** have at least one release site, and that the name of the release sites must be identical in your 'spatial.csv' and your 'biometrics.csv'.
+  : You **must** have at least one release site, and the names of the release sites must be identical to those in your 'spatial.csv' and your 'biometrics.csv'.
 
 ## Creating your distances matrix
 
@@ -127,11 +129,11 @@ Below is an example of the study area in the left, and the respective shapefile 
 
 <img src="distances_shape_1.png" alt="drawing" width="330"/> <img src="distances_shape_2.png" alt="drawing" width="330"/>
 
-Once you have your shapefile ready, copy the the shapefile and respective auxiliary files to the folder where you have your 'spatial.csv'. Later on you will need to know the **EPSG code** of the coordinate system being used (e.g. 29902).
+Once you have your shapefile ready, copy the shapefile and respective auxiliary files to the folder where you have your 'spatial.csv'. Later on you will need to know the **EPSG code** of the coordinate system being used (e.g. 29902).
 
 ##### Preparing the spatial.csv file
 
-In your spatial file, you must include two columns with the coordinates for your receivers and release sites. These coordinates **must** be in the same metric system as the shapefile you just created before. Later on, you will need to know the *column names* of the columns that contain the X and Y coordinates.
+In your spatial file, you must include two columns with the coordinates for your receiver stations and release sites. These coordinates **must** be in the same metric system as the shapefile you just created before. Later on, you will need to know the *column names* of the columns that contain the X and Y coordinates.
 
 
 #### Creating a transition layer
@@ -147,7 +149,7 @@ transitionLayer(shape, size, EPSGcode, directions)
   
     For example, if `size = 20`, then each pixel will have 20 by 20 meters. 
 
-    Keep in mind that your pixel size must allow R to still capture the presence of your river channels. If the river channels are too slim, you can go back to your shapefile and artificially enlarge the river channel.
+    Keep in mind that your pixel size must allow R to still capture the presence of your river channels. If the river channels are too slim, you can go back to your shapefile and artificially enlarge them.
     
     Note that the chosen `size` **must** allow for an integer number of pixels to cover your shapefile (i.e., `size` must be a divisor of your shapefile's resolution). If you pick a wrong number, don't worry, actel will let you know.
 
@@ -174,7 +176,7 @@ Once you have your transition layer, you can use it to calculate multiple distan
 distancesMatrix(coord.x, coord.y, EPSGcode)
 ```
 
-Fill in the column names of the X and Y coordinates of your 'spatial.csv' file in `coord.x` and `coord.y`. Like before, the EPSGcode is the code of the coordinate system of the points (the same as the shapefile's). When you run this command, a file 'distances.csv' will be created in your working directory. 
+Fill in the column names of the X and Y coordinates of your 'spatial.csv' file in `coord.x` and `coord.y`. Like before, the EPSGcode is the code of the coordinate system of the points (the same as the shapefile's). When you run this command, a 'distances.csv' file will be created in your working directory. 
 
 Actel will automatically recognise this file and activate speed calculations in your next analysis!
 
