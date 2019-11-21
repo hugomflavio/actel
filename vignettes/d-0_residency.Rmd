@@ -37,7 +37,7 @@ knitr::opts_chunk$set(
 
 ## The residency() function
 
-The residency() functions builds on the same principles as the explore function and, in addition, computes metrics aiming to show the fish behaviour over time.
+The residency() function builds on the same principles as the explore function and, in addition, computes metrics aiming to show the fish behaviour over time.
 
 residency() has the same arguments as explore(), and includes a set of new arguments aimed to control the residency-related metrics. Like with explore, you *do not need to start working with all arguments right away.* Defining the `sections`, and `tz.study.area` is enough to get you going!
 
