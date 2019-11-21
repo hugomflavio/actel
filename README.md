@@ -1,4 +1,4 @@
-Jump to [**installation instructions**](#installing-actel-v.0.1.0)
+Jump to [**installation instructions**](#installing-actel)
 
 ## Actel: Acoustic telemetry data analysis (v.0.1.0)
 
@@ -58,7 +58,9 @@ Here are some examples:
 
 <img src="vignettes/readme_global_residency.png" alt="drawing" width="870"/>
 
-## Installing actel (v.0.1.0)
+## Installing actel 
+
+Current version: 0.1.0
 
 To install actel, you will need to have the devtools package installed.
 
