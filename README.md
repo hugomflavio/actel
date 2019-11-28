@@ -1,6 +1,10 @@
 Jump to [**installation instructions**](#installing-actel)
 
-## Actel: Acoustic telemetry data analysis (v0.1.0)
+# actel <img src="vignettes/actel_logo.png" align="right" width="120" />
+
+**Acoustic telemetry data analysis** (v0.1.0)
+
+## Overview
 
 If you are using acoustic telemetry to track animals as they move inside a study area or as they migrate somewhere, actel is the package for you. 
 By bringing together the study area configuration and the recorded detections, actel provides a systematic way of analysing fish migration and residency data.
