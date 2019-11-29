@@ -121,7 +121,7 @@ explore <- function(path = NULL, maximum.time = 60, speed.method = c("last to fi
   if (debug)
     appendTo("Report", "!!!--- Debug mode has been activated ---!!!\n")
 
-  appendTo(c("Report"), paste0("Timestamp:", Sys.time(), "\n\nM: Selected folder: ", getwd()))
+  appendTo(c("Report"), paste0("Timestamp:", the.time <- Sys.time(), "\n\nM: Selected folder: ", getwd()))
 
   if (!is.null(path))
     appendTo(c("Screen"), "M: Moving to selected work directory")
@@ -214,10 +214,14 @@ detections.list <- study.data$detections.list
 
   detections <- detections.list
   deployments <- do.call(rbind.data.frame, deployments)
+  
+  # extra info for potential RSP analysis
+  rsp.info <- list(analysis.type = "explore", analysis.time = the.time, bio = bio, tz.study.area = tz.study.area)
+
   if (invalid.dist)
-    save(detections, valid.detections, spatial, deployments, arrays, movements, valid.movements, times, file = resultsname)
+    save(detections, valid.detections, spatial, deployments, arrays, movements, valid.movements, times, rsp.info, file = resultsname)
   else
-    save(detections, valid.detections, spatial, deployments, arrays, movements, valid.movements, times, dist.mat, file = resultsname)
+    save(detections, valid.detections, spatial, deployments, arrays, movements, valid.movements, times, rsp.info, dist.mat, file = resultsname)
 # ------------
 
 # Print graphics
@@ -263,10 +267,10 @@ detections.list <- study.data$detections.list
 
   if (invalid.dist) {
     return(list(detections = detections, valid.detections = valid.detections, spatial = spatial, deployments = deployments, arrays = arrays,
-      movements = movements, valid.movements = valid.movements, times = times))
+      movements = movements, valid.movements = valid.movements, times = times, rsp.info = rsp.info))
   } else {
     return(list(detections = detections, valid.detections = valid.detections, spatial = spatial, deployments = deployments, arrays = arrays,
-      movements = movements, valid.movements = valid.movements, times = times, dist.mat = dist.mat))
+      movements = movements, valid.movements = valid.movements, times = times, rsp.info = rsp.info, dist.mat = dist.mat))
   }
 }
 
