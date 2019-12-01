@@ -118,7 +118,7 @@ residency <- function(path = NULL, sections, section.minimum = 2,
   if (debug)
     appendTo("Report", "!!!--- Debug mode has been activated ---!!!\n")
 
-  appendTo(c("Report"), paste0("Timestamp:", Sys.time(), "\n\nM: Selected folder: ", getwd()))
+  appendTo(c("Report"), paste0("Timestamp:", the.time <- Sys.time(), "\n\nM: Selected folder: ", getwd()))
 
   if (!is.null(path))
     appendTo(c("Screen"), "M: Moving to selected work directory")
@@ -278,14 +278,17 @@ detections.list <- study.data$detections.list
   if (!debug)
     efficiency <- efficiency[1:3]
 
+  # extra info for potential RSP analysis
+  rsp.info <- list(analysis.type = "residency", analysis.time = the.time, bio = bio, tz.study.area = tz.study.area)
+
   if (invalid.dist)
     save(detections, valid.detections, spatial, deployments, arrays, movements, valid.movements, 
       section.movements, valid.section.movements, status.df, last.seen, array.times, section.times,
-      residency.list, daily.ratios, daily.positions, global.ratios, efficiency, intra.array.CJS, file = resultsname)
+      residency.list, daily.ratios, daily.positions, global.ratios, efficiency, intra.array.CJS, rsp.info, file = resultsname)
   else
     save(detections, valid.detections, spatial, deployments, arrays, movements, valid.movements, 
       section.movements, valid.section.movements, status.df, last.seen, array.times, section.times,
-      residency.list, daily.ratios, daily.positions, global.ratios, efficiency, intra.array.CJS, dist.mat, file = resultsname)
+      residency.list, daily.ratios, daily.positions, global.ratios, efficiency, intra.array.CJS, rsp.info, dist.mat, file = resultsname)
 # ------------
 
 # Print graphics
@@ -348,12 +351,12 @@ detections.list <- study.data$detections.list
     return(list(detections = detections, valid.detections = valid.detections, spatial = spatial, deployments = deployments, arrays = arrays,
       movements = movements, valid.movements = valid.movements, section.movements = section.movements, valid.section.movements = valid.section.movements,
       status.df = status.df, efficiency = efficiency, intra.array.CJS = intra.array.CJS, array.times = array.times, section.times = section.times, 
-      residency.list = residency.list, daily.ratios = daily.ratios, daily.positions = daily.positions, global.ratios = global.ratios, last.seen = last.seen))
+      residency.list = residency.list, daily.ratios = daily.ratios, daily.positions = daily.positions, global.ratios = global.ratios, last.seen = last.seen, rsp.info = rsp.info))
   else
     return(list(detections = detections, valid.detections = valid.detections, spatial = spatial, deployments = deployments, arrays = arrays,
       movements = movements, valid.movements = valid.movements, section.movements = section.movements, valid.section.movements = valid.section.movements,
       status.df = status.df, efficiency = efficiency, intra.array.CJS = intra.array.CJS, array.times = array.times, section.times = section.times, 
-      residency.list = residency.list, daily.ratios = daily.ratios, daily.positions = daily.positions, global.ratios = global.ratios, last.seen = last.seen, dist.mat = dist.mat))
+      residency.list = residency.list, daily.ratios = daily.ratios, daily.positions = daily.positions, global.ratios = global.ratios, last.seen = last.seen, rsp.info = rsp.info, dist.mat = dist.mat))
 }
 
 #' Print Rmd report
