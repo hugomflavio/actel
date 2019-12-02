@@ -1,4 +1,4 @@
-# News <img src="vignettes/actel_logo.png" align="right" width="120" />
+# News<img src="vignettes/actel_logo.png" align="right" width="120" />
 
 Find out the main highlights of each update.
 
