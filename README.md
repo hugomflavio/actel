@@ -2,7 +2,7 @@ Jump to [**installation instructions**](#installing-actel)
 
 # actel <img src="vignettes/actel_logo.png" align="right" width="120" />
 
-**Acoustic telemetry data analysis** (v0.1.0)
+**Acoustic telemetry data analysis** (v0.1.1)
 
 ## Overview
 
