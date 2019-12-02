@@ -133,9 +133,9 @@ migration <- function(path = NULL, sections, success.arrays = NULL, minimum.dete
     appendTo("Report", "!!!--- Debug mode has been activated ---!!!\n")
 
   if (is.null(success.arrays))
-    appendTo(c("Report"), paste0("Timestamp:", Sys.time(), "\n\nM: Selected folder: ", getwd(), "\nM: Success has not been defined. Assuming last arrays are success arrays."))
+    appendTo(c("Report"), paste0("Timestamp:", the.time <- Sys.time(), "\n\nM: Selected folder: ", getwd(), "\nM: Success has not been defined. Assuming last arrays are success arrays."))
   else
-    appendTo(c("Report"), paste0("Timestamp:", Sys.time(), "\n\nM: Selected folder: ", getwd(), "\nM: Success has been defined as last detection in: ", paste(success.arrays, collapse = ", "), "."))
+    appendTo(c("Report"), paste0("Timestamp:", the.time <- Sys.time(), "\n\nM: Selected folder: ", getwd(), "\nM: Success has been defined as last detection in: ", paste(success.arrays, collapse = ", "), "."))
 
   if (!is.null(path))
     appendTo(c("Screen"), "M: Moving to selected work directory")
@@ -315,14 +315,16 @@ migration <- function(path = NULL, sections, success.arrays = NULL, minimum.dete
   detections <- detections.list
   deployments <- do.call(rbind.data.frame, deployments)
   matrices <- the.matrices
+
+  # extra info for potential RSP analysis
+  rsp.info <- list(analysis.type = "migration", analysis.time = the.time, bio = bio, tz.study.area = tz.study.area)
+
   if (invalid.dist)
     save(detections, valid.detections, spatial, deployments, arrays, movements, valid.movements, status.df,
-      section.overview, array.overview, matrices, overall.CJS, 
-      intra.array.CJS, times, file = resultsname)
+      section.overview, array.overview, matrices, overall.CJS, intra.array.CJS, times, rsp.info, file = resultsname)
   else
     save(detections, valid.detections, spatial, deployments, arrays, movements, valid.movements, status.df,
-      section.overview, array.overview, matrices, overall.CJS,
-      intra.array.CJS, times, dist.mat, file = resultsname)
+      section.overview, array.overview, matrices, overall.CJS, intra.array.CJS, times, rsp.info, dist.mat, file = resultsname)
 # ------------
 
 # Print graphics
@@ -386,16 +388,12 @@ migration <- function(path = NULL, sections, success.arrays = NULL, minimum.dete
 
   if (invalid.dist)
     return(list(detections = detections, valid.detections = valid.detections, spatial = spatial, deployments = deployments, arrays = arrays,
-      movements = movements, valid.movements = valid.movements,
-      status.df = status.df, section.overview = section.overview, array.overview = array.overview,
-      matrices = matrices, overall.CJS = overall.CJS, 
-      intra.array.CJS = intra.array.CJS, times = times))
+      movements = movements, valid.movements = valid.movements, status.df = status.df, section.overview = section.overview, array.overview = array.overview,
+      matrices = matrices, overall.CJS = overall.CJS, intra.array.CJS = intra.array.CJS, times = times, rsp.info = rsp.info))
   else
     return(list(detections = detections, valid.detections = valid.detections, spatial = spatial, deployments = deployments, arrays = arrays,
-      movements = movements, valid.movements = valid.movements,
-      status.df = status.df, section.overview = section.overview, array.overview = array.overview,
-      matrices = matrices, overall.CJS = overall.CJS, 
-      intra.array.CJS = intra.array.CJS, times = times, dist.mat = dist.mat))
+      movements = movements, valid.movements = valid.movements, status.df = status.df, section.overview = section.overview, array.overview = array.overview,
+      matrices = matrices, overall.CJS = overall.CJS, intra.array.CJS = intra.array.CJS, times = times, rsp.info = rsp.info, dist.mat = dist.mat))
 }
 
 #' Print Rmd report

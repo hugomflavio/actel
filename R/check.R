@@ -75,7 +75,7 @@ checkInactiveness <- function(movements, detections.list, inactive.warning, inac
       # Find first and last potentially inactive movement
       breaks <- rle(valid.moves$Array)
       if(length(breaks$lengths) > 1) {
-        start <- sum(breaks$lengths[1:(length(breaks$lengths) - 1)])
+        start <- sum(breaks$lengths[1:(length(breaks$lengths) - 1)]) + 1
       } else {
         start <- 1
       }

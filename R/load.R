@@ -421,7 +421,7 @@ setSpatialStandards <- function(input){
   input$Standard.Name <- gsub(" ", "", input$Standard.Name)
   link <- input$Type == "Hydrophone"
   input$Standard.Name[link] <- paste("St.", seq_len(sum(input$Type == "Hydrophone")), sep = "")
-  write.csv(input, "spatial.csv", row.names = F)
+  write.csv(input, "spatial.csv", row.names = FALSE)
   appendTo("debug","Terminating setSpatialStandards")
   return(input)
 }
@@ -655,6 +655,7 @@ loadBio <- function(file, tz.study.area){
     appendTo("Screen", "M: No Release site has been indicated in the biometrics.csv file. Creating a 'Release.site' column to avoid function failure. Filling with 'unspecified'.")
     bio$Release.site <- "unspecified"
   } else {
+    bio$Release.site <-  gsub(" ", "", bio$Release.site)
     bio$Release.site <- factor(bio$Release.site)
     if (any(is.na(bio$Release.site) | bio$Release.site == "")) {
       appendTo(c("Screen","Report","Warning"),"W: Some fish contain no release site information. You may want to double-check the data.\n   Filling the blanks with 'unspecified'.")
@@ -1234,9 +1235,9 @@ transformSpatial <- function(spatial, bio, sections = NULL, first.array = NULL) 
                                   Longitude = NA_real_, 
                                   Latitude = NA_real_, 
                                   Array = first.array,
-                                  Standar.Name = "unspecified")
+                                  Standard.Name = "unspecified")
     } else {
-      A <- spatial$Station.Name[spatial$Type == "Release"]
+      A <- spatial$Standard.Name[spatial$Type == "Release"]
       B <- unique(bio$Release.site)
       if (any(is.na(match(B, A)))) {
         appendTo(c("Screen", "Report", "Warning"), "Error: There is a mismatch between the release sites reported and the release locations for the fish.")

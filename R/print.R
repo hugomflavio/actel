@@ -680,7 +680,7 @@ printCircular <- function(times, bio, suffix = NULL){
     #   to = sunrize, units = "hours", template = "clock24", 
     #   limits = c(1, 0), fill = scales::alpha("grey", 0.3), border = "transparent")
     params <- myRoseDiag(trim.times, bins = 24, radii.scale = "linear",
-      prop = prop, tcl.text = -0.1, tol = 0.05, col = colours)
+      prop = prop, tcl.text = -0.1, tol = 0.05, col = colours, border = "black")
     roseMean(trim.times, col = params$col, mean.length = c(0.07, -0.07), mean.lwd = 6,
       box.range = "std.error", fill = "white", border = "black",
       box.size = c(1.015, 0.985), edge.length = c(0.025, -0.025),

@@ -33,6 +33,10 @@ listToTable <- function(input, type = c("table", "frame"), row.names = FALSE, so
   }))
   if (any(is.na(presence.check)))
     stop("The column names in the elements of input are not identical.\n")
+  if (source & length(input) != length(names(input))) {
+    warning("'source' is set to TRUE but not all elements of the list are named. Disregarding 'source'.")
+    source <- FALSE
+  }
   if (source) {
     aux <- lapply(seq_along(input), function(i) {
       input[[i]]$list.source.name <- names(input)[i]
