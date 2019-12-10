@@ -2,6 +2,22 @@
 
 Find out the main highlights of each update.
 
+## development
+
+Changes:
+  * 'maximum.time' has been renamed to 'max.interval'
+  * 'tz.study.area' has been renamed to 'tz'
+  * 'start.timestamp' has been renamed to 'start.time'
+  * 'end.timestamp' has been renamed to 'stop.time'
+  * After a transition period, actel() has been removed
+
+Note: Newly deprecated arguments will continue working during a transition period
+
+Enhancements:
+  * 'tz' is now checked against the output of OlsonNames() to ensure a valid timezone is entered.
+  * messages and warnings are now printed using message() and warning()
+
+
 ## actel 0.1.1
 
 Fixes:
