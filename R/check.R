@@ -289,7 +289,8 @@ checkReport <- function(report){
 #' 
 #' Confirms that the target directory exists.
 #' 
-#' @inheritParams actel
+#' @inheritParams explore
+#' @param my.home The output of getwd()
 #' 
 #' @keywords internal
 #' 

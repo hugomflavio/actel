@@ -4,17 +4,15 @@
 \alias{printIndividuals}
 \title{Print individual graphics}
 \usage{
-printIndividuals(redraw, detections.list, bio, status.df = NULL,
-  tz.study.area, movements, valid.movements = NULL, extension = "png")
+printIndividuals(redraw, detections.list, bio, status.df = NULL, tz,
+  movements, valid.movements = NULL, extension = "png")
 }
 \arguments{
-\item{redraw}{When report is set to TRUE, controls if files created in a previous run of the function should be overridden.}
-
 \item{detections.list}{A list of the detections split by each target tag, created by splitDetections.}
 
 \item{bio}{A table with the tags and biometrics of the studied fish.}
 
-\item{tz.study.area}{The time-zone of the study area. Necessary to convert the ALS time data, which is in UTC.}
+\item{tz}{The time-zone of the study area. Necessary to convert the ALS time data, which is in UTC.}
 
 \item{movements}{A list of movements for each target tag, created by groupMovements.}
 

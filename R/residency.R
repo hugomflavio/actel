@@ -894,7 +894,7 @@ assembleResidency <- function(secmoves, movements, sections) {
 #'
 #' Combines the timetable and the original biometrics.
 #' 
-#' @inheritParams actel
+#' @inheritParams explore
 #' @inheritParams deployValues
 #' @inheritParams splitDetections
 #' @inheritParams simplifyMovements

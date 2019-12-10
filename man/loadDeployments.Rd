@@ -4,7 +4,7 @@
 \alias{loadDeployments}
 \title{Load deployments file and Check the structure}
 \usage{
-loadDeployments(file, tz.study.area)
+loadDeployments(file, tz)
 }
 \arguments{
 \item{file}{an input file with spatial data.}

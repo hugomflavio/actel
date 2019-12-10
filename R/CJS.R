@@ -210,7 +210,7 @@ assembleArrayCJS <- function(mat, CJS, arrays) {
 #' 
 #' @inheritParams loadDetections
 #' @inheritParams simplifyMovements
-#' @inheritParams actel
+#' @inheritParams explore
 #' @param simple.movements A list of valid-only movements for each fish
 #'
 #' @return A list of detection matrices split by groups and release sites
@@ -478,7 +478,7 @@ mbGroupCJS <- function(m, status.df, fixed.efficiency = NULL) {
 
 #' Compile inter-array detection matrix
 #'
-#' @inheritParams actel
+#' @inheritParams explore
 #' @inheritParams loadDetections
 #' @inheritParams simplifyMovements
 #' @inheritParams assembleMatrices
@@ -571,7 +571,7 @@ includeMissing <- function(x, status.df){
 
 #' Compile detection matrix for last array
 #'
-#' @inheritParams actel
+#' @inheritParams explore
 #' @inheritParams loadDetections
 #' @inheritParams groupMovements
 #' 

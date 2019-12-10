@@ -682,7 +682,7 @@ loadBio <- function(file, tz){
 #'
 #' If there are previously compiled detections present, offers the chance to reuse. Otherwise triggers combineDetections.
 #' 
-#' @inheritParams actel
+#' @inheritParams explore
 #' 
 #' @import data.table
 #' 
@@ -736,7 +736,7 @@ loadDetections <- function(start.time = NULL, stop.time = NULL, tz, force = FALS
 #'
 #' Finds the detections' files and processes them.
 #' 
-#' @inheritParams actel
+#' @inheritParams explore
 #' @param path the path(s) to the detection files
 #' 
 #' @import data.table
@@ -958,7 +958,7 @@ convertCodes <- function(input) {
 #' Converts the ALS timestamps (UTC) to the designated study area time zone. Can also trim the data by time.
 #' 
 #' @inheritParams convertCodes
-#' @inheritParams actel
+#' @inheritParams explore
 #'
 #' @return A data frame with corrected timestamps.
 #'
@@ -1012,7 +1012,7 @@ createUniqueSerials <- function(input) {
 #'
 #' Splits the detections' table by tags and selects only detections from target tags
 #' 
-#' @inheritParams actel
+#' @inheritParams explore
 #' @inheritParams loadDetections
 #' @param bio A table with the tags and biometrics of the studied fish.
 #' @param detections A data frame with all the detections. Supplied by loadDetections.
@@ -1214,7 +1214,7 @@ createStandards <- function(detections, spatial, deployments) {
 #' @param file an input file with spatial data.
 #' @param first.array Either NULL or the top level array in the study area.
 #' @inheritParams splitDetections
-#' @inheritParams actel
+#' @inheritParams explore
 #' 
 #' @return A list of 1) stations, 2) release sites, 3) ALS columns in the spatial file, 4) the Number of ASL, 5) The ALS serial numbers and 6) the array order.
 #' 
@@ -1309,7 +1309,7 @@ transformSpatial <- function(spatial, bio, sections = NULL, first.array = NULL) 
 #' Collect summary information on the tags detected but that are not part of the study.
 #'
 #' @param input list of detections
-#' @inheritParams actel
+#' @inheritParams explore
 #' @inheritParams splitDetections
 #'
 #' @keywords internal

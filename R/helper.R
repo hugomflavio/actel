@@ -450,7 +450,7 @@ updateActel <- function() {
 #' 
 #' @inheritParams assembleMatrices
 #' @inheritParams loadDetections
-#' @inheritParams actel
+#' @inheritParams explore
 #' @param type The point to be recorded: one of "arrival" or "departure".
 #' @param events The number of events to record. if "one" and type is "arrival", the very first arrival is returned;
 #' if "one" and type is "departure", the very last departure is returned.

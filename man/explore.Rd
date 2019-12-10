@@ -4,17 +4,20 @@
 \alias{explore}
 \title{Actel: Acoustic telemetry data sorting}
 \usage{
-explore(path = NULL, maximum.time = 60,
+explore(path = NULL, max.interval = 60, maximum.time = 60,
   speed.method = c("last to first", "first to first"),
-  speed.warning = NULL, speed.error = NULL, tz.study.area,
-  start.timestamp = NULL, end.timestamp = NULL, report = TRUE,
-  exclude.tags = NULL, jump.warning = 2, jump.error = 3,
-  inactive.warning = NULL, inactive.error = NULL, debug = FALSE)
+  speed.warning = NULL, speed.error = NULL, tz.study.area = NULL, tz,
+  start.time = NULL, start.timestamp = NULL, stop.time = NULL,
+  end.timestamp = NULL, report = TRUE, exclude.tags = NULL,
+  jump.warning = 2, jump.error = 3, inactive.warning = NULL,
+  inactive.error = NULL, debug = FALSE)
 }
 \arguments{
-\item{path}{Path to the folder containing the data. If the R session is already running in the target folder, path may be left as NA}
+\item{path}{Path to the folder containing the data. If the R session is already running in the target folder, path may be left as NULL}
 
-\item{maximum.time}{The number of minutes that must pass between detections for a new event to be created.}
+\item{max.interval}{The number of minutes that must pass between detections for a new event to be created.}
+
+\item{maximum.time}{Deprecated. See "max.interval"}
 
 \item{speed.method}{One of 'last to first' or 'first to first'. In the former, the last detection on a given array/section is matched to the first detection on the next array/section (default). If changed to 'first to first', the first detection on two consecutive arrays/sections are used to perform the calculations.}
 
@@ -22,13 +25,19 @@ explore(path = NULL, maximum.time = 60,
 
 \item{speed.error}{Numeric value (m/s). If a fish moves at a speed greater or equal to this argument, user intervention is suggested. Defaults to NULL (i.e. no errors are issued)}
 
-\item{tz.study.area}{The time-zone of the study area. Necessary to convert the ALS time data, which is in UTC.}
+\item{tz.study.area}{Deprecated. See "tz"}
 
-\item{start.timestamp}{Detection data prior to this date is not analysed. Improves processing time when loading large amounts of detection data.}
+\item{tz}{The time-zone of the study area. Necessary to convert the ALS time data, which is in UTC.}
 
-\item{end.timestamp}{Detection data posterior to this date is not analysed. Improves processing time when loading large amounts of detection data.}
+\item{start.time}{Detection data prior to this date is not analysed. Improves processing time when loading large amounts of detection data.}
 
-\item{report}{Whether graphics, tables and LaTeX report files should be created. Defaults to TRUE. Allows automatic compiling of a PDF report after the analysis.}
+\item{start.timestamp}{Deprecated. See "start.time"}
+
+\item{stop.time}{Detection data posterior to this date is not analysed. Improves processing time when loading large amounts of detection data.}
+
+\item{end.timestamp}{Deprecated. See "stop.time"}
+
+\item{report}{Whether graphics, tables and html report files should be created. Defaults to TRUE. Allows automatic compiling of an html report after the analysis.}
 
 \item{exclude.tags}{A list of tags that should be excluded from the detection data before any analyses are performed. Intended to be used if stray tags from a different code space but with the same signal as a target tag are detected in the study area.}
 

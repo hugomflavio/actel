@@ -478,7 +478,7 @@ cat("No intra-array replicates were indicated.")
 #'
 #' Prints the individual detections for each fish, overlaying the points in time considered crucial during the analysis.
 #' 
-#' @inheritParams actel
+#' @inheritParams explore
 #' @inheritParams groupMovements
 #' @inheritParams simplifyMovements
 #' @inheritParams assembleMatrices

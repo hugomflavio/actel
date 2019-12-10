@@ -716,7 +716,8 @@ return(reportname)
 #'
 #' Crawls trough the movement events of each fish to find when it entered and left each section of the study area.
 #' 
-#' @inheritParams actel
+#' @inheritParams explore
+#' @inheritParams migration
 #' @inheritParams simplifyMovements
 #' @inheritParams loadDetections
 #' @inheritParams groupMovements
@@ -814,7 +815,8 @@ assembleTimetable <- function(movements, sections, spatial, arrays, minimum.dete
 #'
 #' If the user has called for an override for a specific tag, this function will allow for a fully manual choice of events.
 #' 
-#' @inheritParams actel
+#' @inheritParams explore
+#' @inheritParams migration
 #' @inheritParams simplifyMovements
 #' @param i The tag number currently under scrutiny. Only used for messaging purposes.
 #' 
@@ -910,7 +912,8 @@ checkPrevious <- function(last.events, j){
 
 #' Check event validity during manual mode
 #' 
-#' @inheritParams actel
+#' @inheritParams explore
+#' @inheritParams migration
 #' @inheritParams simplifyMovements
 #' @inheritParams checkPrevious
 #' @param type The type of event being checked, only affects message display
@@ -946,7 +949,8 @@ overrideEventCheck <- function(type, the.event, up.boundary, t, last.events, j, 
 #'
 #' Finds the last event for each section in the study area.
 #' 
-#' @inheritParams actel
+#' @inheritParams explore
+#' @inheritParams migration
 #' @inheritParams simplifyMovements
 #' @inheritParams overrideDefaults
 #' 
@@ -1039,7 +1043,8 @@ findLastEvents <- function(i, movements, sections, minimum.detections, cautious.
 #'
 #' Looks for evidence of backwards movements.
 #' 
-#' @inheritParams actel
+#' @inheritParams explore
+#' @inheritParams migration
 #' @inheritParams simplifyMovements
 #' @inheritParams overrideDefaults
 #' @inheritParams findLastEvents
@@ -1187,7 +1192,8 @@ eventOrderCheck <- function(i, last.events, sections, movements) {
 #'
 #' Finds the row from which the function findFirstEvents should start looking for the first event.
 #' 
-#' @inheritParams actel
+#' @inheritParams explore
+#' @inheritParams migration
 #' @inheritParams simplifyMovements
 #' @inheritParams checkPrevious
 #' @param l The section currently being analysed. Supplied by findFirstEvents
@@ -1230,7 +1236,8 @@ findFirstRow <- function(l, last.events, movements, sections) {
 #'
 #' Finds the first event for each section in the study area that has a last event.
 #' 
-#' @inheritParams actel
+#' @inheritParams explore
+#' @inheritParams migration
 #' @inheritParams simplifyMovements
 #' @inheritParams overrideDefaults
 #' @inheritParams checkPrevious
@@ -1305,13 +1312,14 @@ findFirstEvents <- function(i, last.events, movements, sections, cautious.assign
       }
     }
   }
-  appendTo("debug", paste("Terminating findFirstEvents for fish ", i, ".", sep = ""))
+  appendTo("debug", paste0("Terminating findFirstEvents for fish ", i, "."))
   return(list(first.events = first.events, last.events = last.events))
 }
 
 #' Update movement validity based on the chosen first and last events for each section
 #' 
-#' @inheritParams actel
+#' @inheritParams explore
+#' @inheritParams migration
 #' @inheritParams deployValues
 #' @inheritParams assembleTimetable
 #' 
@@ -1347,7 +1355,8 @@ updateMovementValidity <- function(movements, events, sections){
 #' Compiles the information supplied and deploys it into the correct timetable row.
 #' 
 #' @param timetable A table of the entering and leaving points for each section per target tag, created by assembleTimetable.
-#' @inheritParams actel
+#' @inheritParams explore
+#' @inheritParams migration
 #' @inheritParams simplifyMovements
 #' @inheritParams overrideDefaults
 #' @inheritParams loadDetections
@@ -1489,7 +1498,8 @@ countBackMoves <- function(movements, arrays){
 #'
 #' Combines the timetable and the original biometrics.
 #' 
-#' @inheritParams actel
+#' @inheritParams explore
+#' @inheritParams migration
 #' @inheritParams deployValues
 #' @inheritParams splitDetections
 #' @inheritParams simplifyMovements
@@ -1580,7 +1590,8 @@ assembleOutput <- function(timetable, bio, spatial, sections, dist.mat, invalid.
 #'
 #' Produces a table with the survival per group of fish present in the biometrics.
 #' 
-#' @inheritParams actel
+#' @inheritParams explore
+#' @inheritParams migration
 #' @inheritParams simplifyMovements
 #' 
 #' @return A data frame containing the survival per group of fish present in the biometrics.

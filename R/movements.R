@@ -5,7 +5,7 @@
 #' @param detections.list A list of the detections split by each target tag, created by splitDetections.
 #' @param dist.mat A matrix of the distances between the deployed ALS.
 #' @param invalid.dist Whether or not the distance matrix supplied is valid for the study area.
-#' @inheritParams actel
+#' @inheritParams explore
 #' @inheritParams splitDetections
 #' @inheritParams loadDetections
 #' 
@@ -102,7 +102,7 @@ groupMovements <- function(detections.list, bio, spatial, speed.method, max.inte
 #' 
 #' Remove invalid movement events and recalculate times/speeds.
 #'
-#' @inheritParams actel
+#' @inheritParams explore
 #' @inheritParams groupMovements
 #' @param movements A list of movements for each target tag, created by groupMovements.
 #' 
@@ -132,7 +132,7 @@ simplifyMovements <- function(movements, bio, speed.method, dist.mat, invalid.di
 #' 
 #' Triggers movementTimes and also calculates the speed between events.
 #'
-#' @inheritParams actel
+#' @inheritParams explore
 #' @inheritParams simplifyMovements
 #' @inheritParams groupMovements
 #' @param silent logical: If TRUE, debug messages are issued (only works within actel)
@@ -218,7 +218,7 @@ movementTimes <- function(movements, silent = TRUE, type = c("array", "section")
 #' Calculate time and speed since release.
 #' 
 #' @inheritParams simplifyMovements
-#' @inheritParams actel
+#' @inheritParams explore
 #' @inheritParams groupMovements
 #' @inheritParams movementSpeeds
 #' @param fish The tag ID of the fish currently being analysed

@@ -5,7 +5,7 @@
 \title{Create status.df}
 \usage{
 assembleOutput(timetable, bio, spatial, sections, dist.mat, invalid.dist,
-  tz.study.area)
+  tz)
 }
 \arguments{
 \item{timetable}{A table of the entering and leaving points for each section per target tag, created by assembleTimetable.}
@@ -18,7 +18,7 @@ assembleOutput(timetable, bio, spatial, sections, dist.mat, invalid.dist,
 
 \item{invalid.dist}{Whether or not the distance matrix supplied is valid for the study area.}
 
-\item{tz.study.area}{The time-zone of the study area. Necessary to convert the ALS time data, which is in UTC.}
+\item{tz}{The time-zone of the study area. Necessary to convert the ALS time data, which is in UTC.}
 }
 \value{
 A data frame containing all the final data for each fish.

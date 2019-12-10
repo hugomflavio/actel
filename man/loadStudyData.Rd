@@ -4,18 +4,17 @@
 \alias{loadStudyData}
 \title{Load, structure and check the inputs}
 \usage{
-loadStudyData(tz.study.area, override = NULL, start.timestamp,
-  end.timestamp, sections = NULL, exclude.tags,
-  disregard.parallels = TRUE)
+loadStudyData(tz, override = NULL, start.time, stop.time,
+  sections = NULL, exclude.tags, disregard.parallels = TRUE)
 }
 \arguments{
-\item{tz.study.area}{The time-zone of the study area. Necessary to convert the ALS time data, which is in UTC.}
+\item{tz}{The time-zone of the study area. Necessary to convert the ALS time data, which is in UTC.}
 
 \item{override}{A list of tags for which the user intends to manually define entering and leaving points for each study section.}
 
-\item{start.timestamp}{Detection data prior to this date is not analysed. Improves processing time when loading large amounts of detection data.}
+\item{start.time}{Detection data prior to this date is not analysed. Improves processing time when loading large amounts of detection data.}
 
-\item{end.timestamp}{Detection data posterior to this date is not analysed. Improves processing time when loading large amounts of detection data.}
+\item{stop.time}{Detection data posterior to this date is not analysed. Improves processing time when loading large amounts of detection data.}
 
 \item{sections}{The sections in which the study was divided. Must be coincident with the names given to the ALS arrays. (i.e. if an array is 'River1', then the respective section is 'River')}
 

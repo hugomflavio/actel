@@ -7,7 +7,9 @@
 checkPath(my.home, path)
 }
 \arguments{
-\item{path}{Path to the folder containing the data. If the R session is already running in the target folder, path may be left as NA}
+\item{my.home}{The output of getwd()}
+
+\item{path}{Path to the folder containing the data. If the R session is already running in the target folder, path may be left as NULL}
 }
 \description{
 Confirms that the target directory exists.

@@ -4,17 +4,17 @@
 \alias{compileDetections}
 \title{Combine ALS detections}
 \usage{
-compileDetections(path = "detections", start.timestamp = NULL,
-  end.timestamp = NULL, tz.study.area)
+compileDetections(path = "detections", start.time = NULL,
+  stop.time = NULL, tz)
 }
 \arguments{
 \item{path}{the path(s) to the detection files}
 
-\item{start.timestamp}{Detection data prior to this date is not analysed. Improves processing time when loading large amounts of detection data.}
+\item{start.time}{Detection data prior to this date is not analysed. Improves processing time when loading large amounts of detection data.}
 
-\item{end.timestamp}{Detection data posterior to this date is not analysed. Improves processing time when loading large amounts of detection data.}
+\item{stop.time}{Detection data posterior to this date is not analysed. Improves processing time when loading large amounts of detection data.}
 
-\item{tz.study.area}{The time-zone of the study area. Necessary to convert the ALS time data, which is in UTC.}
+\item{tz}{The time-zone of the study area. Necessary to convert the ALS time data, which is in UTC.}
 }
 \value{
 A dataframe with all the detections

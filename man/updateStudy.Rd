@@ -4,10 +4,10 @@
 \alias{updateStudy}
 \title{Update study area for actel v.0.0.4}
 \usage{
-updateStudy(tz.study.area)
+updateStudy(tz)
 }
 \arguments{
-\item{tz.study.area}{The time-zone of the study area. Necessary to convert the ALS time data, which is in UTC.}
+\item{tz}{The time-zone of the study area. Necessary to convert the ALS time data, which is in UTC.}
 }
 \description{
 Converts the spatial.csv in itself + a deployments.csv file.

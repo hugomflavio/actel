@@ -5,21 +5,25 @@
 \title{Residency analysis}
 \usage{
 residency(path = NULL, sections, section.minimum = 2,
-  maximum.time = 60, speed.method = c("last to first",
-  "first to first"), speed.warning = NULL, speed.error = NULL,
-  if.last.skip.section = TRUE, tz.study.area, start.timestamp = NULL,
+  max.interval = 60, maximum.time = 60,
+  speed.method = c("last to first", "first to first"),
+  speed.warning = NULL, speed.error = NULL,
+  if.last.skip.section = TRUE, tz.study.area = NULL, tz = NULL,
+  start.time = NULL, start.timestamp = NULL, stop.time = NULL,
   end.timestamp = NULL, report = TRUE, exclude.tags = NULL,
   replicates = NULL, jump.warning = 2, jump.error = 3,
   inactive.warning = NULL, inactive.error = NULL, debug = FALSE)
 }
 \arguments{
-\item{path}{Path to the folder containing the data. If the R session is already running in the target folder, path may be left as NA}
+\item{path}{Path to the folder containing the data. If the R session is already running in the target folder, path may be left as NULL}
 
 \item{sections}{The sections in which the study was divided. Must be coincident with the names given to the ALS arrays. (i.e. if an array is 'River1', then the respective section is 'River')}
 
 \item{section.minimum}{threshold consecutive number of detections in a section that awards confidence in the results. If the number of detections is lower than this argument, a warning is issued and user interaction is allowed.}
 
-\item{maximum.time}{The number of minutes that must pass between detections for a new event to be created.}
+\item{max.interval}{The number of minutes that must pass between detections for a new event to be created.}
+
+\item{maximum.time}{Deprecated. See "max.interval"}
 
 \item{speed.method}{One of 'last to first' or 'first to first'. In the former, the last detection on a given array/section is matched to the first detection on the next array/section (default). If changed to 'first to first', the first detection on two consecutive arrays/sections are used to perform the calculations.}
 
@@ -29,13 +33,19 @@ residency(path = NULL, sections, section.minimum = 2,
 
 \item{if.last.skip.section}{Indicates whether a fish detected at the last array of a given section should be considered to have disappeared in the next section. Defaults to TRUE. I.e.: In a study with sections 'River' and 'Fjord', where 'River3' is the last river array, a fish last detected at River3 will be considered as 'disappeared in the Fjord'.}
 
-\item{tz.study.area}{The time-zone of the study area. Necessary to convert the ALS time data, which is in UTC.}
+\item{tz.study.area}{Deprecated. See "tz"}
 
-\item{start.timestamp}{Detection data prior to this date is not analysed. Improves processing time when loading large amounts of detection data.}
+\item{tz}{The time-zone of the study area. Necessary to convert the ALS time data, which is in UTC.}
 
-\item{end.timestamp}{Detection data posterior to this date is not analysed. Improves processing time when loading large amounts of detection data.}
+\item{start.time}{Detection data prior to this date is not analysed. Improves processing time when loading large amounts of detection data.}
 
-\item{report}{Whether graphics, tables and LaTeX report files should be created. Defaults to TRUE. Allows automatic compiling of a PDF report after the analysis.}
+\item{start.timestamp}{Deprecated. See "start.time"}
+
+\item{stop.time}{Detection data posterior to this date is not analysed. Improves processing time when loading large amounts of detection data.}
+
+\item{end.timestamp}{Deprecated. See "stop.time"}
+
+\item{report}{Whether graphics, tables and html report files should be created. Defaults to TRUE. Allows automatic compiling of an html report after the analysis.}
 
 \item{exclude.tags}{A list of tags that should be excluded from the detection data before any analyses are performed. Intended to be used if stray tags from a different code space but with the same signal as a target tag are detected in the study area.}
 
