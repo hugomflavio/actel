@@ -234,26 +234,26 @@ printBiometrics <- function(bio) {
   biometric.fragment <- ""
   if (any(C <- grepl("Length", colnames(bio)) | grepl("Weight", colnames(bio)) | grepl("Mass", colnames(bio)) | grepl("Size", colnames(bio)))) {
     if (sum(C) > 1) {
-      graphic.width <- paste(90 / sum(C), "%", sep = "")
+      graphic.width <- paste0(90 / sum(C), "%")
     } else {
       graphic.width <- 0.45
-      graphic.width <- paste(45, "%", sep = "")
+      graphic.width <- paste0(45, "%")
     }
     counter <- 1
     for (i in colnames(bio)[C]) {
-      appendTo("debug", paste("Debug: Creating graphic '", gsub("[.]", "_", i), "_boxplot.png'.\n", sep = ""))
+      appendTo("debug", paste0("Debug: Creating graphic '", gsub("[.]", "_", i), "_boxplot.png'."))
       p <- ggplot2::ggplot(bio, ggplot2::aes(x = as.factor(Group), y = bio[, i]))
       p <- p + ggplot2::stat_boxplot(geom = "errorbar", na.rm = T)
       p <- p + ggplot2::geom_boxplot(na.rm = T)
       p <- p + ggplot2::theme_bw()
       p <- p + ggplot2::theme(panel.grid.minor.x = ggplot2::element_blank(), panel.grid.major.x = ggplot2::element_blank())
       p <- p + ggplot2::labs(x = "", y = i)
-      ggplot2::ggsave(paste("Report/", gsub("[.]", "_", i), "_boxplot.png", sep = ""), width = 3, height = 4)
+      ggplot2::ggsave(paste0("Report/", gsub("[.]", "_", i), "_boxplot.png"), width = 3, height = 4)
       rm(p)
       if (counter %% 2 == 0)
-        biometric.fragment <- paste(biometric.fragment, "![](", gsub("[.]", "_", i), "_boxplot.png){ width=", graphic.width, " }\n", sep = "")
+        biometric.fragment <- paste0(biometric.fragment, "![](", gsub("[.]", "_", i), "_boxplot.png){ width=", graphic.width, " }\n")
       else
-        biometric.fragment <- paste(biometric.fragment, "![](", gsub("[.]", "_", i), "_boxplot.png){ width=", graphic.width, " }", sep = "")
+        biometric.fragment <- paste0(biometric.fragment, "![](", gsub("[.]", "_", i), "_boxplot.png){ width=", graphic.width, " }")
     }
   }
   rm(C, graphic.width)
@@ -281,34 +281,9 @@ printDotplots <- function(status.df, invalid.dist) {
     colnames(status.df))])]
   t1 <- t1[, apply(t1, 2, function(x) !all(is.na(x)))]
   t1$Transmitter <- factor(t1$Transmitter, levels = rev(t1$Transmitter))
-  # largest <- c(-1, -1, 
-  #   unlist(
-  #     apply(t1[, c(-1, -2)], 2, 
-  #       function(x) 
-  #       if (!all(is.na(x))) {
-  #         max(x, na.rm = TRUE)
-  #       } else {
-  #         NA
-  #       }
-  #     )
-  #   )
-  # )
-  # largest[grepl("Speed.to", colnames(t1))] <- -1
-  # keep.seconds <- largest <= 600 & largest >= 0
-  # to.minutes <- largest <= 36000 & largest > 600
-  # to.hours <- largest <= 172800 & largest > 36000
-  # to.days <- largest > 172800
-  # t1[, to.minutes] <- t1[, to.minutes]/60
-  # t1[, to.hours] <- t1[, to.hours]/3600
-  # t1[, to.days] <- t1[, to.days]/86400
-  # colnames(t1)[keep.seconds] <- paste(colnames(t1)[keep.seconds], ".\n(Secs)", sep = "")
-  # colnames(t1)[to.minutes] <- paste(colnames(t1)[to.minutes], ".\n(Mins)", sep = "")
-  # colnames(t1)[to.hours] <- paste(colnames(t1)[to.hours], ".\n(Hours)", sep = "")
-  # colnames(t1)[to.days] <- paste(colnames(t1)[to.days], ".\n(Days)", sep = "")
-
   link <- unlist(sapply(colnames(t1), function(x) attributes(t1[,x])$units))
   colnames(t1)[match(names(link), colnames(t1))] <- paste0(names(link), "\n(", link, ")")
-  colnames(t1)[grepl("Speed.to", colnames(t1))] <- paste(colnames(t1)[grepl("Speed.to", colnames(t1))], "\n(m/s)", sep = "")
+  colnames(t1)[grepl("Speed.to", colnames(t1))] <- paste0(colnames(t1)[grepl("Speed.to", colnames(t1))], "\n(m/s)")
   colnames(t1)[2] <- "Detections\n(n)"
   if (!invalid.dist) {
     t2 <- t1[, !grepl("Time.until", colnames(t1))]
@@ -345,10 +320,8 @@ printDotplots <- function(status.df, invalid.dist) {
   p <- p + ggplot2::theme(panel.grid.minor.x = ggplot2::element_blank(), panel.grid.major.x = ggplot2::element_blank())
   p <- p + ggplot2::facet_grid(. ~ variable, scales = "free_x")
   p <- p + ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 45, vjust = 1, hjust = 1))
-  # p <- p + ggplot2::theme(strip.text.x = ggplot2::element_text(size = 0.5))
   p <- p + ggplot2::labs(x = "", y = "")
-  # ggplot2::ggsave(paste("Report/dotplots.pdf", sep = ""), width = 6, height = 10)
-  ggplot2::ggsave(paste("Report/dotplots.png", sep = ""), width = 6, height = (1.3 + 0.115 * (nrow(t2) - 1)))
+  ggplot2::ggsave("Report/dotplots.png", width = 6, height = (1.3 + 0.115 * (nrow(t2) - 1)))
   appendTo("debug", "Terminating printDotplots.")
 }
 
@@ -396,7 +369,7 @@ printSurvivalGraphic <- function(section.overview) {
   p <- p + ggplot2::scale_y_continuous(limits = c(0, 1), expand = c(0, 0, 0.05, 0))
   p <- p + ggplot2::labs(x = "", y = "Survival")
   the.width <- max(2, sum(grepl("Disap.", colnames(section.overview))) * nrow(section.overview))
-  ggplot2::ggsave(paste("Report/survival.png", sep = ""), width = the.width, height = 4)
+  ggplot2::ggsave("Report/survival.png", width = the.width, height = 4)
   appendTo("debug", "Terminating printSurvivalGraphic.")
 }
 
@@ -443,7 +416,7 @@ knitr::kable(overall.CJS$absolutes)
 **Array efficiency**
 
 ```{r efficiency2, echo = FALSE}
-to.print <- t(paste(round(overall.CJS$efficiency * 100, 1), "%", sep = ""))
+to.print <- t(paste0(round(overall.CJS$efficiency * 100, 1), "%"))
 to.print[grepl("NA", to.print)] <- "-"
 colnames(to.print) <- names(overall.CJS$efficiency)
 rownames(to.print) <- "efficiency"
@@ -464,12 +437,12 @@ knitr::kable(to.print)
 **Array efficiency**
 
 ```{r efficiency2, echo = FALSE}
-to.print <- t(paste(round(efficiency$max.efficiency * 100, 1), "%", sep = ""))
+to.print <- t(paste0(round(efficiency$max.efficiency * 100, 1), "%"))
 to.print[grepl("NA", to.print)] <- "-"
 to.print <- as.data.frame(to.print, stringsAsFactors = FALSE)
 colnames(to.print) <- names(efficiency$max.efficiency)
 
-aux <- t(paste(round(efficiency$min.efficiency * 100, 1), "%", sep = ""))
+aux <- t(paste0(round(efficiency$min.efficiency * 100, 1), "%"))
 aux[grepl("NA", aux)] <- "-"
 to.print[2, ] <- aux
 
@@ -535,7 +508,7 @@ printIndividuals <- function(redraw, detections.list, bio, status.df = NULL, tz,
   for (i in 1:length(detections.list)) {
     fish <- names(detections.list)[i]
     PlotData <- detections.list[[fish]]
-    if (!(exists("redraw") && redraw == FALSE && file.exists(paste("Report/", fish, ".png", sep = "")))) {
+    if (!(exists("redraw") && redraw == FALSE && file.exists(paste0("Report/", fish, ".png")))) {
       all.moves.line <- data.frame(
         Station = as.vector(t(movements[[fish]][, c("First.station", "Last.station")])),
         Timestamp = as.vector(t(movements[[fish]][, c("First.time", "Last.time")]))
@@ -552,7 +525,7 @@ printIndividuals <- function(redraw, detections.list, bio, status.df = NULL, tz,
         simple.moves.line$Station <- factor(simple.moves.line$Station, levels = levels(PlotData$Standard.Name))
         simple.moves.line$Timestamp <- as.POSIXct(simple.moves.line$Timestamp, tz = tz)
       }
-      appendTo("debug", paste("Debug: Printing graphic for fish", fish, ".", sep = ""))
+      appendTo("debug", paste0("Debug: Printing graphic for fish", fish, "."))
       colnames(PlotData)[1] <- "Timestamp"
       the.row <- which(bio$Transmitter == fish)
       start.line <- as.POSIXct(bio$Release.date[the.row], tz = tz)
@@ -621,9 +594,9 @@ printIndividuals <- function(redraw, detections.list, bio, status.df = NULL, tz,
       # Caption and title
       p <- p + ggplot2::guides(colour = ggplot2::guide_legend(reverse = T))
       if (!is.null(status.df))
-        p <- p + ggplot2::labs(title = paste(fish, " (", status.df[status.df$Transmitter == fish, "Status"], ")", sep = ""), x = paste("tz: ", tz.study.area, sep = ""), y = "Station Standard Name")
+        p <- p + ggplot2::labs(title = paste0(fish, " (", status.df[status.df$Transmitter == fish, "Status"], ")"), x = paste("tz:", tz), y = "Station Standard Name")
       else
-        p <- p + ggplot2::labs(title = paste(fish, " (", nrow(PlotData), " detections)", sep = ""), x = paste("tz: ", tz.study.area, sep = ""), y = "Station Standard Name")
+        p <- p + ggplot2::labs(title = paste0(fish, " (", nrow(PlotData), " detections)"), x = paste("tz:", tz), y = "Station Standard Name")
       # Save
       if (length(levels(PlotData$Standard.Name)) <= 30)
         the.height <- 4
@@ -659,7 +632,7 @@ printIndividuals <- function(redraw, detections.list, bio, status.df = NULL, tz,
 printCircular <- function(times, bio, suffix = NULL){
   cbPalette <- c("#56B4E9", "#c0ff3e", "#E69F00", "#F0E442", "#0072B2", "#D55E00", "#CC79A7", "#999999")
   circular.plots <- ""
-  colours <- paste(cbPalette[c(1:length(unique(bio$Group)))], 80, sep = "")
+  colours <- paste0(cbPalette[c(1:length(unique(bio$Group)))], 80)
   for (i in 1:length(times)) {
     if (length(unique(bio$Group)) > 1) {
       link <- match(names(times[[i]]), bio$Transmitter)
@@ -883,7 +856,7 @@ ringsRel <- function(plot.params, border, rings.lty,
   ring.text, ring.text.pos, ring.text.cex){
   range <- seq(from = 0, to = 1 / plot.params$prop, length.out = 5)
   radius <- c(0.25, 0.50, 0.75, 1)
-  line.values <- paste(round(range * 100, 2), "%", sep = "")
+  line.values <- paste0(round(range * 100, 2), "%")
   if (plot.params$radii.scale == "sqrt")
     radius <- sqrt(radius)
   for (i in 1:3) {

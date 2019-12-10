@@ -61,7 +61,7 @@ exampleWorkspace <- function(spatial = example.spatial, biometrics = example.bio
     dir.create("exampleWorkspace/detections")
   my.list <- split(detections, detections$Receiver)
   for (i in names(my.list)) {
-    write.csv(my.list[[i]], paste("exampleWorkspace/detections/", i, ".csv", sep = ""), row.names = FALSE)
+    write.csv(my.list[[i]], paste0("exampleWorkspace/detections/", i, ".csv"), row.names = FALSE)
   }
   message("M: The example workspace is now ready. To run the analysis on the example data, run:\n
   results <- migration(path = 'exampleWorkspace', sections = c('River', 'Fjord', 'Sea'), 

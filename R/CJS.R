@@ -14,7 +14,7 @@ output <- list()
   for(i in 1:length(replicates)) {
     continue <- TRUE
     if (!is.null(CJS) && !is.na(CJS$efficiency[names(replicates)[i]])) {
-      appendTo(c("Screen", "Warning", "Report"), paste0("W: An inter-array efficiency has already been calculated for array ", names(replicates)[i],"."))
+      appendTo(c("Screen", "Warning", "Report"), paste0("An inter-array efficiency has already been calculated for array ", names(replicates)[i],"."))
       decision <- readline("   Do you want to replace this with an intra-array efficiency estimate?(y/N) ")
       if (decision == "y" | decision == "Y") {
         appendTo("Report", paste0("   Replacing efficiency estimation."))
@@ -151,9 +151,9 @@ breakMatricesByArray <- function(m, arrays, type = c("peers", "all"), verbose = 
       zero.check <- own.zero.check | peer.zero.check
       if (all(zero.check)) {
         if (all(own.zero.check) & verbose)
-          appendTo(c("Screen", "Warning", "Report"), paste0("W: No fish passed through array ", names(arrays)[i], "."))
+          appendTo(c("Screen", "Warning", "Report"), paste0("No fish passed through array ", names(arrays)[i], "."))
         if (all(peer.zero.check) & verbose)
-          appendTo(c("Screen", "Warning", "Report"), paste0("W: No fish passed through any of the efficiency peers of array ", names(arrays)[i], "."))
+          appendTo(c("Screen", "Warning", "Report"), paste0("No fish passed through any of the efficiency peers of array ", names(arrays)[i], "."))
       } else {
         recipient[[length(recipient) + 1]] <- aux[!zero.check]
         names(recipient)[length(recipient)] <- names(arrays)[i]
@@ -161,7 +161,7 @@ breakMatricesByArray <- function(m, arrays, type = c("peers", "all"), verbose = 
     }
   }
   if (length(recipient) == 0 & verbose) {
-    appendTo(c("Screen", "Warning", "Report"), "W: None of the arrays has valid efficiency peers.")
+    appendTo(c("Screen", "Warning", "Report"), "None of the arrays has valid efficiency peers.")
     return(NULL)
   } else {
     return(recipient)
@@ -398,7 +398,7 @@ simpleCJS <- function(input, estimate = NULL, fixed.efficiency = NULL, silent = 
       centeringB <- paste(rep(" ", maxcharB - nchar(the.names[i + 1])), collapse = "")
     else
       centeringB <- ""
-    the.rows[length(the.rows) + 1] <- paste(centeringA, the.names[i], " -> ", the.names[i + 1], centeringB, " =", sep = "")
+    the.rows[length(the.rows) + 1] <- paste0(centeringA, the.names[i], " -> ", the.names[i + 1], centeringB, " =")
   }
   rownames(survival) <- the.rows
   colnames(survival) <- ""
@@ -947,7 +947,7 @@ recalculateCJS <- function(input, estimate = NULL, fixed.efficiency = NULL){
       centeringB <- paste(rep(" ", maxcharB - nchar(the.names[i + 1])), collapse = "")
     else
       centeringB <- ""
-    the.rows[length(the.rows) + 1] <- paste(centeringA, the.names[i], " -> ", the.names[i + 1], centeringB, " =", sep = "")
+    the.rows[length(the.rows) + 1] <- paste0(centeringA, the.names[i], " -> ", the.names[i + 1], centeringB, " =")
   }
   rownames(survival) <- the.rows
   colnames(survival) <- ""

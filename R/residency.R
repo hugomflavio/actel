@@ -195,10 +195,10 @@ detections.list <- study.data$detections.list
                                  spatial = spatial, jump.warning = jump.warning, jump.error = jump.error)
 
   if (is.null(speed.warning)) {
-    appendTo(c("Screen", "Report", "Warning"), "M: 'speed.warning'/'speed.error' were not set, skipping speed checks.")
+    appendTo(c("Screen", "Report", "Warning"), "'speed.warning'/'speed.error' were not set, skipping speed checks.")
   } else {
     if(invalid.dist) {
-      appendTo(c("Screen", "Report", "Warning"), "W: 'speed.warning'/'speed.error' were set, but a valid distance matrix is not present. Aborting speed checks.")
+      appendTo(c("Screen", "Report", "Warning"), "'speed.warning'/'speed.error' were set, but a valid distance matrix is not present. Aborting speed checks.")
     } else {
        temp.valid.movements <- simplifyMovements(movements = movements, bio = bio, 
          speed.method = speed.method, dist.mat = dist.mat, invalid.dist = invalid.dist)
@@ -209,7 +209,7 @@ detections.list <- study.data$detections.list
   }
   
   if (is.null(inactive.warning))
-    appendTo(c("Screen", "Report", "Warning"), "M: 'inactive.warning'/'inactive.error' were not set, skipping inactivity checks.")
+    appendTo(c("Screen", "Report", "Warning"), "'inactive.warning'/'inactive.error' were not set, skipping inactivity checks.")
   else
     movements <- checkInactiveness(movements = movements, detections.list = detections.list, 
       inactive.warning = inactive.warning, inactive.error = inactive.error, 
@@ -285,20 +285,20 @@ detections.list <- study.data$detections.list
 # ---------------
 
 # wrap up in-R objects
-  if (file.exists(resultsname <- paste("actel_residency_results.RData", sep = ""))) {
+  if (file.exists(resultsname <- paste0("actel_residency_results.RData"))) {
     continue <- TRUE
     index <- 1
     while (continue) {
-      if (file.exists(resultsname <- paste("actel_residency_results.", index, ".RData", sep = ""))) {
+      if (file.exists(resultsname <- paste0("actel_residency_results.", index, ".RData"))) {
         index <- index + 1
       } else {
         continue <- FALSE
       }
     }
-    appendTo("Screen", paste("M: An actel residency results file is already present in the current directory.\n   Saving new results as '", resultsname,"'.", sep = ""))
+    appendTo("Screen", paste0("M: An actel residency results file is already present in the current directory.\n   Saving new results as '", resultsname,"'."))
     rm(continue, index)
   } else {
-    appendTo(c("Screen", "Report"), paste("M: Saving results to '", resultsname, "'.", sep = ""))
+    appendTo(c("Screen", "Report"), paste0("M: Saving results to '", resultsname, "'."))
   }
 
   detections <- detections.list
@@ -370,8 +370,8 @@ detections.list <- study.data$detections.list
   appendTo("Screen", "M: Process finished successfully.")
 # ------------------
 
-  appendTo("Screen", paste("M: Saving job log as '", paste(gsub(":", ".", sub(" ", ".", as.character(Sys.time()))), "actel.log.txt", sep = "."), "'.", sep = ""))
-  file.rename("temp_log.txt", paste(gsub(":", ".", sub(" ", ".", as.character(Sys.time()))), "actel.log.txt", sep = "."))
+  appendTo("Screen", paste0("M: Saving job log as '", paste(gsub(":", ".", sub(" ", ".", as.character(Sys.time()))), "actel.log.txt", sep = "."), "'."))
+  file.rename("temp_log.txt", paste0(gsub(":", ".", sub(" ", ".", as.character(Sys.time()))), "actel.log.txt"))
   
   if (!debug)
     deleteHelpers()
@@ -399,29 +399,29 @@ detections.list <- study.data$detections.list
 #' 
 printResidencyRmd <- function(biometric.fragment, efficiency.fragment, individual.detection.plots, individual.residency.plots, array.circular.plots, 
   section.arrival.circular.plots, section.departure.circular.plots, spatial, deployments, detections, valid.detections, last.seen, last.seen.graph.size){
-  if (file.exists(reportname <- paste("Report/actel_residency_report.Rmd", sep = ""))) {
+  if (file.exists(reportname <- "Report/actel_residency_report.Rmd")) {
     continue <- TRUE
     index <- 1
     while (continue) {
-      if(file.exists(reportname <- paste("Report/actel_residency_report.", index, ".Rmd", sep = ""))) {
+      if(file.exists(reportname <- paste0("Report/actel_residency_report.", index, ".Rmd"))) {
         index <- index + 1
       } else {
         continue <- FALSE
       }
     }
-    appendTo("Screen",paste("M: An actel report is already present in the current directory\n   Saving new report as 'actel_residency_report.", index, ".html'.", sep = ""))
+    appendTo("Screen", paste0("M: An actel report is already present in the current directory\n   Saving new report as 'actel_residency_report.", index, ".html'."))
     rm(continue,index)
   } else {
-    appendTo("Screen",paste("M: Saving actel report as 'actel_residency_report.html'.", sep = ""))
+    appendTo("Screen", "M: Saving actel report as 'actel_residency_report.html'.")
   }
   if (any(grepl("Unknown", spatial$stations$Standard.Name))) {
-    unknown.fragment <- paste('<span style="color:red"> Number of relevant unknown receivers: **', sum(grepl("Unknown", spatial$stations$Standard.Name)), '**</span>\n', sep = "")
+    unknown.fragment <- paste0('<span style="color:red"> Number of relevant unknown receivers: **', sum(grepl("Unknown", spatial$stations$Standard.Name)), '**</span>\n')
   } else {
     unknown.fragment <- ""
   } 
   report <- readr::read_file("temp_log.txt")
   sink(reportname)
-  cat(paste(
+  cat(paste0(
 '---
 title: "Acoustic telemetry residency analysis"
 author: "Actel package"
@@ -595,7 +595,7 @@ Note:
 cat(gsub("\\r", "", readr::read_file("../temp_log.txt")))
 ```
 
-', sep = ""), fill = TRUE)
+'), fill = TRUE)
 sink()
 
 if(file.exists("Report/toc_menu_residency.html"))

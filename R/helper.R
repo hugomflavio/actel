@@ -175,10 +175,10 @@ minuteTime <- function(x, format = c("h", "m", "s"), seconds = TRUE) {
       s = m %% 1
       m = m - s
       s = round(60 * s, 0)
-      if (h < 10) h <- paste(0, h, sep = "")
-      if (!seconds & s>30) m = m+1
-      if (m < 10) m <- paste(0,m,sep="")
-      if (s < 10) s <- paste(0,s,sep="")
+      if (h < 10) h <- paste0(0, h)
+      if (!seconds & s>30) m = m + 1
+      if (m < 10) m <- paste0(0, m)
+      if (s < 10) s <- paste0(0, s)
       if (seconds) 
         x <- paste(h, m, s, sep = ":")
       else 
@@ -314,9 +314,13 @@ roundDown <- function(input, to = 10) {
 #' 
 appendTo <- function(recipient, line, fish) {
   for (i in recipient) {
-    if (i == "Screen") 
-      cat(paste(line, "\n", sep = ""))
-    flush.console()
+    if (i == "Screen") {
+      if (any(recipient == "Warning"))
+        warning(line, immediate. = TRUE, call. = FALSE)
+      else
+        message(line)
+      flush.console()
+    } 
     if (i == "Report") 
       write(line, file = "temp_log.txt", append = file.exists("temp_log.txt"))
     if (i == "Warning") 
@@ -336,7 +340,7 @@ appendTo <- function(recipient, line, fish) {
 #' @keywords internal
 #' 
 deleteHelpers <- function(emergency = FALSE) {
-  helper.list <- paste("temp_", c("log", "warnings", "UD", "comments", "debug"), ".txt", sep = "")
+  helper.list <- paste0("temp_", c("log", "warnings", "UD", "comments", "debug"), ".txt")
   if (emergency) 
     helper.list <- helper.list[helper.list != "temp_debug.txt"]
   link <- unlist(lapply(helper.list, file.exists))
@@ -352,8 +356,7 @@ deleteHelpers <- function(emergency = FALSE) {
 emergencyBreak <- function() {
   appendTo("Report", "\nAn exception occurred, stopping the process!\n\n-------------------")
   if (file.exists("temp_UD.txt")) 
-    appendTo("Report", paste("User inverventions:\n-------------------\n", gsub("\r", "", readr::read_file("temp_UD.txt")), "-------------------", sep = ""))
-  # appendTo(c("Screen", "Report"), paste("M: Saving report as '", paste(gsub(":", ".", sub(" ", ".", as.character(Sys.time()))), "actel.log-STOP.txt", sep = "."), "'.", sep = ""))
+    appendTo("Report", paste0("User inverventions:\n-------------------\n", gsub("\r", "", readr::read_file("temp_UD.txt")), "-------------------"))
   file.rename("temp_log.txt", paste(gsub(":", ".", sub(" ", ".", as.character(Sys.time()))), "actel.log-STOP.txt", sep = "."))
   deleteHelpers(TRUE)
 }
@@ -391,7 +394,7 @@ commentCheck <- function(line, tag) {
     if (any(matchl(decision, c("Comment", "comment")))) {
       appendTo(c("UD"), "Comment")
       {
-        appendTo(c("UD", "Comment"), readline(paste("New comment on fish ", tag, ":", sep = "")), tag)
+        appendTo(c("UD", "Comment"), readline(paste0("New comment on fish ", tag, ":")), tag)
       }
       appendTo("Screen", "M: Comment successfully stored, returning to the previous interaction.")
     } else {
@@ -573,7 +576,7 @@ transitionLayer <- function(shape, size, EPSGcode, directions = c(16,8,4), force
   } else {
     stop("'shape' must be a .shp file.\n", call. = FALSE)
   }
-  data.crs <- raster::crs(paste("+init=epsg:", EPSGcode, sep = ""))
+  data.crs <- raster::crs(paste0("+init=epsg:", EPSGcode))
   raster::crs(shape)<-raster::crs(data.crs) # Set CRS 
   pixel.res <- (shape@bbox[,2] - shape@bbox[,1]) / size
   if (any(pixel.res %% 1 != 0)) {
@@ -628,16 +631,16 @@ distancesMatrix <- function(t.layer = "transition.layer.RData", starters = NULL,
   list.of.packages <- c("raster", "gdistance", "sp", "tools", "rgdal")
   new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[, "Package"])]
   if (length(new.packages)>0) {
-    stop(paste("This function requires packages '", paste(new.packages,collapse="', '"), 
-      "' to operate. Please install them before proceeding.\n", sep = ""), call. = FALSE)
+    stop(paste0("This function requires packages '", paste(new.packages,collapse="', '"), 
+      "' to operate. Please install them before proceeding.\n"), call. = FALSE)
   }
-  data.crs <- raster::crs(paste("+init=epsg:", EPSGcode, sep = ""))
+  data.crs <- raster::crs(paste0("+init=epsg:", EPSGcode))
 
   if (tools::file_ext(t.layer) == "RData") {
     load(t.layer)
-    if (!exists("transition.layer")) stop(paste("Could not find a transition layer in '", t.layer, "'.\n", sep = ""), call. = FALSE)
+    if (!exists("transition.layer")) stop(paste0("Could not find a transition layer in '", t.layer, "'.\n"), call. = FALSE)
   } else {
-    stop(paste("'", t.layer, "' could not be recognised as .RData file, please make sure the file name is correct.\n", sep = ""), call. = FALSE)
+    stop(paste0("'", t.layer, "' could not be recognised as .RData file, please make sure the file name is correct.\n"), call. = FALSE)
   }
 
   if (actel)
@@ -653,7 +656,7 @@ distancesMatrix <- function(t.layer = "transition.layer.RData", starters = NULL,
     PointIDCol <- "Standard.Name"
     starters$Standard.Name <- as.character(starters$Station.Name)
     link <- starters$Type == "Hydrophone"
-    starters$Standard.Name[link] <- paste("St.", seq_len(sum(starters$Type == "Hydrophone")), sep = "")
+    starters$Standard.Name[link] <- paste0("St.", seq_len(sum(starters$Type == "Hydrophone")))
     targets = starters
   } else {
     targets <- read.csv(targets)

@@ -18,14 +18,14 @@ checkSpeeds <- function(movements, valid.movements, speed.warning, speed.error) 
       link <- which(vm$Average.speed.m.s >= speed.warning)
       if (link[1] == 1) {
         appendTo(c("Report", "Warning", "Screen"), 
-          the.warning <- paste0("W: Fish ", fish, " had an average speed of ", round(vm$Average.speed.m.s[1], 2),
+          the.warning <- paste0("Fish ", fish, " had an average speed of ", round(vm$Average.speed.m.s[1], 2),
             " m/s from release to first valid event (Release -> ", vm$Array[1], ")."))
         link <- link[-1]
       }
       if (length(link) > 0) {
         for (i in 1:length(link)) {
           appendTo(c("Report", "Warning", "Screen"), 
-            other.warning <- paste0("W: Fish ", fish, " had an average speed of ", round(vm$Average.speed.m.s[link[i]], 2),
+            other.warning <- paste0("Fish ", fish, " had an average speed of ", round(vm$Average.speed.m.s[link[i]], 2),
               " m/s from valid event ", link[i], " to ", link[i] + 1, " (",vm$Array[i], " -> ", vm$Array[i + 1], ")."))
           the.warning <- c(the.warning, other.warning)
         }
@@ -112,7 +112,7 @@ checkInactiveness <- function(movements, detections.list, inactive.warning, inac
           if (length(the.stations) <= 3) {
             n.detections <- sum(valid.moves$Detections[start_i:stop])
             appendTo(c("Report", "Warning", "Screen"), 
-              the.warning <- paste0("W: Fish ", fish, " was detected ", n.detections, " times at three or less stations of array '", tail(breaks$values, 1), "' (",paste(the.stations, collapse = ", "), ") over ", days.spent, " days and then disappeared. Could it be inactive?"))
+              the.warning <- paste0("Fish ", fish, " was detected ", n.detections, " times at three or less stations of array '", tail(breaks$values, 1), "' (",paste(the.stations, collapse = ", "), ") over ", days.spent, " days and then disappeared. Could it be inactive?"))
             continue <- FALSE
           }
           if (length(the.stations) <= 3 & days.spent >= inactive.error)
@@ -122,7 +122,7 @@ checkInactiveness <- function(movements, detections.list, inactive.warning, inac
           if (all(aux <= 1500)) {
             n.detections <- sum(valid.moves$Detections[start_i:stop])
             appendTo(c("Report", "Warning", "Screen"), 
-              the.warning <- paste0("W: Fish ", fish, " was detected ", n.detections, " times at stations less than 1.5 km apart in array '", tail(breaks$values, 1), "' (",paste(the.stations, collapse = ", "), "), over ", days.spent, " days and then disappeared. Could it be inactive?"))
+              the.warning <- paste0("Fish ", fish, " was detected ", n.detections, " times at stations less than 1.5 km apart in array '", tail(breaks$values, 1), "' (",paste(the.stations, collapse = ", "), "), over ", days.spent, " days and then disappeared. Could it be inactive?"))
             continue <- FALSE
           }
           if (all(aux <= 1500) & days.spent >= inactive.error)
@@ -175,7 +175,7 @@ checkImpassables <- function(movements, dotmat){
         distances <- apply(shifts, 1, function(x) dotmat[x[1], x[2]])
         if (any(is.na(distances))) {
           sapply(which(is.na(distances)), function(i) {
-            appendTo(c("Screen", "Warning", "Report"), paste0("W: Fish ", fish, " made an impassable jump: It is not possible to go from array ", shifts[i, 1], " to ", shifts[i, 2], "."))
+            appendTo(c("Screen", "Warning", "Report"), paste0("Fish ", fish, " made an impassable jump: It is not possible to go from array ", shifts[i, 1], " to ", shifts[i, 2], "."))
           })
           cat("\nOpening valid movement table for inspection:\n\n")
           print(valid.moves)
@@ -250,18 +250,18 @@ checkReport <- function(report){
   if (report) {
     appendTo("Report", "M: 'report' option has been activated.")
     if (length(setdiff(c("ggplot2", "reshape2"), rownames(installed.packages()))) > 0) {
-      appendTo(c("Screen", "Report", "Warning"), "W: 'report' can only be activated if 'ggplot2' and 'reshape2' are installed. Please install these. Deactivating 'Report' for the current job.")
+      appendTo(c("Screen", "Report", "Warning"), "'report' can only be activated if 'ggplot2' and 'reshape2' are installed. Please install these. Deactivating 'Report' for the current job.")
       report <- FALSE
     } 
     if (!rmarkdown::pandoc_available()) {
-      appendTo(c("Screen", "Report", "Warning"), "W: 'report' can only be activated if pandoc is installed. You can find how to install pandoc at: https://pandoc.org/installing.html\n   You can also check if pandoc is available to R by running rmarkdown::pandoc_available()")
+      appendTo(c("Screen", "Report", "Warning"), "'report' can only be activated if pandoc is installed. You can find how to install pandoc at: https://pandoc.org/installing.html\n   You can also check if pandoc is available to R by running rmarkdown::pandoc_available()")
       cat("Would you like to:\n\n  a) Continue with 'report' set to FALSE\n  b) Stop the analysis and install pandoc.\n\n")
       check <- TRUE
       while (check) {
         decision <- readline("Decision:(a/b) ")
         appendTo("UD", decision)
         if (decision == "a" | decision == "A") {
-          appendTo(c("Screen", "Report", "Warning"), "W: Deactivating 'report' to prevent function failure.")
+          appendTo(c("Screen", "Report", "Warning"), "Deactivating 'report' to prevent function failure.")
           report <- FALSE
           check <- FALSE
         }
@@ -278,7 +278,7 @@ checkReport <- function(report){
         appendTo("Screen", "M: Creating 'Report' subdirectory to store report files.")
         dir.create("Report")
       } else {
-        appendTo("Screen", "W: 'Report' directory already present. Overwriting files already present.")
+        appendTo("Screen", "'Report' directory already present. Overwriting files already present.")
       }
     }
   }
@@ -343,13 +343,13 @@ checkUpstream <- function(movements, bio, spatial, arrays) {
   Array <- NULL
   for (fish in names(movements)) {
     the.warning <- NULL
-    appendTo("debug", paste("Starting checkUpstream for fish ", fish, ".", sep = ""))
+    appendTo("debug", paste0("Starting checkUpstream for fish ", fish, "."))
     release.site <- as.character(bio$Release.site[na.as.false(bio$Transmitter == fish)])
     release.array <- as.character(with(spatial, release.sites[release.sites$Standard.Name == release.site, "Array"]))
     after.arrays <- c(release.array, arrays[[release.array]]$all.after.and.par)
     if (any(is.na(match(movements[[fish]][Array != "Unknown"]$Array, after.arrays)))) {
       cat("\n")
-      appendTo(c("Screen", "Report", "Warning"), the.warning <- paste0("W: Fish ", fish, " was detected in an array that is not after its release site! Opening relevant data for inspection."))
+      appendTo(c("Screen", "Report", "Warning"), the.warning <- paste0("Fish ", fish, " was detected in an array that is not after its release site! Opening relevant data for inspection."))
       appendTo("Screen", paste("   Release site:", release.site))
       appendTo("Screen", paste("   Expected first array:", release.array))
       cat(paste("\n   Movement table for fish ", fish, ":\n", sep =""))
@@ -415,7 +415,7 @@ checkJumpDistance <- function(movements, bio, spatial, dotmat, jump.warning = 2,
       if (release.jump > jump.warning) {
         # Trigger warning
         appendTo(c("Report", "Warning", "Screen"), 
-          the.warning <- paste0("W: Fish ", fish, " jumped through ", release.jump - 1, 
+          the.warning <- paste0("Fish ", fish, " jumped through ", release.jump - 1, 
             ifelse(release.jump > 2, " arrays ", " array "), 
             "from release to first event (Release -> ", moves$Array[1], ")."))
       }
@@ -439,7 +439,7 @@ checkJumpDistance <- function(movements, bio, spatial, dotmat, jump.warning = 2,
           for (i in 1:length(link)) {
             # Trigger warning
             appendTo(c("Report", "Warning", "Screen"), 
-              other.warning <- paste0("W: Fish ", fish, " jumped through ", jumps[link[i]] - 1, 
+              other.warning <- paste0("Fish ", fish, " jumped through ", jumps[link[i]] - 1, 
                 ifelse(jumps[link[i]] > 2, " arrays ", " array "), 
                 "in events ", link[i], " -> ", link[i] + 1, " (", names(jumps)[link[i]], ")."))
             the.warning <- c(the.warning, other.warning)
@@ -508,7 +508,7 @@ checkDeploymentStations <- function(input, spatial) {
   aux <- spatial[spatial$Type == "Hydrophone", ]
   link <- match(unique(input$Station.Name), aux$Station.Name)
   if (any(is.na(link))) {
-    appendTo(c("Screen", "Report", "Warning"), paste0("W: ", ifelse(sum(is.na(link)) > 1, "Stations", "Station"), " '", paste(unique(input$Station.Name)[is.na(link)], collapse = "', '"), "' ", ifelse(sum(is.na(link)) > 1, "are", "is"), " listed in the deployments but are not part of the study's stations. Discarding deployments at unknown stations."))
+    appendTo(c("Screen", "Report", "Warning"), paste0("", ifelse(sum(is.na(link)) > 1, "Stations", "Station"), " '", paste(unique(input$Station.Name)[is.na(link)], collapse = "', '"), "' ", ifelse(sum(is.na(link)) > 1, "are", "is"), " listed in the deployments but are not part of the study's stations. Discarding deployments at unknown stations."))
     to.remove <- match(input$Station.Name, unique(input$Station.Name)[is.na(link)])
     input <- input[is.na(to.remove), ]
   }
@@ -532,7 +532,7 @@ checkUnknownReceivers <- function(input) {
   appendTo("debug","Terminating unknownReceivers")
   unknown <- is.na(input$Standard.Name)
   if (any(unknown)) {
-    appendTo(c("Screen", "Report", "Warning"), paste0("W: Detections from receivers ", paste(unique(input$Receiver[unknown]), collapse = ", "), " are present in the data, but these receivers are not part of the study's stations. Double-check potential errors."))
+    appendTo(c("Screen", "Report", "Warning"), paste0("Detections from receivers ", paste(unique(input$Receiver[unknown]), collapse = ", "), " are present in the data, but these receivers are not part of the study's stations. Double-check potential errors."))
   }
   appendTo("debug","Terminating unknownReceivers")
 }
@@ -557,7 +557,7 @@ checkTagsInUnknownReceivers <- function(detections.list, deployments, spatial) {
       A <- detections.list[[i]]$Receiver
       B <- names(deployments)
       unknown.receivers <- unique(detections.list[[i]][is.na(match(A, B)), Receiver])
-      appendTo(c("Screen", "Report", "Warning"), paste("W: Fish ", i, " was detected in one or more receivers that are not listed in the study area (receiver(s): ", paste(unknown.receivers, collapse = ", "), ")!", sep = ""))
+      appendTo(c("Screen", "Report", "Warning"), paste0("Fish ", i, " was detected in one or more receivers that are not listed in the study area (receiver(s): ", paste(unknown.receivers, collapse = ", "), ")!"))
       cat("Possible options:\n   a) Stop and double-check the data (recommended)\n   b) Temporary include the hydrophone(s) to the stations list\n")
       check <- TRUE
       while (check) {
@@ -631,7 +631,7 @@ checkDetectionsBeforeRelease <- function(input, bio){
   for(i in seq_len(length(link))) {
     if (!is.na(link[i])) {
       if (any(to.remove <- !(input[[link[i]]]$Timestamp > bio$Release.date[i]))) {
-        appendTo(c("Screen", "Warning", "Report"), paste0("Error: Fish ", names(input)[link[i]], " was detected before being released!"))
+        appendTo(c("Screen", "Warning", "Report"), paste0("Fish ", names(input)[link[i]], " was detected before being released!"))
         appendTo("Screen", paste0("  Release time: ", bio$Release.date[i]))
         appendTo("Screen", paste0("  First detection time: ", input[[link[i]]]$Timestamp[1]))
         appendTo("Screen", paste0("  Number of detections before release: ", sum(to.remove)))
@@ -654,11 +654,11 @@ checkDetectionsBeforeRelease <- function(input, bio){
         appendTo("UD", decision)
         if (decision == "b" | decision == "B") {
           if (all(to.remove)) {
-            appendTo(c("Screen", "Warning", "Report"), paste0("W: ALL detections from Fish ", names(input)[link[i]], " were removed per user command."))
+            appendTo(c("Screen", "Report"), paste0("ALL detections from Fish ", names(input)[link[i]], " were removed per user command."))
             remove.tag <- c(remove.tag, link[i])
           } else {
             input[[link[i]]] <- input[[link[i]]][!to.remove, ]
-            appendTo(c("Screen", "Warning", "Report"), paste0("M: ", sum(to.remove), " detections from Fish ", names(input)[link[i]], " were removed per user command."))
+            appendTo(c("Screen", "Report"), paste0("M: ", sum(to.remove), " detections from Fish ", names(input)[link[i]], " were removed per user command."))
           }
         }
       }
@@ -711,7 +711,7 @@ checkDupSignals <- function(input, bio, tag.list){
     dupsig <- data.frame(Signal = colnames(t3)[apply(t3, 2, sum) > 1], Tags = NA, stringsAsFactors = FALSE)
     for (i in seq_len(nrow(dupsig))) dupsig$Tags[i] <- paste(row.names(t3)[t3[, dupsig$Signal[i]] == 1], collapse = ", ")
     rm(t3)
-    for (i in seq_len(nrow(dupsig))) appendTo(c("Screen", "Report"), paste("   Signal ", dupsig$Signal[i], " was found on tags ", dupsig$Tags[i], ".", sep = ""))
+    for (i in seq_len(nrow(dupsig))) appendTo(c("Screen", "Report"), paste0("   Signal ", dupsig$Signal[i], " was found on tags ", dupsig$Tags[i], "."))
     emergencyBreak()
     stop("Fatal exception found. Stopping analysis.\n", call. = FALSE)
   }
@@ -753,7 +753,7 @@ invalidateEvents <- function(movements, fish) {
       the.rows <- sort(unique(c(the.rows, the.ranges)))
       appendTo("UD", the.string)
       if (is.null(the.rows)) {
-        decision <- readline("W: The input could not be recognised as row numbers, would you like to abort invalidation the process?(y/N) ")
+        decision <- readline("The input could not be recognised as row numbers, would you like to abort invalidation the process?(y/N) ")
         appendTo("UD", decision)
         if (decision == "y" | decision == "Y") {
           appendTo("Screen", "Aborting.")                 
@@ -763,7 +763,7 @@ invalidateEvents <- function(movements, fish) {
         }
       } else {
         if (sum(n.rows, n.ranges) < length(the.inputs))
-          appendTo("Screen", "W: Part of the input could not be recognised as a row number.")
+          appendTo("Screen", "Part of the input could not be recognised as a row number.")
         if (all(the.rows > 0 & the.rows <= nrow(movements))) {
           if (length(the.rows) <= 10)
             decision <- readline(paste0("Confirm: Would you like to render event(s) ", paste(the.rows, collapse = ", "), " invalid?(y/N) "))

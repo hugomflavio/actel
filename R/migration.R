@@ -217,10 +217,10 @@ migration <- function(path = NULL, sections, success.arrays = NULL, minimum.dete
                                  spatial = spatial, jump.warning = jump.warning, jump.error = jump.error)
 
   if (is.null(speed.warning)) {
-    appendTo(c("Screen", "Report", "Warning"), "M: 'speed.warning'/'speed.error' were not set, skipping speed checks.")
+    appendTo(c("Screen", "Report", "Warning"), "'speed.warning'/'speed.error' were not set, skipping speed checks.")
   } else {
     if(invalid.dist) {
-      appendTo(c("Screen", "Report", "Warning"), "W: 'speed.warning'/'speed.error' were set, but a valid distance matrix is not present. Aborting speed checks.")
+      appendTo(c("Screen", "Report", "Warning"), "'speed.warning'/'speed.error' were set, but a valid distance matrix is not present. Aborting speed checks.")
     } else {
        temp.valid.movements <- simplifyMovements(movements = movements, bio = bio, 
          speed.method = speed.method, dist.mat = dist.mat, invalid.dist = invalid.dist)
@@ -231,7 +231,7 @@ migration <- function(path = NULL, sections, success.arrays = NULL, minimum.dete
   }
   
   if (is.null(inactive.warning))
-    appendTo(c("Screen", "Report", "Warning"), "M: 'inactive.warning'/'inactive.error' were not set, skipping inactivity checks.")
+    appendTo(c("Screen", "Report", "Warning"), "'inactive.warning'/'inactive.error' were not set, skipping inactivity checks.")
   else
     movements <- checkInactiveness(movements = movements, detections.list = detections.list, 
       inactive.warning = inactive.warning, inactive.error = inactive.error, 
@@ -274,7 +274,7 @@ migration <- function(path = NULL, sections, success.arrays = NULL, minimum.dete
 
   if (is.null(m.by.array[[1]])) {
     calculate.efficiency <- FALSE
-    appendTo(c("Screen", "Report", "Warning"), "W: Aborting efficiency calculations (will limit the report's output).")
+    appendTo(c("Screen", "Report", "Warning"), "Aborting efficiency calculations (will limit the report's output).")
   } else {
     calculate.efficiency <- TRUE
   }
@@ -319,26 +319,26 @@ migration <- function(path = NULL, sections, success.arrays = NULL, minimum.dete
 
 # wrap up in-R objects
   if (!is.null(override)) {
-    header.fragment <- paste('<span style="color:red">Manual mode has been triggered for **', length(override),'** fish.</span>\n', sep = "")
+    header.fragment <- paste0('<span style="color:red">Manual mode has been triggered for **', length(override),'** fish.</span>\n')
     name.fragment <- "_corrected"
   } else {
     header.fragment <- name.fragment <- ""
   }
 
-  if (file.exists(resultsname <- paste("actel_migration_results", name.fragment, ".RData", sep = ""))) {
+  if (file.exists(resultsname <- paste0("actel_migration_results", name.fragment, ".RData"))) {
     continue <- TRUE
     index <- 1
     while (continue) {
-      if (file.exists(resultsname <- paste("actel_migration_results", name.fragment, ".", index, ".RData", sep = ""))) {
+      if (file.exists(resultsname <- paste0("actel_migration_results", name.fragment, ".", index, ".RData"))) {
         index <- index + 1
       } else {
         continue <- FALSE
       }
     }
-    appendTo("Screen", paste("M: An actel migration results file is already present in the current directory.\n   Saving new results as '", resultsname,"'.", sep = ""))
+    appendTo("Screen", paste0("M: An actel migration results file is already present in the current directory.\n   Saving new results as '", resultsname,"'."))
     rm(continue, index)
   } else {
-    appendTo(c("Screen", "Report"), paste("M: Saving results as '", resultsname, "'.", sep = ""))
+    appendTo(c("Screen", "Report"), paste0("M: Saving results as '", resultsname, "'."))
   }
 
   detections <- detections.list
@@ -409,8 +409,8 @@ migration <- function(path = NULL, sections, success.arrays = NULL, minimum.dete
   appendTo("Screen", "M: Process finished successfully.")
 # ------------------
 
-  appendTo("Screen", paste("M: Saving job log as '", paste(gsub(":", ".", sub(" ", ".", as.character(Sys.time()))), "actel.log.txt", sep = "."), "'.", sep = ""))
-  file.rename("temp_log.txt", paste(gsub(":", ".", sub(" ", ".", as.character(Sys.time()))), "actel.log.txt", sep = "."))
+  appendTo("Screen", paste0("M: Saving job log as '", paste(gsub(":", ".", sub(" ", ".", as.character(Sys.time()))), "actel.log.txt", sep = "."), "'."))
+  file.rename("temp_log.txt", paste0(gsub(":", ".", sub(" ", ".", as.character(Sys.time()))), "actel.log.txt"))
   
   if (!debug)
     deleteHelpers()
@@ -444,29 +444,29 @@ migration <- function(path = NULL, sections, success.arrays = NULL, minimum.dete
 #' 
 printMigrationRmd <- function(name.fragment, header.fragment, biometric.fragment, efficiency.fragment, display.progression, array.overview.fragment,
   survival.graph.size, individual.plots, circular.plots, spatial, deployments, valid.detections, detections){
-  if (file.exists(reportname <- paste("Report/actel_migration_report", name.fragment, ".Rmd", sep = ""))) {
+  if (file.exists(reportname <- paste0("Report/actel_migration_report", name.fragment, ".Rmd"))) {
     continue <- TRUE
     index <- 1
     while (continue) {
-      if(file.exists(reportname <- paste("Report/actel_migration_report", name.fragment, ".", index, ".Rmd", sep = ""))) {
+      if(file.exists(reportname <- paste0("Report/actel_migration_report", name.fragment, ".", index, ".Rmd"))) {
         index <- index + 1
       } else {
         continue <- FALSE
       }
     }
-    appendTo("Screen", paste("M: An actel report is already present in the current directory\n   Saving new report as 'actel_migration_report", name.fragment, ".", index, ".html'.", sep = ""))
+    appendTo("Screen", paste0("M: An actel report is already present in the current directory\n   Saving new report as 'actel_migration_report", name.fragment, ".", index, ".html'."))
     rm(continue,index)
   } else {
-    appendTo("Screen", paste("M: Saving actel report as 'actel_migration_report", name.fragment, ".html'.", sep = ""))
+    appendTo("Screen", paste0("M: Saving actel report as 'actel_migration_report", name.fragment, ".html'."))
   }
   if (any(grepl("Unknown", spatial$stations$Standard.Name))) {
-    unknown.fragment <- paste('<span style="color:red"> Number of relevant unknown receivers: **', sum(grepl("Unknown", spatial$stations$Standard.Name)), '**</span>\n', sep = "")
+    unknown.fragment <- paste0('<span style="color:red"> Number of relevant unknown receivers: **', sum(grepl("Unknown", spatial$stations$Standard.Name)), '**</span>\n')
   } else {
     unknown.fragment <- ""
   } 
   report <- readr::read_file("temp_log.txt")
   sink(reportname)
-  cat(paste(
+  cat(paste0(
 '---
 title: "Acoustic telemetry migration analysis"
 author: "Actel package"
@@ -608,7 +608,7 @@ Note:
 cat(gsub("\\r", "", readr::read_file("../temp_log.txt")))
 ```
 
-', sep = ""), fill = TRUE)
+'), fill = TRUE)
 sink()
 
 if(file.exists("Report/toc_menu_migration.html"))
@@ -771,7 +771,7 @@ assembleTimetable <- function(movements, sections, spatial, arrays, minimum.dete
         ## Find the last events for each section If there is more than one detection event
         if (movements[[i]][(Valid), all(Array == "Unknown")]) {
           ## If all the events are in unknown arrays
-          appendTo(c("Screen","Report", "Warning"), paste("W: Fish ", i, " only moved through unknown hydrophones. Considered invalid.", sep = ""))
+          appendTo(c("Screen","Report", "Warning"), paste0("Fish ", i, " only moved through unknown hydrophones. Considered invalid."))
           last.events <- rep(NA, length(sections))
           movements[[i]]$Valid <- FALSE
           ## Jump to find first events
@@ -779,7 +779,7 @@ assembleTimetable <- function(movements, sections, spatial, arrays, minimum.dete
           ## If all or some events are in known locations
           if (movements[[i]][(Valid), any(Array == "Unknown")]) {
             ## If some unknown events must be discarded
-            appendTo(c("Screen","Report"), paste("M: Disregarding ", sum(movements[[i]][, "Array"] == "Unknown"), " unknown events from fish ", i, "'s movement table.", sep = ""))
+            appendTo(c("Screen","Report"), paste0("M: Disregarding ", sum(movements[[i]][, "Array"] == "Unknown"), " unknown events from fish ", i, "'s movement table."))
             movements[[i]][(Array == "Unknown")]$Valid <- FALSE
           }
           recipient <- findLastEvents(i = i, movements = movements[[i]], 
@@ -824,17 +824,17 @@ assembleTimetable <- function(movements, sections, spatial, arrays, minimum.dete
 #' 
 overrideDefaults <- function(i, movements, sections) {
   appendTo("debug", "Starting overrideDefaults.")
-  cat("----------------------------\n")
-  appendTo(c("Screen", "Report", "Warning"), paste("M: Override has been triggered for fish ", i, ". Entering full manual mode.", sep = ""))
+  message("----------------------------")
+  appendTo(c("Screen", "Report"), paste0("M: Override has been triggered for fish ", i, ". Entering full manual mode."))
   last.events <- vector()
   first.events <- vector()
-  cat("Opening movements list for inspection.\n\n")
+  message("Opening movements list for inspection.\n")
   print(movements, topn = nrow(movements))
-  cat("\n")
+  message("")
   for (j in seq_len(length(sections))) {
     check = TRUE
     while (check) {
-      last.events[j] <- suppressWarnings(as.numeric(commentCheck(line = paste("Last ", sections[j], " event: ", sep = ""), tag = i)))
+      last.events[j] <- suppressWarnings(as.numeric(commentCheck(line = paste0("Last ", sections[j], " event: "), tag = i)))
       if (!is.na(last.events[j])) {
         valid = TRUE
         check <- !overrideEventCheck(type = "last", the.event = last.events[j], 
@@ -860,14 +860,14 @@ overrideDefaults <- function(i, movements, sections) {
   for (j in seq_len(length(sections))) {
     # If the fish left the section
     if (is.na(last.events[j])) {
-      cat(paste("M: Skipping first event selection for ", sections[j], " as this fish never left this section.\n", sep = ""))
+      message("M: Skipping first event selection for ", sections[j], " as this fish never left this section.")
       first.events[j] <- NA
     } else {
       check = TRUE
       while (check) {
-        first.events[j] <- suppressWarnings(as.numeric(commentCheck(line = paste("First ", sections[j], " event: ", sep = ""), tag = i)))
+        first.events[j] <- suppressWarnings(as.numeric(commentCheck(line = paste0("First ", sections[j], " event: "), tag = i)))
         if (is.na(first.events[j])) {
-          cat("M: The inserted value is not numeric. Please try again.\n")
+          message("M: The inserted value is not numeric. Please try again.")
         } else {
           valid = TRUE
           check <- !overrideEventCheck(type = "first", the.event = first.events[j], 
@@ -881,7 +881,7 @@ overrideDefaults <- function(i, movements, sections) {
       rm(check)
     }
   }
-  cat("Terminating full manual mode\n----------------------------\n")
+  message("Terminating full manual mode\n----------------------------")
   appendTo("debug", "Terminating overrideDefaults.")
   return(list(first.events = first.events, last.events = last.events))
 }
@@ -926,17 +926,17 @@ checkPrevious <- function(last.events, j){
 overrideEventCheck <- function(type, the.event, up.boundary, t, last.events, j, sections, movements){
   valid = TRUE
   if (t == 0 && (the.event < 1 | the.event > up.boundary)) {
-    cat(paste("M: Invalid row (", type ," event must be between 1 and ", up.boundary, "). Please try again.\n", sep = ""))
-    if (type == "last") cat("   Leave empty to indicate that the fish did not pass by this section.\n")
+    message("M: Invalid row (", type ," event must be between 1 and ", up.boundary, "). Please try again.")
+    if (type == "last") message("   Leave empty to indicate that the fish did not pass by this section.")
     valid = FALSE
   }
   if (t > 0 && (the.event <= last.events[t] | the.event > up.boundary)) {
-   cat(paste("M: Invalid row (", type ," event must be between ", (last.events[t] + 1), " and ", up.boundary, "). Please try again.\n", sep = ""))
-    if (type == "last") cat("   Leave empty to indicate that the fish did not pass by this section.\n")
+   message("M: Invalid row (", type ," event must be between ", (last.events[t] + 1), " and ", up.boundary, "). Please try again.")
+    if (type == "last") message("   Leave empty to indicate that the fish did not pass by this section.")
     valid = FALSE
   }
   if (valid && !grepl(sections[j], movements[the.event, "Array"])) {
-    cat(paste("M: Invalid row (not a ", sections[j], " event), please try again.\n", sep = ""))
+    message("M: Invalid row (not a ", sections[j], " event), please try again.")
     valid = FALSE
   }
   return(valid)
@@ -961,7 +961,7 @@ findLastEvents <- function(i, movements, sections, minimum.detections, cautious.
   Valid <- NULL
   Detections <- NULL
 
-  appendTo("debug", paste("Starting findLastEvents for fish ", i, ".", sep = ""))
+  appendTo("debug", paste0("Starting findLastEvents for fish ", i, "."))
   if (nrow(movements) > 1) {
     last.events <- rep(NA, length(sections))
     for (l in seq_len(length(sections))) {
@@ -983,21 +983,20 @@ findLastEvents <- function(i, movements, sections, minimum.detections, cautious.
       if (trigger && is.na(last.events[l])) {
         attributes(movements)$p.type <- "Manual"
         ## I used cat here because the appendTo will be used later on, when the findFirstEvents comes up
-        cat(paste0("W: No ", sections[l], " detection events with more than one detection were found for fish ", i, ". Opening movements list for inspection.\n"))
+        message(paste0("No ", sections[l], " detection events with more than one detection were found for fish ", i, ". Opening movements list for inspection."))
         print(movements[(Valid), -c("Valid")], topn = nrow(movements[(Valid), -c("Valid")]))
-        cat("\n")
+        message("")
         check = TRUE
         while (check) {
           new.value <- suppressWarnings(as.numeric(commentCheck(line = paste("Which event should be considered the LAST", sections[l], "detection event?(comment) "), tag = i)))
           appendTo("UD", new.value)
           if (is.na(new.value)) {
-            decision <- commentCheck(line = paste("W: The inserted value is not numeric. Continuing will erase all", sections[l], "related timestamps. Proceed?(y/N/comment) "), tag = i)
+            decision <- commentCheck(line = paste("The inserted value is not numeric. Continuing will erase all", sections[l], "related timestamps. Proceed?(y/N/comment) "), tag = i)
             appendTo("UD", decision)
             if (decision == "Y" | decision == "y") {
-              appendTo("Screen", paste("M: Erasing ", sections[l], " related timestamps for fish ", i, ".", sep = ""))
+              appendTo("Screen", paste0("M: Erasing ", sections[l], " related timestamps for fish ", i, "."))
               last.events[l] <- NA
-              appendTo(c("Report", "Warning"), paste("W: No ", sections[l], " detection events with more than one detection were found for fish ", i, ". Erasing ", sections[l], " timestamps per user command.", 
-              sep = ""))
+              appendTo(c("Report", "Warning"), paste0("No ", sections[l], " detection events with more than one detection were found for fish ", i, ". Erasing ", sections[l], " timestamps per user command."))
               check = FALSE
             }
             rm(decision)
@@ -1005,14 +1004,13 @@ findLastEvents <- function(i, movements, sections, minimum.detections, cautious.
             valid.row = TRUE
             new.value <- movements[(Valid), which = TRUE][new.value]
             if (!grepl(sections[l], movements[new.value, "Array"])) {
-              cat("M: Invalid row (not a", sections[l], "event), please try again.\n")
+              message("M: Invalid row (not a ", sections[l], " event), please try again.")
               valid.row = FALSE
             }
             if (valid.row) {
               check = FALSE
               last.events[l] <- new.value
-              appendTo(c("Report", "Warning"), paste("W: No ", sections[l], " detection events with more than one detection were found for fish ", i, ". Last ", sections[l], " row manually set to ", 
-              new.value, ".", sep = ""))
+              appendTo(c("Report", "Warning"), paste0("No ", sections[l], " detection events with more than one detection were found for fish ", i, ". Last ", sections[l], " row manually set to ", new.value, "."))
             }
           }
         }
@@ -1027,14 +1025,13 @@ findLastEvents <- function(i, movements, sections, minimum.detections, cautious.
     # = there is only one detection event
     if (movements[1, "Detections"] >= minimum.detections) {
       last.events <- pmatch(sections, movements[, "Array"])
-      # last.events <- last.events[1:grep(1, last.events)]
     } else {
       # = not enough detections
-      appendTo(c("Screen", "Report"), paste("M: Fish ", i, " only has one movement entry (", movements[1, "Array"], ") with ", movements[1, "Detections"], " detections. Considered invalid.", sep = ""))
+      appendTo(c("Screen", "Report"), paste0("M: Fish ", i, " only has one movement entry (", movements[1, "Array"], ") with ", movements[1, "Detections"], " detections. Considered invalid."))
       last.events <- rep(NA, length(sections))
     }
   }
-  appendTo("debug", paste("Terminating findLastEvents for fish ", i, ".", sep = ""))
+  appendTo("debug", paste0("Terminating findLastEvents for fish ", i, "."))
   return(list(last.events = last.events, p.type = attributes(movements)$p.type))
 }
 
@@ -1056,7 +1053,7 @@ eventOrderCheck <- function(i, last.events, sections, movements) {
   # This definition is just to prevent the package check from issuing a note due unknown variables.
   Valid <- NULL
   Array <- NULL  
-  appendTo("debug", paste("Starting eventOrderCheck for fish ", i, ".", sep = ""))
+  appendTo("debug", paste0("Starting eventOrderCheck for fish ", i, "."))
   trigger <- vector()
   for (l in seq_len(length(sections))) {
     trigger[movements[(Valid), grep(sections[l], Array)]] <- l
@@ -1066,24 +1063,24 @@ eventOrderCheck <- function(i, last.events, sections, movements) {
     ## If Inter-section backward movements detected
     if (is.unsorted(last.events, na.rm = T)) {
       ## If last events are not ordered
-      appendTo(c("Screen", "Report", "Warning"), paste("W: Inter-section backwards movements were detected for Fish ", i, " and the last events are not ordered!", sep = ""))
+      appendTo(c("Screen", "Report", "Warning"), paste0("Inter-section backwards movements were detected for Fish ", i, " and the last events are not ordered!"))
       not.ordered.trigger <- TRUE
       decision <- "Y"
-      cat("   Opening movements list for inspection.\n")
+      message("   Opening movements list for inspection.")
     } else {
       ## If last events are ordered
-      appendTo(c("Screen", "Report", "Warning"), paste("W: Inter-section backwards movements were detected for Fish ", i, ".", sep = ""))
+      appendTo(c("Screen", "Report", "Warning"), paste0("Inter-section backwards movements were detected for Fish ", i, "."))
       not.ordered.trigger <- FALSE
-      decision <- commentCheck(line = paste("Would you like to see the movement table for fish", i, "?(y/N/comment) "), tag = i)
+      decision <- commentCheck(line = paste0("Would you like to see the movement table for fish ", i, "?(y/N/comment) "), tag = i)
       appendTo("UD", decision)
     }
     if (decision == "Y" | decision == "y") {
       ## If the user decides to see the movements
       print(movements[(Valid), -c("Valid")], topn = nrow(movements[(Valid), -c("Valid")]))
       rm(decision)
-      cat("\n")
-      appendTo("Screen", paste("Current last events: ", paste(last.events, collapse = ", "), " (", paste(sections, collapse = ", "), ").", sep = ""))
-      cat("\n")
+      message("")
+      appendTo("Screen", paste0("Current last events: ", paste(last.events, collapse = ", "), " (", paste(sections, collapse = ", "), ")."))
+      message("")
       if (not.ordered.trigger) {
         appendTo(c("Screen"), "The last movement event of a section must NOT precede the last movement event of a \nprevious section (i.e. the migration analysis cannot cope with inter-section U turns).\nPlease edit the last valid events so this is not the case any more.\n")
         decision <- "Y"
@@ -1094,21 +1091,21 @@ eventOrderCheck <- function(i, last.events, sections, movements) {
       if (decision == "Y" | decision == "y") {
         ## If the user decides to edit the last events
         while (decision == "Y" | decision == "y") {
-          position <- suppressWarnings(as.numeric(commentCheck(line = paste("Which last valid event would you like to edit?(1-", length(last.events), "/comment) ", sep = ""), tag = i)))
+          position <- suppressWarnings(as.numeric(commentCheck(line = paste0("Which last valid event would you like to edit?(1-", length(last.events), "/comment) "), tag = i)))
           ## The position is the last event to edit
           appendTo("UD", position)
           if (is.na(position)) {
             ## If no position was set
-            decision <- commentCheck(line = "W: The inserted value is not numeric. Abort last valid events' edition?(y/N/comment) ", tag = i)
+            decision <- commentCheck(line = "The inserted value is not numeric. Abort last valid events' edition?(y/N/comment) ", tag = i)
             appendTo("UD", decision)
             if (decision != "Y" & decision != "y") {
               decision <- "Y"
             } else {
               if (is.unsorted(last.events, na.rm = T)) {
                 ## If the user decides to abort but last events are still not ordered
-                cat("\n")
-                appendTo("Screen", paste("Current last events: ", paste(last.events, collapse = ", "), " (", paste(sections, collapse = ", "), ").", sep = ""))
-                cat("\n")
+                message("")
+                appendTo("Screen", paste0("Current last events: ", paste(last.events, collapse = ", "), " (", paste(sections, collapse = ", "), ")."))
+                message("")
                 appendTo(c("Screen"), "The last movement event of a section must NOT precede the last movement event\nof a previous section (i.e. Actel cannot cope with inter-section U turns).\nPlease edit the last valid events so this is not the case anymore.\n")
                 decision <- "Y"
               } else {
@@ -1122,11 +1119,11 @@ eventOrderCheck <- function(i, last.events, sections, movements) {
               check = TRUE
               invalidate = FALSE
               while (check) {
-                new.value <- suppressWarnings(as.numeric(commentCheck(line = paste("New last valid event for ", sections[position], ": ", sep = ""), tag = i)))
+                new.value <- suppressWarnings(as.numeric(commentCheck(line = paste0("New last valid event for ", sections[position], ": "), tag = i)))
                 appendTo("UD", new.value)
                 if (is.na(new.value)) {
                   ## If the selected row is not numeric
-                  decision <- commentCheck(line = paste("W: The inserted value is not numeric. Continuing will render ", sections[position], " events invalid. Proceed?(y/N/comment) ", sep = ""), tag = i)
+                  decision <- commentCheck(line = paste0("The inserted value is not numeric. Continuing will render ", sections[position], " events invalid. Proceed?(y/N/comment) "), tag = i)
                   appendTo("UD", decision)
                   if (decision == "Y" | decision == "y") {
                     ## Decides to remove the last event
@@ -1139,7 +1136,7 @@ eventOrderCheck <- function(i, last.events, sections, movements) {
                   new.value <- movements[(Valid), which = TRUE][new.value]
                   if (!grepl(sections[position], movements[new.value, "Array"])) {
                     ## If the elected row does not belong to the right section
-                    cat("M: Invalid row (not a", sections[position], "event), please try again.\n")
+                    message("M: Invalid row (not a ", sections[position], " event), please try again.")
                   } else {
                     ## else terminate the while
                     check = FALSE
@@ -1157,9 +1154,9 @@ eventOrderCheck <- function(i, last.events, sections, movements) {
               rm(position, new.value, invalidate)
               if (is.unsorted(last.events, na.rm = T)) {
                 ## if after the edition the values are still not ordered, edits must continue
-                cat("\n")
-                appendTo("Screen", paste("Current last events: ", paste(last.events, collapse = ", "), " (", paste(sections, collapse = ", "), ").", sep = ""))
-                cat("\n")
+                message("")
+                appendTo("Screen", paste0("Current last events: ", paste(last.events, collapse = ", "), " (", paste(sections, collapse = ", "), ")."))
+                message("")
                 appendTo("Screen", "The last events are not ordered. Please continue editing the last events until the last movement \nevent of each section is NOT lower than the last movement event of a section that precedes it.")
                 decision <- "Y"
               } else {
@@ -1169,7 +1166,7 @@ eventOrderCheck <- function(i, last.events, sections, movements) {
               appendTo("UD", decision)
             } else {
               ## If the position is outside the limits of the last events
-              cat("M: That event is not available, please try again.\n")
+              message("M: That event is not available, please try again.")
             }
           }
         }
@@ -1250,7 +1247,7 @@ findFirstEvents <- function(i, last.events, movements, sections, cautious.assign
   Valid <- NULL
   Detections <- NULL
 
-  appendTo("debug", paste("Starting findFirstEvents for fish ", i, ".", sep = ""))
+  appendTo("debug", paste0("Starting findFirstEvents for fish ", i, "."))
   first.events <- rep(NA, length(sections))
   for (l in seq_len(length(sections))) {
     # If the fish left the section
@@ -1277,13 +1274,13 @@ findFirstEvents <- function(i, last.events, movements, sections, cautious.assign
         new.value <- suppressWarnings(as.numeric(commentCheck(line = paste("Which event should be considered the FIRST", sections[l], "detection event?(comment) "), tag = i)))
         appendTo("UD", new.value)
         if (is.na(new.value)) {
-          decision <- commentCheck(line = paste("W: The inserted value is not numeric. Continuing will erase all", sections[l], "related timestamps. Proceed?(y/N) "), tag = i)
+          decision <- commentCheck(line = paste("The inserted value is not numeric. Continuing will erase all", sections[l], "related timestamps. Proceed?(y/N) "), tag = i)
           appendTo("UD", decision)
           if (decision == "Y" | decision == "y") {
-            appendTo("Screen", paste("M: Erasing ", sections[l], " related timestamps for fish ", i, ".\n", sep = ""))
+            appendTo("Screen", paste0("M: Erasing ", sections[l], " related timestamps for fish ", i, ".\n"))
             first.events[l] <- last.events[l] <- NA
-            appendTo(c("Report", "Warning"), paste("W: No ", sections[l], " detection events with more than one detection were found for fish ", i, ". Erasing ", sections[l], 
-            " timestamps per user command.", sep = ""))
+            appendTo(c("Report", "Warning"), paste0("No ", sections[l], " detection events with more than one detection were found for fish ", i, ". Erasing ", sections[l], 
+            " timestamps per user command."))
             check = FALSE
           }
           rm(decision)
@@ -1291,18 +1288,18 @@ findFirstEvents <- function(i, last.events, movements, sections, cautious.assign
           valid.row = TRUE
           new.value <- movements[(Valid), which = TRUE][new.value]
           if (!grepl(sections[l], movements[new.value, "Array"])) {
-            cat("M: Invalid row (not a", sections[l], "event), please try again.\n")
+            message("M: Invalid row (not a ", sections[l], " event), please try again.")
             valid.row = FALSE
           }
           if (new.value < first.row | new.value > last.events[l]) {
-            cat("M: Invalid row (out of bounds), please try again. Valid range is ", first.row, " to ", last.events[l], ".\n", sep = "")
+            message("M: Invalid row (out of bounds), please try again. Valid range is ", first.row, " to ", last.events[l], ".")
             valid.row = FALSE
           }
           if (valid.row) {
             check = FALSE
             first.events[l] <- new.value
-            appendTo(c("Report", "Warning"), paste("W: No ", sections[l], " detection events with more than one detection were found for fish ", i, ". First ", sections[l], " row manually set to ", 
-            new.value, ".", sep = ""))
+            appendTo(c("Report", "Warning"), paste0("No ", sections[l], " detection events with more than one detection were found for fish ", i, ". First ", sections[l], " row manually set to ", 
+            new.value, "."))
           }
         }
       }
@@ -1370,7 +1367,7 @@ deployValues <- function(i, timetable, movements, events, sections, spatial, arr
   Detections <- NULL
   Array <- NULL
 
-  appendTo("debug", paste("Starting deployValues for fish ", i, ".", sep = ""))
+  appendTo("debug", paste0("Starting deployValues for fish ", i, "."))
   if (any(!is.na(events$last.events))) {
     last.last <- tail(events$last.events[!is.na(events$last.events)], 1)
     for (j in seq_len(length(sections))) {
@@ -1449,7 +1446,7 @@ deployValues <- function(i, timetable, movements, events, sections, spatial, arr
   # if (testA & testB)
   if (testB) 
     timetable[i, "Status"] <- "Succeeded"
-  appendTo("debug", paste("Terminating deployValues for fish ", i, ".", sep = ""))
+  appendTo("debug", paste0("Terminating deployValues for fish ", i, "."))
   return(timetable)
 }
 
@@ -1523,7 +1520,7 @@ assembleOutput <- function(timetable, bio, spatial, sections, dist.mat, invalid.
   
   appendTo("debug", "Calculating time from release to first detection.")
   for (i in 1:nrow(status.df)) {
-    appendTo("debug", paste("(status.df) Analysing fish ", status.df$Signal[i], " (", i, ").", sep = ""))
+    appendTo("debug", paste0("(status.df) Analysing fish ", status.df$Signal[i], " (", i, ")."))
     arriving.points <- status.df[i, paste("Arrived", sections, sep = ".")]
     if (any(!is.na(arriving.points))) {
       first.section <- sections[head(which(!is.na(arriving.points)), 1)]

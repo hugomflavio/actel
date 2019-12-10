@@ -22,7 +22,7 @@ groupMovements <- function(detections.list, bio, spatial, speed.method, max.inte
   {
     pb <- txtProgressBar(min = 0, max = sum(unlist(lapply(detections.list, nrow))), style = 3, width = 60)
     for (i in names(detections.list)) {
-      appendTo("debug", paste("Debug: (Movements) Analysing fish ", i, ".", sep = ""))
+      appendTo("debug", paste0("Debug: (Movements) Analysing fish ", i, "."))
       if (invalid.dist) {
         recipient <- data.frame(
           Array = NA_character_, 
@@ -190,7 +190,7 @@ movementTimes <- function(movements, silent = TRUE, type = c("array", "section")
       h <- a%/%1
       m <- ((a%%1) * 60)%/%1
       if (m < 10) 
-        m <- paste("0", m, sep = "")
+        m <- paste0("0", m)
       movements$Time.travelling[l] <- paste(h, m, sep = ":")
     }
     rm(l)
@@ -204,7 +204,7 @@ movementTimes <- function(movements, silent = TRUE, type = c("array", "section")
       h <- a%/%1
       m <- ((a%%1) * 60)%/%1
       if (m < 10) 
-        m <- paste("0", m, sep = "")
+        m <- paste0("0", m)
       movements[l, time.in] <- paste(h, m, sep = ":")
       rm(a, h, m)
     }
@@ -238,7 +238,7 @@ speedReleaseToFirst <- function(fish, bio, movements, dist.mat, invalid.dist = F
     h <- a%/%1
     m <- ((a%%1) * 60)%/%1
     if (m < 10) 
-      m <- paste("0", m, sep = "")
+      m <- paste0("0", m)
     movements$Time.travelling[1] <- paste(h, m, sep = ":")
     if (!invalid.dist) {
       a.sec <- as.vector(difftime(movements$First.time[1], origin.time, units = "secs"))
