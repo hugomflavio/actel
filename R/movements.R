@@ -13,8 +13,8 @@
 #' 
 #' @keywords internal
 #' 
-groupMovements <- function(detections.list, bio, spatial, speed.method, maximum.time, 
-  tz.study.area, dist.mat, invalid.dist) {
+groupMovements <- function(detections.list, bio, spatial, speed.method, max.interval, 
+  tz, dist.mat, invalid.dist) {
   appendTo("debug", "Starting groupMovements.")
   movements <- list()
   round.points <- roundDown(seq(from = length(detections.list)/10, to = length(detections.list), length.out = 10), to = 1)
@@ -29,8 +29,8 @@ groupMovements <- function(detections.list, bio, spatial, speed.method, maximum.
           Detections = NA_integer_, 
           First.station = NA_character_, 
           Last.station = NA_character_, 
-          First.time = as.POSIXct(NA_character_, tz = tz.study.area, format = "%y-%m-%d %H:%M:%S"), 
-          Last.time = as.POSIXct(NA_character_, tz = tz.study.area, format = "%y-%m-%d %H:%M:%S"), 
+          First.time = as.POSIXct(NA_character_, tz = tz, format = "%y-%m-%d %H:%M:%S"), 
+          Last.time = as.POSIXct(NA_character_, tz = tz, format = "%y-%m-%d %H:%M:%S"), 
           Time.travelling = NA_character_, 
           Time.in.array = NA_character_, 
           Valid = NA,
@@ -42,8 +42,8 @@ groupMovements <- function(detections.list, bio, spatial, speed.method, maximum.
           Detections = NA_integer_, 
           First.station = NA_character_, 
           Last.station = NA_character_, 
-          First.time = as.POSIXct(NA_character_, tz = tz.study.area, format = "%y-%m-%d %H:%M:%S"), 
-          Last.time = as.POSIXct(NA_character_, tz = tz.study.area, format = "%y-%m-%d %H:%M:%S"), 
+          First.time = as.POSIXct(NA_character_, tz = tz, format = "%y-%m-%d %H:%M:%S"), 
+          Last.time = as.POSIXct(NA_character_, tz = tz, format = "%y-%m-%d %H:%M:%S"), 
           Time.travelling = NA_character_, 
           Time.in.array = NA_character_, 
           Average.speed.m.s = NA_real_,
@@ -53,7 +53,7 @@ groupMovements <- function(detections.list, bio, spatial, speed.method, maximum.
       }
       z = 1
       array.shifts <- c(which(detections.list[[i]]$Array[-1] != detections.list[[i]]$Array[-length(detections.list[[i]]$Array)]), nrow(detections.list[[i]]))
-      time.shifts <- which(difftime(detections.list[[i]]$Timestamp[-1], detections.list[[i]]$Timestamp[-length(detections.list[[i]]$Timestamp)], units = "mins") > maximum.time)
+      time.shifts <- which(difftime(detections.list[[i]]$Timestamp[-1], detections.list[[i]]$Timestamp[-length(detections.list[[i]]$Timestamp)], units = "mins") > max.interval)
       all.shifts <- sort(unique(c(array.shifts, time.shifts)))
       for (j in seq_len(length(all.shifts))) {
         if (j == 1)

@@ -64,12 +64,12 @@ listToTable <- function(input, type = c("table", "frame"), row.names = FALSE, so
 #' 
 #' @export
 #' 
-updateStudy <- function(tz.study.area) {
+updateStudy <- function(tz) {
   if (file.exists("deployments.csv")) {
     cat("M: A 'deployments.csv' file is already present in the current directory.\n")
   } else {
     spatial <- loadSpatial(file = "spatial.csv")
-    detections <- loadDetections(tz.study.area = tz.study.area, force = TRUE)
+    detections <- loadDetections(tz = tz, force = TRUE)
     stations <- spatial[spatial$Type == "Hydrophone", ]
     deployments <- stations[, c("Receiver", "Station.Name")]
     if (sum(grepl("Receiver", colnames(stations))) >= 1) {

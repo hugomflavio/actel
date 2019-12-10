@@ -19,18 +19,45 @@
 #' @export
 #' 
 migration <- function(path = NULL, sections, success.arrays = NULL, minimum.detections = 2, 
-  maximum.time = 60, speed.method = c("last to first", "first to first"), speed.warning = NULL,
-  speed.error = NULL, if.last.skip.section = TRUE, tz.study.area, start.timestamp = NULL, 
-  end.timestamp = NULL, report = TRUE, override = NULL, 
+  maximum.time = 60, max.interval = 60, speed.method = c("last to first", "first to first"), speed.warning = NULL,
+  speed.error = NULL, if.last.skip.section = TRUE, tz.study.area = NULL, tz = NULL, start.time = NULL, start.timestamp = NULL, 
+  stop.time = NULL, end.timestamp = NULL, report = TRUE, override = NULL, 
   exclude.tags = NULL, cautious.assignment = TRUE, replicates = NULL, disregard.parallels = TRUE,
   jump.warning = 2, jump.error = 3, inactive.warning = NULL, inactive.error = NULL, debug = FALSE) {
+# Temporary: check deprecated options
+  dep.warning <- "------------------------------------------------------------------\n!!! Deprecated arguments used!\n!!!\n"
+  trigger.dep <- FALSE
+  if (maximum.time != 60) {
+    dep.warning <- paste0(dep.warning, "!!! 'maximum.time' is now 'max.interval'\n")
+    max.interval <- maximum.time
+    trigger.dep <- TRUE
+  }
+  if (!is.null(tz.study.area)) {
+    dep.warning <- paste0(dep.warning, "!!! 'tz.study.area' is now 'tz'\n")
+    tz <- tz.study.area
+    trigger.dep <- TRUE
+  }
+  if (!is.null(start.timestamp)) {
+    dep.warning <- paste0(dep.warning, "!!! 'start.timestamp' is now 'start.time'\n")
+    start.time <- start.timestamp
+    trigger.dep <- TRUE
+  }
+  if (!is.null(end.timestamp)) {
+    dep.warning <- paste0(dep.warning, "!!! 'end.timestamp' is now 'stop.time'\n")
+    stop.time <- end.timestamp
+    trigger.dep <- TRUE
+  }
+  if (trigger.dep)
+    warning(paste0("\n", dep.warning, "!!!\n!!! Please switch to the new arguments as soon as possible.\n!!! The deprecated arguments will stop working in future versions.\n------------------------------------------------------------------"),
+      immediate. = TRUE, call. = FALSE)
+  rm(maximum.time, tz.study.area, start.timestamp, end.timestamp)
   
 # check argument quality
   my.home <- getwd()
   if (!is.numeric(minimum.detections))
     stop("'minimum.detections' must be numeric.\n", call. = FALSE)
-  if (!is.numeric(maximum.time))
-    stop("'maximum.time' must be numeric.\n", call. = FALSE)
+  if (!is.numeric(max.interval))
+    stop("'max.interval' must be numeric.\n", call. = FALSE)
 
   speed.method <- match.arg(speed.method)
   if (!is.null(speed.warning) && !is.numeric(speed.warning))
@@ -45,10 +72,10 @@ migration <- function(path = NULL, sections, success.arrays = NULL, minimum.dete
   if (!is.logical(if.last.skip.section))
     stop("'if.last.skip.section' must be logical.\n", call. = FALSE)
 
-  if (!is.null(start.timestamp) && !grepl("^[1-2][0-9][0-9][0-9]-[0-1][0-9]-[0-3][0-9] [0-2][0-9]:[0-5][0-9]:[0-5][0-9]", start.timestamp))
-    stop("'start.timestamp' must be in 'yyyy-mm-dd hh:mm:ss' format.\n", call. = FALSE)
-  if (!is.null(end.timestamp) && !grepl("^[1-2][0-9][0-9][0-9]-[0-1][0-9]-[0-3][0-9] [0-2][0-9]:[0-5][0-9]:[0-5][0-9]", end.timestamp))
-    stop("'end.timestamp' must be in 'yyyy-mm-dd hh:mm:ss' format.\n", call. = FALSE)
+  if (!is.null(start.time) && !grepl("^[1-2][0-9][0-9][0-9]-[0-1][0-9]-[0-3][0-9] [0-2][0-9]:[0-5][0-9]:[0-5][0-9]", start.time))
+    stop("'start.time' must be in 'yyyy-mm-dd hh:mm:ss' format.\n", call. = FALSE)
+  if (!is.null(stop.time) && !grepl("^[1-2][0-9][0-9][0-9]-[0-1][0-9]-[0-3][0-9] [0-2][0-9]:[0-5][0-9]:[0-5][0-9]", stop.time))
+    stop("'stop.time' must be in 'yyyy-mm-dd hh:mm:ss' format.\n", call. = FALSE)
 
   if (!is.logical(report))
     stop("'report' must be logical.\n", call. = FALSE)
@@ -102,14 +129,14 @@ migration <- function(path = NULL, sections, success.arrays = NULL, minimum.dete
       ", sections = ", paste0("c('", paste(sections, collapse = "', '"), "')"), 
       ", success.arrays = ", paste0("c('", paste(success.arrays, collapse = "', '"), "')"), 
       ", minimum.detections = ", minimum.detections,
-      ", maximum.time = ", maximum.time,
+      ", max.interval = ", max.interval,
       ", speed.method = ", paste0("c('", speed.method, "')"),
       ", speed.warning = ", ifelse(is.null(speed.warning), "NULL", speed.warning), 
       ", speed.error = ", ifelse(is.null(speed.error), "NULL", speed.error), 
       ", if.last.skip.section = ", ifelse(if.last.skip.section, "TRUE", "FALSE"),
-      ", tz.study.area = ", ifelse(is.null(tz.study.area), "NULL", paste0("'", tz.study.area, "'")), 
-      ", start.timestamp = ", ifelse(is.null(start.timestamp), "NULL", paste0("'", start.timestamp, "'")),
-      ", end.timestamp = ", ifelse(is.null(end.timestamp), "NULL", paste0("'", end.timestamp, "'")),
+      ", tz = ", ifelse(is.null(tz), "NULL", paste0("'", tz, "'")), 
+      ", start.time = ", ifelse(is.null(start.time), "NULL", paste0("'", start.time, "'")),
+      ", stop.time = ", ifelse(is.null(stop.time), "NULL", paste0("'", stop.time, "'")),
       ", report = ", ifelse(report, "TRUE", "FALSE"), 
       ", override = ", ifelse(is.null(override), "NULL", paste0("c('", paste(override, collapse = "', '"), "')")),
       ", exclude.tags = ", ifelse(is.null(exclude.tags), "NULL", paste0("c('", paste(exclude.tags, collapse = "', '"), "')")), 
@@ -149,8 +176,8 @@ migration <- function(path = NULL, sections, success.arrays = NULL, minimum.dete
   else
     appendTo("Screen", "M: 'disregard.parallels' is set to FALSE; the presence of parallel arrays can potentially invalidate efficiency peers.")
   
-  study.data <- loadStudyData(tz.study.area = tz.study.area, override = override, 
-                              start.timestamp = start.timestamp, end.timestamp = end.timestamp,
+  study.data <- loadStudyData(tz = tz, override = override, 
+                              start.time = start.time, stop.time = stop.time,
                               sections = sections, exclude.tags = exclude.tags, disregard.parallels = disregard.parallels)
   bio <- study.data$bio
   deployments <- study.data$deployments
@@ -171,7 +198,7 @@ migration <- function(path = NULL, sections, success.arrays = NULL, minimum.dete
 # Process the data
   appendTo(c("Screen", "Report"), "M: Creating movement records for the valid tags.")
   movements <- groupMovements(detections.list = detections.list, bio = bio, spatial = spatial,
-    speed.method = speed.method, maximum.time = maximum.time, tz.study.area = tz.study.area, 
+    speed.method = speed.method, max.interval = max.interval, tz = tz, 
     dist.mat = dist.mat, invalid.dist = invalid.dist)
 
   for(fish in names(movements)){
@@ -220,7 +247,7 @@ migration <- function(path = NULL, sections, success.arrays = NULL, minimum.dete
   appendTo(c("Screen", "Report"), "M: Timetable successfully filled. Fitting in the remaining variables.")
   
   status.df <- assembleOutput(timetable = timetable, bio = bio, spatial = spatial, 
-    sections = sections, dist.mat = dist.mat, invalid.dist = invalid.dist, tz.study.area = tz.study.area)
+    sections = sections, dist.mat = dist.mat, invalid.dist = invalid.dist, tz = tz)
 
   valid.movements <- simplifyMovements(movements = movements, bio = bio, 
     speed.method = speed.method, dist.mat = dist.mat, invalid.dist = invalid.dist)
@@ -317,7 +344,7 @@ migration <- function(path = NULL, sections, success.arrays = NULL, minimum.dete
   matrices <- the.matrices
 
   # extra info for potential RSP analysis
-  rsp.info <- list(analysis.type = "migration", analysis.time = the.time, bio = bio, tz.study.area = tz.study.area)
+  rsp.info <- list(analysis.type = "migration", analysis.time = the.time, bio = bio, tz = tz)
 
   if (invalid.dist)
     save(detections, valid.detections, spatial, deployments, arrays, movements, valid.movements, status.df,
@@ -347,7 +374,7 @@ migration <- function(path = NULL, sections, success.arrays = NULL, minimum.dete
       array.overview.fragment <- ""
     }
     individual.plots <- printIndividuals(redraw = TRUE, detections.list = detections.list, bio = bio, 
-        status.df = status.df, tz.study.area = tz.study.area, movements = movements, valid.movements = valid.movements)
+        status.df = status.df, tz = tz, movements = movements, valid.movements = valid.movements)
     circular.plots <- printCircular(times = convertTimesToCircular(times), bio = bio)
     if (nrow(section.overview) > 3) 
       survival.graph.size <- "width=90%" else survival.graph.size <- "height=4in"
@@ -1474,7 +1501,7 @@ countBackMoves <- function(movements, arrays){
 #' 
 #' @keywords internal
 #' 
-assembleOutput <- function(timetable, bio, spatial, sections, dist.mat, invalid.dist, tz.study.area) {
+assembleOutput <- function(timetable, bio, spatial, sections, dist.mat, invalid.dist, tz) {
   appendTo("debug", "Merging 'bio' and 'timetable'.")
   status.df <- merge(bio, timetable, by = "Transmitter", all = TRUE)
   
@@ -1488,7 +1515,7 @@ assembleOutput <- function(timetable, bio, spatial, sections, dist.mat, invalid.
 
   the.cols <- grepl("Release.date", colnames(status.df)) | grepl("Arrived",colnames(status.df)) | grepl("Left",colnames(status.df))
   for (i in colnames(status.df)[the.cols]) {
-    status.df[, i] <- as.POSIXct(status.df[,i], tz = tz.study.area)
+    status.df[, i] <- as.POSIXct(status.df[,i], tz = tz)
   }
   rm(the.cols)
   
@@ -1498,8 +1525,8 @@ assembleOutput <- function(timetable, bio, spatial, sections, dist.mat, invalid.
     arriving.points <- status.df[i, paste("Arrived", sections, sep = ".")]
     if (any(!is.na(arriving.points))) {
       first.section <- sections[head(which(!is.na(arriving.points)), 1)]
-      pointA <- as.POSIXct(status.df[i, paste("Arrived", first.section, sep = ".")], tz = tz.study.area)
-      pointB <- as.POSIXct(status.df[i, "Release.date"], tz = tz.study.area)
+      pointA <- as.POSIXct(status.df[i, paste("Arrived", first.section, sep = ".")], tz = tz)
+      pointB <- as.POSIXct(status.df[i, "Release.date"], tz = tz)
       AtoB <- as.vector(difftime(pointA, pointB, units = "secs"))
       status.df[i, paste("Time.until", first.section, sep = ".")] <- AtoB
       if (!invalid.dist) {

@@ -4,13 +4,17 @@
 #' Its main function, actel, collects the input present in the target folder and analyses the telemetry data.
 #' It is strongly recommended to read the package vignettes before attempting to run the analyses. You can find the vignettes by running browseVignettes('actel') .
 #' 
-#' @param path Path to the folder containing the data. If the R session is already running in the target folder, path may be left as NA
-#' @param maximum.time The number of minutes that must pass between detections for a new event to be created.
+#' @param path Path to the folder containing the data. If the R session is already running in the target folder, path may be left as NULL
+#' @param maximum.time Deprecated. See "max.interval"
+#' @param max.interval The number of minutes that must pass between detections for a new event to be created.
 #' @param speed.method One of 'last to first' or 'first to first'. In the former, the last detection on a given array/section is matched to the first detection on the next array/section (default). If changed to 'first to first', the first detection on two consecutive arrays/sections are used to perform the calculations.
-#' @param tz.study.area The time-zone of the study area. Necessary to convert the ALS time data, which is in UTC.
-#' @param start.timestamp Detection data prior to this date is not analysed. Improves processing time when loading large amounts of detection data.
-#' @param end.timestamp Detection data posterior to this date is not analysed. Improves processing time when loading large amounts of detection data.
-#' @param report Whether graphics, tables and LaTeX report files should be created. Defaults to TRUE. Allows automatic compiling of a PDF report after the analysis.
+#' @param tz.study.area Deprecated. See "tz"
+#' @param tz The time-zone of the study area. Necessary to convert the ALS time data, which is in UTC.
+#' @param start.timestamp Deprecated. See "start.time"
+#' @param start.time Detection data prior to this date is not analysed. Improves processing time when loading large amounts of detection data.
+#' @param end.timestamp Deprecated. See "stop.time"
+#' @param stop.time Detection data posterior to this date is not analysed. Improves processing time when loading large amounts of detection data.
+#' @param report Whether graphics, tables and html report files should be created. Defaults to TRUE. Allows automatic compiling of an html report after the analysis.
 #' @param exclude.tags A list of tags that should be excluded from the detection data before any analyses are performed. Intended to be used if stray tags from a different code space but with the same signal as a target tag are detected in the study area.
 #' @param debug If TRUE, temporary files are not deleted at the end of the analysis. Defaults to FALSE.
 #' @param jump.warning Integer value. If a fish crosses ´jump.warning´ arrays without being detected, a warning is issued.
@@ -28,15 +32,43 @@
 #' @import utils
 #' @import graphics
 #' 
-explore <- function(path = NULL, maximum.time = 60, speed.method = c("last to first", "first to first"),
-    speed.warning = NULL, speed.error = NULL, tz.study.area, start.timestamp = NULL, end.timestamp = NULL, 
+explore <- function(path = NULL, max.interval = 60, maximum.time = 60, speed.method = c("last to first", "first to first"),
+    speed.warning = NULL, speed.error = NULL, tz.study.area = NULL, tz, start.time = NULL, start.timestamp = NULL, 
+    stop.time = NULL, end.timestamp = NULL, 
     report = TRUE, exclude.tags = NULL, jump.warning = 2, jump.error = 3, inactive.warning = NULL, 
     inactive.error = NULL,  debug = FALSE) {
+# Temporary: check deprecated options
+  dep.warning <- "------------------------------------------------------------------\n!!! Deprecated arguments used!\n!!!\n"
+  trigger.dep <- FALSE
+  if (maximum.time != 60) {
+    dep.warning <- paste0(dep.warning, "!!! 'maximum.time' is now 'max.interval'\n")
+    max.interval <- maximum.time
+    trigger.dep <- TRUE
+  }
+  if (!is.null(tz.study.area)) {
+    dep.warning <- paste0(dep.warning, "!!! 'tz.study.area' is now 'tz'\n")
+    tz <- tz.study.area
+    trigger.dep <- TRUE
+  }
+  if (!is.null(start.timestamp)) {
+    dep.warning <- paste0(dep.warning, "!!! 'start.timestamp' is now 'start.time'\n")
+    start.time <- start.timestamp
+    trigger.dep <- TRUE
+  }
+  if (!is.null(end.timestamp)) {
+    dep.warning <- paste0(dep.warning, "!!! 'end.timestamp' is now 'stop.time'\n")
+    stop.time <- end.timestamp
+    trigger.dep <- TRUE
+  }
+  if (trigger.dep)
+    warning(paste0("\n", dep.warning, "!!!\n!!! Please switch to the new arguments as soon as possible.\n!!! The deprecated arguments will stop working in future versions.\n------------------------------------------------------------------"),
+      immediate. = TRUE, call. = FALSE)
+  rm(maximum.time, tz.study.area, start.timestamp, end.timestamp)
 
 # check arguments quality
   my.home <- getwd()
-  if (!is.numeric(maximum.time))
-    stop("'maximum.time' must be numerical.\n", call. = FALSE)
+  if (!is.numeric(max.interval))
+    stop("'max.interval' must be numerical.\n", call. = FALSE)
 
   speed.method <- match.arg(speed.method)
   if (!is.null(speed.warning) && !is.numeric(speed.warning))
@@ -48,10 +80,10 @@ explore <- function(path = NULL, maximum.time = 60, speed.method = c("last to fi
   if (!is.null(speed.error) && speed.error < speed.warning)
     stop("'speed.error' must not be lower than 'speed.warning'.\n", call. = FALSE)
   
-  if (!is.null(start.timestamp) && !grepl("^[1-2][0-9][0-9][0-9]-[0-1][0-9]-[0-3][0-9] [0-2][0-9]:[0-5][0-9]:[0-5][0-9]", start.timestamp))
-    stop("'start.timestamp' must be in 'yyyy-mm-dd hh:mm:ss' format.\n", call. = FALSE)
-  if (!is.null(end.timestamp) && !grepl("^[1-2][0-9][0-9][0-9]-[0-1][0-9]-[0-3][0-9] [0-2][0-9]:[0-5][0-9]:[0-5][0-9]", end.timestamp))
-    stop("'end.timestamp' must be in 'yyyy-mm-dd hh:mm:ss' format.\n", call. = FALSE)
+  if (!is.null(start.time) && !grepl("^[1-2][0-9][0-9][0-9]-[0-1][0-9]-[0-3][0-9] [0-2][0-9]:[0-5][0-9]:[0-5][0-9]", start.time))
+    stop("'start.time' must be in 'yyyy-mm-dd hh:mm:ss' format.\n", call. = FALSE)
+  if (!is.null(stop.time) && !grepl("^[1-2][0-9][0-9][0-9]-[0-1][0-9]-[0-3][0-9] [0-2][0-9]:[0-5][0-9]:[0-5][0-9]", stop.time))
+    stop("'stop.time' must be in 'yyyy-mm-dd hh:mm:ss' format.\n", call. = FALSE)
   
   if (!is.logical(report))
     stop("'report' must be logical.\n", call. = FALSE)
@@ -96,13 +128,13 @@ explore <- function(path = NULL, maximum.time = 60, speed.method = c("last to fi
 
 # Store function call
   the.function.call <- paste0("explore(path = ", ifelse(is.null(path), "NULL", paste0("'", path, "'")), 
-      ", maximum.time = ", maximum.time,
+      ", max.interval = ", max.interval,
       ", speed.method = ", paste0("c('", speed.method, "')"),
       ", speed.warning = ", ifelse(is.null(speed.warning), "NULL", speed.warning), 
       ", speed.error = ", ifelse(is.null(speed.error), "NULL", speed.error), 
-      ", tz.study.area = ", ifelse(is.null(tz.study.area), "NULL", paste0("'", tz.study.area, "'")), 
-      ", start.timestamp = ", ifelse(is.null(start.timestamp), "NULL", paste0("'", start.timestamp, "'")),
-      ", end.timestamp = ", ifelse(is.null(end.timestamp), "NULL", paste0("'", end.timestamp, "'")),
+      ", tz = ", ifelse(is.null(tz), "NULL", paste0("'", tz, "'")), 
+      ", start.time = ", ifelse(is.null(start.time), "NULL", paste0("'", start.time, "'")),
+      ", stop.time = ", ifelse(is.null(stop.time), "NULL", paste0("'", stop.time, "'")),
       ", report = ", ifelse(report, "TRUE", "FALSE"), 
       ", exclude.tags = ", ifelse(is.null(exclude.tags), "NULL", paste0("c('", paste(exclude.tags, collapse = "', '"), "')")), 
       ", jump.warning = ", jump.warning,
@@ -130,8 +162,8 @@ explore <- function(path = NULL, maximum.time = 60, speed.method = c("last to fi
 # -----------------------------------
 
 # Load, structure and check the inputs
-study.data <- loadStudyData(tz.study.area = tz.study.area, override = NULL, 
-                            start.timestamp = start.timestamp, end.timestamp = end.timestamp,
+study.data <- loadStudyData(tz = tz, override = NULL, 
+                            start.time = start.time, stop.time = stop.time,
                             sections = NULL, exclude.tags = exclude.tags)
 bio <- study.data$bio
 deployments <- study.data$deployments
@@ -148,7 +180,7 @@ detections.list <- study.data$detections.list
 # Process the data
   appendTo(c("Screen", "Report"), "M: Creating movement records for the valid tags.")
   movements <- groupMovements(detections.list = detections.list, bio = bio, spatial = spatial,
-    speed.method = speed.method, maximum.time = maximum.time, tz.study.area = tz.study.area, 
+    speed.method = speed.method, max.interval = max.interval, tz = tz, 
     dist.mat = dist.mat, invalid.dist = invalid.dist)
 
   for (fish in names(movements)) {
@@ -216,7 +248,7 @@ detections.list <- study.data$detections.list
   deployments <- do.call(rbind.data.frame, deployments)
   
   # extra info for potential RSP analysis
-  rsp.info <- list(analysis.type = "explore", analysis.time = the.time, bio = bio, tz.study.area = tz.study.area)
+  rsp.info <- list(analysis.type = "explore", analysis.time = the.time, bio = bio, tz = tz)
 
   if (invalid.dist)
     save(detections, valid.detections, spatial, deployments, arrays, movements, valid.movements, times, rsp.info, file = resultsname)
@@ -230,7 +262,7 @@ detections.list <- study.data$detections.list
     biometric.fragment <- printBiometrics(bio = bio)
     printDot(dot = dot, sections = NULL, spatial = spatial)
     individual.plots <- printIndividuals(redraw = TRUE, detections.list = detections.list, 
-      tz.study.area = tz.study.area, movements = movements, valid.movements = valid.movements, bio = bio)
+      tz = tz, movements = movements, valid.movements = valid.movements, bio = bio)
     circular.plots <- printCircular(times = convertTimesToCircular(times), bio = bio)
   }
   

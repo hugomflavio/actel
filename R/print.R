@@ -515,7 +515,7 @@ cat("No intra-array replicates were indicated.")
 #' 
 #' @keywords internal
 #' 
-printIndividuals <- function(redraw, detections.list, bio, status.df = NULL, tz.study.area, 
+printIndividuals <- function(redraw, detections.list, bio, status.df = NULL, tz, 
   movements, valid.movements = NULL, extension = "png") {
   # NOTE: The NULL variables below are actually column names used by ggplot.
   # This definition is just to prevent the package check from issuing a note due unknown variables.
@@ -541,7 +541,7 @@ printIndividuals <- function(redraw, detections.list, bio, status.df = NULL, tz.
         Timestamp = as.vector(t(movements[[fish]][, c("First.time", "Last.time")]))
       )
       all.moves.line$Station <- factor(all.moves.line$Station, levels = levels(PlotData$Standard.Name))
-      all.moves.line$Timestamp <- as.POSIXct(all.moves.line$Timestamp, tz = tz.study.area)
+      all.moves.line$Timestamp <- as.POSIXct(all.moves.line$Timestamp, tz = tz)
       add.valid.movements <- FALSE
       if (!is.null(valid.movements[[fish]])) {
         add.valid.movements <- TRUE
@@ -550,15 +550,15 @@ printIndividuals <- function(redraw, detections.list, bio, status.df = NULL, tz.
           Timestamp = as.vector(t(valid.movements[[fish]][, c("First.time", "Last.time")]))
           )
         simple.moves.line$Station <- factor(simple.moves.line$Station, levels = levels(PlotData$Standard.Name))
-        simple.moves.line$Timestamp <- as.POSIXct(simple.moves.line$Timestamp, tz = tz.study.area)
+        simple.moves.line$Timestamp <- as.POSIXct(simple.moves.line$Timestamp, tz = tz)
       }
       appendTo("debug", paste("Debug: Printing graphic for fish", fish, ".", sep = ""))
       colnames(PlotData)[1] <- "Timestamp"
       the.row <- which(bio$Transmitter == fish)
-      start.line <- as.POSIXct(bio$Release.date[the.row], tz = tz.study.area)
-      first.time <- min(c(as.POSIXct(head(PlotData$Timestamp, 1), tz = tz.study.area), start.line))
-      attributes(first.time)$tzone <- tz.study.area
-      last.time <- as.POSIXct(tail(PlotData$Timestamp, 1), tz = tz.study.area)
+      start.line <- as.POSIXct(bio$Release.date[the.row], tz = tz)
+      first.time <- min(c(as.POSIXct(head(PlotData$Timestamp, 1), tz = tz), start.line))
+      attributes(first.time)$tzone <- tz
+      last.time <- as.POSIXct(tail(PlotData$Timestamp, 1), tz = tz)
       if (!is.null(status.df)) {
         status.row <- which(status.df$Transmitter == fish)
         relevant.line <- status.df[status.row, (grepl("Arrived", colnames(status.df)) | grepl("Left", colnames(status.df)))]
@@ -596,7 +596,7 @@ printIndividuals <- function(redraw, detections.list, bio, status.df = NULL, tz.
       if (!is.null(status.df)) {
         for (l in 1:length(relevant.line)) {
           if (!is.na(relevant.line[l])) {
-            p <- p + ggplot2::geom_vline(xintercept = as.POSIXct(relevant.line[[l]], tz = tz.study.area), linetype = "dashed", color = "grey")
+            p <- p + ggplot2::geom_vline(xintercept = as.POSIXct(relevant.line[[l]], tz = tz), linetype = "dashed", color = "grey")
           }
         }
         rm(l, relevant.line)

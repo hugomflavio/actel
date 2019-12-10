@@ -65,7 +65,7 @@ exampleWorkspace <- function(spatial = example.spatial, biometrics = example.bio
   }
   message("M: The example workspace is now ready. To run the analysis on the example data, run:\n
   results <- migration(path = 'exampleWorkspace', sections = c('River', 'Fjord', 'Sea'), 
-  \t\t     success.arrays = 'Sea1', tz.study.area = 'Europe/Copenhagen')\n
+  \t\t     success.arrays = 'Sea1', tz = 'Europe/Copenhagen')\n
 And follow the instructions as they come. Once finished, explore the object 'results' for the output.")
 }
 

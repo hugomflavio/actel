@@ -7,22 +7,22 @@
 #' 
 #' @keywords internal
 #' 
-loadStudyData <- function(tz.study.area, override = NULL, start.timestamp, end.timestamp, 
+loadStudyData <- function(tz, override = NULL, start.time, stop.time, 
   sections = NULL, exclude.tags, disregard.parallels = TRUE) {
   appendTo(c("Screen", "Report"), "M: Importing data. This process may take a while.")
-  bio <- loadBio(file = "biometrics.csv", tz.study.area = tz.study.area)
   appendTo(c("Screen", "Report"), paste("M: Number of target tags: ", nrow(bio), ".", sep = ""))
+  bio <- loadBio(file = "biometrics.csv", tz = tz)
   
   # Check that all the overriden fish are part of the study
   if (!is.null(override) && any(link <- is.na(match(unlist(lapply(strsplit(override, "-"), function(x) tail(x, 1))), bio$Signal))))
     stop("Some tag signals listed in 'override' ('", paste0(override[link], collapse = "', '"), "') are not listed in the biometrics file.\n")
-  deployments <- loadDeployments(file = "deployments.csv", tz.study.area = tz.study.area)
+  deployments <- loadDeployments(file = "deployments.csv", tz = tz)
   checkDeploymentTimes(input = deployments) # check that receivers are not deployed before being retrieved
-  spatial <- loadSpatial(file = "spatial.csv", verbose = TRUE)
+  spatial <- loadSpatial(file = "spatial.csv", report = TRUE)
   deployments <- checkDeploymentStations(input = deployments, spatial = spatial) # match Station.Name in the deployments to Station.Name in spatial, and vice-versa
   deployments <- createUniqueSerials(input = deployments) # Prepare serial numbers to overwrite the serials in detections
 
-  detections <- loadDetections(start.timestamp = start.timestamp, end.timestamp = end.timestamp, tz.study.area = tz.study.area)
+  detections <- loadDetections(start.time = start.time, stop.time = stop.time, tz = tz)
   detections <- createStandards(detections = detections, spatial = spatial, deployments = deployments) # get standardize station and receiver names, check for receivers with no detections
   appendTo(c("Screen","Report"), paste("M: Data time range: ", as.character(head(detections$Timestamp, 1)), " to ", as.character(tail(detections$Timestamp, 1)), " (", tz.study.area, ").", sep = ""))
 
@@ -486,7 +486,7 @@ loadDistances <- function(spatial) {
 #' 
 #' @keywords internal
 #' 
-loadDeployments <- function(file, tz.study.area){
+loadDeployments <- function(file, tz){
   appendTo("debug","Starting loadDeployments.")
   if (file.exists(file))
     input <- read.csv(file)
@@ -519,8 +519,8 @@ loadDeployments <- function(file, tz.study.area){
   }
   input$Receiver <- as.character(input$Receiver)
   input$Receiver <- sapply(input$Receiver, function(x) tail(unlist(strsplit(x, "-")), 1))
-  input$Start <- as.POSIXct(input$Start, tz = tz.study.area)
-  input$Stop <- as.POSIXct(input$Stop, tz = tz.study.area)
+  input$Start <- as.POSIXct(input$Start, tz = tz)
+  input$Stop <- as.POSIXct(input$Stop, tz = tz)
   appendTo("debug","Terminating loadDeployments.")
   return(input)
 }
@@ -534,8 +534,8 @@ loadDeployments <- function(file, tz.study.area){
 #' 
 #' @export
 #' 
-loadSpatial <- function(file = "spatial.csv", verbose = FALSE){
-  if (verbose)
+loadSpatial <- function(file = "spatial.csv", report = FALSE){
+  if (report)
     appendTo("debug","Starting loadSpatial.")
   if (file.exists(file))
     input <- read.csv(file)
@@ -548,12 +548,12 @@ loadSpatial <- function(file = "spatial.csv", verbose = FALSE){
     stop("The spatial.csv file must contain a 'Station.Name' column.\n", call. = FALSE)
   } else {
     if (any(link <- table(input$Station.Name) > 1)) {
-      if (verbose)
         appendTo(c("Screen", "Warning", "Report"), "Error: The 'Station.Name' column in the spatial.csv file must not have duplicated values.")
+      if (report)
       else
         cat("Error: The 'Station.Name' column in the spatial.csv file must not have duplicated values.")
       cat("Stations appearing more than once:", paste(names(table(input$Station.Name))[link], collapse = ", "), "\n")
-      if (verbose)
+      if (report)
         emergencyBreak()
       stop("Fatal exception found. Read lines above for more details.\n", call. = FALSE)
     }
@@ -563,12 +563,12 @@ loadSpatial <- function(file = "spatial.csv", verbose = FALSE){
       decision <- readline("Error: No 'Array' column found in the spatial.csv file, but a 'Group' column is present. Use the 'Group' column to define the arrays? (Y/n) ")
       appendTo("UD", decision)
       if (decision == "N" & decision == "n") {
-        if (verbose)
+        if (report)
           emergencyBreak()
         stop("The spatial.csv file must contain an 'Array' column.\n", call. = FALSE)
       } else {
-        if (verbose)
           appendTo("Report", "W: No 'Array' column found in the spatial.csv file, but a 'Group' column is present. Using the 'Group' column to define the arrays.")  
+        if (report)
         colnames(input)[grepl("Group", colnames(input))] <- "Array"
       }
     }
@@ -578,18 +578,18 @@ loadSpatial <- function(file = "spatial.csv", verbose = FALSE){
     input$Array <- gsub(" ", "_", input$Array)
   }
   if (!any(grepl("Type", colnames(input)))) {
-    if (verbose)
+    if (report)
       appendTo("Screen", "M: No 'Type' column found in the spatial.csv file. Assigning all rows as hydrophones.")
     input$Type <- "Hydrophone"
   } else {
     if (any(is.na(match(unique(input$Type), c("Hydrophone","Release"))))){
-      if (verbose)
+      if (report)
         emergencyBreak()
       stop("Could not recognise the data in the 'Type' column as only one of 'Hydrophone' or 'Release'. Please double-check the spatial.csv file.\n", call. = FALSE)
     }
   }
   input <- setSpatialStandards(input = input) # Create Standard.Name for each station  
-  if (verbose)
+  if (report)
     appendTo("debug","Terminating loadSpatial.")
   return(input)
 }
@@ -607,7 +607,7 @@ loadSpatial <- function(file = "spatial.csv", verbose = FALSE){
 #' 
 #' @export
 #' 
-loadBio <- function(file, tz.study.area){
+loadBio <- function(file, tz){
   appendTo("debug", "Starting loadBio.")
   if (file.exists(file))
     bio <- read.csv(file, stringsAsFactors = FALSE)
@@ -626,7 +626,7 @@ loadBio <- function(file, tz.study.area){
     stop("Not all values in the 'Release.date' column appear to be in a 'yyyy-mm-dd hh:mm' format (seconds are optional). Please double-check the biometrics.csv file.\n", call. = FALSE)
   }
   
-  if (inherits(try(bio$Release.date <- as.POSIXct(bio$Release.date, tz = tz.study.area), silent = TRUE),"try-error")){
+  if (inherits(try(bio$Release.date <- as.POSIXct(bio$Release.date, tz = tz), silent = TRUE),"try-error")){
     emergencyBreak()
     stop("Could not recognise the data in the 'Release.date' column as POSIX-compatible timestamps. Please double-check the biometrics.csv file.\n", call. = FALSE)
   }
@@ -690,7 +690,7 @@ loadBio <- function(file, tz.study.area){
 #' 
 #' @keywords internal
 #' 
-loadDetections <- function(start.timestamp = NULL, end.timestamp = NULL, tz.study.area, force = FALSE) {
+loadDetections <- function(start.time = NULL, stop.time = NULL, tz, force = FALSE) {
   # NOTE: The variable actel.detections is loaded from a RData file, if present. To avoid package check
   #   notes, the variable name is created before any use.
   actel.detections <- NULL
@@ -716,7 +716,7 @@ loadDetections <- function(start.timestamp = NULL, end.timestamp = NULL, tz.stud
       appendTo(c("Screen","Report"), paste("M: Using detections previously compiled on ", actel.detections$timestamp, "...", sep = ""))
       detections <- actel.detections$detections
       attributes(detections$Timestamp)$tzone <- "UTC"
-      detections <- convertTimes(input = detections, start.timestamp = start.timestamp, end.timestamp = end.timestamp, tz.study.area = tz.study.area)
+      detections <- convertTimes(input = detections, start.time = start.time, stop.time = stop.time, tz = tz)
       recompile <- FALSE
     } else {
       appendTo("Screen", "M: Reprocessing the detections.")
@@ -725,8 +725,8 @@ loadDetections <- function(start.timestamp = NULL, end.timestamp = NULL, tz.stud
   }
 
   if (recompile)
-    detections <- compileDetections(path = "detections", start.timestamp = start.timestamp, 
-      end.timestamp = end.timestamp, tz.study.area = tz.study.area)
+    detections <- compileDetections(path = "detections", start.time = start.time, 
+      stop.time = stop.time, tz = tz)
   return(detections)
 }
 
@@ -745,7 +745,7 @@ loadDetections <- function(start.timestamp = NULL, end.timestamp = NULL, tz.stud
 #' 
 #' @keywords internal
 #' 
-compileDetections <- function(path = "detections", start.timestamp = NULL, end.timestamp = NULL, tz.study.area) {
+compileDetections <- function(path = "detections", start.time = NULL, stop.time = NULL, tz) {
   appendTo("Screen", "M: Compiling detections...")
   # Find the detection files
   if (file_test("-d", path)) {
@@ -800,8 +800,8 @@ compileDetections <- function(path = "detections", start.timestamp = NULL, end.t
   # Convert codespaces
   output <- convertCodes(input = output)
   # Convert time-zones
-  output <- convertTimes(input = output, start.timestamp = start.timestamp, 
-    end.timestamp = end.timestamp, tz.study.area = tz.study.area)
+  output <- convertTimes(input = output, start.time = start.time, 
+    stop.time = stop.time, tz = tz)
 
   actel.detections <- list(detections = output, timestamp = Sys.time())
     save(actel.detections, file = ifelse(file_test("-d", path), paste0(path, "/actel.detections.RData"), "actel.detections.RData"))
@@ -964,23 +964,23 @@ convertCodes <- function(input) {
 #'
 #' @keywords internal
 #' 
-convertTimes <- function(input, start.timestamp, end.timestamp, tz.study.area) {
+convertTimes <- function(input, start.time, stop.time, tz) {
   # NOTE: The NULL variables below are actually column names used by data.table.
   # This definition is just to prevent the package check from issuing a note due unknown variables.
   Timestamp <- NULL
 
   appendTo("debug", "Starting convertTimes.")
-  attributes(input$Timestamp)$tzone <- tz.study.area
+  attributes(input$Timestamp)$tzone <- tz
   input <- input[order(input$Timestamp), ]
-  if (!is.null(start.timestamp)){
+  if (!is.null(start.time)){
     onr <- nrow(input)
-    input <- input[Timestamp >= as.POSIXct(start.timestamp, tz = tz.study.area)]
     appendTo(c("Screen","Report"), paste("M: Discarding detection data previous to ",start.timestamp," per user command (", onr - nrow(input), " detections discarded).", sep = ""))
+    input <- input[Timestamp >= as.POSIXct(start.time, tz = tz)]
   }
-  if (!is.null(end.timestamp)){
+  if (!is.null(stop.time)){
     onr <- nrow(input)
-    input <- input[Timestamp <= as.POSIXct(end.timestamp, tz = tz.study.area), ]
     appendTo(c("Screen","Report"), paste("M: Discarding detection data posterior to ",end.timestamp," per user command (", onr - nrow(input), " detections discarded).", sep = ""))
+    input <- input[Timestamp <= as.POSIXct(stop.time, tz = tz), ]
   }
   input$Receiver <- droplevels(input$Receiver)
   input$Transmitter <- as.factor(paste(input$CodeSpace, input$Signal, sep = "-"))

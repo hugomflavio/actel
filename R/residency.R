@@ -13,17 +13,44 @@
 #' @export
 #' 
 residency <- function(path = NULL, sections, section.minimum = 2, 
-  maximum.time = 60, speed.method = c("last to first", "first to first"), speed.warning = NULL,
-  speed.error = NULL, if.last.skip.section = TRUE, tz.study.area, start.timestamp = NULL, 
-  end.timestamp = NULL, report = TRUE, exclude.tags = NULL, replicates = NULL,
+  max.interval = 60, maximum.time = 60, speed.method = c("last to first", "first to first"), speed.warning = NULL,
+  speed.error = NULL, if.last.skip.section = TRUE, tz.study.area = NULL, tz = NULL, start.time = NULL, start.timestamp = NULL, 
+  stop.time = NULL, end.timestamp = NULL, report = TRUE, exclude.tags = NULL, replicates = NULL,
   jump.warning = 2, jump.error = 3, inactive.warning = NULL, inactive.error = NULL, debug = FALSE) {
+# Temporary: check deprecated options
+  dep.warning <- "------------------------------------------------------------------\n!!! Deprecated arguments used!\n!!!\n"
+  trigger.dep <- FALSE
+  if (maximum.time != 60) {
+    dep.warning <- paste0(dep.warning, "!!! 'maximum.time' is now 'max.interval'\n")
+    max.interval <- maximum.time
+    trigger.dep <- TRUE
+  }
+  if (!is.null(tz.study.area)) {
+    dep.warning <- paste0(dep.warning, "!!! 'tz.study.area' is now 'tz'\n")
+    tz <- tz.study.area
+    trigger.dep <- TRUE
+  }
+  if (!is.null(start.timestamp)) {
+    dep.warning <- paste0(dep.warning, "!!! 'start.timestamp' is now 'start.time'\n")
+    start.time <- start.timestamp
+    trigger.dep <- TRUE
+  }
+  if (!is.null(end.timestamp)) {
+    dep.warning <- paste0(dep.warning, "!!! 'end.timestamp' is now 'stop.time'\n")
+    stop.time <- end.timestamp
+    trigger.dep <- TRUE
+  }
+  if (trigger.dep)
+    warning(paste0("\n", dep.warning, "!!!\n!!! Please switch to the new arguments as soon as possible.\n!!! The deprecated arguments will stop working in future versions.\n------------------------------------------------------------------"),
+      immediate. = TRUE, call. = FALSE)
+  rm(maximum.time, tz.study.area, start.timestamp, end.timestamp)
   
 # check argument quality
   my.home <- getwd()
   if (!is.numeric(section.minimum))
     stop("'section.minimum' must be numeric.\n", call. = FALSE)
-  if (!is.numeric(maximum.time))
-    stop("'maximum.time' must be numeric.\n", call. = FALSE)
+  if (!is.numeric(max.interval))
+    stop("'max.interval' must be numeric.\n", call. = FALSE)
 
   speed.method <- match.arg(speed.method)
   if (!is.null(speed.warning) && !is.numeric(speed.warning))
@@ -38,10 +65,10 @@ residency <- function(path = NULL, sections, section.minimum = 2,
   if (!is.logical(if.last.skip.section))
     stop("'if.last.skip.section' must be logical.\n", call. = FALSE)
 
-  if (!is.null(start.timestamp) && !grepl("^[1-2][0-9][0-9][0-9]-[0-1][0-9]-[0-3][0-9] [0-2][0-9]:[0-5][0-9]:[0-5][0-9]", start.timestamp))
-    stop("'start.timestamp' must be in 'yyyy-mm-dd hh:mm:ss' format.\n", call. = FALSE)
-  if (!is.null(end.timestamp) && !grepl("^[1-2][0-9][0-9][0-9]-[0-1][0-9]-[0-3][0-9] [0-2][0-9]:[0-5][0-9]:[0-5][0-9]", end.timestamp))
-    stop("'end.timestamp' must be in 'yyyy-mm-dd hh:mm:ss' format.\n", call. = FALSE)
+  if (!is.null(start.time) && !grepl("^[1-2][0-9][0-9][0-9]-[0-1][0-9]-[0-3][0-9] [0-2][0-9]:[0-5][0-9]:[0-5][0-9]", start.time))
+    stop("'start.time' must be in 'yyyy-mm-dd hh:mm:ss' format.\n", call. = FALSE)
+  if (!is.null(stop.time) && !grepl("^[1-2][0-9][0-9][0-9]-[0-1][0-9]-[0-3][0-9] [0-2][0-9]:[0-5][0-9]:[0-5][0-9]", stop.time))
+    stop("'stop.time' must be in 'yyyy-mm-dd hh:mm:ss' format.\n", call. = FALSE)
   
   if (!is.logical(report))
     stop("'report' must be logical.\n", call. = FALSE)
@@ -91,14 +118,14 @@ residency <- function(path = NULL, sections, section.minimum = 2,
   the.function.call <- paste0("residency(path = ", ifelse(is.null(path), "NULL", paste0("'", path, "'")), 
       ", sections = ", paste0("c('", paste(sections, collapse = "', '"), "')"), 
       ", section.minimum = ", section.minimum,
-      ", maximum.time = ", maximum.time,
+      ", max.interval = ", max.interval,
       ", speed.method = ", paste0("c('", speed.method, "')"),
       ", speed.warning = ", ifelse(is.null(speed.warning), "NULL", speed.warning), 
       ", speed.error = ", ifelse(is.null(speed.error), "NULL", speed.error), 
       ", if.last.skip.section = ", ifelse(if.last.skip.section, "TRUE", "FALSE"),
-      ", tz.study.area = ", ifelse(is.null(tz.study.area), "NULL", paste0("'", tz.study.area, "'")), 
-      ", start.timestamp = ", ifelse(is.null(start.timestamp), "NULL", paste0("'", start.timestamp, "'")),
-      ", end.timestamp = ", ifelse(is.null(end.timestamp), "NULL", paste0("'", end.timestamp, "'")),
+      ", tz = ", ifelse(is.null(tz), "NULL", paste0("'", tz, "'")), 
+      ", start.time = ", ifelse(is.null(start.time), "NULL", paste0("'", start.time, "'")),
+      ", stop.time = ", ifelse(is.null(stop.time), "NULL", paste0("'", stop.time, "'")),
       ", report = ", ifelse(report, "TRUE", "FALSE"), 
       ", exclude.tags = ", ifelse(is.null(exclude.tags), "NULL", paste0("c('", paste(exclude.tags, collapse = "', '"), "')")), 
       ", replicates = ", ifelse(is.null(replicates),"NULL", paste0("c('", paste(replicates, collapse = "', '"), "')")),
@@ -127,8 +154,8 @@ residency <- function(path = NULL, sections, section.minimum = 2,
 # -----------------------------------
 
 # Load, structure and check the inputs
-study.data <- loadStudyData(tz.study.area = tz.study.area, override = NULL,
-                            start.timestamp = start.timestamp, end.timestamp = end.timestamp,
+study.data <- loadStudyData(tz = tz, override = NULL,
+                            start.time = start.time, stop.time = stop.time,
                             sections = sections, exclude.tags = exclude.tags)
 bio <- study.data$bio
 deployments <- study.data$deployments
@@ -146,8 +173,8 @@ detections.list <- study.data$detections.list
 # Process the data
   appendTo(c("Screen", "Report"), "M: Creating movement records for the valid tags.")
   movements <- groupMovements(detections.list = detections.list, bio = bio, spatial = spatial,
-                              speed.method = speed.method, maximum.time = maximum.time, 
-                              tz.study.area = tz.study.area, dist.mat = dist.mat, invalid.dist = invalid.dist)
+                              speed.method = speed.method, max.interval = max.interval, 
+                              tz = tz, dist.mat = dist.mat, invalid.dist = invalid.dist)
 
   aux <- names(movements)
   movements <- lapply(names(movements), 
@@ -210,7 +237,7 @@ detections.list <- study.data$detections.list
   appendTo(c("Screen", "Report"), "M: Timetable successfully filled. Fitting in the remaining variables.")
   
   status.df <- res_assembleOutput(res.df = res.df, bio = bio, spatial = spatial, 
-                                  sections = sections, tz.study.area = tz.study.area)
+                                  sections = sections, tz = tz)
 
   last.seen <- as.data.frame.matrix(with(status.df, table(Group, Status)))
 
@@ -279,7 +306,7 @@ detections.list <- study.data$detections.list
     efficiency <- efficiency[1:3]
 
   # extra info for potential RSP analysis
-  rsp.info <- list(analysis.type = "residency", analysis.time = the.time, bio = bio, tz.study.area = tz.study.area)
+  rsp.info <- list(analysis.type = "residency", analysis.time = the.time, bio = bio, tz = tz)
 
   if (invalid.dist)
     save(detections, valid.detections, spatial, deployments, arrays, movements, valid.movements, 
@@ -299,7 +326,7 @@ detections.list <- study.data$detections.list
     printSectionTimes(section.times = section.times, bio = bio, detections = valid.detections)
     printGlobalRatios(ratios = global.ratios)
     individual.detection.plots <- printIndividuals(redraw = TRUE, detections.list = detections.list, bio = bio, 
-        tz.study.area = tz.study.area, movements = movements, valid.movements = valid.movements)
+        tz = tz, movements = movements, valid.movements = valid.movements)
     array.circular.plots <- printCircular(times = convertTimesToCircular(array.times), bio = bio, suffix = "_array")
     section.arrival.circular.plots <- printCircular(times = convertTimesToCircular(section.times$arrival), bio = bio, suffix = "_array")
     section.departure.circular.plots <- printCircular(times = convertTimesToCircular(section.times$departure), bio = bio, suffix = "_array")
@@ -876,7 +903,7 @@ assembleResidency <- function(secmoves, movements, sections) {
 #' 
 #' @keywords internal
 #' 
-res_assembleOutput <- function(res.df, bio, spatial, sections, tz.study.area) {
+res_assembleOutput <- function(res.df, bio, spatial, sections, tz) {
   appendTo("debug", "Merging 'bio' and 'res.df'.")
   status.df <- merge(bio, res.df, by = "Transmitter", all = TRUE)
   
@@ -892,8 +919,8 @@ res_assembleOutput <- function(res.df, bio, spatial, sections, tz.study.area) {
 	status.df$Invalid.events[is.na(status.df$Invalid.events)] <- 0
 
 	# Convert time stamps
-  status.df$Release.date <- as.POSIXct(status.df$Release.date, tz = tz.study.area)
-  status.df$Very.last.time <- as.POSIXct(status.df$Very.last.time, tz = tz.study.area)
+  status.df$Release.date <- as.POSIXct(status.df$Release.date, tz = tz)
+  status.df$Very.last.time <- as.POSIXct(status.df$Very.last.time, tz = tz)
   
   if (file.exists("temp_comments.txt")) {
     temp <- read.table("temp_comments.txt", header = FALSE, sep = "\t")
