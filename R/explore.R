@@ -67,6 +67,8 @@ explore <- function(path = NULL, max.interval = 60, maximum.time = 60, speed.met
 
 # check arguments quality
   my.home <- getwd()
+  if (is.null(tz) || is.na(match(tz, OlsonNames())))
+    stop("'tz' could not be recognized as a timezone. Check available timezones with OlsonNames()\n", call. = FALSE)
   if (!is.numeric(max.interval))
     stop("'max.interval' must be numerical.\n", call. = FALSE)
 

@@ -47,6 +47,8 @@ residency <- function(path = NULL, sections, section.minimum = 2,
   
 # check argument quality
   my.home <- getwd()
+  if (is.null(tz) || is.na(match(tz, OlsonNames())))
+    stop("'tz' could not be recognized as a timezone. Check available timezones with OlsonNames()\n", call. = FALSE)
   if (!is.numeric(section.minimum))
     stop("'section.minimum' must be numeric.\n", call. = FALSE)
   if (!is.numeric(max.interval))
