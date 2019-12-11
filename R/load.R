@@ -584,8 +584,10 @@ loadSpatial <- function(file = "spatial.csv", report = FALSE){
       }
     }
   }
+  if (any(is.na(input$Array)))
+    stop("Some rows do not contain 'Array' information in the spatial.csv file. Please double-check the input files.")
   if (any(grepl(" ", input$Array))) {
-    appendTo("Screen", "Replacing spaces in array names to prevent function failure.")
+    appendTo("Screen", "M: Replacing spaces in array names to prevent function failure.")
     input$Array <- gsub(" ", "_", input$Array)
   }
   if (!any(grepl("Type", colnames(input)))) {
