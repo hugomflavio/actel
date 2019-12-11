@@ -557,7 +557,7 @@ validateDetections <- function(detections.list, movements) {
       return(start:stop)
     }))
     setTxtProgressBar(pb, counter)    
-    return(aux[valid.rows, ])
+    return(data.table::as.data.table(aux[valid.rows, ]))
   })
   close(pb)
   names(output) <- names(movements)
