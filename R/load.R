@@ -498,7 +498,7 @@ loadDistances <- function(spatial) {
 loadDeployments <- function(file, tz){
   appendTo("debug","Starting loadDeployments.")
   if (file.exists(file))
-    input <- read.csv(file)
+    input <- as.data.frame(data.table::fread(file))
   else {
     emergencyBreak()
     stop("Could not find a '", file, "' file in the working directory.\n", call. = FALSE)
@@ -547,7 +547,7 @@ loadSpatial <- function(file = "spatial.csv", report = FALSE){
   if (report)
     appendTo("debug","Starting loadSpatial.")
   if (file.exists(file))
-    input <- read.csv(file)
+    input <- as.data.frame(data.table::fread(file))
   else {
     emergencyBreak()
     stop("Could not find a '", file, "' file in the working directory.\n", call. = FALSE)
@@ -619,7 +619,7 @@ loadSpatial <- function(file = "spatial.csv", report = FALSE){
 loadBio <- function(file, tz){
   appendTo("debug", "Starting loadBio.")
   if (file.exists(file))
-    bio <- read.csv(file, stringsAsFactors = FALSE)
+    bio <- as.data.frame(data.table::fread(file), stringsAsFactors = FALSE)
   else {
     emergencyBreak()
     stop("Could not find a '", file, "' file in the working directory.\n", call. = FALSE)
