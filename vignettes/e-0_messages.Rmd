@@ -339,7 +339,7 @@ Somewhere in your detection files, there are detections for receivers that are n
 W: Fish [...] was detected in one or more receivers that are not listed in the study area (receiver(s): [...])!
 Possible options:
    a) Stop and double-check the data (recommended)
-   b) Temporary include the hydrophone(s) to the stations list
+   b) Temporarily include the hydrophone(s) to the stations list
 Which option should be followed?(a/b) 
 ```
 

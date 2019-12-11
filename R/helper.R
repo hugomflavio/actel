@@ -66,7 +66,7 @@ listToTable <- function(input, type = c("table", "frame"), row.names = FALSE, so
 #' 
 updateStudy <- function(tz) {
   if (file.exists("deployments.csv")) {
-    cat("M: A 'deployments.csv' file is already present in the current directory.\n")
+    message("M: A 'deployments.csv' file is already present in the current directory.")
   } else {
     spatial <- loadSpatial(file = "spatial.csv")
     detections <- loadDetections(tz = tz, force = TRUE)
@@ -84,7 +84,7 @@ updateStudy <- function(tz) {
     write.csv(deployments, "deployments.csv", row.names = FALSE)
     write.csv(spatial, "spatial_obsulete.csv", row.names = FALSE)
     write.csv(spatial[, !grepl("Receiver", colnames(spatial))], "spatial.csv", row.names = FALSE)
-    cat("M: Study area updated. A copy of the original 'spatial.csv' file was stored as 'spatial_obsulete.csv'.\n")
+    message("M: Study area updated. A copy of the original 'spatial.csv' file was stored as 'spatial_obsulete.csv'.")
     deleteHelpers()
   }
 }
@@ -106,7 +106,7 @@ std.error.circular <- function(x, na.rm = TRUE, silent = FALSE){
   x <- x[!is.na(x)]
  output <- circular::sd.circular(x) / sqrt(length(x))
  if (!silent && a != length(x)) 
-  cat("M: Ommited", a - length(x), "missing values.\n")
+  message("M: Ommited", a - length(x), "missing values.")
  return(output)
 }
 
@@ -419,15 +419,15 @@ clearWorkspace <- function(skip = NA){
   files <- files[!files == "actel.detections.RData"]
   files <- files[!matchl(files, skip)]
   if (length(files) > 0) {
-    cat("Proceeding will eliminate the following files/folders:\n")
+    message("Proceeding will eliminate the following files/folders:")
     print(files)
     decision <- readline("Proceed?(y/N) ")
     if(decision == "y" | decision == "Y"){
       unlink(files, recursive = TRUE)
     } else
-      cat("Aborted.\n")
+      message("Aborted.")
   } else {
-    cat("Workspace already clean.\n")
+    message("Workspace already clean.")
   }
 }
 
@@ -438,10 +438,10 @@ clearWorkspace <- function(skip = NA){
 updateActel <- function() {
   rep.ver <- tryCatch(unlist(strsplit(readLines('https://raw.githubusercontent.com/hugomflavio/actel/master/DESCRIPTION')[3], " "))[2], error = function(e) NULL, warning = function(w) NULL)
   if (!is.null(rep.ver)) {
-    cat("M: Opening actel's installation instructions.\n")
+    message("M: Opening actel's installation instructions.")
     browseURL("https://github.com/hugomflavio/actel#installing-actel")
   } else {
-    cat("M: Could not detect an internet connection. Find installation instructions in this webpage:\n   https://github.com/hugomflavio/actel#installing-actel\n")
+    message("M: Could not detect an internet connection. Find installation instructions in this webpage:\n   https://github.com/hugomflavio/actel#installing-actel")
   }
 }
 
@@ -580,12 +580,11 @@ transitionLayer <- function(shape, size, EPSGcode, directions = c(16,8,4), force
   raster::crs(shape)<-raster::crs(data.crs) # Set CRS 
   pixel.res <- (shape@bbox[,2] - shape@bbox[,1]) / size
   if (any(pixel.res %% 1 != 0)) {
-    cat("The chosen pixel size does not allow for an integer number of pixels\n\nShapefile resolution:\n")
+    message("The chosen pixel size does not allow for an integer number of pixels\n\nShapefile resolution:")
     print(shape@bbox)
-    cat(paste("\nChosen pixel size:", size, "\n\n"))
-    cat("Number of resulting pixels:\n")
+    message(paste("\nChosen pixel size:", size, "\nNumber of resulting pixels:"))
     print(pixel.res)
-    cat("\n")
+    message("")
     stop("The extent of the shapefile divided by the pixel size must result in an integer.\n", call. = FALSE)
   }
   if (!force && any(pixel.res > 2000)) {
@@ -685,7 +684,7 @@ distancesMatrix <- function(t.layer = "transition.layer.RData", starters = NULL,
     colnames(dist.mat) <- outputCols
   }
   if (actel) {
-    cat("M: Saving actel-compatible distances matrix as 'distances.csv'.\n"); flush.console()
+    message("M: Saving actel-compatible distances matrix as 'distances.csv'."); flush.console()
     write.csv(dist.mat, "distances.csv", row.names = TRUE)
   }
   return(dist.mat)
@@ -718,7 +717,7 @@ emptyMatrix <- function(){
   if(decision == "Y" | decision == "y")
     write.csv(output, file = "distances.csv", na = "", row.names = TRUE)
   else
-    cat("Aborting.\n")
+    message("Aborting.")
 }
 
 #' Complete an half-filled distances matrix
@@ -741,6 +740,6 @@ completeMatrix <- function(){
     stop("There are NA's in the upper diagonal of the matrix. Please fill in all values above the diagonal 0 line.\n")
 
   write.csv(input, file = "distances.csv", row.names = TRUE)
-  cat("M: Distances matrix successfully completed and stored in 'distances.csv'.\n")
+  message("M: Distances matrix successfully completed and stored in 'distances.csv'.")
   print(input)
 }

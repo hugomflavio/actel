@@ -293,7 +293,7 @@ simpleCJS <- function(input, estimate = NULL, fixed.efficiency = NULL, silent = 
      estimate <- tail(fixed.efficiency, 1)
     # all good
     if(!silent)
-      cat("M: Running CJS with fixed efficiency estimates.\n"); flush.console()
+      message("M: Running CJS with fixed efficiency estimates."); flush.console()
   }
 
   # Start the calculations
@@ -738,7 +738,7 @@ combineCJS <- function(..., estimate = NULL, fixed.efficiency = NULL, silent = F
       stop("Fixed efficiency was set but its length is not the same as the maximum number of columns in the input.\n")
     } else {
       if (!silent)
-        cat("M: Running CJS with fixed efficiency values.\n"); flush.console()
+        message("M: Running CJS with fixed efficiency values."); flush.console()
     }
   }
 

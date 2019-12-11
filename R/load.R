@@ -457,8 +457,8 @@ loadDistances <- function(spatial) {
     }
     if (!invalid.dist && sum(nrow(spatial$stations), nrow(spatial$release.sites)) != nrow(dist.mat)) {
       appendTo(c("Screen", "Report", "Warning"), "The number of spatial points does not match the number of rows in the distance matrix. Deactivating speed calculation to avoid function failure.")
-      message("       Number of stations and release sites listed:", sum(nrow(spatial$stations), nrow(spatial$release.sites)))
-      message("       Number of rows/columns in the distance matrix:", nrow(dist.mat))
+      message("       Number of stations and release sites listed: ", sum(nrow(spatial$stations), nrow(spatial$release.sites)))
+      message("       Number of rows/columns in the distance matrix: ", nrow(dist.mat))
       invalid.dist <- TRUE
     }
     if (!invalid.dist && (any(!matchl(spatial$stations$Standard.Name, colnames(dist.mat))) | any(!matchl(spatial$release.sites$Standard.Name, colnames(dist.mat))))) {

@@ -11,7 +11,6 @@
 checkSpeeds <- function(movements, valid.movements, speed.warning, speed.error) {
   Valid <- NULL
   capture <- lapply(names(valid.movements), function(fish) {
-    # cat(fish,"\n")
     the.warning <- NULL
     vm <- valid.movements[[fish]]
     if (any(na.as.false(vm$Average.speed.m.s >= speed.warning))) {
@@ -20,6 +19,7 @@ checkSpeeds <- function(movements, valid.movements, speed.warning, speed.error) 
         appendTo(c("Report", "Warning", "Screen"), 
           the.warning <- paste0("Fish ", fish, " had an average speed of ", round(vm$Average.speed.m.s[1], 2),
             " m/s from release to first valid event (Release -> ", vm$Array[1], ")."))
+        the.warning <- paste("Warning:", the.warning)
         link <- link[-1]
       }
       if (length(link) > 0) {
@@ -27,6 +27,7 @@ checkSpeeds <- function(movements, valid.movements, speed.warning, speed.error) 
           appendTo(c("Report", "Warning", "Screen"), 
             other.warning <- paste0("Fish ", fish, " had an average speed of ", round(vm$Average.speed.m.s[link[i]], 2),
               " m/s from valid event ", link[i], " to ", link[i] + 1, " (",vm$Array[i], " -> ", vm$Array[i + 1], ")."))
+          other.warning <- paste("Warning:", other.warning)
           the.warning <- c(the.warning, other.warning)
         }
       }
@@ -35,10 +36,12 @@ checkSpeeds <- function(movements, valid.movements, speed.warning, speed.error) 
     if (any(na.as.false(vm$Average.speed.m.s >= speed.error))) {
       appendTo("Screen", paste0("M: Opening valid movements table of fish ", fish, " for inspection:"))
       print(vm, topn = nrow(vm))
-      if (nrow(vm) > 200 & length(the.warning) <= 10)
-        cat(paste0("\nM: Long table detected, repeating warning(s) that triggered the interaction:\n-----\n", the.warning, "\n-----\n"))
-      if (nrow(vm) > 200 & length(the.warning) < 10)
-        cat(paste0("\nM: Long table detected, but the number of related warnings is higher than 10, so they will not be pasted again. Please check them above the table.\n"))
+      if (nrow(vm) >= 100 & length(the.warning) <= 10)
+        message("\nM: Long table detected, repeating warning(s) that triggered the interaction:\n-----\n", the.warning, "\n-----")
+      if (nrow(vm) >= 100 & length(the.warning) < 10)
+        message("\nM: Long table detected, but the number of related warnings is higher than 10, so they will not be pasted again. Please check them above the table.")
+      if (nrow(vm) < 100 & nrow(vm) >= 30)
+        message("\nM: Please find the exception which triggered this interaction at the top of the table.")
       decision <- commentCheck(line = "Would you like to render any movement event invalid?(y/N/comment) ", tag = fish)
       appendTo("UD", decision)
       if (decision == "y" | decision == "Y") {
@@ -91,7 +94,6 @@ checkInactiveness <- function(movements, detections.list, inactive.warning, inac
       continue <- TRUE
       iteration <- 1
       while (continue) {
-        # cat(iteration, "\n")
         the.warning <- NULL
         # count days spent to compare with arguments
         start_i <- start + iteration - 1
@@ -113,6 +115,7 @@ checkInactiveness <- function(movements, detections.list, inactive.warning, inac
             n.detections <- sum(valid.moves$Detections[start_i:stop])
             appendTo(c("Report", "Warning", "Screen"), 
               the.warning <- paste0("Fish ", fish, " was detected ", n.detections, " times at three or less stations of array '", tail(breaks$values, 1), "' (",paste(the.stations, collapse = ", "), ") over ", days.spent, " days and then disappeared. Could it be inactive?"))
+            the.warning <- paste("Warning:", the.warning)
             continue <- FALSE
           }
           if (length(the.stations) <= 3 & days.spent >= inactive.error)
@@ -123,6 +126,7 @@ checkInactiveness <- function(movements, detections.list, inactive.warning, inac
             n.detections <- sum(valid.moves$Detections[start_i:stop])
             appendTo(c("Report", "Warning", "Screen"), 
               the.warning <- paste0("Fish ", fish, " was detected ", n.detections, " times at stations less than 1.5 km apart in array '", tail(breaks$values, 1), "' (",paste(the.stations, collapse = ", "), "), over ", days.spent, " days and then disappeared. Could it be inactive?"))
+            the.warning <- paste("Warning:", the.warning)
             continue <- FALSE
           }
           if (all(aux <= 1500) & days.spent >= inactive.error)
@@ -132,8 +136,10 @@ checkInactiveness <- function(movements, detections.list, inactive.warning, inac
         if (trigger.error) {
           appendTo("Screen", paste0("M: Opening valid movement table of fish ", fish, " for inspection (inactiveness started on ", as.Date(valid.moves$First.time[start_i]),"):"))
           print(valid.moves, topn = nrow(valid.moves))
-          if (nrow(valid.moves) > 200)
-            cat(paste0("\nM: Long table detected, repeating warning that triggered the interaction:\n-----\n", the.warning, "\n  (inactiveness started on ", as.Date(valid.moves$First.time[start_i]),")\n-----\n"))
+          if (nrow(valid.moves) >= 100)
+            message("\nM: Long table detected, repeating warning that triggered the interaction:\n-----\n", the.warning, "\n  (inactiveness started on ", as.Date(valid.moves$First.time[start_i]),")\n-----")
+          if (nrow(valid.moves) < 100 & nrow(valid.moves) >= 30)
+            message("\nM: Please find the exception which triggered this interaction at the top of the table.")          
           decision <- commentCheck(line = "Would you like to render any movement event invalid?(y/N/comment) ", tag = fish)
           appendTo("UD", decision)
           if (decision == "y" | decision == "Y") {
@@ -177,9 +183,9 @@ checkImpassables <- function(movements, dotmat){
           sapply(which(is.na(distances)), function(i) {
             appendTo(c("Screen", "Warning", "Report"), paste0("Fish ", fish, " made an impassable jump: It is not possible to go from array ", shifts[i, 1], " to ", shifts[i, 2], "."))
           })
-          cat("\nOpening valid movement table for inspection:\n\n")
+          message("\nOpening valid movement table for inspection:\n")
           print(valid.moves)
-          cat("\nYou may either:\n\na) Render movement events invalid to resolve the impassable exception.\nb) Stop the analysis and modify the spatial.txt file.\n\n")
+          message("\nYou may either:\n\na) Render movement events invalid to resolve the impassable exception.\nb) Stop the analysis and modify the spatial.txt file.\n")
           check <- TRUE
           while(check) {
             decision <- commentCheck(line = "Decision:(a/b/comment) ", tag = fish)
@@ -198,7 +204,7 @@ checkImpassables <- function(movements, dotmat){
               restart <- TRUE
               check <- FALSE
             } else {
-              cat("Option not recognized, please choose either 'a' or 'b'.\n")
+              message("Option not recognized, please choose either 'a' or 'b'.")
             }
           }
         }
@@ -255,7 +261,7 @@ checkReport <- function(report){
     } 
     if (!rmarkdown::pandoc_available()) {
       appendTo(c("Screen", "Report", "Warning"), "'report' can only be activated if pandoc is installed. You can find how to install pandoc at: https://pandoc.org/installing.html\n   You can also check if pandoc is available to R by running rmarkdown::pandoc_available()")
-      cat("Would you like to:\n\n  a) Continue with 'report' set to FALSE\n  b) Stop the analysis and install pandoc.\n\n")
+      message("Would you like to:\n\n  a) Continue with 'report' set to FALSE\n  b) Stop the analysis and install pandoc.\n")
       check <- TRUE
       while (check) {
         decision <- readline("Decision:(a/b) ")
@@ -314,7 +320,7 @@ checkPath <- function(my.home, path) {
           stop("Analysis stopped per user command.\n", call. = FALSE)
         }
         if (unknown.input) {
-          cat("Option not recognised, please input either 'a' or 'b'.\n")
+          message("Option not recognised, please input either 'a' or 'b'.")
         }
       }
     }
@@ -349,18 +355,19 @@ checkUpstream <- function(movements, bio, spatial, arrays) {
     release.array <- as.character(with(spatial, release.sites[release.sites$Standard.Name == release.site, "Array"]))
     after.arrays <- c(release.array, arrays[[release.array]]$all.after.and.par)
     if (any(is.na(match(movements[[fish]][Array != "Unknown"]$Array, after.arrays)))) {
-      cat("\n")
+      message("")
       appendTo(c("Screen", "Report", "Warning"), the.warning <- paste0("Fish ", fish, " was detected in an array that is not after its release site! Opening relevant data for inspection."))
+      the.warning <- paste("Warning:", the.warning)
       appendTo("Screen", paste("   Release site:", release.site))
       appendTo("Screen", paste("   Expected first array:", release.array))
-      cat(paste("\n   Movement table for fish ", fish, ":\n", sep =""))
+      message("\n   Movement table for fish ", fish, ":")
       print(movements[[fish]], topn = nrow(movements[[fish]]))
       if (nrow(movements) > 200)
-        cat(paste0("\nM: Long table detected, repeating warning that triggered the interaction:\n-----\n", 
-          the.warning, "\n", paste("   Release site:", release.site), "\n", paste("   Expected first array:", release.array), "\n-----\n"))
-      cat("\n")
+        message("\nM: Long table detected, repeating warning that triggered the interaction:\n-----\n", 
+          the.warning, "\n   Release site: ", release.site, "\n   Expected first array: ", release.array, "\n-----")
+      message("")
       appendTo("Screen", "You may either:\n  a) Stop the analysis if the expected first array is wrong;\n  b) Continue as is (does not impact the results);\n  c) Render a movement event invalid, if you are confident it is a false detection.")
-      cat("\n")
+      message("")
       unknown.input = TRUE
       while (unknown.input) {
         decision <- commentCheck(line = "Decision:(a/b/c/comment) ", tag = fish)
@@ -419,6 +426,7 @@ checkJumpDistance <- function(movements, bio, spatial, dotmat, jump.warning = 2,
           the.warning <- paste0("Fish ", fish, " jumped through ", release.jump - 1, 
             ifelse(release.jump > 2, " arrays ", " array "), 
             "from release to first event (Release -> ", moves$Array[1], ")."))
+        the.warning <- paste("Warning:", the.warning)
       }
       if (release.jump > jump.error)
         trigger.error <- TRUE
@@ -443,6 +451,7 @@ checkJumpDistance <- function(movements, bio, spatial, dotmat, jump.warning = 2,
               other.warning <- paste0("Fish ", fish, " jumped through ", jumps[link[i]] - 1, 
                 ifelse(jumps[link[i]] > 2, " arrays ", " array "), 
                 "in events ", link[i], " -> ", link[i] + 1, " (", names(jumps)[link[i]], ")."))
+            other.warning <- paste("Warning:", other.warning)
             the.warning <- c(the.warning, other.warning)
           }
         if (any(jumps[link] > jump.error))
@@ -454,9 +463,11 @@ checkJumpDistance <- function(movements, bio, spatial, dotmat, jump.warning = 2,
         appendTo("Screen", paste0("M: Opening movement table of fish ", fish, " for inspection:"))
         print(movements[[fish]], topn = nrow(movements[[fish]]))
         if (nrow(moves) > 200 & length(the.warning) <= 10)
-          cat(paste0("\nM: Long table detected, repeating warning(s) that triggered the interaction:\n-----\n", the.warning, "\n-----\n"))
+          message("\nM: Long table detected, repeating warning(s) that triggered the interaction:\n-----\n", the.warning, "\n-----")
         if (nrow(moves) > 200 & length(the.warning) < 10)
-          cat(paste0("\nM: Long table detected, but the number of related warnings is higher than 10, so they will not be pasted again. Please check them above the table.\n"))
+          message("\nM: Long table detected, but the number of related warnings is higher than 10, so they will not be pasted again. Please check them above the table.")
+        if (nrow(moves) < 100 & nrow(moves) >= 30)
+          message("\nM: Please find the exception which triggered this interaction at the top of the table.")
         decision <- commentCheck(line = "Would you like to render any movement event invalid?(y/N/comment) ", tag = fish)
         appendTo("UD", decision)
         if (decision == "y" | decision == "Y") {
@@ -488,7 +499,7 @@ checkDeploymentTimes <- function(input) {
         aux[[i]][c(FALSE, AtoB < 0), "Bleh"] <- " <- !!!"
         names(aux[[i]])[ncol(aux[[i]])] <- ""
         print(aux[[i]], row.names = FALSE)
-        cat("\n")
+        message("")
         emergencyBreak()
         stop("Fatal exception found. Read lines above for more details.\n", call. = FALSE)      
       }
@@ -559,7 +570,6 @@ checkTagsInUnknownReceivers <- function(detections.list, deployments, spatial) {
       B <- names(deployments)
       unknown.receivers <- unique(detections.list[[i]][is.na(match(A, B)), Receiver])
       appendTo(c("Screen", "Report", "Warning"), paste0("Fish ", i, " was detected in one or more receivers that are not listed in the study area (receiver(s): ", paste(unknown.receivers, collapse = ", "), ")!"))
-      cat("Possible options:\n   a) Stop and double-check the data (recommended)\n   b) Temporary include the hydrophone(s) to the stations list\n")
       check <- TRUE
       while (check) {
         decision <- commentCheck(line = "Which option should be followed?(a/b/comment) ", tag = i)
@@ -577,6 +587,7 @@ checkTagsInUnknownReceivers <- function(detections.list, deployments, spatial) {
         recipient <- includeUnknownReceiver(spatial = spatial, deployments = deployments, unknown.receivers = unknown.receivers)
         spatial <- recipient[[1]]
         deployments <- recipient[[2]]
+        message("Possible options:\n   a) Stop and double-check the data (recommended)\n   b) Temporarily include the receiver(s) to the stations list")
       }
     }
   }
@@ -593,7 +604,7 @@ checkTagsInUnknownReceivers <- function(detections.list, deployments, spatial) {
 #' 
 includeUnknownReceiver <- function(spatial, deployments, unknown.receivers){
   appendTo("debug", "Starting includeUnknownReceiver.")
-  appendTo(c("Screen", "Report"), "M: Including missing receiver(s) in the deployments and stations. Assigning to array 'Unknown'.")
+  appendTo(c("Screen", "Report"), "M: Including missing receiver(s) in the deployments and stations. Assigning to array 'Unknown' and standard name 'Ukn'.")
   if (is.na(match("Unknown", levels(spatial$stations$Station.Name)))) {
     levels(spatial$stations$Station.Name) <- c(levels(spatial$stations$Station.Name), "Unknown")
     levels(spatial$stations$Array) <- c(levels(spatial$stations$Array), "Unknown")
@@ -636,9 +647,9 @@ checkDetectionsBeforeRelease <- function(input, bio){
         appendTo("Screen", paste0("  Release time: ", bio$Release.date[i]))
         appendTo("Screen", paste0("  First detection time: ", input[[link[i]]]$Timestamp[1]))
         appendTo("Screen", paste0("  Number of detections before release: ", sum(to.remove)))
-        cat("\n")
+        message("")
         appendTo("Screen", "You may either:\n  a) Stop the analysis and check the data;\n  b) Discard the before-release detections and continue.")
-        cat("\n")
+        message("")
         unknown.input = TRUE
         while (unknown.input) {
           decision <- commentCheck(line = "Decision:(a/b/comment) ", tag = bio$Transmitter[i])
@@ -650,7 +661,7 @@ checkDetectionsBeforeRelease <- function(input, bio){
           if (decision == "b" | decision == "B")
             unknown.input = FALSE
           if (unknown.input)
-            cat("Option not recognised, please input either 'a' or 'b'.\n")
+            message("Option not recognised, please input either 'a' or 'b'.")
         }
         appendTo("UD", decision)
         if (decision == "b" | decision == "B") {
