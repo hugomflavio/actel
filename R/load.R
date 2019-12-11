@@ -43,10 +43,13 @@ loadStudyData <- function(tz, override = NULL, start.time, stop.time,
     fakedot <- paste(unique(spatial$Array), collapse = "--")
     recipient <- loadDot(string = fakedot, spatial = spatial, sections = NULL, disregard.parallels = disregard.parallels)
   }
-  dot <- recipient[[1]]
-  arrays <- recipient[[2]]
-  dotmat <- recipient[[3]]
-  paths <- recipient[[4]]
+  dot <- recipient$dot
+  arrays <- recipient$arrays
+  dotmat <- recipient$dotmat
+  paths <- recipient$paths
+  if (is.null(dot) | is.null(arrays) | is.null(dotmat) | is.null(paths))
+    stop("Something went wrong when assigning recipient objects (loadDot). If this error persists, contact the developer.")
+
   rm(use.fakedot, recipient)
 
   # Check if there is a logical first array in the study area, should a replacement release site need to be created.
@@ -58,19 +61,25 @@ loadStudyData <- function(tz, override = NULL, start.time, stop.time,
   arrays <- arrays[unlist(spatial$array.order)]
 
   recipient <- loadDistances(spatial = spatial) # Load distances and check if they are valid
-  dist.mat <- recipient[[1]]
-  invalid.dist <- recipient[[2]]
+  dist.mat <- recipient$dist.mat
+  invalid.dist <- recipient$invalid.dist
+  if (is.null(dist.mat) | is.null(invalid.dist))
+    stop("Something went wrong when assigning recipient objects (loadDistances). If this error persists, contact the developer.\n", call. = FALSE)
   rm(recipient)
 
   recipient <- splitDetections(detections = detections, bio = bio, exclude.tags = exclude.tags) # Split the detections by tag, store full transmitter names in bio
-  detections.list <- recipient[[1]]
-  bio <- recipient[[2]]
+  detections.list <- recipient$detections.list
+  bio <- recipient$bio
+  if (is.null(detections.list) | is.null(bio))
+    stop("Something went wrong when assigning recipient objects (splitDetections). If this error persists, contact the developer.\n", call. = FALSE)
   rm(recipient)
 
   recipient <- checkTagsInUnknownReceivers(detections.list = detections.list, deployments = deployments, spatial = spatial) # Check if there is any data loss due to unknown receivers
-  spatial <- recipient[[1]]
-  deployments <- recipient[[2]]
+  spatial <- recipient$spatial
+  deployments <- recipient$deployments
   detections.list <- recipient$detections.list
+  if (is.null(spatial) | is.null(deployments) | is.null(detections.list))
+    stop("Something went wrong when assigning recipient objects (unknownReceivers). If this error persists, contact the developer.\n", call. = FALSE)
   rm(recipient)
 
   detections.list <- checkDetectionsBeforeRelease(input = detections.list, bio = bio)
@@ -1041,7 +1050,7 @@ splitDetections <- function(detections, bio, exclude.tags = NULL, silent = FALSE
   }
 
   appendTo("debug", "Terminating splitDetections.")
-  return(list(trimmed.list = trimmed.list, bio = bio))
+  return(list(detections.list = trimmed.list, bio = bio))
 }
 
 #' Collect summary information on the tags detected but that are not part of the study.
