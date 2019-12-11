@@ -70,9 +70,9 @@ loadStudyData <- function(tz, override = NULL, start.time, stop.time,
   recipient <- checkTagsInUnknownReceivers(detections.list = detections.list, deployments = deployments, spatial = spatial) # Check if there is any data loss due to unknown receivers
   spatial <- recipient[[1]]
   deployments <- recipient[[2]]
+  detections.list <- recipient$detections.list
   rm(recipient)
 
-  detections.list <- labelUnknowns(detections.list = detections.list)
   detections.list <- checkDetectionsBeforeRelease(input = detections.list, bio = bio)
   appendTo(c("Screen", "Report"), "M: Data successfully imported!")
   return(list(bio = bio, deployments = deployments, spatial = spatial, dot = dot,

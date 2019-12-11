@@ -1,3 +1,16 @@
+#' Generate default ggplot colours
+#' 
+#' Copied from: https://stackoverflow.com/questions/8197559/emulate-ggplot2-default-color-palette
+#' 
+#' @param n The number of colours to be generated
+#' 
+#' @keywords internal
+#' 
+gg_colour_hue <- function(n) {
+  hues = seq(15, 375, length = n + 1)
+  hcl(h = hues, l = 65, c = 100)[1:n]
+}
+
 #' Open HTML report
 #' 
 #' @param file.name the name of the html file
@@ -499,11 +512,14 @@ printIndividuals <- function(redraw, detections.list, bio, status.df = NULL, tz,
 
   cbPalette <- c("#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7", "#999999")
   names(cbPalette) <- c("Orange", "Blue", "Green", "Yellow", "Darkblue", "Darkorange", "Pink", "Grey")
+
   appendTo(c("Screen", "Report"), "M: Drawing individual detection graphics.")
   if (exists("redraw") && redraw == FALSE) {
     appendTo(c("Screen", "Report"), "M: 'redraw' is set to FALSE, only drawing new graphics.")
   }
+
   pb <- txtProgressBar(min = 0, max = length(detections.list), style = 3, width = 60)
+  counter <- 0
   individual.plots <- ""
   for (i in 1:length(detections.list)) {
     fish <- names(detections.list)[i]
@@ -582,17 +598,24 @@ printIndividuals <- function(redraw, detections.list, bio, status.df = NULL, tz,
       # Trim graphic
       p <- p + ggplot2::xlim(first.time, last.time)
       # Paint
-      if (length(levels(PlotData$Array)) <= 8) {
-        p <- p + ggplot2::scale_color_manual(values = as.vector(cbPalette)[1:length(levels(PlotData$Array))], drop = FALSE)
+      if (length(levels(PlotData$Array)) <= 7 | (length(levels(PlotData$Array)) == 8 & any(levels(PlotData$Array) == "Unknown"))) {
+        if (any(levels(PlotData$Array) == "Unknown"))
+          the.colours <- as.vector(cbPallete)[c(1:(length(levels(PlotData$Array)) - 1), 8)]
+        else
+          the.colours <- as.vector(cbPalette)[1:length(levels(PlotData$Array))]
       } else {
-        p <- p + ggplot2::scale_color_discrete(drop = FALSE)
+        if (any(levels(PlotData$Array) == "Unknown"))
+          the.colours <- c(gg_colour_hue(length(levels(PlotData$Array)) - 1), "#999999")
+        else
+          the.colours <- gg_colour_hue(length(levels(PlotData$Array)))
+        p <- p + ggplot2::scale_color_manual(values = the.colours, drop = FALSE)
       }
       # Plot points
       p <- p + ggplot2::geom_point()
       # Fixate Y axis
       p <- p + ggplot2::scale_y_discrete(drop = FALSE)
       # Caption and title
-      p <- p + ggplot2::guides(colour = ggplot2::guide_legend(reverse = T))
+      p <- p + ggplot2::guides(colour = ggplot2::guide_legend(reverse = TRUE))
       if (!is.null(status.df))
         p <- p + ggplot2::labs(title = paste0(fish, " (", status.df[status.df$Transmitter == fish, "Status"], ")"), x = paste("tz:", tz), y = "Station Standard Name")
       else

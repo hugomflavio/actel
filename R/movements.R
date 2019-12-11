@@ -17,6 +17,7 @@ groupMovements <- function(detections.list, bio, spatial, speed.method, max.inte
   tz, dist.mat, invalid.dist) {
   appendTo("debug", "Starting groupMovements.")
   movements <- list()
+  trigger.unknown <- FALSE
   round.points <- roundDown(seq(from = length(detections.list)/10, to = length(detections.list), length.out = 10), to = 1)
   counter <- 1
   {
@@ -88,12 +89,19 @@ groupMovements <- function(detections.list, bio, spatial, speed.method, max.inte
         movements[[length(movements) + 1]] <- recipient
         names(movements)[length(movements)] <- i
         attributes(movements[[length(movements)]])$p.type <- "Auto"
+      if (any(link <- recipient$Array == "Unknown")) {
+        recipient$Valid[recipient$Array == "Unknown"] <- FALSE
+        trigger.unknown <<- TRUE
       }
       rm(recipient)
     }
     close(pb)
     rm(pb)
   }
+
+  if (trigger.unknown)
+    warning("Movement events at 'Unknown' locations have been rendered invalid.", immediate. = TRUE, call. = FALSE)
+
   appendTo("debug", "Done.")
   return(movements)
 }

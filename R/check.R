@@ -569,30 +569,37 @@ checkTagsInUnknownReceivers <- function(detections.list, deployments, spatial) {
       A <- detections.list[[i]]$Receiver
       B <- names(deployments)
       unknown.receivers <- unique(detections.list[[i]][is.na(match(A, B)), Receiver])
-      appendTo(c("Screen", "Report", "Warning"), paste0("Fish ", i, " was detected in one or more receivers that are not listed in the study area (receiver(s): ", paste(unknown.receivers, collapse = ", "), ")!"))
-      check <- TRUE
-      while (check) {
-        decision <- commentCheck(line = "Which option should be followed?(a/b/comment) ", tag = i)
-        if (decision == "a" | decision == "A" | decision == "b" | decision == "B") 
-          check <- FALSE 
-        else 
-          cat("Option not recognized, please try again.\n")
-        appendTo("UD", decision)
-      }
-      if (decision == "a" | decision == "A") {
-        emergencyBreak()
-        stop("Stopping analysis per user command.\n", call. = FALSE)
-      }
-      if (decision == "b" | decision == "B") {
-        recipient <- includeUnknownReceiver(spatial = spatial, deployments = deployments, unknown.receivers = unknown.receivers)
-        spatial <- recipient[[1]]
-        deployments <- recipient[[2]]
+      if (length(unknown.receivers) > 0) {
+        appendTo(c("Screen", "Report", "Warning"), paste0("Fish ", i, " was detected in one or more receivers that are not listed in the study area (receiver(s): ", paste(unknown.receivers, collapse = ", "), ")!"))
         message("Possible options:\n   a) Stop and double-check the data (recommended)\n   b) Temporarily include the receiver(s) to the stations list")
+        check <- TRUE
+        while (check) {
+          decision <- commentCheck(line = "Which option should be followed?(a/b/comment) ", tag = i)
+          if (decision == "a" | decision == "A" | decision == "b" | decision == "B") 
+            check <- FALSE 
+          else 
+            message("Option not recognized, please try again.")
+          appendTo("UD", decision)
+        }
+        if (decision == "a" | decision == "A") {
+          emergencyBreak()
+          stop("Stopping analysis per user command.\n", call. = FALSE)
+        }
+        if (decision == "b" | decision == "B") {
+          recipient <- includeUnknownReceiver(spatial = spatial, deployments = deployments, unknown.receivers = unknown.receivers)
+          spatial <- recipient[[1]]
+          deployments <- recipient[[2]]
+        }
       }
+      link <- is.na(detections.list[[i]]$Standard.Name)
+      levels(detections.list[[i]]$Standard.Name) <- c(levels(detections.list[[i]]$Standard.Name), "Ukn")
+      detections.list[[i]]$Standard.Name[link] <- "Ukn"
+      levels(detections.list[[i]]$Array) <- c(levels(detections.list[[i]]$Array), "Unknown")
+      detections.list[[i]]$Array[link] <- "Unknown"
     }
   }
-  appendTo("debug", "Terminating unknownReceiversCheckB.")
-  return(list(spatial = spatial, deployments = deployments))
+  appendTo("debug", "Terminating tagsInUnknownReceivers")
+  return(list(spatial = spatial, deployments = deployments, detections.list = detections.list))
 }
 
 #' Temporarily include missing receivers in the spatial object
@@ -617,8 +624,8 @@ includeUnknownReceiver <- function(spatial, deployments, unknown.receivers){
       deployments[[length(deployments) + 1]] <- data.frame(
         Receiver = i,
         Station.Name = "Unknown",
-        Start = NA_real_,
-        Stop = NA_real_)
+        Start = NA_character_,
+        Stop = NA_character_)
       names(deployments)[length(deployments)] <- i
     }
   }
