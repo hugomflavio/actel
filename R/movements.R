@@ -16,13 +16,12 @@
 groupMovements <- function(detections.list, bio, spatial, speed.method, max.interval, 
   tz, dist.mat, invalid.dist) {
   appendTo("debug", "Starting groupMovements.")
-  movements <- list()
   trigger.unknown <- FALSE
   round.points <- roundDown(seq(from = length(detections.list)/10, to = length(detections.list), length.out = 10), to = 1)
   counter <- 1
   {
     pb <- txtProgressBar(min = 0, max = sum(unlist(lapply(detections.list, nrow))), style = 3, width = 60)
-    for (i in names(detections.list)) {
+    movements <- lapply(names(detections.list), function(i) {
       appendTo("debug", paste0("Debug: (Movements) Analysing fish ", i, "."))
       if (invalid.dist) {
         recipient <- data.frame(
@@ -69,34 +68,31 @@ groupMovements <- function(detections.list, bio, spatial, speed.method, max.inte
         recipient[z, "Last.station"] = paste(detections.list[[i]]$Standard.Name[stop])
         recipient[z, "Last.time"] = detections.list[[i]]$Timestamp[stop]
         z = z + 1
-        counter <- counter + stop - start + 1
+        counter <<- counter + stop - start + 1
         if (i == tail(names(detections.list), 1)) 
-          counter <- sum(unlist(lapply(detections.list, nrow)))
+          counter <<- sum(unlist(lapply(detections.list, nrow)))
         setTxtProgressBar(pb, counter)
         flush.console()
       }
 
       recipient$Valid <- TRUE
-      
-      if (!is.null(recipient)) {
-        recipient <- data.table::as.data.table(recipient)
-        recipient <- movementTimes(movements = recipient,
-            silent = FALSE, type = "array")
-        if (!invalid.dist)
-          recipient <- movementSpeeds(movements = recipient, 
-            speed.method = speed.method, dist.mat = dist.mat, silent = FALSE)
-        
-        movements[[length(movements) + 1]] <- recipient
-        names(movements)[length(movements)] <- i
-        attributes(movements[[length(movements)]])$p.type <- "Auto"
       if (any(link <- recipient$Array == "Unknown")) {
         recipient$Valid[recipient$Array == "Unknown"] <- FALSE
         trigger.unknown <<- TRUE
       }
-      rm(recipient)
-    }
+      
+      recipient <- data.table::as.data.table(recipient)
+      recipient <- movementTimes(movements = recipient,
+          silent = FALSE, type = "array")
+      if (!invalid.dist)
+        recipient <- movementSpeeds(movements = recipient, 
+          speed.method = speed.method, dist.mat = dist.mat, silent = FALSE)
+      
+      attributes(recipient)$p.type <- "Auto"
+      return(recipient)
+    })
+    names(movements) <- names(detections.list)
     close(pb)
-    rm(pb)
   }
 
   if (trigger.unknown)

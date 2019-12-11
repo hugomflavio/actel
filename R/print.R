@@ -521,8 +521,9 @@ printIndividuals <- function(redraw, detections.list, bio, status.df = NULL, tz,
   pb <- txtProgressBar(min = 0, max = length(detections.list), style = 3, width = 60)
   counter <- 0
   individual.plots <- ""
-  for (i in 1:length(detections.list)) {
-    fish <- names(detections.list)[i]
+  
+  capture <- lapply(names(detections.list), function(fish) {
+    counter <<- counter + 1
     PlotData <- detections.list[[fish]]
     if (!(exists("redraw") && redraw == FALSE && file.exists(paste0("Report/", fish, ".png")))) {
       all.moves.line <- data.frame(
@@ -628,13 +629,13 @@ printIndividuals <- function(redraw, detections.list, bio, status.df = NULL, tz,
       ggplot2::ggsave(paste0("Report/", fish, ".", extension), width = 5, height = the.height)  # better to save in png to avoid point overlapping issues
       rm(PlotData, start.line, last.time, first.time)
     }
-    if (i%%2 == 0) {
-      individual.plots <- paste0(individual.plots, "![](", fish, ".", extension, "){ width=50% }\n")
+    if (counter %% 2 == 0) {
+      individual.plots <<- paste0(individual.plots, "![](", fish, ".", extension, "){ width=50% }\n")
     } else {
-      individual.plots <- paste0(individual.plots, "![](", fish, ".", extension, "){ width=50% }")
+      individual.plots <<- paste0(individual.plots, "![](", fish, ".", extension, "){ width=50% }")
     }
-    setTxtProgressBar(pb, i)
-  }
+    setTxtProgressBar(pb, counter)
+  })
   close(pb)
   return(individual.plots)
 }
