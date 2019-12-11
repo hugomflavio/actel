@@ -318,6 +318,13 @@ migration <- function(path = NULL, sections, success.arrays = NULL, minimum.dete
 # -------------------------------------
 
 # wrap up in-R objects
+  detections <- detections.list
+  deployments <- do.call(rbind.data.frame, deployments)
+  matrices <- the.matrices
+
+  # extra info for potential RSP analysis
+  rsp.info <- list(analysis.type = "migration", analysis.time = the.time, bio = bio, tz = tz)
+
   if (!is.null(override)) {
     header.fragment <- paste0('<span style="color:red">Manual mode has been triggered for **', length(override),'** fish.</span>\n')
     name.fragment <- "_corrected"
@@ -340,13 +347,6 @@ migration <- function(path = NULL, sections, success.arrays = NULL, minimum.dete
   } else {
     appendTo(c("Screen", "Report"), paste0("M: Saving results as '", resultsname, "'."))
   }
-
-  detections <- detections.list
-  deployments <- do.call(rbind.data.frame, deployments)
-  matrices <- the.matrices
-
-  # extra info for potential RSP analysis
-  rsp.info <- list(analysis.type = "migration", analysis.time = the.time, bio = bio, tz = tz)
 
   if (invalid.dist)
     save(detections, valid.detections, spatial, deployments, arrays, movements, valid.movements, status.df,

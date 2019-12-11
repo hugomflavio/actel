@@ -285,6 +285,15 @@ detections.list <- study.data$detections.list
 # ---------------
 
 # wrap up in-R objects
+  detections <- detections.list
+  deployments <- do.call(rbind.data.frame, deployments)
+
+  if (!debug)
+    efficiency <- efficiency[1:3]
+
+  # extra info for potential RSP analysis
+  rsp.info <- list(analysis.type = "residency", analysis.time = the.time, bio = bio, tz = tz)
+
   if (file.exists(resultsname <- paste0("actel_residency_results.RData"))) {
     continue <- TRUE
     index <- 1
@@ -300,15 +309,6 @@ detections.list <- study.data$detections.list
   } else {
     appendTo(c("Screen", "Report"), paste0("M: Saving results to '", resultsname, "'."))
   }
-
-  detections <- detections.list
-  deployments <- do.call(rbind.data.frame, deployments)
-
-  if (!debug)
-    efficiency <- efficiency[1:3]
-
-  # extra info for potential RSP analysis
-  rsp.info <- list(analysis.type = "residency", analysis.time = the.time, bio = bio, tz = tz)
 
   if (invalid.dist)
     save(detections, valid.detections, spatial, deployments, arrays, movements, valid.movements, 

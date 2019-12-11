@@ -233,6 +233,12 @@ detections.list <- study.data$detections.list
 # -------------------------------------
 
 # wrap up in-R objects
+  detections <- detections.list
+  deployments <- do.call(rbind.data.frame, deployments)
+  
+  # extra info for potential RSP analysis
+  rsp.info <- list(analysis.type = "explore", analysis.time = the.time, bio = bio, tz = tz)
+
   if (file.exists(resultsname <- "actel_explore_results.RData")) {
     continue <- TRUE
     index <- 1
@@ -248,12 +254,6 @@ detections.list <- study.data$detections.list
   } else {
     appendTo(c("Screen", "Report"), paste0("M: Saving results as '", resultsname, "'."))
   }
-
-  detections <- detections.list
-  deployments <- do.call(rbind.data.frame, deployments)
-  
-  # extra info for potential RSP analysis
-  rsp.info <- list(analysis.type = "explore", analysis.time = the.time, bio = bio, tz = tz)
 
   if (invalid.dist)
     save(detections, valid.detections, spatial, deployments, arrays, movements, valid.movements, times, rsp.info, file = resultsname)
