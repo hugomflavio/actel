@@ -450,6 +450,8 @@ loadDistances <- function(spatial) {
   if (file.exists("distances.csv")) {
     appendTo(c("Screen", "Report"), "M: A distances.csv file is present, activating speed calculations.")
     dist.mat <- read.csv("distances.csv", row.names = 1)
+    if (ncol(dist.mat) == 1)
+      warning("Only one column was identified in 'distances.csv'. If this seems wrong, please make sure that the values are separated using commas.", immediate. = TRUE, call. = FALSE)
     rownames(dist.mat) <- gsub(" ", "", rownames(dist.mat))
     colnames(dist.mat) <- gsub(" ", "", colnames(dist.mat))
     invalid.dist <- FALSE
