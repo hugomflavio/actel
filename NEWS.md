@@ -4,6 +4,9 @@ Find out the main highlights of each update.
 
 ## development
 
+Fixes:
+  * Fix mechanisms that deal with unknown receivers
+  
 Changes:
   * 'maximum.time' has been renamed to 'max.interval'
   * 'tz.study.area' has been renamed to 'tz'
