@@ -1,3 +1,15 @@
+#' Import actel results into a single list object
+#' 
+#' @param source A RData file containing actel results from a previous run
+#' 
+#' @export
+#' 
+dataToList <- function(source){
+  e <- new.env()
+  load(source, envir = e)
+  return(as.list(e))
+}
+
 #' Remove Code Spaces from transmitter names
 #' 
 #' @param input A vector of transmitter names
