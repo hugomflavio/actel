@@ -15,7 +15,7 @@
 #' 
 groupMovements <- function(detections.list, bio, spatial, speed.method, max.interval, 
   tz, dist.mat, invalid.dist) {
-  appendTo("debug", "Starting groupMovements.")
+  appendTo("debug", "Running groupMovements.")
   trigger.unknown <- FALSE
   round.points <- roundDown(seq(from = length(detections.list)/10, to = length(detections.list), length.out = 10), to = 1)
   counter <- 1
@@ -147,7 +147,7 @@ simplifyMovements <- function(movements, bio, speed.method, dist.mat, invalid.di
 #' 
 movementSpeeds <- function(movements, speed.method, dist.mat, silent = TRUE) {
   if (!silent) 
-    appendTo("debug", "Starting movementSpeeds.")
+    appendTo("debug", "Running movementSpeeds.")
   if (nrow(movements) > 1) {
     movements$Average.speed.m.s[1] <- NA
     for (l in 2:nrow(movements)) {
@@ -166,7 +166,6 @@ movementSpeeds <- function(movements, speed.method, dist.mat, silent = TRUE) {
     }
   }
   if (!silent) 
-    appendTo("debug", "Terminating movementSpeeds.")
   return(movements)
 }
 
@@ -186,7 +185,7 @@ movementTimes <- function(movements, silent = TRUE, type = c("array", "section")
   type = match.arg(type)
   time.in <- paste0("Time.in.", type)
   if (!silent) 
-    appendTo("debug", "Starting movementTimes.")
+    appendTo("debug", "Running movementTimes.")
   # Time travelling
   if (nrow(movements) > 1) {
     for (l in 2:nrow(movements)) {
@@ -215,7 +214,6 @@ movementTimes <- function(movements, silent = TRUE, type = c("array", "section")
   }
   rm(l)
   if (!silent) 
-    appendTo("debug", "Terminating movementTimes.")
   return(movements)
 }
 
@@ -233,7 +231,7 @@ movementTimes <- function(movements, silent = TRUE, type = c("array", "section")
 #' 
 speedReleaseToFirst <- function(fish, bio, movements, dist.mat, invalid.dist = FALSE, silent = TRUE){
   if (!silent) 
-    appendTo("debug", "Starting speedReleaseToFirst.")
+    appendTo("debug", "Running speedReleaseToFirst.")
   the.row <- match(fish,bio$Transmitter)
   origin.time <- bio[the.row,"Release.date"]
   origin.place <- as.character(bio[the.row,"Release.site"])

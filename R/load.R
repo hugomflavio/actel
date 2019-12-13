@@ -425,13 +425,12 @@ findShortestChains <- function(input) {
 #' @keywords internal
 #' 
 setSpatialStandards <- function(input){
-  appendTo("debug","Starting setSpatialStandards")
+  appendTo("debug","Running setSpatialStandards")
   input$Standard.Name <- as.character(input$Station.Name)
   input$Standard.Name <- gsub(" ", "", input$Standard.Name)
   link <- input$Type == "Hydrophone"
   input$Standard.Name[link] <- paste0("St.", seq_len(sum(input$Type == "Hydrophone")))
   write.csv(input, "spatial.csv", row.names = FALSE)
-  appendTo("debug","Terminating setSpatialStandards")
   return(input)
 }
 
@@ -498,7 +497,7 @@ loadDistances <- function(spatial) {
 #' @keywords internal
 #' 
 loadDeployments <- function(file, tz){
-  appendTo("debug","Starting loadDeployments.")
+  appendTo("debug","Running loadDeployments.")
   if (file.exists(file))
     input <- as.data.frame(data.table::fread(file))
   else {
@@ -532,7 +531,6 @@ loadDeployments <- function(file, tz){
   input$Receiver <- sapply(input$Receiver, function(x) tail(unlist(strsplit(x, "-")), 1))
   input$Start <- as.POSIXct(input$Start, tz = tz)
   input$Stop <- as.POSIXct(input$Stop, tz = tz)
-  appendTo("debug","Terminating loadDeployments.")
   return(input)
 }
 
@@ -547,7 +545,7 @@ loadDeployments <- function(file, tz){
 #' 
 loadSpatial <- function(file = "spatial.csv", report = FALSE){
   if (report)
-    appendTo("debug","Starting loadSpatial.")
+    appendTo("debug","Running loadSpatial.")
   if (file.exists(file))
     input <- as.data.frame(data.table::fread(file))
   else {
@@ -603,7 +601,6 @@ loadSpatial <- function(file = "spatial.csv", report = FALSE){
   }
   input <- setSpatialStandards(input = input) # Create Standard.Name for each station  
   if (report)
-    appendTo("debug","Terminating loadSpatial.")
   return(input)
 }
 
@@ -621,7 +618,7 @@ loadSpatial <- function(file = "spatial.csv", report = FALSE){
 #' @export
 #' 
 loadBio <- function(file, tz){
-  appendTo("debug", "Starting loadBio.")
+  appendTo("debug", "Running loadBio.")
   if (file.exists(file))
     bio <- as.data.frame(data.table::fread(file), stringsAsFactors = FALSE)
   else {
@@ -687,7 +684,6 @@ loadBio <- function(file, tz){
     }
   }
   bio <- bio[order(bio$Signal),]
-  appendTo("debug", "Terminating loadbio.")
   return(bio)
 }
 
@@ -819,7 +815,6 @@ compileDetections <- function(path = "detections", start.time = NULL, stop.time 
   actel.detections <- list(detections = output, timestamp = Sys.time())
     save(actel.detections, file = ifelse(file_test("-d", path), paste0(path, "/actel.detections.RData"), "actel.detections.RData"))
   
-  appendTo("debug", "Terminating loadDetections.")
   return(output)
 }
 
@@ -832,7 +827,7 @@ compileDetections <- function(path = "detections", start.time = NULL, stop.time 
 #' @keywords internal
 #' 
 findFiles <- function(path = NULL, pattern = NULL) {
-  appendTo("debug", "Starting findFiles.")
+  appendTo("debug", "Running findFiles.")
   if (is.null(path)) {
       file.list <- list.files(pattern = pattern)
   } else {
@@ -845,7 +840,6 @@ findFiles <- function(path = NULL, pattern = NULL) {
       }
     }
   }
-  appendTo("debug", "Terminating findFiles.")
   return(file.list)
 }
 
@@ -860,14 +854,13 @@ findFiles <- function(path = NULL, pattern = NULL) {
 #' @keywords internal
 #' 
 processThelmaFile <- function(input) {
-  appendTo("debug", "Starting processThelmaFile.")
+  appendTo("debug", "Running processThelmaFile.")
   input <- as.data.frame(input)
   output <- data.table(
     Timestamp = fasttime::fastPOSIXct(sapply(input[, 1], function(x) gsub("Z", "", gsub("T", " ", x))), tz = "UTC"),
     Receiver = input[, 8],
     CodeSpace = input[, 3],
     Signal = input[, 4])
-  appendTo("debug", "Terminating processThelmaFile.")
   return(output)
 }
 
@@ -882,7 +875,7 @@ processThelmaFile <- function(input) {
 #' @keywords internal
 #' 
 processVemcoFile <- function(input) {
-  appendTo("Debug", "Starting processVemcoFile.")
+  appendTo("Debug", "Running processVemcoFile.")
   appendTo("Debug", "Processing data inside the file...")
   transmitter_aux <- strsplit(input$Transmitter, "-", fixed = TRUE)
   receiver_aux <- strsplit(input$Receiver, "-", fixed = TRUE) # split model and serial
@@ -893,7 +886,6 @@ processVemcoFile <- function(input) {
   colnames(input)[1] <- c("Timestamp")
   input <- input[, c("Timestamp", "Receiver", "CodeSpace", "Signal")]
   input$Timestamp <- fasttime::fastPOSIXct(input$Timestamp, tz = "UTC")
-  appendTo("debug", "Terminating processVemcoFile.")
   return(input)
 }
 
@@ -909,7 +901,7 @@ processVemcoFile <- function(input) {
 #' @keywords internal
 #' 
 bindDetections <- function(data.files, file.list) {
-  appendTo("debug", "Starting bindDetections.")
+  appendTo("debug", "Running bindDetections.")
   if (length(file.list) >= 1) {
     temp <- data.files[file.list]
     appendTo("debug", "Compiling the data object.")
@@ -921,7 +913,6 @@ bindDetections <- function(data.files, file.list) {
   }
   output$Receiver <- as.factor(output$Receiver)
   output$CodeSpace <- as.factor(output$CodeSpace)
-  appendTo("debug", "Terminating bindDetections.")
   return(output)
 }
 
@@ -936,7 +927,7 @@ bindDetections <- function(data.files, file.list) {
 #' @keywords internal
 #' 
 convertCodes <- function(input) {
-  appendTo("debug", "Starting convertCodes.")
+  appendTo("debug", "Running convertCodes.")
   vemco <- c("A69-1008", 
              "A69-1206", 
              "A69-1105", 
@@ -962,7 +953,6 @@ convertCodes <- function(input) {
   for (i in seq_len(length(replace))) {
     levels(input$CodeSpace)[levels(input$CodeSpace) == vemco[i]] <- replace[i]
   }
-  appendTo("debug", "Terminating convertCodes.")
   return(input)
 }
 
@@ -982,7 +972,7 @@ convertTimes <- function(input, start.time, stop.time, tz) {
   # This definition is just to prevent the package check from issuing a note due unknown variables.
   Timestamp <- NULL
 
-  appendTo("debug", "Starting convertTimes.")
+  appendTo("debug", "Running convertTimes.")
   attributes(input$Timestamp)$tzone <- tz
   input <- input[order(input$Timestamp), ]
   if (!is.null(start.time)){
@@ -997,7 +987,6 @@ convertTimes <- function(input, start.time, stop.time, tz) {
   }
   input$Receiver <- droplevels(input$Receiver)
   input$Transmitter <- as.factor(paste(input$CodeSpace, input$Signal, sep = "-"))
-  appendTo("debug", "Terminating convertTimes.")
   return(input)
 }
 
@@ -1010,14 +999,12 @@ convertTimes <- function(input, start.time, stop.time, tz) {
 #' @keywords internal
 #' 
 createUniqueSerials <- function(input) {
-  appendTo("debug","Terminating createUniqueSerials")
   output <- split(input, input$Receiver)
   for (i in 1:length(output)) {
     if (nrow(output[[i]]) > 1) {
       output[[i]]$Receiver <- paste0(output[[i]]$Receiver, ".dpl.", 1:nrow(output[[i]]))
     }
   }
-  appendTo("debug","Terminating createUniqueSerials")
   return(output)
 }
 
@@ -1036,7 +1023,7 @@ createUniqueSerials <- function(input) {
 #' @keywords internal
 #' 
 splitDetections <- function(detections, bio, exclude.tags = NULL, silent = FALSE) {
-  appendTo("debug", "Starting splitDetections.")
+  appendTo("debug", "Running splitDetections.")
   my.list <- split(detections, detections$Transmitter)
   my.list <- excludeTags(input = my.list, exclude.tags = exclude.tags, silent = silent)
   
@@ -1053,7 +1040,6 @@ splitDetections <- function(detections, bio, exclude.tags = NULL, silent = FALSE
     storeStrays()
   }
 
-  appendTo("debug", "Terminating splitDetections.")
   return(list(detections.list = trimmed.list, bio = bio))
 }
 
@@ -1065,7 +1051,7 @@ splitDetections <- function(detections, bio, exclude.tags = NULL, silent = FALSE
 #' @keywords internal
 #' 
 collectStrays <- function(input, restart = FALSE){
-  appendTo("debug", "Starting collectStrays.")
+  appendTo("debug", "Running collectStrays.")
   if (restart && file.exists("temp_strays.csv")) {
     file.remove("temp_strays.csv")
   }
@@ -1078,7 +1064,6 @@ collectStrays <- function(input, restart = FALSE){
       )
     write.table(recipient, file = "temp_strays.csv", sep = ",", append = file.exists("temp_strays.csv"), row.names = FALSE, col.names = !file.exists("temp_strays.csv"))
   }
-  appendTo("debug", "Terminating collectStrays.")
 }
 
 #' Store summary information on the stray tags detected in a permanent file.
@@ -1086,7 +1071,7 @@ collectStrays <- function(input, restart = FALSE){
 #' @keywords internal
 #'
 storeStrays <- function(){
-  appendTo("debug", "Starting storeStrays.")
+  appendTo("debug", "Running storeStrays.")
   if (file.exists("temp_strays.csv")) {
     if (file.exists(newname <- "stray_tags.csv")) {
       continue <- TRUE
@@ -1101,7 +1086,6 @@ storeStrays <- function(){
     }
     file.rename("temp_strays.csv", newname)
   }
-  appendTo("debug", "Terminating storeStrays.")
 }
 
 #' Temporarily include unknown receivers with target detections in the study area
@@ -1161,7 +1145,6 @@ labelUnknowns <- function(detections.list) {
 #' @keywords internal
 #' 
 createStandards <- function(detections, spatial, deployments) {
-  appendTo("debug","Terminating createStandards")
   detections$Receiver <- as.character(detections$Receiver)
   detections$Standard.Name <- NA_character_
   detections$Array <- NA_character_
@@ -1212,7 +1195,6 @@ createStandards <- function(detections, spatial, deployments) {
   appendTo(c("Screen", "Report"), paste0("M: Number of ALS: ", length(deployments), " (of which ", length(empty.receivers), " had no detections)"))
   if (!is.null(empty.receivers))
     appendTo(c("Screen", "Report", "Warning"), paste0("No detections were found for receiver(s) ", paste0(empty.receivers, collapse = ", "), "."))
-  appendTo("debug","Terminating createStandards")
   aux <- spatial[spatial$Type == "Hydrophone", ]
   detections$Receiver <- as.factor(detections$Receiver)
   detections$Array <- factor(detections$Array, levels = unique(aux$Array))
@@ -1234,7 +1216,7 @@ createStandards <- function(detections, spatial, deployments) {
 #' @keywords internal
 #' 
 transformSpatial <- function(spatial, bio, sections = NULL, first.array = NULL) {
-  appendTo("debug", "Starting transformSpatial.")
+  appendTo("debug", "Running transformSpatial.")
   # Break the stations away
   appendTo("debug", "Creating 'stations'.")
   stations <- spatial[spatial$Type == "Hydrophone", -match("Type", colnames(spatial))]
@@ -1315,7 +1297,6 @@ transformSpatial <- function(spatial, bio, sections = NULL, first.array = NULL) 
   output <- list(stations = stations, 
                  release.sites = release.sites, 
                  array.order = array.order)
-  appendTo("debug", "Terminating transformSpatial")
   return(output)
 }
 
@@ -1328,16 +1309,14 @@ transformSpatial <- function(spatial, bio, sections = NULL, first.array = NULL) 
 #' @keywords internal
 #' 
 excludeTags <- function(input, exclude.tags, silent){
-  appendTo("debug", "Starting excludeTags.")  
+  appendTo("debug", "Running excludeTags.")  
   if (length(exclude.tags) != 0) {
     link <- match(exclude.tags, names(input))
     if (!silent){
       appendTo(c("Screen", "Report"), paste0("M: Excluding tag(s) ", paste(exclude.tags, collapse = ", "), " from the analysis per used command (detections removed: ", paste(unlist(lapply(input[link], nrow)), collapse = ", "), ", respectively)."))
       collectStrays(input = input[link], restart = TRUE)
     }
-    appendTo("debug", "Terminating excludeTags.")  
     return(input[-link])
   }
-  appendTo("debug", "Terminating excludeTags.")  
   return(input)
 }

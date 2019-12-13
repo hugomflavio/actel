@@ -472,7 +472,7 @@ updateActel <- function() {
 #' @return A data frame with the timestamps for each fish (rows) and array (columns)
 #' 
 getTimes <- function(movements, spatial, type = c("arrival", "departure"), events = c("one", "all")){
-  # appendTo("Debug", "Starting getTimes.")
+  # appendTo("Debug", "Running getTimes.")
   type <- match.arg(type)
   events <- match.arg(events)
 
@@ -536,7 +536,6 @@ getTimes <- function(movements, spatial, type = c("arrival", "departure"), event
   output <- do.call(cbind, aux)
   output$Transmitter <- gsub("_[0-9]*$", "", rownames(output))
   output <- output[, c(ncol(output), 1:(ncol(output) - 1))]
-  # appendTo("Debug", "Terminating getTimes.")
   return(output)
 }
 
@@ -550,7 +549,7 @@ getTimes <- function(movements, spatial, type = c("arrival", "departure"), event
 #' @return A list of circular objects
 #' 
 convertTimesToCircular <- function(times) {
-  appendTo("Debug", "Starting convertTimesToCircular.")
+  appendTo("Debug", "Running convertTimesToCircular.")
   output <- list()
   cols.with.data <- apply(times, 2, function(x) !all(is.na(x)))
   times <- times[, cols.with.data]
@@ -559,7 +558,6 @@ convertTimesToCircular <- function(times) {
     names(output[[i - 1]]) <- times$Transmitter
   }
   names(output) <- colnames(times)[2:ncol(times)]
-  appendTo("Debug", "Terminating convertTimesToCircular.")
   return(output)
 }
 
