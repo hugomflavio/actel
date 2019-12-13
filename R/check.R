@@ -520,7 +520,7 @@ checkDeploymentStations <- function(input, spatial) {
   aux <- spatial[spatial$Type == "Hydrophone", ]
   link <- match(unique(input$Station.Name), aux$Station.Name)
   if (any(is.na(link))) {
-    appendTo(c("Screen", "Report", "Warning"), paste0("", ifelse(sum(is.na(link)) > 1, "Stations", "Station"), " '", paste(unique(input$Station.Name)[is.na(link)], collapse = "', '"), "' ", ifelse(sum(is.na(link)) > 1, "are", "is"), " listed in the deployments but are not part of the study's stations. Discarding deployments at unknown stations."))
+    appendTo(c("Screen", "Report", "Warning"), paste0("", ifelse(sum(is.na(link)) > 1, "Stations", "Station"), " '", paste(unique(input$Station.Name)[is.na(link)], collapse = "', '"), "' ", ifelse(sum(is.na(link)) > 1, "are", "is"), " listed in the deployments but ", ifelse(sum(is.na(link)) > 1, "are", "is"), " not part of the study's stations. Discarding deployments at unknown stations."))
     to.remove <- match(input$Station.Name, unique(input$Station.Name)[is.na(link)])
     input <- input[is.na(to.remove), ]
   }

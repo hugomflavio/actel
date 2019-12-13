@@ -336,7 +336,7 @@ appendTo <- function(recipient, line, fish) {
     if (i == "Report") 
       write(line, file = "temp_log.txt", append = file.exists("temp_log.txt"))
     if (i == "Warning") 
-      write(line, file = "temp_warnings.txt", append = file.exists("temp_warnings.txt"))
+      write(paste("Warning:", line), file = "temp_warnings.txt", append = file.exists("temp_warnings.txt"))
     if (i == "UD") 
       write(line, file = "temp_UD.txt", append = file.exists("temp_UD.txt"))
     if (i == "Comment") 
