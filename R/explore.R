@@ -37,7 +37,7 @@ NULL
 #' 
 explore <- function(path = NULL, max.interval = 60, maximum.time = 60, speed.method = c("last to first", "first to first"),
     speed.warning = NULL, speed.error = NULL, tz.study.area = NULL, tz, start.time = NULL, start.timestamp = NULL, 
-    stop.time = NULL, end.timestamp = NULL, 
+    stop.time = NULL, end.timestamp = NULL, override = NULL, 
     report = TRUE, exclude.tags = NULL, jump.warning = 2, jump.error = 3, inactive.warning = NULL, 
     inactive.error = NULL,  debug = FALSE) {
 # Temporary: check deprecated options
@@ -142,6 +142,7 @@ explore <- function(path = NULL, max.interval = 60, maximum.time = 60, speed.met
       ", stop.time = ", ifelse(is.null(stop.time), "NULL", paste0("'", stop.time, "'")),
       ", report = ", ifelse(report, "TRUE", "FALSE"), 
       ", exclude.tags = ", ifelse(is.null(exclude.tags), "NULL", paste0("c('", paste(exclude.tags, collapse = "', '"), "')")), 
+      ", override = ", ifelse(is.null(override), "NULL", paste0("c('", paste(override, collapse = "', '"), "')")),
       ", jump.warning = ", jump.warning,
       ", jump.error = ", jump.error,
       ", inactive.warning = ", ifelse(is.null(inactive.warning), "NULL", inactive.warning), 
@@ -167,7 +168,7 @@ explore <- function(path = NULL, max.interval = 60, maximum.time = 60, speed.met
 # -----------------------------------
 
 # Load, structure and check the inputs
-study.data <- loadStudyData(tz = tz, override = NULL, 
+study.data <- loadStudyData(tz = tz, override = override, 
                             start.time = start.time, stop.time = stop.time,
                             sections = NULL, exclude.tags = exclude.tags)
 bio <- study.data$bio
@@ -195,34 +196,94 @@ detections.list <- study.data$detections.list
 
   appendTo(c("Screen", "Report"), "M: Checking movement events quality.")
 
-  movements <- checkImpassables(movements = movements, dotmat = dotmat)
-
-  movements <- checkJumpDistance(movements = movements, bio = bio, dotmat = dotmat, 
-                                 spatial = spatial, jump.warning = jump.warning, jump.error = jump.error)
-
   if (is.null(speed.warning)) {
     appendTo(c("Screen", "Report", "Warning"), "'speed.warning'/'speed.error' were not set, skipping speed checks.")
   } else {
     if(invalid.dist) {
       appendTo(c("Screen", "Report", "Warning"), "'speed.warning'/'speed.error' were set, but a valid distance matrix is not present. Aborting speed checks.")
     } else {
-       temp.valid.movements <- simplifyMovements(movements = movements, bio = bio, 
-         speed.method = speed.method, dist.mat = dist.mat, invalid.dist = invalid.dist)
-      movements <- checkSpeeds(movements = movements, valid.movements = temp.valid.movements, 
-        speed.warning = speed.warning, speed.error = speed.error)
-       rm(temp.valid.movements)
-     }
+      do.checkSpeeds <- TRUE
+    }
   }
 
+  do.checkInactiveness <- FALSE
   if (is.null(inactive.warning))
     appendTo(c("Screen", "Report", "Warning"), "'inactive.warning'/'inactive.error' were not set, skipping inactivity checks.")
   else
-    movements <- checkInactiveness(movements = movements, detections.list = detections.list, 
-      inactive.warning = inactive.warning, inactive.error = inactive.error, 
-      dist.mat = dist.mat, invalid.dist = invalid.dist)
+    do.checkInactiveness <- TRUE
 
-  valid.movements <- simplifyMovements(movements = movements, bio = bio, 
-    speed.method = speed.method, dist.mat = dist.mat, invalid.dist = invalid.dist)
+  movement.names <- names(movements)
+  movements <- lapply(seq_along(movements), function(i) {
+    fish <- names(movements)[i]
+    appendTo("debug", paste0("debug: Checking movement quality for fish ", fish,"."))
+    
+    if (is.na(match(fish, override))) {
+      output <- checkImpassables(movements = movements[[i]], fish = fish, dotmat = dotmat)
+
+      release <- as.character(bio$Release.site[na.as.false(bio$Transmitter == fish)])
+      release <- with(spatial, release.sites[release.sites$Standard.Name == release, "Array"])
+
+      output <- checkJumpDistance(movements = output, release = release, fish = fish, dotmat = dotmat, 
+                                  jump.warning = jump.warning, jump.error = jump.error)
+
+      rm(release)
+
+      if (do.checkSpeeds) {
+        temp.valid.movements <- simplifyMovements(movements = output, fish = fish, bio = bio, 
+          speed.method = speed.method, dist.mat = dist.mat, invalid.dist = invalid.dist)
+        output <- checkSpeeds(movements = output, fish = fish, valid.movements = temp.valid.movements, 
+          speed.warning = speed.warning, speed.error = speed.error)
+        rm(temp.valid.movements)
+      }
+
+      if (do.checkInactiveness) {
+        output <- checkInactiveness(movements = output, fish = fish, detections.list = detections.list[[fish]], 
+          inactive.warning = inactive.warning, inactive.error = inactive.error, 
+          dist.mat = dist.mat, invalid.dist = invalid.dist)
+      }
+    } else {
+      output <- overrideValidityChecks(moves = movements[[i]], fish = names(movements)[i])
+    }
+    return(output)
+  })
+  names(movements) <- movement.names
+  rm(movement.names)
+
+  valid.movements <- lapply(seq_along(movements), function(i){
+    output <- simplifyMovements(movements = movements[[i]], fish = names(movements)[i], bio = bio, 
+      speed.method = speed.method, dist.mat = dist.mat, invalid.dist = invalid.dist)
+  })
+  names(valid.movements) <- names(movements)
+  valid.movements <- valid.movements[!unlist(lapply(valid.movements, is.null))]
+
+  # movements <- checkImpassables(movements = movements, dotmat = dotmat)
+
+  # movements <- checkJumpDistance(movements = movements, bio = bio, dotmat = dotmat, 
+  #                                spatial = spatial, jump.warning = jump.warning, jump.error = jump.error)
+
+  # if (is.null(speed.warning)) {
+  #   appendTo(c("Screen", "Report", "Warning"), "'speed.warning'/'speed.error' were not set, skipping speed checks.")
+  # } else {
+  #   if(invalid.dist) {
+  #     appendTo(c("Screen", "Report", "Warning"), "'speed.warning'/'speed.error' were set, but a valid distance matrix is not present. Aborting speed checks.")
+  #   } else {
+  #      temp.valid.movements <- simplifyMovements(movements = movements, bio = bio, 
+  #        speed.method = speed.method, dist.mat = dist.mat, invalid.dist = invalid.dist)
+  #     movements <- checkSpeeds(movements = movements, valid.movements = temp.valid.movements, 
+  #       speed.warning = speed.warning, speed.error = speed.error)
+  #      rm(temp.valid.movements)
+  #    }
+  # }
+
+  # if (is.null(inactive.warning))
+  #   appendTo(c("Screen", "Report", "Warning"), "'inactive.warning'/'inactive.error' were not set, skipping inactivity checks.")
+  # else
+  #   movements <- checkInactiveness(movements = movements, detections.list = detections.list, 
+  #     inactive.warning = inactive.warning, inactive.error = inactive.error, 
+  #     dist.mat = dist.mat, invalid.dist = invalid.dist)
+
+  # valid.movements <- simplifyMovements(movements = movements, bio = bio, 
+  #   speed.method = speed.method, dist.mat = dist.mat, invalid.dist = invalid.dist)
 
   times <- getTimes(movements = valid.movements, spatial = spatial, type = "arrival", events = "all")
 
