@@ -114,21 +114,22 @@ groupMovements <- function(detections.list, bio, spatial, speed.method, max.inte
 #' 
 #' @return The movement data frame containing only valid events
 #' 
-simplifyMovements <- function(movements, bio, speed.method, dist.mat, invalid.dist) {
+simplifyMovements <- function(movements, fish, bio, speed.method, dist.mat, invalid.dist) {
   # NOTE: The NULL variables below are actually column names used by data.table.
   # This definition is just to prevent the package check from issuing a note due unknown variables.
   Valid <- NULL
 
-  simple.movements <- lapply(movements, function(x) x[(Valid), ])
-  simple.movements <- simple.movements[unlist(lapply(simple.movements, nrow)) > 0]
-  for(fish in names(simple.movements)){
-    aux <- movementTimes(movements = simple.movements[[fish]], silent = FALSE, type = "array")
+  if (any(movements$Valid)) {
+    simple.movements <- movements[(Valid), ]
+    aux <- movementTimes(movements = simple.movements, silent = FALSE, type = "array")
     if (!invalid.dist)
         aux <- movementSpeeds(movements = aux, speed.method = speed.method, dist.mat = dist.mat, silent = FALSE)
-    simple.movements[[fish]] <- speedReleaseToFirst(fish = fish, bio = bio, movements = aux,
+    output <- speedReleaseToFirst(fish = fish, bio = bio, movements = aux,
      dist.mat = dist.mat, invalid.dist = invalid.dist, silent = FALSE)
+    return(output)
+  } else {
+    return(NULL)
   }
-  return(simple.movements)
 }
 
 
