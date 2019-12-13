@@ -12,25 +12,25 @@ License: GPL-3 + file LICENSE
 Encoding: UTF-8
 LazyData: true
 RoxygenNote: 6.1.1
-Depends: R (>= 2.10)
+Depends: R (>= 3.6)
 Imports:
-    stats,
-    utils,
-    graphics,
-    readr,
-    scales,
-    ggplot2,
-    reshape2,
-    fs,
-    knitr,
-    rmarkdown,
     circular,
     data.table,
-    fasttime,
     DiagrammeR,
     DiagrammeRsvg,
+    fasttime,
+    fs,
+    ggplot2,
+    graphics,
+    knitr,
+    readr,
+    reshape2,
+    rmarkdown,
+    rsvg,
+    scales,
+    stats,
     stringr,
-    rsvg
+    utils
 Suggests: 
     raster,
     gdistance,
