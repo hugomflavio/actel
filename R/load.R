@@ -504,6 +504,8 @@ loadDeployments <- function(file, tz){
     emergencyBreak()
     stop("Could not find a '", file, "' file in the working directory.\n", call. = FALSE)
   }
+  if (any(link <- duplicated(colnames(input))))
+    stop("The following columns are duplicated in the file 'deployments.csv': '", paste(unique(colnames(input)[link]), sep = "', '"), "'.", call. = FALSE)
   default.cols <- c("Receiver", "Station.Name", "Start", "Stop")
   link <- match(default.cols, colnames(input))
   if (any(is.na(link))) {
@@ -552,6 +554,8 @@ loadSpatial <- function(file = "spatial.csv", report = FALSE){
     emergencyBreak()
     stop("Could not find a '", file, "' file in the working directory.\n", call. = FALSE)
   }
+  if (any(link <- duplicated(colnames(input))))
+    stop("The following columns are duplicated in the file 'spatial.csv': '", paste(unique(colnames(input)[link]), sep = "', '"), "'.", call. = FALSE)
   if (!any(grepl("Station.Name", colnames(input)))) {
     emergencyBreak()
     stop("The spatial.csv file must contain a 'Station.Name' column.\n", call. = FALSE)
@@ -625,6 +629,8 @@ loadBio <- function(file, tz){
     emergencyBreak()
     stop("Could not find a '", file, "' file in the working directory.\n", call. = FALSE)
   }  
+  if (any(link <- duplicated(colnames(bio))))
+    stop("The following columns are duplicated in the file 'biometrics.csv': '", paste(unique(colnames(bio)[link]), sep = "', '"), "'.", call. = FALSE)
 
   if (!any(grepl("Release.date", colnames(bio)))) {
     emergencyBreak()
