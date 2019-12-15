@@ -31,17 +31,17 @@ loadStudyData <- function(tz, override = NULL, start.time, stop.time,
   use.fakedot <- TRUE
   if (file.exists("spatial.dot")) {
     appendTo(c("Screen", "Report"), "M: A 'spatial.dot' file was detected, activating multi-branch analysis.")
-    recipient <- loadDot(input = "spatial.dot", spatial = spatial, sections = NULL, disregard.parallels = disregard.parallels)
+    recipient <- loadDot(input = "spatial.dot", spatial = spatial, sections = sections, disregard.parallels = disregard.parallels)
     use.fakedot <- FALSE
   } 
   if (use.fakedot & file.exists("spatial.txt")) {
     appendTo(c("Screen", "Report"), "M: A 'spatial.txt' file was detected, activating multi-branch analysis.")
-    recipient <- loadDot(input = "spatial.txt", spatial = spatial, sections = NULL, disregard.parallels = disregard.parallels)
+    recipient <- loadDot(input = "spatial.txt", spatial = spatial, sections = sections, disregard.parallels = disregard.parallels)
     use.fakedot <- FALSE
   }
   if (use.fakedot) {
     fakedot <- paste(unique(spatial$Array), collapse = "--")
-    recipient <- loadDot(string = fakedot, spatial = spatial, sections = NULL, disregard.parallels = disregard.parallels)
+    recipient <- loadDot(string = fakedot, spatial = spatial, sections = sections, disregard.parallels = disregard.parallels)
   }
   dot <- recipient$dot
   arrays <- recipient$arrays
@@ -115,7 +115,12 @@ loadDot <- function(string = NULL, input = NULL, spatial, sections = NULL, disre
   mat <- dotMatrix(input = dot)
   if (any(is.na(match(unique(spatial$Array), colnames(mat))))) {
     emergencyBreak()
-    stop("Not all the arrays listed in the spatial.csv file are present in the dot table.\n", call. = FALSE)
+    if (file.exists("spatial.txt"))
+      stop("Not all the arrays listed in the spatial.csv file are present in the spatial.txt.\n", call. = FALSE)
+    if (file.exists("spatial.dot"))
+      stop("Not all the arrays listed in the spatial.csv file are present in the spatial.dot.\n", call. = FALSE)
+    else
+      stop("Something went wrong when compiling the dot file. Try restarting R and trying again. If the problem persists, contact the developer.\n", call. = FALSE)
   }
   arrays <- dotList(input = dot, sections = sections)
   arrays <- dotPaths(input = arrays, dotmat = mat, disregard.parallels = disregard.parallels)

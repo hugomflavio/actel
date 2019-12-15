@@ -6,6 +6,7 @@ Find out the main highlights of each update.
 
 Fixes:
   * Fix mechanisms that deal with unknown receivers
+  * Edge arrays are now recognized if sections are provided
   
 Changes:
   * 'maximum.time' has been renamed to 'max.interval'
