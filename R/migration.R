@@ -193,8 +193,13 @@ migration <- function(path = NULL, sections, success.arrays = NULL, minimum.dete
   invalid.dist <- study.data$invalid.dist
   detections.list <- study.data$detections.list
 
-  if (is.null(success.arrays)) 
+  if (is.null(success.arrays)) {
     success.arrays <- names(arrays)[unlist(lapply(arrays, function(x) is.null(x$after)))]
+    if (length(success.arrays) == 1)
+      appendTo(c("Screen", "Warning"), paste0("'success.arrays' was not defined. Assuming success if fish are last detected at array ", success.arrays, "."))
+    else
+      appendTo(c("Screen", "Warning"), paste0("'success.arrays' was not defined. Assuming success if fish are last detected at arrays ", paste(success.arrays[-length(success.arrays)], collapse = ", "), " or ", tail(success.arrays, 1), "."))
+  }
 # -------------------------------------
   
 # Process the data

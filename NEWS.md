@@ -21,6 +21,7 @@ Enhancements:
   * 'tz' is now checked against the output of OlsonNames() to ensure a valid timezone is entered.
   * messages and warnings are now printed using message() and warning()
   * Stop if any of the input files has duplicated column names
+  * Warn user if success.arrays is not defined in migration()
 
 ## actel 0.1.1
 
