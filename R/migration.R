@@ -173,11 +173,6 @@ migration <- function(path = NULL, sections, success.arrays = NULL, minimum.dete
 # -----------------------------------
 
 # Load, structure and check the inputs
-  if (disregard.parallels)
-    appendTo("Screen", "M: 'disregard.parallels' is set to TRUE; the presence of parallel arrays will not invalidate efficiency peers.")
-  else
-    appendTo("Screen", "M: 'disregard.parallels' is set to FALSE; the presence of parallel arrays can potentially invalidate efficiency peers.")
-  
   study.data <- loadStudyData(tz = tz, override = override, 
                               start.time = start.time, stop.time = stop.time,
                               sections = sections, exclude.tags = exclude.tags, disregard.parallels = disregard.parallels)
@@ -192,6 +187,13 @@ migration <- function(path = NULL, sections, success.arrays = NULL, minimum.dete
   dist.mat <- study.data$dist.mat
   invalid.dist <- study.data$invalid.dist
   detections.list <- study.data$detections.list
+
+  if (any(!sapply(arrays, function(x) is.null(x$parallel)))) {
+    if (disregard.parallels)
+      appendTo("Screen", "M: 'disregard.parallels' is set to TRUE; the presence of parallel arrays will not invalidate efficiency peers.")
+    else
+      appendTo("Screen", "M: 'disregard.parallels' is set to FALSE; the presence of parallel arrays can potentially invalidate efficiency peers.")
+  }
 
   if (is.null(success.arrays)) {
     success.arrays <- names(arrays)[unlist(lapply(arrays, function(x) is.null(x$after)))]
