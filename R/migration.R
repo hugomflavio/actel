@@ -750,7 +750,7 @@ assembleTimetable <- function(movements, sections, spatial, arrays, minimum.dete
         "Arrived", "Time.in", "Speed.in", "Last.station", "Left"), sections[i], sep = "."))
     }
   }
-  recipient <- c(recipient, "Very.last.array", "Status", "Detections", "Backwards.movements", "Max.cons.back.moves", "P.type")
+  recipient <- c(recipient, "Very.last.array", "Status", "Valid.detections", "All.detections", "Backwards.movements", "Max.cons.back.moves", "P.type")
   if (!invalid.dist && speed.method == "first to first")
     recipient <- recipient[!grepl("Speed.in",recipient)]
 
@@ -1339,11 +1339,13 @@ updateMovementValidity <- function(movements, events, sections){
     if (is.na(events$last.events[j])) {
       if (any(link))
         movements[link, "Valid"] <- FALSE
+      timetable[fish, "Valid.detections"] <- vm[[fish]][, sum(Detections)]
     } else {
       if (any(which(link) > events$last.events[j]))
         movements[which(link)[which(link) > events$last.events[j]]]$Valid <- FALSE
       if (any(which(link) < events$first.events[j]))
         movements[which(link)[which(link) < events$first.events[j]]]$Valid <- FALSE
+      timetable[fish, "Valid.detections"] <- 0
     }
     rm(link)
   }
@@ -1457,6 +1459,7 @@ deployValues <- function(i, timetable, movements, events, sections, spatial, arr
   if (testB) 
     timetable[i, "Status"] <- "Succeeded"
   appendTo("debug", paste0("Terminating deployValues for fish ", i, "."))
+    timetable[fish, "All.Detections"] <- all.moves[[fish]][, sum(Detections)]
   return(timetable)
 }
 
@@ -1520,7 +1523,8 @@ assembleOutput <- function(timetable, bio, spatial, sections, dist.mat, invalid.
   status.df$Very.last.array[is.na(status.df$Very.last.array)] <- "Release"
   status.df$Very.last.array <- factor(status.df$Very.last.array, levels = c("Release", levels(spatial$stations$Array)))
   status.df$P.type[is.na(status.df$P.type)] <- "Skipped"
-  status.df$Detections[is.na(status.df$Detections)] <- 0
+  status.df$Valid.detections[is.na(status.df$Valid.detections)] <- 0
+  status.df$All.detections[is.na(status.df$All.detections)] <- 0
 
   the.cols <- grepl("Release.date", colnames(status.df)) | grepl("Arrived",colnames(status.df)) | grepl("Left",colnames(status.df))
   for (i in colnames(status.df)[the.cols]) {
