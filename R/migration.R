@@ -1459,7 +1459,7 @@ deployValues <- function(i, timetable, movements, events, sections, spatial, arr
   if (testB) 
     timetable[i, "Status"] <- "Succeeded"
   appendTo("debug", paste0("Terminating deployValues for fish ", i, "."))
-    timetable[fish, "All.Detections"] <- all.moves[[fish]][, sum(Detections)]
+    timetable[fish, "All.detections"] <- all.moves[[fish]][, sum(Detections)]
   return(timetable)
 }
 
