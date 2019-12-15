@@ -9,7 +9,6 @@
 #' @param minimum.detections The minimum number of times a tag must have been recorded during the study period for it to be considered a true tag and not random noise.
 #' @param if.last.skip.section Indicates whether a fish detected at the last array of a given section should be considered to have disappeared in the next section. Defaults to TRUE. I.e.: In a study with sections 'River' and 'Fjord', where 'River3' is the last river array, a fish last detected at River3 will be considered as 'disappeared in the Fjord'.
 #' @param override A list of tags for which the user intends to manually define entering and leaving points for each study section.
-#' @param cautious.assignment If TRUE, actel avoids assigning events with one detection as first and/or last events of a section.
 #' @param disregard.parallels Logical. If TRUE, the presence of parallel arrays does not invalidate potential efficiency peers. For more details on this, have a look at the vignettes.
 #' @param replicates A list containing, for each desired array, the standard names of the stations to be used as a replicate, for efficiency estimations.
 #' @inheritParams explore
@@ -22,7 +21,6 @@ migration <- function(path = NULL, sections, success.arrays = NULL, minimum.dete
   maximum.time = 60, max.interval = 60, speed.method = c("last to first", "first to first"), speed.warning = NULL,
   speed.error = NULL, if.last.skip.section = TRUE, tz.study.area = NULL, tz = NULL, start.time = NULL, start.timestamp = NULL, 
   stop.time = NULL, end.timestamp = NULL, report = TRUE, override = NULL, 
-  exclude.tags = NULL, cautious.assignment = TRUE, replicates = NULL, disregard.parallels = TRUE,
   jump.warning = 2, jump.error = 3, inactive.warning = NULL, inactive.error = NULL, debug = FALSE) {
 # Temporary: check deprecated options
   dep.warning <- "------------------------------------------------------------------\n!!! Deprecated arguments used!\n!!!\n"
@@ -82,9 +80,6 @@ migration <- function(path = NULL, sections, success.arrays = NULL, minimum.dete
   if (!is.logical(report))
     stop("'report' must be logical.\n", call. = FALSE)
 
-  if (!is.logical(cautious.assignment))
-    stop("'cautious.assignment' must be logical.\n", call. = FALSE)
-
   if (!is.null(replicates) && !is.list(replicates))
     stop("'replicates' must be a list.\n", call. = FALSE)
 
@@ -142,7 +137,6 @@ migration <- function(path = NULL, sections, success.arrays = NULL, minimum.dete
       ", report = ", ifelse(report, "TRUE", "FALSE"), 
       ", override = ", ifelse(is.null(override), "NULL", paste0("c('", paste(override, collapse = "', '"), "')")),
       ", exclude.tags = ", ifelse(is.null(exclude.tags), "NULL", paste0("c('", paste(exclude.tags, collapse = "', '"), "')")), 
-      ", cautious.assignment = ", ifelse(cautious.assignment, "TRUE", "FALSE"), 
       ", replicates = ", ifelse(is.null(replicates),"NULL", paste0("c('", paste(replicates, collapse = "', '"), "')")),
       ", disregard.parallels = ", ifelse(disregard.parallels, "TRUE", "FALSE"), 
       ", jump.warning = ", jump.warning,
