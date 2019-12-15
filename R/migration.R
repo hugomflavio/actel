@@ -1472,13 +1472,12 @@ deployValues <- function(i, timetable, movements, events, sections, spatial, arr
 countBackMoves <- function(movements, arrays){
   appendTo("debug", "Starting countBackMoves.")
   if (nrow(movements) > 1) {# Determine number of backwards movements
-    direction <- NULL
     aux <- data.frame(
       A = movements$Array[-nrow(movements)],
       B = movements$Array[-1])
     backwards.movements <- apply(aux, 1, function(x)
       if(x[1] != x[2]) 
-        is.na(match(x[2], arrays[[x[1]]]$after))
+        is.na(match(x[2], arrays[[x[1]]]$all.after))
       else
         FALSE
       )
