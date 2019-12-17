@@ -15,8 +15,7 @@ Changes:
   * 'start.timestamp' has been renamed to 'start.time'
   * 'end.timestamp' has been renamed to 'stop.time'
   * After a transition period, actel() has been removed
-
-Note: Newly deprecated arguments will continue working during a transition period
+  * 'cautious.assignment' has been removed from the migration analysis
 
 Enhancements:
   * 'tz' is now checked against the output of OlsonNames() to ensure a valid timezone is entered.
