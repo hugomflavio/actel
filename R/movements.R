@@ -82,8 +82,7 @@ groupMovements <- function(detections.list, bio, spatial, speed.method, max.inte
       }
       
       recipient <- data.table::as.data.table(recipient)
-      recipient <- movementTimes(movements = recipient,
-          silent = FALSE, type = "array")
+      recipient <- movementTimes(movements = recipient, type = "array")
       if (!invalid.dist)
         recipient <- movementSpeeds(movements = recipient, 
           speed.method = speed.method, dist.mat = dist.mat, silent = FALSE)
@@ -121,7 +120,7 @@ simplifyMovements <- function(movements, fish, bio, speed.method, dist.mat, inva
 
   if (any(movements$Valid)) {
     simple.movements <- movements[(Valid), ]
-    aux <- movementTimes(movements = simple.movements, silent = FALSE, type = "array")
+    aux <- movementTimes(movements = simple.movements, type = "array")
     if (!invalid.dist)
         aux <- movementSpeeds(movements = aux, speed.method = speed.method, dist.mat = dist.mat, silent = FALSE)
     output <- speedReleaseToFirst(fish = fish, bio = bio, movements = aux,
@@ -180,41 +179,40 @@ movementSpeeds <- function(movements, speed.method, dist.mat, silent = TRUE) {
 #' 
 #' @return The movement data frame with time and speed calculations
 #' 
-#' @export
+#' @keywords internal
 #' 
-movementTimes <- function(movements, silent = TRUE, type = c("array", "section")){
+movementTimes <- function(movements, type = c("array", "section")){
   type = match.arg(type)
   time.in <- paste0("Time.in.", type)
-  if (!silent) 
-    appendTo("debug", "Running movementTimes.")
+  appendTo("debug", "Running movementTimes.")
   # Time travelling
   if (nrow(movements) > 1) {
-    for (l in 2:nrow(movements)) {
-      a <- as.vector(difftime(movements$First.time[l], movements$Last.time[l - 1], units = "hours"))
-      h <- a%/%1
-      m <- ((a%%1) * 60)%/%1
+    aux <- data.frame(
+      First.time = movements$First.time[-1],
+      Last.time = movements$Last.time[-nrow(movements)]
+      )
+    recipient <- apply(aux, 1, function(x) {
+      a <- as.vector(difftime(x[1], x[2], units = "hours"))
+      h <- a %/% 1
+      m <- ((a %% 1) * 60) %/% 1
       if (m < 10) 
         m <- paste0("0", m)
-      movements$Time.travelling[l] <- paste(h, m, sep = ":")
-    }
-    rm(l)
+      return(paste(h, m, sep = ":"))
+    })
+    movements$Time.travelling[2:nrow(movements)] <- recipient
   }
   # Time on array
-  for (l in 1:nrow(movements)) {
-    if (movements$Detections[l] == 1) {
-      movements[l, time.in] <- "0:00"
-    } else {
-      a <- as.vector(difftime(movements$Last.time[l], movements$First.time[l], units = "hours"))
-      h <- a%/%1
-      m <- ((a%%1) * 60)%/%1
+  movements[, time.in] <- apply(movements, 1, function(x) {
+    if (x["Detections"] == 1)
+      return("0:00")
+    else
+      a <- as.vector(difftime(x["Last.time"], x["First.time"], units = "hours"))
+      h <- a %/% 1
+      m <- ((a %% 1) * 60) %/% 1
       if (m < 10) 
         m <- paste0("0", m)
-      movements[l, time.in] <- paste(h, m, sep = ":")
-      rm(a, h, m)
-    }
-  }
-  rm(l)
-  if (!silent) 
+      return(paste(h, m, sep = ":"))
+  })
   return(movements)
 }
 
@@ -256,3 +254,99 @@ speedReleaseToFirst <- function(fish, bio, movements, dist.mat, invalid.dist = F
     appendTo("debug", "Done.")
   return(movements)
 } 
+
+#' Compress array-movements into section-movements
+#' 
+#' @inheritParams simplifyMovements
+#' @inheritParams migration
+#' 
+#' @return the section movements
+#' 
+#' @keywords internal
+#' 
+sectionMovements <- function(movements, sections, invalid.dist) {
+  Valid <- NULL
+  
+  if (any(movements$Valid))
+    vm <- movements[(Valid)]
+  else
+    return(NULL)
+
+  aux <- lapply(seq_along(sections), function(i) {
+    x <- rep(NA_character_, nrow(vm))
+    x[grepl(sections[i], vm$Array)] <- sections[i]
+    return(x)
+  })
+
+  event.index <- combine(aux)
+  aux <- rle(event.index)
+  last.events <- cumsum(aux$lengths)
+  first.events <- c(1, last.events[-length(last.events)] + 1)
+  
+  if (invalid.dist) {
+    recipient <- data.frame(
+      Section = aux$values,
+      Events = aux$lengths,
+      Detections = unlist(lapply(seq_along(aux$values), function(i) sum(vm$Detections[first.events[i]:last.events[i]]))),
+      First.array = vm$Array[first.events],
+      Last.array = vm$Array[last.events],
+      First.time = vm$First.time[first.events],
+      Last.time = vm$Last.time[last.events],
+      Time.travelling = c(vm$Time.travelling[1], rep(NA_character_, length(aux$values) - 1)),
+      Time.in.section = rep(NA_character_, length(aux$values)),
+      Valid = rep(TRUE, length(aux$values)),
+      stringsAsFactors = FALSE
+      )
+  } else {
+    recipient <- data.frame(
+      Section = aux$values,
+      Events = aux$lengths,
+      Detections = unlist(lapply(seq_along(aux$values), function(i) sum(vm$Detections[first.events[i]:last.events[i]]))),
+      First.array = vm$Array[first.events],
+      Last.array = vm$Array[last.events],
+      First.time = vm$First.time[first.events],
+      Last.time = vm$Last.time[last.events],
+      Time.travelling = c(vm$Time.travelling[1], rep(NA_character_, length(aux$values) - 1)),
+      Time.in.section = rep(NA_character_, length(aux$values)),
+      Speed.in.section.m.s = unlist(lapply(seq_along(aux$values), function(i) mean(vm$Average.speed.m.s[first.events[i]:last.events[i]], na.rm = TRUE))),
+      Valid = rep(TRUE, length(aux$values)),
+      stringsAsFactors = FALSE
+      )
+  }
+  output <- as.data.table(movementTimes(movements = recipient, type = "section"))
+  attributes(output)$p.type <- attributes(movements)$p.type
+  return(output)
+}
+
+#' update array-movement validity based on the section-movements
+#' 
+#' @param arrmoves the array movements
+#' @param secmoves the section movements
+#' 
+#' @return the updated array movements
+#' 
+#' @keywords internal
+#' 
+updateValidity <- function(arrmoves, secmoves) {
+  Valid <- NULL
+  output <- lapply(names(arrmoves), 
+    function(i) {
+      if (!is.null(secmoves[[i]]) && any(!secmoves[[i]]$Valid)) {
+        aux <- secmoves[[i]][(!Valid)]
+        to.change <- unlist(lapply(1:nrow(aux),
+          function(j) {
+            A <- which(arrmoves[[i]]$First.time == aux$First.time)
+            B <- A + (aux$Events - 1)
+            return(A:B)
+          }))
+        appendTo(c("Screen", "Report"), paste0("M: Rendering ", length(to.change), " array movement(s) invalid for fish ", i ," as the respective section movements were discarded by the user."))
+        arrmoves[[i]]$Valid[to.change] <- FALSE
+        if (attributes(arrmoves[[i]])$p.type == "Auto")
+          attributes(arrmoves[[i]])$p.type <- "Manual"
+      }
+      return(arrmoves[[i]])
+    })
+  names(output) <- names(arrmoves)
+  return(output)
+}
+

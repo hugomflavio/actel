@@ -176,15 +176,14 @@ invalid.dist <- study.data$invalid.dist
 detections.list <- study.data$detections.list
 # -------------------------------------
   
-# Process the data
+# Compile array movements
   appendTo(c("Screen", "Report"), "M: Creating movement records for the valid tags.")
   movements <- groupMovements(detections.list = detections.list, bio = bio, spatial = spatial,
-                              speed.method = speed.method, max.interval = max.interval, 
-                              tz = tz, dist.mat = dist.mat, invalid.dist = invalid.dist)
+    speed.method = speed.method, max.interval = max.interval, tz = tz, 
+    dist.mat = dist.mat, invalid.dist = invalid.dist)
 
   aux <- names(movements)
-  movements <- lapply(names(movements), 
-    function(fish) {
+  movements <- lapply(names(movements), function(fish) {
       speedReleaseToFirst(fish = fish, bio = bio, movements = movements[[fish]],
                           dist.mat = dist.mat, invalid.dist = invalid.dist, silent = FALSE)
     })
@@ -193,58 +192,93 @@ detections.list <- study.data$detections.list
 
   appendTo(c("Screen", "Report"), "M: Checking movement events quality.")
 
-  movements <- checkImpassables(movements = movements, dotmat = dotmat)
-
-  movements <- checkJumpDistance(movements = movements, bio = bio, dotmat = dotmat, 
-                                 spatial = spatial, jump.warning = jump.warning, jump.error = jump.error)
-
+  do.checkSpeeds <- FALSE
   if (is.null(speed.warning)) {
     appendTo(c("Screen", "Report", "Warning"), "'speed.warning'/'speed.error' were not set, skipping speed checks.")
   } else {
     if(invalid.dist) {
       appendTo(c("Screen", "Report", "Warning"), "'speed.warning'/'speed.error' were set, but a valid distance matrix is not present. Aborting speed checks.")
     } else {
-       temp.valid.movements <- simplifyMovements(movements = movements, bio = bio, 
-         speed.method = speed.method, dist.mat = dist.mat, invalid.dist = invalid.dist)
-      movements <- checkSpeeds(movements = movements, valid.movements = temp.valid.movements, 
-        speed.warning = speed.warning, speed.error = speed.error)
-       rm(temp.valid.movements)
-     }
+      do.checkSpeeds <- TRUE
+    }
   }
-  
+
+  do.checkInactiveness <- FALSE
   if (is.null(inactive.warning))
     appendTo(c("Screen", "Report", "Warning"), "'inactive.warning'/'inactive.error' were not set, skipping inactivity checks.")
   else
-    movements <- checkInactiveness(movements = movements, detections.list = detections.list, 
-      inactive.warning = inactive.warning, inactive.error = inactive.error, 
-      dist.mat = dist.mat, invalid.dist = invalid.dist)
+    do.checkInactiveness <- TRUE
+
+  movement.names <- names(movements)
+  movements <- lapply(seq_along(movements), function(i) {
+    fish <- names(movements)[i]
+    appendTo("debug", paste0("debug: Checking movement quality for fish ", fish,"."))
+    
     if (is.na(match(fish, override))) {
+      release <- as.character(bio$Release.site[na.as.false(bio$Transmitter == fish)])
+      release <- with(spatial, release.sites[release.sites$Standard.Name == release, "Array"])
+
       output <- checkMinimumN(movements = movements[[i]], fish = fish, minimum.detections = minimum.detections)
     
+      output <- checkImpassables(movements = output, fish = fish, dotmat = dotmat)
 
-  valid.movements <- simplifyMovements(movements = movements, bio = bio, 
-    speed.method = speed.method, dist.mat = dist.mat, invalid.dist = invalid.dist)
+      output <- checkJumpDistance(movements = output, release = release, fish = fish, dotmat = dotmat, 
+                                  jump.warning = jump.warning, jump.error = jump.error)
+
+      if (do.checkSpeeds) {
+        temp.valid.movements <- simplifyMovements(movements = output, fish = fish, bio = bio, 
+          speed.method = speed.method, dist.mat = dist.mat, invalid.dist = invalid.dist)
+        output <- checkSpeeds(movements = output, fish = fish, valid.movements = temp.valid.movements, 
+          speed.warning = speed.warning, speed.error = speed.error)
+        rm(temp.valid.movements)
+      }
+
+      if (do.checkInactiveness) {
+        output <- checkInactiveness(movements = output, fish = fish, detections.list = detections.list[[fish]], 
+          inactive.warning = inactive.warning, inactive.error = inactive.error, 
+          dist.mat = dist.mat, invalid.dist = invalid.dist)
+      }
     } else {
       output <- overrideValidityChecks(moves = movements[[i]], fish = names(movements)[i])
     }
+    return(output)
+  })
+  names(movements) <- movement.names
+  rm(movement.names)
+# -------------------------
+  
 
-  # Residency-exclusive area
+# Compile section movements
+  section.movements <- lapply(seq_along(movements), function(i) {
+    fish <- names(movements)[i]
+    appendTo("debug", paste0("debug: Compiling section movements for fish ", fish,"."))
+    aux <- sectionMovements(movements = movements[[i]], sections = sections, invalid.dist = invalid.dist)
+    output <- checkSMovesN(secmoves = aux, fish = fish, section.minimum = section.minimum)
+    return(output)
+  })
+  names(section.movements) <- names(movements)
 
-  # Compress array movements into section movements
-  section.movements <- sectionMovements(movements = valid.movements, sections = sections, invalid.dist = invalid.dist)
-  # Look for isolated section movements
-  section.movements <- checkSMovesN(secmoves = section.movements, section.minimum = section.minimum)
-  # Update array movements based on secmove validity
-  movements <- updateAMValidity(arrmoves = movements, secmoves = section.movements)
+  # Update array movements based on section movements validity
+  movements <- updateValidity(arrmoves = movements, secmoves = section.movements)
 
-  # Resimplify array moves and calculate simple section moves
-  valid.movements <- simplifyMovements(movements = movements, bio = bio, 
-    speed.method = speed.method, dist.mat = dist.mat, invalid.dist = invalid.dist)
+  # compile valid movements
+  valid.movements <- lapply(seq_along(movements), function(i){
+    output <- simplifyMovements(movements = movements[[i]], fish = names(movements)[i], bio = bio, 
+      speed.method = speed.method, dist.mat = dist.mat, invalid.dist = invalid.dist)
+  })
+  names(valid.movements) <- names(movements)
+  valid.movements <- valid.movements[!unlist(lapply(valid.movements, is.null))]
 
-  valid.section.movements <- sectionMovements(movements = valid.movements, sections = sections, invalid.dist = invalid.dist)
+  section.movements <- lapply(seq_along(valid.movements), function(i) {
+    fish <- names(valid.movements)[i]
+    appendTo("debug", paste0("debug: Compiling valid section movements for fish ", fish,"."))
+    output <- sectionMovements(movements = valid.movements[[i]], sections = sections, invalid.dist = invalid.dist)
+    return(output)
+  })
+  names(section.movements) <- names(valid.movements)
 
   # Grab summary information
-  res.df <- assembleResidency(secmoves = valid.section.movements, movements = valid.movements, sections = sections)
+  res.df <- assembleResidency(secmoves = section.movements, movements = valid.movements, sections = sections)
   
   appendTo(c("Screen", "Report"), "M: Timetable successfully filled. Fitting in the remaining variables.")
   
@@ -256,10 +290,10 @@ detections.list <- study.data$detections.list
   array.times <- getTimes(movements = valid.movements, spatial = spatial, type = "arrival", events = "all")
 
   section.times <- list(
-    arrival = getTimes(movements = valid.section.movements, spatial = spatial, type = "arrival", events = "all"),
-    departure = getTimes(movements = valid.section.movements, spatial = spatial, type = "departure", events = "all"))
+    arrival = getTimes(movements = section.movements, spatial = spatial, type = "arrival", events = "all"),
+    departure = getTimes(movements = section.movements, spatial = spatial, type = "departure", events = "all"))
 
-  residency.list <- getResidency(movements = valid.section.movements, spatial = spatial)
+  residency.list <- getResidency(movements = section.movements, spatial = spatial)
   
   appendTo(c("Screen", "Report"), "M: Calculating daily locations for each fish.")
 
@@ -322,11 +356,11 @@ detections.list <- study.data$detections.list
 
   if (invalid.dist)
     save(detections, valid.detections, spatial, deployments, arrays, movements, valid.movements, 
-      section.movements, valid.section.movements, status.df, last.seen, array.times, section.times,
+      section.movements, status.df, last.seen, array.times, section.times,
       residency.list, daily.ratios, daily.positions, global.ratios, efficiency, intra.array.CJS, rsp.info, file = resultsname)
   else
     save(detections, valid.detections, spatial, deployments, arrays, movements, valid.movements, 
-      section.movements, valid.section.movements, status.df, last.seen, array.times, section.times,
+      section.movements, status.df, last.seen, array.times, section.times,
       residency.list, daily.ratios, daily.positions, global.ratios, efficiency, intra.array.CJS, rsp.info, dist.mat, file = resultsname)
 # ------------
 
@@ -388,12 +422,12 @@ detections.list <- study.data$detections.list
 
   if (invalid.dist)
     return(list(detections = detections, valid.detections = valid.detections, spatial = spatial, deployments = deployments, arrays = arrays,
-      movements = movements, valid.movements = valid.movements, section.movements = section.movements, valid.section.movements = valid.section.movements,
+      movements = movements, valid.movements = valid.movements, section.movements = section.movements,
       status.df = status.df, efficiency = efficiency, intra.array.CJS = intra.array.CJS, array.times = array.times, section.times = section.times, 
       residency.list = residency.list, daily.ratios = daily.ratios, daily.positions = daily.positions, global.ratios = global.ratios, last.seen = last.seen, rsp.info = rsp.info))
   else
     return(list(detections = detections, valid.detections = valid.detections, spatial = spatial, deployments = deployments, arrays = arrays,
-      movements = movements, valid.movements = valid.movements, section.movements = section.movements, valid.section.movements = valid.section.movements,
+      movements = movements, valid.movements = valid.movements, section.movements = section.movements,
       status.df = status.df, efficiency = efficiency, intra.array.CJS = intra.array.CJS, array.times = array.times, section.times = section.times, 
       residency.list = residency.list, daily.ratios = daily.ratios, daily.positions = daily.positions, global.ratios = global.ratios, last.seen = last.seen, rsp.info = rsp.info, dist.mat = dist.mat))
 }
@@ -711,100 +745,6 @@ return(reportname)
 }
 
 
-#' update array-movement validity based on the section-movements
-#' 
-#' @param arrmoves the array movements
-#' @param secmoves the section movements
-#' 
-#' @return the updated array movements
-#' 
-#' @keywords internal
-#' 
-updateAMValidity <- function(arrmoves, secmoves) {
-  Valid <- NULL
-  output <- lapply(names(arrmoves), 
-    function(i) {
-      if (!is.null(secmoves[[i]]) && any(!secmoves[[i]]$Valid)) {
-        aux <- secmoves[[i]][(!Valid)]
-        to.change <- unlist(lapply(1:nrow(aux),
-          function(j) {
-            A <- which(arrmoves[[i]]$First.time == aux$First.time)
-            B <- A + (aux$Events - 1)
-            return(A:B)
-          }))
-        appendTo(c("Screen", "Report"), paste0("M: Rendering ", length(to.change), " array movement(s) invalid for fish ", i ," as the respective section movements were discarded by the user."))
-        arrmoves[[i]]$Valid[to.change] <- FALSE
-      }
-      return(arrmoves[[i]])
-    })
-  names(output) <- names(arrmoves)
-  return(output)
-}
-
-#' Compress array-movements into section-movements
-#' 
-#' @inheritParams simplifyMovements
-#' @inheritParams migration
-#' 
-#' @return the section movements
-#' 
-#' @keywords internal
-#' 
-sectionMovements <- function(movements, sections, invalid.dist) {
-	Valid <- NULL
-	output <- list()
-	for (fish in names(movements)) {
-		valid.movements <- movements[[fish]][(Valid)]
-		if (nrow(valid.movements) > 0) {
-			aux <- lapply(seq_along(sections), function(i) {
-				x <- rep(NA_character_, nrow(valid.movements))
-				x[grepl(sections[i], valid.movements$Array)] <- sections[i]
-				return(x)
-				})
-
-			event.index <- combine(aux)
-			aux <- rle(event.index)
-			last.events <- cumsum(aux$lengths)
-			first.events <- c(1, last.events[-length(last.events)] + 1)
-			
-      if (invalid.dist) {
-        recipient <- data.frame(
-          Section = aux$values,
-          Events = aux$lengths,
-          Detections = unlist(lapply(seq_along(aux$values), function(i) sum(valid.movements$Detections[first.events[i]:last.events[i]]))),
-          First.array = valid.movements$Array[first.events],
-          Last.array = valid.movements$Array[last.events],
-          First.time = valid.movements$First.time[first.events],
-          Last.time = valid.movements$Last.time[last.events],
-          Time.travelling = c(valid.movements$Time.travelling[1], rep(NA_character_, length(aux$values) - 1)),
-          Time.in.section = rep(NA_character_, length(aux$values)),
-          Valid = rep(TRUE, length(aux$values)),
-          stringsAsFactors = FALSE
-          )
-      } else {
-        recipient <- data.frame(
-          Section = aux$values,
-          Events = aux$lengths,
-          Detections = unlist(lapply(seq_along(aux$values), function(i) sum(valid.movements$Detections[first.events[i]:last.events[i]]))),
-          First.array = valid.movements$Array[first.events],
-          Last.array = valid.movements$Array[last.events],
-          First.time = valid.movements$First.time[first.events],
-          Last.time = valid.movements$Last.time[last.events],
-          Time.travelling = c(valid.movements$Time.travelling[1], rep(NA_character_, length(aux$values) - 1)),
-          Time.in.section = rep(NA_character_, length(aux$values)),
-          Speed.in.section.m.s = unlist(lapply(seq_along(aux$values), function(i) mean(valid.movements$Average.speed.m.s[first.events[i]:last.events[i]], na.rm = TRUE))),
-          Valid = rep(TRUE, length(aux$values)),
-          stringsAsFactors = FALSE
-          )
-      }
-			output[[length(output) + 1]] <- as.data.table(movementTimes(movements = recipient, type = "section"))
-			names(output)[length(output)] <- fish
-			attributes(output[[length(output)]])$p.type <- attributes(movements[[fish]])$p.type
-		}
-	}
-	return(output)
-}
-
 #' Collect summary information for the residency analysis
 #' 
 #' @param secmoves the section-movements
@@ -905,7 +845,6 @@ assembleResidency <- function(secmoves, movements, sections) {
 #' Combines the timetable and the original biometrics.
 #' 
 #' @inheritParams explore
-#' @inheritParams deployValues
 #' @inheritParams splitDetections
 #' @inheritParams simplifyMovements
 #' @inheritParams loadDetections
@@ -952,7 +891,7 @@ res_assembleOutput <- function(res.df, bio, spatial, sections, tz) {
 
 #' Calculate array efficiency for residency analysis
 #' 
-#' @inheritParams updateAMValidity
+#' @inheritParams updateValidity
 #' @inheritParams splitDetections
 #' @inheritParams createStandards
 #' @param arrays a list containing information for each array

@@ -86,11 +86,7 @@ checkSpeeds <- function(movements, fish, valid.movements, speed.warning, speed.e
     appendTo("UD", decision)
     if (decision == "y" | decision == "Y") {
       aux <- invalidateEvents(movements = vm, fish = fish)
-      if (any(!aux$Valid)) {
-        aux <- aux[!(Valid)]
-        link <- apply(aux, 1, function(x) which(movements$Array == x["Array"] & grepl(x["First.time"], movements$First.time, fixed = TRUE)))
-        movements$Valid[link] <- FALSE
-      }
+      movements <- transferValidity(from = aux, to = movements)
     }
   } # end trigger error
   return(movements)   
@@ -182,11 +178,7 @@ checkInactiveness <- function(movements, fish, detections.list, inactive.warning
         appendTo("UD", decision)
         if (decision == "y" | decision == "Y") {
           aux <- invalidateEvents(movements = valid.moves, fish = fish)
-          if (any(!aux$Valid)) {
-            aux <- aux[!(Valid)]
-            link <- apply(aux, 1, function(x) which(movements$Array == x["Array"] & grepl(x["First.time"], movements$First.time, fixed = TRUE)))
-            movements$Valid[link] <- FALSE
-          }
+          movements <- transferValidity(from = aux, to = movements)
         }
       }
       iteration <- iteration + 1
@@ -233,11 +225,7 @@ checkImpassables <- function(movements, fish, dotmat){
           }
           if (decision == "a" | decision == "A") {
             aux <- invalidateEvents(movements = valid.moves, fish = fish)
-            if (any(!aux$Valid)) {
-              aux <- aux[!(Valid)]
-              link <- apply(aux, 1, function(x) which(movements$Array == x["Array"] & grepl(x["First.time"], movements$First.time, fixed = TRUE)))
-              movements$Valid[link] <- FALSE
-            }
+            movements <- transferValidity(from = aux, to = movements)
             restart <- TRUE
             check <- FALSE
           } else {
@@ -253,23 +241,29 @@ checkImpassables <- function(movements, fish, dotmat){
 #' Verify number of detections in section movements
 #' 
 #' @param secmoves the section movements list
+#' @param fish The fish being analysed
 #' @inheritParams residency
 #' 
 #' @return the section movements with valid/invalid notes
 #' 
 #' @keywords internal
 #' 
-checkSMovesN <- function(secmoves, section.minimum) {
+checkSMovesN <- function(secmoves, fish, section.minimum) {
   appendTo("debug", "Running checkSMovesN")
-  output <- lapply(seq_along(secmoves), 
-    function(i) {
-      if (any(link <- secmoves[[i]]$Detections < section.minimum)) {
-        appendTo(c("Screen", "Report"), paste0("M: Section movements with less than ",section.minimum, " detections are present for fish ", names(secmoves)[i], "."))
-        decision <- commentCheck(paste0("Would you like to inspect the section movements from fish ", names(secmoves)[i]," ?(y/N/comment) "), tag = names(secmoves)[i])
-        appendTo("UD", decision)
-        if (decision == "y" | decision == "Y") {
-          print(secmoves[[i]])
-          decision <- commentCheck(line = "Would you like to render any movement event invalid?(y/N/comment) ", tag = names(secmoves)[i])
+  if (any(link <- secmoves$Detections < section.minimum)) {
+    appendTo("Screen", paste0("M: Opening section movements for fish ", fish," for inspection:"))
+    print(secmoves, topn = nrow(secmoves))
+    message("")
+    decision <- commentCheck(line = "Would you like to render any movement event invalid?(y/N/comment) ", tag = fish)
+    appendTo("UD", decision)
+    if (decision == "y" | decision == "Y") {
+      aux <- invalidateEvents(movements = secmoves, fish = fish)
+      secmoves <- transferValidity(from = aux, to = secmoves)
+    }
+  }
+  return(secmoves)
+}
+
 #' Check that the fish linearly moved along the sections
 #' 
 #' @param secmoves the section movements list
@@ -563,18 +557,14 @@ checkJumpDistance <- function(movements, fish, release, dotmat, jump.warning = 2
       appendTo("Screen", paste0("M: Opening movement table of fish ", fish, " for inspection:"))
       print(vm, topn = nrow(vm))
       if (nrow(vm) >= 100)
-        message("\nM: Long table detected, repeating warning that triggered the interaction:\n-----\n", the.warning, "\n  (inactiveness started on ", as.Date(valid.moves$First.time[start_i]),")\n-----")
+        message("\nM: Long table detected, repeating warning that triggered the interaction:\n-----\n", the.warning, "\n-----")
       if (nrow(vm) < 100 & nrow(vm) >= 30)
         message("\nM: Please find the exception which triggered this interaction at the top of the table.")          
       decision <- commentCheck(line = "Would you like to render any movement event invalid?(y/N/comment) ", tag = fish)
       appendTo("UD", decision)
       if (decision == "y" | decision == "Y") {
         aux <- invalidateEvents(movements = vm, fish = fish)
-        if (any(!aux$Valid)) {
-          aux <- aux[!(Valid)]
-          link <- apply(aux, 1, function(x) which(movements$Array == x["Array"] & grepl(x["First.time"], movements$First.time, fixed = TRUE)))
-          movements$Valid[link] <- FALSE
-        }
+        movements <- transferValidity(from = aux, to = movements)
       }
     } # end trigger error
   }
@@ -845,7 +835,7 @@ invalidateEvents <- function(movements, fish) {
     check <- TRUE
     while (check) {
       the.string <- commentCheck(line = "Events to be rendered invalid: ", tag = fish)
-      the.inputs <- unlist(strsplit(the.string, "\ "))
+      the.inputs <- unlist(strsplit(the.string, "\ |,"))
       the.rows <- the.inputs[grepl("^[0-9]*$", the.inputs)]
       n.rows <- length(the.rows)
       if (length(the.rows) > 0)
@@ -915,3 +905,22 @@ invalidateEvents <- function(movements, fish) {
   return(movements)
 }
 
+#' Transfer validity updates from valid movements to all movements
+#' 
+#' @param from the valid movements with newly invalidated moves
+#' @param to the all movements table
+#' 
+#' @return the all movements table with valid/invalid updated
+#' 
+#' @keywords internal
+#' 
+transferValidity <- function(from, to) {
+  Valid <- NULL
+  if (any(!from$Valid)) {
+    aux <- from[!(Valid)]
+    link <- apply(aux, 1, function(x) which(to[, 1] == x[1] & grepl(x["First.time"], to$First.time, fixed = TRUE)))
+    to$Valid[link] <- FALSE
+    attributes(to)$p.type <- "Manual"
+  }
+  return(to)
+}
