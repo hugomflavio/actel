@@ -7,11 +7,14 @@
 checkMinimumN(movements, minimum.detections, fish)
 }
 \arguments{
-\item{movements}{the movements list}
+\item{movements}{The movements table}
 
-\item{minimum.detections}{The minimum number of times a tag must have been recorded during the study period for it to be considered a true tag and not random noise.}
+\item{minimum.detections}{For tags with only one movement event, defines the
+minimum number of times a tag must have been recorded during the study
+period for it to be considered true detections and not random noise.
+Defaults to 2.}
 
-\item{fish}{the fish being analysed}
+\item{fish}{The fish being analysed}
 }
 \value{
 The movements with valid/invalid notes

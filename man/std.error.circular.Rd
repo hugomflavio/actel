@@ -9,12 +9,12 @@ std.error.circular(x, na.rm = TRUE, silent = FALSE)
 \arguments{
 \item{x}{input data}
 
-\item{na.rm}{logical: if TRUE, missing values are removed.}
+\item{na.rm}{Logical: Should missing values be removed?}
 
-\item{silent}{logica: if TRUE, The number of NA's removed is not displayed.}
+\item{silent}{Logical: Should the number of NA's removed be displayed?}
 }
 \value{
-SDM
+Standard Error of the Mean
 }
 \description{
 Calculate the standard error of the mean

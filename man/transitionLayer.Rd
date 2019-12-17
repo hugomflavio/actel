@@ -21,5 +21,5 @@ transitionLayer(shape, size, EPSGcode, directions = c(16, 8, 4), force = FALSE)
 Adapted from Grant Adams' script "distance to closest mpa". (grant.adams@eagles.usm.edu)
 }
 \details{
-https://cran.r-project.org/web/packages/gdistance/vignettes/gdistance1.pdf
+\url{https://cran.r-project.org/web/packages/gdistance/vignettes/gdistance1.pdf}
 }

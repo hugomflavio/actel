@@ -7,9 +7,9 @@
 roundUp(input, to = 10)
 }
 \arguments{
-\item{input}{The value to be rounded}
+\item{input}{The value to be rounded.}
 
-\item{to}{The level of rounding to be applied (i.e. to=10 will round 14.2 to 20; to=1 will round i to 15)}
+\item{to}{The level of rounding to be applied (i.e. to=10 will round 14.2 to 20; to=1 will round i to 15).}
 }
 \value{
 The rounded value

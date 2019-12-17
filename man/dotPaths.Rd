@@ -11,7 +11,8 @@ dotPaths(input, dotmat, disregard.parallels)
 
 \item{dotmat}{A dot distance matrix}
 
-\item{disregard.parallels}{Logical. If TRUE, the presence of parallel arrays does not invalidate potential efficiency peers. For more details on this, have a look at the vignettes.}
+\item{disregard.parallels}{Logical:  Should the presence of parallel arrays
+invalidate potential efficiency peers? See the vignettes for more details.}
 }
 \value{
 The input list, with an extra element for each array with valid efficiency peers

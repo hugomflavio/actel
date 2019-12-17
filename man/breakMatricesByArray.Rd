@@ -7,9 +7,13 @@
 breakMatricesByArray(m, arrays, type = c("peers", "all"), verbose = TRUE)
 }
 \arguments{
-\item{m}{the original presence/absence matrices}
+\item{m}{The presence/absence matrices.}
 
-\item{arrays}{a list of arrays}
+\item{arrays}{A list containing information for each array.}
+
+\item{type}{The type of arrays to be matched}
+
+\item{verbose}{Logical: Should appendto be used?}
 }
 \value{
 a list of matrices, split by array

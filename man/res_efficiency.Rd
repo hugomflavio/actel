@@ -20,7 +20,7 @@ res_efficiency(arrmoves, bio, spatial, arrays, paths, dotmat)
 \item{dotmat}{A dot distance matrix}
 }
 \value{
-An efficiency list, containing a table of absolutes, min and max efficiency 
+An efficiency list, containing a table of absolutes, min and max efficiency
 and detailed information of where the arrays failed.
 }
 \description{

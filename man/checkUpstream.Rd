@@ -6,6 +6,15 @@
 \usage{
 checkUpstream(movements, fish, release, arrays)
 }
+\arguments{
+\item{movements}{The movements table}
+
+\item{fish}{The fish being analysed}
+
+\item{release}{The release location of the fish}
+
+\item{arrays}{a list containing information for each array}
+}
 \value{
 The updated movements
 }

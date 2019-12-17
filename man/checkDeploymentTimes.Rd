@@ -7,7 +7,7 @@
 checkDeploymentTimes(input)
 }
 \arguments{
-\item{input}{the table of deployments}
+\item{input}{The table of deployments}
 }
 \description{
 Confirm that receivers were not re-deployed before being retrieved

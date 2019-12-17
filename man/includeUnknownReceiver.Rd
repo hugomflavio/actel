@@ -7,6 +7,8 @@
 includeUnknownReceiver(spatial, deployments, unknown.receivers)
 }
 \arguments{
+\item{spatial}{The spatial data frame, as loaded by loadSpatial}
+
 \item{unknown.receivers}{serial number of the receivers to be included}
 }
 \description{

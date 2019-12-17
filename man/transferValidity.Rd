@@ -7,9 +7,9 @@
 transferValidity(from, to)
 }
 \arguments{
-\item{from}{the valid movements with newly invalidated moves}
+\item{from}{The valid movements table with newly invalidated moves}
 
-\item{to}{the all movements table}
+\item{to}{The target movements table}
 }
 \value{
 the all movements table with valid/invalid updated

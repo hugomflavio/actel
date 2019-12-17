@@ -70,9 +70,9 @@ listToTable <- function(input, type = c("table", "frame"), row.names = FALSE, so
 
 #' Update study area for actel v.0.0.4
 #' 
-#' Converts the spatial.csv in itself + a deployments.csv file.
+#' Converts the spatial.csv in itself plus a deployments.csv file.
 #' 
-#' @inheritParams migration
+#' @inheritParams explore
 #' 
 #' @export
 #' 
@@ -105,10 +105,10 @@ updateStudy <- function(tz) {
 #' Calculate the standard error of the mean
 #' 
 #' @param x input data
-#' @param na.rm logical: if TRUE, missing values are removed.
-#' @param silent logica: if TRUE, The number of NA's removed is not displayed.
+#' @param na.rm Logical: Should missing values be removed?
+#' @param silent Logical: Should the number of NA's removed be displayed?
 #' 
-#' @return SDM
+#' @return Standard Error of the Mean
 #' 
 #' @export
 #' 
@@ -125,8 +125,8 @@ std.error.circular <- function(x, na.rm = TRUE, silent = FALSE){
 
 #' Convert hh:mm:ss time to hh.hhh
 #'
-#' @param input Single string or a vector of strings containing hours:minutes or hours:minutes:seconds
-#' @param unit the desired units of the output, one of "h" (hours), "m", (minutes) or "s" (seconds)
+#' @param input Single string or a vector of strings containing hours:minutes or hours:minutes:seconds.
+#' @param unit the desired units of the output, one of "h" (hours), "m", (minutes) or "s" (seconds).
 #' 
 #' @return Decimal hour equivalent (single value or vector)
 #' 
@@ -159,8 +159,8 @@ decimalTime <- function(input, unit = c("h", "m", "s")) {
 
 #' Convert numeric time to HH:MM
 #'
-#' @param x Single string or a vector of strings containing hours:minutes or hours:minutes:seconds
-#' @param format the format of x, one of "h" (hours), "m", (minutes) or "s" (seconds)
+#' @param x Single string or a vector of strings containing hours:minutes or hours:minutes:seconds.
+#' @param format the format of x, one of "h" (hours), "m", (minutes) or "s" (seconds).
 #' @param seconds Logical; If TRUE, output is returned in HH:MM:SS format.
 #' 
 #' @return Decimal hour equivalent (single value or vector)
@@ -238,7 +238,7 @@ matchl <- function(input, match) {
 
 #' Consider NA's as FALSE
 #'
-#' Aimed to be used in a vector of TRUE/FALSE's, where NA's are present and should be considered as false
+#' Aimed to be used in a vector of TRUE/FALSE's, where NA's are present and should be considered as false.
 #' 
 #' @param input vector containing NA's.
 #' 
@@ -284,8 +284,8 @@ combine <- function(input) {
 #'
 #' Forces the rounding of the input to the next higher rounded value.
 #' 
-#' @param input The value to be rounded
-#' @param to The level of rounding to be applied (i.e. to=10 will round 14.2 to 20; to=1 will round i to 15)
+#' @param input The value to be rounded.
+#' @param to The level of rounding to be applied (i.e. to=10 will round 14.2 to 20; to=1 will round i to 15).
 #' 
 #' @return The rounded value
 #' 
@@ -302,8 +302,8 @@ roundUp <- function(input, to = 10) {
 #'
 #' Forces the rounding of the input to the next lower rounded value.
 #' 
-#' @param input The value to be rounded
-#' @param to The level of rounding to be applied (i.e. to=10 will round 14.8 to 10; to=1 will round i to 14)
+#' @param input The value to be rounded.
+#' @param to The level of rounding to be applied (i.e. to=10 will round 14.8 to 10; to=1 will round i to 14).
 #' 
 #' @return The rounded value
 #' 
@@ -353,6 +353,8 @@ appendTo <- function(recipient, line, fish) {
 #' 
 #' At the end of the function actel or emergencyBreak, removes temporary files.
 #' 
+#' @param emergency Logical: Should temp_debug.txt be kept?
+#' 
 #' @keywords internal
 #' 
 deleteHelpers <- function(emergency = FALSE) {
@@ -379,7 +381,7 @@ emergencyBreak <- function() {
 
 #' Move helper files to new directory
 #' 
-#' @param my.home The working directory where the function was triggered.
+#' @param my.home The working directory where the main function was triggered.
 #' 
 #' @keywords internal
 #' 
@@ -398,8 +400,8 @@ moveHelpers <- function(my.home) {
 #' 
 #' Checks if the user has invoked the comment command for a specific fish, and stores the comment.
 #' 
-#' @param line The text of the interaction in which the user may or may not request a comment
-#' @param tag The tag number currently being analysed
+#' @param line The text of the interaction in which the user may or may not request a comment.
+#' @param tag The tag number currently being analysed.
 #' 
 #' @keywords internal
 #' 
@@ -464,9 +466,8 @@ updateActel <- function() {
 
 #' Extract time stamp of valid entry or exit in each array
 #' 
-#' @inheritParams assembleMatrices
-#' @inheritParams loadDetections
-#' @inheritParams explore
+#' @param spatial The list of spatial objects.
+#' @param movements The list of valid movements.
 #' @param type The point to be recorded: one of "arrival" or "departure".
 #' @param events The number of events to record. if "one" and type is "arrival", the very first arrival is returned;
 #' if "one" and type is "departure", the very last departure is returned.
@@ -546,7 +547,7 @@ getTimes <- function(movements, spatial, type = c("arrival", "departure"), event
 
 #' Convert times data frame into a list of circular objects
 #' 
-#' @param times A data frame with the time stamps for reach fish and array
+#' @param times A data frame with the time stamps for reach fish and array.
 #' 
 #' @keywords internal
 #' 
@@ -567,9 +568,9 @@ convertTimesToCircular <- function(times) {
 
 #' Calculate distance matrix
 #' 
-#' Adapted from Grant Adams' script "distance to closest mpa". (grant.adams@eagles.usm.edu)
+#' Adapted from Grant Adams' script "distance to closest mpa". (grant.adams@@eagles.usm.edu)
 #' 
-#' https://cran.r-project.org/web/packages/gdistance/vignettes/gdistance1.pdf
+#' \url{https://cran.r-project.org/web/packages/gdistance/vignettes/gdistance1.pdf}
 #'
 #' @param shape A shape file from which to create the transition layer.
 #' @param size The pixel size, in metres.
@@ -579,7 +580,7 @@ convertTimesToCircular <- function(times) {
 #' 
 #' @export
 #' 
-transitionLayer <- function(shape, size, EPSGcode, directions = c(16,8,4), force = FALSE){
+transitionLayer <- function(shape, size, EPSGcode, directions = c(16, 8, 4), force = FALSE){
   directions <- as.character(directions)
   directions <- match.arg(directions)
   if (!file.exists(shape))
@@ -624,8 +625,9 @@ transitionLayer <- function(shape, size, EPSGcode, directions = c(16,8,4), force
 
 #' Calculate distance matrix
 #' 
-#' Adapted from Grant Adams' script "distance to closest mpa". (grant.adams@eagles.usm.edu)
-#' https://cran.r-project.org/web/packages/gdistance/vignettes/gdistance1.pdf
+#' Adapted from Grant Adams' script "distance to closest mpa". (grant.adams@@eagles.usm.edu)
+#' 
+#' \url{https://cran.r-project.org/web/packages/gdistance/vignettes/gdistance1.pdf}
 #'
 #' @param t.layer A .RData file containing a transition layer.
 #' @param starters The points from which to start measuring the distance.
@@ -633,7 +635,7 @@ transitionLayer <- function(shape, size, EPSGcode, directions = c(16,8,4), force
 #' @param EPSGcode The EPSG code corresponding to the coordinate system of the input data. All inputs must be in the same metric system. DO NOT use degree-based coordinates.
 #' @param coord.x,coord.y The names of the columns containing the x and y information. Must be identical in the starters and targets.
 #' @param PointIDCol The name of the column containing the IDs of the points to be used as starters and targets. Must be identical in both files.
-#' @param actel logical: if TRUE, a distance matrix optimized for actel will be saved in the working directory.
+#' @param actel logical: Should the distance matrix be optimized for actel and saved in the working directory?
 #'
 #' @return The distance matrix
 #' 

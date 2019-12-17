@@ -7,7 +7,7 @@
 mbSplitCJS(m, fixed.efficiency = NULL)
 }
 \arguments{
-\item{m}{A list of detection matrices}
+\item{m}{The presence/absence matrices.}
 
 \item{fixed.efficiency}{A vector of fixed efficiency estimates from a more complete CJS model.}
 }

@@ -7,7 +7,7 @@
 overrideValidityChecks(moves, fish)
 }
 \arguments{
-\item{moves}{the respective movements table}
+\item{moves}{The movements table}
 
 \item{fish}{The fish being analysed}
 }

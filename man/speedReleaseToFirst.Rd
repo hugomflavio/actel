@@ -32,3 +32,4 @@ The movement data frame containing the missing information.
 \description{
 Calculate time and speed since release.
 }
+\keyword{internal}

@@ -1,14 +1,78 @@
 #' Residency analysis
 #' 
-#' The actel package provides a systematic way of analysing fish residency data.
-#' residency() collects the input present in the target folder and analyses the telemetry data, extracting residency-related metrics.
-#' It is strongly recommended to read the package vignettes before attempting to run the analyses. You can find the vignettes by running browseVignettes('actel') .
+#' The \code{\link{residency}} analysis runs the same initial checks as 
+#' \code{\link{explore}}, but, similarly to \code{\link{migration}}, explores 
+#' particular points of the fish behaviour. If you want to know where your fish 
+#' were in each day of the study, how many fish were in each section each day, 
+#' and other residency-focused variables, this is the analysis you are looking 
+#' for!
 #'  
+#' @param section.minimum If a fish has less than \code{section.minimum} 
+#'  consecutive detections in a section, a warning is issued. Defaults to 2.
 #' @inheritParams migration
 #' @inheritParams explore
-#' @param section.minimum threshold consecutive number of detections in a section that awards confidence in the results. If the number of detections is lower than this argument, a warning is issued and user interaction is allowed.
 #' 
-#' @return A list containing 1) the detections used during the analysis, 2) the movement events, 3) the status dataframe, 4) the survival overview per group, 5) the progression through the study area, 6) the ALS array/sections' efficiency, 7) the list of spatial objects used during the analysis.
+#' @return A list containing:
+#' \itemize{
+#'  \item \code{detections}: All detections for each target fish;
+#'  \item \code{valid.detections}: Valid detections for each target fish;
+#'  \item \code{spatial}: The spatial information used during the analysis;
+#'  \item \code{deployments}: The deployments of each receiver;
+#'  \item \code{arrays}: The array details used during the analysis;
+#'  \item \code{movements}: All movement events for each target fish;
+#'  \item \code{valid.movements}: Valid movemenet events for each target fish;
+#'  \item \code{section.movements}: Valid section shifts for each target fish;
+#'  \item \code{status.df}: Summary information for each fish, including the
+#'   following columns:
+#'    \itemize{
+#'      \item \emph{Times.entered.\[section\]}: Total number of times the fish
+#'        entered a given section
+#'      \item \emph{Average.entry.\[section\]}: Average entry time at a given 
+#'        section
+#'      \item \emph{Average.time.\[section\]}: Average time the fish spent in a
+#'        given section during each visit
+#'      \item \emph{Average.departure.\[section\]}: Average departure time from 
+#'        a given section
+#'      \item \emph{Total.time.\[section\]}: Total time spent in a given section
+#'      \item \emph{Very.last.array}: Last array where the fish was detected
+#'      \item \emph{Very.last.time}: Time of the last valid detection
+#'      \item \emph{Status}: Fate assigned to the fish
+#'      \item \emph{Valid.detections}: Number of valid detections
+#'      \item \emph{Invalid.detections}: Number of invalid detections
+#'      \item \emph{Valid.events}: Number of valid events
+#'      \item \emph{Invalid.events}: Number of invalid events
+#'      \item \emph{P.type}: Type of processing: 
+#'        \itemize{
+#'          \item 'Skipped' if no data was found for the fish,
+#'          \item 'Auto' if no user interaction was required,
+#'          \item 'Manual' if user interaction was suggested and the user made
+#'            changes to the validity of the events,
+#'          \item 'Overridden' if the user listed the fish in the 
+#'            \code{override} argument.
+#'        }
+#'      \item \emph{Comments}: Comments left by the user during the analysis
+#'    }
+#'  \item \code{last.seen}: Summary table of the number of fish last seen in
+#'    each study area section;
+#'  \item \code{array.times}: Table containing ALL the entry times of each fish
+#'    in each array;
+#'  \item \code{section.times}: Table containing all the entry times of each 
+#'    fish in each section;
+#'  \item \code{residency.list}: Places of residency between first and last
+#'    valid detection for each fish;
+#'  \item \code{daily.ratios}: Daily location per section (both in seconds spent
+#'    and in percentage of day) for each fish;
+#'  \item \code{daily.positions}: Summary table showing the location where each
+#'    fish spent the most time per day;
+#'  \item \code{global.ratios}: Summary tables showing the number of active fish
+#'    (and respective percentages) present at each location per day;
+#'  \item \code{efficiency}: Results of the inter-array Multi-way efficiency
+#'    calculations (see vignettes for more details);
+#'  \item \code{intra.array.CJS}: Results of the intra-array CJS calculations;
+#'  \item \code{rsp.info}: Appendix information for the RSP package;
+#'  \item \code{dist.mat}: The distance matrix used in the analysis (if a valid
+#'   distance matrix was supplied)
+#' }
 #' 
 #' @export
 #' 

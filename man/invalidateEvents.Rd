@@ -7,9 +7,9 @@
 invalidateEvents(movements, fish)
 }
 \arguments{
-\item{movements}{te movement table being analysed}
+\item{movements}{The movements table}
 
-\item{fish}{The corresponding tag}
+\item{fish}{The fish being analysed}
 }
 \value{
 the movement table with valid/invalid notes

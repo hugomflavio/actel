@@ -1,8 +1,8 @@
 #' Create a default Workspace
 #'
-#' @param dir The name of the target directory. Will be created if not present
-#' 
 #' Produces the files and folders required to run the package, which the user can use as a template.
+#' 
+#' @param dir The name of the target directory. Will be created if not present
 #'
 #' @export
 #' 
@@ -44,10 +44,7 @@ createWorkspace <- function(dir = "actel_workspace") {
 #'
 #' Creates a ready-to-run workspace with example data.
 #' 
-#' @param spatial A dataset containing the positions of the deployed ALS and release site.
-#' @param biometrics A dataset containing the positions of the deployed ALS and release site.
-#' @param detections A dataset containing the detections of the deployed ALS, for the 60 fish.
-#' @param deployments A dataset containing the deployed receivers.
+#' @param spatial,biometrics,detections,deployments Datasets provided with the package.
 #'
 #' @export
 #' 
@@ -82,6 +79,9 @@ And follow the instructions as they come. Once finished, explore the object 'res
 #'   \item{Type}{The type of spatial object (must be either Hydrophone or Release)}
 #' }
 #' @source Data collected by the authors.
+#' 
+#' @keywords internal
+#' 
 "example.spatial"
 
 #' Example biometric data
@@ -99,6 +99,9 @@ And follow the instructions as they come. Once finished, explore the object 'res
 #'   \item{Mass.g}{The mass of the tagged fish}
 #' }
 #' @source Data collected by the authors.
+#' 
+#' @keywords internal
+#' 
 "example.biometrics"
 
 #' Example detection data
@@ -113,6 +116,9 @@ And follow the instructions as they come. Once finished, explore the object 'res
 #'   \item{Station.Name}{The name given to the ALS}
 #' }
 #' @source Data collected by the authors.
+#' 
+#' @keywords internal
+#' 
 "example.detections"
 
 #' Example deployment data
@@ -127,4 +133,7 @@ And follow the instructions as they come. Once finished, explore the object 'res
 #'   \item{Stop}{The date and time of the retrieval}
 #' }
 #' @source Data collected by the authors.
+#' 
+#' @keywords internal
+#' 
 "example.deployments"

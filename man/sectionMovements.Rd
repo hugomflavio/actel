@@ -9,7 +9,9 @@ sectionMovements(movements, sections, invalid.dist)
 \arguments{
 \item{movements}{A list of movements for each target tag, created by groupMovements.}
 
-\item{sections}{The sections in which the study was divided. Must be coincident with the names given to the ALS arrays. (i.e. if an array is 'River1', then the respective section is 'River')}
+\item{sections}{The sections in which the study area is divided. Must be
+coincident with the names given to the arrays. See the vignettes for more
+details.}
 
 \item{invalid.dist}{Whether or not the distance matrix supplied is valid for the study area.}
 }

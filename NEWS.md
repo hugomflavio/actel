@@ -25,6 +25,8 @@ Enhancements:
   * 'minimum.detections' is now available in all functions.
   * 'override' is now available in all functions, and allows the user to directly invalidate specific events.
   * 'Detections' column in the object *status.df* has been split into 'Valid.detections' and 'All.detections'.
+  * Package-level documentation has been implemented (can be found using ?actel).
+  * explore(), migration() and residency() documentation has been expanded.
 
 ## actel 0.1.1
 

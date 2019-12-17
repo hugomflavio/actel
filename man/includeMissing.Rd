@@ -8,6 +8,8 @@ includeMissing(x, status.df)
 }
 \arguments{
 \item{x}{an efficiency matrix}
+
+\item{status.df}{The main results table.}
 }
 \value{
 a matrix of detection histories per fish, including fish that were never detected.

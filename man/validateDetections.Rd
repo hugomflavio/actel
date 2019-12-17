@@ -7,9 +7,9 @@
 validateDetections(detections.list, movements)
 }
 \arguments{
-\item{detections.list}{the list of detections per fish}
+\item{detections.list}{The list of detections per fish}
 
-\item{movements}{the list of movements to be matched}
+\item{movements}{The list of movements to be matched}
 }
 \value{
 A list of valid detections per fish

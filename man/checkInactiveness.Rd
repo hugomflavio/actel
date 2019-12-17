@@ -15,19 +15,21 @@ checkInactiveness(
 )
 }
 \arguments{
-\item{movements}{the movements list}
+\item{movements}{The movements table}
 
-\item{fish}{the fish being analysed}
+\item{fish}{The fish being analysed}
 
 \item{detections.list}{A list of the detections split by each target tag, created by splitDetections.}
 
-\item{inactive.warning}{Numeric value (days). If a fish spends a number of days greater or equal to this argument in a given place, a warning is issued. Defaults to NULL (i.e. no speed checks are performed, with a message)}
+\item{inactive.warning}{If a fish spends a number of days equal or greater
+than \code{inactive.error} in a given array at the tail of the respective
+detections, a warning is issued. If left NULL (default), no warnings are
+issued.}
 
-\item{inactive.error}{Numeric value (days). If a fish spends a number of days greater or equal to this argument in a given place, user intervention is suggested. Defaults to NULL (i.e. no errors are issued)}
-
-\item{invalid.dist}{Whether or not the distance matrix supplied is valid for the study area.}
-
-\item{dist.mat}{A matrix of the distances between the deployed ALS.}
+\item{inactive.error}{If a fish spends a number of days equal or greater than
+\code{inactive.error} in a given array at the tail of the respective
+detections, user intervention is suggested. If left NULL (default), user
+intervention is never suggested.}
 }
 \value{
 The valid movements list with valid/invalid rows

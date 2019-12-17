@@ -19,9 +19,12 @@ loadDot(
 
 \item{spatial}{A spatial data frame}
 
-\item{sections}{The sections in which the study was divided. Must be coincident with the names given to the ALS arrays. (i.e. if an array is 'River1', then the respective section is 'River')}
+\item{sections}{The sections in which the study area is divided. Must be
+coincident with the names given to the arrays. See the vignettes for more
+details.}
 
-\item{disregard.parallels}{Logical. If TRUE, the presence of parallel arrays does not invalidate potential efficiency peers. For more details on this, have a look at the vignettes.}
+\item{disregard.parallels}{Logical:  Should the presence of parallel arrays
+invalidate potential efficiency peers? See the vignettes for more details.}
 }
 \value{
 The dot list

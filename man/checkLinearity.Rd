@@ -9,9 +9,11 @@ checkLinearity(secmoves, fish, sections, arrays)
 \arguments{
 \item{secmoves}{the section movements list}
 
-\item{fish}{the fish being analysed}
+\item{fish}{The fish being analysed}
 
-\item{sections}{The sections in which the study was divided. Must be coincident with the names given to the ALS arrays. (i.e. if an array is 'River1', then the respective section is 'River')}
+\item{sections}{The sections in which the study area is divided. Must be
+coincident with the names given to the arrays. See the vignettes for more
+details.}
 
 \item{arrays}{a list containing information for each array}
 }

@@ -15,19 +15,31 @@ loadStudyData(
 )
 }
 \arguments{
-\item{tz}{The time-zone of the study area. Necessary to convert the ALS time data, which is in UTC.}
+\item{tz}{The time zone of the study area. Must match one of the values
+present in \code{\link[base]{timezones}}.}
 
-\item{override}{A list of tags for which the user intends to manually define entering and leaving points for each study section.}
+\item{override}{A vector of tags for which the user intends to manually
+define which movement events are valid and invalid.}
 
-\item{start.time}{Detection data prior to this date is not analysed. Improves processing time when loading large amounts of detection data.}
+\item{start.time}{Detection data prior to the timestamp set in
+\code{start.time} (in YYYY-MM-DD HH:MM:SS format) is not considered during
+the analysis.}
 
-\item{stop.time}{Detection data posterior to this date is not analysed. Improves processing time when loading large amounts of detection data.}
+\item{stop.time}{Detection data posterior to the timestamp set in
+\code{stop.time} (in YYYY-MM-DD HH:MM:SS format) is not considered during
+the analysis.}
 
-\item{sections}{The sections in which the study was divided. Must be coincident with the names given to the ALS arrays. (i.e. if an array is 'River1', then the respective section is 'River')}
+\item{sections}{The sections in which the study area is divided. Must be
+coincident with the names given to the arrays. See the vignettes for more
+details.}
 
-\item{exclude.tags}{A list of tags that should be excluded from the detection data before any analyses are performed. Intended to be used if stray tags from a different code space but with the same signal as a target tag are detected in the study area.}
+\item{exclude.tags}{A vector of tags that should be excluded from the
+detection data before any analyses are performed. Intended to be used if
+stray tags from a different code space but with the same signal as a target
+tag are detected in the study area.}
 
-\item{disregard.parallels}{Logical. If TRUE, the presence of parallel arrays does not invalidate potential efficiency peers. For more details on this, have a look at the vignettes.}
+\item{disregard.parallels}{Logical:  Should the presence of parallel arrays
+invalidate potential efficiency peers? See the vignettes for more details.}
 }
 \value{
 a list of objects to be used for data analysis

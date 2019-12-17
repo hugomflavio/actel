@@ -20,7 +20,10 @@ printIndividuals(
 
 \item{bio}{A table with the tags and biometrics of the studied fish.}
 
-\item{tz}{The time-zone of the study area. Necessary to convert the ALS time data, which is in UTC.}
+\item{status.df}{The main results table.}
+
+\item{tz}{The time zone of the study area. Must match one of the values
+present in \code{\link[base]{timezones}}.}
 
 \item{movements}{A list of movements for each target tag, created by groupMovements.}
 

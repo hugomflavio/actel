@@ -7,8 +7,9 @@
 updateStudy(tz)
 }
 \arguments{
-\item{tz}{The time-zone of the study area. Necessary to convert the ALS time data, which is in UTC.}
+\item{tz}{The time zone of the study area. Must match one of the values
+present in \code{\link[base]{timezones}}.}
 }
 \description{
-Converts the spatial.csv in itself + a deployments.csv file.
+Converts the spatial.csv in itself plus a deployments.csv file.
 }

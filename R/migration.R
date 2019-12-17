@@ -1,18 +1,81 @@
 #' Migration analysis
 #' 
-#' The actel package provides a systematic way of analysing fish migration data.
-#' migration() collects the input present in the target folder and analyses the telemetry data, extracting migration-related metrics.
-#' It is strongly recommended to read the package vignettes before attempting to run the analyses. You can find the vignettes by running browseVignettes('actel') .
+#' The \code{migration} analysis runs the same initial checks as \code{explore},
+#' but on top of it, it analyses the fish behaviour. By selecting the arrays
+#' that lead to success, you can define whether or not your fish survived the
+#' migration. Additional plots help you find out if some fish has been acting
+#' odd. Multiple options allow you to tweak the analysis to fit your study
+#' perfectly.
 #' 
-#' @param sections The sections in which the study was divided. Must be coincident with the names given to the ALS arrays. (i.e. if an array is 'River1', then the respective section is 'River') 
-#' @param success.arrays The ALS arrays mark the end of the study area. If a fish crosses one of these arrays, it is considered to have successfully migrated through the area.
-#' @param if.last.skip.section Indicates whether a fish detected at the last array of a given section should be considered to have disappeared in the next section. Defaults to TRUE. I.e.: In a study with sections 'River' and 'Fjord', where 'River3' is the last river array, a fish last detected at River3 will be considered as 'disappeared in the Fjord'.
-#' @param disregard.parallels Logical. If TRUE, the presence of parallel arrays does not invalidate potential efficiency peers. For more details on this, have a look at the vignettes.
-#' @param replicates A list containing, for each desired array, the standard names of the stations to be used as a replicate, for efficiency estimations.
+#' @param sections The sections in which the study area is divided. Must be 
+#'  coincident with the names given to the arrays. See the vignettes for more
+#'  details.
+#' @param success.arrays The arrays that mark the end of the study area. If a 
+#'  fish crosses one of these arrays, it is considered to have successfully 
+#'  migrated through the study area.
+#' @param if.last.skip.section Logical: Should a fish detected at the last array
+#'  of a given section be considered to have disappeared in the next section?
+#' @param disregard.parallels Logical:  Should the presence of parallel arrays
+#'  invalidate potential efficiency peers? See the vignettes for more details.
+#' @param replicates A list containing, for each array to which intra-array
+#'  efficiency is to be calculated: The standard names of the stations to be 
+#'  used as a replicate. See the vignettes for more details.
 #' @inheritParams explore
 #' 
-#' @return A list containing 1) the detections used during the analysis, 2) the movement events, 3) the status dataframe, 4) the survival overview per group, 5) the progression through the study area, 6) the ALS array/sections' efficiency, 7) the list of spatial objects used during the analysis.
-#' 
+#' @return A list containing:
+#' \itemize{
+#'  \item \code{detections}: All detections for each target fish;
+#'  \item \code{valid.detections}: Valid detections for each target fish;
+#'  \item \code{spatial}: The spatial information used during the analysis;
+#'  \item \code{deployments}: The deployments of each receiver;
+#'  \item \code{arrays}: The array details used during the analysis;
+#'  \item \code{movements}: All movement events for each target fish;
+#'  \item \code{valid.movements}: Valid movemenet events for each target fish;
+#'  \item \code{section.movements}: Valid section shifts for each target fish;
+#'  \item \code{status.df}: Summary information for each fish, including the
+#'   following columns:
+#'    \itemize{
+#'      \item \emph{Time.until.\[section\]}: Time spent between leaving one
+#'        section and reaching the next.
+#'      \item \emph{Speed.to.\[section\]}: Average speed from one section to the
+#'        next (if a distance matrix is provided)
+#'      \item \emph{First.station.\[section\]}: Standard name of the first station
+#'        where the fish was detected in a given section
+#'      \item \emph{Arrived.\[section\]}: Arrival time at a given section
+#'      \item \emph{Time.in.\[section\]}: Total time spent within a given section
+#'      \item \emph{Last.station.\[section\]}: Standard name of the last station
+#'        where the fish was detected in a given section
+#'      \item \emph{Left.\[section\]}: Departure time from a givem section
+#'      \item \emph{Very.last.array}: Last array where the fish was detected
+#'      \item \emph{Status}: Fate assigned to the fish
+#'      \item \emph{Valid.detections}: Number of valid detections
+#'      \item \emph{Invalid.detections}: Number of invalid detections
+#'      \item \emph{Backwards.movements}: Number of backward movement events
+#'      \item \emph{Max.cons.back.moves}: Longest successive backwards movements
+#'      \item \emph{P.type}: Type of processing: 
+#'        \itemize{
+#'          \item 'Skipped' if no data was found for the fish,
+#'          \item 'Auto' if no user interaction was required,
+#'          \item 'Manual' if user interaction was suggested and the user made
+#'            changes to the validity of the events,
+#'          \item 'Overridden' if the user listed the fish in the 
+#'            \code{override} argument.
+#'        }
+#'      \item \emph{Comments}: Comments left by the user during the analysis
+#'    }
+#'  \item \code{section.overview}: Summary table of the number of fish that 
+#'    disappeared in each section;
+#'  \item \code{array.overview}: Number of known and estimated fish to have
+#'    passed through each array;
+#'  \item \code{matrices}: CJS matrices used for the efficiency calculations;
+#'  \item \code{overall.CJS}: Results of the inter-array CJS calculations;
+#'  \item \code{intra.array.CJS}: Results of the intra-array CJS calculations;
+#'  \item \code{times}: All arrival times (per fish) at each array;
+#'  \item \code{rsp.info}: Appendix information for the RSP package;
+#'  \item \code{dist.mat}: The distance matrix used in the analysis (if a valid
+#'   distance matrix was supplied)
+#' }
+#'
 #' @export
 #' 
 migration <- function(path = NULL, sections, success.arrays = NULL, minimum.detections = 2, 
@@ -809,7 +872,7 @@ assembleTimetable <- function(vm, all.moves, sections, arrays,
         "Arrived", "Time.in", "Speed.in", "Last.station", "Left"), sections[i], sep = "."))
     }
   }
-  recipient <- c(recipient, "Very.last.array", "Status", "Valid.detections", "All.detections", "Backwards.movements", "Max.cons.back.moves", "P.type")
+  recipient <- c(recipient, "Very.last.array", "Status", "Valid.detections", "Invalid.detections", "Backwards.movements", "Max.cons.back.moves", "P.type")
   if (!invalid.dist && speed.method == "first to first")
     recipient <- recipient[!grepl("Speed.in",recipient)]
 
@@ -910,7 +973,11 @@ assembleTimetable <- function(vm, all.moves, sections, arrays,
     } else {
       timetable[fish, "Valid.detections"] <- 0
     }
-    timetable[fish, "All.detections"] <- all.moves[[fish]][, sum(Detections)]
+    if (any(!all.moves[[fish]]$Valid)) {
+      timetable[fish, "Invalid.detections"] <- sum(all.moves[[fish]][!(Valid)]$Detections)
+    } else {
+      timetable[fish, "Invalid.detections"] <- 0
+    }
     recipient <- countBackMoves(movements = all.moves[[fish]], arrays = arrays)
     timetable[fish, "Backwards.movements"] <- recipient[[1]]
     timetable[fish, "Max.cons.back.moves"] <- recipient[[2]]
@@ -987,7 +1054,7 @@ assembleOutput <- function(timetable, bio, spatial, sections, dist.mat, invalid.
   status.df$Very.last.array <- factor(status.df$Very.last.array, levels = c("Release", levels(spatial$stations$Array)))
   status.df$P.type[is.na(status.df$P.type)] <- "Skipped"
   status.df$Valid.detections[is.na(status.df$Valid.detections)] <- 0
-  status.df$All.detections[is.na(status.df$All.detections)] <- 0
+  status.df$Invalid.detections[is.na(status.df$Invalid.detections)] <- 0
 
   the.cols <- grepl("Release.date", colnames(status.df)) | grepl("Arrived",colnames(status.df)) | grepl("Left",colnames(status.df))
   for (i in colnames(status.df)[the.cols]) {

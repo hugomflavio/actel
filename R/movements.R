@@ -143,7 +143,7 @@ simplifyMovements <- function(movements, fish, bio, speed.method, dist.mat, inva
 #' 
 #' @return The movement data frame with time and speed calculations
 #' 
-#' @export
+#' @keywords internal
 #' 
 movementSpeeds <- function(movements, speed.method, dist.mat, silent = TRUE) {
   if (!silent) 
@@ -226,7 +226,7 @@ movementTimes <- function(movements, type = c("array", "section")){
 #' 
 #' @return The movement data frame containing the missing information.
 #' 
-#' @export
+#' @keywords internal
 #' 
 speedReleaseToFirst <- function(fish, bio, movements, dist.mat, invalid.dist = FALSE, silent = TRUE){
   if (!silent) 

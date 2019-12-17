@@ -11,7 +11,8 @@ checkSMovesN(secmoves, fish, section.minimum)
 
 \item{fish}{The fish being analysed}
 
-\item{section.minimum}{threshold consecutive number of detections in a section that awards confidence in the results. If the number of detections is lower than this argument, a warning is issued and user interaction is allowed.}
+\item{section.minimum}{If a fish has less than \code{section.minimum}
+consecutive detections in a section, a warning is issued. Defaults to 2.}
 }
 \value{
 the section movements with valid/invalid notes

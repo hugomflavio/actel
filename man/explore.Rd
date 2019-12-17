@@ -2,7 +2,7 @@
 % Please edit documentation in R/explore.R
 \name{explore}
 \alias{explore}
-\title{Actel: Acoustic telemetry data sorting}
+\title{Explorative Analysis}
 \usage{
 explore(
   path = NULL,
@@ -29,53 +29,101 @@ explore(
 )
 }
 \arguments{
-\item{path}{Path to the folder containing the data. If the R session is already running in the target folder, path may be left as NULL}
+\item{path}{Path to the folder containing the data. If left NULL (default),
+the analysis runs in the current folder.}
 
-\item{max.interval}{The number of minutes that must pass between detections for a new event to be created.}
+\item{max.interval}{The number of minutes that must pass between detections
+for a new event to be created. Defaults to 60.}
 
-\item{maximum.time}{Deprecated. See "max.interval"}
+\item{maximum.time}{DEPRECATED. See \code{max.interval}.}
 
-\item{speed.method}{One of 'last to first' or 'first to first'. In the former, the last detection on a given array/section is matched to the first detection on the next array/section (default). If changed to 'first to first', the first detection on two consecutive arrays/sections are used to perform the calculations.}
+\item{speed.method}{Can take two forms: 'last to first' or 'first to first'.
+If 'last to first' (default), the last detection on a given array is matched
+to the first detection on the next array to perform the calculations.
+If 'first to first', the first detection on a given array is matched to the
+first detection on the next array to perform the calculations.}
 
-\item{speed.warning}{Numeric value (m/s). If a fish moves at a speed greater or equal to this argument, a warning is issued. Defaults to NULL (i.e. no speed checks are performed, with a message)}
+\item{speed.warning}{If a fish moves at a speed equal or greater than
+\code{speed.warning} (in metres per second), a warning is issued. If left
+NULL (default), no warnings are issued.}
 
-\item{speed.error}{Numeric value (m/s). If a fish moves at a speed greater or equal to this argument, user intervention is suggested. Defaults to NULL (i.e. no errors are issued)}
+\item{speed.error}{If a fish moves at a speed equal or greater than
+\code{speed.error} (in metres per second), user intervention is suggested.
+If left NULL (default), user intervention is never suggested.}
 
-\item{tz.study.area}{Deprecated. See "tz"}
+\item{tz.study.area}{DEPRECATED. See \code{tz}.}
 
-\item{tz}{The time-zone of the study area. Necessary to convert the ALS time data, which is in UTC.}
+\item{tz}{The time zone of the study area. Must match one of the values
+present in \code{\link[base]{timezones}}.}
 
-\item{start.time}{Detection data prior to this date is not analysed. Improves processing time when loading large amounts of detection data.}
+\item{start.time}{Detection data prior to the timestamp set in
+\code{start.time} (in YYYY-MM-DD HH:MM:SS format) is not considered during
+the analysis.}
 
-\item{start.timestamp}{Deprecated. See "start.time"}
+\item{start.timestamp}{DEPRECATED. See \code{start.time}.}
 
-\item{stop.time}{Detection data posterior to this date is not analysed. Improves processing time when loading large amounts of detection data.}
+\item{stop.time}{Detection data posterior to the timestamp set in
+\code{stop.time} (in YYYY-MM-DD HH:MM:SS format) is not considered during
+the analysis.}
 
-\item{end.timestamp}{Deprecated. See "stop.time"}
+\item{end.timestamp}{DEPRECATED See argument \code{stop.time}}
 
-\item{override}{A list of tags for which the user intends to manually define entering and leaving points for each study section.}
+\item{override}{A vector of tags for which the user intends to manually
+define which movement events are valid and invalid.}
 
-\item{minimum.detections}{The minimum number of times a tag must have been recorded during the study period for it to be considered a true tag and not random noise.}
+\item{minimum.detections}{For tags with only one movement event, defines the
+minimum number of times a tag must have been recorded during the study
+period for it to be considered true detections and not random noise.
+Defaults to 2.}
 
-\item{report}{Whether graphics, tables and html report files should be created. Defaults to TRUE. Allows automatic compiling of an html report after the analysis.}
+\item{report}{Logical. Should an HTML report be created at the end of the
+analysis?}
 
-\item{exclude.tags}{A list of tags that should be excluded from the detection data before any analyses are performed. Intended to be used if stray tags from a different code space but with the same signal as a target tag are detected in the study area.}
+\item{exclude.tags}{A vector of tags that should be excluded from the
+detection data before any analyses are performed. Intended to be used if
+stray tags from a different code space but with the same signal as a target
+tag are detected in the study area.}
 
-\item{jump.warning}{Integer value. If a fish crosses ´jump.warning´ arrays without being detected, a warning is issued.}
+\item{jump.warning}{If a fish crosses a number of arrays equal or greater
+than \code{jump.error} without being detected, a warning is issued. If left
+NULL (default), no warnings are issued.}
 
-\item{jump.error}{Integer value. If a fish crosses ´jump.error´ arrays without being detected, user intervention is suggested.}
+\item{jump.error}{If a fish crosses a number of arrays equal or greater than
+\code{jump.error} without being detected, user intervention is suggested.
+If left NULL (default), user intervention is never suggested.}
 
-\item{inactive.warning}{Numeric value (days). If a fish spends a number of days greater or equal to this argument in a given place, a warning is issued. Defaults to NULL (i.e. no speed checks are performed, with a message)}
+\item{inactive.warning}{If a fish spends a number of days equal or greater
+than \code{inactive.error} in a given array at the tail of the respective
+detections, a warning is issued. If left NULL (default), no warnings are
+issued.}
 
-\item{inactive.error}{Numeric value (days). If a fish spends a number of days greater or equal to this argument in a given place, user intervention is suggested. Defaults to NULL (i.e. no errors are issued)}
+\item{inactive.error}{If a fish spends a number of days equal or greater than
+\code{inactive.error} in a given array at the tail of the respective
+detections, user intervention is suggested. If left NULL (default), user
+intervention is never suggested.}
 
-\item{debug}{If TRUE, temporary files are not deleted at the end of the analysis. Defaults to FALSE.}
+\item{debug}{Logical: Should temporary files be kept at the end of the
+analysis?}
 }
 \value{
-A list containing 1) the detections used during the analysis, 2) the movement events, 3) the status dataframe, 4) the survival overview per group, 5) the progression through the study area, 6) the ALS array/sections' efficiency, 7) the list of spatial objects used during the analysis.
+A list containing:
+\itemize{
+\item \code{detections}: All detections for each target fish;
+\item \code{valid.detections}: Valid detections for each target fish;
+\item \code{spatial}: The spatial information used during the analysis;
+\item \code{deployments}: The deployments of each receiver;
+\item \code{arrays}: The array details used during the analysis;
+\item \code{movements}: All movement events for each target fish;
+\item \code{valid.movements}: Valid movemenet events for each target fish;
+\item \code{times}: All arrival times (per fish) at each array;
+\item \code{rsp.info}: Appendix information for the RSP package;
+\item \code{dist.mat}: The distance matrix used in the analysis (if a valid
+distance matrix was supplied)
+}
 }
 \description{
-The actel package provides a systematic way of analysing fish migration data.
-Its main function, actel, collects the input present in the target folder and analyses the telemetry data.
-It is strongly recommended to read the package vignettes before attempting to run the analyses. You can find the vignettes by running browseVignettes('actel') .
+\code{explore} allows you to quickly get a summary of your data. You can use
+\code{explore} to get a general feel for the study results, and check if the
+input files are behaving as expected. It is also a good candidate if you just
+want to validate your detections for later use in other analyses.
 }

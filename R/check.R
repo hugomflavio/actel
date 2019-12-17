@@ -1,8 +1,22 @@
+#' check.R arguments
+#' @param arrays a list containing information for each array
+#' @param bio A table with the tags and biometrics of the studied fish.
+#' @param detections.list A list of the detections split by each target tag, created by splitDetections.
+#' @param dotmat The matrix of distances between arrays
+#' @param fish The fish being analysed
+#' @param movements,moves The movements table
+#' @param release The release location of the fish
+#' @param secmoves the section movements list
+#' @param spatial The spatial data frame, as loaded by loadSpatial
+#' @param valid.movements The valid movements table
+#' @name check_args
+#' @keywords internal
+NULL
+
+
 #' Skips all validity checks for a fish and allows the user to freely invalidate events
 #' 
-#' @param fish The fish being analysed
-#' @param moves the respective movements table
-#' 
+#' @inheritParams check_args
 #' @keywords internal
 #' 
 overrideValidityChecks <- function(moves, fish) {
@@ -21,8 +35,7 @@ overrideValidityChecks <- function(moves, fish) {
 
 #' Check that the fish have enough detections to be valid
 #' 
-#' @param movements the movements list
-#' @param fish the fish being analysed
+#' @inheritParams check_args
 #' @inheritParams explore
 #' 
 #' @return The movements with valid/invalid notes
@@ -39,9 +52,7 @@ checkMinimumN <- function(movements, minimum.detections, fish) {
 
 #' check fish speeds against defined thresholds (in m/s)
 #' 
-#' @param movements the movements list
-#' @param valid.movements a temporary valid.movements list, with updated speeds
-#' @param fish the fish being analysed
+#' @inheritParams check_args
 #' @inheritParams explore
 #' 
 #' @return The valid movements list with valid/invalid rows
@@ -94,9 +105,8 @@ checkSpeeds <- function(movements, fish, valid.movements, speed.warning, speed.e
 
 #' Find if a fish is standing still in an array
 #' 
-#' @inheritParams checkSpeeds
+#' @inheritParams check_args
 #' @inheritParams explore
-#' @inheritParams groupMovements
 #' 
 #' @return The valid movements list with valid/invalid rows
 #' 
@@ -189,8 +199,7 @@ checkInactiveness <- function(movements, fish, detections.list, inactive.warning
 
 #' Find out if a fish moved in an impossible direction
 #' 
-#' @inheritParams checkSpeeds
-#' @param dotmat the matrix of distances between arrays
+#' @inheritParams check_args
 #' 
 #' @return the movements list with valid/invalid rows
 #' 
@@ -240,8 +249,7 @@ checkImpassables <- function(movements, fish, dotmat){
 
 #' Verify number of detections in section movements
 #' 
-#' @param secmoves the section movements list
-#' @param fish The fish being analysed
+#' @inheritParams check_args
 #' @inheritParams residency
 #' 
 #' @return the section movements with valid/invalid notes
@@ -266,9 +274,7 @@ checkSMovesN <- function(secmoves, fish, section.minimum) {
 
 #' Check that the fish linearly moved along the sections
 #' 
-#' @param secmoves the section movements list
-#' @param fish the fish being analysed
-#' @param arrays a list containing information for each array
+#' @inheritParams check_args
 #' @inheritParams migration
 #' 
 #' @return the section movements with valid/invalid notes
@@ -335,6 +341,8 @@ checkLinearity <- function(secmoves, fish, sections, arrays) {
 #' 
 #' Creates a "Report" folder if necessary and silently activates ggplot2 and reshape2 to avoid startup messages
 #'
+#' @inheritParams explore
+#' 
 #' @return A TRUE/FALSE decision
 #' 
 #' @keywords internal
@@ -383,8 +391,8 @@ checkReport <- function(report){
 #' 
 #' Confirms that the target directory exists.
 #' 
+#' @inheritParams check_args
 #' @inheritParams explore
-#' @param my.home The output of getwd()
 #' 
 #' @keywords internal
 #' 
@@ -425,8 +433,7 @@ checkPath <- function(my.home, path) {
 
 #' Check for movements upstream of the release site.
 #'
-#' @inheritParams splitDetections
-#' @inheritParams loadDetections
+#' @inheritParams check_args
 #' 
 #' @return The updated movements
 #' 
@@ -492,19 +499,14 @@ checkUpstream <- function(movements, fish, release, arrays) {
 
 #' Check if fish are jumping over arrays
 #' 
-#' @inheritParams simplifyMovements
-#' @inheritParams splitDetections
-#' @inheritParams dotPaths
+#' @inheritParams check_args
 #' @inheritParams explore
-#' @inheritParams createStandards
-#' @param fish the fish being analysed
-#' @param release the release array of the fish being analysed
 #' 
 #' @return a checked movements list
 #' 
 #' @keywords internal
 #' 
-checkJumpDistance <- function(movements, fish, release, dotmat, jump.warning = 2, jump.error = 3) {
+checkJumpDistance <- function(movements, fish, release, dotmat, jump.warning, jump.error) {
   appendTo("debug", "Running checkJumpDistance")
   # NOTE: The NULL variables below are actually column names used by data.table.
   # This definition is just to prevent the package check from issuing a note due unknown variables.
@@ -573,7 +575,7 @@ checkJumpDistance <- function(movements, fish, release, dotmat, jump.warning = 2
 
 #' Confirm that receivers were not re-deployed before being retrieved
 #' 
-#' @param input the table of deployments
+#' @param input The table of deployments
 #' 
 #' @keywords internal
 #' 
@@ -601,8 +603,8 @@ checkDeploymentTimes <- function(input) {
 
 #' Confirm that the station names in the deployments table match those listed in the spatial file
 #' 
-#' @inheritParams checkDeploymentTimes
-#' @param spatial The spatial data frame, as loaded by loadSpatial
+#' @param input The table of deployments
+#' @inheritParams check_args
 #' 
 #' @keywords internal
 #' 
@@ -626,7 +628,7 @@ checkDeploymentStations <- function(input, spatial) {
 
 #' Find detections from unknown receivers
 #' 
-#' @param input The detections data frame
+#' @param input The detections dataframe
 #' 
 #' @keywords internal
 #' 
@@ -640,8 +642,7 @@ checkUnknownReceivers <- function(input) {
 
 #' Check for target data in the unknown receivers
 #' 
-#' @inheritParams groupMovements
-#' @inheritParams loadDetections
+#' @inheritParams check_args
 #' 
 #' @return A list containing an updated spatial list and a TRUE/FALSE object indicating whether or not Standard station names must be reprocessed.
 #' 
@@ -693,7 +694,7 @@ checkTagsInUnknownReceivers <- function(detections.list, deployments, spatial) {
 #' Temporarily include missing receivers in the spatial object
 #' 
 #' @param unknown.receivers serial number of the receivers to be included
-#' @inheritParams loadDetections
+#' @inheritParams check_args
 #' 
 #' @keywords internal
 #' 
@@ -722,8 +723,8 @@ includeUnknownReceiver <- function(spatial, deployments, unknown.receivers){
 
 #' Check if there are detections for the target tags before release.
 #'
-#' @param input list of detections
-#' @inheritParams splitDetections
+#' @param input The list of detections
+#' @inheritParams check_args
 #' 
 #' @keywords internal
 #' 
@@ -778,8 +779,8 @@ checkDetectionsBeforeRelease <- function(input, bio){
 
 #' Check if there are detections matching the target tags.
 #'
-#' @param input list of detections
-#' @inheritParams splitDetections
+#' @param input The list of detections
+#' @inheritParams check_args
 #' 
 #' @keywords internal
 #' 
@@ -798,8 +799,8 @@ checkNoDetections <- function(input, bio){
 #' Check if there are duplicated signals in the detected tags.
 #'
 #' @param input list of detections
-#' @inheritParams splitDetections
 #' @param tag.list list of the target signals
+#' @inheritParams check_args
 #' 
 #' @keywords internal
 #' 
@@ -823,8 +824,7 @@ checkDupSignals <- function(input, bio, tag.list){
 
 #' Allow the user to determine a given movement event invalid
 #' 
-#' @param movements te movement table being analysed
-#' @param fish The corresponding tag
+#' @inheritParams check_args
 #' 
 #' @return the movement table with valid/invalid notes
 #' 
@@ -907,8 +907,8 @@ invalidateEvents <- function(movements, fish) {
 
 #' Transfer validity updates from valid movements to all movements
 #' 
-#' @param from the valid movements with newly invalidated moves
-#' @param to the all movements table
+#' @param from The valid movements table with newly invalidated moves
+#' @param to The target movements table
 #' 
 #' @return the all movements table with valid/invalid updated
 #' 

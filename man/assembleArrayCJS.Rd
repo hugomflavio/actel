@@ -7,11 +7,11 @@
 assembleArrayCJS(mat, CJS, arrays)
 }
 \arguments{
-\item{mat}{the original presence/absence matrices}
+\item{mat}{The presence/absence matrices.}
 
 \item{CJS}{A list of CJS calculated for each array}
 
-\item{arrays}{a list of arrays}
+\item{arrays}{A list containing information for each array.}
 }
 \value{
 A list with the CJS absolute numbers and efficiency estimates

@@ -171,7 +171,7 @@ readDot <- function (input = NULL, string = NULL) {
 #' 
 #' @return a matrix of distances between arrays
 #' 
-#' @export
+#' @keywords internal
 #' 
 dotMatrix <- function(input) {
   nodes <- unique(unlist(input[, c(1, 3)]))
@@ -703,8 +703,6 @@ loadBio <- function(file, tz){
 #' If there are previously compiled detections present, offers the chance to reuse. Otherwise triggers combineDetections.
 #' 
 #' @inheritParams explore
-#' 
-#' @import data.table
 #' 
 #' @return A dataframe with all the detections
 #' 

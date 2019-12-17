@@ -9,7 +9,8 @@ loadBio(file, tz)
 \arguments{
 \item{file}{an input file with biometric data.}
 
-\item{tz}{The time-zone of the study area. Necessary to convert the ALS time data, which is in UTC.}
+\item{tz}{The time zone of the study area. Must match one of the values
+present in \code{\link[base]{timezones}}.}
 }
 \value{
 The biometrics table

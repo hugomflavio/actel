@@ -17,19 +17,28 @@ assembleTimetable(
 )
 }
 \arguments{
-\item{sections}{The sections in which the study was divided. Must be coincident with the names given to the ALS arrays. (i.e. if an array is 'River1', then the respective section is 'River')}
+\item{sections}{The sections in which the study area is divided. Must be
+coincident with the names given to the arrays. See the vignettes for more
+details.}
 
-\item{arrays}{a list of arrays}
+\item{arrays}{A list containing information for each array.}
 
 \item{dist.mat}{A matrix of the distances between the deployed ALS.}
 
 \item{invalid.dist}{Whether or not the distance matrix supplied is valid for the study area.}
 
-\item{speed.method}{One of 'last to first' or 'first to first'. In the former, the last detection on a given array/section is matched to the first detection on the next array/section (default). If changed to 'first to first', the first detection on two consecutive arrays/sections are used to perform the calculations.}
+\item{speed.method}{Can take two forms: 'last to first' or 'first to first'.
+If 'last to first' (default), the last detection on a given array is matched
+to the first detection on the next array to perform the calculations.
+If 'first to first', the first detection on a given array is matched to the
+first detection on the next array to perform the calculations.}
 
-\item{if.last.skip.section}{Indicates whether a fish detected at the last array of a given section should be considered to have disappeared in the next section. Defaults to TRUE. I.e.: In a study with sections 'River' and 'Fjord', where 'River3' is the last river array, a fish last detected at River3 will be considered as 'disappeared in the Fjord'.}
+\item{if.last.skip.section}{Logical: Should a fish detected at the last array
+of a given section be considered to have disappeared in the next section?}
 
-\item{success.arrays}{The ALS arrays mark the end of the study area. If a fish crosses one of these arrays, it is considered to have successfully migrated through the area.}
+\item{success.arrays}{The arrays that mark the end of the study area. If a
+fish crosses one of these arrays, it is considered to have successfully
+migrated through the study area.}
 
 \item{movements}{A list of movements for each target tag, created by groupMovements.}
 }

@@ -42,3 +42,4 @@ roseMean(
 Computes and draws the mean value for a given dataset, may also plot standard error of the mean
 or standard deviation ranges.
 }
+\keyword{internal}

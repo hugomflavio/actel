@@ -7,11 +7,11 @@
 checkImpassables(movements, fish, dotmat)
 }
 \arguments{
-\item{movements}{the movements list}
+\item{movements}{The movements table}
 
-\item{fish}{the fish being analysed}
+\item{fish}{The fish being analysed}
 
-\item{dotmat}{the matrix of distances between arrays}
+\item{dotmat}{The matrix of distances between arrays}
 }
 \value{
 the movements list with valid/invalid rows

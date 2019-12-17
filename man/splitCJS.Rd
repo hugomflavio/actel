@@ -7,13 +7,13 @@
 splitCJS(input, by, estimate = NULL, fixed.efficiency = TRUE)
 }
 \arguments{
-\item{input}{The CJS matrix to be split}
+\item{input}{A presence/Absence matrix.}
 
 \item{by}{a grouping vector with the same length has the number of rows in input}
 
-\item{estimate}{an estimate of the last array's efficiency}
+\item{estimate}{an estimate of the last array's efficiency.}
 
-\item{fixed.efficiency}{logical: If TRUE, a CJS is run with the entire dataset and the efficiency estimates of that CJS are used in the split CJS's.}
+\item{fixed.efficiency}{A vector of fixed efficiency estimates from a more complete CJS model.}
 }
 \value{
 The split CJS
@@ -21,3 +21,4 @@ The split CJS
 \description{
 Split CJS matrix and calculate separate CJS
 }
+\keyword{internal}

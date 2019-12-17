@@ -7,9 +7,17 @@
 assembleMatrices(spatial, movements, status.df, arrays, paths, dotmat)
 }
 \arguments{
-\item{movements}{A list of movements for each target tag, created by groupMovements.}
+\item{spatial}{The spatial data frame.}
 
-\item{simple.movements}{A list of valid-only movements for each fish}
+\item{movements}{The movements table.}
+
+\item{status.df}{The main results table.}
+
+\item{arrays}{A list containing information for each array.}
+
+\item{paths}{A list containing the shortest paths between arrays with distance > 1.}
+
+\item{dotmat}{The matrix of distances between arrays.}
 }
 \value{
 A list of detection matrices split by groups and release sites

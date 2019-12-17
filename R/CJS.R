@@ -1,9 +1,26 @@
+#' CJS.R arguments
+#' @param replicates A list of arrays containing the respective replicate stations.
+#' @param CJS The overall CJS results.
+#' @param detections.list A list of the detections split by each target tag.
+#' @param spatial The spatial data frame.
+#' @param efficiency The efficiency results.
+#' @param arrays A list containing information for each array.
+#' @param mat,m The presence/absence matrices.
+#' @param input A presence/Absence matrix.
+#' @param movements,moves The movements table.
+#' @param status.df The main results table.
+#' @param dotmat The matrix of distances between arrays.
+#' @param paths A list containing the shortest paths between arrays with distance > 1.
+#' @param estimate an estimate of the last array's efficiency.
+#' @param fixed.efficiency A vector of fixed efficiency estimates from a more complete CJS model.
+#' @param silent Logical: Should messages be printed?
+#' @name cjs_args
+#' @keywords internal
+NULL
+
 #' Prepare intra-array matrices for selected arrays
 #' 
-#' @param replicates A list of arrays containing the respective replicate stations
-#' @param CJS The overall CJS results
-#' @inheritParams setSpatialStandards
-#' @inheritParams labelUnknowns
+#' @inheritParams cjs_args
 #' 
 #' @return A list of dual matrices
 #' 
@@ -36,8 +53,7 @@ output <- list()
 #' Incorporate intra-array estimates in the overall CJS object
 #' 
 #' @param m A list of dual matrices
-#' @param efficiency The efficiency results (from a residency analysis)
-#' @param CJS The overall CJS results (from a migration analysis)
+#' @inheritParams cjs_args
 #' 
 #' @return A list containing the updated overall CJS and the intra-array CJS results
 #' 
@@ -73,7 +89,6 @@ includeIntraArrayEstimates <- function(m, efficiency = NULL, CJS = NULL) {
 
 #' Assembles CJS tables for all group x release site combinations
 #' 
-#' @param mat the original presence/absence matrices
 #' @param CJS A list of CJS calculated for each group x release site x array combinations
 #' @param arrays a list of arrays
 #' 
@@ -92,9 +107,8 @@ assembleSplitCJS <- function(mat, CJS, arrays) {
 
 #' Assembles CJS tables for all groups
 #' 
-#' @param mat the original presence/absence matrices
 #' @param CJS A list of CJS calculated for each group x array combinations
-#' @param arrays a list of arrays
+#' @inheritParams cjs_args
 #' 
 #' @return A CJS results table for each group 
 #' 
@@ -112,8 +126,9 @@ assembleGroupCJS <- function(mat, CJS, arrays) {
 
 #' Break the detection matrices per array
 #' 
-#' @param m the original presence/absence matrices
-#' @param arrays a list of arrays
+#' @param type The type of arrays to be matched
+#' @param verbose Logical: Should appendto be used?
+#' @inheritParams cjs_args
 #' 
 #' @return a list of matrices, split by array
 #' 
@@ -170,9 +185,8 @@ breakMatricesByArray <- function(m, arrays, type = c("peers", "all"), verbose = 
 
 #' Combine the individual CJS's of each array into a single table
 #' 
-#' @param mat the original presence/absence matrices
 #' @param CJS A list of CJS calculated for each array
-#' @param arrays a list of arrays
+#' @inheritParams cjs_args
 #' 
 #' @return A list with the CJS absolute numbers and efficiency estimates
 #' 
@@ -208,10 +222,7 @@ assembleArrayCJS <- function(mat, CJS, arrays) {
 
 #' Assemble detection matrices
 #' 
-#' @inheritParams loadDetections
-#' @inheritParams simplifyMovements
-#' @inheritParams explore
-#' @param simple.movements A list of valid-only movements for each fish
+#' @inheritParams cjs_args
 #'
 #' @return A list of detection matrices split by groups and release sites
 #' 
@@ -251,10 +262,7 @@ assembleMatrices <- function(spatial, movements, status.df, arrays, paths, dotma
 #'
 #' The calculations are based on 'Using mark-recapture models to estimate survival from telemetry data' by Perry et al. 2012
 #'
-#' @param input a detection matrix
-#' @param estimate an estimate of the last array's efficiency
-#' @param fixed.efficiency A vector of fixed efficiency estimates from a more complete CJS model.
-#' @inheritParams splitDetections
+#' @inheritParams cjs_args
 #' 
 #' @return A summary of the CJS results
 #' 
@@ -408,8 +416,7 @@ simpleCJS <- function(input, estimate = NULL, fixed.efficiency = NULL, silent = 
 
 #' Calculate CJS for each group.release combination
 #' 
-#' @param m A list of detection matrices
-#' @inheritParams simpleCJS
+#' @inheritParams cjs_args
 #' 
 #' @return A list of CJS results
 #' 
@@ -443,9 +450,7 @@ mbSplitCJS <- function(m, fixed.efficiency = NULL) {
 
 #' Calculate CJS for each group for each array
 #' 
-#' @param n A list of detection matrices
-#' @inheritParams simplifyMovements
-#' @inheritParams simpleCJS
+#' @inheritParams cjs_args
 #' 
 #' @return A list of CJS results
 #' 
@@ -478,10 +483,7 @@ mbGroupCJS <- function(m, status.df, fixed.efficiency = NULL) {
 
 #' Compile inter-array detection matrix
 #'
-#' @inheritParams explore
-#' @inheritParams loadDetections
-#' @inheritParams simplifyMovements
-#' @inheritParams assembleMatrices
+#' @inheritParams cjs_args
 #' 
 #' @return a matrix of detection histories per fish.
 #' 
@@ -517,8 +519,7 @@ efficiencyMatrix <- function(movements, arrays, paths, dotmat) {
 
 #' Trim movements table to contain only uni-directional movements
 #' 
-#' @param movements a table of movements
-#' @param arrays a list of array information
+#' @inheritParams cjs_args
 #' 
 #' @return the uni-directional movement table
 #' 
@@ -553,7 +554,7 @@ oneWayMoves <- function(movements, arrays) {
 #' Include fish that were never detected
 #' 
 #' @param x an efficiency matrix
-#' @inheritParams simplifyMovements
+#' @inheritParams cjs_args
 #' 
 #' @return a matrix of detection histories per fish, including fish that were never detected.
 #' 
@@ -571,9 +572,7 @@ includeMissing <- function(x, status.df){
 
 #' Compile detection matrix for last array
 #'
-#' @inheritParams explore
-#' @inheritParams loadDetections
-#' @inheritParams groupMovements
+#' @inheritParams cjs_args
 #' 
 #' @return a matrix of detection histories per fish for the last array.
 #' 
@@ -604,12 +603,11 @@ dualMatrix <- function(array, replicates, spatial, detections.list){
 #'
 #' The calculations are based on 'Using mark-recapture models to estimate survival from telemetry data' by Perry et al. 2012
 #' 
-#' @inheritParams simpleCJS
-#' @inheritParams splitDetections
+#' @inheritParams cjs_args
 #' 
 #' @return A summary of the CJS results
 #' 
-#' @export
+#' @keywords internal
 #' 
 dualArrayCJS <- function(input, silent = TRUE){
   if(!silent) appendTo("debug", "Starting dualArrayCJS.")
@@ -647,14 +645,12 @@ dualArrayCJS <- function(input, silent = TRUE){
 
 #' Split CJS matrix and calculate separate CJS
 #' 
-#' @param input The CJS matrix to be split
 #' @param by a grouping vector with the same length has the number of rows in input
-#' @param fixed.efficiency logical: If TRUE, a CJS is run with the entire dataset and the efficiency estimates of that CJS are used in the split CJS's.
-#' @inheritParams simpleCJS
+#' @inheritParams cjs_args
 #' 
 #' @return The split CJS
 #' 
-#' @export
+#' @keywords internal
 #' 
 splitCJS <- function(input, by, estimate = NULL, fixed.efficiency = TRUE){
   if (!is.matrix(input))
@@ -680,12 +676,11 @@ splitCJS <- function(input, by, estimate = NULL, fixed.efficiency = TRUE){
 #' Combine multiple CJS models
 #' 
 #' @param ... The detection matrices to be joined, or a list containing detection matrices
-#' @inheritParams simpleCJS
-#' @inheritParams splitDetections
+#' @inheritParams cjs_args
 #' 
 #' @return The combined CJS
 #' 
-#' @export
+#' @keywords internal
 #' 
 combineCJS <- function(..., estimate = NULL, fixed.efficiency = NULL, silent = FALSE){
   # stop if both estimate and fixed efficiency are present
@@ -770,7 +765,7 @@ combineCJS <- function(..., estimate = NULL, fixed.efficiency = NULL, silent = F
 #' Combine CJS model results
 #' 
 #' @param input A list of CJS results to be combined
-#' @inheritParams simpleCJS
+#' @inheritParams cjs_args
 #' 
 #' @return The combined CJS
 #' 

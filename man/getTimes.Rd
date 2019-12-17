@@ -12,7 +12,9 @@ getTimes(
 )
 }
 \arguments{
-\item{movements}{A list of movements for each target tag, created by groupMovements.}
+\item{movements}{The list of valid movements.}
+
+\item{spatial}{The list of spatial objects.}
 
 \item{type}{The point to be recorded: one of "arrival" or "departure".}
 

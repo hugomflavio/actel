@@ -7,11 +7,13 @@
 getDualMatrices(replicates, CJS = NULL, spatial, detections.list)
 }
 \arguments{
-\item{replicates}{A list of arrays containing the respective replicate stations}
+\item{replicates}{A list of arrays containing the respective replicate stations.}
 
-\item{CJS}{The overall CJS results}
+\item{CJS}{The overall CJS results.}
 
-\item{detections.list}{a list of the detections for each target tag}
+\item{spatial}{The spatial data frame.}
+
+\item{detections.list}{A list of the detections split by each target tag.}
 }
 \value{
 A list of dual matrices

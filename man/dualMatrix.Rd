@@ -7,7 +7,11 @@
 dualMatrix(array, replicates, spatial, detections.list)
 }
 \arguments{
-\item{detections.list}{A list of the detections split by each target tag, created by splitDetections.}
+\item{replicates}{A list of arrays containing the respective replicate stations.}
+
+\item{spatial}{The spatial data frame.}
+
+\item{detections.list}{A list of the detections split by each target tag.}
 }
 \value{
 a matrix of detection histories per fish for the last array.

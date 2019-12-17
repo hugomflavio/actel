@@ -9,9 +9,9 @@ includeIntraArrayEstimates(m, efficiency = NULL, CJS = NULL)
 \arguments{
 \item{m}{A list of dual matrices}
 
-\item{efficiency}{The efficiency results (from a residency analysis)}
+\item{efficiency}{The efficiency results.}
 
-\item{CJS}{The overall CJS results (from a migration analysis)}
+\item{CJS}{The overall CJS results.}
 }
 \value{
 A list containing the updated overall CJS and the intra-array CJS results

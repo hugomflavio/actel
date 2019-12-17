@@ -6,6 +6,10 @@
 \usage{
 checkReport(report)
 }
+\arguments{
+\item{report}{Logical. Should an HTML report be created at the end of the
+analysis?}
+}
 \value{
 A TRUE/FALSE decision
 }

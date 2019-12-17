@@ -7,9 +7,9 @@
 oneWayMoves(movements, arrays)
 }
 \arguments{
-\item{movements}{a table of movements}
+\item{movements}{The movements table.}
 
-\item{arrays}{a list of array information}
+\item{arrays}{A list containing information for each array.}
 }
 \value{
 the uni-directional movement table

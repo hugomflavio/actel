@@ -644,7 +644,7 @@ printIndividuals <- function(redraw, detections.list, bio, status.df = NULL, tz,
 #' 
 #' Prints the time of first entry point on each of the arrays. Contains functions adapted from the circular R package.
 #' 
-#' For more details about the original function, visit the circular package homepage at https://github.com/cran/circular
+#' For more details about the original function, visit the circular package homepage at \url{https://github.com/cran/circular}
 #' 
 #' @param times a (list of) circular object(s)
 #' @inheritParams splitDetections
@@ -727,7 +727,7 @@ circularSection <- function(from, to, units = "hours", template = "clock24", lim
 
 #' Edited rose diagram function
 #' 
-#' Adapted from the rose.diag function of the circular package.
+#' Adapted from the \code{\link[circular]{rose.diag}} function of the circular package.
 #' 
 #' For more details about the original function, visit the circular package homepage at https://github.com/cran/circular
 #' 
@@ -868,9 +868,9 @@ myRoseDiag <- function (x, pch = 16, cex = 1, axes = TRUE, shrink = 1, bins = 24
 
 #' Draw rings at relative points
 #' 
-#' Adapted from RosediagRad (from the circular package) to draw rings inside the circular plot. Called if rings = TRUE in myRoseDiag
+#' Adapted from RosediagRad (from the circular package) to draw rings inside the circular plot. Called if rings = TRUE in \code{\link{myRoseDiag}}
 #' 
-#' For more details about the circular package, visit its homepage at https://github.com/cran/circular
+#' For more details about the circular package, visit its homepage at \url{https://github.com/cran/circular}
 #' 
 #' @inheritParams myRoseDiag
 #' 
@@ -908,6 +908,8 @@ ringsRel <- function(plot.params, border, rings.lty,
 #' @param box.size Vertical size of the range box.
 #' @param edge.length Vertical size of the edge whiskers in the range box.
 #' @param edge.lwd Width of the edge whiskers in the range box.
+#' 
+#' @keywords internal
 #' 
 roseMean <- function(input, col = c("cornflowerblue", "chartreuse3", "deeppink"),
   mean.length = c(0.0125, -0.0125), mean.lwd = 4,
@@ -956,7 +958,7 @@ roseMean <- function(input, col = c("cornflowerblue", "chartreuse3", "deeppink")
 #' As the function is not exported by the original package, I have copied it here to resolve
 #' the note thrown by devtools:check()
 #' 
-#' For more details about the original function, visit the circular package homepage at https://github.com/cran/circular
+#' For more details about the original function, visit the circular package homepage at \url{https://github.com/cran/circular}
 #' 
 #' @param xlim,ylim the ranges to be encompassed by the x and y axes. Useful for centering the plot.
 #' @param uin desired values for the units per inch parameter. If of length 1, the desired units per inch on the x axis.
@@ -1021,7 +1023,7 @@ copyOfCirclePlotRad <- function (xlim = c(-1, 1), ylim = c(-1, 1), uin = NULL, s
 #' As the function is not exported by the original package, I have copied it here to resolve
 #' the note thrown by devtools:check()
 #' 
-#' For more details about the original function, visit the circular package homepage at https://github.com/cran/circular
+#' For more details about the original function, visit the circular package homepage at \url{https://github.com/cran/circular}
 #' 
 #' @inheritParams myRoseDiag
 #' @keywords internal

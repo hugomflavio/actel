@@ -18,6 +18,6 @@ A rmd string to be attached to the report.
 Prints the time of first entry point on each of the arrays. Contains functions adapted from the circular R package.
 }
 \details{
-For more details about the original function, visit the circular package homepage at https://github.com/cran/circular
+For more details about the original function, visit the circular package homepage at \url{https://github.com/cran/circular}
 }
 \keyword{internal}

@@ -28,12 +28,14 @@ distancesMatrix(
 
 \item{PointIDCol}{The name of the column containing the IDs of the points to be used as starters and targets. Must be identical in both files.}
 
-\item{actel}{logical: if TRUE, a distance matrix optimized for actel will be saved in the working directory.}
+\item{actel}{logical: Should the distance matrix be optimized for actel and saved in the working directory?}
 }
 \value{
 The distance matrix
 }
 \description{
 Adapted from Grant Adams' script "distance to closest mpa". (grant.adams@eagles.usm.edu)
-https://cran.r-project.org/web/packages/gdistance/vignettes/gdistance1.pdf
+}
+\details{
+\url{https://cran.r-project.org/web/packages/gdistance/vignettes/gdistance1.pdf}
 }

@@ -37,11 +37,11 @@ copyOfRosediagRad(
 \item{col}{the colour for filling the rose diagram. The default, NULL, is to leave rose diagram unfilled. The values are recycled if needed.}
 }
 \description{
-This function is an EXACT copy of the function RosediagRad in the circular package. 
+This function is an EXACT copy of the function RosediagRad in the circular package.
 As the function is not exported by the original package, I have copied it here to resolve
 the note thrown by devtools:check()
 }
 \details{
-For more details about the original function, visit the circular package homepage at https://github.com/cran/circular
+For more details about the original function, visit the circular package homepage at \url{https://github.com/cran/circular}
 }
 \keyword{internal}

@@ -9,11 +9,16 @@ compileDetections(path = "detections", start.time = NULL, stop.time = NULL, tz)
 \arguments{
 \item{path}{the path(s) to the detection files}
 
-\item{start.time}{Detection data prior to this date is not analysed. Improves processing time when loading large amounts of detection data.}
+\item{start.time}{Detection data prior to the timestamp set in
+\code{start.time} (in YYYY-MM-DD HH:MM:SS format) is not considered during
+the analysis.}
 
-\item{stop.time}{Detection data posterior to this date is not analysed. Improves processing time when loading large amounts of detection data.}
+\item{stop.time}{Detection data posterior to the timestamp set in
+\code{stop.time} (in YYYY-MM-DD HH:MM:SS format) is not considered during
+the analysis.}
 
-\item{tz}{The time-zone of the study area. Necessary to convert the ALS time data, which is in UTC.}
+\item{tz}{The time zone of the study area. Must match one of the values
+present in \code{\link[base]{timezones}}.}
 }
 \value{
 A dataframe with all the detections
