@@ -12,10 +12,10 @@
 #' 
 #' @export
 #' 
-residency <- function(path = NULL, sections, section.minimum = 2, 
+residency <- function(path = NULL, sections, section.minimum = 2, minimum.detections = 2,
   max.interval = 60, maximum.time = 60, speed.method = c("last to first", "first to first"), speed.warning = NULL,
   speed.error = NULL, if.last.skip.section = TRUE, tz.study.area = NULL, tz = NULL, start.time = NULL, start.timestamp = NULL, 
-  stop.time = NULL, end.timestamp = NULL, report = TRUE, exclude.tags = NULL, replicates = NULL,
+  stop.time = NULL, end.timestamp = NULL, report = TRUE, exclude.tags = NULL, override = NULL, replicates = NULL,
   jump.warning = 2, jump.error = 3, inactive.warning = NULL, inactive.error = NULL, debug = FALSE) {
 # Temporary: check deprecated options
   dep.warning <- "------------------------------------------------------------------\n!!! Deprecated arguments used!\n!!!\n"
@@ -51,6 +51,8 @@ residency <- function(path = NULL, sections, section.minimum = 2,
     stop("'tz' could not be recognized as a timezone. Check available timezones with OlsonNames()\n", call. = FALSE)
   if (!is.numeric(section.minimum))
     stop("'section.minimum' must be numeric.\n", call. = FALSE)
+  if (!is.numeric(minimum.detections))
+    stop("'minimum.detections' must be numeric.\n", call. = FALSE)
   if (!is.numeric(max.interval))
     stop("'max.interval' must be numeric.\n", call. = FALSE)
 
@@ -120,6 +122,7 @@ residency <- function(path = NULL, sections, section.minimum = 2,
   the.function.call <- paste0("residency(path = ", ifelse(is.null(path), "NULL", paste0("'", path, "'")), 
       ", sections = ", paste0("c('", paste(sections, collapse = "', '"), "')"), 
       ", section.minimum = ", section.minimum,
+      ", minimum.detections = ", minimum.detections,
       ", max.interval = ", max.interval,
       ", speed.method = ", paste0("c('", speed.method, "')"),
       ", speed.warning = ", ifelse(is.null(speed.warning), "NULL", speed.warning), 
@@ -130,6 +133,7 @@ residency <- function(path = NULL, sections, section.minimum = 2,
       ", stop.time = ", ifelse(is.null(stop.time), "NULL", paste0("'", stop.time, "'")),
       ", report = ", ifelse(report, "TRUE", "FALSE"), 
       ", exclude.tags = ", ifelse(is.null(exclude.tags), "NULL", paste0("c('", paste(exclude.tags, collapse = "', '"), "')")), 
+      ", override = ", ifelse(is.null(override), "NULL", paste0("c('", paste(override, collapse = "', '"), "')")),
       ", replicates = ", ifelse(is.null(replicates),"NULL", paste0("c('", paste(replicates, collapse = "', '"), "')")),
       ", jump.warning = ", jump.warning,
       ", jump.error = ", jump.error,
@@ -156,7 +160,7 @@ residency <- function(path = NULL, sections, section.minimum = 2,
 # -----------------------------------
 
 # Load, structure and check the inputs
-study.data <- loadStudyData(tz = tz, override = NULL,
+study.data <- loadStudyData(tz = tz, override = override,
                             start.time = start.time, stop.time = stop.time,
                             sections = sections, exclude.tags = exclude.tags)
 bio <- study.data$bio
@@ -214,9 +218,15 @@ detections.list <- study.data$detections.list
     movements <- checkInactiveness(movements = movements, detections.list = detections.list, 
       inactive.warning = inactive.warning, inactive.error = inactive.error, 
       dist.mat = dist.mat, invalid.dist = invalid.dist)
+    if (is.na(match(fish, override))) {
+      output <- checkMinimumN(movements = movements[[i]], fish = fish, minimum.detections = minimum.detections)
+    
 
   valid.movements <- simplifyMovements(movements = movements, bio = bio, 
     speed.method = speed.method, dist.mat = dist.mat, invalid.dist = invalid.dist)
+    } else {
+      output <- overrideValidityChecks(moves = movements[[i]], fish = names(movements)[i])
+    }
 
   # Residency-exclusive area
 

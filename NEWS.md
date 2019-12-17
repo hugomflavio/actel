@@ -23,6 +23,8 @@ Enhancements:
   * messages and warnings are now printed using message() and warning()
   * Stop if any of the input files has duplicated column names
   * Warn user if success.arrays is not defined in migration()
+  * 'minimum.detections' is now available in all functions.
+  * 'override' is now available in all functions, and allows the user to directly invalidate specific events.
   * 'Detections' column in the object *status.df* has been split into 'Valid.detections' and 'All.detections'.
 
 ## actel 0.1.1

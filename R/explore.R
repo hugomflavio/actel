@@ -9,6 +9,7 @@ NULL
 #' 
 #' @param path Path to the folder containing the data. If the R session is already running in the target folder, path may be left as NULL
 #' @param maximum.time Deprecated. See "max.interval"
+#' @param minimum.detections The minimum number of times a tag must have been recorded during the study period for it to be considered a true tag and not random noise.
 #' @param max.interval The number of minutes that must pass between detections for a new event to be created.
 #' @param speed.method One of 'last to first' or 'first to first'. In the former, the last detection on a given array/section is matched to the first detection on the next array/section (default). If changed to 'first to first', the first detection on two consecutive arrays/sections are used to perform the calculations.
 #' @param tz.study.area Deprecated. See "tz"
@@ -26,6 +27,7 @@ NULL
 #' @param speed.error Numeric value (m/s). If a fish moves at a speed greater or equal to this argument, user intervention is suggested. Defaults to NULL (i.e. no errors are issued)
 #' @param inactive.warning Numeric value (days). If a fish spends a number of days greater or equal to this argument in a given place, a warning is issued. Defaults to NULL (i.e. no speed checks are performed, with a message)
 #' @param inactive.error Numeric value (days). If a fish spends a number of days greater or equal to this argument in a given place, user intervention is suggested. Defaults to NULL (i.e. no errors are issued)
+#' @param override A list of tags for which the user intends to manually define entering and leaving points for each study section.
 #' 
 #' @return A list containing 1) the detections used during the analysis, 2) the movement events, 3) the status dataframe, 4) the survival overview per group, 5) the progression through the study area, 6) the ALS array/sections' efficiency, 7) the list of spatial objects used during the analysis.
 #' 
@@ -37,7 +39,7 @@ NULL
 #' 
 explore <- function(path = NULL, max.interval = 60, maximum.time = 60, speed.method = c("last to first", "first to first"),
     speed.warning = NULL, speed.error = NULL, tz.study.area = NULL, tz, start.time = NULL, start.timestamp = NULL, 
-    stop.time = NULL, end.timestamp = NULL, override = NULL, 
+    stop.time = NULL, end.timestamp = NULL, override = NULL, minimum.detections = 2, 
     report = TRUE, exclude.tags = NULL, jump.warning = 2, jump.error = 3, inactive.warning = NULL, 
     inactive.error = NULL,  debug = FALSE) {
 # Temporary: check deprecated options
@@ -72,6 +74,8 @@ explore <- function(path = NULL, max.interval = 60, maximum.time = 60, speed.met
   my.home <- getwd()
   if (is.null(tz) || is.na(match(tz, OlsonNames())))
     stop("'tz' could not be recognized as a timezone. Check available timezones with OlsonNames()\n", call. = FALSE)
+  if (!is.numeric(minimum.detections))
+    stop("'minimum.detections' must be numeric.\n", call. = FALSE)
   if (!is.numeric(max.interval))
     stop("'max.interval' must be numerical.\n", call. = FALSE)
 
@@ -134,6 +138,7 @@ explore <- function(path = NULL, max.interval = 60, maximum.time = 60, speed.met
 # Store function call
   the.function.call <- paste0("explore(path = ", ifelse(is.null(path), "NULL", paste0("'", path, "'")), 
       ", max.interval = ", max.interval,
+      ", minimum.detections = ", minimum.detections,
       ", speed.method = ", paste0("c('", speed.method, "')"),
       ", speed.warning = ", ifelse(is.null(speed.warning), "NULL", speed.warning), 
       ", speed.error = ", ifelse(is.null(speed.error), "NULL", speed.error), 
@@ -222,6 +227,8 @@ detections.list <- study.data$detections.list
 
       release <- as.character(bio$Release.site[na.as.false(bio$Transmitter == fish)])
       release <- with(spatial, release.sites[release.sites$Standard.Name == release, "Array"])
+
+      output <- checkMinimumN(movements = movements[[i]], fish = fish, minimum.detections = minimum.detections)
 
       output <- checkJumpDistance(movements = output, release = release, fish = fish, dotmat = dotmat, 
                                   jump.warning = jump.warning, jump.error = jump.error)
