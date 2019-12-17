@@ -4,8 +4,12 @@
 \alias{listToTable}
 \title{Convert a list of data frames with identical columns into a single data frame}
 \usage{
-listToTable(input, type = c("table", "frame"), row.names = FALSE,
-  source = TRUE)
+listToTable(
+  input,
+  type = c("table", "frame"),
+  row.names = FALSE,
+  source = TRUE
+)
 }
 \arguments{
 \item{input}{a list of data frames}

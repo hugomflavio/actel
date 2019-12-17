@@ -4,8 +4,14 @@
 \alias{printExploreRmd}
 \title{Print Rmd report}
 \usage{
-printExploreRmd(biometric.fragment, individual.plots, circular.plots,
-  spatial, detections, valid.detections)
+printExploreRmd(
+  biometric.fragment,
+  individual.plots,
+  circular.plots,
+  spatial,
+  detections,
+  valid.detections
+)
 }
 \arguments{
 \item{biometric.fragment}{Rmarkdown string specifying the biometric graphics drawn.}

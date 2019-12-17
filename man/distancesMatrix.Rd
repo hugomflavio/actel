@@ -4,9 +4,16 @@
 \alias{distancesMatrix}
 \title{Calculate distance matrix}
 \usage{
-distancesMatrix(t.layer = "transition.layer.RData", starters = NULL,
-  targets = starters, EPSGcode, coord.x = "x", coord.y = "y",
-  PointIDCol = NA, actel = TRUE)
+distancesMatrix(
+  t.layer = "transition.layer.RData",
+  starters = NULL,
+  targets = starters,
+  EPSGcode,
+  coord.x = "x",
+  coord.y = "y",
+  PointIDCol = NA,
+  actel = TRUE
+)
 }
 \arguments{
 \item{t.layer}{A .RData file containing a transition layer.}

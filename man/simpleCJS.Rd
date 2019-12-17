@@ -4,8 +4,7 @@
 \alias{simpleCJS}
 \title{Compute simple CJS model}
 \usage{
-simpleCJS(input, estimate = NULL, fixed.efficiency = NULL,
-  silent = TRUE)
+simpleCJS(input, estimate = NULL, fixed.efficiency = NULL, silent = TRUE)
 }
 \arguments{
 \item{input}{a detection matrix}

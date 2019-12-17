@@ -4,10 +4,12 @@
 \alias{checkImpassables}
 \title{Find out if a fish moved in an impossible direction}
 \usage{
-checkImpassables(movements, dotmat)
+checkImpassables(movements, fish, dotmat)
 }
 \arguments{
 \item{movements}{the movements list}
+
+\item{fish}{the fish being analysed}
 
 \item{dotmat}{the matrix of distances between arrays}
 }

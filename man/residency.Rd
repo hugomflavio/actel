@@ -4,15 +4,33 @@
 \alias{residency}
 \title{Residency analysis}
 \usage{
-residency(path = NULL, sections, section.minimum = 2,
-  max.interval = 60, maximum.time = 60,
+residency(
+  path = NULL,
+  sections,
+  section.minimum = 2,
+  minimum.detections = 2,
+  max.interval = 60,
+  maximum.time = 60,
   speed.method = c("last to first", "first to first"),
-  speed.warning = NULL, speed.error = NULL,
-  if.last.skip.section = TRUE, tz.study.area = NULL, tz = NULL,
-  start.time = NULL, start.timestamp = NULL, stop.time = NULL,
-  end.timestamp = NULL, report = TRUE, exclude.tags = NULL,
-  replicates = NULL, jump.warning = 2, jump.error = 3,
-  inactive.warning = NULL, inactive.error = NULL, debug = FALSE)
+  speed.warning = NULL,
+  speed.error = NULL,
+  if.last.skip.section = TRUE,
+  tz.study.area = NULL,
+  tz = NULL,
+  start.time = NULL,
+  start.timestamp = NULL,
+  stop.time = NULL,
+  end.timestamp = NULL,
+  report = TRUE,
+  exclude.tags = NULL,
+  override = NULL,
+  replicates = NULL,
+  jump.warning = 2,
+  jump.error = 3,
+  inactive.warning = NULL,
+  inactive.error = NULL,
+  debug = FALSE
+)
 }
 \arguments{
 \item{path}{Path to the folder containing the data. If the R session is already running in the target folder, path may be left as NULL}
@@ -20,6 +38,8 @@ residency(path = NULL, sections, section.minimum = 2,
 \item{sections}{The sections in which the study was divided. Must be coincident with the names given to the ALS arrays. (i.e. if an array is 'River1', then the respective section is 'River')}
 
 \item{section.minimum}{threshold consecutive number of detections in a section that awards confidence in the results. If the number of detections is lower than this argument, a warning is issued and user interaction is allowed.}
+
+\item{minimum.detections}{The minimum number of times a tag must have been recorded during the study period for it to be considered a true tag and not random noise.}
 
 \item{max.interval}{The number of minutes that must pass between detections for a new event to be created.}
 
@@ -48,6 +68,8 @@ residency(path = NULL, sections, section.minimum = 2,
 \item{report}{Whether graphics, tables and html report files should be created. Defaults to TRUE. Allows automatic compiling of an html report after the analysis.}
 
 \item{exclude.tags}{A list of tags that should be excluded from the detection data before any analyses are performed. Intended to be used if stray tags from a different code space but with the same signal as a target tag are detected in the study area.}
+
+\item{override}{A list of tags for which the user intends to manually define entering and leaving points for each study section.}
 
 \item{replicates}{A list containing, for each desired array, the standard names of the stations to be used as a replicate, for efficiency estimations.}
 

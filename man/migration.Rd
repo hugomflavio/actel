@@ -4,16 +4,34 @@
 \alias{migration}
 \title{Migration analysis}
 \usage{
-migration(path = NULL, sections, success.arrays = NULL,
-  minimum.detections = 2, maximum.time = 60, max.interval = 60,
+migration(
+  path = NULL,
+  sections,
+  success.arrays = NULL,
+  minimum.detections = 2,
+  maximum.time = 60,
+  max.interval = 60,
   speed.method = c("last to first", "first to first"),
-  speed.warning = NULL, speed.error = NULL,
-  if.last.skip.section = TRUE, tz.study.area = NULL, tz = NULL,
-  start.time = NULL, start.timestamp = NULL, stop.time = NULL,
-  end.timestamp = NULL, report = TRUE, override = NULL,
-  exclude.tags = NULL, cautious.assignment = TRUE, replicates = NULL,
-  disregard.parallels = TRUE, jump.warning = 2, jump.error = 3,
-  inactive.warning = NULL, inactive.error = NULL, debug = FALSE)
+  speed.warning = NULL,
+  speed.error = NULL,
+  if.last.skip.section = TRUE,
+  tz.study.area = NULL,
+  tz = NULL,
+  start.time = NULL,
+  start.timestamp = NULL,
+  stop.time = NULL,
+  end.timestamp = NULL,
+  report = TRUE,
+  override = NULL,
+  exclude.tags = NULL,
+  replicates = NULL,
+  disregard.parallels = TRUE,
+  jump.warning = 2,
+  jump.error = 3,
+  inactive.warning = NULL,
+  inactive.error = NULL,
+  debug = FALSE
+)
 }
 \arguments{
 \item{path}{Path to the folder containing the data. If the R session is already running in the target folder, path may be left as NULL}
@@ -53,8 +71,6 @@ migration(path = NULL, sections, success.arrays = NULL,
 \item{override}{A list of tags for which the user intends to manually define entering and leaving points for each study section.}
 
 \item{exclude.tags}{A list of tags that should be excluded from the detection data before any analyses are performed. Intended to be used if stray tags from a different code space but with the same signal as a target tag are detected in the study area.}
-
-\item{cautious.assignment}{If TRUE, actel avoids assigning events with one detection as first and/or last events of a section.}
 
 \item{replicates}{A list containing, for each desired array, the standard names of the stations to be used as a replicate, for efficiency estimations.}
 

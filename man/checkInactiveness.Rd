@@ -4,11 +4,20 @@
 \alias{checkInactiveness}
 \title{Find if a fish is standing still in an array}
 \usage{
-checkInactiveness(movements, detections.list, inactive.warning,
-  inactive.error, invalid.dist, dist.mat)
+checkInactiveness(
+  movements,
+  fish,
+  detections.list,
+  inactive.warning,
+  inactive.error,
+  invalid.dist,
+  dist.mat
+)
 }
 \arguments{
 \item{movements}{the movements list}
+
+\item{fish}{the fish being analysed}
 
 \item{detections.list}{A list of the detections split by each target tag, created by splitDetections.}
 
@@ -19,8 +28,6 @@ checkInactiveness(movements, detections.list, inactive.warning,
 \item{invalid.dist}{Whether or not the distance matrix supplied is valid for the study area.}
 
 \item{dist.mat}{A matrix of the distances between the deployed ALS.}
-
-\item{valid.movements}{a temporary valid.movements list}
 }
 \value{
 The valid movements list with valid/invalid rows

@@ -4,8 +4,7 @@
 \alias{transitionLayer}
 \title{Calculate distance matrix}
 \usage{
-transitionLayer(shape, size, EPSGcode, directions = c(16, 8, 4),
-  force = FALSE)
+transitionLayer(shape, size, EPSGcode, directions = c(16, 8, 4), force = FALSE)
 }
 \arguments{
 \item{shape}{A shape file from which to create the transition layer.}

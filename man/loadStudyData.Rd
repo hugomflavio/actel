@@ -4,8 +4,15 @@
 \alias{loadStudyData}
 \title{Load, structure and check the inputs}
 \usage{
-loadStudyData(tz, override = NULL, start.time, stop.time,
-  sections = NULL, exclude.tags, disregard.parallels = TRUE)
+loadStudyData(
+  tz,
+  override = NULL,
+  start.time,
+  stop.time,
+  sections = NULL,
+  exclude.tags,
+  disregard.parallels = TRUE
+)
 }
 \arguments{
 \item{tz}{The time-zone of the study area. Necessary to convert the ALS time data, which is in UTC.}

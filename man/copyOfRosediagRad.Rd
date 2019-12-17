@@ -4,8 +4,18 @@
 \alias{copyOfRosediagRad}
 \title{circular:::RosediagRad}
 \usage{
-copyOfRosediagRad(x, zero, rotation, bins, upper, radii.scale, prop,
-  border, col, ...)
+copyOfRosediagRad(
+  x,
+  zero,
+  rotation,
+  bins,
+  upper,
+  radii.scale,
+  prop,
+  border,
+  col,
+  ...
+)
 }
 \arguments{
 \item{x}{a vector, matrix or data.frame. The object is coerced to class circular.}

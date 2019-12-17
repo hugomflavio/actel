@@ -4,8 +4,13 @@
 \alias{loadDot}
 \title{Load spatial.dot}
 \usage{
-loadDot(string = NULL, input = NULL, spatial, sections = NULL,
-  disregard.parallels)
+loadDot(
+  string = NULL,
+  input = NULL,
+  spatial,
+  sections = NULL,
+  disregard.parallels
+)
 }
 \arguments{
 \item{string}{A dot string}

@@ -9,7 +9,7 @@ loadSpatial(file = "spatial.csv", report = FALSE)
 \arguments{
 \item{file}{an input file with spatial data.}
 
-\item{verbose}{Logical: If TRUE, the appendTo function is enabled.}
+\item{report}{Logical: If TRUE, the appendTo function is enabled.}
 }
 \value{
 The spatial dataframe

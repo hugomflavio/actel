@@ -4,10 +4,7 @@
 \alias{checkUpstream}
 \title{Check for movements upstream of the release site.}
 \usage{
-checkUpstream(movements, bio, spatial, arrays)
-}
-\arguments{
-\item{bio}{A table with the tags and biometrics of the studied fish.}
+checkUpstream(movements, fish, release, arrays)
 }
 \value{
 The updated movements

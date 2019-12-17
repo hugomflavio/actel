@@ -4,8 +4,7 @@
 \alias{assembleOutput}
 \title{Create status.df}
 \usage{
-assembleOutput(timetable, bio, spatial, sections, dist.mat, invalid.dist,
-  tz)
+assembleOutput(timetable, bio, spatial, sections, dist.mat, invalid.dist, tz)
 }
 \arguments{
 \item{timetable}{A table of the entering and leaving points for each section per target tag, created by assembleTimetable.}

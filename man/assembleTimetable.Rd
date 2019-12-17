@@ -4,18 +4,22 @@
 \alias{assembleTimetable}
 \title{Create the timetable}
 \usage{
-assembleTimetable(movements, sections, spatial, arrays, minimum.detections,
-  dist.mat, invalid.dist, speed.method, if.last.skip.section,
-  success.arrays, override, cautious.assignment)
+assembleTimetable(
+  vm,
+  all.moves,
+  sections,
+  arrays,
+  dist.mat,
+  invalid.dist,
+  speed.method,
+  if.last.skip.section,
+  success.arrays
+)
 }
 \arguments{
-\item{movements}{A list of movements for each target tag, created by groupMovements.}
-
 \item{sections}{The sections in which the study was divided. Must be coincident with the names given to the ALS arrays. (i.e. if an array is 'River1', then the respective section is 'River')}
 
 \item{arrays}{a list of arrays}
-
-\item{minimum.detections}{The minimum number of times a tag must have been recorded during the study period for it to be considered a true tag and not random noise.}
 
 \item{dist.mat}{A matrix of the distances between the deployed ALS.}
 
@@ -27,9 +31,7 @@ assembleTimetable(movements, sections, spatial, arrays, minimum.detections,
 
 \item{success.arrays}{The ALS arrays mark the end of the study area. If a fish crosses one of these arrays, it is considered to have successfully migrated through the area.}
 
-\item{override}{A list of tags for which the user intends to manually define entering and leaving points for each study section.}
-
-\item{cautious.assignment}{If TRUE, actel avoids assigning events with one detection as first and/or last events of a section.}
+\item{movements}{A list of movements for each target tag, created by groupMovements.}
 }
 \value{
 A table of the entering and leaving points for each section per target tag

@@ -4,8 +4,14 @@
 \alias{ringsRel}
 \title{Draw rings at relative points}
 \usage{
-ringsRel(plot.params, border, rings.lty, ring.text, ring.text.pos,
-  ring.text.cex)
+ringsRel(
+  plot.params,
+  border,
+  rings.lty,
+  ring.text,
+  ring.text.pos,
+  ring.text.cex
+)
 }
 \arguments{
 \item{border}{the colour to draw the border. The default, NULL, means to use par("fg"). Use border = NA to omit borders.}

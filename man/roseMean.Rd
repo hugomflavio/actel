@@ -4,11 +4,18 @@
 \alias{roseMean}
 \title{Draw mean value in the axis margin}
 \usage{
-roseMean(input, col = c("cornflowerblue", "chartreuse3", "deeppink"),
-  mean.length = c(0.0125, -0.0125), mean.lwd = 4,
-  box.range = c("none", "std.error", "sd"), fill = "white",
-  border = "black", box.size = c(1.015, 0.985),
-  edge.length = c(0.025, -0.025), edge.lwd = 2)
+roseMean(
+  input,
+  col = c("cornflowerblue", "chartreuse3", "deeppink"),
+  mean.length = c(0.0125, -0.0125),
+  mean.lwd = 4,
+  box.range = c("none", "std.error", "sd"),
+  fill = "white",
+  border = "black",
+  box.size = c(1.015, 0.985),
+  edge.length = c(0.025, -0.025),
+  edge.lwd = 2
+)
 }
 \arguments{
 \item{input}{the input dataset}

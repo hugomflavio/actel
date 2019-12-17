@@ -4,9 +4,18 @@
 \alias{copyOfCirclePlotRad}
 \title{circular:::circlePlotRad}
 \usage{
-copyOfCirclePlotRad(xlim = c(-1, 1), ylim = c(-1, 1), uin = NULL,
-  shrink = 1, tol = 0.04, main = NULL, sub = NULL, xlab = NULL,
-  ylab = NULL, control.circle = circular::circle.control())
+copyOfCirclePlotRad(
+  xlim = c(-1, 1),
+  ylim = c(-1, 1),
+  uin = NULL,
+  shrink = 1,
+  tol = 0.04,
+  main = NULL,
+  sub = NULL,
+  xlab = NULL,
+  ylab = NULL,
+  control.circle = circular::circle.control()
+)
 }
 \arguments{
 \item{xlim, ylim}{the ranges to be encompassed by the x and y axes. Useful for centering the plot.}

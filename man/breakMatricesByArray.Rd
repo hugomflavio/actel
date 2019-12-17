@@ -4,8 +4,7 @@
 \alias{breakMatricesByArray}
 \title{Break the detection matrices per array}
 \usage{
-breakMatricesByArray(m, arrays, type = c("peers", "all"),
-  verbose = TRUE)
+breakMatricesByArray(m, arrays, type = c("peers", "all"), verbose = TRUE)
 }
 \arguments{
 \item{m}{the original presence/absence matrices}

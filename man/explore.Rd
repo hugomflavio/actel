@@ -4,13 +4,29 @@
 \alias{explore}
 \title{Actel: Acoustic telemetry data sorting}
 \usage{
-explore(path = NULL, max.interval = 60, maximum.time = 60,
+explore(
+  path = NULL,
+  max.interval = 60,
+  maximum.time = 60,
   speed.method = c("last to first", "first to first"),
-  speed.warning = NULL, speed.error = NULL, tz.study.area = NULL, tz,
-  start.time = NULL, start.timestamp = NULL, stop.time = NULL,
-  end.timestamp = NULL, report = TRUE, exclude.tags = NULL,
-  jump.warning = 2, jump.error = 3, inactive.warning = NULL,
-  inactive.error = NULL, debug = FALSE)
+  speed.warning = NULL,
+  speed.error = NULL,
+  tz.study.area = NULL,
+  tz,
+  start.time = NULL,
+  start.timestamp = NULL,
+  stop.time = NULL,
+  end.timestamp = NULL,
+  override = NULL,
+  minimum.detections = 2,
+  report = TRUE,
+  exclude.tags = NULL,
+  jump.warning = 2,
+  jump.error = 3,
+  inactive.warning = NULL,
+  inactive.error = NULL,
+  debug = FALSE
+)
 }
 \arguments{
 \item{path}{Path to the folder containing the data. If the R session is already running in the target folder, path may be left as NULL}
@@ -36,6 +52,10 @@ explore(path = NULL, max.interval = 60, maximum.time = 60,
 \item{stop.time}{Detection data posterior to this date is not analysed. Improves processing time when loading large amounts of detection data.}
 
 \item{end.timestamp}{Deprecated. See "stop.time"}
+
+\item{override}{A list of tags for which the user intends to manually define entering and leaving points for each study section.}
+
+\item{minimum.detections}{The minimum number of times a tag must have been recorded during the study period for it to be considered a true tag and not random noise.}
 
 \item{report}{Whether graphics, tables and html report files should be created. Defaults to TRUE. Allows automatic compiling of an html report after the analysis.}
 

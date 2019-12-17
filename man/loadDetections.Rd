@@ -4,8 +4,7 @@
 \alias{loadDetections}
 \title{Load ALS detections}
 \usage{
-loadDetections(start.time = NULL, stop.time = NULL, tz,
-  force = FALSE)
+loadDetections(start.time = NULL, stop.time = NULL, tz, force = FALSE)
 }
 \arguments{
 \item{start.time}{Detection data prior to this date is not analysed. Improves processing time when loading large amounts of detection data.}

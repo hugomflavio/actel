@@ -4,7 +4,7 @@
 \alias{simplifyMovements}
 \title{Removes invalid events}
 \usage{
-simplifyMovements(movements, bio, speed.method, dist.mat, invalid.dist)
+simplifyMovements(movements, fish, bio, speed.method, dist.mat, invalid.dist)
 }
 \arguments{
 \item{movements}{A list of movements for each target tag, created by groupMovements.}

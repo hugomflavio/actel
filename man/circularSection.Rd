@@ -4,8 +4,15 @@
 \alias{circularSection}
 \title{Draw a section on the outside of the circle}
 \usage{
-circularSection(from, to, units = "hours", template = "clock24",
-  limits = c(1, 0), fill = "white", border = "black")
+circularSection(
+  from,
+  to,
+  units = "hours",
+  template = "clock24",
+  limits = c(1, 0),
+  fill = "white",
+  border = "black"
+)
 }
 \arguments{
 \item{from}{value where the section should start}

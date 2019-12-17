@@ -4,8 +4,16 @@
 \alias{printIndividuals}
 \title{Print individual graphics}
 \usage{
-printIndividuals(redraw, detections.list, bio, status.df = NULL, tz,
-  movements, valid.movements = NULL, extension = "png")
+printIndividuals(
+  redraw,
+  detections.list,
+  bio,
+  status.df = NULL,
+  tz,
+  movements,
+  valid.movements = NULL,
+  extension = "png"
+)
 }
 \arguments{
 \item{detections.list}{A list of the detections split by each target tag, created by splitDetections.}

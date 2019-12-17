@@ -4,10 +4,12 @@
 \alias{checkSpeeds}
 \title{check fish speeds against defined thresholds (in m/s)}
 \usage{
-checkSpeeds(movements, valid.movements, speed.warning, speed.error)
+checkSpeeds(movements, fish, valid.movements, speed.warning, speed.error)
 }
 \arguments{
 \item{movements}{the movements list}
+
+\item{fish}{the fish being analysed}
 
 \item{valid.movements}{a temporary valid.movements list, with updated speeds}
 

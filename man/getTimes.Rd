@@ -4,8 +4,12 @@
 \alias{getTimes}
 \title{Extract time stamp of valid entry or exit in each array}
 \usage{
-getTimes(movements, spatial, type = c("arrival", "departure"),
-  events = c("one", "all"))
+getTimes(
+  movements,
+  spatial,
+  type = c("arrival", "departure"),
+  events = c("one", "all")
+)
 }
 \arguments{
 \item{movements}{A list of movements for each target tag, created by groupMovements.}

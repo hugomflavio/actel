@@ -4,8 +4,16 @@
 \alias{groupMovements}
 \title{Group movements}
 \usage{
-groupMovements(detections.list, bio, spatial, speed.method, max.interval,
-  tz, dist.mat, invalid.dist)
+groupMovements(
+  detections.list,
+  bio,
+  spatial,
+  speed.method,
+  max.interval,
+  tz,
+  dist.mat,
+  invalid.dist
+)
 }
 \arguments{
 \item{detections.list}{A list of the detections split by each target tag, created by splitDetections.}

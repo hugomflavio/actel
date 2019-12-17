@@ -4,10 +4,21 @@
 \alias{printMigrationRmd}
 \title{Print Rmd report}
 \usage{
-printMigrationRmd(name.fragment, header.fragment, biometric.fragment,
-  efficiency.fragment, display.progression, array.overview.fragment,
-  survival.graph.size, individual.plots, circular.plots, spatial,
-  deployments, valid.detections, detections)
+printMigrationRmd(
+  name.fragment,
+  header.fragment,
+  biometric.fragment,
+  efficiency.fragment,
+  display.progression,
+  array.overview.fragment,
+  survival.graph.size,
+  individual.plots,
+  circular.plots,
+  spatial,
+  deployments,
+  valid.detections,
+  detections
+)
 }
 \arguments{
 \item{name.fragment}{Rmarkdown string specifying the type of report for the title.}

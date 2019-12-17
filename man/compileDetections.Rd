@@ -4,8 +4,7 @@
 \alias{compileDetections}
 \title{Combine ALS detections}
 \usage{
-compileDetections(path = "detections", start.time = NULL,
-  stop.time = NULL, tz)
+compileDetections(path = "detections", start.time = NULL, stop.time = NULL, tz)
 }
 \arguments{
 \item{path}{the path(s) to the detection files}

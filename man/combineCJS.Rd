@@ -4,8 +4,7 @@
 \alias{combineCJS}
 \title{Combine multiple CJS models}
 \usage{
-combineCJS(..., estimate = NULL, fixed.efficiency = NULL,
-  silent = FALSE)
+combineCJS(..., estimate = NULL, fixed.efficiency = NULL, silent = FALSE)
 }
 \arguments{
 \item{...}{The detection matrices to be joined, or a list containing detection matrices}

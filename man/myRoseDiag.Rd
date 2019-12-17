@@ -4,17 +4,43 @@
 \alias{myRoseDiag}
 \title{Edited rose diagram function}
 \usage{
-myRoseDiag(x, pch = 16, cex = 1, axes = TRUE, shrink = 1,
-  bins = 24, upper = TRUE, ticks = TRUE, tcl = 0.025,
-  tcl.text = 0.125, radii.scale = c("sqrt", "linear"), border = NULL,
-  col = c("lightblue", "#c0ff3e80", "#ffc0cb80", "#F0E4424D",
-  "#0072B24D", "#D55E004D"), tol = 0.04, uin = NULL, xlim = c(-1, 1),
-  ylim = c(-1, 1), prop = 1, digits = 2, plot.info = NULL,
-  units = NULL, template = NULL, zero = NULL, rotation = NULL,
-  main = NULL, sub = NULL, xlab = "", ylab = "", add = TRUE,
-  control.circle = circular::circle.control(), rings = c("none",
-  "absolute", "relative"), rings.lty = 2, ring.text = FALSE,
-  ring.text.pos = -0.04, ring.text.cex = 1)
+myRoseDiag(
+  x,
+  pch = 16,
+  cex = 1,
+  axes = TRUE,
+  shrink = 1,
+  bins = 24,
+  upper = TRUE,
+  ticks = TRUE,
+  tcl = 0.025,
+  tcl.text = 0.125,
+  radii.scale = c("sqrt", "linear"),
+  border = NULL,
+  col = c("lightblue", "#c0ff3e80", "#ffc0cb80", "#F0E4424D", "#0072B24D", "#D55E004D"),
+  tol = 0.04,
+  uin = NULL,
+  xlim = c(-1, 1),
+  ylim = c(-1, 1),
+  prop = 1,
+  digits = 2,
+  plot.info = NULL,
+  units = NULL,
+  template = NULL,
+  zero = NULL,
+  rotation = NULL,
+  main = NULL,
+  sub = NULL,
+  xlab = "",
+  ylab = "",
+  add = TRUE,
+  control.circle = circular::circle.control(),
+  rings = c("none", "absolute", "relative"),
+  rings.lty = 2,
+  ring.text = FALSE,
+  ring.text.pos = -0.04,
+  ring.text.cex = 1
+)
 }
 \arguments{
 \item{x}{a vector, matrix or data.frame. The object is coerced to class circular.}
