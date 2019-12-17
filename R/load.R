@@ -465,15 +465,15 @@ loadDistances <- function(spatial) {
     }
     if (!invalid.dist && any(link <- is.na(match(rownames(dist.mat), colnames(dist.mat))))) {
       appendTo(c("Screen", "Report", "Warning"), "The column and row names in the distance matrix do not match each other. Deactivating speed calculation to avoid function failure.")
-      message(paste0("       Row names missing in the columns: '", paste(rownames(dist.mat)[link], collapse = "', '"), "'."))
+      message(paste0("   Row names missing in the columns: '", paste(rownames(dist.mat)[link], collapse = "', '"), "'."))
       if (any(link <- is.na(match(colnames(dist.mat), rownames(dist.mat))))) 
-        message(paste0("       Column names missing in the rows: '", paste(colnames(dist.mat)[link], collapse = "', '"), "'."))
+        message(paste0("   Column names missing in the rows: '", paste(colnames(dist.mat)[link], collapse = "', '"), "'."))
       invalid.dist <- TRUE
     }
     if (!invalid.dist && sum(nrow(spatial$stations), nrow(spatial$release.sites)) != nrow(dist.mat)) {
       appendTo(c("Screen", "Report", "Warning"), "The number of spatial points does not match the number of rows in the distance matrix. Deactivating speed calculation to avoid function failure.")
-      message("       Number of stations and release sites listed: ", sum(nrow(spatial$stations), nrow(spatial$release.sites)))
-      message("       Number of rows/columns in the distance matrix: ", nrow(dist.mat))
+      message("   Number of stations and release sites listed: ", sum(nrow(spatial$stations), nrow(spatial$release.sites)))
+      message("   Number of rows/columns in the distance matrix: ", nrow(dist.mat))
       invalid.dist <- TRUE
     }
     if (!invalid.dist && (any(!matchl(spatial$stations$Standard.Name, colnames(dist.mat))) | any(!matchl(spatial$release.sites$Standard.Name, colnames(dist.mat))))) {
@@ -481,9 +481,9 @@ loadDistances <- function(spatial) {
       missing.releases <- spatial$release.sites$Standard.Name[!matchl(spatial$release.sites$Standard.Name, colnames(dist.mat))]
       missing.stations <- spatial$stations$Standard.Name[!matchl(spatial$stations$Standard.Name, colnames(dist.mat))]
       if (length(missing.releases) > 0)
-        message(paste0("       Release sites missing: '", paste(missing.releases, collapse = "', '")))
+        message(paste0("   Release sites missing: '", paste(missing.releases, collapse = "', '")))
       if (length(missing.stations) > 0)
-        message(paste0("       Stations missing: '", paste(missing.stations, collapse = "', '")))
+        message(paste0("   Stations missing: '", paste(missing.stations, collapse = "', '")))
       invalid.dist <- TRUE
     }    
   } else {
@@ -544,7 +544,7 @@ loadDeployments <- function(file, tz){
 #' Load Spatial file and Check the structure
 #' 
 #' @param file an input file with spatial data.
-#' @param verbose Logical: If TRUE, the appendTo function is enabled.
+#' @param report Logical: If TRUE, the appendTo function is enabled.
 #' 
 #' @return The spatial dataframe
 #' 
@@ -1251,8 +1251,8 @@ transformSpatial <- function(spatial, bio, sections = NULL, first.array = NULL) 
       B <- unique(bio$Release.site)
       if (any(is.na(match(B, A)))) {
         appendTo(c("Screen", "Report", "Warning"), "There is a mismatch between the release sites reported and the release locations for the fish.")
-        message("       Release sites listed in the spatial.csv file:", paste(A, collapse = ", "))
-        message("       Sites listed in the biometrics.csv file 'Release.site' column:", paste(B, collapse = ", "))
+        message("   Release sites listed in the spatial.csv file:", paste(A, collapse = ", "))
+        message("   Sites listed in the biometrics.csv file 'Release.site' column:", paste(B, collapse = ", "))
         emergencyBreak()
         stop("The release names should be identical in the spatial.csv file and in the biometrics.csv file.\n", call. = FALSE)
       } else {
@@ -1265,8 +1265,8 @@ transformSpatial <- function(spatial, bio, sections = NULL, first.array = NULL) 
       B <- unique(release.sites$Array)
       if (any(is.na(match(B, A)))) {
         appendTo(c("Screen", "Report", "Warning"), "There is a mismatch between the expected first array of a release site and the list of arrays.")
-        message("       Arrays listed in the spatial.csv file:", paste(A, collapse = ", "))
-        message("       Expected first arrays of the release sites:", paste(B, collapse = ", "))
+        message("   Arrays listed in the spatial.csv file:", paste(A, collapse = ", "))
+        message("   Expected first arrays of the release sites:", paste(B, collapse = ", "))
         emergencyBreak()
         stop("The expected first arrays should match the arrays where stations where deployed in the spatial.csv file.\n", call. = FALSE)
       }

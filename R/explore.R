@@ -337,7 +337,7 @@ detections.list <- study.data$detections.list
   appendTo("Screen", "M: Process finished successfully.")
 # ------------------
   
-  appendTo("Screen", paste("M: Saving job log as '", paste0(gsub(":", ".", sub(" ", ".", as.character(Sys.time()))), "actel.log.txt", sep = "."), "'."))
+  appendTo("Screen", paste0("M: Saving job log as '", paste0(gsub(":", ".", sub(" ", ".", as.character(Sys.time()))), "actel.log.txt", sep = "."), "'."))
   file.rename("temp_log.txt", paste(gsub(":", ".", sub(" ", ".", as.character(Sys.time()))), "actel.log.txt", sep = "."))
   
   if (!debug)

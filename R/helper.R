@@ -333,8 +333,12 @@ appendTo <- function(recipient, line, fish) {
         message(line)
       flush.console()
     } 
-    if (i == "Report") 
-      write(line, file = "temp_log.txt", append = file.exists("temp_log.txt"))
+    if (i == "Report") {
+      if (any(recipient == "Warning"))
+        write(paste("Warning:", line), file = "temp_log.txt", append = file.exists("temp_log.txt"))
+      else
+        write(line, file = "temp_log.txt", append = file.exists("temp_log.txt"))
+    }
     if (i == "Warning") 
       write(paste("Warning:", line), file = "temp_warnings.txt", append = file.exists("temp_warnings.txt"))
     if (i == "UD") 
