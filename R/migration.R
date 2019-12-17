@@ -7,7 +7,6 @@
 #' @param sections The sections in which the study was divided. Must be coincident with the names given to the ALS arrays. (i.e. if an array is 'River1', then the respective section is 'River') 
 #' @param success.arrays The ALS arrays mark the end of the study area. If a fish crosses one of these arrays, it is considered to have successfully migrated through the area.
 #' @param if.last.skip.section Indicates whether a fish detected at the last array of a given section should be considered to have disappeared in the next section. Defaults to TRUE. I.e.: In a study with sections 'River' and 'Fjord', where 'River3' is the last river array, a fish last detected at River3 will be considered as 'disappeared in the Fjord'.
-#' @param override A list of tags for which the user intends to manually define entering and leaving points for each study section.
 #' @param disregard.parallels Logical. If TRUE, the presence of parallel arrays does not invalidate potential efficiency peers. For more details on this, have a look at the vignettes.
 #' @param replicates A list containing, for each desired array, the standard names of the stations to be used as a replicate, for efficiency estimations.
 #' @inheritParams explore
@@ -148,17 +147,17 @@ migration <- function(path = NULL, sections, success.arrays = NULL, minimum.dete
 # --------------------
 
 # Final arrangements before beginning
-  appendTo("Report", "Acoustic telemetry data analysis report.\n") 
+  inst.ver <- utils::packageVersion("actel")
+  inst.ver.short <- substr(inst.ver, start = 1, stop = nchar(as.character(inst.ver)) - 5) 
+  appendTo("Report", paste0("Actel R package report.\nVersion: ", inst.ver.short, "\n"))
+  rm(inst.ver)
 
   path <- checkPath(my.home = my.home, path = path)  
 
   if (debug)
     appendTo("Report", "!!!--- Debug mode has been activated ---!!!\n")
 
-  if (is.null(success.arrays))
-    appendTo(c("Report"), paste0("Timestamp:", the.time <- Sys.time(), "\n\nM: Selected folder: ", getwd(), "\nM: Success has not been defined. Assuming last arrays are success arrays."))
-  else
-    appendTo(c("Report"), paste0("Timestamp:", the.time <- Sys.time(), "\n\nM: Selected folder: ", getwd(), "\nM: Success has been defined as last detection in: ", paste(success.arrays, collapse = ", "), "."))
+  appendTo(c("Report"), paste0("Target folder: ", getwd(), "\nTimestamp: ", the.time <- Sys.time(), "\nFunction: migration()\n"))
 
   if (!is.null(path))
     appendTo(c("Screen"), "M: Moving to selected work directory")
@@ -184,17 +183,17 @@ migration <- function(path = NULL, sections, success.arrays = NULL, minimum.dete
 
   if (any(!sapply(arrays, function(x) is.null(x$parallel)))) {
     if (disregard.parallels)
-      appendTo("Screen", "M: 'disregard.parallels' is set to TRUE; the presence of parallel arrays will not invalidate efficiency peers.")
+      appendTo(c("Screen", "Report"), "M: 'disregard.parallels' is set to TRUE; the presence of parallel arrays will not invalidate efficiency peers.")
     else
-      appendTo("Screen", "M: 'disregard.parallels' is set to FALSE; the presence of parallel arrays can potentially invalidate efficiency peers.")
+      appendTo(c("Screen", "Report"), "M: 'disregard.parallels' is set to FALSE; the presence of parallel arrays can potentially invalidate efficiency peers.")
   }
 
   if (is.null(success.arrays)) {
     success.arrays <- names(arrays)[unlist(lapply(arrays, function(x) is.null(x$after)))]
     if (length(success.arrays) == 1)
-      appendTo(c("Screen", "Warning"), paste0("'success.arrays' was not defined. Assuming success if fish are last detected at array ", success.arrays, "."))
+      appendTo(c("Screen", "Warning", "Report"), paste0("'success.arrays' was not defined. Assuming success if fish are last detected at array ", success.arrays, "."))
     else
-      appendTo(c("Screen", "Warning"), paste0("'success.arrays' was not defined. Assuming success if fish are last detected at arrays ", paste(success.arrays[-length(success.arrays)], collapse = ", "), " or ", tail(success.arrays, 1), "."))
+      appendTo(c("Screen", "Warning", "Report"), paste0("'success.arrays' was not defined. Assuming success if fish are last detected at arrays ", paste(success.arrays[-length(success.arrays)], collapse = ", "), " or ", tail(success.arrays, 1), "."))
   }
 # -------------------------------------
   
@@ -380,7 +379,7 @@ migration <- function(path = NULL, sections, success.arrays = NULL, minimum.dete
   matrices <- the.matrices
 
   # extra info for potential RSP analysis
-  rsp.info <- list(analysis.type = "migration", analysis.time = the.time, bio = bio, tz = tz)
+  rsp.info <- list(analysis.type = "migration", analysis.time = the.time, bio = bio, tz = tz, actel.version = inst.ver.short)
 
   if (!is.null(override)) {
     header.fragment <- paste0('<span style="color:red">Manual mode has been triggered for **', length(override),'** fish.</span>\n')
@@ -501,6 +500,8 @@ migration <- function(path = NULL, sections, success.arrays = NULL, minimum.dete
 #' 
 printMigrationRmd <- function(name.fragment, header.fragment, biometric.fragment, efficiency.fragment, display.progression, array.overview.fragment,
   survival.graph.size, individual.plots, circular.plots, spatial, deployments, valid.detections, detections){
+  inst.ver <- utils::packageVersion("actel")
+  inst.ver.short <- substr(inst.ver, start = 1, stop = nchar(as.character(inst.ver)) - 5) 
   if (file.exists(reportname <- paste0("Report/actel_migration_report", name.fragment, ".Rmd"))) {
     continue <- TRUE
     index <- 1
@@ -526,7 +527,7 @@ printMigrationRmd <- function(name.fragment, header.fragment, biometric.fragment
   cat(paste0(
 '---
 title: "Acoustic telemetry migration analysis"
-author: "Actel package"
+author: "Actel R package (', inst.ver.short, ')"
 output: 
   html_document:
     includes:
@@ -535,9 +536,9 @@ output:
 
 ### Summary
 
-Selected folder: ', stringr::str_extract(pattern = '(?<=M: Selected folder: )[^\r|^\n]*', string = report), '
+Target folder: ', stringr::str_extract(pattern = '(?<=Target folder: )[^\r]*', string = report), '
 
-Timestamp: **', stringr::str_extract(pattern = '(?<=Timestamp:)[^\r|^\n]*', string = report), '** 
+Timestamp: **', stringr::str_extract(pattern = '(?<=Timestamp: )[^\r|^\n]*', string = report), '** 
 
 Number of target tags: **`r I(nrow(status.df))`**
 

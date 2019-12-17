@@ -144,14 +144,17 @@ residency <- function(path = NULL, sections, section.minimum = 2, minimum.detect
 # --------------------
 
 # Final arrangements before beginning
-  appendTo("Report", "Acoustic telemetry data analysis report.\n") 
+  inst.ver <- utils::packageVersion("actel")
+  inst.ver.short <- substr(inst.ver, start = 1, stop = nchar(as.character(inst.ver)) - 5) 
+  appendTo("Report", paste0("Actel R package report.\nVersion: ", inst.ver.short, "\n"))
+  rm(inst.ver)
 
   path <- checkPath(my.home = my.home, path = path)  
 
   if (debug)
     appendTo("Report", "!!!--- Debug mode has been activated ---!!!\n")
 
-  appendTo(c("Report"), paste0("Timestamp:", the.time <- Sys.time(), "\n\nM: Selected folder: ", getwd()))
+  appendTo(c("Report"), paste0("Target folder: ", getwd(), "\nTimestamp: ", the.time <- Sys.time(), "\nFunction: residency()\n"))
 
   if (!is.null(path))
     appendTo(c("Screen"), "M: Moving to selected work directory")
@@ -336,7 +339,7 @@ detections.list <- study.data$detections.list
     efficiency <- efficiency[1:3]
 
   # extra info for potential RSP analysis
-  rsp.info <- list(analysis.type = "residency", analysis.time = the.time, bio = bio, tz = tz)
+  rsp.info <- list(analysis.type = "residency", analysis.time = the.time, bio = bio, tz = tz, actel.version = inst.ver.short)
 
   if (file.exists(resultsname <- paste0("actel_residency_results.RData"))) {
     continue <- TRUE
@@ -443,6 +446,8 @@ detections.list <- study.data$detections.list
 #' 
 printResidencyRmd <- function(biometric.fragment, efficiency.fragment, individual.detection.plots, individual.residency.plots, array.circular.plots, 
   section.arrival.circular.plots, section.departure.circular.plots, spatial, deployments, detections, valid.detections, last.seen, last.seen.graph.size){
+  inst.ver <- utils::packageVersion("actel")
+  inst.ver.short <- substr(inst.ver, start = 1, stop = nchar(as.character(inst.ver)) - 5) 
   if (file.exists(reportname <- "Report/actel_residency_report.Rmd")) {
     continue <- TRUE
     index <- 1
@@ -468,7 +473,7 @@ printResidencyRmd <- function(biometric.fragment, efficiency.fragment, individua
   cat(paste0(
 '---
 title: "Acoustic telemetry residency analysis"
-author: "Actel package"
+author: "Actel R package (', inst.ver.short, ')"
 output: 
   html_document:
     includes:
@@ -477,9 +482,9 @@ output:
 
 ### Summary
 
-Selected folder: ', stringr::str_extract(pattern = '(?<=M: Selected folder: )[^\r|^\n]*', string = report), '
+Target folder: ', stringr::str_extract(pattern = '(?<=Target folder: )[^\r]*', string = report), '
 
-Timestamp: **', stringr::str_extract(pattern = '(?<=Timestamp:)[^\r|^\n]*', string = report), '** 
+Timestamp: **', stringr::str_extract(pattern = '(?<=Timestamp: )[^\r|^\n]*', string = report), '** 
 
 Number of target tags: **`r I(nrow(status.df))`**
 
