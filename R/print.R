@@ -8,7 +8,7 @@
 #' 
 gg_colour_hue <- function(n) {
   hues = seq(15, 375, length = n + 1)
-  hcl(h = hues, l = 65, c = 100)[1:n]
+  grDevices::hcl(h = hues, l = 65, c = 100)[1:n]
 }
 
 #' Open HTML report
@@ -601,7 +601,7 @@ printIndividuals <- function(redraw, detections.list, bio, status.df = NULL, tz,
       # Paint
       if (length(levels(PlotData$Array)) <= 7 | (length(levels(PlotData$Array)) == 8 & any(levels(PlotData$Array) == "Unknown"))) {
         if (any(levels(PlotData$Array) == "Unknown"))
-          the.colours <- as.vector(cbPallete)[c(1:(length(levels(PlotData$Array)) - 1), 8)]
+          the.colours <- as.vector(cbPalette)[c(1:(length(levels(PlotData$Array)) - 1), 8)]
         else
           the.colours <- as.vector(cbPalette)[1:length(levels(PlotData$Array))]
       } else {
