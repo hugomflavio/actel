@@ -1,3 +1,42 @@
+#' Skips all validity checks for a fish and allows the user to freely invalidate events
+#' 
+#' @param fish The fish being analysed
+#' @param moves the respective movements table
+#' 
+#' @keywords internal
+#' 
+overrideValidityChecks <- function(moves, fish) {
+  appendTo("debug", "Starting overrideDefaults.")
+  message("----------------------------")
+  appendTo(c("Screen", "Report"), paste0("M: Override has been triggered for fish ", fish, ". Entering full manual mode."))
+  message("Opening movements list for inspection.\n")
+  print(moves, topn = nrow(moves))
+  message("")
+  aux <- invalidateEvents(movements = moves, fish = fish)
+  moves <- transferValidity(from = aux, to = moves)
+  attributes(moves)$p.type <- "Overridden"
+  message("Terminating full manual mode\n----------------------------")
+  return(moves)
+}
+
+#' Check that the fish have enough detections to be valid
+#' 
+#' @param movements the movements list
+#' @param fish the fish being analysed
+#' @inheritParams explore
+#' 
+#' @return The movements with valid/invalid notes
+#' 
+#' @keywords internal
+#' 
+checkMinimumN <- function(movements, minimum.detections, fish) {
+  if (nrow(movements) == 1 && movements$Detections < minimum.detections) {
+    appendTo(c("Screen", "Report", "Warning"), paste0("Fish ", fish, " only has one movement event (", movements$Array, ") with ", movements$Detections, " detections. Considered invalid."))
+    movements$Valid <- FALSE
+  }
+  return(movements)
+}
+
 #' check fish speeds against defined thresholds (in m/s)
 #' 
 #' @param movements the movements list
@@ -231,15 +270,71 @@ checkSMovesN <- function(secmoves, section.minimum) {
         if (decision == "y" | decision == "Y") {
           print(secmoves[[i]])
           decision <- commentCheck(line = "Would you like to render any movement event invalid?(y/N/comment) ", tag = names(secmoves)[i])
+#' Check that the fish linearly moved along the sections
+#' 
+#' @param secmoves the section movements list
+#' @param fish the fish being analysed
+#' @param arrays a list containing information for each array
+#' @inheritParams migration
+#' 
+#' @return the section movements with valid/invalid notes
+#' 
+#' @keywords internal
+#' 
+checkLinearity <- function(secmoves, fish, sections, arrays) {
+  try.again <- TRUE
+  double.call <- FALSE
+  while (try.again) {
+    vsm <- secmoves[secmoves$Valid, ]
+    back.check <- match(vsm$Section, sections)
+    turn.check <- rev(match(sections, rev(vsm$Section)))
+    if (is.unsorted(back.check)) {
+      if (double.call) {
+        appendTo(c("Screen", "Warning"), paste0("The last interaction did not linearise the movements for fish ", fish, ". Trying again."))       
+      } else {
+        if (is.unsorted(turn.check))
+          appendTo(c("Screen", "Report", "Warning"), paste0("Inter-section backwards movements were detected for fish ", fish, " and the last events are not ordered!"))
+        else
+          appendTo(c("Screen", "Report", "Warning"), paste0("Inter-section backwards movements were detected for fish ", fish, "."))
+      }
+      aux <- data.frame(
+        A = back.check[-length(back.check)], 
+        B = back.check[-1])
+      suggestion <- which(aux$A > aux$B) + 1
+      appendTo("Screen", paste0("M: Opening section movements for fish ", fish," for inspection:"))
+      print(vsm, topn = nrow(vsm))
+      message("")
+      appendTo("Screen", paste0("M: migration() expects the movements to be linear, from release to success arrays.\n   To linearize the movements, actel suggests invalidating the following events: ",
+      paste(suggestion, collapse = ", "), "\n\nWould you like to:\na) Accept the suggestion\nb) Manually choose other events to be invalidated\n"))
+
+      unknown.input = TRUE
+      while (unknown.input) {
+        decision <- commentCheck(line = paste0("Decision:(a/b/comment) "), tag = fish)
+        if (decision == "a" | decision == "A") {
+          unknown.input = FALSE
           appendTo("UD", decision)
-          if (decision == "y" | decision == "Y") 
-            return(invalidateEvents(movements = secmoves[[i]], fish = names(secmoves)[i]))
+          aux <- vsm
+          aux$Valid[suggestion] <- FALSE
+        }
+        if (decision == "b" | decision == "B") {
+          # Trigger user interaction
+          appendTo("UD", decision)
+          unknown.input = FALSE
+          aux <- invalidateEvents(movements = vsm, fish = fish)
+        } # end trigger error
+        if (unknown.input) {
+          appendTo("Screen", "Option not recognized, please input either 'a', 'b', 'c' or 'comment'.")
         }
       }
-      return(secmoves[[i]])
-    })
-  names(output) <- names(secmoves)
-  return(output)
+      # Transfer invalidated events to secmoves
+      secmoves <- transferValidity(from = aux, to = secmoves)
+      # Prepare double call warning
+      double.call <- TRUE
+    } else {
+      try.again <- FALSE
+    }
+  }
+  return(secmoves)
 }
 
 #' Check report compatibility
@@ -343,52 +438,58 @@ checkPath <- function(my.home, path) {
 #' 
 #' @keywords internal
 #' 
-checkUpstream <- function(movements, bio, spatial, arrays) {
+checkUpstream <- function(movements, fish, release, arrays) {
   appendTo("debug", "Running checkUpstream")
   # NOTE: The NULL variables below are actually column names used by data.table.
   # This definition is just to prevent the package check from issuing a note due unknown variables.
+  Valid <- NULL
   Array <- NULL
-  for (fish in names(movements)) {
-    the.warning <- NULL
-    appendTo("debug", paste0("Running checkUpstream for fish ", fish, "."))
-    release.site <- as.character(bio$Release.site[na.as.false(bio$Transmitter == fish)])
-    release.array <- as.character(with(spatial, release.sites[release.sites$Standard.Name == release.site, "Array"]))
-    after.arrays <- c(release.array, arrays[[release.array]]$all.after.and.par)
-    if (any(is.na(match(movements[[fish]][Array != "Unknown"]$Array, after.arrays)))) {
-      message("")
-      appendTo(c("Screen", "Report", "Warning"), the.warning <- paste0("Fish ", fish, " was detected in an array that is not after its release site! Opening relevant data for inspection."))
-      the.warning <- paste("Warning:", the.warning)
-      appendTo("Screen", paste("   Release site:", release.site))
-      appendTo("Screen", paste("   Expected first array:", release.array))
-      message("\n   Movement table for fish ", fish, ":")
-      print(movements[[fish]], topn = nrow(movements[[fish]]))
-      if (nrow(movements) > 200)
-        message("\nM: Long table detected, repeating warning that triggered the interaction:\n-----\n", 
-          the.warning, "\n   Release site: ", release.site, "\n   Expected first array: ", release.array, "\n-----")
-      message("")
-      appendTo("Screen", "You may either:\n  a) Stop the analysis if the expected first array is wrong;\n  b) Continue as is (does not impact the results);\n  c) Render a movement event invalid, if you are confident it is a false detection.")
-      message("")
-      unknown.input = TRUE
-      while (unknown.input) {
-        decision <- commentCheck(line = "Decision:(a/b/c/comment) ", tag = fish)
-        if (decision == "a" | decision == "A") {
-          unknown.input = FALSE
-          appendTo("UD", decision)
-          emergencyBreak()
-          stop("Script stopped by user command.", call. = FALSE)
-        }
-        if (decision == "b" | decision == "B") {
-          appendTo("UD", decision)
-          unknown.input = FALSE
-        }
-        if (decision == "c" | decision == "C") {
-          appendTo("UD", decision)
-          unknown.input = FALSE
-          movements[[fish]] <- invalidateEvents(movements = movements[[fish]], fish = fish)
-        }
-        if (unknown.input) {
-          appendTo("Screen", "Option not recognized, please input either 'a', 'b', 'c' or 'comment'.")
-        }
+
+  the.warning <- NULL
+  after.arrays <- c(release, arrays[[release]]$all.after.and.par)
+  
+  if (any(movements$Valid))
+    vm <- movements[(Valid)]
+  else
+    return(movements)
+
+  if (any(is.na(match(vm$Array, after.arrays)))) {
+    message("")
+    appendTo(c("Screen", "Report", "Warning"), the.warning <- paste0("Fish ", fish, " was detected in an array that is not after its release site! Opening relevant data for inspection."))
+    the.warning <- paste("Warning:", the.warning)
+    appendTo("Screen", paste("   Expected first array:", release))
+    message("\nMovement table for fish ", fish, ":")
+    print(vm, topn = nrow(vm))
+    if (nrow(vm) >= 100)
+      message("\nM: Long table detected, repeating warning that triggered the interaction:\n-----\n", 
+        the.warning, "\n   Expected first array: ", release, "\n-----")
+    if (nrow(vm) < 100 & nrow(vm) >= 30)
+      message("\nM: Please find the exception which triggered this interaction at the top of the table.")          
+    message("")
+    appendTo("Screen", "You may either:\n  a) Stop the analysis if the expected first array is wrong;\n  b) Continue as is (does not impact the results);\n  c) Render a movement event invalid, if you are confident it is a false detection.")
+    message("")
+    unknown.input = TRUE
+    while (unknown.input) {
+      decision <- commentCheck(line = "Decision:(a/b/c/comment) ", tag = fish)
+      if (decision == "a" | decision == "A") {
+        unknown.input = FALSE
+        appendTo("UD", decision)
+        emergencyBreak()
+        stop("Script stopped by user command.", call. = FALSE)
+      }
+      if (decision == "b" | decision == "B") {
+        appendTo("UD", decision)
+        unknown.input = FALSE
+      }
+      if (decision == "c" | decision == "C") {
+        # Trigger user interaction
+        appendTo("UD", decision)
+        unknown.input = FALSE
+        aux <- invalidateEvents(movements = vm, fish = fish)
+        movements <- transferValidity(from = aux, to = movements)
+      } # end trigger error
+      if (unknown.input) {
+        appendTo("Screen", "Option not recognized, please input either 'a', 'b', 'c' or 'comment'.")
       }
     }
   }
