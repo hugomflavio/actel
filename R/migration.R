@@ -539,8 +539,9 @@ migration <- function(path = NULL, sections, success.arrays = NULL, minimum.dete
   appendTo("Screen", "M: Process finished successfully.")
 # ------------------
 
-  appendTo("Screen", paste0("M: Saving job log as '", paste(gsub(":", ".", sub(" ", ".", as.character(Sys.time()))), "actel.log.txt", sep = "."), "'."))
-  file.rename("temp_log.txt", paste0(gsub(":", ".", sub(" ", ".", as.character(Sys.time()))), "actel.log.txt"))
+  jobname <- paste0(gsub(" |:", ".", as.character(Sys.time())), ".actel.log.txt")
+  appendTo("Screen", paste0("M: Saving job log as '",jobname, "'."))
+  file.rename("temp_log.txt", jobname)
   
   if (!debug)
     deleteHelpers()
