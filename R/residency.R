@@ -1280,10 +1280,8 @@ dailyRatiosIndOut <- function(input) {
     output <- days.tables
     output$one.last.col <- names(input)
   } else {
-    output <- listToTable(days.tables, type = "frame", source = TRUE)
+    output <- as.data.frame(data.table::rbindlist(days.tables, idcol = "Date"))    
   }
-  output <- output[, c(ncol(output), 1:(ncol(output) - 1)), drop = FALSE]
-  colnames(output)[1] <- "Date"
   output[is.na(output)] <- 0
   aux <- which(grepl("^p", colnames(output)))
   aux <- aux[!is.na(match(colnames(output)[aux - 1], sub("p", "", colnames(output)[aux])))]

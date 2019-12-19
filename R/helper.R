@@ -20,54 +20,6 @@ stripCodeSpaces <- function(input) {
   unlist(lapply(input, function(x) tail(unlist(strsplit(x, "-")), 1)))
 }
 
-#' Convert a list of data frames with identical columns into a single data frame
-#' 
-#' @param input a list of data frames
-#' @param type the type of output, one of table (for data tables) or frame (for data frames)
-#' @param row.names wether or not row names should be kept in the output
-#' @param source wether or not the source list name should be added as a new column.
-#' 
-#' @return a data frame with all lists combined
-#' 
-#' @export
-#' 
-listToTable <- function(input, type = c("table", "frame"), row.names = FALSE, source = TRUE) {
-  type <- match.arg(type)
-  if (type == "table" & row.names)
-    warning("When type = 'table', row names cannot be returned. To keep row names, use type = 'frame' instead.")
-  if (!is.list(input))
-    stop("input must be a list.\n")
-  input <- input[!unlist(lapply(input, is.null))]
-  input <- input[!unlist(lapply(input, nrow)) == 0]
-  the.columns <- lapply(input, colnames)
-  presence.check <- unlist(lapply(seq_along(the.columns), function(i) {
-    lapply(the.columns, function(x) match(the.columns[[i]], x))
-  }))
-  if (any(is.na(presence.check)))
-    stop("The column names in the elements of input are not identical.\n")
-  if (source & length(input) != length(names(input))) {
-    warning("'source' is set to TRUE but not all elements of the list are named. Disregarding 'source'.")
-    source <- FALSE
-  }
-  if (source) {
-    aux <- lapply(seq_along(input), function(i) {
-      input[[i]]$list.source.name <- names(input)[i]
-      return(input[[i]])
-    })
-  } else {
-    aux <- input
-  }
-  output <- do.call(rbind.data.frame, aux)
-  if (row.names)
-    rownames(output) <- unlist(lapply(aux, row.names))
-  else
-    rownames(output) <- 1:nrow(output)
-  if (type == "table")
-    return(data.table::as.data.table(output))
-  else
-    return(as.data.frame(output))
-}
-
 #' Update study area for actel v.0.0.4
 #' 
 #' Converts the spatial.csv in itself plus a deployments.csv file.
@@ -508,10 +460,12 @@ getTimes <- function(movements, spatial, type = c("arrival", "departure"), event
   aux <- lapply(col.order, function(i) {
     aux <- lapply(names(the.times), function(j) {
       # cat(j, "\n")
-      output <- data.frame(V1 = the.times[[j]][names(the.times[[j]]) == i])
-      colnames(output) <- i
-      if (nrow(output) > 0) {
-        rownames(output) <- paste(j, 1:nrow(output), sep = "_")
+      if (any(link <- names(the.times[[j]]) == i)) {
+        output <- data.frame(
+          Event = paste(j, 1:sum(link), sep = "_"),
+          V1 = the.times[[j]][link]
+        )
+        colnames(output)[2] <- i
         if (events == "one") {
           if (type == "arrival")
             return(output[1, , drop = FALSE])
@@ -525,7 +479,9 @@ getTimes <- function(movements, spatial, type = c("arrival", "departure"), event
       }
     })
     names(aux) <- names(the.times)
-    output <- listToTable(aux, type = "frame", row.names = TRUE, source = FALSE)
+    output <- as.data.frame(data.table::rbindlist(aux))
+    rownames(output) <- output$Event
+    output <- output[, -1, drop = FALSE]
     if (events == "one")
       rownames(output) <- gsub("_[0-9]*$", "", rownames(output))
     return(output)
