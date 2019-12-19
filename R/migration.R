@@ -76,6 +76,8 @@
 #'   distance matrix was supplied)
 #' }
 #'
+#' @seealso \code{\link{explore}}, \code{\link{residency}}
+
 #' @export
 #' 
 migration <- function(path = NULL, sections, success.arrays = NULL, minimum.detections = 2, 

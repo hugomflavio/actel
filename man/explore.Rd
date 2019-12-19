@@ -127,3 +127,6 @@ distance matrix was supplied)
 input files are behaving as expected. It is also a good candidate if you just
 want to validate your detections for later use in other analyses.
 }
+\seealso{
+\code{\link{migration}}, \code{\link{residency}}
+}

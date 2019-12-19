@@ -74,6 +74,8 @@
 #'   distance matrix was supplied)
 #' }
 #' 
+#' @seealso \code{\link{explore}}, \code{\link{migration}}
+#' 
 #' @export
 #' 
 residency <- function(path = NULL, sections, section.minimum = 2, minimum.detections = 2,

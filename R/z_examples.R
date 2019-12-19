@@ -40,7 +40,7 @@ createWorkspace <- function(dir = "actel_workspace") {
   message(paste0("M: Workspace files created in folder '", dir,"'."))
 }
 
-#' Start \code{actel} Example
+#' Deploy Example Data
 #'
 #' Creates a ready-to-run workspace with example data.
 #' 

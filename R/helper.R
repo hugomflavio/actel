@@ -1,4 +1,4 @@
-#' Import \code{actel} Results a List
+#' Import actel Results to a List
 #' 
 #' @param source A RData file containing actel results from a previous run
 #' 
@@ -18,39 +18,6 @@ dataToList <- function(source){
 #' 
 stripCodeSpaces <- function(input) {
   unlist(lapply(input, function(x) tail(unlist(strsplit(x, "-")), 1)))
-}
-
-#' Update study area for actel v.0.0.4
-#' 
-#' Converts the spatial.csv in itself plus a deployments.csv file.
-#' 
-#' @inheritParams explore
-#' 
-#' @export
-#' 
-updateStudy <- function(tz) {
-  if (file.exists("deployments.csv")) {
-    message("M: A 'deployments.csv' file is already present in the current directory.")
-  } else {
-    spatial <- loadSpatial(file = "spatial.csv")
-    detections <- loadDetections(tz = tz, force = TRUE)
-    stations <- spatial[spatial$Type == "Hydrophone", ]
-    deployments <- stations[, c("Receiver", "Station.Name")]
-    if (sum(grepl("Receiver", colnames(stations))) >= 1) {
-      the.rows <- which(grepl("Receiver", colnames(stations)))[-1]
-      for (i in the.rows) {
-        recipient <- stations[!is.na(stations[, i]) , c(i, "Station.Name")]
-        rbind(deployments, recipient)
-      }
-    }
-    deployments[, "Start"] <- min(detections$Timestamp) - 1
-    deployments[,  "Stop"] <- max(detections$Timestamp) + 1
-    write.csv(deployments, "deployments.csv", row.names = FALSE)
-    write.csv(spatial, "spatial_obsulete.csv", row.names = FALSE)
-    write.csv(spatial[, !grepl("Receiver", colnames(spatial))], "spatial.csv", row.names = FALSE)
-    message("M: Study area updated. A copy of the original 'spatial.csv' file was stored as 'spatial_obsulete.csv'.")
-    deleteHelpers()
-  }
 }
 
 
@@ -82,7 +49,7 @@ std.error.circular <- function(x, na.rm = TRUE, silent = FALSE){
 #' 
 #' @return Decimal hour equivalent (single value or vector)
 #' 
-#' @keyword internal
+#' @keywords internal
 #' 
 decimalTime <- function(input, unit = c("h", "m", "s")) {
   unit <- match.arg(unit)

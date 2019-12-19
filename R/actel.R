@@ -47,7 +47,7 @@
 #' 
 #' # Main functions
 #' 
-#' The actel package provides three main analysis:
+#' The actel package provides three main analyses:
 #' \code{\link{explore}}, \code{\link{migration}} and \code{\link{residency}}
 #' 
 #' ## explore
@@ -79,7 +79,7 @@
 #' for!
 #' 
 #' 
-#' @seealso \code{\link{explore}} \code{\link{migration}} \code{\link{residency}}
+#' @seealso \code{\link{explore}}, \code{\link{migration}}, \code{\link{residency}}
 #' 
 #' @importFrom circular sd.circular mean.circular var.circular
 #' @import stats

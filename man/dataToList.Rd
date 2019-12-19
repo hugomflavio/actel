@@ -2,7 +2,7 @@
 % Please edit documentation in R/helper.R
 \name{dataToList}
 \alias{dataToList}
-\title{Import \code{actel} Results a List}
+\title{Import actel Results to a List}
 \usage{
 dataToList(source)
 }
@@ -10,5 +10,5 @@ dataToList(source)
 \item{source}{A RData file containing actel results from a previous run}
 }
 \description{
-Import \code{actel} Results a List
+Import actel Results to a List
 }

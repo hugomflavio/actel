@@ -76,6 +76,8 @@
 #'   distance matrix was supplied)
 #' }
 #' 
+#' @seealso \code{\link{migration}}, \code{\link{residency}}
+
 #' @export
 #' 
 explore <- function(path = NULL, max.interval = 60, maximum.time = 60, speed.method = c("last to first", "first to first"),

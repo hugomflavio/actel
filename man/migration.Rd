@@ -191,3 +191,6 @@ migration. Additional plots help you find out if some fish has been acting
 odd. Multiple options allow you to tweak the analysis to fit your study
 perfectly.
 }
+\seealso{
+\code{\link{explore}}, \code{\link{residency}}
+}

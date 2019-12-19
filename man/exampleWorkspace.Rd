@@ -2,7 +2,7 @@
 % Please edit documentation in R/z_examples.R
 \name{exampleWorkspace}
 \alias{exampleWorkspace}
-\title{Start \code{actel} Example}
+\title{Deploy Example Data}
 \usage{
 exampleWorkspace(
   spatial = example.spatial,

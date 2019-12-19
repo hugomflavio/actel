@@ -14,7 +14,7 @@ behaviour. actel allows the user to run the analysis in a systematic way, and
 makes it easy to compare results from different studies.
 }
 \seealso{
-\code{\link{explore}} \code{\link{migration}} \code{\link{residency}}
+\code{\link{explore}}, \code{\link{migration}}, \code{\link{residency}}
 }
 \author{
 \strong{Maintainer}: Hugo Flávio \email{hdmfla@aqua.dtu.dk}
@@ -55,7 +55,7 @@ actel will give you a suggestion, which you can easily follow by answering
 }
 \section{Main functions}{
 
-The actel package provides three main analysis:
+The actel package provides three main analyses:
 \code{\link{explore}}, \code{\link{migration}} and \code{\link{residency}}
 \subsection{explore}{
 

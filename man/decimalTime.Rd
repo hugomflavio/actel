@@ -17,3 +17,4 @@ Decimal hour equivalent (single value or vector)
 \description{
 Convert hh:mm:ss time to hh.hhh
 }
+\keyword{internal}

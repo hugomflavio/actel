@@ -194,3 +194,6 @@ were in each day of the study, how many fish were in each section each day,
 and other residency-focused variables, this is the analysis you are looking
 for!
 }
+\seealso{
+\code{\link{explore}}, \code{\link{migration}}
+}
