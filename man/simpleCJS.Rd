@@ -21,3 +21,4 @@ A summary of the CJS results
 \description{
 The calculations are based on 'Using mark-recapture models to estimate survival from telemetry data' by Perry et al. 2012
 }
+\keyword{internal}

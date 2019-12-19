@@ -2,7 +2,7 @@
 % Please edit documentation in R/load.R
 \name{loadSpatial}
 \alias{loadSpatial}
-\title{Load Spatial file and Check the structure}
+\title{Load Spatial File}
 \usage{
 loadSpatial(file = "spatial.csv", report = FALSE)
 }
@@ -15,5 +15,5 @@ loadSpatial(file = "spatial.csv", report = FALSE)
 The spatial dataframe
 }
 \description{
-Load Spatial file and Check the structure
+Load Spatial File
 }

@@ -541,7 +541,7 @@ loadDeployments <- function(file, tz){
   return(input)
 }
 
-#' Load Spatial file and Check the structure
+#' Load Spatial File
 #' 
 #' @param file an input file with spatial data.
 #' @param report Logical: If TRUE, the appendTo function is enabled.
@@ -615,7 +615,7 @@ loadSpatial <- function(file = "spatial.csv", report = FALSE){
 
 
 
-#' Import biometrics
+#' Load Biometrics file
 #' 
 #' @param file an input file with biometric data.
 #' @inheritParams explore

@@ -2,15 +2,13 @@
 % Please edit documentation in R/z_examples.R
 \name{createWorkspace}
 \alias{createWorkspace}
-\title{Create a default Workspace}
+\title{Create a Default Workspace}
 \usage{
 createWorkspace(dir = "actel_workspace")
 }
 \arguments{
-\item{dir}{The name of the target directory. Will be created if not present
-
-Produces the files and folders required to run the package, which the user can use as a template.}
+\item{dir}{The name of the target directory. Will be created if not present}
 }
 \description{
-Create a default Workspace
+Produces the files and folders required to run the package, which the user can use as a template.
 }

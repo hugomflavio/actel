@@ -1,4 +1,4 @@
-#' Import actel results into a single list object
+#' Import \code{actel} Results a List
 #' 
 #' @param source A RData file containing actel results from a previous run
 #' 
@@ -62,7 +62,7 @@ updateStudy <- function(tz) {
 #' 
 #' @return Standard Error of the Mean
 #' 
-#' @export
+#' @keywords internal
 #' 
 std.error.circular <- function(x, na.rm = TRUE, silent = FALSE){
  a <- length(x)
@@ -82,7 +82,7 @@ std.error.circular <- function(x, na.rm = TRUE, silent = FALSE){
 #' 
 #' @return Decimal hour equivalent (single value or vector)
 #' 
-#' @export
+#' @keyword internal
 #' 
 decimalTime <- function(input, unit = c("h", "m", "s")) {
   unit <- match.arg(unit)
@@ -117,7 +117,7 @@ decimalTime <- function(input, unit = c("h", "m", "s")) {
 #' 
 #' @return Decimal hour equivalent (single value or vector)
 #' 
-#' @export
+#' @keywords internal
 #' 
 minuteTime <- function(x, format = c("h", "m", "s"), seconds = TRUE) {
   format <- match.arg(format)
@@ -167,7 +167,7 @@ minuteTime <- function(x, format = c("h", "m", "s"), seconds = TRUE) {
 #' 
 #' @return Trimmed character string
 #' 
-#' @export
+#' @keywords internal
 #' 
 substrRight <- function(input, n) {
   substr(input, nchar(input) - n + 1, nchar(input))
@@ -241,7 +241,7 @@ combine <- function(input) {
 #' 
 #' @return The rounded value
 #' 
-#' @export
+#' @keywords internal
 #' 
 roundUp <- function(input, to = 10) {
   if (inherits(input, "list"))
@@ -259,7 +259,7 @@ roundUp <- function(input, to = 10) {
 #' 
 #' @return The rounded value
 #' 
-#' @export
+#' @keywords internal
 #' 
 roundDown <- function(input, to = 10) {
   to * (input%/%to)
@@ -374,7 +374,9 @@ commentCheck <- function(line, tag) {
   return(decision)
 }
 
-#' Delete previous analysis files from the current workspace. Input files are not deleted.
+#' Clean Current Folder
+#' 
+#' Deletes previous analysis files from the current workspace. Input files are not deleted.
 #' 
 #' @param skip A vector of files to be ignored.
 #' 
@@ -401,7 +403,7 @@ clearWorkspace <- function(skip = NA){
   }
 }
 
-#' Open actel installation instructions
+#' Display Update Help
 #' 
 #' @export
 #' 
@@ -522,19 +524,23 @@ convertTimesToCircular <- function(times) {
   return(output)
 }
 
-#' Calculate distance matrix
+#' Calculate Transition Layer
 #' 
-#' Adapted from Grant Adams' script "distance to closest mpa". (grant.adams@@eagles.usm.edu)
+#' \code{transitionLayer} imports a shape file into R and prepares it to be used in distance
+#' estimations. Adapted from Grant Adams' script "distance to closest mpa". 
+#' (grant.adams@@eagles.usm.edu)
 #' 
 #' \url{https://cran.r-project.org/web/packages/gdistance/vignettes/gdistance1.pdf}
 #'
-#' @param shape A shape file from which to create the transition layer.
+#' @param shape A shape file projected in a metric coordinate system.
 #' @param size The pixel size, in metres.
-#' @param EPSGcode The EPSG code corresponding to the coordinate system of the input data. All inputs must be in the same metric system. DO NOT use degree-based coordinates.
-#' @param directions The number of directions considered for every movement situation during cost calculation.
-#' @param force logical: if TRUE, allows producing transition layers with more than 2000 pixels on one or both axes.
+#' @param EPSGcode The EPSG code of the shape file's coordinate system. DO NOT USE degree-based coordinate systems.
+#' @param directions The number of directions considered for every movement situation during cost calculation. See the vignettes for more details.
+#' @param force Logical: Should the process continue even if the transition layer has 2000 pixels on one or both axes?
 #' 
 #' @export
+#' 
+#' @return A RData file with the transition layer is stored in the current directory.
 #' 
 transitionLayer <- function(shape, size, EPSGcode, directions = c(16, 8, 4), force = FALSE){
   directions <- as.character(directions)
@@ -579,21 +585,22 @@ transitionLayer <- function(shape, size, EPSGcode, directions = c(16, 8, 4), for
   }
 }
 
-#' Calculate distance matrix
+#' Calculate Distances Matrix
 #' 
-#' Adapted from Grant Adams' script "distance to closest mpa". (grant.adams@@eagles.usm.edu)
+#' Using a previously created transition layer (see \code{\link{transitionLayer}}), calculates the distances
+#' between spatial points. Adapted from Grant Adams' script "distance to closest mpa". (grant.adams@@eagles.usm.edu)
 #' 
 #' \url{https://cran.r-project.org/web/packages/gdistance/vignettes/gdistance1.pdf}
 #'
-#' @param t.layer A .RData file containing a transition layer.
+#' @param t.layer An RData file containing a transition layer.
 #' @param starters The points from which to start measuring the distance.
 #' @param targets The points to which a way must be found.
 #' @param EPSGcode The EPSG code corresponding to the coordinate system of the input data. All inputs must be in the same metric system. DO NOT use degree-based coordinates.
 #' @param coord.x,coord.y The names of the columns containing the x and y information. Must be identical in the starters and targets.
 #' @param PointIDCol The name of the column containing the IDs of the points to be used as starters and targets. Must be identical in both files.
-#' @param actel logical: Should the distance matrix be optimized for actel and saved in the working directory?
+#' @param actel Logical: Should the distance matrix be optimized for actel and saved in the working directory?
 #'
-#' @return The distance matrix
+#' @return If actel = TRUE, The distance matrix is stored in the 
 #' 
 #' @export
 #' 
@@ -662,7 +669,7 @@ distancesMatrix <- function(t.layer = "transition.layer.RData", starters = NULL,
   return(dist.mat)
 }
 
-#' Create an empty distances matrix
+#' Create a Template Distances Matrix
 #' 
 #' Creates a matrix based on the local 'spatial.csv' file and saves it to 'distances.csv' so the
 #' user can manually fill it.
@@ -692,7 +699,7 @@ emptyMatrix <- function(){
     message("Aborting.")
 }
 
-#' Complete an half-filled distances matrix
+#' Complete a Distances Matrix
 #' 
 #' Completes a matrix that has the upper diagonal half filled.
 #' 

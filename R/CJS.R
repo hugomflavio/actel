@@ -266,7 +266,7 @@ assembleMatrices <- function(spatial, movements, status.df, arrays, paths, dotma
 #' 
 #' @return A summary of the CJS results
 #' 
-#' @export
+#' @keywords internal
 #' 
 simpleCJS <- function(input, estimate = NULL, fixed.efficiency = NULL, silent = TRUE){
   # stop if there is weird data in the input

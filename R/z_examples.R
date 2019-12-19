@@ -1,4 +1,4 @@
-#' Create a default Workspace
+#' Create a Default Workspace
 #'
 #' Produces the files and folders required to run the package, which the user can use as a template.
 #' 
@@ -40,7 +40,7 @@ createWorkspace <- function(dir = "actel_workspace") {
   message(paste0("M: Workspace files created in folder '", dir,"'."))
 }
 
-#' Create an example Workspace
+#' Start \code{actel} Example
 #'
 #' Creates a ready-to-run workspace with example data.
 #' 

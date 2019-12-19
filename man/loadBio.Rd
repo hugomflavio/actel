@@ -2,7 +2,7 @@
 % Please edit documentation in R/load.R
 \name{loadBio}
 \alias{loadBio}
-\title{Import biometrics}
+\title{Load Biometrics file}
 \usage{
 loadBio(file, tz)
 }
@@ -16,6 +16,6 @@ present in \code{\link[base]{timezones}}.}
 The biometrics table
 }
 \description{
-Import biometrics
+Load Biometrics file
 }
 \keyword{internal}

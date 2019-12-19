@@ -2,7 +2,7 @@
 % Please edit documentation in R/residency.R
 \name{residency}
 \alias{residency}
-\title{Residency analysis}
+\title{Residency Analysis}
 \usage{
 residency(
   path = NULL,

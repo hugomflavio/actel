@@ -19,3 +19,4 @@ Decimal hour equivalent (single value or vector)
 \description{
 Convert numeric time to HH:MM
 }
+\keyword{internal}

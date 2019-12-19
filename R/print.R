@@ -765,6 +765,8 @@ circularSection <- function(from, to, units = "hours", template = "clock24", lim
 #' 
 #' @return A list with the zero, rotation and next.points values, to be parsed to an overlaying graphic.
 #' 
+#' @keywords internal
+#' 
 myRoseDiag <- function (x, pch = 16, cex = 1, axes = TRUE, shrink = 1, bins = 24, 
   upper = TRUE, ticks = TRUE, tcl = 0.025, tcl.text = 0.125, 
   radii.scale = c("sqrt", "linear"), border = NULL, col = c("lightblue", "#c0ff3e80", "#ffc0cb80", "#F0E4424D", "#0072B24D", "#D55E004D"), 

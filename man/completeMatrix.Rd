@@ -2,7 +2,7 @@
 % Please edit documentation in R/helper.R
 \name{completeMatrix}
 \alias{completeMatrix}
-\title{Complete an half-filled distances matrix}
+\title{Complete a Distances Matrix}
 \usage{
 completeMatrix()
 }

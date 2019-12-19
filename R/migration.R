@@ -1,4 +1,4 @@
-#' Migration analysis
+#' Migration Analysis
 #' 
 #' The \code{migration} analysis runs the same initial checks as \code{explore},
 #' but on top of it, it analyses the fish behaviour. By selecting the arrays

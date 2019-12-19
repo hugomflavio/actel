@@ -19,3 +19,4 @@ Standard Error of the Mean
 \description{
 Calculate the standard error of the mean
 }
+\keyword{internal}

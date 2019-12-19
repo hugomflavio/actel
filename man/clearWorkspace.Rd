@@ -2,7 +2,7 @@
 % Please edit documentation in R/helper.R
 \name{clearWorkspace}
 \alias{clearWorkspace}
-\title{Delete previous analysis files from the current workspace. Input files are not deleted.}
+\title{Clean Current Folder}
 \usage{
 clearWorkspace(skip = NA)
 }
@@ -10,5 +10,5 @@ clearWorkspace(skip = NA)
 \item{skip}{A vector of files to be ignored.}
 }
 \description{
-Delete previous analysis files from the current workspace. Input files are not deleted.
+Deletes previous analysis files from the current workspace. Input files are not deleted.
 }

@@ -1,4 +1,4 @@
-#' Residency analysis
+#' Residency Analysis
 #' 
 #' The \code{\link{residency}} analysis runs the same initial checks as 
 #' \code{\link{explore}}, but, similarly to \code{\link{migration}}, explores 

@@ -2,7 +2,7 @@
 % Please edit documentation in R/helper.R
 \name{distancesMatrix}
 \alias{distancesMatrix}
-\title{Calculate distance matrix}
+\title{Calculate Distances Matrix}
 \usage{
 distancesMatrix(
   t.layer = "transition.layer.RData",
@@ -16,7 +16,7 @@ distancesMatrix(
 )
 }
 \arguments{
-\item{t.layer}{A .RData file containing a transition layer.}
+\item{t.layer}{An RData file containing a transition layer.}
 
 \item{starters}{The points from which to start measuring the distance.}
 
@@ -28,13 +28,14 @@ distancesMatrix(
 
 \item{PointIDCol}{The name of the column containing the IDs of the points to be used as starters and targets. Must be identical in both files.}
 
-\item{actel}{logical: Should the distance matrix be optimized for actel and saved in the working directory?}
+\item{actel}{Logical: Should the distance matrix be optimized for actel and saved in the working directory?}
 }
 \value{
-The distance matrix
+If actel = TRUE, The distance matrix is stored in the
 }
 \description{
-Adapted from Grant Adams' script "distance to closest mpa". (grant.adams@eagles.usm.edu)
+Using a previously created transition layer (see \code{\link{transitionLayer}}), calculates the distances
+between spatial points. Adapted from Grant Adams' script "distance to closest mpa". (grant.adams@eagles.usm.edu)
 }
 \details{
 \url{https://cran.r-project.org/web/packages/gdistance/vignettes/gdistance1.pdf}

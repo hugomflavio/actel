@@ -2,7 +2,7 @@
 % Please edit documentation in R/helper.R
 \name{emptyMatrix}
 \alias{emptyMatrix}
-\title{Create an empty distances matrix}
+\title{Create a Template Distances Matrix}
 \usage{
 emptyMatrix()
 }

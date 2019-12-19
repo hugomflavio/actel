@@ -17,3 +17,4 @@ Trimmed character string
 \description{
 Allows to quickly remove a given number of characters from the end of a string
 }
+\keyword{internal}

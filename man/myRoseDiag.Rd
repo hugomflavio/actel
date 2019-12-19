@@ -114,3 +114,4 @@ Adapted from the \code{\link[circular]{rose.diag}} function of the circular pack
 \details{
 For more details about the original function, visit the circular package homepage at https://github.com/cran/circular
 }
+\keyword{internal}

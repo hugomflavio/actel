@@ -2,7 +2,7 @@
 % Please edit documentation in R/migration.R
 \name{migration}
 \alias{migration}
-\title{Migration analysis}
+\title{Migration Analysis}
 \usage{
 migration(
   path = NULL,

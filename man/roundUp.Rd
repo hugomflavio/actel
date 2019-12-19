@@ -17,3 +17,4 @@ The rounded value
 \description{
 Forces the rounding of the input to the next higher rounded value.
 }
+\keyword{internal}
