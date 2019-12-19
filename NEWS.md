@@ -8,6 +8,7 @@ Fixes:
   * Fix mechanisms that deal with unknown receivers
   * Edge arrays are now recognized if sections are provided
   * The columns "Backwards.movements" and "Backwards.movements" now display correct values
+  * Prevent crash if inactive.warning is set but inactive.error is left null (applicable for speed checks as well)
   
 Changes:
   * 'maximum.time' has been renamed to 'max.interval'
@@ -18,13 +19,13 @@ Changes:
   * 'cautious.assignment' has been removed from the migration analysis
 
 Enhancements:
-  * 'tz' is now checked against the output of OlsonNames() to ensure a valid timezone is entered.
+  * 'tz' is now checked against the output of OlsonNames() to ensure a valid time zone is entered.
   * messages and warnings are now printed using message() and warning()
   * Stop if any of the input files has duplicated column names
   * Warn user if success.arrays is not defined in migration()
   * 'minimum.detections' is now available in all functions.
   * 'override' is now available in all functions, and allows the user to directly invalidate specific events.
-  * 'Detections' column in the object *status.df* has been split into 'Valid.detections' and 'All.detections'.
+  * 'Detections' column in the object *status.df* (migration analysis) has been split into 'Valid.detections' and 'Invalid.detections'.
   * Package-level documentation has been implemented (can be found using ?actel).
   * explore(), migration() and residency() documentation has been expanded.
 
