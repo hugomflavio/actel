@@ -64,7 +64,15 @@ Here are some examples:
 
 ## Installing actel 
 
-Current version: 0.1.1
+----------------------------------------------------------------------
+
+**NOTE: THIS IS NOT THE LATEST VERSION OF ACTEL**
+
+If you intended to install the latest release, visit this page: https://github.com/hugomflavio/actel/#installing-actel
+
+If you intend to install version 0.1.1, follow the instructions below.
+
+----------------------------------------------------------------------
 
 To install actel, you will need to have the devtools package installed.
 
@@ -75,15 +83,15 @@ Now you can either install actel sourcing remotely or locally.
 
 **a) install directly from the repository:**
 
-    devtools::install_github("hugomflavio/actel", build_opts = c("--no-resave-data", "--no-manual"))
+    devtools::install_github("hugomflavio/actel", build_opts = c("--no-resave-data", "--no-manual"), ref = "v0.1.1")
 
 **b) install locally:**
 
-1. Download actel's source files here: [**actel-master.zip**](https://github.com/hugomflavio/actel/archive/master.zip)
+1. Download actel's source files here: [**actel-0.1.1.zip**](https://github.com/hugomflavio/actel/archive/v0.1.1.zip)
 1. Unzip the file and move your R session into the newly created folder
 1. Run: 
 
-        devtools::install("actel-devel", build_vignettes = TRUE)
+        devtools::install("actel-0.1.1", build_vignettes = TRUE)
 
 **Have a look at the manual:**
 
@@ -93,6 +101,6 @@ After installing, you should read the package vignettes (i.e. the manual), which
 
 <span style="color:red">**Note:**</span> 
 
-1. If the vignettes are not showing up with the command above, you can download them directly here: [**compiled_vignettes.zip**](https://github.com/hugomflavio/actel/raw/master/compiled_vignettes.zip)
+1. If the vignettes are not showing up with the command above, you can download them directly here: [**compiled_vignettes.zip**](https://github.com/hugomflavio/actel/raw/v0.1.1/compiled_vignettes.zip)
 1. If you are getting "pandoc document conversion" errors during the package installation, try installing the [newest version of pandoc](https://pandoc.org/installing.html), restarting R and trying again.
 
