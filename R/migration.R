@@ -132,6 +132,8 @@ migration <- function(path = NULL, sections, success.arrays = NULL, minimum.dete
     speed.warning <- speed.error
   if (!is.null(speed.error) && speed.error < speed.warning)
     stop("'speed.error' must not be lower than 'speed.warning'.\n", call. = FALSE)
+  if (!is.null(speed.warning) & is.null(speed.error))
+    speed.error <- Inf
 
   if (!is.logical(if.last.skip.section))
     stop("'if.last.skip.section' must be logical.\n", call. = FALSE)
@@ -157,6 +159,8 @@ migration <- function(path = NULL, sections, success.arrays = NULL, minimum.dete
     stop("'jump.error' must not be lower than 1.\n", call. = FALSE)
   if (jump.error < jump.warning)
     stop("'jump.error' must not be lower than 'jump.warning'.\n", call. = FALSE)
+  if (!is.null(jump.warning) & is.null(jump.error))
+    jump.error <- Inf
   
   if (!is.null(inactive.warning) && !is.numeric(inactive.warning))
     stop("'inactive.warning' must be numeric.\n", call. = FALSE)    
@@ -166,6 +170,8 @@ migration <- function(path = NULL, sections, success.arrays = NULL, minimum.dete
     inactive.warning <- inactive.error
   if (!is.null(inactive.error) && inactive.error < inactive.warning)
     stop("'inactive.error' must not be lower than 'inactive.warning'.\n", call. = FALSE)
+  if (!is.null(inactive.warning) & is.null(inactive.error))
+    inactive.error <- Inf
   
   if (!is.logical(debug))
     stop("'debug' must be logical.\n", call. = FALSE)

@@ -131,6 +131,8 @@ explore <- function(path = NULL, max.interval = 60, maximum.time = 60, speed.met
     speed.warning <- speed.error
   if (!is.null(speed.error) && speed.error < speed.warning)
     stop("'speed.error' must not be lower than 'speed.warning'.\n", call. = FALSE)
+  if (!is.null(speed.warning) & is.null(speed.error))
+    speed.error <- Inf
   
   if (!is.null(start.time) && !grepl("^[1-2][0-9][0-9][0-9]-[0-1][0-9]-[0-3][0-9] [0-2][0-9]:[0-5][0-9]:[0-5][0-9]", start.time))
     stop("'start.time' must be in 'yyyy-mm-dd hh:mm:ss' format.\n", call. = FALSE)
@@ -150,6 +152,8 @@ explore <- function(path = NULL, max.interval = 60, maximum.time = 60, speed.met
     stop("'jump.error' must not be lower than 1.\n", call. = FALSE)
   if (jump.error < jump.warning)
     stop("'jump.error' must not be lower than 'jump.warning'.\n", call. = FALSE)
+  if (!is.null(jump.warning) & is.null(jump.error))
+    jump.error <- Inf
   
   if (!is.null(inactive.warning) && !is.numeric(inactive.warning))
     stop("'inactive.warning' must be numeric.\n", call. = FALSE)    
@@ -159,6 +163,8 @@ explore <- function(path = NULL, max.interval = 60, maximum.time = 60, speed.met
     inactive.warning <- inactive.error
   if (!is.null(inactive.error) && inactive.error < inactive.warning)
     stop("'inactive.error' must not be lower than 'inactive.warning'.\n", call. = FALSE)
+  if (!is.null(inactive.warning) & is.null(inactive.error))
+    inactive.error <- Inf
   
   if (!is.logical(debug))
     stop("'debug' must be logical.\n", call. = FALSE)
