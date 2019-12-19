@@ -257,6 +257,7 @@ checkImpassables <- function(movements, fish, dotmat){
 checkSMovesN <- function(secmoves, fish, section.minimum) {
   appendTo("debug", "Running checkSMovesN")
   if (any(link <- secmoves$Detections < section.minimum)) {
+    appendTo(c("Screen", "Report", "Warning"), paste0("Section movements with less than ", section.minimum, " detections are present for fish ", fish, "."))
     appendTo("Screen", paste0("M: Opening section movements for fish ", fish," for inspection:"))
     print(secmoves, topn = nrow(secmoves))
     message("")
