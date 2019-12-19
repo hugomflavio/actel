@@ -9,6 +9,7 @@ Fixes:
   * Edge arrays are now recognized if sections are provided
   * The columns "Backwards.movements" and "Backwards.movements" now display correct values
   * Prevent crash if inactive.warning is set but inactive.error is left null (applicable for speed checks as well)
+  * Fix crash when calculating multi-way efficiency estimations for fish that jumped at release
   
 Changes:
   * 'maximum.time' has been renamed to 'max.interval'

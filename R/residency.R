@@ -1051,7 +1051,7 @@ firstArrayFailure <- function(fish, bio, spatial, first.array, paths, dotmat) {
       return(unlist(list(known = release.array)))
     } else {
       aux <- blameArrays(from = release.array, to = first.array, paths = paths)
-      return(unlist(list(known = c(release.array, aux[[1]]), unsure = aux[[2]])))
+      return(unlist(list(known = c(release.array, aux$known), unsure = aux$unsure)))
     }
   }
 }
