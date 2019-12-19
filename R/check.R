@@ -115,8 +115,6 @@ checkSpeeds <- function(movements, fish, valid.movements, speed.warning, speed.e
 checkInactiveness <- function(movements, fish, detections.list, inactive.warning, inactive.error, invalid.dist, dist.mat) {
   Valid <- NULL
   appendTo("debug", "Running checkInactiveness")
-  if (invalid.dist)
-    appendTo(c("Report", "Screen"), "M: Running inactiveness checks without a distance matrix. Performance may be limited.")
   if (any(movements$Valid)) {
     valid.moves <- movements[(Valid)]
     # Find first and last potentially inactive movement

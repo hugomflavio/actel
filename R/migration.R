@@ -290,10 +290,13 @@ migration <- function(path = NULL, sections, success.arrays = NULL, minimum.dete
   }
 
   do.checkInactiveness <- FALSE
-  if (is.null(inactive.warning))
+  if (is.null(inactive.warning)) {
     appendTo(c("Screen", "Report", "Warning"), "'inactive.warning'/'inactive.error' were not set, skipping inactivity checks.")
-  else
+  } else {
+    if (invalid.dist)
+      appendTo(c("Report", "Screen", "Warning"), "Running inactiveness checks without a distance matrix. Performance may be limited.")
     do.checkInactiveness <- TRUE
+  }
 
   movement.names <- names(movements)
   movements <- lapply(seq_along(movements), function(i) {
