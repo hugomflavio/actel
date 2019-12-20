@@ -1152,6 +1152,11 @@ printIndividualResidency <- function(ratios, dayrange) {
   names(cbPalette) <- c("Orange", "Blue", "Green", "Yellow", "Darkblue", "Darkorange", "Pink", "Grey")
   counter <- 0
   individual.plots <- NULL
+  unique.values <- sort(unique(unlist(lapply(ratios, function(x) {
+    aux <- which(grepl("^p", colnames(x)))
+    aux <- aux[!is.na(match(colnames(x)[aux - 1], sub("p", "", colnames(x)[aux])))]
+    return(colnames(x)[aux - 1])    
+  }))))
   pb <- txtProgressBar(min = 0, max = length(ratios), style = 3, width = 60)
   capture <- lapply(names(ratios), function(i) {
     counter <<- counter + 1
@@ -1159,11 +1164,12 @@ printIndividualResidency <- function(ratios, dayrange) {
     aux <- which(grepl("^p", colnames(x)))
     aux <- aux[!is.na(match(colnames(x)[aux - 1], sub("p", "", colnames(x)[aux])))]
     new.colnames <-colnames(x)[c(1, aux - 1)]
-    x <- x[ c(1, aux)]
+    x <- x[, c(1, aux)]
     colnames(x) <- new.colnames
     plotdata <- suppressMessages(reshape2::melt(x))
     colnames(plotdata) <- c("Date", "Location", "n")
     plotdata$Date <- as.Date(plotdata$Date)
+    plotdata$Location <- factor(plotdata$Location, levels = unique.values)
     p <- ggplot2::ggplot(data = plotdata, ggplot2::aes(x = Date, y = n, fill = Location))
     p <- p + ggplot2::geom_bar(width = 1, stat = "identity")
     p <- p + ggplot2::theme_bw()
@@ -1171,7 +1177,7 @@ printIndividualResidency <- function(ratios, dayrange) {
     p <- p + ggplot2::labs(title = paste0(i, " (", substring(x$Date[1], 1, 10), " to ", substring(x$Date[nrow(x)], 1, 10), ")") , x = "", y = "% time per day")
     p <- p + ggplot2::scale_x_date(limits = dayrange)
     if (length(unique(plotdata$Location)) <= 8)
-      p <- p + ggplot2::scale_fill_manual(values = as.vector(cbPalette)[1:length(unique(plotdata$Location))], drop = FALSE)
+      p <- p + ggplot2::scale_fill_manual(values = as.vector(cbPalette)[1:length(unique.values)], drop = FALSE)
     if (length(unique(plotdata$Location)) > 5)
       p <- p + ggplot2::guides(fill = ggplot2::guide_legend(ncol = 2))
     if (length(unique(plotdata$Location)) > 10)

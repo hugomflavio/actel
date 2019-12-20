@@ -1290,7 +1290,8 @@ dailyRatiosIndOut <- function(input) {
   # merge all tables
   if (is.data.frame(days.tables)) {
     output <- days.tables
-    output$one.last.col <- names(input)
+    output$Date <- names(input)
+    output <- output[, c(ncol(output), 1:(ncol(output) - 1))]
   } else {
     output <- as.data.frame(data.table::rbindlist(days.tables, idcol = "Date"))    
   }
