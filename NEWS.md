@@ -29,6 +29,7 @@ Enhancements:
   * 'Detections' column in the object *status.df* (migration analysis) has been split into 'Valid.detections' and 'Invalid.detections'.
   * Package-level documentation has been implemented (can be found using ?actel).
   * explore(), migration() and residency() documentation has been expanded.
+  * Force all individual residency plots to include all used locations in the caption, to ensure locations always show up with the same colour.
 
 ## actel 0.1.1
 
