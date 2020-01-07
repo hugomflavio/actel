@@ -776,45 +776,50 @@ compileDetections <- function(path = "detections", start.time = NULL, stop.time 
   }
   if (file_test("-d", path) & file.exists("detections.csv"))
     appendTo(c("Screen", "Warning", "Report"), "Both a 'detections' folder and a 'detections.csv' file are present in the current directory.\n   Loading ONLY the files present in the 'detections' folder.")
-  number.of.files <- length(file.list)
   # Prepare the detection files
-  data.files <- list()
-  for (i in file.list) {
+  data.files <- lapply(file.list, function(i) {
     appendTo("debug", paste0("Importing file '", i, "'."))
-    data.files[[length(data.files) + 1]] <- data.table::fread(i, fill = TRUE, showProgress = FALSE)
-    names(data.files)[length(data.files)] <- i
-    if(nrow(data.files[[i]]) > 0){
+    aux <- data.table::fread(i, fill = TRUE, showProgress = FALSE)
+    if(nrow(aux) > 0){
       unknown.file <- TRUE
-      if (unknown.file && any(grepl("CodeType", colnames(data.files[[i]])))) {
+      if (unknown.file && any(grepl("CodeType", colnames(aux)))) {
         appendTo("debug", paste0("File '", i, "' matches a Thelma log."))
-        data.files[[i]] <- processThelmaFile(input = data.files[[i]])
+        output <- processThelmaFile(input = aux)
         unknown.file <- FALSE
       }
-      if (unknown.file && any(grepl("Receiver", colnames(data.files[[i]])))) {
+      if (unknown.file && any(grepl("Receiver", colnames(aux)))) {
         appendTo("debug", paste0("File '", i, "' matches a Vemco log."))
-        data.files[[i]] <- processVemcoFile(input = data.files[[i]])
+        output <- processVemcoFile(input = aux)
         unknown.file <- FALSE
       }
       if (unknown.file) {
         appendTo(c("Screen", "Report", "Warning"), paste("File '", i, "' does not match to any of the supported hydrophone file formats!\n   If your file corresponds to a hydrophone log and actel did not recognize it, please get in contact through www.github.com/hugomflavio/actel/issues/new", 
           sep = ""))
-        file.list <- file.list[-grep(i, file.list)]
+        return(NULL)
       }
-      rm(unknown.file)
+      return(output)
     } else {
       appendTo("debug", paste0("File '", i, "' is empty, skipping processing."))
+      return(NULL)
     }
-  }
-  rm(i)
-  if (length(file.list) != number.of.files) {
-    if (abs(length(file.list) - number.of.files) > 1) {
-      appendTo("Screen", paste0("", number.of.files - length(file.list), "files were excluded from further analyses."))
+  })
+  names(data.files) <- file.list
+  if (any(sapply(data.files, is.null))) {
+    if (sum(sapply(data.files, is.null)) > 1) {
+      appendTo("Screen", paste("M:", sum(sapply(data.files, is.null)), "files were excluded from further analyses."))
     } else {
-      appendTo("Screen", paste0("One file was excluded from further analyses."))
+      appendTo("Screen", "M: One file was excluded from further analyses.")
     }
   }
+
+  if (all(sapply(data.files, is.null))) 
+    stop("No valid detection files were found.\n", call. = FALSE)
+
   # Bind the detection files
-  output <- bindDetections(data.files = data.files, file.list = file.list)
+  appendTo("debug", "Binding detections.")
+  output <- data.table::rbindlist(data.files)
+  output$Receiver <- as.factor(output$Receiver)
+  output$CodeSpace <- as.factor(output$CodeSpace)
   # Convert codespaces
   output <- convertCodes(input = output)
   # Convert time-zones
@@ -822,7 +827,7 @@ compileDetections <- function(path = "detections", start.time = NULL, stop.time 
     stop.time = stop.time, tz = tz)
 
   actel.detections <- list(detections = output, timestamp = Sys.time())
-    save(actel.detections, file = ifelse(file_test("-d", path), paste0(path, "/actel.detections.RData"), "actel.detections.RData"))
+  save(actel.detections, file = ifelse(file_test("-d", path), paste0(path, "/actel.detections.RData"), "actel.detections.RData"))
   
   return(output)
 }
@@ -896,33 +901,6 @@ processVemcoFile <- function(input) {
   input <- input[, c("Timestamp", "Receiver", "CodeSpace", "Signal")]
   input$Timestamp <- fasttime::fastPOSIXct(input$Timestamp, tz = "UTC")
   return(input)
-}
-
-#' Bind detections
-#' 
-#' Combines all the standardized detections into one data frame.
-#' 
-#' @param data.files The list of processed files, supplied by loadDetections.
-#' @param file.list The list of valid files, supplied by loadDetections.
-#'
-#' @return A data frame of standardized detections from all the input files.
-#'
-#' @keywords internal
-#' 
-bindDetections <- function(data.files, file.list) {
-  appendTo("debug", "Running bindDetections.")
-  if (length(file.list) >= 1) {
-    temp <- data.files[file.list]
-    appendTo("debug", "Compiling the data object.")
-    output <- temp[[1]]
-    if (length(temp) > 1) 
-      for (i in 2:length(temp)) output <- rbind(output, temp[[i]])
-  } else {
-    stop("No valid detection files were found.\n", call. = FALSE)
-  }
-  output$Receiver <- as.factor(output$Receiver)
-  output$CodeSpace <- as.factor(output$CodeSpace)
-  return(output)
 }
 
 #' Convert code spaces
