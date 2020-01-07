@@ -78,11 +78,12 @@
 #' 
 #' @export
 #' 
-residency <- function(path = NULL, sections, section.minimum = 2, minimum.detections = 2,
-  max.interval = 60, maximum.time = 60, speed.method = c("last to first", "first to first"), speed.warning = NULL,
-  speed.error = NULL, if.last.skip.section = TRUE, tz.study.area = NULL, tz = NULL, start.time = NULL, start.timestamp = NULL, 
-  stop.time = NULL, end.timestamp = NULL, report = TRUE, exclude.tags = NULL, override = NULL, replicates = NULL,
-  jump.warning = 2, jump.error = 3, inactive.warning = NULL, inactive.error = NULL, debug = FALSE) {
+residency <- function(path = NULL, tz, sections, success.arrays = NULL, max.interval = 60, minimum.detections = 2, 
+  start.time = NULL, stop.time = NULL, speed.method = c("last to first", "first to first"), 
+  speed.warning = NULL, speed.error = NULL, jump.warning = 2, jump.error = 3, 
+  inactive.warning = NULL, inactive.error = NULL, exclude.tags = NULL, override = NULL, report = TRUE,
+  section.minimum = 2, replicates = NULL, debug = FALSE,
+  maximum.time = 60, tz.study.area = NULL, start.timestamp = NULL, end.timestamp = NULL) {
 # Temporary: check deprecated options
   dep.warning <- "------------------------------------------------------------------\n!!! Deprecated arguments used!\n!!!\n"
   trigger.dep <- FALSE
@@ -133,9 +134,6 @@ residency <- function(path = NULL, sections, section.minimum = 2, minimum.detect
     stop("'speed.error' must not be lower than 'speed.warning'.\n", call. = FALSE)
   if (!is.null(speed.warning) & is.null(speed.error))
     speed.error <- Inf
-
-  if (!is.logical(if.last.skip.section))
-    stop("'if.last.skip.section' must be logical.\n", call. = FALSE)
 
   if (!is.null(start.time) && !grepl("^[1-2][0-9][0-9][0-9]-[0-1][0-9]-[0-3][0-9] [0-2][0-9]:[0-5][0-9]:[0-5][0-9]", start.time))
     stop("'start.time' must be in 'yyyy-mm-dd hh:mm:ss' format.\n", call. = FALSE)
@@ -199,7 +197,6 @@ residency <- function(path = NULL, sections, section.minimum = 2, minimum.detect
       ", speed.method = ", paste0("c('", speed.method, "')"),
       ", speed.warning = ", ifelse(is.null(speed.warning), "NULL", speed.warning), 
       ", speed.error = ", ifelse(is.null(speed.error), "NULL", speed.error), 
-      ", if.last.skip.section = ", ifelse(if.last.skip.section, "TRUE", "FALSE"),
       ", tz = ", ifelse(is.null(tz), "NULL", paste0("'", tz, "'")), 
       ", start.time = ", ifelse(is.null(start.time), "NULL", paste0("'", start.time, "'")),
       ", stop.time = ", ifelse(is.null(stop.time), "NULL", paste0("'", stop.time, "'")),
