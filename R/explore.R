@@ -80,11 +80,12 @@
 
 #' @export
 #' 
-explore <- function(path = NULL, max.interval = 60, maximum.time = 60, speed.method = c("last to first", "first to first"),
-    speed.warning = NULL, speed.error = NULL, tz.study.area = NULL, tz, start.time = NULL, start.timestamp = NULL, 
-    stop.time = NULL, end.timestamp = NULL, override = NULL, minimum.detections = 2, 
-    report = TRUE, exclude.tags = NULL, jump.warning = 2, jump.error = 3, inactive.warning = NULL, 
-    inactive.error = NULL,  debug = FALSE) {
+explore <- function(path = NULL, tz, max.interval = 60, minimum.detections = 2, start.time = NULL, stop.time = NULL, 
+  speed.method = c("last to first", "first to first"), speed.warning = NULL, speed.error = NULL, 
+  jump.warning = 2, jump.error = 3, inactive.warning = NULL, inactive.error = NULL, 
+  exclude.tags = NULL, override = NULL, report = TRUE, debug = FALSE,
+  maximum.time = 60, tz.study.area = NULL, start.timestamp = NULL, end.timestamp = NULL) {
+
 # Temporary: check deprecated options
   dep.warning <- "------------------------------------------------------------------\n!!! Deprecated arguments used!\n!!!\n"
   trigger.dep <- FALSE

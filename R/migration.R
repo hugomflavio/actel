@@ -80,12 +80,13 @@
 
 #' @export
 #' 
-migration <- function(path = NULL, sections, success.arrays = NULL, minimum.detections = 2, 
-  maximum.time = 60, max.interval = 60, speed.method = c("last to first", "first to first"), speed.warning = NULL,
-  speed.error = NULL, if.last.skip.section = TRUE, tz.study.area = NULL, tz = NULL, start.time = NULL, start.timestamp = NULL, 
-  stop.time = NULL, end.timestamp = NULL, report = TRUE, override = NULL, 
-  exclude.tags = NULL, replicates = NULL, disregard.parallels = TRUE,
-  jump.warning = 2, jump.error = 3, inactive.warning = NULL, inactive.error = NULL, debug = FALSE) {
+migration <- function(path = NULL, tz, sections, success.arrays = NULL, max.interval = 60, minimum.detections = 2, 
+  start.time = NULL, stop.time = NULL, speed.method = c("last to first", "first to first"), 
+  speed.warning = NULL, speed.error = NULL, jump.warning = 2, jump.error = 3, 
+  inactive.warning = NULL, inactive.error = NULL, exclude.tags = NULL, override = NULL, report = TRUE,
+  if.last.skip.section = TRUE, replicates = NULL, disregard.parallels = TRUE, debug = FALSE,
+  maximum.time = 60, tz.study.area = NULL, start.timestamp = NULL, end.timestamp = NULL) {
+
 # Temporary: check deprecated options
   dep.warning <- "------------------------------------------------------------------\n!!! Deprecated arguments used!\n!!!\n"
   trigger.dep <- FALSE
