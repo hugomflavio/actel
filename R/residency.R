@@ -369,7 +369,7 @@ detections.list <- study.data$detections.list
     departure = getTimes(movements = section.movements, spatial = spatial, type = "departure", events = "all"))
 
   residency.list <- getResidency(movements = section.movements, spatial = spatial)
-  
+
   appendTo(c("Screen", "Report"), "M: Calculating daily locations for each fish.")
 
   daily.ratios <- dailyRatios(res = residency.list)
@@ -1128,6 +1128,11 @@ getResidency <- function(movements, spatial){
       }
       return(output)
     })
+  inst.exception <- sapply(output, function(x) nrow(x) == 1 && x$First.time == x$Last.time)
+  if (any(inst.exception)) {
+    appendTo(c("Screen", "Report", "Warning"), paste("Valid detections for fish", paste(names(output)[inst.exception], collapse = ", "), "start and end on the same instant. Excluding them from residency analyses."))
+    output <- output[!inst.exception]
+  }
   return(output)
 }
 
