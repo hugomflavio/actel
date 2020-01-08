@@ -456,12 +456,10 @@ migration <- function(path = NULL, tz, sections, success.arrays = NULL, max.inte
   # extra info for potential RSP analysis
   rsp.info <- list(analysis.type = "migration", analysis.time = the.time, bio = bio, tz = tz, actel.version = inst.ver.short)
 
-  if (!is.null(override)) {
-    header.fragment <- paste0('<span style="color:red">Manual mode has been triggered for **', length(override),'** fish.</span>\n')
-    name.fragment <- "_corrected"
-  } else {
-    header.fragment <- name.fragment <- ""
-  }
+  if (!is.null(override))
+    override.fragment <- paste0('<span style="color:red">Manual mode has been triggered for **', length(override),'** fish.</span>\n')
+  else
+    override.fragment <- ""
 
   if (file.exists(resultsname <- "actel_migration_results.RData")) {
     continue <- TRUE
@@ -527,7 +525,7 @@ migration <- function(path = NULL, tz, sections, success.arrays = NULL, max.inte
 # print html report
   if (report) {
     appendTo("debug", "debug: Printing report")
-    rmarkdown::render(reportname <- printMigrationRmd(name.fragment = name.fragment, header.fragment = header.fragment, 
+    rmarkdown::render(reportname <- printMigrationRmd(override.fragment = override.fragment, 
         biometric.fragment = biometric.fragment, survival.graph.size = survival.graph.size, circular.plots = circular.plots,
         individual.plots = individual.plots, spatial = spatial, efficiency.fragment = efficiency.fragment, 
         display.progression = display.progression, array.overview.fragment = array.overview.fragment, 
@@ -617,7 +615,7 @@ Timestamp: **', stringr::str_extract(pattern = '(?<=Timestamp: )[^\r|^\n]*', str
 
 Number of target tags: **`r I(nrow(status.df))`**
 
-', header.fragment,' 
+', override.fragment,' 
 
 Number of listed receivers: **', stringr::str_extract(pattern = '(?<=Number of ALS: )[0-9]*', string = report), '** (of which **', stringr::str_extract(pattern = '(?<=of which )[0-9]*', string = report), '** had no detections)
 
