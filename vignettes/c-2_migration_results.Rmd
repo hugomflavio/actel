@@ -22,23 +22,35 @@ knitr::opts_chunk$set(
     1. [Structuring the study area](a-1_study_area.html)
     1. [Creating a distances matrix](a-2_distances_matrix.html)
 1. [explore()](b-0_explore.html)
-    1. [From raw to movements](b-1_explore_processes.html)
+    1. [Processes behind explore()](b-1_explore_processes.html)
     1. [Inspecting the explore() results](b-2_explore_results.html)
 1. [migration()](c-0_migration.html)
     1. [Processes behind migration()](c-1_migration_processes.html)
     1. [__Inspecting the migration() results__](c-2_migration_results.html)
-    1. [Manual mode in migration()](c-3_migration_manual_mode.html)
-    1. [One-way efficiency estimations](c-4_migration_efficiency.html)
+    1. [One-way efficiency estimations](c-3_migration_efficiency.html)
 1. [residency()](d-0_residency.html)
     1. [Processes behind residency()](d-1_residency_processes.html)
     1. [Inspecting the residency() results](d-2_residency_results.html)
     1. [Multi-way efficiency estimations](d-3_residency_efficiency.html)
-1. [Errors and messages](e-0_messages.html)
+1. [Manual mode](e-0_manual_mode.html)
+1. [Errors and messages](f-0_messages.html)
 
 
 ## Results within R
 
 The results compiled by the migration() function include [those of the explore() function](b-2_explore_results.html). To keep the vignettes shorter, I will only detail **new** outputs here:
+
+### section.movements
+
+The `section.movements` list contains the section-level movement events created during [the movement compressing process](c-1_migration_processes.html#section-movements). Here is an example:
+
+|Section  | Events| Detections|First.array  |Last.array  |First.time |Last.time |Time.travelling |Time.in.section |
+|:--------|------:|----------:|:------------|:-----------|:----------|:---------|:---------------|:---------------|
+|River    |      3|         10|River1       |River3      |...        |...       |11:45           |0:00            |
+|Fjord    |      2|          5|Fjord1       |Fjord2      |...        |...       |14:00           |03:32           |
+|Sea      |      2|          7|Sea1         |Sea1        |...        |...       |26:27           |15:59           |
+(Timestamps were trimmed so the table fits better in the page)
+
 
 ### status.df
 
@@ -123,11 +135,9 @@ This is the main non-R output. If you activated the `report` option, actel will 
 
   It is a good idea to have a good look at all of these graphics and verify that everything is looking correct (i.e. actel has assigned fates and entry/exit points correctly). This is also a good chance to have a closer look at the tags you flagged as suspicious during the analysis.
 
-  Note that fish where you had to manually intervene during the analysis will be highlighted with a yellow border, and fish that were manually overridden through the [`override` argument](c-0_migration.html#override) will be highlighted with a red border.
-
 
 ## What if actel has miss-assigned something?
 
-Fish with strange behaviour can be complicated to analyse. While actel's functions have been designed to deal with this as best as possible, if you find out that actel has miss-assigned something, you can act upon it. If you disagree with any of the assigned entry/exit times of a section, or with the fate assigned to the fish, you can always [enter manual mode and tell actel what to do.](c-3_migration_manual_mode.html)
+Fish with strange behaviour can be complicated to analyse. While actel's functions have been designed to deal with this as best as possible, you can always [enter manual mode](e-0_manual_mode.html) if you find out that actel has miss-assigned something. I.e. has a movement event been invalidated that seems valid, or vice-versa? Are part of the movements detected characteristic of predator behaviour?
 
 [Back to top.](#)

@@ -22,27 +22,27 @@ knitr::opts_chunk$set(
     1. [Structuring the study area](a-1_study_area.html)
     1. [Creating a distances matrix](a-2_distances_matrix.html)
 1. [explore()](b-0_explore.html)
-    1. [From raw to movements](b-1_explore_processes.html)
+    1. [Processes behind explore()](b-1_explore_processes.html)
     1. [Inspecting the explore() results](b-2_explore_results.html)
 1. [__migration()__](c-0_migration.html)
     1. [Processes behind migration()](c-1_migration_processes.html)
     1. [Inspecting the migration() results](c-2_migration_results.html)
-    1. [Manual mode in migration()](c-3_migration_manual_mode.html)
-    1. [One-way efficiency estimations](c-4_migration_efficiency.html)
+    1. [One-way efficiency estimations](c-3_migration_efficiency.html)
 1. [residency()](d-0_residency.html)
     1. [Processes behind residency()](d-1_residency_processes.html)
     1. [Inspecting the residency() results](d-2_residency_results.html)
     1. [Multi-way efficiency estimations](d-3_residency_efficiency.html)
-1. [Errors and messages](e-0_messages.html)
+1. [Manual mode](e-0_manual_mode.html)
+1. [Errors and messages](f-0_messages.html)
 
 ## The migration() function
 
 The migration() functions builds on the same principles as the explore() function and, in addition, computes metrics under the assumption that the fish will move in a predictable direction.
 
-migration() has the same arguments as explore(), and includes a set of new arguments aimed to fine tune the migration-related metrics. Like with explore, you *do not need to start working with all arguments right away.* Defining the `sections`, and `tz.study.area` is enough to get you going!
+migration() has the same arguments as explore(), and includes a set of new arguments aimed to fine tune the migration-related metrics. Like with explore, you *do not need to start working with all arguments right away.* For simple study areas, defining the `tz` and `sections` arguments is enough to get you going!
 
 ```r
-migration(sections = c("River", "Fjord", "Sea"), tz.study.area = "Europe/Copenhagen")
+migration(tz = "Europe/Copenhagen", sections = c("River", "Fjord", "Sea"))
 ```
 
 
@@ -51,29 +51,14 @@ migration(sections = c("River", "Fjord", "Sea"), tz.study.area = "Europe/Copenha
 Study areas can differ considerably. The arguments within migration() allow you to capture that diversity!
 
 ```r
-migration(path = NULL, sections, success.arrays = NULL, minimum.detections = 2, 
-  maximum.time = 60, speed.method = c("last to first", "first to first"), speed.warning = NULL,
-  speed.error = NULL, if.last.skip.section = TRUE, tz.study.area, start.timestamp = NULL, 
-  end.timestamp = NULL, report = TRUE, override = NULL, exclude.tags = NULL, 
-  cautious.assignment = TRUE, replicates = NULL, disregard.parallels = TRUE, jump.warning = 2, 
-  jump.error = 3, inactive.warning = NULL, inactive.error = NULL)
+migration(path = NULL, tz, sections, success.arrays = NULL, max.interval = 60, minimum.detections = 2, 
+  start.time = NULL, stop.time = NULL, speed.method = c("last to first", "first to first"), 
+  speed.warning = NULL, speed.error = NULL, jump.warning = 2, jump.error = 3, 
+  inactive.warning = NULL, inactive.error = NULL, exclude.tags = NULL, override = NULL, report = TRUE,
+  if.last.skip.section = TRUE, replicates = NULL, disregard.parallels = TRUE)
 ```
 
-Below are listed the new arguments, which do not exist in explore. If you cannot find a description of an argument here, [have a look at the explore() page](b-0_explore.html#general-arguments).
-
-### minimum.detections
-
-This argument controls how many times a fish must be registered to be considered valid, if there is only one movement event. Movement events are [explained in greater detail here](b-1_explore_processes.html#from-detections-to-movements). Lets have a look at an example:
-
-Fish A only has one movement event at **River1**, with **one** detection.
-    
-  * If `minimum.detections = 1`, this movement is considered **valid**, and the fish is considered to have passed through **River1** and then disappeared.
-
-  * If `minimum.detections = 2`, this movement is considered **invalid** (i.e. could be the result of error detections), and the fish is considered to have been lost after release.
-
-If a Fish has more than one movement event, then the `minimum.detections` argument no longer plays a role. 
-
-For example, if Fish B has two movement events at **River1**, both with one detection (i.e. two detections in total), these movements are considered valid even if `minimum.detections = 3`. This is because it is unlikely that an erroneous signal which matches a target tag would be recorded on two or more occasions separated in time and/or space.
+Below are listed only new arguments that do not exist in [explore](b-0_explore.html#general-arguments). 
 
 ### sections
 
@@ -81,23 +66,24 @@ For the `migration()` analysis, the study area sections must be set in the order
 
 In the other hand, if you expect your fish to migrate upstream, then `sections = c("Sea", "Fjord", "River")`. To learn more about how to organise your study area in an actel-friendly way, have a look at [this manual page.](a-1_study_area.html)
 
-### override
 
-Once you finish your analysis, you should go through the generated outputs and check for any strange behaviour. We will discuss this in more detail [later on](c-2_migration_results.html), but for now the important message is that, if you would like to **manually change the results for any set of tags**, you can list those tags in `override` to trigger full manual mode (e.g. `override = c("R64K-1234", "R64K-1405")`).
+### success.arrays
 
-When you list tags in `override`, actel will recognise them and enter full manual mode when it is their turn to be analysed. You will know this is happening when you see the following message:
+If a fish is last detected at an array listed in `success.arrays`, it will be considered as having successfully crossed the study area. By default, the last array of your study area is considered a success array. However, if you are not sure about your last array's efficiency, you can define multiple success arrays (e.g. `success.arrays = c("Sea1", "Sea2")` ).
 
-```
-M: Override has been triggered for fish R64K-1234. Entering full manual mode.
-```
+Note:
+  : In multi-branch study areas with multiple endings, the last array of each ending is, by default, considered a success array.
 
-You can find more information on [how to operate full manual mode here](c-3_migration_manual_mode.html).
 
-### cautious.assignment
+### if.last.skip.section
 
-Isolated detections lead to movement events with only one detection. These movement events are less robust than events with multiple detections, and can be caused by flawed detections. Actel tries to avoid assigning movement events with one detection as the first and/or last events for a given section, to ensure that the results are as robust as possible (hence why `cautious.assignment` defaults to `TRUE`).
+This option is best explained with examples. Let us assume we have a study area with four arrays: River1, River2, Fjord1 and Fjord2. Now, we have a fish that was last detected at River2. Should this fish be considered to have disappeared in the river or in the fjord? It comes down to how your stations are deployed in the field, and this is what `if.last.skip.section` is controlling for. Lets have a look at the two maps below.
 
-If you set `cautious.assignment` to `FALSE`, actel will consider all movement events as equally reliable for assignment. This may be helpful if you believe your arrays have a short range or if your fish are swimming very fast, and thus low detection numbers are expected.
+<img src="if_last_skip_section_true.svg" alt="drawing" width="330"/> <img src="if_last_skip_section_false.svg" alt="drawing" width="330"/>
+
+On study area **A**, it seems reasonable that a fish last detected at River2 has likely died in the fjord, before reaching Fjord1. In this case, `if.last.skip.section = TRUE`.
+
+However, on study area **B**, if a fish was last detected at River2, it most likely died somewhere in the river. In this case, `if.last.skip.section = FALSE`.
 
 
 ### replicates
@@ -110,6 +96,7 @@ Note:
 <img src="replicates_A.svg" alt="drawing" width="330"/> <img src="replicates_B.svg" alt="drawing" width="330"/>
 
 <img src="replicates_C.svg" alt="drawing" width="330"/> <img src="replicates_D.svg" alt="drawing" width="330"/>
+
 
 #### Setting up the replicates argument
 
@@ -124,26 +111,10 @@ Where [...] stands for other arguments you want to specify in the function.
 
 It is important that you list replicates using the `list(Array = "Replicate")` construction. Keep this in mind while you prepare the code.
 
+
 ### disregard.parallels
 
 This argument controls wether or not the presence of parallel arrays (in multi-branch analyses) should potentially lead to the invalidation of efficiency peers. This argument is a bit tough to explain in few words, so I recommend that you [have a look at how efficiency is calculated in migration()](c-4_migration_efficiency.html#cjs-and-multiple-branches).
-
-### success.arrays
-
-If a fish is last detected at an array listed in `success.arrays`, it will be considered as having successfully crossed the study area. By default, the last array of your study area is considered a success array. However, if you are not sure about your last array's efficiency, you can define multiple success arrays (e.g. `success.arrays = c("Sea1", "Sea2")` ).
-
-Note:
-  : In multi-branch study areas with multiple endings, the last array of each ending is, by default, considered a success array.
-
-### if.last.skip.section
-
-This option is best explained with examples. Let us assume we have a study area with four arrays: River1, River2, Fjord1 and Fjord2. Now, we have a fish that was last detected at River2. Should this fish be considered to have disappeared in the river or in the fjord? It comes down to how your stations are deployed in the field, and this is what `if.last.skip.section` is controlling for. Lets have a look at the two maps below.
-
-<img src="if_last_skip_section_true.svg" alt="drawing" width="330"/> <img src="if_last_skip_section_false.svg" alt="drawing" width="330"/>
-
-On study area **A**, it seems reasonable that a fish last detected at River2 has likely died in the fjord, before reaching Fjord1. In this case, `if.last.skip.section = TRUE`.
-
-However, on study area **B**, if a fish was last detected at River2, it most likely died somewhere in the river. In this case, `if.last.skip.section = FALSE`.
 
 
 Now that you know how to run the migration analysis, you may want to:

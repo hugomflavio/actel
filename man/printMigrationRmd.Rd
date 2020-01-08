@@ -5,8 +5,7 @@
 \title{Print Rmd report}
 \usage{
 printMigrationRmd(
-  name.fragment,
-  header.fragment,
+  override.fragment,
   biometric.fragment,
   efficiency.fragment,
   display.progression,
@@ -21,9 +20,7 @@ printMigrationRmd(
 )
 }
 \arguments{
-\item{name.fragment}{Rmarkdown string specifying the type of report for the title.}
-
-\item{header.fragment}{Rmarkdown string specifying the type of report for the header.}
+\item{override.fragment}{Rmarkdown string specifying the type of report for the header.}
 
 \item{biometric.fragment}{Rmarkdown string specifying the biometric graphics drawn.}
 

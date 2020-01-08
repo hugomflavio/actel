@@ -6,36 +6,50 @@
 \usage{
 explore(
   path = NULL,
+  tz,
   max.interval = 60,
-  maximum.time = 60,
+  minimum.detections = 2,
+  start.time = NULL,
+  stop.time = NULL,
   speed.method = c("last to first", "first to first"),
   speed.warning = NULL,
   speed.error = NULL,
-  tz.study.area = NULL,
-  tz,
-  start.time = NULL,
-  start.timestamp = NULL,
-  stop.time = NULL,
-  end.timestamp = NULL,
-  override = NULL,
-  minimum.detections = 2,
-  report = TRUE,
-  exclude.tags = NULL,
   jump.warning = 2,
   jump.error = 3,
   inactive.warning = NULL,
   inactive.error = NULL,
-  debug = FALSE
+  exclude.tags = NULL,
+  override = NULL,
+  report = TRUE,
+  debug = FALSE,
+  maximum.time = 60,
+  tz.study.area = NULL,
+  start.timestamp = NULL,
+  end.timestamp = NULL
 )
 }
 \arguments{
 \item{path}{Path to the folder containing the data. If left NULL (default),
 the analysis runs in the current folder.}
 
+\item{tz}{The time zone of the study area. Must match one of the values
+present in \code{\link[base]{timezones}}.}
+
 \item{max.interval}{The number of minutes that must pass between detections
 for a new event to be created. Defaults to 60.}
 
-\item{maximum.time}{DEPRECATED. See \code{max.interval}.}
+\item{minimum.detections}{For tags with only one movement event, defines the
+minimum number of times a tag must have been recorded during the study
+period for it to be considered true detections and not random noise.
+Defaults to 2.}
+
+\item{start.time}{Detection data prior to the timestamp set in
+\code{start.time} (in YYYY-MM-DD HH:MM:SS format) is not considered during
+the analysis.}
+
+\item{stop.time}{Detection data posterior to the timestamp set in
+\code{stop.time} (in YYYY-MM-DD HH:MM:SS format) is not considered during
+the analysis.}
 
 \item{speed.method}{Can take two forms: 'last to first' or 'first to first'.
 If 'last to first' (default), the last detection on a given array is matched
@@ -50,39 +64,6 @@ NULL (default), no warnings are issued.}
 \item{speed.error}{If a fish moves at a speed equal or greater than
 \code{speed.error} (in metres per second), user intervention is suggested.
 If left NULL (default), user intervention is never suggested.}
-
-\item{tz.study.area}{DEPRECATED. See \code{tz}.}
-
-\item{tz}{The time zone of the study area. Must match one of the values
-present in \code{\link[base]{timezones}}.}
-
-\item{start.time}{Detection data prior to the timestamp set in
-\code{start.time} (in YYYY-MM-DD HH:MM:SS format) is not considered during
-the analysis.}
-
-\item{start.timestamp}{DEPRECATED. See \code{start.time}.}
-
-\item{stop.time}{Detection data posterior to the timestamp set in
-\code{stop.time} (in YYYY-MM-DD HH:MM:SS format) is not considered during
-the analysis.}
-
-\item{end.timestamp}{DEPRECATED See argument \code{stop.time}}
-
-\item{override}{A vector of tags for which the user intends to manually
-define which movement events are valid and invalid.}
-
-\item{minimum.detections}{For tags with only one movement event, defines the
-minimum number of times a tag must have been recorded during the study
-period for it to be considered true detections and not random noise.
-Defaults to 2.}
-
-\item{report}{Logical. Should an HTML report be created at the end of the
-analysis?}
-
-\item{exclude.tags}{A vector of tags that should be excluded from the
-detection data before any analyses are performed. Intended to be used if
-stray tags from a different code space but with the same signal as a target
-tag are detected in the study area.}
 
 \item{jump.warning}{If a fish crosses a number of arrays equal or greater
 than \code{jump.error} without being detected, a warning is issued. If left
@@ -102,8 +83,27 @@ issued.}
 detections, user intervention is suggested. If left NULL (default), user
 intervention is never suggested.}
 
+\item{exclude.tags}{A vector of tags that should be excluded from the
+detection data before any analyses are performed. Intended to be used if
+stray tags from a different code space but with the same signal as a target
+tag are detected in the study area.}
+
+\item{override}{A vector of tags for which the user intends to manually
+define which movement events are valid and invalid.}
+
+\item{report}{Logical. Should an HTML report be created at the end of the
+analysis?}
+
 \item{debug}{Logical: Should temporary files be kept at the end of the
 analysis?}
+
+\item{maximum.time}{DEPRECATED. See \code{max.interval}.}
+
+\item{tz.study.area}{DEPRECATED. See \code{tz}.}
+
+\item{start.timestamp}{DEPRECATED. See \code{start.time}.}
+
+\item{end.timestamp}{DEPRECATED See argument \code{stop.time}}
 }
 \value{
 A list containing:

@@ -5,6 +5,7 @@
 \title{Print Rmd report}
 \usage{
 printResidencyRmd(
+  override.fragment,
   biometric.fragment,
   efficiency.fragment,
   individual.detection.plots,
@@ -21,6 +22,8 @@ printResidencyRmd(
 )
 }
 \arguments{
+\item{override.fragment}{Rmarkdown string specifying the type of report for the header.}
+
 \item{biometric.fragment}{Rmarkdown string specifying the biometric graphics drawn.}
 
 \item{efficiency.fragment}{Rmarkdown string specifying the efficiency results.}

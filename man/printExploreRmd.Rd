@@ -5,6 +5,7 @@
 \title{Print Rmd report}
 \usage{
 printExploreRmd(
+  override.fragment,
   biometric.fragment,
   individual.plots,
   circular.plots,
@@ -14,6 +15,8 @@ printExploreRmd(
 )
 }
 \arguments{
+\item{override.fragment}{Rmarkdown string specifying the type of report for the header.}
+
 \item{biometric.fragment}{Rmarkdown string specifying the biometric graphics drawn.}
 
 \item{individual.plots}{Rmarkdown string specifying the name of the individual plots.}
