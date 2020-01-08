@@ -32,8 +32,7 @@ Imports:
     stats,
     stringr,
     grDevices,
-    utils,
-    bit64
+    utils
 Suggests: 
     raster,
     gdistance,
