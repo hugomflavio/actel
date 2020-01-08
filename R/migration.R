@@ -525,11 +525,21 @@ migration <- function(path = NULL, tz, sections, success.arrays = NULL, max.inte
 # print html report
   if (report) {
     appendTo("debug", "debug: Printing report")
-    rmarkdown::render(reportname <- printMigrationRmd(override.fragment = override.fragment, 
-        biometric.fragment = biometric.fragment, survival.graph.size = survival.graph.size, circular.plots = circular.plots,
-        individual.plots = individual.plots, spatial = spatial, efficiency.fragment = efficiency.fragment, 
-        display.progression = display.progression, array.overview.fragment = array.overview.fragment, 
-        detections = detections, valid.detections = valid.detections), quiet = TRUE)
+    rmarkdown::render(
+      reportname <- printMigrationRmd(override.fragment = override.fragment,
+                                      biometric.fragment = biometric.fragment,
+                                      section.overview = section.overview,
+                                      efficiency.fragment = efficiency.fragment,
+                                      display.progression = display.progression,
+                                      array.overview.fragment = array.overview.fragment,
+                                      survival.graph.size = survival.graph.size,
+                                      individual.plots = individual.plots,
+                                      circular.plots = circular.plots,
+                                      spatial = spatial,
+                                      deployments = deployments,
+                                      valid.detections = valid.detections,
+                                      detections = detections),
+      quiet = TRUE)
     appendTo("debug", "debug: Moving report")
     fs::file_move(sub("Rmd", "html", reportname), sub("Report/", "", sub("Rmd", "html", reportname)))
     appendTo("debug", "debug: Opening report if the pc has internet.")
@@ -561,6 +571,7 @@ migration <- function(path = NULL, tz, sections, success.arrays = NULL, max.inte
 #' 
 #' @param override.fragment Rmarkdown string specifying the type of report for the header.
 #' @param biometric.fragment Rmarkdown string specifying the biometric graphics drawn.
+#' @param section.overview A summary table with the number of fish that disappeared/moved onwards at each section.
 #' @param efficiency.fragment Rmarkdown string specifying the efficiency results.
 #' @param display.progression Logical. If TRUE, the progression plot has been created and can be displayed.
 #' @param array.overview.fragment Rmarkdown string specifying the array overview results.
@@ -571,7 +582,7 @@ migration <- function(path = NULL, tz, sections, success.arrays = NULL, max.inte
 #' 
 #' @keywords internal
 #' 
-printMigrationRmd <- function(override.fragment, biometric.fragment, efficiency.fragment, display.progression, array.overview.fragment,
+printMigrationRmd <- function(override.fragment, biometric.fragment, section.overview, efficiency.fragment, display.progression, array.overview.fragment,
   survival.graph.size, individual.plots, circular.plots, spatial, deployments, valid.detections, detections){
   inst.ver <- utils::packageVersion("actel")
   inst.ver.short <- substr(inst.ver, start = 1, stop = nchar(as.character(inst.ver)) - 5) 
@@ -635,21 +646,15 @@ Arrays with the same background belong to the same section. Release sites are ma
 
 ### Receiver stations
 
-```{r stations, echo = FALSE}
-knitr::kable(spatial$stations, row.names = FALSE)
-```
+', paste(knitr::kable(spatial$stations, row.names = FALSE), collapse = "\n"), '
 
 ### Deployments
 
-```{r deployments, echo = FALSE}
-knitr::kable(deployments, row.names = FALSE)
-```
+', paste(knitr::kable(deployments, row.names = FALSE), collapse = "\n"), '
 
 ### Release sites
 
-```{r releases, echo = FALSE}
-knitr::kable(spatial$release.sites, row.names = FALSE)
-```
+', paste(knitr::kable(spatial$release.sites, row.names = FALSE), collapse = "\n"), '
 
 ### Array forward efficiency
 
@@ -687,9 +692,7 @@ Note:
 Note:
   : The data used in this table and graphic is stored in the `section.overview` object.
 
-```{r survival, echo = FALSE}
-knitr::kable(section.overview)
-```
+', paste(knitr::kable(section.overview), collapse = "\n"), '
 
 <center>
 ![](survival.png){ ',survival.graph.size ,' }

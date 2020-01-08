@@ -387,9 +387,16 @@ detections.list <- study.data$detections.list
 # print html report
   if (report) {
     appendTo("debug", "debug: Printing report")
-    rmarkdown::render(reportname <- printExploreRmd(override.fragment = override.fragment, biometric.fragment = biometric.fragment, 
-      circular.plots = circular.plots, individual.plots = individual.plots, spatial = spatial,
-      detections = detections, valid.detections = valid.detections), quiet = TRUE)
+    rmarkdown::render(
+      reportname <- printExploreRmd(override.fragment = override.fragment,
+                                    biometric.fragment = biometric.fragment,
+                                    individual.plots = individual.plots,
+                                    circular.plots = circular.plots,
+                                    spatial = spatial,
+                                    deployments = deployments,
+                                    detections = detections,
+                                    valid.detections = valid.detections),
+      quiet = TRUE)
     appendTo("debug", "debug: Moving report")
     fs::file_move(sub("Rmd", "html", reportname), sub("Report/", "", sub("Rmd", "html", reportname)))
     appendTo("debug", "debug: Opening report if the pc has internet.")
@@ -429,7 +436,7 @@ detections.list <- study.data$detections.list
 #' 
 #' @keywords internal
 #' 
-printExploreRmd <- function(override.fragment, biometric.fragment, individual.plots, circular.plots, spatial, detections, valid.detections){
+printExploreRmd <- function(override.fragment, biometric.fragment, individual.plots, circular.plots, spatial, deployments, detections, valid.detections){
   inst.ver <- utils::packageVersion("actel")
   inst.ver.short <- substr(inst.ver, start = 1, stop = nchar(as.character(inst.ver)) - 5) 
   if (file.exists(reportname <- "Report/actel_explore_report.Rmd")) {
@@ -492,21 +499,15 @@ Release sites are marked with "R.S.". Arrays connected with an arrow indicate th
 
 ### Receiver stations
 
-```{r stations, echo = FALSE}
-knitr::kable(spatial$stations, row.names = FALSE)
-```
+', paste(knitr::kable(spatial$stations, row.names = FALSE), collapse = "\n"), '
 
 ### Deployments
 
-```{r deployments, echo = FALSE}
-knitr::kable(deployments, row.names = FALSE)
-```
+', paste(knitr::kable(deployments, row.names = FALSE), collapse = "\n"), '
 
 ### Release sites
 
-```{r releases, echo = FALSE}
-knitr::kable(spatial$release.sites, row.names = FALSE)
-```
+', paste(knitr::kable(spatial$release.sites, row.names = FALSE), collapse = "\n"), '
 
 ### Warning messages
 

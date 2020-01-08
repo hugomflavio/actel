@@ -481,11 +481,22 @@ detections.list <- study.data$detections.list
 # print html report
   if (report) {
     appendTo("debug", "debug: Printing report")
-    rmarkdown::render(reportname <- printResidencyRmd(override.fragment = override.fragment, biometric.fragment = biometric.fragment, efficiency.fragment = efficiency.fragment,
-        array.circular.plots = array.circular.plots, section.arrival.circular.plots = section.arrival.circular.plots, 
-        section.departure.circular.plots = section.departure.circular.plots, individual.detection.plots = individual.detection.plots, 
-        individual.residency.plots = individual.residency.plots, spatial = spatial, detections = detections, valid.detections = valid.detections,
-        last.seen = last.seen, last.seen.graph.size = last.seen.graph.size), quiet = TRUE)
+    rmarkdown::render(
+      reportname <- printResidencyRmd(override.fragment = override.fragment, 
+                                      biometric.fragment = biometric.fragment, 
+                                      efficiency.fragment = efficiency.fragment, 
+                                      individual.detection.plots = individual.detection.plots, 
+                                      individual.residency.plots = individual.residency.plots, 
+                                      array.circular.plots = array.circular.plots, 
+                                      section.arrival.circular.plots = section.arrival.circular.plots, 
+                                      section.departure.circular.plots = section.departure.circular.plots, 
+                                      spatial = spatial, 
+                                      deployments = deployments, 
+                                      detections = detections, 
+                                      valid.detections = valid.detections, 
+                                      last.seen = last.seen, 
+                                      last.seen.graph.size = last.seen.graph.size), 
+      quiet = TRUE)
     appendTo("debug", "debug: Moving report")
     fs::file_move(sub("Rmd", "html", reportname), sub("Report/", "", sub("Rmd", "html", reportname)))
     appendTo("debug", "debug: Opening report if the pc has internet.")
@@ -586,21 +597,15 @@ Arrays with the same background belong to the same section. Release sites are ma
 
 ### Receiver stations
 
-```{r stations, echo = FALSE}
-knitr::kable(spatial$stations, row.names = FALSE)
-```
+', paste(knitr::kable(spatial$stations, row.names = FALSE), collapse = "\n"), '
 
 ### Deployments
 
-```{r deployments, echo = FALSE}
-knitr::kable(deployments, row.names = FALSE)
-```
+', paste(knitr::kable(deployments, row.names = FALSE), collapse = "\n"), '
 
 ### Release sites
 
-```{r releases, echo = FALSE}
-knitr::kable(spatial$release.sites, row.names = FALSE)
-```
+', paste(knitr::kable(spatial$release.sites, row.names = FALSE), collapse = "\n"), '
 
 ### Array efficiency
 
@@ -636,9 +641,7 @@ Note:
 Note:
   : The data used in this table and graphic is stored in the `last.seen` object.
 
-```{r survival, echo = FALSE}
-knitr::kable(last.seen)
-```
+', paste(knitr::kable(last.seen), collapse = "\n"), '
 
 <center>
 ![](last_seen.png){ ',last.seen.graph.size ,' }
