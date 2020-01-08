@@ -63,9 +63,9 @@ groupMovements <- function(detections.list, bio, spatial, speed.method, max.inte
         stop <- all.shifts[j]
         recipient[z, "Array"] = paste(detections.list[[i]]$Array[start])
         recipient[z, "Detections"] = stop - start + 1
-        recipient[z, "First.station"] = paste(detections.list[[i]]$Standard.Name[start])
+        recipient[z, "First.station"] = paste(detections.list[[i]]$Standard.name[start])
         recipient[z, "First.time"] = detections.list[[i]]$Timestamp[start]
-        recipient[z, "Last.station"] = paste(detections.list[[i]]$Standard.Name[stop])
+        recipient[z, "Last.station"] = paste(detections.list[[i]]$Standard.name[stop])
         recipient[z, "Last.time"] = detections.list[[i]]$Timestamp[stop]
         z = z + 1
         counter <<- counter + stop - start + 1

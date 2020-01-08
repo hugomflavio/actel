@@ -284,7 +284,7 @@ detections.list <- study.data$detections.list
     
     if (is.na(match(fish, override))) {
       release <- as.character(bio$Release.site[na.as.false(bio$Transmitter == fish)])
-      release <- with(spatial, release.sites[release.sites$Standard.Name == release, "Array"])
+      release <- with(spatial, release.sites[release.sites$Standard.name == release, "Array"])
 
       output <- checkMinimumN(movements = movements[[i]], fish = fish, minimum.detections = minimum.detections)
 
@@ -447,8 +447,8 @@ printExploreRmd <- function(override.fragment, biometric.fragment, individual.pl
   } else {
     appendTo("Screen", "M: Saving actel report as 'actel_explore_report.html'.")
   }
-  if (any(grepl("Ukn.", spatial$stations$Standard.Name))) {
-    unknown.fragment <- paste0('<span style="color:red"> Number of relevant unknown receivers: **', sum(grepl("Ukn.", spatial$stations$Standard.Name)), '**</span>\n')
+  if (any(grepl("Ukn.", spatial$stations$Standard.name))) {
+    unknown.fragment <- paste0('<span style="color:red"> Number of relevant unknown receivers: **', sum(grepl("Ukn.", spatial$stations$Standard.name)), '**</span>\n')
   } else {
     unknown.fragment <- ""
   } 
@@ -471,6 +471,8 @@ Target folder: ', stringr::str_extract(pattern = '(?<=Target folder: )[^\r]*', s
 Timestamp: **', stringr::str_extract(pattern = '(?<=Timestamp: )[^\r]*', string = report), '** 
 
 Number of target tags: **`r I(nrow(bio))`**
+
+', override.fragment,' 
 
 Number of listed receivers: **', stringr::str_extract(pattern = '(?<=Number of ALS: )[0-9]*', string = report), '** (of which **', stringr::str_extract(pattern = '(?<=of which )[0-9]*', string = report), '** had no detections)
 
@@ -657,7 +659,7 @@ validateDetections <- function(detections.list, movements) {
     counter <<- counter + nrow(movements[[i]])    
     aux <- detections.list[[i]]
     valid.rows <- unlist(lapply(1:nrow(movements[[i]]), function(j) {
-      start <- min(which(aux$Timestamp == movements[[i]]$First.time[j] & aux$Standard.Name == movements[[i]]$First.station[j]))
+      start <- min(which(aux$Timestamp == movements[[i]]$First.time[j] & aux$Standard.name == movements[[i]]$First.station[j]))
       stop <- start + (movements[[i]]$Detections[j] - 1)
       # cat(j, ":", start, ":", stop, "\n"); flush.console()
       return(start:stop)

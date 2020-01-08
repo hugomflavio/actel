@@ -240,13 +240,13 @@ assembleMatrices <- function(spatial, movements, status.df, arrays, paths, dotma
     # Re-order
     the.order <- c()
     for (i in unique(status.df$Group)) {
-      the.order <- c(the.order, paste0(i, ".", unique(spatial$release.sites$Standard.Name)))
+      the.order <- c(the.order, paste0(i, ".", unique(spatial$release.sites$Standard.name)))
     }
     aux <- aux[order(match(names(aux), the.order))]
     # If the release sites start in different arrays
     if (length(unique(spatial$release.sites$Array)) > 1) {
       for(i in 1:length(aux)){
-        r <- sapply(spatial$release.sites$Standard.Name, function(x) grepl(x, names(aux)[i]))
+        r <- sapply(spatial$release.sites$Standard.name, function(x) grepl(x, names(aux)[i]))
         if(sum(r) > 1)
           stop("Multiple release sites match the matrix name. Make sure that the release sites' names are not contained within the fish groups or within themselves.\n")
         the.col <- which(grepl(spatial$release.sites$Array[r], colnames(aux[[i]])))
@@ -580,7 +580,7 @@ includeMissing <- function(x, status.df){
 #' 
 dualMatrix <- function(array, replicates, spatial, detections.list){
   appendTo("debug", "Starting dualMatrix.")
-  all.stations <- spatial$stations$Standard.Name[spatial$stations$Array == array]
+  all.stations <- spatial$stations$Standard.name[spatial$stations$Array == array]
   if (any(link <- !replicates %in% all.stations)) {
     if (sum(link) > 1)
       stop(paste0("In replicates: Stations ", paste(replicates[link], collapse = ", "), " are not part of ", array, " (available stations: ", paste(all.stations, collapse = ", "), ")."), call. = FALSE)
@@ -592,8 +592,8 @@ dualMatrix <- function(array, replicates, spatial, detections.list){
   colnames(efficiency) <- c("original","replicates")
   rownames(efficiency) <- names(detections.list)
   for (i in 1:length(detections.list)) {
-    efficiency[i, "original"] <- any(!is.na(match(original, detections.list[[i]]$Standard.Name)))
-    efficiency[i, "replicates"] <- any(!is.na(match(replicates, detections.list[[i]]$Standard.Name)))
+    efficiency[i, "original"] <- any(!is.na(match(original, detections.list[[i]]$Standard.name)))
+    efficiency[i, "replicates"] <- any(!is.na(match(replicates, detections.list[[i]]$Standard.name)))
   }
   appendTo("debug", "Terminating dualMatrix.")
   return(efficiency)

@@ -312,7 +312,7 @@ migration <- function(path = NULL, tz, sections, success.arrays = NULL, max.inte
     
     if (is.na(match(fish, override))) {
       release <- as.character(bio$Release.site[na.as.false(bio$Transmitter == fish)])
-      release <- with(spatial, release.sites[release.sites$Standard.Name == release, "Array"])
+      release <- with(spatial, release.sites[release.sites$Standard.name == release, "Array"])
 
       output <- checkMinimumN(movements = movements[[i]], fish = fish, minimum.detections = minimum.detections)
 
@@ -592,8 +592,8 @@ printMigrationRmd <- function(override.fragment, biometric.fragment, efficiency.
   } else {
     appendTo("Screen", "M: Saving actel report as 'actel_migration_report.html'.")
   }
-  if (any(grepl("Unknown", spatial$stations$Standard.Name))) {
-    unknown.fragment <- paste0('<span style="color:red"> Number of relevant unknown receivers: **', sum(grepl("Unknown", spatial$stations$Standard.Name)), '**</span>\n')
+  if (any(grepl("Unknown", spatial$stations$Standard.name))) {
+    unknown.fragment <- paste0('<span style="color:red"> Number of relevant unknown receivers: **', sum(grepl("Unknown", spatial$stations$Standard.name)), '**</span>\n')
   } else {
     unknown.fragment <- ""
   } 

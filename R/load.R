@@ -19,7 +19,7 @@ loadStudyData <- function(tz, override = NULL, start.time, stop.time,
   deployments <- loadDeployments(file = "deployments.csv", tz = tz)
   checkDeploymentTimes(input = deployments) # check that receivers are not deployed before being retrieved
   spatial <- loadSpatial(file = "spatial.csv", report = TRUE)
-  deployments <- checkDeploymentStations(input = deployments, spatial = spatial) # match Station.Name in the deployments to Station.Name in spatial, and vice-versa
+  deployments <- checkDeploymentStations(input = deployments, spatial = spatial) # match Station.name in the deployments to Station.name in spatial, and vice-versa
   deployments <- createUniqueSerials(input = deployments) # Prepare serial numbers to overwrite the serials in detections
 
   detections <- loadDetections(start.time = start.time, stop.time = stop.time, tz = tz)
@@ -431,10 +431,10 @@ findShortestChains <- function(input) {
 #' 
 setSpatialStandards <- function(input){
   appendTo("debug","Running setSpatialStandards")
-  input$Standard.Name <- as.character(input$Station.Name)
-  input$Standard.Name <- gsub(" ", "", input$Standard.Name)
+  input$Standard.name <- as.character(input$Station.name)
+  input$Standard.name <- gsub(" ", "", input$Standard.name)
   link <- input$Type == "Hydrophone"
-  input$Standard.Name[link] <- paste0("St.", seq_len(sum(input$Type == "Hydrophone")))
+  input$Standard.name[link] <- paste0("St.", seq_len(sum(input$Type == "Hydrophone")))
   write.csv(input, "spatial.csv", row.names = FALSE)
   return(input)
 }
@@ -476,10 +476,10 @@ loadDistances <- function(spatial) {
       message("   Number of rows/columns in the distance matrix: ", nrow(dist.mat))
       invalid.dist <- TRUE
     }
-    if (!invalid.dist && (any(!matchl(spatial$stations$Standard.Name, colnames(dist.mat))) | any(!matchl(spatial$release.sites$Standard.Name, colnames(dist.mat))))) {
+    if (!invalid.dist && (any(!matchl(spatial$stations$Standard.name, colnames(dist.mat))) | any(!matchl(spatial$release.sites$Standard.name, colnames(dist.mat))))) {
       appendTo(c("Screen", "Report", "Warning"), "Some stations and/or release sites are not present in the distance matrix. Deactivating speed calculation to avoid function failure.")
-      missing.releases <- spatial$release.sites$Standard.Name[!matchl(spatial$release.sites$Standard.Name, colnames(dist.mat))]
-      missing.stations <- spatial$stations$Standard.Name[!matchl(spatial$stations$Standard.Name, colnames(dist.mat))]
+      missing.releases <- spatial$release.sites$Standard.name[!matchl(spatial$release.sites$Standard.name, colnames(dist.mat))]
+      missing.stations <- spatial$stations$Standard.name[!matchl(spatial$stations$Standard.name, colnames(dist.mat))]
       if (length(missing.releases) > 0)
         message(paste0("   Release sites missing: '", paste(missing.releases, collapse = "', '")))
       if (length(missing.stations) > 0)
@@ -509,9 +509,11 @@ loadDeployments <- function(file, tz){
     emergencyBreak()
     stop("Could not find a '", file, "' file in the working directory.\n", call. = FALSE)
   }
+  if (!is.na(link <- match("Station.Name", colnames(input))))
+    colnames(input)[link] <- "Station.name"
   if (any(link <- duplicated(colnames(input))))
     stop("The following columns are duplicated in the file 'deployments.csv': '", paste(unique(colnames(input)[link]), sep = "', '"), "'.", call. = FALSE)
-  default.cols <- c("Receiver", "Station.Name", "Start", "Stop")
+  default.cols <- c("Receiver", "Station.name", "Start", "Stop")
   link <- match(default.cols, colnames(input))
   if (any(is.na(link))) {
     appendTo("Report", paste0("Error: Column(s) '", paste(default.cols[is.na(link)], collapse = "', '"), "' are missing in the deployments.csv file."))
@@ -561,16 +563,18 @@ loadSpatial <- function(file = "spatial.csv", report = FALSE){
   }
   if (any(link <- duplicated(colnames(input))))
     stop("The following columns are duplicated in the file 'spatial.csv': '", paste(unique(colnames(input)[link]), sep = "', '"), "'.", call. = FALSE)
-  if (!any(grepl("Station.Name", colnames(input)))) {
+  if (!is.na(link <- match("Station.Name", colnames(input))))
+    colnames(input)[link] <- "Station.name"
+  if (!any(grepl("Station.name", colnames(input)))) {
     emergencyBreak()
-    stop("The spatial.csv file must contain a 'Station.Name' column.\n", call. = FALSE)
+    stop("The spatial.csv file must contain a 'Station.name' column.\n", call. = FALSE)
   } else {
-    if (any(link <- table(input$Station.Name) > 1)) {
+    if (any(link <- table(input$Station.name) > 1)) {
       if (report)
-        appendTo(c("Screen", "Warning", "Report"), "The 'Station.Name' column in the spatial.csv file must not have duplicated values.")
+        appendTo(c("Screen", "Warning", "Report"), "The 'Station.name' column in the spatial.csv file must not have duplicated values.")
       else
-        message("Error: The 'Station.Name' column in the spatial.csv file must not have duplicated values.")
-      message("Stations appearing more than once:", paste(names(table(input$Station.Name))[link], collapse = ", "), "\n")
+        message("Error: The 'Station.name' column in the spatial.csv file must not have duplicated values.")
+      message("Stations appearing more than once:", paste(names(table(input$Station.name))[link], collapse = ", "), "\n")
       if (report)
         emergencyBreak()
       stop("Fatal exception found. Read lines above for more details.\n", call. = FALSE)
@@ -608,7 +612,7 @@ loadSpatial <- function(file = "spatial.csv", report = FALSE){
       stop("Could not recognise the data in the 'Type' column as only one of 'Hydrophone' or 'Release'. Please double-check the spatial.csv file.\n", call. = FALSE)
     }
   }
-  input <- setSpatialStandards(input = input) # Create Standard.Name for each station  
+  input <- setSpatialStandards(input = input) # Create Standard.name for each station  
   if (report)
   return(input)
 }
@@ -1108,8 +1112,8 @@ labelUnknowns <- function(detections.list) {
       stop("Stopping analysis per user command.\n", call. = FALSE)
     }
     detections.list <- lapply(detections.list, function(x) {
-      levels(x$Standard.Name) <- c(levels(x$Standard.Name), "Unknown")
-      x$Standard.Name[is.na(x$Standard.Name)] <- "Unknown"
+      levels(x$Standard.name) <- c(levels(x$Standard.name), "Unknown")
+      x$Standard.name[is.na(x$Standard.name)] <- "Unknown"
       levels(x$Array) <- c(levels(x$Array), "Unknown")
       x$Array[is.na(x$Array)] <- "Unknown"
       return(x)
@@ -1133,7 +1137,7 @@ labelUnknowns <- function(detections.list) {
 #' 
 createStandards <- function(detections, spatial, deployments) {
   detections$Receiver <- as.character(detections$Receiver)
-  detections$Standard.Name <- NA_character_
+  detections$Standard.name <- NA_character_
   detections$Array <- NA_character_
   empty.receivers <- NULL
   for (i in 1:length(deployments)) {
@@ -1148,13 +1152,13 @@ createStandards <- function(detections, spatial, deployments) {
         # rename receiver
         detections$Receiver[receiver.link][deployment.link] <- deployments[[i]]$Receiver[j]
         # find corresponding standard station name
-        the.station <- match(deployments[[i]]$Station.Name[j], spatial$Station.Name)
-        # include Standard.Name
-        detections$Standard.Name[receiver.link][deployment.link] <- spatial$Standard.Name[the.station]
+        the.station <- match(deployments[[i]]$Station.name[j], spatial$Station.name)
+        # include Standard.name
+        detections$Standard.name[receiver.link][deployment.link] <- spatial$Standard.name[the.station]
         # include Array
         detections$Array[receiver.link][deployment.link] <- as.character(spatial$Array[the.station])
       }
-      if (any(the.error <- is.na(detections$Standard.Name[receiver.link]))) {
+      if (any(the.error <- is.na(detections$Standard.name[receiver.link]))) {
         appendTo(c("Screen", "Report"), paste0("Error: ", sum(the.error), " detections for receiver ", names(deployments)[i], " do not fall within deployment periods."))
         message("")
         print(detections[receiver.link][the.error, -c(6, 7)])
@@ -1185,7 +1189,7 @@ createStandards <- function(detections, spatial, deployments) {
   aux <- spatial[spatial$Type == "Hydrophone", ]
   detections$Receiver <- as.factor(detections$Receiver)
   detections$Array <- factor(detections$Array, levels = unique(aux$Array))
-  detections$Standard.Name <- factor(detections$Standard.Name, levels = aux$Standard.Name)
+  detections$Standard.name <- factor(detections$Standard.name, levels = aux$Standard.name)
   return(detections)
 }
 
@@ -1217,13 +1221,13 @@ transformSpatial <- function(spatial, bio, sections = NULL, first.array = NULL) 
         emergencyBreak()
         stop("There is more than one top level array in the study area. Please specify release site(s) in the 'spatial.csv' file and in the 'biometrics.csv' file.\n", call. = FALSE)
       }
-      release.sites <- data.frame(Station.Name = "unspecified", 
+      release.sites <- data.frame(Station.name = "unspecified", 
                                   Longitude = NA_real_, 
                                   Latitude = NA_real_, 
                                   Array = first.array,
-                                  Standard.Name = "unspecified")
+                                  Standard.name = "unspecified")
     } else {
-      A <- spatial$Standard.Name[spatial$Type == "Release"]
+      A <- spatial$Standard.name[spatial$Type == "Release"]
       B <- unique(bio$Release.site)
       if (any(is.na(match(B, A)))) {
         appendTo(c("Screen", "Report", "Warning"), "There is a mismatch between the release sites reported and the release locations for the fish.")
@@ -1255,11 +1259,11 @@ transformSpatial <- function(spatial, bio, sections = NULL, first.array = NULL) 
         stop("There is more than one top level array in the study area. Please specify release site(s) in the spatial.csv file and in the biometrics.csv file.\n", call. = FALSE)
       }
     }
-    release.sites <- data.frame(Station.Name = unique(bio$Release.site), 
+    release.sites <- data.frame(Station.name = unique(bio$Release.site), 
                                 Longitude = NA_real_,
                                 Latitude = NA_real_, 
                                 Array = rep(first.array, length(unique(bio$Release.site))),
-                                Standard.Name = unique(bio$Release.site))
+                                Standard.name = unique(bio$Release.site))
   }
   # Wrap up
   if (!is.null(sections)) {

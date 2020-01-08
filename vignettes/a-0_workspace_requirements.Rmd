@@ -81,7 +81,7 @@ Note:
 Your spatial file should look similar to this:
 
 ```{r, echo=FALSE, results='asis'}
-  spatial <- data.frame(Station.Name=c("River East","River West","Estuary","Site A","Site B")
+  spatial <- data.frame(Station.name=c("River East","River West","Estuary","Site A","Site B")
     ,Latitude=c(8.411,8.521,8.402,8.442,8.442)
     ,Longitude=c(40.411,40.521,40.402,40.442,40.442)
     ,Array=c("River1","River1","River2","River1","River2")
@@ -92,7 +92,7 @@ knitr::kable(spatial)
 
 In this file you should include both your station deployment sites and your release sites. It is essential that this table has the following columns:
 
-Station.Name
+Station.name
   : The name of the station will be used to match the receiver deployments.
 
 Array
@@ -126,7 +126,7 @@ The deployments file is where you will list the receivers you used in the study.
 
 ```{r, echo=FALSE, results='asis'}
   deployments <- data.frame(Receiver = c(11111, 22222, 33333),
-    Station.Name = c("River East","River West","Estuary")
+    Station.name = c("River East","River West","Estuary")
     ,Start = c("2018-01-01 11:30:00", "2018-01-01 11:33:00", "2018-01-01 11:34:00")
     ,Stop = c("2018-05-03 09:30:00", "2018-05-04 08:33:00", "2018-05-05 12:00:00")
     )
@@ -138,7 +138,7 @@ Short description of the columns:
 Receiver
   : The serial number of the receiver. If a receiver was retrieved and re-deployed, you should add extra rows for each deployment.
 
-Station.Name
+Station.name
   : The name of the station where the receiver was deployed. It **must** match one of the station names in the spatial file.
 
 Start and Stop

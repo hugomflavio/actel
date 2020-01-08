@@ -598,10 +598,10 @@ distancesMatrix <- function(t.layer = "transition.layer.RData", starters = NULL,
   
   if (actel) {
     message("M: Creating actel-compatible distances matrix."); flush.console()
-    PointIDCol <- "Standard.Name"
-    starters$Standard.Name <- as.character(starters$Station.Name)
+    PointIDCol <- "Standard.name"
+    starters$Standard.name <- as.character(starters$Station.name)
     link <- starters$Type == "Hydrophone"
-    starters$Standard.Name[link] <- paste0("St.", seq_len(sum(starters$Type == "Hydrophone")))
+    starters$Standard.name[link] <- paste0("St.", seq_len(sum(starters$Type == "Hydrophone")))
     targets = starters
   } else {
     targets <- read.csv(targets)
@@ -650,7 +650,7 @@ emptyMatrix <- function(){
   input <- loadSpatial(file = "spatial.csv")
 
   output <- matrix(nrow = nrow(input), ncol = nrow(input))
-  colnames(output) <- rownames(output) <- input$Standard.Name
+  colnames(output) <- rownames(output) <- input$Standard.name
 
   for(i in 1:nrow(output))
     output[i,i] = 0

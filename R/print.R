@@ -71,9 +71,9 @@ printProgression <- function(dot, sections, overall.CJS, spatial, status.df) {
   }
 
   # Release nodes
-  release_nodes <- spatial$release.sites[, c("Standard.Name", "Array")]
+  release_nodes <- spatial$release.sites[, c("Standard.name", "Array")]
   n <- table(status.df$Release.site)
-  release_nodes$n <- n[match(names(n), release_nodes$Standard.Name)]
+  release_nodes$n <- n[match(names(n), release_nodes$Standard.name)]
   release_nodes$label <- apply(release_nodes, 1, function(s) {
     paste0(s[1], "\\nn = ", s[3])
   })
@@ -167,7 +167,7 @@ printDot <- function(dot, sections = NULL, spatial) {
   }
 
  # Release nodes
-  release_nodes <- spatial$release.sites[, c("Standard.Name", "Array")]
+  release_nodes <- spatial$release.sites[, c("Standard.name", "Array")]
   colnames(release_nodes)[1] <- "label"
   release_nodes$id <- nrow(diagram_nodes) + 1:nrow(release_nodes)
 
@@ -506,7 +506,7 @@ printIndividuals <- function(redraw, detections.list, bio, status.df = NULL, tz,
   # NOTE: The NULL variables below are actually column names used by ggplot.
   # This definition is just to prevent the package check from issuing a note due unknown variables.
   Timestamp <- NULL
-  Standard.Name <- NULL
+  Standard.name <- NULL
   Array <- NULL
   Station <- NULL
 
@@ -530,7 +530,7 @@ printIndividuals <- function(redraw, detections.list, bio, status.df = NULL, tz,
         Station = as.vector(t(movements[[fish]][, c("First.station", "Last.station")])),
         Timestamp = as.vector(t(movements[[fish]][, c("First.time", "Last.time")]))
       )
-      all.moves.line$Station <- factor(all.moves.line$Station, levels = levels(PlotData$Standard.Name))
+      all.moves.line$Station <- factor(all.moves.line$Station, levels = levels(PlotData$Standard.name))
       all.moves.line$Timestamp <- as.POSIXct(all.moves.line$Timestamp, tz = tz)
       add.valid.movements <- FALSE
       if (!is.null(valid.movements[[fish]])) {
@@ -539,7 +539,7 @@ printIndividuals <- function(redraw, detections.list, bio, status.df = NULL, tz,
           Station = as.vector(t(valid.movements[[fish]][, c("First.station", "Last.station")])),
           Timestamp = as.vector(t(valid.movements[[fish]][, c("First.time", "Last.time")]))
           )
-        simple.moves.line$Station <- factor(simple.moves.line$Station, levels = levels(PlotData$Standard.Name))
+        simple.moves.line$Station <- factor(simple.moves.line$Station, levels = levels(PlotData$Standard.name))
         simple.moves.line$Timestamp <- as.POSIXct(simple.moves.line$Timestamp, tz = tz)
       }
       appendTo("debug", paste0("Debug: Printing graphic for fish", fish, "."))
@@ -554,7 +554,7 @@ printIndividuals <- function(redraw, detections.list, bio, status.df = NULL, tz,
         relevant.line <- status.df[status.row, (grepl("Arrived", colnames(status.df)) | grepl("Left", colnames(status.df)))]
       }
       # Start plot
-      p <- ggplot2::ggplot(PlotData, ggplot2::aes(x = Timestamp, y = Standard.Name, colour = Array))
+      p <- ggplot2::ggplot(PlotData, ggplot2::aes(x = Timestamp, y = Standard.name, colour = Array))
       # Choose background
       default.cols <- TRUE
       if (attributes(movements[[fish]])$p.type == "Overridden") {
@@ -622,10 +622,10 @@ printIndividuals <- function(redraw, detections.list, bio, status.df = NULL, tz,
       else
         p <- p + ggplot2::labs(title = paste0(fish, " (", nrow(PlotData), " detections)"), x = paste("tz:", tz), y = "Station Standard Name")
       # Save
-      if (length(levels(PlotData$Standard.Name)) <= 30)
+      if (length(levels(PlotData$Standard.name)) <= 30)
         the.height <- 4
       else
-        the.height <- 4 + (length(levels(PlotData$Standard.Name)) - 30) * 0.1
+        the.height <- 4 + (length(levels(PlotData$Standard.name)) - 30) * 0.1
       ggplot2::ggsave(paste0("Report/", fish, ".", extension), width = 5, height = the.height)  # better to save in png to avoid point overlapping issues
       rm(PlotData, start.line, last.time, first.time)
     }

@@ -291,7 +291,7 @@ detections.list <- study.data$detections.list
     
     if (is.na(match(fish, override))) {
       release <- as.character(bio$Release.site[na.as.false(bio$Transmitter == fish)])
-      release <- with(spatial, release.sites[release.sites$Standard.Name == release, "Array"])
+      release <- with(spatial, release.sites[release.sites$Standard.name == release, "Array"])
 
       output <- checkMinimumN(movements = movements[[i]], fish = fish, minimum.detections = minimum.detections)
     
@@ -541,8 +541,8 @@ printResidencyRmd <- function(override.fragment, biometric.fragment, efficiency.
   } else {
     appendTo("Screen", "M: Saving actel report as 'actel_residency_report.html'.")
   }
-  if (any(grepl("Unknown", spatial$stations$Standard.Name))) {
-    unknown.fragment <- paste0('<span style="color:red"> Number of relevant unknown receivers: **', sum(grepl("Unknown", spatial$stations$Standard.Name)), '**</span>\n')
+  if (any(grepl("Unknown", spatial$stations$Standard.name))) {
+    unknown.fragment <- paste0('<span style="color:red"> Number of relevant unknown receivers: **', sum(grepl("Unknown", spatial$stations$Standard.name)), '**</span>\n')
   } else {
     unknown.fragment <- ""
   } 
@@ -1047,7 +1047,7 @@ res_efficiency <- function(arrmoves, bio, spatial, arrays, paths, dotmat) {
 #' 
 firstArrayFailure <- function(fish, bio, spatial, first.array, paths, dotmat) {
   release <- as.character(bio$Release.site[na.as.false(bio$Transmitter == fish)])
-  release.array <- as.character(with(spatial, release.sites[release.sites$Standard.Name == release, "Array"]))
+  release.array <- as.character(with(spatial, release.sites[release.sites$Standard.name == release, "Array"]))
   if (release.array == first.array) {
     return(NULL)
   } else {

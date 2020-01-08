@@ -128,7 +128,7 @@ checkInactiveness <- function(movements, fish, detections.list, inactive.warning
     # Fetch respective detection rows
     aux <- detections.list
     valid.row.list <- lapply(start:stop, function(j) {
-      start <- min(which(aux$Timestamp == valid.moves$First.time[j] & aux$Standard.Name == valid.moves$First.station[j]))
+      start <- min(which(aux$Timestamp == valid.moves$First.time[j] & aux$Standard.name == valid.moves$First.station[j]))
       stop <- start + (valid.moves$Detections[j] - 1)
       return(start:stop)
     })
@@ -149,7 +149,7 @@ checkInactiveness <- function(movements, fish, detections.list, inactive.warning
       valid.rows <- unlist(valid.row.list[iteration:length(valid.row.list)])
       the.detections <- aux[valid.rows, ]
       # find all stations
-      the.stations <- as.character(sort(unique(the.detections$Standard.Name)))
+      the.stations <- as.character(sort(unique(the.detections$Standard.name)))
       trigger.error <- FALSE
       if (invalid.dist) {
         # Trigger warning
@@ -610,15 +610,15 @@ checkDeploymentTimes <- function(input) {
 checkDeploymentStations <- function(input, spatial) {
   appendTo("debug","Running checkDeploymentStations")
   aux <- spatial[spatial$Type == "Hydrophone", ]
-  link <- match(unique(input$Station.Name), aux$Station.Name)
+  link <- match(unique(input$Station.name), aux$Station.name)
   if (any(is.na(link))) {
-    appendTo(c("Screen", "Report", "Warning"), paste0("", ifelse(sum(is.na(link)) > 1, "Stations", "Station"), " '", paste(unique(input$Station.Name)[is.na(link)], collapse = "', '"), "' ", ifelse(sum(is.na(link)) > 1, "are", "is"), " listed in the deployments but ", ifelse(sum(is.na(link)) > 1, "are", "is"), " not part of the study's stations. Discarding deployments at unknown stations."))
-    to.remove <- match(input$Station.Name, unique(input$Station.Name)[is.na(link)])
+    appendTo(c("Screen", "Report", "Warning"), paste0("", ifelse(sum(is.na(link)) > 1, "Stations", "Station"), " '", paste(unique(input$Station.name)[is.na(link)], collapse = "', '"), "' ", ifelse(sum(is.na(link)) > 1, "are", "is"), " listed in the deployments but ", ifelse(sum(is.na(link)) > 1, "are", "is"), " not part of the study's stations. Discarding deployments at unknown stations."))
+    to.remove <- match(input$Station.name, unique(input$Station.name)[is.na(link)])
     input <- input[is.na(to.remove), ]
   }
-  link <- match(aux$Station.Name, unique(input$Station.Name))
+  link <- match(aux$Station.name, unique(input$Station.name))
   if (any(is.na(link))) {
-    appendTo(c("Screen", "Report"), paste0("Error: Stations '", paste(aux$Station.Name[is.na(link)], collapse = "', '"), "' are listed in the spatial file but no receivers were ever deployed there."))
+    appendTo(c("Screen", "Report"), paste0("Error: Stations '", paste(aux$Station.name[is.na(link)], collapse = "', '"), "' are listed in the spatial file but no receivers were ever deployed there."))
     emergencyBreak()
     stop("Fatal exception found. Read lines above for more details.\n", call. = FALSE)      
   }
@@ -633,7 +633,7 @@ checkDeploymentStations <- function(input, spatial) {
 #' 
 checkUnknownReceivers <- function(input) {
   appendTo("debug", "Running checkUnknownReceivers")
-  unknown <- is.na(input$Standard.Name)
+  unknown <- is.na(input$Standard.name)
   if (any(unknown)) {
     appendTo(c("Screen", "Report", "Warning"), paste0("Detections from receivers ", paste(unique(input$Receiver[unknown]), collapse = ", "), " are present in the data, but these receivers are not part of the study's stations. Double-check potential errors."))
   }
@@ -654,7 +654,7 @@ checkTagsInUnknownReceivers <- function(detections.list, deployments, spatial) {
 
   appendTo("debug", "Running tagsInUnknownReceivers")
   for (i in names(detections.list)) {
-    if (any(is.na(detections.list[[i]]$Standard.Name))) {
+    if (any(is.na(detections.list[[i]]$Standard.name))) {
       A <- detections.list[[i]]$Receiver
       B <- names(deployments)
       unknown.receivers <- unique(detections.list[[i]][is.na(match(A, B)), Receiver])
@@ -680,9 +680,9 @@ checkTagsInUnknownReceivers <- function(detections.list, deployments, spatial) {
           deployments <- recipient[[2]]
         }
       }
-      link <- is.na(detections.list[[i]]$Standard.Name)
-      levels(detections.list[[i]]$Standard.Name) <- c(levels(detections.list[[i]]$Standard.Name), "Ukn")
-      detections.list[[i]]$Standard.Name[link] <- "Ukn"
+      link <- is.na(detections.list[[i]]$Standard.name)
+      levels(detections.list[[i]]$Standard.name) <- c(levels(detections.list[[i]]$Standard.name), "Ukn")
+      detections.list[[i]]$Standard.name[link] <- "Ukn"
       levels(detections.list[[i]]$Array) <- c(levels(detections.list[[i]]$Array), "Unknown")
       detections.list[[i]]$Array[link] <- "Unknown"
     }
@@ -700,18 +700,18 @@ checkTagsInUnknownReceivers <- function(detections.list, deployments, spatial) {
 includeUnknownReceiver <- function(spatial, deployments, unknown.receivers){
   appendTo("debug", "Running includeUnknownReceiver.")
   appendTo(c("Screen", "Report"), "M: Including missing receiver(s) in the deployments and stations. Assigning to array 'Unknown' and standard name 'Ukn'.")
-  if (is.na(match("Unknown", levels(spatial$stations$Station.Name)))) {
-    levels(spatial$stations$Station.Name) <- c(levels(spatial$stations$Station.Name), "Unknown")
+  if (is.na(match("Unknown", levels(spatial$stations$Station.name)))) {
+    levels(spatial$stations$Station.name) <- c(levels(spatial$stations$Station.name), "Unknown")
     levels(spatial$stations$Array) <- c(levels(spatial$stations$Array), "Unknown")
-    spatial$stations[nrow(spatial$stations) + 1, "Station.Name"] <- "Unknown"
+    spatial$stations[nrow(spatial$stations) + 1, "Station.name"] <- "Unknown"
     spatial$stations[nrow(spatial$stations), "Array"] <- "Unknown"
-    spatial$stations[nrow(spatial$stations), "Standard.Name"] <- "Ukn"
+    spatial$stations[nrow(spatial$stations), "Standard.name"] <- "Ukn"
   }
   for (i in unknown.receivers) {
     if (is.na(match(i, names(deployments)))) {
       deployments[[length(deployments) + 1]] <- data.frame(
         Receiver = i,
-        Station.Name = "Unknown",
+        Station.name = "Unknown",
         Start = NA_character_,
         Stop = NA_character_)
       names(deployments)[length(deployments)] <- i

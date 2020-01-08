@@ -7,7 +7,7 @@
 \format{A data frame with 17 rows and 4 variables:
 \describe{
 \item{Receiver}{The receiver serial number}
-\item{Station.Name}{The name given to the receiver}
+\item{Station.name}{The name given to the receiver}
 \item{Start}{The date and time of the deployment}
 \item{Stop}{The date and time of the retrieval}
 }}
