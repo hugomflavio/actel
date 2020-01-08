@@ -413,6 +413,11 @@ detections.list <- study.data$detections.list
   # extra info for potential RSP analysis
   rsp.info <- list(analysis.type = "residency", analysis.time = the.time, bio = bio, tz = tz, actel.version = inst.ver.short)
 
+  if (!is.null(override))
+    override.fragment <- paste0('<span style="color:red">Manual mode has been triggered for **', length(override),'** fish.</span>\n')
+  else
+    override.fragment <- ""
+
   if (file.exists(resultsname <- paste0("actel_residency_results.RData"))) {
     continue <- TRUE
     index <- 1
@@ -476,7 +481,7 @@ detections.list <- study.data$detections.list
 # print html report
   if (report) {
     appendTo("debug", "debug: Printing report")
-    rmarkdown::render(reportname <- printResidencyRmd(biometric.fragment = biometric.fragment, efficiency.fragment = efficiency.fragment,
+    rmarkdown::render(reportname <- printResidencyRmd(override.fragment = override.fragment, biometric.fragment = biometric.fragment, efficiency.fragment = efficiency.fragment,
         array.circular.plots = array.circular.plots, section.arrival.circular.plots = section.arrival.circular.plots, 
         section.departure.circular.plots = section.departure.circular.plots, individual.detection.plots = individual.detection.plots, 
         individual.residency.plots = individual.residency.plots, spatial = spatial, detections = detections, valid.detections = valid.detections,
@@ -517,7 +522,7 @@ detections.list <- study.data$detections.list
 #' 
 #' @keywords internal
 #' 
-printResidencyRmd <- function(biometric.fragment, efficiency.fragment, individual.detection.plots, individual.residency.plots, array.circular.plots, 
+printResidencyRmd <- function(override.fragment, biometric.fragment, efficiency.fragment, individual.detection.plots, individual.residency.plots, array.circular.plots, 
   section.arrival.circular.plots, section.departure.circular.plots, spatial, deployments, detections, valid.detections, last.seen, last.seen.graph.size){
   inst.ver <- utils::packageVersion("actel")
   inst.ver.short <- substr(inst.ver, start = 1, stop = nchar(as.character(inst.ver)) - 5) 
@@ -560,6 +565,8 @@ Target folder: ', stringr::str_extract(pattern = '(?<=Target folder: )[^\r]*', s
 Timestamp: **', stringr::str_extract(pattern = '(?<=Timestamp: )[^\r|^\n]*', string = report), '** 
 
 Number of target tags: **`r I(nrow(status.df))`**
+
+', override.fragment,' 
 
 Number of listed receivers: **', stringr::str_extract(pattern = '(?<=Number of ALS: )[0-9]*', string = report), '** (of which **', stringr::str_extract(pattern = '(?<=of which )[0-9]*', string = report), '** had no detections)
 

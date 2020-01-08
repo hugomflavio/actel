@@ -463,11 +463,11 @@ migration <- function(path = NULL, tz, sections, success.arrays = NULL, max.inte
     header.fragment <- name.fragment <- ""
   }
 
-  if (file.exists(resultsname <- paste0("actel_migration_results", name.fragment, ".RData"))) {
+  if (file.exists(resultsname <- "actel_migration_results.RData")) {
     continue <- TRUE
     index <- 1
     while (continue) {
-      if (file.exists(resultsname <- paste0("actel_migration_results", name.fragment, ".", index, ".RData"))) {
+      if (file.exists(resultsname <- paste0("actel_migration_results.", index, ".RData"))) {
         index <- index + 1
       } else {
         continue <- FALSE
@@ -561,8 +561,7 @@ migration <- function(path = NULL, tz, sections, success.arrays = NULL, max.inte
 #'
 #' Creates a Rmd report and converts it to hmtl.
 #' 
-#' @param name.fragment Rmarkdown string specifying the type of report for the title.
-#' @param header.fragment Rmarkdown string specifying the type of report for the header.
+#' @param override.fragment Rmarkdown string specifying the type of report for the header.
 #' @param biometric.fragment Rmarkdown string specifying the biometric graphics drawn.
 #' @param efficiency.fragment Rmarkdown string specifying the efficiency results.
 #' @param display.progression Logical. If TRUE, the progression plot has been created and can be displayed.
@@ -574,24 +573,24 @@ migration <- function(path = NULL, tz, sections, success.arrays = NULL, max.inte
 #' 
 #' @keywords internal
 #' 
-printMigrationRmd <- function(name.fragment, header.fragment, biometric.fragment, efficiency.fragment, display.progression, array.overview.fragment,
+printMigrationRmd <- function(override.fragment, biometric.fragment, efficiency.fragment, display.progression, array.overview.fragment,
   survival.graph.size, individual.plots, circular.plots, spatial, deployments, valid.detections, detections){
   inst.ver <- utils::packageVersion("actel")
   inst.ver.short <- substr(inst.ver, start = 1, stop = nchar(as.character(inst.ver)) - 5) 
-  if (file.exists(reportname <- paste0("Report/actel_migration_report", name.fragment, ".Rmd"))) {
+  if (file.exists(reportname <- "Report/actel_migration_report.Rmd")) {
     continue <- TRUE
     index <- 1
     while (continue) {
-      if(file.exists(reportname <- paste0("Report/actel_migration_report", name.fragment, ".", index, ".Rmd"))) {
+      if(file.exists(reportname <- paste0("Report/actel_migration_report.", index, ".Rmd"))) {
         index <- index + 1
       } else {
         continue <- FALSE
       }
     }
-    appendTo("Screen", paste0("M: An actel report is already present in the current directory\n   Saving new report as 'actel_migration_report", name.fragment, ".", index, ".html'."))
+    appendTo("Screen", paste0("M: An actel report is already present in the current directory\n   Saving new report as 'actel_migration_report.", index, ".html'."))
     rm(continue,index)
   } else {
-    appendTo("Screen", paste0("M: Saving actel report as 'actel_migration_report", name.fragment, ".html'."))
+    appendTo("Screen", "M: Saving actel report as 'actel_migration_report.html'.")
   }
   if (any(grepl("Unknown", spatial$stations$Standard.Name))) {
     unknown.fragment <- paste0('<span style="color:red"> Number of relevant unknown receivers: **', sum(grepl("Unknown", spatial$stations$Standard.Name)), '**</span>\n')

@@ -336,6 +336,11 @@ detections.list <- study.data$detections.list
   # extra info for potential RSP analysis
   rsp.info <- list(analysis.type = "explore", analysis.time = the.time, bio = bio, tz = tz, actel.version = inst.ver.short)
 
+  if (!is.null(override))
+    override.fragment <- paste0('<span style="color:red">Manual mode has been triggered for **', length(override),'** fish.</span>\n')
+  else
+    override.fragment <- ""
+
   if (file.exists(resultsname <- "actel_explore_results.RData")) {
     continue <- TRUE
     index <- 1
@@ -382,7 +387,7 @@ detections.list <- study.data$detections.list
 # print html report
   if (report) {
     appendTo("debug", "debug: Printing report")
-    rmarkdown::render(reportname <- printExploreRmd(biometric.fragment = biometric.fragment, 
+    rmarkdown::render(reportname <- printExploreRmd(override.fragment = override.fragment, biometric.fragment = biometric.fragment, 
       circular.plots = circular.plots, individual.plots = individual.plots, spatial = spatial,
       detections = detections, valid.detections = valid.detections), quiet = TRUE)
     appendTo("debug", "debug: Moving report")
@@ -414,6 +419,7 @@ detections.list <- study.data$detections.list
 #'
 #' Creates a Rmd report and converts it to hmtl.
 #' 
+#' @param override.fragment Rmarkdown string specifying the type of report for the header.
 #' @param biometric.fragment Rmarkdown string specifying the biometric graphics drawn.
 #' @param individual.plots Rmarkdown string specifying the name of the individual plots.
 #' @param circular.plots Rmarkdown string specifying the name of the circular plots.
@@ -423,7 +429,7 @@ detections.list <- study.data$detections.list
 #' 
 #' @keywords internal
 #' 
-printExploreRmd <- function(biometric.fragment, individual.plots, circular.plots, spatial, detections, valid.detections){
+printExploreRmd <- function(override.fragment, biometric.fragment, individual.plots, circular.plots, spatial, detections, valid.detections){
   inst.ver <- utils::packageVersion("actel")
   inst.ver.short <- substr(inst.ver, start = 1, stop = nchar(as.character(inst.ver)) - 5) 
   if (file.exists(reportname <- "Report/actel_explore_report.Rmd")) {

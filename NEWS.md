@@ -21,6 +21,7 @@ Changes:
   * 'end.timestamp' has been renamed to 'stop.time'
   * After a transition period, `actel` function has been removed
   * 'cautious.assignment' has been removed from the migration analysis
+  * Analysis run with 'override' are no longer saved with a "\_corrected" appendix
 
 Enhancements:
   * 'tz' is now checked against the output of `OlsonNames` to ensure a valid time zone is entered.
