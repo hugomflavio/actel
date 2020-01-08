@@ -612,7 +612,6 @@ loadSpatial <- function(file = "spatial.csv", report = FALSE){
     }
   }
   input <- setSpatialStandards(input = input) # Create Standard.name for each station  
-  if (report)
   return(input)
 }
 
