@@ -502,7 +502,7 @@ cat("No intra-array replicates were indicated.")
 #' @keywords internal
 #' 
 printIndividuals <- function(redraw, detections.list, bio, status.df = NULL, tz, 
-  movements, valid.movements = NULL, extension = "png") {
+  movements, valid.movements = NULL, extension = "png", arrays, spatial) {
   # NOTE: The NULL variables below are actually column names used by ggplot.
   # This definition is just to prevent the package check from issuing a note due unknown variables.
   Timestamp <- NULL
@@ -518,6 +518,13 @@ printIndividuals <- function(redraw, detections.list, bio, status.df = NULL, tz,
     appendTo(c("Screen", "Report"), "M: 'redraw' is set to FALSE, only drawing new graphics.")
   }
 
+  # Y axis order
+  link <- match(spatial$stations$Array, names(arrays))
+  names(link) <- 1:length(link)
+  link <- sort(link)
+  link <- as.numeric(names(link))
+  y.order <- spatial$stations$Standard.name[link]
+
   pb <- txtProgressBar(min = 0, max = length(detections.list), style = 3, width = 60)
   counter <- 0
   individual.plots <- ""
@@ -525,6 +532,7 @@ printIndividuals <- function(redraw, detections.list, bio, status.df = NULL, tz,
   capture <- lapply(names(detections.list), function(fish) {
     counter <<- counter + 1
     PlotData <- detections.list[[fish]]
+    PlotData$Standard.name <- factor(PlotData$Standard.name, levels = y.order)
     if (!(exists("redraw") && redraw == FALSE && file.exists(paste0("Report/", fish, ".png")))) {
       all.moves.line <- data.frame(
         Station = as.vector(t(movements[[fish]][, c("First.station", "Last.station")])),

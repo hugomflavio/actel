@@ -505,7 +505,7 @@ migration <- function(path = NULL, tz, sections, success.arrays = NULL, max.inte
       array.overview.fragment <- ""
     }
     individual.plots <- printIndividuals(redraw = TRUE, detections.list = detections.list, bio = bio, 
-        status.df = status.df, tz = tz, movements = movements, valid.movements = valid.movements)
+        status.df = status.df, tz = tz, arrays = arrays, spatial = spatial, movements = movements, valid.movements = valid.movements)
     circular.plots <- printCircular(times = convertTimesToCircular(times), bio = bio)
     if (nrow(section.overview) > 3) 
       survival.graph.size <- "width=90%" else survival.graph.size <- "height=4in"
@@ -728,6 +728,7 @@ Note:
   : The movement event lines move straight between the first and last station of each event (i.e. in-between detections will not be individually linked by the line).
   : Manually **edited** fish are highlighted with **yellow** graphic borders.
   : Manually **overridden** fish are highlighted with **red** graphic borders.
+  : The stations have been grouped by array, following the array order provided either in the spatial.csv file or in the spatial.txt file.
 
 <center>
 ', individual.plots,'

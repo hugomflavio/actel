@@ -322,7 +322,7 @@ checkLinearity <- function(secmoves, fish, sections, arrays) {
           aux <- invalidateEvents(movements = vsm, fish = fish)
         } # end trigger error
         if (unknown.input) {
-          appendTo("Screen", "Option not recognized, please input either 'a', 'b', 'c' or 'comment'.")
+          appendTo("Screen", "Option not recognized, please input either 'a', 'b' or 'comment'.")
         }
       }
       # Transfer invalidated events to secmoves

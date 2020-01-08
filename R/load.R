@@ -23,7 +23,7 @@ loadStudyData <- function(tz, override = NULL, start.time, stop.time,
   deployments <- createUniqueSerials(input = deployments) # Prepare serial numbers to overwrite the serials in detections
 
   detections <- loadDetections(start.time = start.time, stop.time = stop.time, tz = tz)
-  detections <- createStandards(detections = detections, spatial = spatial, deployments = deployments) # get standardize station and receiver names, check for receivers with no detections
+  detections <- createStandards(detections = detections, spatial = spatial, deployments = deployments) # get standardized station and receiver names, check for receivers with no detections
   appendTo(c("Screen","Report"), paste0("M: Data time range: ", as.character(head(detections$Timestamp, 1)), " to ", as.character(tail(detections$Timestamp, 1)), " (", tz, ")."))
 
   checkUnknownReceivers(input = detections) # Check if there are detections from unknown detections
@@ -57,8 +57,7 @@ loadStudyData <- function(tz, override = NULL, start.time, stop.time,
     first.array <- names(arrays)[unlist(lapply(arrays, function(a) is.null(a$before)))]
   else
     first.array <- NULL
-  spatial <- transformSpatial(spatial = spatial, bio = bio, sections = sections, first.array = first.array) # Finish structuring the spatial file
-  arrays <- arrays[unlist(spatial$array.order)]
+  spatial <- transformSpatial(spatial = spatial, bio = bio, sections = sections, arrays = arrays, first.array = first.array) # Finish structuring the spatial file
 
   recipient <- loadDistances(spatial = spatial) # Load distances and check if they are valid
   dist.mat <- recipient$dist.mat
@@ -1206,7 +1205,7 @@ createStandards <- function(detections, spatial, deployments) {
 #' 
 #' @keywords internal
 #' 
-transformSpatial <- function(spatial, bio, sections = NULL, first.array = NULL) {
+transformSpatial <- function(spatial, bio, arrays, sections = NULL, first.array = NULL) {
   appendTo("debug", "Running transformSpatial.")
   # Break the stations away
   appendTo("debug", "Creating 'stations'.")
@@ -1269,7 +1268,7 @@ transformSpatial <- function(spatial, bio, sections = NULL, first.array = NULL) 
   if (!is.null(sections)) {
     array.order <- list()  # Used to determine if the fish's last detection was in the last array of a given section
     for (j in sections) {
-      array.order[[j]] <- levels(stations$Array)[grepl(j, levels(stations$Array))]
+      array.order[[j]] <- names(arrays)[grepl(j, names(arrays))]
     }
     if (any(trigger <- unlist(lapply(array.order,length)) == 0)) {
       appendTo(c("Screen", "Warning"), decision <- readline(paste0("No arrays were found that match section(s) ",paste(names(array.order)[trigger], collapse = ", "), ". There could be a typing mistake!\n   Continue the analysis?(y/N) ")))
@@ -1279,7 +1278,7 @@ transformSpatial <- function(spatial, bio, sections = NULL, first.array = NULL) 
       }
     }
   } else {
-    array.order <- list(all = levels(stations$Array))
+    array.order <- list(all = names(arrays))
   }
   # Order release sites by entry point.
   if (!is.ordered(match(release.sites$Array, unlist(array.order))))

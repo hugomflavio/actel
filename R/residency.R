@@ -452,7 +452,7 @@ detections.list <- study.data$detections.list
     printSectionTimes(section.times = section.times, bio = bio, detections = valid.detections)
     printGlobalRatios(ratios = global.ratios)
     individual.detection.plots <- printIndividuals(redraw = TRUE, detections.list = detections.list, bio = bio, 
-        tz = tz, movements = movements, valid.movements = valid.movements)
+        tz = tz, arrays = arrays, spatial = spatial, movements = movements, valid.movements = valid.movements)
     array.circular.plots <- printCircular(times = convertTimesToCircular(array.times), bio = bio, suffix = "_array")
     section.arrival.circular.plots <- printCircular(times = convertTimesToCircular(section.times$arrival), bio = bio, suffix = "_array")
     section.departure.circular.plots <- printCircular(times = convertTimesToCircular(section.times$departure), bio = bio, suffix = "_array")
@@ -713,6 +713,7 @@ Note:
   : The detections are coloured by array. The vertical black dashed line shows the time of release. The vertical grey dashed lines show the assigned moments of entry and exit for each study area section. The full dark-grey line shows the movement events considered valid, while the dashed dark-grey line shows the movement events considered invalid.
   : The movement event lines move straight between the first and last station of each event (i.e. in-between detections will not be individually linked by the line).
   : Manually **edited** fish are highlighted with **yellow** graphic borders.
+  : The stations have been grouped by array, following the array order provided either in the spatial.csv file or in the spatial.txt file.
 
 <center>
 ', individual.detection.plots,'

@@ -368,8 +368,8 @@ detections.list <- study.data$detections.list
     appendTo(c("Screen", "Report"), "M: Producing the report.")
     biometric.fragment <- printBiometrics(bio = bio)
     printDot(dot = dot, sections = NULL, spatial = spatial)
-    individual.plots <- printIndividuals(redraw = TRUE, detections.list = detections.list, 
-      tz = tz, movements = movements, valid.movements = valid.movements, bio = bio)
+    individual.plots <- printIndividuals(redraw = TRUE, detections.list = detections.list, spatial = spatial, 
+      tz = tz, movements = movements, valid.movements = valid.movements, arrays = arrays, bio = bio)
     circular.plots <- printCircular(times = convertTimesToCircular(times), bio = bio)
   }
   
@@ -537,7 +537,7 @@ Note:
   : The detections are coloured by array. The vertical black dashed line shows the time of release. The dashed dark-grey line shows the generated movement events.
   : The movement event lines move straight between the first and last station of each event (i.e. in-between detections will not be individually linked by the line).
   : Manually **edited** fish are highlighted with **yellow** graphic borders.
-
+  : The stations have been grouped by array, following the array order provided either in the spatial.csv file or in the spatial.txt file.
 
 <center>
 ', individual.plots,'

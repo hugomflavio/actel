@@ -13,7 +13,6 @@ Fixes:
   * Prevent crash during residency analysis if a fish had more than one detection but all at the exact same time
   * Prevent crash when loading empty detection files
 
-  
 Changes:
   * 'maximum.time' has been renamed to 'max.interval'
   * 'tz.study.area' has been renamed to 'tz'
@@ -34,6 +33,7 @@ Enhancements:
   * Package-level documentation has been implemented (can be found using ?actel).
   * `explore`, `migration` and `residency` documentation has been expanded.
   * Force all individual residency plots to include all used locations in the caption, to ensure locations always show up with the same colour.
+  * Stations are now grouped by array in the individual plots, following the array order provided either by the spatial.csv file or the spatial.txt file.
 
 ## actel 0.1.1
 
