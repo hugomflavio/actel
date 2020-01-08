@@ -303,7 +303,7 @@ checkLinearity <- function(secmoves, fish, sections, arrays) {
       appendTo("Screen", paste0("M: Opening section movements for fish ", fish," for inspection:"))
       print(vsm, topn = nrow(vsm))
       message("")
-      appendTo("Screen", paste0("M: migration() expects the movements to be linear, from release to success arrays.\n   To linearize the movements, actel suggests invalidating the following events: ",
+      appendTo("Screen", paste0("M: migration() expects the movements to be linear, from release to success arrays.\n   To linearise the movements, actel suggests invalidating the following events: ",
       paste(suggestion, collapse = ", "), "\n\nWould you like to:\na) Accept the suggestion\nb) Manually choose other events to be invalidated\n"))
 
       unknown.input = TRUE
