@@ -27,7 +27,7 @@ knitr::opts_chunk$set(
 1. [migration()](c-0_migration.html)
     1. [Processes behind migration()](c-1_migration_processes.html)
     1. [Inspecting the migration() results](c-2_migration_results.html)
-    1. [One-way efficiency estimations](c-4_migration_efficiency.html)
+    1. [One-way efficiency estimations](c-3_migration_efficiency.html)
 1. [residency()](d-0_residency.html)
     1. [Processes behind residency()](d-1_residency_processes.html)
     1. [Inspecting the residency() results](d-2_residency_results.html)

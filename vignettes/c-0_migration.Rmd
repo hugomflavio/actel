@@ -114,7 +114,7 @@ It is important that you list replicates using the `list(Array = "Replicate")` c
 
 ### disregard.parallels
 
-This argument controls wether or not the presence of parallel arrays (in multi-branch analyses) should potentially lead to the invalidation of efficiency peers. This argument is a bit tough to explain in few words, so I recommend that you [have a look at how efficiency is calculated in migration()](c-4_migration_efficiency.html#cjs-and-multiple-branches).
+This argument controls wether or not the presence of parallel arrays (in multi-branch analyses) should potentially lead to the invalidation of efficiency peers. This argument is a bit tough to explain in few words, so I recommend that you [have a look at how efficiency is calculated in migration()](c-3_migration_efficiency.html#cjs-and-multiple-branches).
 
 
 Now that you know how to run the migration analysis, you may want to:

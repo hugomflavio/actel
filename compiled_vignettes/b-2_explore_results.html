@@ -1,11 +1,10 @@
 <!DOCTYPE html>
 
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html>
 
 <head>
 
 <meta charset="utf-8" />
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <meta name="generator" content="pandoc" />
 <meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
 
@@ -13,7 +12,7 @@
 
 <meta name="author" content="Hugo Flávio" />
 
-<meta name="date" content="2019-11-21" />
+<meta name="date" content="2020-01-08" />
 
 <title>2.2) Inspecting the explore() results</title>
 
@@ -218,7 +217,7 @@ code > span.fu { color: #900; font-weight: bold; }  code > span.er { color: #a61
 
 <h1 class="title toc-ignore">2.2) Inspecting the explore() results</h1>
 <h4 class="author">Hugo Flávio</h4>
-<h4 class="date">2019-11-21</h4>
+<h4 class="date">2020-01-08</h4>
 
 
 
@@ -232,15 +231,14 @@ code > span.fu { color: #900; font-weight: bold; }  code > span.er { color: #a61
 </ol></li>
 <li><a href="b-0_explore.html">explore()</a>
 <ol style="list-style-type: decimal">
-<li><a href="b-1_explore_processes.html">From raw to movements</a></li>
+<li><a href="b-1_explore_processes.html">Processes behind explore()</a></li>
 <li><a href="b-2_explore_results.html"><strong>Inspecting the explore() results</strong></a></li>
 </ol></li>
 <li><a href="c-0_migration.html">migration()</a>
 <ol style="list-style-type: decimal">
 <li><a href="c-1_migration_processes.html">Processes behind migration()</a></li>
 <li><a href="c-2_migration_results.html">Inspecting the migration() results</a></li>
-<li><a href="c-3_migration_manual_mode.html">Manual mode in migration()</a></li>
-<li><a href="c-4_migration_efficiency.html">One-way efficiency estimations</a></li>
+<li><a href="c-3_migration_efficiency.html">One-way efficiency estimations</a></li>
 </ol></li>
 <li><a href="d-0_residency.html">residency()</a>
 <ol style="list-style-type: decimal">
@@ -248,7 +246,8 @@ code > span.fu { color: #900; font-weight: bold; }  code > span.er { color: #a61
 <li><a href="d-2_residency_results.html">Inspecting the residency() results</a></li>
 <li><a href="d-3_residency_efficiency.html">Multi-way efficiency estimations</a></li>
 </ol></li>
-<li><a href="e-0_messages.html">Errors and messages</a></li>
+<li><a href="e-0_manual_mode.html">Manual mode</a></li>
+<li><a href="f-0_messages.html">Errors and messages</a></li>
 </ol>
 </div>
 <div id="results-within-r" class="section level2">
@@ -495,6 +494,7 @@ code > span.fu { color: #900; font-weight: bold; }  code > span.er { color: #a61
 </ol>
 <p>This section contains a plot for each of your target tags, showing all the detections found in the data for the respective fish. The detections are coloured by array. The vertical black dashed line shows the time of release.</p>
 <p>The full dark-grey line moving between detections shows the movement events considered valid, while the dashed dark-grey line shows the movement events considered invalid. The movement event lines move straight between the first and last station of each event (i.e. in-between detections will not be individually linked by the line).</p>
+<p>Note that fish where you had to manually intervene during the analysis will be highlighted with a yellow border, and fish that were manually overridden through the <a href="b-0_explore.html#override"><code>override</code> argument</a> will be highlighted with a red border.</p>
 <p>Lastly, the total number of detections for the fish is displayed in the header, between brackets.</p>
 <ol start="8" style="list-style-type: decimal">
 <li><strong>Actel log</strong></li>
@@ -504,9 +504,16 @@ code > span.fu { color: #900; font-weight: bold; }  code > span.er { color: #a61
 <div id="report-folder-if-report-true" class="section level3">
 <h3>‘Report’ folder (if report = TRUE)</h3>
 <p>Activating the <code>report</code> option will trigger the creation of this folder. This folder contains all the pieces used to build the actel report described above. This allows you to have a look at the raw graphics used in the report.</p>
+</div>
+</div>
+<div id="what-if-actel-has-miss-assigned-something" class="section level2">
+<h2>What if actel has miss-assigned something?</h2>
+<p>Fish with strange behaviour can be complicated to analyse. While actel’s functions have been designed to deal with this as best as possible, you can always <a href="e-0_manual_mode.html">enter manual mode</a> if you find out that actel has miss-assigned something. I.e. has a movement event been invalidated that seems valid, or vice-versa? Are part of the movements detected characteristic of predator behaviour?</p>
+</div>
+<div id="more-detailed-analyses" class="section level2">
+<h2>More detailed analyses</h2>
 <p>To advance into more detailed analyses, you can proceed either to the <strong><a href="c-0_migration.html">migration()</a></strong> analysis or to the <strong><a href="d-0_residency.html">residency()</a></strong> analysis. These will use the movement events created here to extract more complex metrics!</p>
 <p><a href="#">Back to top.</a></p>
-</div>
 </div>
 
 

@@ -86,7 +86,7 @@ In this object you will find the matrix/matrices that were used for efficiency e
 
 ### overall.CJS
 
-This object contains the results of the efficiency estimations performed by actel. During the migration analysis, actel calculates forward efficiency only to improve the accuracy of the efficiency measurement. You can learn more about how these one-way efficiency estimations are made in [this manual page.](c-4_migration_efficiency.html)
+This object contains the results of the efficiency estimations performed by actel. During the migration analysis, actel calculates forward efficiency only to improve the accuracy of the efficiency measurement. You can learn more about how these one-way efficiency estimations are made in [this manual page.](c-3_migration_efficiency.html)
 
 
 ### intra.array.CJS

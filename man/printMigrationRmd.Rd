@@ -7,6 +7,7 @@
 printMigrationRmd(
   override.fragment,
   biometric.fragment,
+  section.overview,
   efficiency.fragment,
   display.progression,
   array.overview.fragment,
@@ -23,6 +24,8 @@ printMigrationRmd(
 \item{override.fragment}{Rmarkdown string specifying the type of report for the header.}
 
 \item{biometric.fragment}{Rmarkdown string specifying the biometric graphics drawn.}
+
+\item{section.overview}{A summary table with the number of fish that disappeared/moved onwards at each section.}
 
 \item{efficiency.fragment}{Rmarkdown string specifying the efficiency results.}
 

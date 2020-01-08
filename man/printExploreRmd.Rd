@@ -10,6 +10,7 @@ printExploreRmd(
   individual.plots,
   circular.plots,
   spatial,
+  deployments,
   detections,
   valid.detections
 )

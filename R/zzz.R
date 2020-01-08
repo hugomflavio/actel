@@ -1,7 +1,7 @@
 .onAttach <- function(libname, pkgname){
   inst.ver <- utils::packageVersion("actel")
   inst.ver.short <- substr(inst.ver, start = 1, stop = nchar(as.character(inst.ver)) - 5) 
-  packageStartupMessage("Welcome to actel (", inst.ver.short, ")! Run ?actel for starting tips.")
+  packageStartupMessage("Welcome to actel (", inst.ver.short, ")!\nRun ?actel for starting tips.")
   rep.ver <- tryCatch(unlist(strsplit(readLines('https://raw.githubusercontent.com/hugomflavio/actel/master/DESCRIPTION')[3], " "))[2], error = function(e) NULL, warning = function(w) NULL)
   if (!is.null(rep.ver)) {
   	rep.ver.short <- substr(rep.ver, start = 1, stop = nchar(rep.ver) - 5)

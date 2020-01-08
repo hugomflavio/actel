@@ -1,11 +1,10 @@
 <!DOCTYPE html>
 
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html>
 
 <head>
 
 <meta charset="utf-8" />
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <meta name="generator" content="pandoc" />
 <meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
 
@@ -13,7 +12,7 @@
 
 <meta name="author" content="Hugo Flávio" />
 
-<meta name="date" content="2019-11-21" />
+<meta name="date" content="2020-01-08" />
 
 <title>4) residency()</title>
 
@@ -304,7 +303,7 @@ code > span.fu { color: #900; font-weight: bold; }  code > span.er { color: #a61
 
 <h1 class="title toc-ignore">4) residency()</h1>
 <h4 class="author">Hugo Flávio</h4>
-<h4 class="date">2019-11-21</h4>
+<h4 class="date">2020-01-08</h4>
 
 
 
@@ -318,15 +317,14 @@ code > span.fu { color: #900; font-weight: bold; }  code > span.er { color: #a61
 </ol></li>
 <li><a href="b-0_explore.html">explore()</a>
 <ol style="list-style-type: decimal">
-<li><a href="b-1_explore_processes.html">From raw to movements</a></li>
+<li><a href="b-1_explore_processes.html">Processes behind explore()</a></li>
 <li><a href="b-2_explore_results.html">Inspecting the explore() results</a></li>
 </ol></li>
 <li><a href="c-0_migration.html">migration()</a>
 <ol style="list-style-type: decimal">
 <li><a href="c-1_migration_processes.html">Processes behind migration()</a></li>
 <li><a href="c-2_migration_results.html">Inspecting the migration() results</a></li>
-<li><a href="c-3_migration_manual_mode.html">Manual mode in migration()</a></li>
-<li><a href="c-4_migration_efficiency.html">One-way efficiency estimations</a></li>
+<li><a href="c-3_migration_efficiency.html">One-way efficiency estimations</a></li>
 </ol></li>
 <li><a href="d-0_residency.html"><strong>residency()</strong></a>
 <ol style="list-style-type: decimal">
@@ -334,7 +332,8 @@ code > span.fu { color: #900; font-weight: bold; }  code > span.er { color: #a61
 <li><a href="d-2_residency_results.html">Inspecting the residency() results</a></li>
 <li><a href="d-3_residency_efficiency.html">Multi-way efficiency estimations</a></li>
 </ol></li>
-<li><a href="e-0_messages.html">Errors and messages</a></li>
+<li><a href="e-0_manual_mode.html">Manual mode</a></li>
+<li><a href="f-0_messages.html">Errors and messages</a></li>
 </ol>
 </div>
 <div id="the-residency-function" class="section level2">
@@ -346,11 +345,11 @@ code > span.fu { color: #900; font-weight: bold; }  code > span.er { color: #a61
 <div id="residency-arguments" class="section level2">
 <h2>Residency arguments</h2>
 <p>The arguments within residency() allow you thoroughly analyse the fish behaviour.</p>
-<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb2-1" title="1"><span class="kw">residency</span>(<span class="dt">path =</span> <span class="ot">NULL</span>, sections, <span class="dt">section.minimum =</span> <span class="dv">2</span>, </a>
-<a class="sourceLine" id="cb2-2" title="2">  <span class="dt">maximum.time =</span> <span class="dv">60</span>, <span class="dt">speed.method =</span> <span class="kw">c</span>(<span class="st">&quot;last to first&quot;</span>, <span class="st">&quot;first to first&quot;</span>), <span class="dt">speed.warning =</span> <span class="ot">NULL</span>,</a>
-<a class="sourceLine" id="cb2-3" title="3">  <span class="dt">speed.error =</span> <span class="ot">NULL</span>, <span class="dt">if.last.skip.section =</span> <span class="ot">TRUE</span>, tz.study.area, <span class="dt">start.timestamp =</span> <span class="ot">NULL</span>, </a>
-<a class="sourceLine" id="cb2-4" title="4">  <span class="dt">end.timestamp =</span> <span class="ot">NULL</span>, <span class="dt">report =</span> <span class="ot">TRUE</span>, <span class="dt">exclude.tags =</span> <span class="ot">NULL</span>, <span class="dt">replicates =</span> <span class="ot">NULL</span>,</a>
-<a class="sourceLine" id="cb2-5" title="5">  <span class="dt">jump.warning =</span> <span class="dv">2</span>, <span class="dt">jump.error =</span> <span class="dv">3</span>, <span class="dt">inactive.warning =</span> <span class="ot">NULL</span>, <span class="dt">inactive.error =</span> <span class="ot">NULL</span>)</a></code></pre></div>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb2-1" title="1"><span class="kw">residency</span>(<span class="dt">path =</span> <span class="ot">NULL</span>, tz, sections, <span class="dt">success.arrays =</span> <span class="ot">NULL</span>, <span class="dt">max.interval =</span> <span class="dv">60</span>, <span class="dt">minimum.detections =</span> <span class="dv">2</span>, </a>
+<a class="sourceLine" id="cb2-2" title="2">  <span class="dt">start.time =</span> <span class="ot">NULL</span>, <span class="dt">stop.time =</span> <span class="ot">NULL</span>, <span class="dt">speed.method =</span> <span class="kw">c</span>(<span class="st">&quot;last to first&quot;</span>, <span class="st">&quot;first to first&quot;</span>), </a>
+<a class="sourceLine" id="cb2-3" title="3">  <span class="dt">speed.warning =</span> <span class="ot">NULL</span>, <span class="dt">speed.error =</span> <span class="ot">NULL</span>, <span class="dt">jump.warning =</span> <span class="dv">2</span>, <span class="dt">jump.error =</span> <span class="dv">3</span>, </a>
+<a class="sourceLine" id="cb2-4" title="4">  <span class="dt">inactive.warning =</span> <span class="ot">NULL</span>, <span class="dt">inactive.error =</span> <span class="ot">NULL</span>, <span class="dt">exclude.tags =</span> <span class="ot">NULL</span>, <span class="dt">override =</span> <span class="ot">NULL</span>, <span class="dt">report =</span> <span class="ot">TRUE</span>,</a>
+<a class="sourceLine" id="cb2-5" title="5">  <span class="dt">section.minimum =</span> <span class="dv">2</span>, <span class="dt">replicates =</span> <span class="ot">NULL</span>)</a></code></pre></div>
 <p>Below are listed the new arguments, which do not exist in explore. If you cannot find a description of an argument here, <a href="b-0_explore.html#general-arguments">have a look at the explore() page</a>.</p>
 <div id="sections" class="section level3">
 <h3>sections</h3>

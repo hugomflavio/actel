@@ -42,7 +42,7 @@ The results compiled by the residency() function include [those of the explore()
 
 ### status.df
 
-The `status.df` is a data frame that combines [both the timetable data and your biometrics](d-1_residency_processes.html#compiling-a-timetable) into a single, organised table. If you have stored any comments during the analysis process, they will show up in a reserved column in this table. The `status.df` also contains some more summary information for each fish. This table can be quite big, so it may be a good idea to use `head(status.df)`  the first time you look at it.
+The `status.df` is a data frame that combines both the timetable data and your biometrics into a single, organised table (see ["Compiling a timetable"](d-1_residency_processes.html#compiling-a-timetable)). If you have stored any comments during the analysis process, they will show up in a reserved column in this table. The `status.df` also contains some more summary information for each fish. This table can be quite big, so it may be a good idea to use `head(status.df)`  the first time you look at it.
 
 ### section.movements
 

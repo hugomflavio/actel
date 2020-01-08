@@ -43,7 +43,7 @@ Note :
   : Errors related to function arguments (i.e. `'maximum.time' must be numerical.`) are not displayed here.
   : Less relevant messages may have been left out to keep the page shorter.
   : Similar errors were grouped in the same code box.
-  : As actel evolves, some new errors and messages may accidentally be left out of this page. If you need help with a message, warning or error that is not reported here, please open an issue at [actel's GitHub repository.](https://github.com/hugomflavio/actel/issues/new/new)
+  : As actel evolves, some new errors and messages may accidentally be left out of this page. If you need help with a message, warning or error that is not reported here, please open an issue at [actel's GitHub repository.](https://github.com/hugomflavio/actel/issues/new)
 
 ### Exceptions while importing the data:
 
@@ -440,7 +440,7 @@ It would seem that a fish has moved through an impassable obstacle. You can [fin
 <!-- 1. **Jump distance**
 -->
 ````
-Warning: Fish [...] had an average speed of [#] m/s from valid event [#] to [#] ([Array] -> [Array])
+Warning: Fish [...] jumped through [#] arrays in events [#] -> [#] ([Array] -> [Array])
 M: Opening valid movements table of fish [...] for inspection:
 [...]
 Would you like to render any movement event invalid?(y/N/comment)

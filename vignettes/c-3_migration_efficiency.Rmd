@@ -124,7 +124,7 @@ Keep in mind that you can always run the analysis twice, and find out which case
 
 ## Arrays with no efficiency peers
 
-Regardless of the mechanics explained above, arrays __C__, __E__, __F__ and __G__ would never have any valid efficiency peers. As such, inter-array efficiency cannot be calculated for them using a CJS model. However, you have the chance to calculate intra-array efficiency, if an array is [composed by two lines of receivers](c-0_migration.html#replicates). You can find the efficiency peers of each array in the [`arrays` object](c-2_migration_results.html#arrays).
+Regardless of the mechanics explained above, arrays __C__, __E__, __F__ and __G__ would never have any valid efficiency peers. As such, inter-array efficiency cannot be calculated for them using a CJS model. However, you have the chance to calculate intra-array efficiency, if an array is [composed by two lines of receivers](c-0_migration.html#replicates). You can find the efficiency peers of each array in the [`arrays` object](b-2_explore_results.html#arrays).
 
 
 #### Intra-array efficiency

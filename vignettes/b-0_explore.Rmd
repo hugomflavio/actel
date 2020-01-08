@@ -27,7 +27,7 @@ knitr::opts_chunk$set(
 1. [migration()](c-0_migration.html)
     1. [Processes behind migration()](c-1_migration_processes.html)
     1. [Inspecting the migration() results](c-2_migration_results.html)
-    1. [One-way efficiency estimations](c-4_migration_efficiency.html)
+    1. [One-way efficiency estimations](c-3_migration_efficiency.html)
 1. [residency()](d-0_residency.html)
     1. [Processes behind residency()](d-1_residency_processes.html)
     1. [Inspecting the residency() results](d-2_residency_results.html)
@@ -232,7 +232,7 @@ You can find more information on [how to operate full manual mode here](e-0_manu
 
 ### report
 
-The `report` option activates a series of print functions that draw tables and figures for later integration in an html report. When you activate this option, a new *Report* subdirectory is created, where all the relevant files are stored. Before finishing, actel assembles the [html report](c-2_explore_processes.html#actel_explore_report.html-if-report-true) and stores it in your working directory. If you already have a report in your working directory, actel will create a new file with a different name.
+The `report` option activates a series of print functions that draw tables and figures for later integration in an html report. When you activate this option, a new *Report* subdirectory is created, where all the relevant files are stored. Before finishing, actel assembles the [html report](b-2_explore_results.html#actel_explore_report.html-if-report-true) and stores it in your working directory. If you already have a report in your working directory, actel will create a new file with a different name.
 
 You can also inspect each graphic individually in the *Report* subdirectory.
 
