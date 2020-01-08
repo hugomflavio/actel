@@ -451,7 +451,7 @@ detections.list <- study.data$detections.list
     printDot(dot = dot, sections = sections, spatial = spatial)
     printSectionTimes(section.times = section.times, bio = bio, detections = valid.detections)
     printGlobalRatios(ratios = global.ratios)
-    individual.detection.plots <- printIndividuals(redraw = TRUE, detections.list = detections.list, bio = bio, 
+    individual.detection.plots <- printIndividuals(redraw = TRUE, detections.list = detections, bio = bio, 
         tz = tz, arrays = arrays, spatial = spatial, movements = movements, valid.movements = valid.movements)
     array.circular.plots <- printCircular(times = convertTimesToCircular(array.times), bio = bio, suffix = "_array")
     section.arrival.circular.plots <- printCircular(times = convertTimesToCircular(section.times$arrival), bio = bio, suffix = "_array")
@@ -604,8 +604,6 @@ knitr::kable(spatial$release.sites, row.names = FALSE)
 
 ### Array efficiency
 
-More information on the differences between "Known missed events" and "Potentially missed events" can be found in the package vignettes.
-
 ', efficiency.fragment,'
 
 ### Warning messages
@@ -616,11 +614,17 @@ if(file.exists("../temp_warnings.txt")) cat(gsub("\\r", "", readr::read_file("..
 
 ### User comments
 
+Note:
+  : Comments are also stored in the `status.df` object.
+
 ```{r comments, echo = FALSE, comment = NA}
  if(file.exists("../temp_comments.txt")) cat(gsub("\\r", "", readr::read_file("../temp_comments.txt"))) else cat("No comments were included during the analysis.")
 ```
 
 ### Biometric graphics
+
+Note:
+  : The data used in this graphic is the data present in the biometrics.csv file.
 
 <center>
 ', biometric.fragment,'
@@ -628,6 +632,9 @@ if(file.exists("../temp_warnings.txt")) cat(gsub("\\r", "", readr::read_file("..
 
 
 ### Last seen
+
+Note:
+  : The data used in this table and graphic is stored in the `last.seen` object.
 
 ```{r survival, echo = FALSE}
 knitr::kable(last.seen)
@@ -643,6 +650,7 @@ knitr::kable(last.seen)
 Note:
   : Coloured lines on the outer circle indicate the mean value for each group and the respective ranges show the standard error of the mean. Each group\'s bars sum to 100%. The number of data points in each group is presented between brackets in the legend of each pannel. 
   : These graphics have been saved in vectorial format (svg) in the "Results" folder, so you may edit them as needed.
+  : The data used in these graphics is stored in the `array.times` object.
 
 <center>
 ', array.circular.plots,'
@@ -651,6 +659,9 @@ Note:
 ### Time details for each section
 
 #### Arrival days at each section
+
+Note:
+  : The data used in these graphics is stored in the `section.times$arrival` object.
 
 <center>
 ![](arrival_days.png){ width=95% }
@@ -661,12 +672,16 @@ Note:
 Note:
   : Coloured lines on the outer circle indicate the mean value for each group and the respective ranges show the standard error of the mean. Each group\'s bars sum to 100%. The number of data points in each group is presented between brackets in the legend of each pannel. 
   : These graphics have been saved in vectorial format (svg) in the "Results" folder, so you may edit them as needed.
+  : The data used in these graphics is stored in the `section.times$arrival` object.
 
 <center>
 ', section.arrival.circular.plots,'
 </center>
 
 #### Departure days at each section
+
+Note:
+  : The data used in these graphics is stored in the `section.times$departure` object.
 
 <center>
 ![](departure_days.png){ width=95% }
@@ -677,6 +692,7 @@ Note:
 Note:
   : Coloured lines on the outer circle indicate the mean value for each group and the respective ranges show the standard error of the mean. Each group\'s bars sum to 100%. The number of data points in each group is presented between brackets in the legend of each pannel. 
   : These graphics have been saved in vectorial format (svg) in the "Results" folder, so you may edit them as needed.
+  : The data used in these graphics is stored in the `section.times$departure` object.
 
 <center>
 ', section.departure.circular.plots,'
@@ -686,6 +702,7 @@ Note:
 
 Note:
   : These graphics have been saved in vectorial format (svg) in the "Results" folder, so you may edit them as needed.
+  : The data used in these graphics is stored in the `global.ratios` and `daily.positions` objects.
 
 #### Absolutes
 
@@ -703,6 +720,9 @@ Note:
 
 ### Individual residency plots
 
+Note:
+  : The data used in these graphics is stored in the `daily.ratios` object (one table per fish). More condensed information can be found in the `section.movements` object.
+
 <center>
 ', individual.residency.plots,'
 </center>
@@ -714,6 +734,7 @@ Note:
   : The movement event lines move straight between the first and last station of each event (i.e. in-between detections will not be individually linked by the line).
   : Manually **edited** fish are highlighted with **yellow** graphic borders.
   : The stations have been grouped by array, following the array order provided either in the spatial.csv file or in the spatial.txt file.
+  : The data used in these graphics is stored in the `detections`, `movements` and `valid.movements` objects.
 
 <center>
 ', individual.detection.plots,'

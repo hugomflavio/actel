@@ -504,7 +504,7 @@ migration <- function(path = NULL, tz, sections, success.arrays = NULL, max.inte
       display.progression <- FALSE
       array.overview.fragment <- ""
     }
-    individual.plots <- printIndividuals(redraw = TRUE, detections.list = detections.list, bio = bio, 
+    individual.plots <- printIndividuals(redraw = TRUE, detections.list = detections, bio = bio, 
         status.df = status.df, tz = tz, arrays = arrays, spatial = spatial, movements = movements, valid.movements = valid.movements)
     circular.plots <- printCircular(times = convertTimesToCircular(times), bio = bio)
     if (nrow(section.overview) > 3) 
@@ -664,6 +664,9 @@ if(file.exists("../temp_warnings.txt")) cat(gsub("\\r", "", readr::read_file("..
 
 ### User comments
 
+Note:
+  : Comments are also stored in the `status.df` object.
+  
 ```{r comments, echo = FALSE, comment = NA}
  if(file.exists("../temp_comments.txt")) cat(gsub("\\r", "", readr::read_file("../temp_comments.txt"))) else cat("No comments were included during the analysis.")
 ```
@@ -671,12 +674,18 @@ if(file.exists("../temp_warnings.txt")) cat(gsub("\\r", "", readr::read_file("..
 
 ### Biometric graphics
 
+Note:
+  : The data used in this graphic is the data present in the biometrics.csv file.
+
 <center>
 ', biometric.fragment,'
 </center>
 
 
 ### Survival
+
+Note:
+  : The data used in this table and graphic is stored in the `section.overview` object.
 
 ```{r survival, echo = FALSE}
 knitr::kable(section.overview)
@@ -693,6 +702,7 @@ knitr::kable(section.overview)
 
 Note:
   : The progression calculations **do not account for** intra-section backwards movements. This implies that the total number of fish to have been **last seen** at a given array **may be lower** than the displayed below. Please refer to the [section survival overview](#survival) to find out how many fish were considered to have disappeared per section.
+  : The data used in this graphic is stored in the `overall.CJS` object, and the data used in the tables is stored in the `array.overview` object.
 
 <img src="mb_efficiency.svg" alt="Missing file" style="padding-top: 15px; padding-bottom: 15px;"/>
 
@@ -703,6 +713,7 @@ Note:
 
 Note:
   : Coloured lines on the outer circle indicate the mean value for each group and the respective ranges show the standard error of the mean. Each group\'s bars sum to 100%. The number of data points in each group is presented between brackets in the legend of each pannel. 
+  : The data used in these graphics is stored in the `times` object.
 
 <center>
 ', circular.plots,'
@@ -715,6 +726,7 @@ Note:
   : The **top** 10% of the values for each panel are marked in **red**.
   : The **bottom** 10% of the values for each panel are marked in **blue**.
   : The columns starting with "To" should be read as either "Time to ..." or "Speed to ...", depending on the unit used. The columns starting with "In" should be read as "Time in ...". These reductions were made to keep the column headers as short as possible.
+  : The data used in these graphics is stored in the `status.df` object.
 
 <center>
 ![](dotplots.png){ width=95% }
@@ -729,6 +741,7 @@ Note:
   : Manually **edited** fish are highlighted with **yellow** graphic borders.
   : Manually **overridden** fish are highlighted with **red** graphic borders.
   : The stations have been grouped by array, following the array order provided either in the spatial.csv file or in the spatial.txt file.
+  : The data used in these graphics is stored in the `detections`, `movements` and `valid.movements` objects.
 
 <center>
 ', individual.plots,'

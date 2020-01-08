@@ -420,6 +420,9 @@ printEfficiency <- function(intra.CJS, type = c("migration", "residency")){
   type <- match.arg(type)
   if (type == "migration") {
     efficiency.fragment <- paste('
+Note:
+  : The data used in the tables below is stored in the `overall.CJS` object. Auxiliary information can also be found in the `matrixes` and `arrays` objects.
+
 **Individuals detected and estimated**
 
 ```{r efficiency1, echo = FALSE}
@@ -440,6 +443,10 @@ knitr::kable(to.print)
 ')
   } else {
     efficiency.fragment <- paste('
+Note:
+  : More information on the differences between "Known missed events" and "Potentially missed events" can be found in the package vignettes.
+  : The data used in this table is stored in the `efficiency` object.
+
 **Events recorded and missed**
 
 ```{r efficiency1, echo = FALSE}
@@ -468,6 +475,10 @@ knitr::kable(to.print)
 ')    
   }
   if (!is.null(intra.CJS)){
+    efficiency.fragment <- paste0(efficiency.fragment, '
+Note:
+  : The data used in the table(s) below is stored in the `intra.array.CJS` object.
+')
     for (i in 1:length(intra.CJS)) {
     efficiency.fragment <- paste0(efficiency.fragment, '
 **Array: ', names(intra.CJS)[i], '**

@@ -368,7 +368,7 @@ detections.list <- study.data$detections.list
     appendTo(c("Screen", "Report"), "M: Producing the report.")
     biometric.fragment <- printBiometrics(bio = bio)
     printDot(dot = dot, sections = NULL, spatial = spatial)
-    individual.plots <- printIndividuals(redraw = TRUE, detections.list = detections.list, spatial = spatial, 
+    individual.plots <- printIndividuals(redraw = TRUE, detections.list = detections, spatial = spatial, 
       tz = tz, movements = movements, valid.movements = valid.movements, arrays = arrays, bio = bio)
     circular.plots <- printCircular(times = convertTimesToCircular(times), bio = bio)
   }
@@ -514,7 +514,16 @@ knitr::kable(spatial$release.sites, row.names = FALSE)
 if(file.exists("../temp_warnings.txt")) cat(gsub("\\r", "", readr::read_file("../temp_warnings.txt"))) else cat("No warnings were raised during the analysis.")
 ```
 
+### User comments
+
+```{r comments, echo = FALSE, comment = NA}
+ if(file.exists("../temp_comments.txt")) cat(gsub("\\r", "", readr::read_file("../temp_comments.txt"))) else cat("No comments were included during the analysis.")
+```
+
 ### Biometric graphics
+
+Note:
+  : The data used in this graphic is the data present in the biometrics.csv file.
 
 <center>
 ', biometric.fragment,'
@@ -525,6 +534,7 @@ if(file.exists("../temp_warnings.txt")) cat(gsub("\\r", "", readr::read_file("..
 
 Note:
   : Coloured lines on the outer circle indicate the mean value for each group and the respective ranges show the standard error of the mean. Each group\'s bars sum to 100%. The number of data points in each group is presented between brackets in the legend of each pannel. 
+  : The data used in these graphics is stored in the `times` object.
 
 <center>
 ', circular.plots,'
@@ -538,6 +548,7 @@ Note:
   : The movement event lines move straight between the first and last station of each event (i.e. in-between detections will not be individually linked by the line).
   : Manually **edited** fish are highlighted with **yellow** graphic borders.
   : The stations have been grouped by array, following the array order provided either in the spatial.csv file or in the spatial.txt file.
+  : The data used in these graphics is stored in the `detections` and `valid.movements` objects.
 
 <center>
 ', individual.plots,'
@@ -632,6 +643,7 @@ h4 {
   <a href="#deployments">Deployments</a>
   <a href="#release-sites">Release sites</a>
   <a href="#warning-messages">Warnings</a>
+  <a href="#user-comments">Comments</a>
   <a href="#biometric-graphics">Biometrics</a>
   <a href="#average-time-of-arrival-at-each-array">Arrival times</a>
   <a href="#individual-plots">Individuals</a>

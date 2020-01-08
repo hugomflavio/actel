@@ -34,6 +34,7 @@ Enhancements:
   * `explore`, `migration` and `residency` documentation has been expanded.
   * Force all individual residency plots to include all used locations in the caption, to ensure locations always show up with the same colour.
   * Stations are now grouped by array in the individual plots, following the array order provided either by the spatial.csv file or the spatial.txt file.
+  * Improved links between the report plots and the R objects by naming the objects containing the data used in the plots.
 
 ## actel 0.1.1
 
