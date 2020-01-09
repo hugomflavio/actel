@@ -1123,32 +1123,45 @@ printSectionTimes <- function(section.times, bio, detections) {
 
 #' print the distribution of fish per location
 #' 
-#' @param ratios the global ratios
+#' @param global.ratios the global ratios
+#' @param daily.ratios the daily ratios
 #' 
 #' @keywords internal
 #' 
-printGlobalRatios <- function(ratios) {
+printGlobalRatios <- function(global.ratios, daily.ratios) {
   Date <- NULL
   Location <- NULL
   n <- NULL
   cbPalette <- c("#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7", "#999999")
   names(cbPalette) <- c("Orange", "Blue", "Green", "Yellow", "Darkblue", "Darkorange", "Pink", "Grey")
-  capture <- lapply(names(ratios), function(i) {
-    plotdata <- suppressMessages(reshape2::melt(ratios[[i]][, -ncol(ratios[[i]])]))
+
+  unique.values <- sort(unique(unlist(lapply(daily.ratios, function(x) {
+    aux <- which(grepl("^p", colnames(x)))
+    aux <- aux[!is.na(match(colnames(x)[aux - 1], sub("p", "", colnames(x)[aux])))]
+    return(colnames(x)[aux - 1])    
+  }))))
+
+  capture <- lapply(names(global.ratios), function(i) {
+    plotdata <- suppressMessages(reshape2::melt(global.ratios[[i]][, -ncol(global.ratios[[i]])]))
     colnames(plotdata) <- c("Date", "Location", "n")
+    plotdata$Location <- factor(plotdata$Location, levels = unique.values)
     plotdata$Date <- as.Date(plotdata$Date)
     p <- ggplot2::ggplot(data = plotdata, ggplot2::aes(x = Date, y = n, fill = Location))
     p <- p + ggplot2::geom_bar(width = 1, stat = "identity")
     p <- p + ggplot2::theme_bw()
+    if (ncol(global.ratios[[i]]) > 3)
+      max.y <- max(apply(global.ratios[[i]][, c(-1, -ncol(global.ratios[[i]]))], 1, sum))
+    else
+      max.y <- max(global.ratios[[i]][, 2])
     if (i == "absolutes") {
-      p <- p + ggplot2::scale_y_continuous(limits = c(0,  max(apply(ratios[[i]][, c(-1, -ncol(ratios[[i]]))], 1, sum)) * 1.05), expand = c(0, 0))
+      p <- p + ggplot2::scale_y_continuous(limits = c(0,  max.y * 1.05), expand = c(0, 0))
       p <- p + ggplot2::labs(x = "", y = "n")
     } else {
-      p <- p + ggplot2::scale_y_continuous(limits = c(0,  max(apply(ratios[[i]][, c(-1, -ncol(ratios[[i]]))], 1, sum))), expand = c(0, 0))
+      p <- p + ggplot2::scale_y_continuous(limits = c(0,  max.y), expand = c(0, 0))
       p <- p + ggplot2::labs(x = "", y = "% fish")
     }
     if (length(unique(plotdata$Location)) <= 8)
-      p <- p + ggplot2::scale_fill_manual(values = as.vector(cbPalette)[1:length(unique(plotdata$Location))], drop = FALSE)
+      p <- p + ggplot2::scale_fill_manual(values = as.vector(cbPalette)[1:length(unique.values)], drop = FALSE)
     ggplot2::ggsave(paste0("Report/global_ratios_", i,".png"), width = 10, height = 4)
     ggplot2::ggsave(paste0("Report/global_ratios_", i,".svg"), width = 10, height = 4)
   })

@@ -374,7 +374,7 @@ detections.list <- study.data$detections.list
     emergencyBreak()
     stop("No fish have enough data for residency analysis. Consider running explore() instead.\n", call. = FALSE)
   }
-  
+
   appendTo(c("Screen", "Report"), "M: Calculating daily locations for each fish.")
 
   daily.ratios <- dailyRatios(res = residency.list)
@@ -455,7 +455,7 @@ detections.list <- study.data$detections.list
     biometric.fragment <- printBiometrics(bio = bio)
     printDot(dot = dot, sections = sections, spatial = spatial)
     printSectionTimes(section.times = section.times, bio = bio, detections = valid.detections)
-    printGlobalRatios(ratios = global.ratios)
+    printGlobalRatios(global.ratios = global.ratios, daily.ratios = daily.ratios)
     individual.detection.plots <- printIndividuals(redraw = TRUE, detections.list = detections, bio = bio, 
         tz = tz, arrays = arrays, spatial = spatial, movements = movements, valid.movements = valid.movements)
     array.circular.plots <- printCircular(times = convertTimesToCircular(array.times), bio = bio, suffix = "_array")
@@ -1410,7 +1410,7 @@ vectorsIntoTables <- function(input, columns) {
 #' @keywords internal
 #' 
 globalRatios <- function(positions) {
-  aux <- apply(positions, 1, table)
+  aux <- apply(positions, 1, function(x) as.data.frame(t(as.matrix(table(x)))))
   the.cols <- sort(unique(unlist(lapply(aux, names))))
   the.tables <- vectorsIntoTables(input = aux, columns = the.cols)
   absolutes <- do.call(rbind.data.frame, the.tables)
@@ -1418,7 +1418,10 @@ globalRatios <- function(positions) {
   absolutes <- absolutes[, c(ncol(absolutes), 1:(ncol(absolutes) - 1))]
   rownames(absolutes) <- 1:nrow(absolutes)
   absolutes[is.na(absolutes)] <- 0
-  absolutes$Total <- apply(absolutes[, -1], 1, sum)
+  if (ncol(absolutes) > 2)
+    absolutes$Total <- apply(absolutes[, -1], 1, sum)
+  else
+    absolutes$Total <- absolutes[, 2]
   percentages <- absolutes
   percentages[, -1] <- round(percentages[, -1] / percentages[, ncol(percentages)], 3)
   return(list(absolutes = absolutes, percentages = percentages))
