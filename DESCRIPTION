@@ -2,7 +2,7 @@ Package: actel
 Title: Acoustic Telemetry Data Analysis
 Version: 0.1.2.9000
 Authors@R: person("Hugo", "Flávio", role = c("aut", "cre"), email = "hdmfla@aqua.dtu.dk")
-Description: actel is designed for studies where fish tagged with acoustic tags are expected
+Description: This package is designed for studies where fish tagged with acoustic tags are expected
     to move through a pre-defined set of receiver arrays. Actel combines the
     advantages of automatic sorting and checking of fish movements with the
     possibility for user intervention on tags that deviate from expected behaviour. actel allows

@@ -4,10 +4,12 @@
 \alias{printGlobalRatios}
 \title{print the distribution of fish per location}
 \usage{
-printGlobalRatios(ratios)
+printGlobalRatios(global.ratios, daily.ratios)
 }
 \arguments{
-\item{ratios}{the global ratios}
+\item{global.ratios}{the global ratios}
+
+\item{daily.ratios}{the daily ratios}
 }
 \description{
 print the distribution of fish per location
