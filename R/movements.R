@@ -335,8 +335,8 @@ updateValidity <- function(arrmoves, secmoves) {
         aux <- secmoves[[i]][(!Valid)]
         to.change <- unlist(lapply(1:nrow(aux),
           function(j) {
-            A <- which(arrmoves[[i]]$First.time == aux$First.time)
-            B <- A + (aux$Events - 1)
+            A <- which(arrmoves[[i]]$First.time == aux$First.time[j])
+            B <- A + (aux$Events[j] - 1)
             return(A:B)
           }))
         appendTo(c("Screen", "Report"), paste0("M: Rendering ", length(to.change), " array movement(s) invalid for fish ", i ," as the respective section movements were discarded by the user."))
