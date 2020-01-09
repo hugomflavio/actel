@@ -291,10 +291,12 @@ deleteHelpers <- function(emergency = FALSE) {
 #' @keywords internal
 #' 
 emergencyBreak <- function() {
-  appendTo("Report", "\nAn exception occurred, stopping the process!\n\n-------------------")
+  appendTo("Report", "\nA fatal exception occurred, stopping the process!\n\n-------------------")
+  logname <- paste(gsub(":", ".", sub(" ", ".", as.character(Sys.time()))), "actel.log-STOP.txt", sep = ".")
+  appendTo("Screen", paste("M: A fatal exception occurred, saving emergency log as", logname))
   if (file.exists("temp_UD.txt")) 
     appendTo("Report", paste0("User inverventions:\n-------------------\n", gsub("\r", "", readr::read_file("temp_UD.txt")), "-------------------"))
-  file.rename("temp_log.txt", paste(gsub(":", ".", sub(" ", ".", as.character(Sys.time()))), "actel.log-STOP.txt", sep = "."))
+  file.rename("temp_log.txt", logname)
   deleteHelpers(TRUE)
 }
 
