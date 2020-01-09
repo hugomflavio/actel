@@ -2,7 +2,7 @@
 
 Find out the main highlights of each update.
 
-## development
+## actel 0.1.2
 
 Fixes:
   * Fix mechanisms that deal with unknown receivers
