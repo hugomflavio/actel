@@ -58,6 +58,7 @@ loadStudyData <- function(tz, override = NULL, start.time, stop.time,
   else
     first.array <- NULL
   spatial <- transformSpatial(spatial = spatial, bio = bio, sections = sections, arrays = arrays, first.array = first.array) # Finish structuring the spatial file
+  detections$Array <- factor(detections$Array, levels = unlist(spatial$array.order)) # Fix array levels
 
   recipient <- loadDistances(spatial = spatial) # Load distances and check if they are valid
   dist.mat <- recipient$dist.mat
