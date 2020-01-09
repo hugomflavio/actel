@@ -4,21 +4,23 @@
 \alias{assembleOutput}
 \title{Create status.df}
 \usage{
-assembleOutput(timetable, bio, spatial, sections, dist.mat, invalid.dist,
-  tz.study.area)
+assembleOutput(timetable, bio, spatial, sections, dist.mat, invalid.dist, tz)
 }
 \arguments{
 \item{timetable}{A table of the entering and leaving points for each section per target tag, created by assembleTimetable.}
 
 \item{bio}{A table with the tags and biometrics of the studied fish.}
 
-\item{sections}{The sections in which the study was divided. Must be coincident with the names given to the ALS arrays. (i.e. if an array is 'River1', then the respective section is 'River')}
+\item{sections}{The sections in which the study area is divided. Must be
+coincident with the names given to the arrays. See the vignettes for more
+details.}
 
 \item{dist.mat}{A matrix of the distances between the deployed ALS.}
 
 \item{invalid.dist}{Whether or not the distance matrix supplied is valid for the study area.}
 
-\item{tz.study.area}{The time-zone of the study area. Necessary to convert the ALS time data, which is in UTC.}
+\item{tz}{The time zone of the study area. Must match one of the values
+present in \code{\link[base]{timezones}}.}
 }
 \value{
 A data frame containing all the final data for each fish.

@@ -2,19 +2,20 @@
 % Please edit documentation in R/load.R
 \name{loadBio}
 \alias{loadBio}
-\title{Import biometrics}
+\title{Load Biometrics file}
 \usage{
-loadBio(file, tz.study.area)
+loadBio(file, tz)
 }
 \arguments{
 \item{file}{an input file with biometric data.}
 
-\item{tz.study.area}{The time-zone of the study area. Necessary to convert the ALS time data, which is in UTC.}
+\item{tz}{The time zone of the study area. Must match one of the values
+present in \code{\link[base]{timezones}}.}
 }
 \value{
 The biometrics table
 }
 \description{
-Import biometrics
+Load Biometrics file
 }
 \keyword{internal}

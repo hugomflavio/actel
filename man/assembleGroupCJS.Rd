@@ -7,11 +7,11 @@
 assembleGroupCJS(mat, CJS, arrays)
 }
 \arguments{
-\item{mat}{the original presence/absence matrices}
+\item{mat}{The presence/absence matrices.}
 
 \item{CJS}{A list of CJS calculated for each group x array combinations}
 
-\item{arrays}{a list of arrays}
+\item{arrays}{A list containing information for each array.}
 }
 \value{
 A CJS results table for each group

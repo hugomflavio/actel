@@ -7,8 +7,6 @@
 assembleSplitCJS(mat, CJS, arrays)
 }
 \arguments{
-\item{mat}{the original presence/absence matrices}
-
 \item{CJS}{A list of CJS calculated for each group x release site x array combinations}
 
 \item{arrays}{a list of arrays}

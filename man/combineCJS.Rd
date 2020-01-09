@@ -4,17 +4,16 @@
 \alias{combineCJS}
 \title{Combine multiple CJS models}
 \usage{
-combineCJS(..., estimate = NULL, fixed.efficiency = NULL,
-  silent = FALSE)
+combineCJS(..., estimate = NULL, fixed.efficiency = NULL, silent = FALSE)
 }
 \arguments{
 \item{...}{The detection matrices to be joined, or a list containing detection matrices}
 
-\item{estimate}{an estimate of the last array's efficiency}
+\item{estimate}{an estimate of the last array's efficiency.}
 
 \item{fixed.efficiency}{A vector of fixed efficiency estimates from a more complete CJS model.}
 
-\item{silent}{logical: if TRUE, suppress messages.}
+\item{silent}{Logical: Should messages be printed?}
 }
 \value{
 The combined CJS
@@ -22,3 +21,4 @@ The combined CJS
 \description{
 Combine multiple CJS models
 }
+\keyword{internal}

@@ -2,18 +2,18 @@
 % Please edit documentation in R/load.R
 \name{loadSpatial}
 \alias{loadSpatial}
-\title{Load Spatial file and Check the structure}
+\title{Load Spatial File}
 \usage{
-loadSpatial(file = "spatial.csv", verbose = FALSE)
+loadSpatial(file = "spatial.csv", report = FALSE)
 }
 \arguments{
 \item{file}{an input file with spatial data.}
 
-\item{verbose}{Logical: If TRUE, the appendTo function is enabled.}
+\item{report}{Logical: If TRUE, the appendTo function is enabled.}
 }
 \value{
 The spatial dataframe
 }
 \description{
-Load Spatial file and Check the structure
+Load Spatial File
 }

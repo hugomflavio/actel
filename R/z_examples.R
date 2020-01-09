@@ -1,8 +1,8 @@
-#' Create a default Workspace
+#' Create a Default Workspace
 #'
-#' @param dir The name of the target directory. Will be created if not present
-#' 
 #' Produces the files and folders required to run the package, which the user can use as a template.
+#' 
+#' @param dir The name of the target directory. Will be created if not present
 #'
 #' @export
 #' 
@@ -10,7 +10,7 @@ createWorkspace <- function(dir = "actel_workspace") {
   if (!dir.exists(dir)) 
     dir.create(dir)
   spatial <- data.frame(
-    Station.Name = c("Example station1", "Example station2", "Example station3", "Example release1", "Example release2"),
+    Station.name = c("Example station1", "Example station2", "Example station3", "Example release1", "Example release2"),
     Latitude = c(8.411, 8.521, 8.402, 8.442, 8.442),
     Longitude = c(40.411, 40.521, 40.402, 40.442, 40.442), 
     Array = c("River1", "River1", "River2", "River1", "River2"), 
@@ -27,7 +27,7 @@ createWorkspace <- function(dir = "actel_workspace") {
 
   deployments <- data.frame(
     Receiver = c("123001", "123002", "331"), 
-    Station.Name = c("Example station1", "Example station2", "Example station3"),
+    Station.name = c("Example station1", "Example station2", "Example station3"),
     Start = c("2018-01-25 12:00:00", "2018-01-25 12:00:00", "2018-01-25 12:00:00"),
     Stop = c("2018-04-03 12:00:00", "2018-04-03 12:00:00", "2018-04-03 12:00:00"))
 
@@ -40,14 +40,11 @@ createWorkspace <- function(dir = "actel_workspace") {
   message(paste0("M: Workspace files created in folder '", dir,"'."))
 }
 
-#' Create an example Workspace
+#' Deploy Example Data
 #'
 #' Creates a ready-to-run workspace with example data.
 #' 
-#' @param spatial A dataset containing the positions of the deployed ALS and release site.
-#' @param biometrics A dataset containing the positions of the deployed ALS and release site.
-#' @param detections A dataset containing the detections of the deployed ALS, for the 60 fish.
-#' @param deployments A dataset containing the deployed receivers.
+#' @param spatial,biometrics,detections,deployments Datasets provided with the package.
 #'
 #' @export
 #' 
@@ -61,11 +58,11 @@ exampleWorkspace <- function(spatial = example.spatial, biometrics = example.bio
     dir.create("exampleWorkspace/detections")
   my.list <- split(detections, detections$Receiver)
   for (i in names(my.list)) {
-    write.csv(my.list[[i]], paste("exampleWorkspace/detections/", i, ".csv", sep = ""), row.names = FALSE)
+    write.csv(my.list[[i]], paste0("exampleWorkspace/detections/", i, ".csv"), row.names = FALSE)
   }
   message("M: The example workspace is now ready. To run the analysis on the example data, run:\n
   results <- migration(path = 'exampleWorkspace', sections = c('River', 'Fjord', 'Sea'), 
-  \t\t     success.arrays = 'Sea1', tz.study.area = 'Europe/Copenhagen')\n
+  \t\t     success.arrays = 'Sea1', tz = 'Europe/Copenhagen')\n
 And follow the instructions as they come. Once finished, explore the object 'results' for the output.")
 }
 
@@ -75,13 +72,16 @@ And follow the instructions as they come. Once finished, explore the object 'res
 #'
 #' @format A data frame with 18 rows and 6 variables:
 #' \describe{
-#'   \item{Station.Name}{The name of the ALS or release site}
+#'   \item{Station.name}{The name of the ALS or release site}
 #'   \item{Latitude}{The latitude of the ALS or release site}
 #'   \item{Longitude}{The longitude of the ALS or release site}
 #'   \item{Array}{The Array to which the ALS belongs, or the first ALS array downstream of the release site.}
 #'   \item{Type}{The type of spatial object (must be either Hydrophone or Release)}
 #' }
 #' @source Data collected by the authors.
+#' 
+#' @keywords internal
+#' 
 "example.spatial"
 
 #' Example biometric data
@@ -99,6 +99,9 @@ And follow the instructions as they come. Once finished, explore the object 'res
 #'   \item{Mass.g}{The mass of the tagged fish}
 #' }
 #' @source Data collected by the authors.
+#' 
+#' @keywords internal
+#' 
 "example.biometrics"
 
 #' Example detection data
@@ -113,6 +116,9 @@ And follow the instructions as they come. Once finished, explore the object 'res
 #'   \item{Station.Name}{The name given to the ALS}
 #' }
 #' @source Data collected by the authors.
+#' 
+#' @keywords internal
+#' 
 "example.detections"
 
 #' Example deployment data
@@ -122,9 +128,12 @@ And follow the instructions as they come. Once finished, explore the object 'res
 #' @format A data frame with 17 rows and 4 variables:
 #' \describe{
 #'   \item{Receiver}{The receiver serial number}
-#'   \item{Station.Name}{The name given to the receiver}
+#'   \item{Station.name}{The name given to the receiver}
 #'   \item{Start}{The date and time of the deployment}
 #'   \item{Stop}{The date and time of the retrieval}
 #' }
 #' @source Data collected by the authors.
+#' 
+#' @keywords internal
+#' 
 "example.deployments"

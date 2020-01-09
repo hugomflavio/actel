@@ -1,10 +1,10 @@
 ---
-title: "5) Errors and messages"
+title: "6) Errors and messages"
 author: "Hugo Flávio"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{5.0) Errors and messages}
+  %\VignetteIndexEntry{6.0) Errors and messages}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -22,18 +22,18 @@ knitr::opts_chunk$set(
     1. [Structuring the study area](a-1_study_area.html)
     1. [Creating a distances matrix](a-2_distances_matrix.html)
 1. [explore()](b-0_explore.html)
-    1. [From raw to movements](b-1_explore_processes.html)
+    1. [Processes behind explore()](b-1_explore_processes.html)
     1. [Inspecting the explore() results](b-2_explore_results.html)
 1. [migration()](c-0_migration.html)
     1. [Processes behind migration()](c-1_migration_processes.html)
     1. [Inspecting the migration() results](c-2_migration_results.html)
-    1. [Manual mode in migration()](c-3_migration_manual_mode.html)
-    1. [One-way efficiency estimations](c-4_migration_efficiency.html)
+    1. [One-way efficiency estimations](c-3_migration_efficiency.html)
 1. [residency()](d-0_residency.html)
     1. [Processes behind residency()](d-1_residency_processes.html)
     1. [Inspecting the residency() results](d-2_residency_results.html)
     1. [Multi-way efficiency estimations](d-3_residency_efficiency.html)
-1. [__Errors and messages__](e-0_messages.html)
+1. [Manual mode](e-0_manual_mode.html)
+1. [__Errors and messages__](f-0_messages.html)
 
 ## List of Exceptions
 
@@ -43,7 +43,7 @@ Note :
   : Errors related to function arguments (i.e. `'maximum.time' must be numerical.`) are not displayed here.
   : Less relevant messages may have been left out to keep the page shorter.
   : Similar errors were grouped in the same code box.
-  : As actel evolves, some new errors and messages may accidentally be left out of this page. If you need help with a message, warning or error that is not reported here, please open an issue at [actel's GitHub repository.](https://github.com/hugomflavio/actel/issues/new/new)
+  : As actel evolves, some new errors and messages may accidentally be left out of this page. If you need help with a message, warning or error that is not reported here, please open an issue at [actel's GitHub repository.](https://github.com/hugomflavio/actel/issues/new)
 
 ### Exceptions while importing the data:
 
@@ -66,7 +66,7 @@ It would appear that you asked actel to move to a folder that does not exist. Re
 <!-- 1. **Report exceptions** -->
 
 ```
-W: 'Report' option can only be activated if 'ggplot2' and 'reshape2' are installed. Please install these. Deactivating 'Report' for the current job.
+Warning: 'Report' option can only be activated if 'ggplot2' and 'reshape2' are installed. Please install these. Deactivating 'Report' for the current job.
 ```
 
 Actel could not access libraries ggplot2 and reshape2. Please install these so actel can draw graphics.
@@ -74,7 +74,7 @@ Actel could not access libraries ggplot2 and reshape2. Please install these so a
 ----------------------
 
 ```
-W: 'Report' directory already present. Overwriting files already present.
+Warning: 'Report' directory already present. Overwriting files already present.
 ```
 
 If you are running actel for the second time in a given folder, the 'Report' directory may have already been created. If the folder exists, previously present files may get overwritten.
@@ -173,7 +173,7 @@ The values in the 'Type' column of the spatial.csv file must be one of 'Hydropho
 ----------------------
 
 ````
-W: At least one release site has been indicated in the spatial.csv file, but no release sites were specified in the biometrics.csv file.
+Warning: At least one release site has been indicated in the spatial.csv file, but no release sites were specified in the biometrics.csv file.
    Discarding release site information and assuming all fish were released at the top level array to avoid function failure.
    Please double-check your data.
 
@@ -185,7 +185,7 @@ It would appear that there are rows with Type = "Release" in the spatial.csv fil
 ----------------------
 
 ````
-W: Release sites were not specified in the spatial.csv file but more than one release site is reported in the biometric data.
+Warning: Release sites were not specified in the spatial.csv file but more than one release site is reported in the biometric data.
    Assuming all released fish start at the top level array.
 
 Error: There is more than one top level array in the study area. Please specify release site(s) in the spatial.csv file and in the biometrics.csv file.
@@ -218,7 +218,7 @@ It would appear that something is wrong in the "Array" column of the spatial.csv
 ----------------------
 
 ````
-W: No arrays were found that match section(s) [...]. There could be a typing mistake!
+Warning: No arrays were found that match section(s) [...]. There could be a typing mistake!
    Continue the analysis?(y/N) 
 ````
 
@@ -240,12 +240,12 @@ A fish with no signal cannot be tracked. Similarly, signals must be unique, or e
 ----------------------
 
 ```
-W: File [...] does not match to any of the supported hydrophone file formats!
+Warning: File [...] does not match to any of the supported hydrophone file formats!
    If your file corresponds to a hydrophone log and actel did not recognize it, please get in contact through www.github.com/hugomflavio/actel/issues/new
 
-W: One file was excluded from further analyses.
+Warning: One file was excluded from further analyses.
 
-W: # files were excluded from further analyses.
+Warning: # files were excluded from further analyses.
 ```
 
 Not all files in your 'detections' folder were recognised as receiver logs. Make sure you did not edit the detection files manually before feeding them to Actel. If the problem persists, file in a new issue at [actel's GitHub repository.](https://github.com/hugomflavio/actel/issues/new)
@@ -275,7 +275,7 @@ It appears that your distances matrix is wrongly configured. Please make sure th
 <!-- 1. **Automatic handling of exceptions**
 -->
 ````
-W: Replacing spaces in array names to prevent function failure.
+Warning: Replacing spaces in array names to prevent function failure.
 ````
 
 The array names must not contain any spaces, to avoid issues when other data sources are split by space (e.g. the spatial.txt file). As such, actel corrects this automatically in the spatial.csv file. Note that, if you provided a spatial.txt file and the array names contain spaces there, the function will still crash at a later point.
@@ -287,12 +287,12 @@ M: No 'Type' column found in the spatial.csv file. Assigning all rows as hydroph
 
 M: No Release site has been indicated in the biometrics.csv file. Creating a 'Release.site' column to avoid function failure. Filling with 'unspecified'.
 
-W: Some fish contain no release site information. You may want to double-check the data.
+Warning: Some fish contain no release site information. You may want to double-check the data.
    Filling the blanks with 'unspecified'.
 
 M: No 'Group' column found in the biometrics.csv file. Assigning all fish to group 'All'.
 
-W: Some fish contain no group information. You may want to double-check the data.
+Warning: Some fish contain no group information. You may want to double-check the data.
    Filling the blanks with 'unspecified'.
 ```
 
@@ -328,7 +328,7 @@ This error shows up if no detections were found in the files of the 'detections'
 <!-- 1. **Something is off with the receivers**
 -->
 ```
-W: Detections from receivers [...] are present in the data, but these receivers are not part of the study's stations. Double-check potential errors.
+Warning: Detections from receivers [...] are present in the data, but these receivers are not part of the study's stations. Double-check potential errors.
 ```
 
 Somewhere in your detection files, there are detections for receivers that are not listed in the deployments.csv file. If some of your target tags are detected in these receivers, this warning will escalate to the one below.
@@ -336,10 +336,10 @@ Somewhere in your detection files, there are detections for receivers that are n
 ----------------------
 
 ```
-W: Fish [...] was detected in one or more receivers that are not listed in the study area (receiver(s): [...])!
+Warning: Fish [...] was detected in one or more receivers that are not listed in the study area (receiver(s): [...])!
 Possible options:
    a) Stop and double-check the data (recommended)
-   b) Temporary include the hydrophone(s) to the stations list
+   b) Temporarily include the hydrophone(s) to the stations list
 Which option should be followed?(a/b) 
 ```
 
@@ -363,7 +363,7 @@ It would appear that some detections for a receiver were registered when the rec
 ----------------------
 
 ```
-W: No detections were found for receiver(s) [...].
+Warning: No detections were found for receiver(s) [...].
 ```
 
 One or more of the receivers listed in the deployments.csv file had 0 detections in the detection files (not even noise/stray detections). While this is not bad on its own (perhaps nothing passed through that receiver), it may also mean that there are some detection files missing from the 'detections' folder. It is up to you to decide if something looks odd or not.
@@ -419,7 +419,7 @@ If you are sure that the release time information is correct, and the detections
 <!-- 1. **Impassable movement**
  -->
 ````
-W: Fish [...] made an impassable jump: It is not possible to go from array [...] to [...].
+Warning: Fish [...] made an impassable jump: It is not possible to go from array [...] to [...].
 
 Opening valid movement table for inspection:
 
@@ -440,7 +440,7 @@ It would seem that a fish has moved through an impassable obstacle. You can [fin
 <!-- 1. **Jump distance**
 -->
 ````
-W: Fish [...] had an average speed of [#] m/s from valid event [#] to [#] ([Array] -> [Array])
+Warning: Fish [...] jumped through [#] arrays in events [#] -> [#] ([Array] -> [Array])
 M: Opening valid movements table of fish [...] for inspection:
 [...]
 Would you like to render any movement event invalid?(y/N/comment)
@@ -453,7 +453,7 @@ It seems that a fish has passed multiple arrays undetected. You can [find more i
 <!-- 1. **Speed limits**
 -->
 ````
-W: Fish [...] had an average speed of [#] m/s from valid event [#] to [#] ([Array] -> [Array])
+Warning: Fish [...] had an average speed of [#] m/s from valid event [#] to [#] ([Array] -> [Array])
 M: Opening valid movements table of fish [...] for inspection:
 [...]
 Would you like to render any movement event invalid?(y/N/comment)
@@ -474,25 +474,42 @@ If possible, inactiveness checks make use of the distances matrix to determine t
 ----------------------
 
 ````
-W: Fish [...] was detected [#] times at three or less stations of array [...] over [#] days and then disappeared. Could it be inactive?
+Warning: Fish [...] was detected [#] times at three or less stations of array [...] over [#] days and then disappeared. Could it be inactive?
 
-W: Fish [...] was detected [#] times at stations less than 1.5 km apart in array [...] over [#] days and then disappeared. Could it be inactive?
-M: Opening valid movements table of fish [...] for inspection ((inactiveness started on [...]):
+Warning: Fish [...] was detected [#] times at stations less than 1.5 km apart in array [...] over [#] days and then disappeared. Could it be inactive?
+M: Opening valid movements table of fish [...] for inspection (inactiveness started on [...]):
 [...]
 Would you like to render any movement event invalid?(y/N/comment)
 ````
 
 It seems that a fish has been stopped in an array for a very long time. You can [find more information about this warning here.](b-1_explore_processes.html#inactiveness)
 
+----------------------
+
+<!-- 1. **Triggering override** --> 
+
+```
+M: Override has been triggered for fish [...]. Entering full manual mode.
+```
+
+If you included any transmitters in the `override` argument, this message will show up when it is their turn to be analysed. You can find more details on [how to operate full manual mode here.](e-0_manual_mode.html)
 
 ----------------------
 
-### Exceptions exclusive to the migration() function
-
-<!-- 1. **Detections outside the expected path**
- -->  
 ```
-W: Fish [...] was detected in an array that is not after its release site! Opening relevant data for inspection.
+M: Fish [...] only has one movement entry ([...]) with [#] detections. Considered invalid.
+```
+
+If a fish only has one movement event and the number of detections within that event is below the number set at `minimum.detections`, the detection(s) for this fish will be considered invalid and the fish will be considered lost at release.
+
+----------------------
+
+### Exceptions exclusive to the migration function
+
+<!-- 1. **Detections outside the expected path** -->  
+
+```
+Warning: Fish [...] was detected in an array that is not after its release site! Opening relevant data for inspection.
    Release site: [...]
    Expected first array: [...]
    Movement table for fish [...]:
@@ -508,89 +525,41 @@ A fish being released and moving in the opposite direction to what we expected i
 
 ----------------------
 
-<!-- #### Exceptions while filling in the timetable -->
-
-<!-- 1. **Unknown receivers**
--->
-```
-M: Disregarding [#] unknown events from fish [...]'s movement table.
-W: Fish [...] only moved through unknown hydrophones. Considered invalid.
-```
-
-If you are running the analysis with unknown receivers, these will be excluded from the timetable analysis. If the fish only moved through unknown receivers, the message will escalate to a warning.
-
-----------------------
-
-<!-- 1. **Triggering override**
--->	
-```
-M: Override has been triggered for fish [...]. Entering full manual mode.
-```
-
-If you included any transmitters in the `override` argument, this message will show up when it is their turn to be analysed. You can find more details on [how to operate full manual mode here.](5.refining_results.html)
-
-
-----------------------
-
-<!-- 1. **Cautious assignment**
--->
-```
-W: No [section] detection events with more than one detection were found for fish [...]. Opening movements list for inspection.
-[...]
-Which event should be considered the LAST [section] detection event?
-```
-
-If `cautious.assignment` is set to TRUE, actel will avoid assigning movements with one detection as moments of entry/leaving a given section. However, if there are no movements with more than one detection, actel will ask you to intervene. This message does not show up if `cautious.assignment` is set to FALSE, because then all movement events are considered equally valid.
-
-----------------------
-
-```
-M: Fish [...] only has one movement entry ([...]) with [#] detections. Considered invalid.
-```
-
-If a fish only has one movement event and the number of detections within that event is below the number set at `minimum.detections`, the detection(s) for this fish will be considered invalid and the fish will be considered lost at release.
-
-----------------------
-
 <!-- 1. **Backwards movements**
 -->
 ```
-W: Inter-section backwards movements were detected for Fish [...].
-Would you like to see the movement table for fish [...]?(y/N) 
+Warning: Inter-section backwards movements were detected for Fish [...].
+
+Warning: Inter-section backwards movements were detected for Fish [...] and the last events are not ordered!
 ```
 
-A fish moving a bit up and down is not much to worry about. But if these backward movements involve moving from one section of your study area to another (i.e. a fish migrating downstream moved to the sea and then back to the river), actel will issue a warning. You can then verify the movements and the assigned last events.
+A fish moving a bit up and down is not much to worry about. But if these backward movements involve moving from one section of your study area to another (i.e. a fish migrating downstream moved to the sea and then back to the river), actel will issue a warning. You must then verify the movements and take action.
+
+You can [read more about backward movements here.](c-1_migration_processes.html#backwards-movements)
 
 ----------------------
 
+### Exceptions exclusive to the residency function
+
+
 ````
-W: Inter-section backwards movements were detected for Fish [...] and the last events are not ordered!
-   Opening movements list for inspection.
-[...]
-
-The last movement event of a section must NOT precede the last movement event of a 
-previous section (i.e. the migration analysis cannot cope with inter-section U turns).
-Please edit the last valid events so this is not the case any more.
-
-Which last valid event would you like to edit?(1-[#]) 
+Warning: Section movements with less than [#] detections are present for fish [...].
 ````
 
-If there are backwards inter-section movements and, on top of that, the last events are not ordered (e.g. a downstream migrating was last seen in section 'Sea' before being last seen in section 'River'), then the warning will escalate and you will have to take action.
-
-You can [read more about backward movements here.](c-1_migration_processes.html#backwards-movements)
+This exception is controlled by the `section.minimum` argument. If a fish has a number of consecutive detections that is lower than this threshold, you are given a chance to inspect the data and render movement events invalid, if necessary.
 
 ----------------------
 
 ### Exceptions during CJS calculations
 
 ````
-W: No fish passed through array [...].
+Warning: No fish passed through array [...].
 
-W: No fish passed through any of the efficiency peers of array [...].
+Warning: No fish passed through any of the efficiency peers of array [...].
 
-W: None of the arrays has valid efficiency peers.
+Warning: None of the arrays has valid efficiency peers.
 
-W: Aborting efficiency calculations (will limit the report's output).
+Warning: Aborting efficiency calculations (will limit the report's output).
 ````
 
 The two top warnings inform you that, for some reason, array efficiency cannot be calculated for a given array. There is nothing you can do about this, unless something is wrong in the input files. If efficiency cannot be calculated for any array (either because of lack of passing fish, or lack of valid efficiency peers), actel cannot calculate efficiency estimates at all, and the last warning is issued.
@@ -615,7 +584,7 @@ It would appear that you requested for a station to be used as a replicate for a
 ----------------------
 
 ````
-W: An inter-array efficiency has already been calculated for array [...].
+Warning: An inter-array efficiency has already been calculated for array [...].
    Do you want to replace this with an intra-array efficiency estimate?(y/N) 
 ````
 

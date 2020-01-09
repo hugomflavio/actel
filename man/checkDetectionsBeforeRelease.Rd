@@ -7,7 +7,7 @@
 checkDetectionsBeforeRelease(input, bio)
 }
 \arguments{
-\item{input}{list of detections}
+\item{input}{The list of detections}
 
 \item{bio}{A table with the tags and biometrics of the studied fish.}
 }

@@ -9,7 +9,10 @@ excludeTags(input, exclude.tags, silent)
 \arguments{
 \item{input}{list of detections}
 
-\item{exclude.tags}{A list of tags that should be excluded from the detection data before any analyses are performed. Intended to be used if stray tags from a different code space but with the same signal as a target tag are detected in the study area.}
+\item{exclude.tags}{A vector of tags that should be excluded from the
+detection data before any analyses are performed. Intended to be used if
+stray tags from a different code space but with the same signal as a target
+tag are detected in the study area.}
 
 \item{silent}{logical: if TRUE, suppress messages.}
 }

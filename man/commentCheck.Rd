@@ -7,9 +7,9 @@
 commentCheck(line, tag)
 }
 \arguments{
-\item{line}{The text of the interaction in which the user may or may not request a comment}
+\item{line}{The text of the interaction in which the user may or may not request a comment.}
 
-\item{tag}{The tag number currently being analysed}
+\item{tag}{The tag number currently being analysed.}
 }
 \description{
 Checks if the user has invoked the comment command for a specific fish, and stores the comment.

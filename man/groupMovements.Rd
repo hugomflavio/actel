@@ -4,19 +4,33 @@
 \alias{groupMovements}
 \title{Group movements}
 \usage{
-groupMovements(detections.list, bio, spatial, speed.method, maximum.time,
-  tz.study.area, dist.mat, invalid.dist)
+groupMovements(
+  detections.list,
+  bio,
+  spatial,
+  speed.method,
+  max.interval,
+  tz,
+  dist.mat,
+  invalid.dist
+)
 }
 \arguments{
 \item{detections.list}{A list of the detections split by each target tag, created by splitDetections.}
 
 \item{bio}{A table with the tags and biometrics of the studied fish.}
 
-\item{speed.method}{One of 'last to first' or 'first to first'. In the former, the last detection on a given array/section is matched to the first detection on the next array/section (default). If changed to 'first to first', the first detection on two consecutive arrays/sections are used to perform the calculations.}
+\item{speed.method}{Can take two forms: 'last to first' or 'first to first'.
+If 'last to first' (default), the last detection on a given array is matched
+to the first detection on the next array to perform the calculations.
+If 'first to first', the first detection on a given array is matched to the
+first detection on the next array to perform the calculations.}
 
-\item{maximum.time}{The number of minutes that must pass between detections for a new event to be created.}
+\item{max.interval}{The number of minutes that must pass between detections
+for a new event to be created. Defaults to 60.}
 
-\item{tz.study.area}{The time-zone of the study area. Necessary to convert the ALS time data, which is in UTC.}
+\item{tz}{The time zone of the study area. Must match one of the values
+present in \code{\link[base]{timezones}}.}
 
 \item{dist.mat}{A matrix of the distances between the deployed ALS.}
 

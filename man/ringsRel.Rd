@@ -4,8 +4,14 @@
 \alias{ringsRel}
 \title{Draw rings at relative points}
 \usage{
-ringsRel(plot.params, border, rings.lty, ring.text, ring.text.pos,
-  ring.text.cex)
+ringsRel(
+  plot.params,
+  border,
+  rings.lty,
+  ring.text,
+  ring.text.pos,
+  ring.text.cex
+)
 }
 \arguments{
 \item{border}{the colour to draw the border. The default, NULL, means to use par("fg"). Use border = NA to omit borders.}
@@ -19,9 +25,9 @@ ringsRel(plot.params, border, rings.lty, ring.text, ring.text.pos,
 \item{ring.text.cex}{The size of the ring's text. Ignored if ring.text is set to FALSE.}
 }
 \description{
-Adapted from RosediagRad (from the circular package) to draw rings inside the circular plot. Called if rings = TRUE in myRoseDiag
+Adapted from RosediagRad (from the circular package) to draw rings inside the circular plot. Called if rings = TRUE in \code{\link{myRoseDiag}}
 }
 \details{
-For more details about the circular package, visit its homepage at https://github.com/cran/circular
+For more details about the circular package, visit its homepage at \url{https://github.com/cran/circular}
 }
 \keyword{internal}

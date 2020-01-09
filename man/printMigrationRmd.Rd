@@ -4,17 +4,28 @@
 \alias{printMigrationRmd}
 \title{Print Rmd report}
 \usage{
-printMigrationRmd(name.fragment, header.fragment, biometric.fragment,
-  efficiency.fragment, display.progression, array.overview.fragment,
-  survival.graph.size, individual.plots, circular.plots, spatial,
-  deployments, valid.detections, detections)
+printMigrationRmd(
+  override.fragment,
+  biometric.fragment,
+  section.overview,
+  efficiency.fragment,
+  display.progression,
+  array.overview.fragment,
+  survival.graph.size,
+  individual.plots,
+  circular.plots,
+  spatial,
+  deployments,
+  valid.detections,
+  detections
+)
 }
 \arguments{
-\item{name.fragment}{Rmarkdown string specifying the type of report for the title.}
-
-\item{header.fragment}{Rmarkdown string specifying the type of report for the header.}
+\item{override.fragment}{Rmarkdown string specifying the type of report for the header.}
 
 \item{biometric.fragment}{Rmarkdown string specifying the biometric graphics drawn.}
+
+\item{section.overview}{A summary table with the number of fish that disappeared/moved onwards at each section.}
 
 \item{efficiency.fragment}{Rmarkdown string specifying the efficiency results.}
 

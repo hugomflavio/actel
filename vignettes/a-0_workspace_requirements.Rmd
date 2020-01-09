@@ -22,18 +22,18 @@ knitr::opts_chunk$set(
     1. [Structuring the study area](a-1_study_area.html)
     1. [Creating a distances matrix](a-2_distances_matrix.html)
 1. [explore()](b-0_explore.html)
-    1. [From raw to movements](b-1_explore_processes.html)
+    1. [Processes behind explore()](b-1_explore_processes.html)
     1. [Inspecting the explore() results](b-2_explore_results.html)
 1. [migration()](c-0_migration.html)
     1. [Processes behind migration()](c-1_migration_processes.html)
     1. [Inspecting the migration() results](c-2_migration_results.html)
-    1. [Manual mode in migration()](c-3_migration_manual_mode.html)
-    1. [One-way efficiency estimations](c-4_migration_efficiency.html)
+    1. [One-way efficiency estimations](c-3_migration_efficiency.html)
 1. [residency()](d-0_residency.html)
     1. [Processes behind residency()](d-1_residency_processes.html)
     1. [Inspecting the residency() results](d-2_residency_results.html)
     1. [Multi-way efficiency estimations](d-3_residency_efficiency.html)
-1. [Errors and messages](e-0_messages.html)
+1. [Manual mode](e-0_manual_mode.html)
+1. [Errors and messages](f-0_messages.html)
 
 ## Preparing your data
 
@@ -61,7 +61,7 @@ knitr::kable(biometrics)
 Although the column order is not important, it is essential that this table contains two columns:
 
 Release.date
-  : Corresponds to the date and time when the fish was released, and **must** be typed in **yyyy-mm-dd hh:mm:ss** format. Note that the timestamps must be in the **local time zone** of the study area, which you will later supply in the `tz.study.area` argument.
+  : Corresponds to the date and time when the fish was released, and **must** be typed in **yyyy-mm-dd hh:mm:ss** format. Note that the timestamps must be in the **local time zone** of the study area, which you will later supply in the `tz` argument.
 
 Signal 
   : Corresponds to the code emitted by your tags. If you are unsure as to what signals are, you should ask the tag manufacturer more about the differences between code spaces and signals.
@@ -81,7 +81,7 @@ Note:
 Your spatial file should look similar to this:
 
 ```{r, echo=FALSE, results='asis'}
-  spatial <- data.frame(Station.Name=c("River East","River West","Estuary","Site A","Site B")
+  spatial <- data.frame(Station.name=c("River East","River West","Estuary","Site A","Site B")
     ,Latitude=c(8.411,8.521,8.402,8.442,8.442)
     ,Longitude=c(40.411,40.521,40.402,40.442,40.442)
     ,Array=c("River1","River1","River2","River1","River2")
@@ -92,7 +92,7 @@ knitr::kable(spatial)
 
 In this file you should include both your station deployment sites and your release sites. It is essential that this table has the following columns:
 
-Station.Name
+Station.name
   : The name of the station will be used to match the receiver deployments.
 
 Array
@@ -126,7 +126,7 @@ The deployments file is where you will list the receivers you used in the study.
 
 ```{r, echo=FALSE, results='asis'}
   deployments <- data.frame(Receiver = c(11111, 22222, 33333),
-    Station.Name = c("River East","River West","Estuary")
+    Station.name = c("River East","River West","Estuary")
     ,Start = c("2018-01-01 11:30:00", "2018-01-01 11:33:00", "2018-01-01 11:34:00")
     ,Stop = c("2018-05-03 09:30:00", "2018-05-04 08:33:00", "2018-05-05 12:00:00")
     )
@@ -138,11 +138,11 @@ Short description of the columns:
 Receiver
   : The serial number of the receiver. If a receiver was retrieved and re-deployed, you should add extra rows for each deployment.
 
-Station.Name
+Station.name
   : The name of the station where the receiver was deployed. It **must** match one of the station names in the spatial file.
 
 Start and Stop
-  : The times when the receiver was deployed and when the receiver was retrieved, respectively. Must be in a **yyyy-mm-dd hh:mm:ss** format. Note that these timestamps **must** be in the local time zone of the study area, which you will later supply in the `tz.study.area` argument.
+  : The times when the receiver was deployed and when the receiver was retrieved, respectively. Must be in a **yyyy-mm-dd hh:mm:ss** format. Note that these timestamps **must** be in the local time zone of the study area, which you will later supply in the `tz` argument.
 
 ## Detections
 
@@ -173,46 +173,106 @@ A distances matrix is a table that contains information on  the distance (in met
 
 ## Optional: spatial.txt file
 
-If your study area has multiple branches, then you need to tell actel how these branches connect with each other. This file is optional because, if ommitted, actel will assume that your study area is composed by a single branch and that the array order is the one listed in the spatial.csv file.
+If your study area has multiple branches, then you need to tell actel how your receivers array connect with each other. This file is optional because, if ommitted, actel will assume that your study area is composed by a single branch and that the array order is the one listed in the spatial.csv file.
 
-The spatial.txt file is very simple; all you need to do is connect your arrays with either dashes or arrows (find out the difference below). You can connect your arrays in pairs or make longer strings. For example, both this file:
+The spatial.txt file is very simple; all you need to do is connect your arrays with either dashes or arrows (find out the difference below). You can connect your arrays in pairs or make longer strings. To decide whether or not two arrays should be connected, ask yourself the following: "Can fish move from A to B without having to pass through any other array?" If the answer is yes, then the arrays should be connected. Let's have a look at some examples:
 
-```
-River1 -- River2
-River2 -- River3
-River3 -- Fjord
-Fjord -- Sea1
-Sea1 -- Sea2
-Sea2 -- Sea3
-River1 -- River4
-River4 -- River5
-River5 -- Fjord
-River4 -- River6
-River6 -- Fjord
-```
+#### One branch study area, fully covering arrays
 
-and this file:
+This is the simplest case, e.g. your fish are migrating through a channel, and your arrays split this channel in sections. Like in the figure below:
+
+<center>
+<img src="spatial_a.svg" alt="drawing" width="600"/>
+</center>
+
+For this specific case you do not need to include a spatial.txt file, as long as you order the arrays in the spatial.csv file. However, if you wanted to include a spatial.txt file, it would look like this:
 
 ```
-River1 -- River2 -- River3 -- Fjord -- Sea1 -- Sea2 -- Sea3
-River1 -- River4 -- River5 -- Fjord
-River4 -- River6 -- Fjord
+A -- B -- C -- D -- E
 ```
 
-Would code this study area:
+Note that you could also specify only one connection per line. E.g.:
 
-<img src="multi-branch.svg" alt="drawing" width="680"/>
+```
+A -- B 
+B -- C 
+C -- D 
+D -- E
+```
+
+#### One branch study area, partly-covering arrays
+
+This case is similar to above, but some arrays do not cover the totality. For example, they may cover a specific area of a lake (e.g. a spawning ground), Like in the figure below:
+
+<center>
+<img src="spatial_b.svg" alt="drawing" width="600"/>
+</center>
+
+In this case, fish can move from B to D without passing through C. As such, a spatial.txt file is now required, and it would look like this:
+
+```
+A -- B -- D -- E
+B -- C
+C -- D
+```
+
+Note that now, B, C and D are all directly connected with each other.
+
+
+#### Multi branch study areas
+
+In this case, the water channel branches into multiple paths, which may then merge again or not, like in the figure below:
+
+<center>
+<img src="spatial_c.svg" alt="drawing" width="600"/>
+</center>
+
+Things are getting a bit more complex now. To make sure you do not miss any connection, it can be useful to draw in a map the links between the arrays as you write them down, so you can check at the end if everything is done. Below, I have marked in purple the connections between all the arrays:
+
+<center>
+<img src="spatial_d.svg" alt="drawing" width="600"/>
+</center>
+
+And here is the respective spatial.txt:
+
+```
+A -- B 
+A -- E
+A -- F
+B -- E
+B -- F
+E -- F
+B -- C
+C -- D
+C -- E
+E -- D
+F -- G
+```
+
+Or, in the shortened version:
+
+```
+A -- B -- C -- D
+A -- E -- D
+A -- F -- G
+B -- E -- F
+B -- F
+C -- E
+```
+
+If are feeling wary of including multiple links in a single line, you can use the function `readDot` to read your spatial.txt file before starting the analysis and see if everything checks out. E.g.: `readDot(input = "spatial.txt")`
+
 
 <span style="color:red">Note:</span>
   : This file can be called either "spatial.dot" or "spatial.txt", and you can create it using a simple text editor such as notepad, kate, VIM, etc.
 
+
 #### Array direction
 
-In the migration analysis, array direction is relevant. That means that writing `A -- B` is not the same as writing `B -- A`. In the first case, array B comes after array A (i.e. the fish are expected to reach A before reaching B), while in the second case the situation is reversed.
-
-This has implications for array efficiency calculations, so be sure to encode your study area carefully.
+In the migration analysis, array direction is relevant. That means that writing `A -- B` is not the same as writing `B -- A`. In the first case, array B comes after array A (i.e. the fish are expected to reach A before reaching B), while in the second case the situation is reversed. This has implications for array efficiency calculations, so be sure to encode your study area carefully.
 
 If you intend to run an explore or residency analysis, array direction is irrelevant.
+
 
 #### explore()/residency() vs migration()
 
@@ -256,27 +316,8 @@ C -- F -- C
 E -- F -- E
 ```
 
-The difference here is that, in the spatial.txt for migration, actel expects arrays to connected in a directional way. That means that connecting `D -- B` and `B -- D` does not mean the same thing, and it is important that you explicitly state that the fish are as likely to reach B coming from D as they are to reach D coming from B. In other words, you are saying that neither of the movements would be an explicit upstream movement. This will inform actel that D and B are parallel arrays, and special that rules should be applied to them. The same applies to C, E and F.
+The difference here is that, in the spatial.txt for migration, actel expects arrays to connected in a directional way. That means that connecting `D -- B` and `B -- D` does not mean the same thing, and it is important that you explicitly state that the fish are as likely to reach B coming from D as they are to reach D coming from B. In other words, you are saying that neither of the movements would be an explicit backwards movement. This will inform actel that D and B are parallel arrays, and that special rules should apply to them. The same goes for C, E and F.
 
-<!--
-However, if the study area looked more like this:
- 
-<center>
-<img src="multi_way_efficiency_alt.svg" alt="drawing" width="330"/>
-</center>
-
-Then perhaps it would no longer make sense to connect C to E and F, as it would be unlikely for fish passing through C to move all the way back to E and F. In that case, the spatial.txt file would instead look like this:
-
-```
-A -- B -- C -- G
-A -- D -- E -- G
-D -- F -- G
-D -- B -- D
-E -- F -- E
-```
-
-The main disadvantage here is that if a fish was to actually move from C to E, actel would assume that array G had failed to detect the fish on its way. What I am trying to convey with these examples is that organizing your study area is context dependent, and it is up to you to decide how to best represent it. Remember, you can always run the analysis with `jump.warning = 1` to highlight all instances where an array was assumed to have failed. This could prove useful should you choose to omit lateral connections, as in the last example.
--->
 
 #### Barriers
 

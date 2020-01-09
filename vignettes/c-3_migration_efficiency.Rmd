@@ -1,10 +1,10 @@
 ---
-title: "3.4) One-way efficiency estimations"
+title: "3.3) One-way efficiency estimations"
 author: "Hugo Flávio"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{3.4) One-way efficiency estimations}
+  %\VignetteIndexEntry{3.3) One-way efficiency estimations}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -22,18 +22,18 @@ knitr::opts_chunk$set(
     1. [Structuring the study area](a-1_study_area.html)
     1. [Creating a distances matrix](a-2_distances_matrix.html)
 1. [explore()](b-0_explore.html)
-    1. [From raw to movements](b-1_explore_processes.html)
+    1. [Processes behind explore()](b-1_explore_processes.html)
     1. [Inspecting the explore() results](b-2_explore_results.html)
 1. [migration()](c-0_migration.html)
     1. [Processes behind migration()](c-1_migration_processes.html)
     1. [Inspecting the migration() results](c-2_migration_results.html)
-    1. [Manual mode in migration()](c-3_migration_manual_mode.html)
-    1. [__One-way efficiency estimations__](c-4_migration_efficiency.html)
+    1. [__One-way efficiency estimations__](c-3_migration_efficiency.html)
 1. [residency()](d-0_residency.html)
     1. [Processes behind residency()](d-1_residency_processes.html)
     1. [Inspecting the residency() results](d-2_residency_results.html)
     1. [Multi-way efficiency estimations](d-3_residency_efficiency.html)
-1. [Errors and messages](e-0_messages.html)
+1. [Manual mode](e-0_manual_mode.html)
+1. [Errors and messages](f-0_messages.html)
 
 
 ## Forward efficiency
@@ -124,7 +124,7 @@ Keep in mind that you can always run the analysis twice, and find out which case
 
 ## Arrays with no efficiency peers
 
-Regardless of the mechanics explained above, arrays __C__, __E__, __F__ and __G__ would never have any valid efficiency peers. As such, inter-array efficiency cannot be calculated for them using a CJS model. However, you have the chance to calculate intra-array efficiency, if an array is [composed by two lines of receivers](c-0_migration.html#replicates). You can find the efficiency peers of each array in the [`arrays` object](c-2_migration_results.html#arrays).
+Regardless of the mechanics explained above, arrays __C__, __E__, __F__ and __G__ would never have any valid efficiency peers. As such, inter-array efficiency cannot be calculated for them using a CJS model. However, you have the chance to calculate intra-array efficiency, if an array is [composed by two lines of receivers](c-0_migration.html#replicates). You can find the efficiency peers of each array in the [`arrays` object](b-2_explore_results.html#arrays).
 
 
 #### Intra-array efficiency

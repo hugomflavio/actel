@@ -1,11 +1,10 @@
 <!DOCTYPE html>
 
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html>
 
 <head>
 
 <meta charset="utf-8" />
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <meta name="generator" content="pandoc" />
 <meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
 
@@ -13,7 +12,7 @@
 
 <meta name="author" content="Hugo Flávio" />
 
-<meta name="date" content="2019-11-21" />
+<meta name="date" content="2020-01-08" />
 
 <title>1.1) Structuring the study area</title>
 
@@ -218,7 +217,7 @@ code > span.fu { color: #900; font-weight: bold; }  code > span.er { color: #a61
 
 <h1 class="title toc-ignore">1.1) Structuring the study area</h1>
 <h4 class="author">Hugo Flávio</h4>
-<h4 class="date">2019-11-21</h4>
+<h4 class="date">2020-01-08</h4>
 
 
 
@@ -232,15 +231,14 @@ code > span.fu { color: #900; font-weight: bold; }  code > span.er { color: #a61
 </ol></li>
 <li><a href="b-0_explore.html">explore()</a>
 <ol style="list-style-type: decimal">
-<li><a href="b-1_explore_processes.html">From raw to movements</a></li>
+<li><a href="b-1_explore_processes.html">Processes behind explore()</a></li>
 <li><a href="b-2_explore_results.html">Inspecting the explore() results</a></li>
 </ol></li>
 <li><a href="c-0_migration.html">migration()</a>
 <ol style="list-style-type: decimal">
 <li><a href="c-1_migration_processes.html">Processes behind migration()</a></li>
 <li><a href="c-2_migration_results.html">Inspecting the migration() results</a></li>
-<li><a href="c-3_migration_manual_mode.html">Manual mode in migration()</a></li>
-<li><a href="c-4_migration_efficiency.html">One-way efficiency estimations</a></li>
+<li><a href="c-3_migration_efficiency.html">One-way efficiency estimations</a></li>
 </ol></li>
 <li><a href="d-0_residency.html">residency()</a>
 <ol style="list-style-type: decimal">
@@ -248,7 +246,8 @@ code > span.fu { color: #900; font-weight: bold; }  code > span.er { color: #a61
 <li><a href="d-2_residency_results.html">Inspecting the residency() results</a></li>
 <li><a href="d-3_residency_efficiency.html">Multi-way efficiency estimations</a></li>
 </ol></li>
-<li><a href="e-0_messages.html">Errors and messages</a></li>
+<li><a href="e-0_manual_mode.html">Manual mode</a></li>
+<li><a href="f-0_messages.html">Errors and messages</a></li>
 </ol>
 </div>
 <div id="from-the-field-to-the-computer" class="section level2">
@@ -350,12 +349,7 @@ code > span.fu { color: #900; font-weight: bold; }  code > span.er { color: #a61
 </div>
 <div id="rivers-with-multiple-parallel-channels" class="section level4">
 <h4>Rivers with multiple parallel channels</h4>
-<p>If your study area includes multiple pathways that the fish may take, you must tell actel how to connect the arrays. By default, arrays are sorted in a linear order according to the spatial.csv file. To instruct actel to act otherwise, you must create a ‘<strong>spatial.txt</strong>’ file. The spatial.txt file is very simple; all you need to do is connect your arrays with arrows. Here is an example:</p>
-<pre><code>River1 -- River2 -- River3 -- Fjord -- Sea1 -- Sea2 -- Sea3
-River1 -- River4 -- River5 -- Fjord
-River4 -- River6 -- Fjord</code></pre>
-<p>This will allow actel to properly structure your study area, and correctly estimate efficiency values for each array.</p>
-<p><a href="a-0_workspace_requirements.html#optional-spatial.txt-file">You can learn more about spatial.txt files here</a></p>
+<p>If your study area includes multiple pathways that the fish may take, you must tell actel how to connect the arrays. By default, arrays are sorted in a linear order according to the spatial.csv file. To instruct actel to act otherwise, you must create a ‘<strong>spatial.txt</strong>’ file. The spatial.txt file is very simple; all you need to do is connect your arrays with arrows. <a href="a-0_workspace_requirements.html#optional-spatial.txt-file">You can learn more about spatial.txt files here</a></p>
 <p>Now you know how to organise your study area in a way that actel will understand!</p>
 <p><strong><a href="javascript:history.back()">Return to previous page</a></strong></p>
 <p><a href="#">Back to top.</a></p>

@@ -4,8 +4,7 @@
 \alias{findPeers}
 \title{Find efficiency peers for each array}
 \usage{
-findPeers(input, dotmat, type = c("before", "after"),
-  disregard.parallels)
+findPeers(input, dotmat, type = c("before", "after"), disregard.parallels)
 }
 \arguments{
 \item{input}{An array list}

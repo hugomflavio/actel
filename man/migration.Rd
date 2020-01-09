@@ -2,70 +2,195 @@
 % Please edit documentation in R/migration.R
 \name{migration}
 \alias{migration}
-\title{Migration analysis}
+\title{Migration Analysis}
 \usage{
-migration(path = NULL, sections, success.arrays = NULL,
-  minimum.detections = 2, maximum.time = 60,
+migration(
+  path = NULL,
+  tz,
+  sections,
+  success.arrays = NULL,
+  max.interval = 60,
+  minimum.detections = 2,
+  start.time = NULL,
+  stop.time = NULL,
   speed.method = c("last to first", "first to first"),
-  speed.warning = NULL, speed.error = NULL,
-  if.last.skip.section = TRUE, tz.study.area, start.timestamp = NULL,
-  end.timestamp = NULL, report = TRUE, override = NULL,
-  exclude.tags = NULL, cautious.assignment = TRUE, replicates = NULL,
-  disregard.parallels = TRUE, jump.warning = 2, jump.error = 3,
-  inactive.warning = NULL, inactive.error = NULL, debug = FALSE)
+  speed.warning = NULL,
+  speed.error = NULL,
+  jump.warning = 2,
+  jump.error = 3,
+  inactive.warning = NULL,
+  inactive.error = NULL,
+  exclude.tags = NULL,
+  override = NULL,
+  report = TRUE,
+  if.last.skip.section = TRUE,
+  replicates = NULL,
+  disregard.parallels = TRUE,
+  debug = FALSE,
+  maximum.time = 60,
+  tz.study.area = NULL,
+  start.timestamp = NULL,
+  end.timestamp = NULL
+)
 }
 \arguments{
-\item{path}{Path to the folder containing the data. If the R session is already running in the target folder, path may be left as NA}
+\item{path}{Path to the folder containing the data. If left NULL (default),
+the analysis runs in the current folder.}
 
-\item{sections}{The sections in which the study was divided. Must be coincident with the names given to the ALS arrays. (i.e. if an array is 'River1', then the respective section is 'River')}
+\item{tz}{The time zone of the study area. Must match one of the values
+present in \code{\link[base]{timezones}}.}
 
-\item{success.arrays}{The ALS arrays mark the end of the study area. If a fish crosses one of these arrays, it is considered to have successfully migrated through the area.}
+\item{sections}{The sections in which the study area is divided. Must be
+coincident with the names given to the arrays. See the vignettes for more
+details.}
 
-\item{minimum.detections}{The minimum number of times a tag must have been recorded during the study period for it to be considered a true tag and not random noise.}
+\item{success.arrays}{The arrays that mark the end of the study area. If a
+fish crosses one of these arrays, it is considered to have successfully
+migrated through the study area.}
 
-\item{maximum.time}{The number of minutes that must pass between detections for a new event to be created.}
+\item{max.interval}{The number of minutes that must pass between detections
+for a new event to be created. Defaults to 60.}
 
-\item{speed.method}{One of 'last to first' or 'first to first'. In the former, the last detection on a given array/section is matched to the first detection on the next array/section (default). If changed to 'first to first', the first detection on two consecutive arrays/sections are used to perform the calculations.}
+\item{minimum.detections}{For tags with only one movement event, defines the
+minimum number of times a tag must have been recorded during the study
+period for it to be considered true detections and not random noise.
+Defaults to 2.}
 
-\item{speed.warning}{Numeric value (m/s). If a fish moves at a speed greater or equal to this argument, a warning is issued. Defaults to NULL (i.e. no speed checks are performed, with a message)}
+\item{start.time}{Detection data prior to the timestamp set in
+\code{start.time} (in YYYY-MM-DD HH:MM:SS format) is not considered during
+the analysis.}
 
-\item{speed.error}{Numeric value (m/s). If a fish moves at a speed greater or equal to this argument, user intervention is suggested. Defaults to NULL (i.e. no errors are issued)}
+\item{stop.time}{Detection data posterior to the timestamp set in
+\code{stop.time} (in YYYY-MM-DD HH:MM:SS format) is not considered during
+the analysis.}
 
-\item{if.last.skip.section}{Indicates whether a fish detected at the last array of a given section should be considered to have disappeared in the next section. Defaults to TRUE. I.e.: In a study with sections 'River' and 'Fjord', where 'River3' is the last river array, a fish last detected at River3 will be considered as 'disappeared in the Fjord'.}
+\item{speed.method}{Can take two forms: 'last to first' or 'first to first'.
+If 'last to first' (default), the last detection on a given array is matched
+to the first detection on the next array to perform the calculations.
+If 'first to first', the first detection on a given array is matched to the
+first detection on the next array to perform the calculations.}
 
-\item{tz.study.area}{The time-zone of the study area. Necessary to convert the ALS time data, which is in UTC.}
+\item{speed.warning}{If a fish moves at a speed equal or greater than
+\code{speed.warning} (in metres per second), a warning is issued. If left
+NULL (default), no warnings are issued.}
 
-\item{start.timestamp}{Detection data prior to this date is not analysed. Improves processing time when loading large amounts of detection data.}
+\item{speed.error}{If a fish moves at a speed equal or greater than
+\code{speed.error} (in metres per second), user intervention is suggested.
+If left NULL (default), user intervention is never suggested.}
 
-\item{end.timestamp}{Detection data posterior to this date is not analysed. Improves processing time when loading large amounts of detection data.}
+\item{jump.warning}{If a fish crosses a number of arrays equal or greater
+than \code{jump.error} without being detected, a warning is issued. If left
+NULL (default), no warnings are issued.}
 
-\item{report}{Whether graphics, tables and LaTeX report files should be created. Defaults to TRUE. Allows automatic compiling of a PDF report after the analysis.}
+\item{jump.error}{If a fish crosses a number of arrays equal or greater than
+\code{jump.error} without being detected, user intervention is suggested.
+If left NULL (default), user intervention is never suggested.}
 
-\item{override}{A list of tags for which the user intends to manually define entering and leaving points for each study section.}
+\item{inactive.warning}{If a fish spends a number of days equal or greater
+than \code{inactive.error} in a given array at the tail of the respective
+detections, a warning is issued. If left NULL (default), no warnings are
+issued.}
 
-\item{exclude.tags}{A list of tags that should be excluded from the detection data before any analyses are performed. Intended to be used if stray tags from a different code space but with the same signal as a target tag are detected in the study area.}
+\item{inactive.error}{If a fish spends a number of days equal or greater than
+\code{inactive.error} in a given array at the tail of the respective
+detections, user intervention is suggested. If left NULL (default), user
+intervention is never suggested.}
 
-\item{cautious.assignment}{If TRUE, actel avoids assigning events with one detection as first and/or last events of a section.}
+\item{exclude.tags}{A vector of tags that should be excluded from the
+detection data before any analyses are performed. Intended to be used if
+stray tags from a different code space but with the same signal as a target
+tag are detected in the study area.}
 
-\item{replicates}{A list containing, for each desired array, the standard names of the stations to be used as a replicate, for efficiency estimations.}
+\item{override}{A vector of tags for which the user intends to manually
+define which movement events are valid and invalid.}
 
-\item{disregard.parallels}{Logical. If TRUE, the presence of parallel arrays does not invalidate potential efficiency peers. For more details on this, have a look at the vignettes.}
+\item{report}{Logical. Should an HTML report be created at the end of the
+analysis?}
 
-\item{jump.warning}{Integer value. If a fish crosses ´jump.warning´ arrays without being detected, a warning is issued.}
+\item{if.last.skip.section}{Logical: Should a fish detected at the last array
+of a given section be considered to have disappeared in the next section?}
 
-\item{jump.error}{Integer value. If a fish crosses ´jump.error´ arrays without being detected, user intervention is suggested.}
+\item{replicates}{A list containing, for each array to which intra-array
+efficiency is to be calculated: The standard names of the stations to be
+used as a replicate. See the vignettes for more details.}
 
-\item{inactive.warning}{Numeric value (days). If a fish spends a number of days greater or equal to this argument in a given place, a warning is issued. Defaults to NULL (i.e. no speed checks are performed, with a message)}
+\item{disregard.parallels}{Logical:  Should the presence of parallel arrays
+invalidate potential efficiency peers? See the vignettes for more details.}
 
-\item{inactive.error}{Numeric value (days). If a fish spends a number of days greater or equal to this argument in a given place, user intervention is suggested. Defaults to NULL (i.e. no errors are issued)}
+\item{debug}{Logical: Should temporary files be kept at the end of the
+analysis?}
 
-\item{debug}{If TRUE, temporary files are not deleted at the end of the analysis. Defaults to FALSE.}
+\item{maximum.time}{DEPRECATED. See \code{max.interval}.}
+
+\item{tz.study.area}{DEPRECATED. See \code{tz}.}
+
+\item{start.timestamp}{DEPRECATED. See \code{start.time}.}
+
+\item{end.timestamp}{DEPRECATED See argument \code{stop.time}}
 }
 \value{
-A list containing 1) the detections used during the analysis, 2) the movement events, 3) the status dataframe, 4) the survival overview per group, 5) the progression through the study area, 6) the ALS array/sections' efficiency, 7) the list of spatial objects used during the analysis.
+A list containing:
+\itemize{
+\item \code{detections}: All detections for each target fish;
+\item \code{valid.detections}: Valid detections for each target fish;
+\item \code{spatial}: The spatial information used during the analysis;
+\item \code{deployments}: The deployments of each receiver;
+\item \code{arrays}: The array details used during the analysis;
+\item \code{movements}: All movement events for each target fish;
+\item \code{valid.movements}: Valid movemenet events for each target fish;
+\item \code{section.movements}: Valid section shifts for each target fish;
+\item \code{status.df}: Summary information for each fish, including the
+following columns:
+\itemize{
+\item \emph{Time.until.[section]}: Time spent between leaving one
+section and reaching the next.
+\item \emph{Speed.to.[section]}: Average speed from one section to the
+next (if a distance matrix is provided)
+\item \emph{First.station.[section]}: Standard name of the first station
+where the fish was detected in a given section
+\item \emph{Arrived.[section]}: Arrival time at a given section
+\item \emph{Time.in.[section]}: Total time spent within a given section
+\item \emph{Last.station.[section]}: Standard name of the last station
+where the fish was detected in a given section
+\item \emph{Left.[section]}: Departure time from a givem section
+\item \emph{Very.last.array}: Last array where the fish was detected
+\item \emph{Status}: Fate assigned to the fish
+\item \emph{Valid.detections}: Number of valid detections
+\item \emph{Invalid.detections}: Number of invalid detections
+\item \emph{Backwards.movements}: Number of backward movement events
+\item \emph{Max.cons.back.moves}: Longest successive backwards movements
+\item \emph{P.type}: Type of processing:
+\itemize{
+\item 'Skipped' if no data was found for the fish,
+\item 'Auto' if no user interaction was required,
+\item 'Manual' if user interaction was suggested and the user made
+changes to the validity of the events,
+\item 'Overridden' if the user listed the fish in the
+\code{override} argument.
+}
+\item \emph{Comments}: Comments left by the user during the analysis
+}
+\item \code{section.overview}: Summary table of the number of fish that
+disappeared in each section;
+\item \code{array.overview}: Number of known and estimated fish to have
+passed through each array;
+\item \code{matrices}: CJS matrices used for the efficiency calculations;
+\item \code{overall.CJS}: Results of the inter-array CJS calculations;
+\item \code{intra.array.CJS}: Results of the intra-array CJS calculations;
+\item \code{times}: All arrival times (per fish) at each array;
+\item \code{rsp.info}: Appendix information for the RSP package;
+\item \code{dist.mat}: The distance matrix used in the analysis (if a valid
+distance matrix was supplied)
+}
 }
 \description{
-The actel package provides a systematic way of analysing fish migration data.
-migration() collects the input present in the target folder and analyses the telemetry data, extracting migration-related metrics.
-It is strongly recommended to read the package vignettes before attempting to run the analyses. You can find the vignettes by running browseVignettes('actel') .
+The \code{migration} analysis runs the same initial checks as \code{explore},
+but on top of it, it analyses the fish behaviour. By selecting the arrays
+that lead to success, you can define whether or not your fish survived the
+migration. Additional plots help you find out if some fish has been acting
+odd. Multiple options allow you to tweak the analysis to fit your study
+perfectly.
+}
+\seealso{
+\code{\link{explore}}, \code{\link{residency}}
 }

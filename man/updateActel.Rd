@@ -2,10 +2,10 @@
 % Please edit documentation in R/helper.R
 \name{updateActel}
 \alias{updateActel}
-\title{Open actel installation instructions}
+\title{Display Update Help}
 \usage{
 updateActel()
 }
 \description{
-Open actel installation instructions
+Display Update Help
 }

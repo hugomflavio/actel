@@ -7,7 +7,7 @@
 moveHelpers(my.home)
 }
 \arguments{
-\item{my.home}{The working directory where the function was triggered.}
+\item{my.home}{The working directory where the main function was triggered.}
 }
 \description{
 Move helper files to new directory

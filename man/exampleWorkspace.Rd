@@ -2,20 +2,17 @@
 % Please edit documentation in R/z_examples.R
 \name{exampleWorkspace}
 \alias{exampleWorkspace}
-\title{Create an example Workspace}
+\title{Deploy Example Data}
 \usage{
-exampleWorkspace(spatial = example.spatial,
-  biometrics = example.biometrics, detections = example.detections,
-  deployments = example.deployments)
+exampleWorkspace(
+  spatial = example.spatial,
+  biometrics = example.biometrics,
+  detections = example.detections,
+  deployments = example.deployments
+)
 }
 \arguments{
-\item{spatial}{A dataset containing the positions of the deployed ALS and release site.}
-
-\item{biometrics}{A dataset containing the positions of the deployed ALS and release site.}
-
-\item{detections}{A dataset containing the detections of the deployed ALS, for the 60 fish.}
-
-\item{deployments}{A dataset containing the deployed receivers.}
+\item{spatial, biometrics, detections, deployments}{Datasets provided with the package.}
 }
 \description{
 Creates a ready-to-run workspace with example data.

@@ -11,7 +11,7 @@ globalRatios(positions)
 }
 \value{
 A list with 1) a table containing the absolute number of fish at each location per day,
- and 2) the respective percentage table.
+and 2) the respective percentage table.
 }
 \description{
 Calculate number/percentage of fish at each location for each day

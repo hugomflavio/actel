@@ -9,7 +9,7 @@ recalculateCJS(input, estimate = NULL, fixed.efficiency = NULL)
 \arguments{
 \item{input}{A list of CJS results to be combined}
 
-\item{estimate}{an estimate of the last array's efficiency}
+\item{estimate}{an estimate of the last array's efficiency.}
 
 \item{fixed.efficiency}{A vector of fixed efficiency estimates from a more complete CJS model.}
 }

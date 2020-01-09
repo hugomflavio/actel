@@ -2,25 +2,29 @@
 % Please edit documentation in R/helper.R
 \name{transitionLayer}
 \alias{transitionLayer}
-\title{Calculate distance matrix}
+\title{Calculate Transition Layer}
 \usage{
-transitionLayer(shape, size, EPSGcode, directions = c(16, 8, 4),
-  force = FALSE)
+transitionLayer(shape, size, EPSGcode, directions = c(16, 8, 4), force = FALSE)
 }
 \arguments{
-\item{shape}{A shape file from which to create the transition layer.}
+\item{shape}{A shape file projected in a metric coordinate system.}
 
 \item{size}{The pixel size, in metres.}
 
-\item{EPSGcode}{The EPSG code corresponding to the coordinate system of the input data. All inputs must be in the same metric system. DO NOT use degree-based coordinates.}
+\item{EPSGcode}{The EPSG code of the shape file's coordinate system. DO NOT USE degree-based coordinate systems.}
 
-\item{directions}{The number of directions considered for every movement situation during cost calculation.}
+\item{directions}{The number of directions considered for every movement situation during cost calculation. See the vignettes for more details.}
 
-\item{force}{logical: if TRUE, allows producing transition layers with more than 2000 pixels on one or both axes.}
+\item{force}{Logical: Should the process continue even if the transition layer has 2000 pixels on one or both axes?}
+}
+\value{
+A RData file with the transition layer is stored in the current directory.
 }
 \description{
-Adapted from Grant Adams' script "distance to closest mpa". (grant.adams@eagles.usm.edu)
+\code{transitionLayer} imports a shape file into R and prepares it to be used in distance
+estimations. Adapted from Grant Adams' script "distance to closest mpa".
+(grant.adams@eagles.usm.edu)
 }
 \details{
-https://cran.r-project.org/web/packages/gdistance/vignettes/gdistance1.pdf
+\url{https://cran.r-project.org/web/packages/gdistance/vignettes/gdistance1.pdf}
 }

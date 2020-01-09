@@ -22,18 +22,18 @@ knitr::opts_chunk$set(
     1. [Structuring the study area](a-1_study_area.html)
     1. [Creating a distances matrix](a-2_distances_matrix.html)
 1. [explore()](b-0_explore.html)
-    1. [From raw to movements](b-1_explore_processes.html)
+    1. [Processes behind explore()](b-1_explore_processes.html)
     1. [Inspecting the explore() results](b-2_explore_results.html)
 1. [migration()](c-0_migration.html)
     1. [Processes behind migration()](c-1_migration_processes.html)
     1. [Inspecting the migration() results](c-2_migration_results.html)
-    1. [Manual mode in migration()](c-3_migration_manual_mode.html)
-    1. [One-way efficiency estimations](c-4_migration_efficiency.html)
+    1. [One-way efficiency estimations](c-3_migration_efficiency.html)
 1. [residency()](d-0_residency.html)
     1. [__Processes behind residency()__](d-1_residency_processes.html)
     1. [Inspecting the residency() results](d-2_residency_results.html)
     1. [Multi-way efficiency estimations](d-3_residency_efficiency.html)
-1. [Errors and messages](e-0_messages.html)
+1. [Manual mode](e-0_manual_mode.html)
+1. [Errors and messages](f-0_messages.html)
 
 
 Note: 
@@ -43,7 +43,7 @@ Note:
 
 The initial processes of residency() are the same as those from [the explore() function](b-1_explore_processes.html).
 
-Upon validating the movement events, the residency analysis proceeds to compressing these array-level events into section-level events. [You can find an example here](d-2_residency_results.html#section.movements). This shows how many times a fish entered and left each section. It is here that [the argument `section.minimum`](d-0_residency.html#section.minimumm) comes in. If the number of consecutive detections at a given section are lower than the value stipulated, a warning will be issued, and user interaction is suggested:
+Upon validating the movement events, the residency analysis proceeds to compressing these array-level events into section-level events. [You can find an example here](d-2_residency_results.html#section.movements). This shows how many times a fish entered and left each section. It is here that [the argument `section.minimum`](d-0_residency.html#section.minimum) comes in. If the number of consecutive detections at a given section are lower than the value stipulated, a warning will be issued, and user interaction is suggested:
 
 ````
 M: Section movements with less than 2 detections are present for fish R64K-3.

@@ -7,7 +7,13 @@
 efficiencyMatrix(movements, arrays, paths, dotmat)
 }
 \arguments{
-\item{movements}{A list of movements for each target tag, created by groupMovements.}
+\item{movements}{The movements table.}
+
+\item{arrays}{A list containing information for each array.}
+
+\item{paths}{A list containing the shortest paths between arrays with distance > 1.}
+
+\item{dotmat}{The matrix of distances between arrays.}
 }
 \value{
 a matrix of detection histories per fish.

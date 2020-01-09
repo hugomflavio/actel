@@ -7,7 +7,7 @@
 convertTimesToCircular(times)
 }
 \arguments{
-\item{times}{A data frame with the time stamps for reach fish and array}
+\item{times}{A data frame with the time stamps for reach fish and array.}
 }
 \value{
 A list of circular objects

@@ -9,7 +9,9 @@ printProgression(dot, sections, overall.CJS, spatial, status.df)
 \arguments{
 \item{dot}{a dot data frame}
 
-\item{sections}{The sections in which the study was divided. Must be coincident with the names given to the ALS arrays. (i.e. if an array is 'River1', then the respective section is 'River')}
+\item{sections}{The sections in which the study area is divided. Must be
+coincident with the names given to the arrays. See the vignettes for more
+details.}
 
 \item{overall.CJS}{a single CJS with all the groups and release sites merged}
 

@@ -7,7 +7,7 @@
 checkDeploymentStations(input, spatial)
 }
 \arguments{
-\item{input}{the table of deployments}
+\item{input}{The table of deployments}
 
 \item{spatial}{The spatial data frame, as loaded by loadSpatial}
 }

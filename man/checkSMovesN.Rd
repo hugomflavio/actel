@@ -4,12 +4,15 @@
 \alias{checkSMovesN}
 \title{Verify number of detections in section movements}
 \usage{
-checkSMovesN(secmoves, section.minimum)
+checkSMovesN(secmoves, fish, section.minimum)
 }
 \arguments{
 \item{secmoves}{the section movements list}
 
-\item{section.minimum}{threshold consecutive number of detections in a section that awards confidence in the results. If the number of detections is lower than this argument, a warning is issued and user interaction is allowed.}
+\item{fish}{The fish being analysed}
+
+\item{section.minimum}{If a fish has less than \code{section.minimum}
+consecutive detections in a section, a warning is issued. Defaults to 2.}
 }
 \value{
 the section movements with valid/invalid notes

@@ -4,9 +4,18 @@
 \alias{copyOfCirclePlotRad}
 \title{circular:::circlePlotRad}
 \usage{
-copyOfCirclePlotRad(xlim = c(-1, 1), ylim = c(-1, 1), uin = NULL,
-  shrink = 1, tol = 0.04, main = NULL, sub = NULL, xlab = NULL,
-  ylab = NULL, control.circle = circular::circle.control())
+copyOfCirclePlotRad(
+  xlim = c(-1, 1),
+  ylim = c(-1, 1),
+  uin = NULL,
+  shrink = 1,
+  tol = 0.04,
+  main = NULL,
+  sub = NULL,
+  xlab = NULL,
+  ylab = NULL,
+  control.circle = circular::circle.control()
+)
 }
 \arguments{
 \item{xlim, ylim}{the ranges to be encompassed by the x and y axes. Useful for centering the plot.}
@@ -22,11 +31,11 @@ copyOfCirclePlotRad(xlim = c(-1, 1), ylim = c(-1, 1), uin = NULL,
 \item{control.circle}{parameters passed to plot.default in order to draw the circle. The function circle.control is used to set the parameters.}
 }
 \description{
-This function is an EXACT copy of the function circlePlotRad in the circular package. 
+This function is an EXACT copy of the function circlePlotRad in the circular package.
 As the function is not exported by the original package, I have copied it here to resolve
 the note thrown by devtools:check()
 }
 \details{
-For more details about the original function, visit the circular package homepage at https://github.com/cran/circular
+For more details about the original function, visit the circular package homepage at \url{https://github.com/cran/circular}
 }
 \keyword{internal}

@@ -6,10 +6,10 @@
 \title{Example deployment data}
 \format{A data frame with 17 rows and 4 variables:
 \describe{
-  \item{Receiver}{The receiver serial number}
-  \item{Station.Name}{The name given to the receiver}
-  \item{Start}{The date and time of the deployment}
-  \item{Stop}{The date and time of the retrieval}
+\item{Receiver}{The receiver serial number}
+\item{Station.name}{The name given to the receiver}
+\item{Start}{The date and time of the deployment}
+\item{Stop}{The date and time of the retrieval}
 }}
 \source{
 Data collected by the authors.
@@ -20,4 +20,4 @@ example.deployments
 \description{
 A dataset containing the deployed receivers.
 }
-\keyword{datasets}
+\keyword{internal}

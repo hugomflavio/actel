@@ -7,9 +7,9 @@
 minuteTime(x, format = c("h", "m", "s"), seconds = TRUE)
 }
 \arguments{
-\item{x}{Single string or a vector of strings containing hours:minutes or hours:minutes:seconds}
+\item{x}{Single string or a vector of strings containing hours:minutes or hours:minutes:seconds.}
 
-\item{format}{the format of x, one of "h" (hours), "m", (minutes) or "s" (seconds)}
+\item{format}{the format of x, one of "h" (hours), "m", (minutes) or "s" (seconds).}
 
 \item{seconds}{Logical; If TRUE, output is returned in HH:MM:SS format.}
 }
@@ -19,3 +19,4 @@ Decimal hour equivalent (single value or vector)
 \description{
 Convert numeric time to HH:MM
 }
+\keyword{internal}

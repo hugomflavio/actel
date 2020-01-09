@@ -4,17 +4,16 @@
 \alias{simpleCJS}
 \title{Compute simple CJS model}
 \usage{
-simpleCJS(input, estimate = NULL, fixed.efficiency = NULL,
-  silent = TRUE)
+simpleCJS(input, estimate = NULL, fixed.efficiency = NULL, silent = TRUE)
 }
 \arguments{
-\item{input}{a detection matrix}
+\item{input}{A presence/Absence matrix.}
 
-\item{estimate}{an estimate of the last array's efficiency}
+\item{estimate}{an estimate of the last array's efficiency.}
 
 \item{fixed.efficiency}{A vector of fixed efficiency estimates from a more complete CJS model.}
 
-\item{silent}{logical: if TRUE, suppress messages.}
+\item{silent}{Logical: Should messages be printed?}
 }
 \value{
 A summary of the CJS results
@@ -22,3 +21,4 @@ A summary of the CJS results
 \description{
 The calculations are based on 'Using mark-recapture models to estimate survival from telemetry data' by Perry et al. 2012
 }
+\keyword{internal}

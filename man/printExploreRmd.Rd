@@ -4,10 +4,20 @@
 \alias{printExploreRmd}
 \title{Print Rmd report}
 \usage{
-printExploreRmd(biometric.fragment, individual.plots, circular.plots,
-  spatial, detections, valid.detections)
+printExploreRmd(
+  override.fragment,
+  biometric.fragment,
+  individual.plots,
+  circular.plots,
+  spatial,
+  deployments,
+  detections,
+  valid.detections
+)
 }
 \arguments{
+\item{override.fragment}{Rmarkdown string specifying the type of report for the header.}
+
 \item{biometric.fragment}{Rmarkdown string specifying the biometric graphics drawn.}
 
 \item{individual.plots}{Rmarkdown string specifying the name of the individual plots.}

@@ -9,7 +9,7 @@ countBackMoves(movements, arrays)
 \arguments{
 \item{movements}{A list of movements for each target tag, created by groupMovements.}
 
-\item{arrays}{a list of arrays}
+\item{arrays}{A list containing information for each array.}
 }
 \value{
 The number of backwards movements and the maximum consecutive backwards movements

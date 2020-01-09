@@ -4,16 +4,22 @@
 \alias{checkSpeeds}
 \title{check fish speeds against defined thresholds (in m/s)}
 \usage{
-checkSpeeds(movements, valid.movements, speed.warning, speed.error)
+checkSpeeds(movements, fish, valid.movements, speed.warning, speed.error)
 }
 \arguments{
-\item{movements}{the movements list}
+\item{movements}{The movements table}
 
-\item{valid.movements}{a temporary valid.movements list, with updated speeds}
+\item{fish}{The fish being analysed}
 
-\item{speed.warning}{Numeric value (m/s). If a fish moves at a speed greater or equal to this argument, a warning is issued. Defaults to NULL (i.e. no speed checks are performed, with a message)}
+\item{valid.movements}{The valid movements table}
 
-\item{speed.error}{Numeric value (m/s). If a fish moves at a speed greater or equal to this argument, user intervention is suggested. Defaults to NULL (i.e. no errors are issued)}
+\item{speed.warning}{If a fish moves at a speed equal or greater than
+\code{speed.warning} (in metres per second), a warning is issued. If left
+NULL (default), no warnings are issued.}
+
+\item{speed.error}{If a fish moves at a speed equal or greater than
+\code{speed.error} (in metres per second), user intervention is suggested.
+If left NULL (default), user intervention is never suggested.}
 }
 \value{
 The valid movements list with valid/invalid rows

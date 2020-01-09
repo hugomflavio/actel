@@ -4,8 +4,14 @@
 \alias{speedReleaseToFirst}
 \title{Calculate time and speed since release.}
 \usage{
-speedReleaseToFirst(fish, bio, movements, dist.mat, invalid.dist = FALSE,
-  silent = TRUE)
+speedReleaseToFirst(
+  fish,
+  bio,
+  movements,
+  dist.mat,
+  invalid.dist = FALSE,
+  silent = TRUE
+)
 }
 \arguments{
 \item{fish}{The tag ID of the fish currently being analysed}
@@ -26,3 +32,4 @@ The movement data frame containing the missing information.
 \description{
 Calculate time and speed since release.
 }
+\keyword{internal}

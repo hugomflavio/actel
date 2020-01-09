@@ -15,3 +15,4 @@ a matrix of distances between arrays
 \description{
 Create numerical distances between dot elements
 }
+\keyword{internal}

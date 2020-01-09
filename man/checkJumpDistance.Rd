@@ -4,21 +4,24 @@
 \alias{checkJumpDistance}
 \title{Check if fish are jumping over arrays}
 \usage{
-checkJumpDistance(movements, bio, spatial, dotmat, jump.warning = 2,
-  jump.error = 3)
+checkJumpDistance(movements, fish, release, dotmat, jump.warning, jump.error)
 }
 \arguments{
-\item{movements}{A list of movements for each target tag, created by groupMovements.}
+\item{movements}{The movements table}
 
-\item{bio}{A table with the tags and biometrics of the studied fish.}
+\item{fish}{The fish being analysed}
 
-\item{spatial}{A list of spatial objects in the study area}
+\item{release}{The release location of the fish}
 
-\item{dotmat}{A dot distance matrix}
+\item{dotmat}{The matrix of distances between arrays}
 
-\item{jump.warning}{Integer value. If a fish crosses ´jump.warning´ arrays without being detected, a warning is issued.}
+\item{jump.warning}{If a fish crosses a number of arrays equal or greater
+than \code{jump.error} without being detected, a warning is issued. If left
+NULL (default), no warnings are issued.}
 
-\item{jump.error}{Integer value. If a fish crosses ´jump.error´ arrays without being detected, user intervention is suggested.}
+\item{jump.error}{If a fish crosses a number of arrays equal or greater than
+\code{jump.error} without being detected, user intervention is suggested.
+If left NULL (default), user intervention is never suggested.}
 }
 \value{
 a checked movements list

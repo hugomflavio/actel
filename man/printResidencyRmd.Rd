@@ -4,13 +4,26 @@
 \alias{printResidencyRmd}
 \title{Print Rmd report}
 \usage{
-printResidencyRmd(biometric.fragment, efficiency.fragment,
-  individual.detection.plots, individual.residency.plots,
-  array.circular.plots, section.arrival.circular.plots,
-  section.departure.circular.plots, spatial, deployments, detections,
-  valid.detections, last.seen, last.seen.graph.size)
+printResidencyRmd(
+  override.fragment,
+  biometric.fragment,
+  efficiency.fragment,
+  individual.detection.plots,
+  individual.residency.plots,
+  array.circular.plots,
+  section.arrival.circular.plots,
+  section.departure.circular.plots,
+  spatial,
+  deployments,
+  detections,
+  valid.detections,
+  last.seen,
+  last.seen.graph.size
+)
 }
 \arguments{
+\item{override.fragment}{Rmarkdown string specifying the type of report for the header.}
+
 \item{biometric.fragment}{Rmarkdown string specifying the biometric graphics drawn.}
 
 \item{efficiency.fragment}{Rmarkdown string specifying the efficiency results.}

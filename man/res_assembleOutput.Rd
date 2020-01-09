@@ -4,14 +4,13 @@
 \alias{res_assembleOutput}
 \title{Create status.df}
 \usage{
-res_assembleOutput(res.df, bio, spatial, sections, tz.study.area)
+res_assembleOutput(res.df, bio, spatial, sections, tz)
 }
 \arguments{
 \item{bio}{A table with the tags and biometrics of the studied fish.}
 
-\item{sections}{The sections in which the study was divided. Must be coincident with the names given to the ALS arrays. (i.e. if an array is 'River1', then the respective section is 'River')}
-
-\item{tz.study.area}{The time-zone of the study area. Necessary to convert the ALS time data, which is in UTC.}
+\item{tz}{The time zone of the study area. Must match one of the values
+present in \code{\link[base]{timezones}}.}
 }
 \value{
 A data frame containing all the final data for each fish.

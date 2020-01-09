@@ -6,6 +6,9 @@
 \usage{
 deleteHelpers(emergency = FALSE)
 }
+\arguments{
+\item{emergency}{Logical: Should temp_debug.txt be kept?}
+}
 \description{
 At the end of the function actel or emergencyBreak, removes temporary files.
 }

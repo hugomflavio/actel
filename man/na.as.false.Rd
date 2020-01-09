@@ -13,6 +13,6 @@ na.as.false(input)
 TRUE/FALSE vector
 }
 \description{
-Aimed to be used in a vector of TRUE/FALSE's, where NA's are present and should be considered as false
+Aimed to be used in a vector of TRUE/FALSE's, where NA's are present and should be considered as false.
 }
 \keyword{internal}
