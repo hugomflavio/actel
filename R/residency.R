@@ -370,6 +370,11 @@ detections.list <- study.data$detections.list
 
   residency.list <- getResidency(movements = section.movements, spatial = spatial)
 
+  if (length(residency.list) == 0) {
+    emergencyBreak()
+    stop("No fish have enough data for residency analysis. Consider running explore() instead.\n", call. = FALSE)
+  }
+  
   appendTo(c("Screen", "Report"), "M: Calculating daily locations for each fish.")
 
   daily.ratios <- dailyRatios(res = residency.list)
