@@ -64,7 +64,7 @@ Here are some examples:
 
 ## Installing actel 
 
-Current version: 0.1.1
+Current version: 0.1.2
 
 To install actel, you will need to have the devtools package installed.
 
