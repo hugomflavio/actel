@@ -12,6 +12,7 @@ Fixes:
   * Prevent crash when calculating multi-way efficiency estimations for fish that jumped at release
   * Prevent crash during residency analysis if a fish had more than one detection but all at the exact same time
   * Prevent crash when loading empty detection files
+  * Display correct event numbers and names when speed warnings are triggered
 
 Changes:
   * 'maximum.time' has been renamed to 'max.interval'
