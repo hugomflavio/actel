@@ -77,7 +77,7 @@ checkSpeeds <- function(movements, fish, valid.movements, speed.warning, speed.e
       for (i in 1:length(link)) {
         appendTo(c("Report", "Warning", "Screen"), 
           other.warning <- paste0("Fish ", fish, " had an average speed of ", round(vm$Average.speed.m.s[link[i]], 2),
-            " m/s from valid event ", link[i], " to ", link[i] + 1, " (",vm$Array[i], " -> ", vm$Array[i + 1], ")."))
+            " m/s from valid event ", link[i] - 1, " to ", link[i], " (",vm$Array[link[i] - 1], " -> ", vm$Array[link[i]], ")."))
         other.warning <- paste("Warning:", other.warning)
         the.warning <- c(the.warning, other.warning)
       }
