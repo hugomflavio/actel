@@ -545,7 +545,7 @@ Note:
 ### Individual plots
 
 Note:
-  : The detections are coloured by array. The vertical black dashed line shows the time of release. The dashed dark-grey line shows the generated movement events.
+  : The detections are coloured by array. The full dark-grey line shows the movement events considered valid, while the dashed dark-grey line shows the movement events considered invalid.
   : The movement event lines move straight between the first and last station of each event (i.e. in-between detections will not be individually linked by the line).
   : Manually **edited** fish are highlighted with **yellow** graphic borders.
   : The stations have been grouped by array, following the array order provided either in the spatial.csv file or in the spatial.txt file.
