@@ -628,8 +628,8 @@ printIndividuals <- function(redraw, detections.list, bio, status.df = NULL, tz,
           the.colours <- c(gg_colour_hue(length(levels(PlotData$Array)) - 1), "#999999")
         else
           the.colours <- gg_colour_hue(length(levels(PlotData$Array)))
-        p <- p + ggplot2::scale_color_manual(values = the.colours, drop = FALSE)
       }
+      p <- p + ggplot2::scale_color_manual(values = the.colours, drop = FALSE)
       # Plot points
       p <- p + ggplot2::geom_point()
       # Fixate Y axis
