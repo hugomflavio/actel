@@ -2,6 +2,11 @@
 
 Find out the main highlights of each update.
 
+## development
+
+Fixes:
+  * Force R to assume detection files are separated by commas (prevents ocasional thelma log crash)
+
 ## actel 0.1.2
 
 Fixes:

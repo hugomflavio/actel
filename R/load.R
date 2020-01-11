@@ -782,7 +782,7 @@ compileDetections <- function(path = "detections", start.time = NULL, stop.time 
   # Prepare the detection files
   data.files <- lapply(file.list, function(i) {
     appendTo("debug", paste0("Importing file '", i, "'."))
-    aux <- data.table::fread(i, fill = TRUE, showProgress = FALSE)
+    aux <- data.table::fread(i, fill = TRUE, sep = ",", showProgress = FALSE)
     if(nrow(aux) > 0){
       unknown.file <- TRUE
       if (unknown.file && any(grepl("CodeType", colnames(aux)))) {
