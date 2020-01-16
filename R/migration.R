@@ -393,7 +393,10 @@ migration <- function(path = NULL, tz, sections, success.arrays = NULL, max.inte
 
   appendTo("Screen", "M: Validating detections...")
 
-  valid.detections <- validateDetections(detections.list = detections.list, movements = valid.movements)
+  recipient <- validateDetections(detections.list = detections.list, movements = valid.movements)
+  detections <- recipient$detections
+  valid.detections <- recipient$valid.detections
+  rm(recipient)
 
 # -------------------------------------
 
@@ -423,7 +426,7 @@ migration <- function(path = NULL, tz, sections, success.arrays = NULL, max.inte
     overall.CJS <- assembleArrayCJS(mat = the.matrices, CJS = CJS.list, arrays = arrays)
 
     if (!is.null(replicates)) {
-      intra.array.matrices <- getDualMatrices(replicates = replicates, CJS = overall.CJS, spatial = spatial, detections.list = detections.list)
+      intra.array.matrices <- getDualMatrices(replicates = replicates, CJS = overall.CJS, spatial = spatial, detections.list = detections)
       recipient <- includeIntraArrayEstimates(m = intra.array.matrices, CJS = overall.CJS)
       overall.CJS <- recipient[[1]]
       intra.array.CJS <- recipient[[2]]
@@ -449,7 +452,6 @@ migration <- function(path = NULL, tz, sections, success.arrays = NULL, max.inte
 # -------------------------------------
 
 # wrap up in-R objects
-  detections <- detections.list
   deployments <- do.call(rbind.data.frame, deployments)
   matrices <- the.matrices
 
@@ -744,7 +746,7 @@ Note:
   : Manually **edited** fish are highlighted with **yellow** graphic borders.
   : Manually **overridden** fish are highlighted with **red** graphic borders.
   : The stations have been grouped by array, following the array order provided either in the spatial.csv file or in the spatial.txt file.
-  : The data used in these graphics is stored in the `detections`, `movements` and `valid.movements` objects.
+  : The data used in these graphics is stored in the `detections` and `movements` objects (and respective valid counterparts).
 
 <center>
 ', individual.plots,'

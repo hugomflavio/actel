@@ -385,7 +385,10 @@ detections.list <- study.data$detections.list
 
   appendTo("Screen", "M: Validating detections...")
 
-  valid.detections <- validateDetections(detections.list = detections.list, movements = valid.movements)
+  recipient <- validateDetections(detections.list = detections.list, movements = valid.movements)
+  detections <- recipient$detections
+  valid.detections <- recipient$valid.detections
+  rm(recipient)
 
 # ---------------
   
@@ -393,7 +396,7 @@ detections.list <- study.data$detections.list
   appendTo(c("Screen", "Report"), "M: Calculating array efficiency.")
   efficiency <- res_efficiency(arrmoves = valid.movements, bio = bio, spatial = spatial, arrays = arrays, paths = paths, dotmat = dotmat)
   if (!is.null(replicates)) {
-    intra.array.matrices <- getDualMatrices(replicates = replicates, CJS = NULL, spatial = spatial, detections.list = detections.list)
+    intra.array.matrices <- getDualMatrices(replicates = replicates, CJS = NULL, spatial = spatial, detections.list = detections)
     recipient <- includeIntraArrayEstimates(m = intra.array.matrices, efficiency = efficiency, CJS = NULL)
     efficiency <- recipient[[1]]
     intra.array.CJS <- recipient[[2]]
@@ -409,7 +412,6 @@ detections.list <- study.data$detections.list
 # ---------------
 
 # wrap up in-R objects
-  detections <- detections.list
   deployments <- do.call(rbind.data.frame, deployments)
 
   if (!debug)
@@ -742,7 +744,7 @@ Note:
   : The movement event lines move straight between the first and last station of each event (i.e. in-between detections will not be individually linked by the line).
   : Manually **edited** fish are highlighted with **yellow** graphic borders.
   : The stations have been grouped by array, following the array order provided either in the spatial.csv file or in the spatial.txt file.
-  : The data used in these graphics is stored in the `detections`, `movements` and `valid.movements` objects.
+  : The data used in these graphics is stored in the `detections` and `movements` objects (and respective valid counterparts).
 
 <center>
 ', individual.detection.plots,'

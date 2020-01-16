@@ -5,8 +5,13 @@ Find out the main highlights of each update.
 ## development
 
 Fixes:
-  * Force R to assume detection files are separated by commas (prevents occasional Thelma log crash)
+  * Force R to assume detection files are separated by commas (prevents occasional Thelma log crash).
   * Fix bug where fish whose data started in summer time and extended into winter time would cause one day to be lost in the daily positions during residency analysis.
+
+Enhancements:
+  * The object `detections` now contains a "Valid" column, similarly to the `movements` objects.
+  * Invalid detections are now painted in grey in the individual detection plots.
+
 
 ## actel 0.1.2
 

@@ -541,6 +541,14 @@ printIndividuals <- function(detections.list, bio, status.df = NULL, tz,
     counter <<- counter + 1
     PlotData <- detections.list[[fish]]
     PlotData$Standard.name <- factor(PlotData$Standard.name, levels = y.order)
+
+    if (any(levels(PlotData$Array) == "Unknown"))
+      levels(PlotData$Array)[levels(PlotData$Array) == "Unknown"] = "Invalid"
+    else
+      levels(PlotData$Array) <- c(levels(PlotData$Array), "Invalid")
+    if (any(!PlotData$Valid))
+      PlotData$Array[!PlotData$Valid] <- "Invalid"
+    
     all.moves.line <- data.frame(
       Station = as.vector(t(movements[[fish]][, c("First.station", "Last.station")])),
       Timestamp = as.vector(t(movements[[fish]][, c("First.time", "Last.time")]))

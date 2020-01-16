@@ -325,12 +325,13 @@ detections.list <- study.data$detections.list
 
   appendTo("Screen", "M: Validating detections...")
 
-  valid.detections <- validateDetections(detections.list = detections.list, movements = valid.movements)
-
+  recipient <- validateDetections(detections.list = detections.list, movements = valid.movements)
+  detections <- recipient$detections
+  valid.detections <- recipient$valid.detections
+  rm(recipient)
 # -------------------------------------
 
 # wrap up in-R objects
-  detections <- detections.list
   deployments <- do.call(rbind.data.frame, deployments)
   
   # extra info for potential RSP analysis
@@ -549,7 +550,7 @@ Note:
   : The movement event lines move straight between the first and last station of each event (i.e. in-between detections will not be individually linked by the line).
   : Manually **edited** fish are highlighted with **yellow** graphic borders.
   : The stations have been grouped by array, following the array order provided either in the spatial.csv file or in the spatial.txt file.
-  : The data used in these graphics is stored in the `detections` and `valid.movements` objects.
+  : The data used in these graphics is stored in the `detections` and `movements` objects (and respective valid counterparts).
 
 <center>
 ', individual.plots,'
@@ -667,23 +668,35 @@ return(reportname)
 validateDetections <- function(detections.list, movements) {
   counter <- 0
   pb <- txtProgressBar(min = 0, max = sum(unlist(lapply(movements, nrow))), style = 3, width = 60)
-  output <- lapply(names(movements), function(i) {
+  output.all <- lapply(names(detections.list), function(i) {
     # cat(i, "\n")
-    counter <<- counter + nrow(movements[[i]])    
     aux <- detections.list[[i]]
-    valid.rows <- unlist(lapply(1:nrow(movements[[i]]), function(j) {
-      start <- min(which(aux$Timestamp == movements[[i]]$First.time[j] & aux$Standard.name == movements[[i]]$First.station[j]))
-      stop <- start + (movements[[i]]$Detections[j] - 1)
-      # cat(j, ":", start, ":", stop, "\n"); flush.console()
-      return(start:stop)
-    }))
-    setTxtProgressBar(pb, counter)    
-    return(data.table::as.data.table(aux[valid.rows, ]))
+    aux$Valid <- FALSE
+    if (!is.null(movements[[i]])) {
+      counter <<- counter + nrow(movements[[i]])
+      valid.rows <- unlist(lapply(1:nrow(movements[[i]]), function(j) {
+        start <- min(which(aux$Timestamp == movements[[i]]$First.time[j] & aux$Standard.name == movements[[i]]$First.station[j]))
+        stop <- start + (movements[[i]]$Detections[j] - 1)
+        # cat(j, ":", start, ":", stop, "\n"); flush.console()
+        return(start:stop)
+      }))
+      aux$Valid[valid.rows] <- TRUE
+    }
+    setTxtProgressBar(pb, counter)
+    return(data.table::as.data.table(aux))
   })
   close(pb)
-  names(output) <- names(movements)
-  attributes(output)$actel <- "valid.detections"
-  return(output)
+  names(output.all) <- names(detections.list)
+  attributes(output.all)$actel <- "all.detections"
+  output.valid <- lapply(output.all, function(x) {
+    if (any(x$Valid))
+      return(x[(Valid)])
+    else
+      return(NULL)
+  })
+  output.valid <- output.valid[!sapply(output.valid, is.null)]
+  attributes(output.valid)$actel <- "valid.detections"
+  return(list(detections = output.all, valid.detections = output.valid))
 }
 
 
