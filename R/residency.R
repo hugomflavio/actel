@@ -1193,7 +1193,7 @@ dailyRatios <- function(res) {
       findSecondsPerSection(res = x, day = d, the.range = range(dayrange))
     })
     setTxtProgressBar(pb, counter)
-    names(days.list) <- dayrange
+    names(days.list) <- round.POSIXt(dayrange, units = "days")
     dailyRatiosIndOut(input = days.list)
   })
   close(pb)
