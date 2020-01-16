@@ -456,7 +456,7 @@ detections.list <- study.data$detections.list
     printDot(dot = dot, sections = sections, spatial = spatial)
     printSectionTimes(section.times = section.times, bio = bio, detections = valid.detections)
     printGlobalRatios(global.ratios = global.ratios, daily.ratios = daily.ratios)
-    individual.detection.plots <- printIndividuals(redraw = TRUE, detections.list = detections, bio = bio, 
+    individual.detection.plots <- printIndividuals(detections.list = detections, bio = bio, 
         tz = tz, arrays = arrays, spatial = spatial, movements = movements, valid.movements = valid.movements)
     array.circular.plots <- printCircular(times = convertTimesToCircular(array.times), bio = bio, suffix = "_array")
     section.arrival.circular.plots <- printCircular(times = convertTimesToCircular(section.times$arrival), bio = bio, suffix = "_array")

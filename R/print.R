@@ -512,7 +512,7 @@ cat("No intra-array replicates were indicated.")
 #' 
 #' @keywords internal
 #' 
-printIndividuals <- function(redraw, detections.list, bio, status.df = NULL, tz, 
+printIndividuals <- function(detections.list, bio, status.df = NULL, tz, 
   movements, valid.movements = NULL, extension = "png", arrays, spatial) {
   # NOTE: The NULL variables below are actually column names used by ggplot.
   # This definition is just to prevent the package check from issuing a note due unknown variables.
@@ -525,9 +525,6 @@ printIndividuals <- function(redraw, detections.list, bio, status.df = NULL, tz,
   names(cbPalette) <- c("Orange", "Blue", "Green", "Yellow", "Darkblue", "Darkorange", "Pink", "Grey")
 
   appendTo(c("Screen", "Report"), "M: Drawing individual detection graphics.")
-  if (exists("redraw") && redraw == FALSE) {
-    appendTo(c("Screen", "Report"), "M: 'redraw' is set to FALSE, only drawing new graphics.")
-  }
 
   # Y axis order
   link <- match(spatial$stations$Array, names(arrays))
@@ -544,110 +541,113 @@ printIndividuals <- function(redraw, detections.list, bio, status.df = NULL, tz,
     counter <<- counter + 1
     PlotData <- detections.list[[fish]]
     PlotData$Standard.name <- factor(PlotData$Standard.name, levels = y.order)
-    if (!(exists("redraw") && redraw == FALSE && file.exists(paste0("Report/", fish, ".png")))) {
-      all.moves.line <- data.frame(
-        Station = as.vector(t(movements[[fish]][, c("First.station", "Last.station")])),
-        Timestamp = as.vector(t(movements[[fish]][, c("First.time", "Last.time")]))
-      )
-      all.moves.line$Station <- factor(all.moves.line$Station, levels = levels(PlotData$Standard.name))
-      all.moves.line$Timestamp <- as.POSIXct(all.moves.line$Timestamp, tz = tz)
-      add.valid.movements <- FALSE
-      if (!is.null(valid.movements[[fish]])) {
-        add.valid.movements <- TRUE
-        simple.moves.line <- data.frame(
-          Station = as.vector(t(valid.movements[[fish]][, c("First.station", "Last.station")])),
-          Timestamp = as.vector(t(valid.movements[[fish]][, c("First.time", "Last.time")]))
-          )
-        simple.moves.line$Station <- factor(simple.moves.line$Station, levels = levels(PlotData$Standard.name))
-        simple.moves.line$Timestamp <- as.POSIXct(simple.moves.line$Timestamp, tz = tz)
-      }
-      appendTo("debug", paste0("Debug: Printing graphic for fish", fish, "."))
-      colnames(PlotData)[1] <- "Timestamp"
-      the.row <- which(bio$Transmitter == fish)
-      start.line <- as.POSIXct(bio$Release.date[the.row], tz = tz)
-      first.time <- min(c(as.POSIXct(head(PlotData$Timestamp, 1), tz = tz), start.line))
-      attributes(first.time)$tzone <- tz
-      last.time <- as.POSIXct(tail(PlotData$Timestamp, 1), tz = tz)
-      if (!is.null(status.df)) {
-        status.row <- which(status.df$Transmitter == fish)
-        relevant.line <- status.df[status.row, (grepl("Arrived", colnames(status.df)) | grepl("Left", colnames(status.df)))]
-      }
-      # Start plot
-      p <- ggplot2::ggplot(PlotData, ggplot2::aes(x = Timestamp, y = Standard.name, colour = Array))
-      # Choose background
-      default.cols <- TRUE
-      if (attributes(movements[[fish]])$p.type == "Overridden") {
-        p <- p + ggplot2::theme(
-          panel.background = ggplot2::element_rect(fill = "white"),
-          panel.border = ggplot2::element_rect(fill = NA, colour = "#ef3b32" , size = 2),
-          panel.grid.major = ggplot2::element_line(size = 0.5, linetype = 'solid', colour = "#ffd8d6"), 
-          panel.grid.minor = ggplot2::element_line(size = 0.25, linetype = 'solid', colour = "#ffd8d6"),
-          legend.key = ggplot2::element_rect(fill = "white", colour = "white"),
-          )
-        default.cols <- FALSE
-      } 
-      if (attributes(movements[[fish]])$p.type == "Manual") {
-         p <- p + ggplot2::theme(
-          panel.background = ggplot2::element_rect(fill = "white"),
-          panel.border = ggplot2::element_rect(fill = NA, colour = "#ffd016" , size = 2),
-          panel.grid.major = ggplot2::element_line(size = 0.5, linetype = 'solid', colour = "#f2e4b8"), 
-          panel.grid.minor = ggplot2::element_line(size = 0.25, linetype = 'solid', colour = "#f2e4b8"),
-          legend.key = ggplot2::element_rect(fill = "white", colour = "white"),
-          )
-        default.cols <- FALSE
-      } 
-      if (default.cols) {
-        p <- p + ggplot2::theme_bw()
-      }
-      # Plot starting line
-      p <- p + ggplot2::geom_vline(xintercept = start.line, linetype = "dashed")
-      # Plot entry/exit lines
-      if (!is.null(status.df)) {
-        for (l in 1:length(relevant.line)) {
-          if (!is.na(relevant.line[l])) {
-            p <- p + ggplot2::geom_vline(xintercept = as.POSIXct(relevant.line[[l]], tz = tz), linetype = "dashed", color = "grey")
-          }
-        }
-        rm(l, relevant.line)
-      }
-      # Plot movements
-      p <- p + ggplot2::geom_path(data = all.moves.line, ggplot2::aes(x = Timestamp, y = Station, group = 1), col = "grey40", linetype = "dashed")
-      if (add.valid.movements) {
-        p <- p + ggplot2::geom_path(data = simple.moves.line, ggplot2::aes(x = Timestamp, y = Station, group = 1), col = "grey40")
-      }
-      # Trim graphic
-      p <- p + ggplot2::xlim(first.time, last.time)
-      # Paint
-      if (length(levels(PlotData$Array)) <= 7 | (length(levels(PlotData$Array)) == 8 & any(levels(PlotData$Array) == "Unknown"))) {
-        if (any(levels(PlotData$Array) == "Unknown"))
-          the.colours <- as.vector(cbPalette)[c(1:(length(levels(PlotData$Array)) - 1), 8)]
-        else
-          the.colours <- as.vector(cbPalette)[1:length(levels(PlotData$Array))]
-      } else {
-        if (any(levels(PlotData$Array) == "Unknown"))
-          the.colours <- c(gg_colour_hue(length(levels(PlotData$Array)) - 1), "#999999")
-        else
-          the.colours <- gg_colour_hue(length(levels(PlotData$Array)))
-      }
-      p <- p + ggplot2::scale_color_manual(values = the.colours, drop = FALSE)
-      # Plot points
-      p <- p + ggplot2::geom_point()
-      # Fixate Y axis
-      p <- p + ggplot2::scale_y_discrete(drop = FALSE)
-      # Caption and title
-      p <- p + ggplot2::guides(colour = ggplot2::guide_legend(reverse = TRUE))
-      if (!is.null(status.df))
-        p <- p + ggplot2::labs(title = paste0(fish, " (", status.df[status.df$Transmitter == fish, "Status"], ")"), x = paste("tz:", tz), y = "Station Standard Name")
-      else
-        p <- p + ggplot2::labs(title = paste0(fish, " (", nrow(PlotData), " detections)"), x = paste("tz:", tz), y = "Station Standard Name")
-      # Save
-      if (length(levels(PlotData$Standard.name)) <= 30)
-        the.height <- 4
-      else
-        the.height <- 4 + (length(levels(PlotData$Standard.name)) - 30) * 0.1
-      ggplot2::ggsave(paste0("Report/", fish, ".", extension), width = 5, height = the.height)  # better to save in png to avoid point overlapping issues
-      rm(PlotData, start.line, last.time, first.time)
+    all.moves.line <- data.frame(
+      Station = as.vector(t(movements[[fish]][, c("First.station", "Last.station")])),
+      Timestamp = as.vector(t(movements[[fish]][, c("First.time", "Last.time")]))
+    )
+    all.moves.line$Station <- factor(all.moves.line$Station, levels = levels(PlotData$Standard.name))
+    all.moves.line$Timestamp <- as.POSIXct(all.moves.line$Timestamp, tz = tz)
+    
+    add.valid.movements <- FALSE
+    if (!is.null(valid.movements[[fish]])) {
+      add.valid.movements <- TRUE
+      simple.moves.line <- data.frame(
+        Station = as.vector(t(valid.movements[[fish]][, c("First.station", "Last.station")])),
+        Timestamp = as.vector(t(valid.movements[[fish]][, c("First.time", "Last.time")]))
+        )
+      simple.moves.line$Station <- factor(simple.moves.line$Station, levels = levels(PlotData$Standard.name))
+      simple.moves.line$Timestamp <- as.POSIXct(simple.moves.line$Timestamp, tz = tz)
     }
+    
+    colnames(PlotData)[1] <- "Timestamp"
+
+    the.row <- which(bio$Transmitter == fish)
+    start.line <- as.POSIXct(bio$Release.date[the.row], tz = tz)
+    first.time <- min(c(as.POSIXct(head(PlotData$Timestamp, 1), tz = tz), start.line))
+    attributes(first.time)$tzone <- tz
+    last.time <- as.POSIXct(tail(PlotData$Timestamp, 1), tz = tz)
+
+    if (!is.null(status.df)) {
+      status.row <- which(status.df$Transmitter == fish)
+      relevant.line <- status.df[status.row, (grepl("Arrived", colnames(status.df)) | grepl("Left", colnames(status.df)))]
+    }
+
+    appendTo("debug", paste0("Debug: Printing graphic for fish", fish, "."))
+    # Start plot
+    p <- ggplot2::ggplot(PlotData, ggplot2::aes(x = Timestamp, y = Standard.name, colour = Array))
+    # Choose background
+    default.cols <- TRUE
+    if (attributes(movements[[fish]])$p.type == "Overridden") {
+      p <- p + ggplot2::theme(
+        panel.background = ggplot2::element_rect(fill = "white"),
+        panel.border = ggplot2::element_rect(fill = NA, colour = "#ef3b32" , size = 2),
+        panel.grid.major = ggplot2::element_line(size = 0.5, linetype = 'solid', colour = "#ffd8d6"), 
+        panel.grid.minor = ggplot2::element_line(size = 0.25, linetype = 'solid', colour = "#ffd8d6"),
+        legend.key = ggplot2::element_rect(fill = "white", colour = "white"),
+        )
+      default.cols <- FALSE
+    } 
+    if (attributes(movements[[fish]])$p.type == "Manual") {
+       p <- p + ggplot2::theme(
+        panel.background = ggplot2::element_rect(fill = "white"),
+        panel.border = ggplot2::element_rect(fill = NA, colour = "#ffd016" , size = 2),
+        panel.grid.major = ggplot2::element_line(size = 0.5, linetype = 'solid', colour = "#f2e4b8"), 
+        panel.grid.minor = ggplot2::element_line(size = 0.25, linetype = 'solid', colour = "#f2e4b8"),
+        legend.key = ggplot2::element_rect(fill = "white", colour = "white"),
+        )
+      default.cols <- FALSE
+    } 
+    if (default.cols) {
+      p <- p + ggplot2::theme_bw()
+    }
+    # Plot starting line
+    p <- p + ggplot2::geom_vline(xintercept = start.line, linetype = "dashed")
+    # Plot entry/exit lines
+    if (!is.null(status.df)) {
+      for (l in 1:length(relevant.line)) {
+        if (!is.na(relevant.line[l])) {
+          p <- p + ggplot2::geom_vline(xintercept = as.POSIXct(relevant.line[[l]], tz = tz), linetype = "dashed", color = "grey")
+        }
+      }
+      rm(l, relevant.line)
+    }
+    # Plot movements
+    p <- p + ggplot2::geom_path(data = all.moves.line, ggplot2::aes(x = Timestamp, y = Station, group = 1), col = "grey40", linetype = "dashed")
+    if (add.valid.movements) {
+      p <- p + ggplot2::geom_path(data = simple.moves.line, ggplot2::aes(x = Timestamp, y = Station, group = 1), col = "grey40")
+    }
+    # Trim graphic
+    p <- p + ggplot2::xlim(first.time, last.time)
+    # Paint
+    if (length(levels(PlotData$Array)) <= 7 | (length(levels(PlotData$Array)) == 8 & any(levels(PlotData$Array) == "Unknown"))) {
+      if (any(levels(PlotData$Array) == "Invalid"))
+        the.colours <- as.vector(cbPalette)[c(1:(length(levels(PlotData$Array)) - 1), 8)]
+      else
+        the.colours <- as.vector(cbPalette)[1:length(levels(PlotData$Array))]
+    } else {
+      if (any(levels(PlotData$Array) == "Invalid"))
+        the.colours <- c(gg_colour_hue(length(levels(PlotData$Array)) - 1), "#999999")
+      else
+        the.colours <- gg_colour_hue(length(levels(PlotData$Array)))
+    }
+    p <- p + ggplot2::scale_color_manual(values = the.colours, drop = FALSE)
+    # Plot points
+    p <- p + ggplot2::geom_point()
+    # Fixate Y axis
+    p <- p + ggplot2::scale_y_discrete(drop = FALSE)
+    # Caption and title
+    p <- p + ggplot2::guides(colour = ggplot2::guide_legend(reverse = TRUE))
+    if (!is.null(status.df))
+      p <- p + ggplot2::labs(title = paste0(fish, " (", status.df[status.df$Transmitter == fish, "Status"], ")"), x = paste("tz:", tz), y = "Station Standard Name")
+    else
+      p <- p + ggplot2::labs(title = paste0(fish, " (", nrow(PlotData), " detections)"), x = paste("tz:", tz), y = "Station Standard Name")
+    # Save
+    if (length(levels(PlotData$Standard.name)) <= 30)
+      the.height <- 4
+    else
+      the.height <- 4 + (length(levels(PlotData$Standard.name)) - 30) * 0.1
+    ggplot2::ggsave(paste0("Report/", fish, ".", extension), width = 5, height = the.height)  # better to save in png to avoid point overlapping issues
+    rm(PlotData, start.line, last.time, first.time)
     if (counter %% 2 == 0) {
       individual.plots <<- paste0(individual.plots, "![](", fish, ".", extension, "){ width=50% }\n")
     } else {

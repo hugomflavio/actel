@@ -504,7 +504,7 @@ migration <- function(path = NULL, tz, sections, success.arrays = NULL, max.inte
       display.progression <- FALSE
       array.overview.fragment <- ""
     }
-    individual.plots <- printIndividuals(redraw = TRUE, detections.list = detections, bio = bio, 
+    individual.plots <- printIndividuals(detections.list = detections, bio = bio, 
         status.df = status.df, tz = tz, arrays = arrays, spatial = spatial, movements = movements, valid.movements = valid.movements)
     circular.plots <- printCircular(times = convertTimesToCircular(times), bio = bio)
     if (nrow(section.overview) > 3) 
