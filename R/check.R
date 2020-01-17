@@ -13,6 +13,51 @@
 #' @keywords internal
 NULL
 
+#' Check if there are duplicated detection in the input data
+#' 
+#' @param input The detections dataframe
+#' @keywords internal
+#' 
+checkDupDetections <- function(input) {
+  appendTo("debug", "Running overrideDefaults.")
+  dups <- duplicated(input$Timestamp) & duplicated(input$Receiver) & duplicated(input$Transmitter)
+  if (any(dups)) {
+    appendTo(c("Screen", "Report", "Warning"), paste0(sum(dups), " duplicated detection", ifelse(sum(dups) == 1, " was", "s were"), " found. Could an input file be duplicated?"))
+    message("")
+    appendTo("Screen", "Possible options:\n   a) Stop and double-check the data\n   b) Remove duplicated detections\n   c) Continue without changes")
+    message("")
+    unknown.input = TRUE
+    while (unknown.input) {
+      decision <- readline("Decision:(a/b/c) ")
+      if (decision == "a" | decision == "A") {
+        unknown.input = FALSE
+        appendTo("UD", decision)
+        emergencyBreak()
+        stop("Function stopped by user command.", call. = FALSE)
+      }
+      if (decision == "b" | decision == "B") {
+        appendTo("UD", decision)
+        unknown.input = FALSE
+        appendTo(c("Screen", "Report"), "M: Removing duplicated detections from the analysis per user command.")
+        output <- input[!dups, ]
+      }
+      if (decision == "c" | decision == "C") {
+        # Trigger user interaction
+        appendTo("UD", decision)
+        unknown.input = FALSE
+        appendTo(c("Screen", "Report"), "M: Continuing analysis with duplicated detections per user command.")
+        output <- input
+      } # end trigger error
+      if (unknown.input) {
+        appendTo("Screen", "Option not recognized, please input either 'a', 'b', 'c' or 'comment'.")
+      }
+    }
+  } else {
+    output <- input
+  }
+  return(output)
+}
+
 
 #' Skips all validity checks for a fish and allows the user to freely invalidate events
 #' 
@@ -475,7 +520,7 @@ checkUpstream <- function(movements, fish, release, arrays) {
         unknown.input = FALSE
         appendTo("UD", decision)
         emergencyBreak()
-        stop("Script stopped by user command.", call. = FALSE)
+        stop("Function stopped by user command.", call. = FALSE)
       }
       if (decision == "b" | decision == "B") {
         appendTo("UD", decision)
@@ -750,7 +795,7 @@ checkDetectionsBeforeRelease <- function(input, bio){
           if (decision == "a" | decision == "A") {
             unknown.input = FALSE
             emergencyBreak()
-            stop("Script stopped by user command.", call. = FALSE)
+            stop("Function stopped by user command.", call. = FALSE)
           }
           if (decision == "b" | decision == "B")
             unknown.input = FALSE

@@ -11,6 +11,7 @@ Fixes:
 Enhancements:
   * The object `detections` now contains a "Valid" column, similarly to the `movements` objects.
   * Invalid detections are now painted in grey in the individual detection plots.
+  * Check for duplicated detections and give the user a chance to clear them out before continuing.
 
 
 ## actel 0.1.2

@@ -23,9 +23,9 @@ loadStudyData <- function(tz, override = NULL, start.time, stop.time,
   deployments <- createUniqueSerials(input = deployments) # Prepare serial numbers to overwrite the serials in detections
 
   detections <- loadDetections(start.time = start.time, stop.time = stop.time, tz = tz)
+  detections <- checkDupDetections(input = detections)
   detections <- createStandards(detections = detections, spatial = spatial, deployments = deployments) # get standardized station and receiver names, check for receivers with no detections
   appendTo(c("Screen","Report"), paste0("M: Data time range: ", as.character(head(detections$Timestamp, 1)), " to ", as.character(tail(detections$Timestamp, 1)), " (", tz, ")."))
-
   checkUnknownReceivers(input = detections) # Check if there are detections from unknown detections
 
   use.fakedot <- TRUE
