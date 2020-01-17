@@ -5,7 +5,6 @@
 \title{Print individual graphics}
 \usage{
 printIndividuals(
-  redraw,
   detections.list,
   bio,
   status.df = NULL,

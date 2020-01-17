@@ -796,13 +796,13 @@ compileDetections <- function(path = "detections", start.time = NULL, stop.time 
         unknown.file <- FALSE
       }
       if (unknown.file) {
-        appendTo(c("Screen", "Report", "Warning"), paste("File '", i, "' does not match to any of the supported hydrophone file formats!\n   If your file corresponds to a hydrophone log and actel did not recognize it, please get in contact through www.github.com/hugomflavio/actel/issues/new", 
-          sep = ""))
+        appendTo(c("Screen", "Report", "Warning"), 
+          paste0("File '", i, "' does not match to any of the supported hydrophone file formats!\n   If your file corresponds to a hydrophone log and actel did not recognize it, please get in contact through www.github.com/hugomflavio/actel/issues/new"))
         return(NULL)
       }
       return(output)
     } else {
-      appendTo("debug", paste0("File '", i, "' is empty, skipping processing."))
+      appendTo(c("Screen", "Report"), paste0("File '", i, "' is empty, skipping processing."))
       return(NULL)
     }
   })
