@@ -150,6 +150,9 @@ migration <- function(path = NULL, tz, sections, success.arrays = NULL, max.inte
   if (!is.null(replicates) && !is.list(replicates))
     stop("'replicates' must be a list.\n", call. = FALSE)
 
+  if (length(names(replicates)) != length(replicates))
+    stop("All list elements within 'replicates' must be named (i.e. list(Array = 'St.1') rather than list('St.1')).\n", call. = FALSE)
+
   if (!is.numeric(jump.warning))
     stop("'jump.warning' must be numeric.\n", call. = FALSE)
   if (jump.warning < 1)
@@ -252,6 +255,9 @@ migration <- function(path = NULL, tz, sections, success.arrays = NULL, max.inte
   dist.mat <- study.data$dist.mat
   invalid.dist <- study.data$invalid.dist
   detections.list <- study.data$detections.list
+
+  if (!is.null(replicates) && any(is.na(match(names(replicates), names(arrays)))))
+    stop("Some of the array names listed in the 'replicates' argument do not match the study's arrays.\n", call. = FALSE)
 
   if (any(!sapply(arrays, function(x) is.null(x$parallel)))) {
     if (disregard.parallels)

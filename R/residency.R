@@ -146,6 +146,9 @@ residency <- function(path = NULL, tz, sections, success.arrays = NULL, max.inte
   if (!is.null(replicates) && !is.list(replicates))
     stop("'replicates' must be a list.\n", call. = FALSE)
 
+  if (length(names(replicates)) != length(replicates))
+    stop("All list elements within 'replicates' must be named (i.e. list(Array = 'St.1') rather than list('St.1')).\n", call. = FALSE)
+
   if (!is.numeric(jump.warning))
     stop("'jump.warning' must be numeric.\n", call. = FALSE)
   if (jump.warning < 1)
@@ -232,20 +235,24 @@ residency <- function(path = NULL, tz, sections, success.arrays = NULL, max.inte
 # -----------------------------------
 
 # Load, structure and check the inputs
-study.data <- loadStudyData(tz = tz, override = override,
-                            start.time = start.time, stop.time = stop.time,
-                            sections = sections, exclude.tags = exclude.tags)
-bio <- study.data$bio
-deployments <- study.data$deployments
-spatial <- study.data$spatial
-dot <- study.data$dot
-arrays <- study.data$arrays
-dotmat <- study.data$dotmat
-paths <- study.data$paths
-detections <- study.data$detections
-dist.mat <- study.data$dist.mat
-invalid.dist <- study.data$invalid.dist
-detections.list <- study.data$detections.list
+  study.data <- loadStudyData(tz = tz, override = override,
+                              start.time = start.time, stop.time = stop.time,
+                              sections = sections, exclude.tags = exclude.tags)
+  bio <- study.data$bio
+  deployments <- study.data$deployments
+  spatial <- study.data$spatial
+  dot <- study.data$dot
+  arrays <- study.data$arrays
+  dotmat <- study.data$dotmat
+  paths <- study.data$paths
+  detections <- study.data$detections
+  dist.mat <- study.data$dist.mat
+  invalid.dist <- study.data$invalid.dist
+  detections.list <- study.data$detections.list
+
+  if (!is.null(replicates) && any(is.na(match(names(replicates), names(arrays)))))
+    stop("Some of the array names listed in the 'replicates' argument do not match the study's arrays.\n", call. = FALSE)
+
 # -------------------------------------
   
 # Compile array movements
