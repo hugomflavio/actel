@@ -20,7 +20,15 @@ NULL
 #' 
 checkDupDetections <- function(input) {
   appendTo("debug", "Running overrideDefaults.")
-  dups <- duplicated(input$Timestamp) & duplicated(input$Receiver) & duplicated(input$Transmitter)
+  aux <- data.frame(
+    TimestampA = input$Timestamp[-nrow(input)],
+    TimestampB = input$Timestamp[-1],
+    ReceiverA = input$Receiver[-nrow(input)],
+    ReceiverB = input$Receiver[-1],
+    TransmitterA = input$Transmitter[-nrow(input)],
+    TransmitterB = input$Transmitter[-1]
+    )
+  dups <- c(FALSE, aux[,1] == aux[,2] & aux[,3] == aux[,4] & aux[,5] == aux[,6])
   if (any(dups)) {
     appendTo(c("Screen", "Report", "Warning"), paste0(sum(dups), " duplicated detection", ifelse(sum(dups) == 1, " was", "s were"), " found. Could an input file be duplicated?"))
     message("")
