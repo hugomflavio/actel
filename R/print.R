@@ -72,8 +72,10 @@ printProgression <- function(dot, sections, overall.CJS, spatial, status.df) {
 
   # Release nodes
   release_nodes <- spatial$release.sites[, c("Standard.name", "Array")]
+  release_nodes$n <- 0
   n <- table(status.df$Release.site)
-  release_nodes$n <- n[match(names(n), release_nodes$Standard.name)]
+  link <- match(names(n), release_nodes$Standard.name)
+  release_nodes$n[link] <- n
   release_nodes$label <- apply(release_nodes, 1, function(s) {
     paste0(s[1], "\\nn = ", s[3])
   })
