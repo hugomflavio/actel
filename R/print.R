@@ -515,7 +515,7 @@ cat("No intra-array replicates were indicated.")
 #' @keywords internal
 #' 
 printIndividuals <- function(detections.list, bio, status.df = NULL, tz, 
-  movements, valid.movements = NULL, extension = "png", arrays, spatial) {
+  movements, valid.movements = NULL, extension = "png", spatial) {
   # NOTE: The NULL variables below are actually column names used by ggplot.
   # This definition is just to prevent the package check from issuing a note due unknown variables.
   Timestamp <- NULL
@@ -529,7 +529,7 @@ printIndividuals <- function(detections.list, bio, status.df = NULL, tz,
   appendTo(c("Screen", "Report"), "M: Drawing individual detection graphics.")
 
   # Y axis order
-  link <- match(spatial$stations$Array, names(arrays))
+  link <- match(spatial$stations$Array, unlist(spatial$array.order))
   names(link) <- 1:length(link)
   link <- sort(link)
   link <- as.numeric(names(link))
@@ -629,7 +629,7 @@ printIndividuals <- function(detections.list, bio, status.df = NULL, tz,
     # Trim graphic
     p <- p + ggplot2::xlim(first.time, last.time)
     # Paint
-    if (length(levels(PlotData$Array)) <= 7 | (length(levels(PlotData$Array)) == 8 & any(levels(PlotData$Array) == "Unknown"))) {
+    if (length(levels(PlotData$Array)) <= 7 | (length(levels(PlotData$Array)) == 8 & any(levels(PlotData$Array) == "Invalid"))) {
       if (any(levels(PlotData$Array) == "Invalid"))
         the.colours <- as.vector(cbPalette)[c(1:(length(levels(PlotData$Array)) - 1), 8)]
       else

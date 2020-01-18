@@ -513,7 +513,7 @@ migration <- function(path = NULL, tz, sections, success.arrays = NULL, max.inte
       array.overview.fragment <- ""
     }
     individual.plots <- printIndividuals(detections.list = detections, bio = bio, 
-        status.df = status.df, tz = tz, arrays = arrays, spatial = spatial, movements = movements, valid.movements = valid.movements)
+        status.df = status.df, tz = tz, spatial = spatial, movements = movements, valid.movements = valid.movements)
     circular.plots <- printCircular(times = convertTimesToCircular(times), bio = bio)
     if (nrow(section.overview) > 3) 
       survival.graph.size <- "width=90%" else survival.graph.size <- "height=4in"

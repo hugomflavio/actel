@@ -466,7 +466,7 @@ residency <- function(path = NULL, tz, sections, success.arrays = NULL, max.inte
     printSectionTimes(section.times = section.times, bio = bio, detections = valid.detections)
     printGlobalRatios(global.ratios = global.ratios, daily.ratios = daily.ratios)
     individual.detection.plots <- printIndividuals(detections.list = detections, bio = bio, 
-        tz = tz, arrays = arrays, spatial = spatial, movements = movements, valid.movements = valid.movements)
+        tz = tz, spatial = spatial, movements = movements, valid.movements = valid.movements)
     array.circular.plots <- printCircular(times = convertTimesToCircular(array.times), bio = bio, suffix = "_array")
     section.arrival.circular.plots <- printCircular(times = convertTimesToCircular(section.times$arrival), bio = bio, suffix = "_array")
     section.departure.circular.plots <- printCircular(times = convertTimesToCircular(section.times$departure), bio = bio, suffix = "_array")
