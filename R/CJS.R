@@ -204,6 +204,16 @@ assembleArrayCJS <- function(mat, CJS, arrays) {
     absolutes[, names(CJS)[i]] <- CJS[[i]]$absolutes[, 2]
     efficiency[names(CJS)[i]] <- CJS[[i]]$efficiency[2]
   }
+  # Fix max estimated based on arrays before, if needed
+  for (i in names(arrays)) {
+    if (!is.na(absolutes[4, i]) && !is.null(arrays[[i]]$before)) {
+      if (all(!is.na(absolutes[4, arrays[[i]]$before]))) {
+        the.max <- sum(absolutes[4, arrays[[i]]$before])
+        if (absolutes[4, i] > the.max)
+          absolutes[4, i] <- the.max
+      }
+    }
+  }
   # Fix estimated for arrays with 0% efficiency and Fix absolutes for arrays with no peers
   fix.zero <- na.as.false(efficiency == 0)
   fix.peers <- is.na(efficiency)
