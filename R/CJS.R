@@ -68,7 +68,7 @@ includeIntraArrayEstimates <- function(m, efficiency = NULL, CJS = NULL) {
     intra.CJS <- lapply(m, dualArrayCJS)
     if (!is.null(CJS)) {
       for (i in names(intra.CJS)) {
-        CJS$absolutes[4, i] <- round(CJS$absolutes[1, i] * intra.CJS[[i]]$combined.efficiency, 0)
+        CJS$absolutes[4, i] <- round(CJS$absolutes[1, i] / intra.CJS[[i]]$combined.efficiency, 0)
         CJS$efficiency[i] <- intra.CJS[[i]]$combined.efficiency
       }
     } else {
