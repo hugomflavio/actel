@@ -9,6 +9,7 @@ Fixes:
   * Fix bug where fish whose data started in summer time and extended into winter time would cause one day to be lost in the daily positions during residency analysis.
   * Prevent arrays from having maximum estimated fish passing through greater than previous arrays (unless new fish are released).
   * Fix internal but where efficiency matrices did not have "1" at Release for all fish (did not impact results).
+  * Fix bug where arrays with no detections for a group\*release combination would cause skewed estimates.
 
 Enhancements:
   * The object `detections` now contains a "Valid" column, similarly to the `movements` objects.

@@ -167,12 +167,14 @@ breakMatricesByArray <- function(m, arrays, type = c("peers", "all"), verbose = 
       peer.zero.check <- unlist(lapply(aux, function(x) sum(x$AnyPeer) == 0))
       zero.check <- own.zero.check | peer.zero.check
       if (all(zero.check)) {
-        if (all(own.zero.check) & verbose)
-          appendTo(c("Screen", "Warning", "Report"), paste0("No fish passed through array ", names(arrays)[i], "."))
-        if (all(peer.zero.check) & verbose)
-          appendTo(c("Screen", "Warning", "Report"), paste0("No fish passed through any of the efficiency peers of array ", names(arrays)[i], "."))
+        if (all(own.zero.check) & verbose) {
+          appendTo(c("Screen", "Warning", "Report"), paste0("No fish passed through array ", names(arrays)[i], ". Skipping efficiency estimations for this array."))
+        } else {
+          if (all(peer.zero.check) & verbose)
+            appendTo(c("Screen", "Warning", "Report"), paste0("No fish passed through any of the efficiency peers of array ", names(arrays)[i], ". Skipping efficiency estimations for this array"))
+          }
       } else {
-        recipient[[length(recipient) + 1]] <- aux[!zero.check]
+        recipient[[length(recipient) + 1]] <- aux
         names(recipient)[length(recipient)] <- names(arrays)[i]
       }
     }
@@ -348,9 +350,11 @@ simpleCJS <- function(input, estimate = NULL, fixed.efficiency = NULL, silent = 
     m[i] = sum(input[, i])
     # number of fish estimated alive at i (M)
     # Failsafe for array with 0 efficiency. Issues warning.
-    if (p[i] == 0) {
-      if(!silent)
+    if (p[i] == 0 | m[i] == 0) {
+      if(p[i] == 0 & !silent)
         warning("Array '", colnames(input)[i],"' had 0% efficiency. Skipping survival estimation.")
+      if(m[i] == 0 & !silent)
+        warning("No fish were detected at array '", colnames(input)[i],"'. Skipping survival estimation.")
       M[i] = M[i - 1]
       S[i - 1] = -999
       if (i == (ncol(input)-1))
