@@ -13,6 +13,7 @@ Enhancements:
   * Invalid detections are now painted in grey in the individual detection plots.
   * Check for duplicated detections and give the user a chance to clear them out before continuing.
   * Prevent unhandled crashes if the 'replicates' argument is badly structured.
+  * Show number of released fish per release location in the release sites table.
 
 
 ## actel 0.1.2

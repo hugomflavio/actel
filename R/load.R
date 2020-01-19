@@ -1224,7 +1224,8 @@ transformSpatial <- function(spatial, bio, arrays, sections = NULL, first.array 
                                   Longitude = NA_real_, 
                                   Latitude = NA_real_, 
                                   Array = first.array,
-                                  Standard.name = "unspecified")
+                                  Standard.name = "unspecified",
+                                  n = nrow(bio))
     } else {
       A <- spatial$Standard.name[spatial$Type == "Release"]
       B <- unique(bio$Release.site)
@@ -1238,6 +1239,10 @@ transformSpatial <- function(spatial, bio, arrays, sections = NULL, first.array 
         from.row <- spatial$Type == "Release"
         from.col <- colnames(spatial)[!grepl("Receiver", colnames(spatial))]
         release.sites <- spatial[from.row, from.col]
+        release.sites$n <- 0
+        n <- table(bio$Release.site)
+        link <- match(names(n), release.sites$Standard.name)
+        release.sites$n[link] <- n
         row.names(release.sites) <- 1:nrow(release.sites)
       }
       A <- unique(stations$Array)
@@ -1263,6 +1268,10 @@ transformSpatial <- function(spatial, bio, arrays, sections = NULL, first.array 
                                 Latitude = NA_real_, 
                                 Array = rep(first.array, length(unique(bio$Release.site))),
                                 Standard.name = unique(bio$Release.site))
+    release.sites$n <- 0
+    n <- table(bio$Release.site)
+    link <- match(names(n), release.sites$Standard.name)
+    release.sites$n[link] <- n
   }
   # Wrap up
   if (!is.null(sections)) {
