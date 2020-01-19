@@ -510,6 +510,7 @@ efficiencyMatrix <- function(movements, arrays, paths, dotmat) {
   colnames(max.ef) <- c("Release", names(arrays))
   rownames(max.ef) <- stripCodeSpaces(names(movements))
   max.ef[is.na(max.ef)] = 0
+  max.ef$Release = 1
   min.ef <- max.ef
 
   capture <- lapply(names(movements), function(fish) {
