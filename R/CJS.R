@@ -322,17 +322,17 @@ simpleCJS <- function(input, estimate = NULL, fixed.efficiency = NULL, silent = 
   }
 
   # Start the calculations
-  S <- rep(NA, ncol(input)-1)
+  S <- rep(NA, ncol(input) - 1)
   r <- z <- p <- m <- M <- rep(NA, ncol(input))
-  for(i in 1:(ncol(input)-1)){
+  for(i in 1:(ncol(input) - 1)){
     # number of tags detected at i and downstream (r)
-    tr <- input[input[, i] == 1, (i + 1) : ncol(input)]
+    tr <- input[input[, i] == 1, (i + 1):ncol(input)]
     if (is.data.frame(tr))
       r[i] = sum(apply(tr, 1, function(f) any(f == 1)))
     if (is.vector(tr))
       r[i] = sum(tr)
     # number of tags NOT detected at i but detected downstream (z)
-    tz <- input[input[, i] == 0, (i + 1) : ncol(input)]
+    tz <- input[input[, i] == 0, (i + 1):ncol(input)]
     if (is.data.frame(tz))
       z[i] = sum(apply(tz, 1, function(f) any(f == 1)))
     if (is.vector(tz))
@@ -390,7 +390,7 @@ simpleCJS <- function(input, estimate = NULL, fixed.efficiency = NULL, silent = 
   # Complete final values if estimate is present
   if (!is.null(estimate)) {
     if (estimate == 0) {
-      S[ncol(input) -1 ] <- -999
+      S[ncol(input) - 1] <- -999
     } else {
       S[ncol(input) - 1] <- l / estimate
       if (S[ncol(input) - 1] > 1)
