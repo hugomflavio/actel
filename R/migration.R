@@ -448,11 +448,11 @@ migration <- function(path = NULL, tz, sections, success.arrays = NULL, max.inte
 
     aux <- mbSplitCJS(mat = m.by.array, fixed.efficiency = overall.CJS$efficiency)
     aux <- aux[names(the.matrices)]
-    split.CJS <- assembleSplitCJS(mat = the.matrices, CJS = aux, arrays = arrays, releases = release_nodes)
+    split.CJS <- assembleSplitCJS(mat = the.matrices, CJS = aux, arrays = arrays, releases = release_nodes, intra.CJS = intra.array.CJS)
     rm(aux)
 
     aux <- mbGroupCJS(mat = m.by.array, status.df = status.df, fixed.efficiency = overall.CJS$efficiency)
-    group.CJS <- assembleGroupCJS(mat = the.matrices, CJS = aux, arrays = arrays, releases = release_nodes)
+    group.CJS <- assembleGroupCJS(mat = the.matrices, CJS = aux, arrays = arrays, releases = release_nodes, intra.CJS = intra.array.CJS)
     array.overview <- mbAssembleArrayOverview(input = group.CJS)
     rm(aux)
 } else {

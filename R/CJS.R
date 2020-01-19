@@ -96,12 +96,17 @@ includeIntraArrayEstimates <- function(m, efficiency = NULL, CJS = NULL) {
 #' 
 #' @keywords internal
 #' 
-assembleSplitCJS <- function(mat, CJS, arrays, releases) {
-  recipient <- list()
-  for (i in names(CJS)) {
+assembleSplitCJS <- function(mat, CJS, arrays, releases, intra.CJS = NULL) {
+  recipient <- lapply(names(CJS), function(i) {
     aux <- releases[releases$Combined == i, ]
-    recipient[[length(recipient) + 1]] <- assembleArrayCJS(mat = mat[i], CJS = CJS[[i]], arrays = arrays, releases = aux)[[1]]
-  }
+    output <- assembleArrayCJS(mat = mat[i], CJS = CJS[[i]], arrays = arrays, releases = aux)[[1]]
+    if (!is.null(intra.CJS)) {
+      for (i in names(intra.CJS)) {
+        output[4, i] <- round(output[1, i] / intra.CJS[[i]]$combined.efficiency, 0)
+      }
+    }
+    return(output)
+  })
   names(recipient) <- names(CJS)
   return(recipient)
 }
@@ -115,13 +120,18 @@ assembleSplitCJS <- function(mat, CJS, arrays, releases) {
 #' 
 #' @keywords internal
 #' 
-assembleGroupCJS <- function(mat, CJS, arrays, releases) {
-  recipient <- list()
-  for (i in names(CJS)) {
+assembleGroupCJS <- function(mat, CJS, arrays, releases, intra.CJS = NULL) {
+  recipient <- lapply(names(CJS), function(i) {
     link <- grepl(paste0("^", i), names(mat))
     aux <- releases[releases$Group == i, ]
-    recipient[[length(recipient) + 1]] <- assembleArrayCJS(mat = mat[link], CJS = CJS[[i]], arrays = arrays, releases = aux)[[1]]
-  }
+    output <- assembleArrayCJS(mat = mat[link], CJS = CJS[[i]], arrays = arrays, releases = aux)[[1]]
+    if (!is.null(intra.CJS)) {
+      for (i in names(intra.CJS)) {
+        output[4, i] <- round(output[1, i] / intra.CJS[[i]]$combined.efficiency, 0)
+      }
+    }
+    return(output)
+  })
   names(recipient) <- names(CJS)
   return(recipient)
 }

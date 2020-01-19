@@ -666,6 +666,7 @@ return(reportname)
 #' @keywords internal
 #' 
 validateDetections <- function(detections.list, movements) {
+  Valid <- NULL
   counter <- 0
   pb <- txtProgressBar(min = 0, max = sum(unlist(lapply(movements, nrow))), style = 3, width = 60)
   output.all <- lapply(names(detections.list), function(i) {
