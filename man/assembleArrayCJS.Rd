@@ -4,7 +4,7 @@
 \alias{assembleArrayCJS}
 \title{Combine the individual CJS's of each array into a single table}
 \usage{
-assembleArrayCJS(mat, CJS, arrays)
+assembleArrayCJS(mat, CJS, arrays, releases)
 }
 \arguments{
 \item{mat}{The presence/absence matrices.}

@@ -4,10 +4,10 @@
 \alias{mbSplitCJS}
 \title{Calculate CJS for each group.release combination}
 \usage{
-mbSplitCJS(m, fixed.efficiency = NULL)
+mbSplitCJS(mat, fixed.efficiency = NULL)
 }
 \arguments{
-\item{m}{The presence/absence matrices.}
+\item{mat}{The presence/absence matrices.}
 
 \item{fixed.efficiency}{A vector of fixed efficiency estimates from a more complete CJS model.}
 }

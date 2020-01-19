@@ -12,7 +12,6 @@ printIndividuals(
   movements,
   valid.movements = NULL,
   extension = "png",
-  arrays,
   spatial
 )
 }
@@ -29,8 +28,6 @@ present in \code{\link[base]{timezones}}.}
 \item{movements}{A list of movements for each target tag, created by groupMovements.}
 
 \item{extension}{the format of the generated graphics}
-
-\item{arrays}{A list containing information for each array.}
 
 \item{spatial}{The spatial data frame.}
 }
