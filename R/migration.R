@@ -429,7 +429,12 @@ migration <- function(path = NULL, tz, sections, success.arrays = NULL, max.inte
         combineCJS(m)
       })
 
-    overall.CJS <- assembleArrayCJS(mat = the.matrices, CJS = CJS.list, arrays = arrays)
+    release_nodes <- as.data.frame(table(bio$Group, bio$Release.site))
+    colnames(release_nodes) <- c("Group", "Release.site", "n")
+    release_nodes$Array <- spatial$release.sites$Array[match(release_nodes$Release.site, spatial$release.sites$Standard.name)]
+    release_nodes$Combined <- paste(release_nodes[, 1], release_nodes[, 2], sep = ".")
+
+    overall.CJS <- assembleArrayCJS(mat = the.matrices, CJS = CJS.list, arrays = arrays, releases = release_nodes)
 
     if (!is.null(replicates)) {
       intra.array.matrices <- getDualMatrices(replicates = replicates, CJS = overall.CJS, spatial = spatial, detections.list = detections)
@@ -441,13 +446,13 @@ migration <- function(path = NULL, tz, sections, success.arrays = NULL, max.inte
       intra.array.CJS <- NULL
     }
 
-    aux <- mbSplitCJS(m = m.by.array, fixed.efficiency = overall.CJS$efficiency)
+    aux <- mbSplitCJS(mat = m.by.array, fixed.efficiency = overall.CJS$efficiency)
     aux <- aux[names(the.matrices)]
-    split.CJS <- assembleSplitCJS(mat = the.matrices, CJS = aux, arrays = arrays)
+    split.CJS <- assembleSplitCJS(mat = the.matrices, CJS = aux, arrays = arrays, releases = release_nodes)
     rm(aux)
 
-    aux <- mbGroupCJS(m = m.by.array, status.df = status.df, fixed.efficiency = overall.CJS$efficiency)
-    group.CJS <- assembleGroupCJS(mat = the.matrices, CJS = aux, arrays = arrays)
+    aux <- mbGroupCJS(mat = m.by.array, status.df = status.df, fixed.efficiency = overall.CJS$efficiency)
+    group.CJS <- assembleGroupCJS(mat = the.matrices, CJS = aux, arrays = arrays, releases = release_nodes)
     array.overview <- mbAssembleArrayOverview(input = group.CJS)
     rm(aux)
 } else {

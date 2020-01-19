@@ -7,6 +7,7 @@ Find out the main highlights of each update.
 Fixes:
   * Force R to assume detection files are separated by commas (prevents occasional Thelma log crash).
   * Fix bug where fish whose data started in summer time and extended into winter time would cause one day to be lost in the daily positions during residency analysis.
+  * Prevent arrays from having maximum estimated fish passing through greater than previous arrays (unless new fish are released).
 
 Enhancements:
   * The object `detections` now contains a "Valid" column, similarly to the `movements` objects.

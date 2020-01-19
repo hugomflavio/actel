@@ -96,10 +96,11 @@ includeIntraArrayEstimates <- function(m, efficiency = NULL, CJS = NULL) {
 #' 
 #' @keywords internal
 #' 
-assembleSplitCJS <- function(mat, CJS, arrays) {
+assembleSplitCJS <- function(mat, CJS, arrays, releases) {
   recipient <- list()
   for (i in names(CJS)) {
-    recipient[[length(recipient) + 1]] <- assembleArrayCJS(mat = mat[i], CJS = CJS[[i]], arrays = arrays)[[1]]
+    aux <- releases[releases$Combined == i, ]
+    recipient[[length(recipient) + 1]] <- assembleArrayCJS(mat = mat[i], CJS = CJS[[i]], arrays = arrays, releases = aux)[[1]]
   }
   names(recipient) <- names(CJS)
   return(recipient)
@@ -114,11 +115,12 @@ assembleSplitCJS <- function(mat, CJS, arrays) {
 #' 
 #' @keywords internal
 #' 
-assembleGroupCJS <- function(mat, CJS, arrays) {
+assembleGroupCJS <- function(mat, CJS, arrays, releases) {
   recipient <- list()
   for (i in names(CJS)) {
     link <- grepl(paste0("^", i), names(mat))
-    recipient[[length(recipient) + 1]] <- assembleArrayCJS(mat = mat[link], CJS = CJS[[i]], arrays = arrays)[[1]]
+    aux <- releases[releases$Group == i, ]
+    recipient[[length(recipient) + 1]] <- assembleArrayCJS(mat = mat[link], CJS = CJS[[i]], arrays = arrays, releases = aux)[[1]]
   }
   names(recipient) <- names(CJS)
   return(recipient)
@@ -192,7 +194,7 @@ breakMatricesByArray <- function(m, arrays, type = c("peers", "all"), verbose = 
 #' 
 #' @keywords internal
 #' 
-assembleArrayCJS <- function(mat, CJS, arrays) { 
+assembleArrayCJS <- function(mat, CJS, arrays, releases) { 
   # Compile final objects
   absolutes <- matrix(nrow = 4, ncol = length(arrays))
   colnames(absolutes) <- names(arrays)
@@ -208,7 +210,10 @@ assembleArrayCJS <- function(mat, CJS, arrays) {
   for (i in names(arrays)) {
     if (!is.na(absolutes[4, i]) && !is.null(arrays[[i]]$before)) {
       if (all(!is.na(absolutes[4, arrays[[i]]$before]))) {
-        the.max <- sum(absolutes[4, arrays[[i]]$before])
+        if (any(releases$Array == i))
+          the.max <- sum(absolutes[4, arrays[[i]]$before]) + sum(releases$n[releases$Array == i])
+        else
+          the.max <- sum(absolutes[4, arrays[[i]]$before])
         if (absolutes[4, i] > the.max)
           absolutes[4, i] <- the.max
       }
@@ -432,8 +437,8 @@ simpleCJS <- function(input, estimate = NULL, fixed.efficiency = NULL, silent = 
 #' 
 #' @keywords internal
 #' 
-mbSplitCJS <- function(m, fixed.efficiency = NULL) {
-  recipient <- lapply(m, function(m) {
+mbSplitCJS <- function(mat, fixed.efficiency = NULL) {
+  recipient <- lapply(mat, function(m) {
     if (is.na(fixed.efficiency[grepl(colnames(m[[1]])[2], names(fixed.efficiency))]))
       array.efficiency <- NULL
     else
@@ -466,10 +471,10 @@ mbSplitCJS <- function(m, fixed.efficiency = NULL) {
 #' 
 #' @keywords internal
 #' 
-mbGroupCJS <- function(m, status.df, fixed.efficiency = NULL) {
+mbGroupCJS <- function(mat, status.df, fixed.efficiency = NULL) {
   output <- list()
   for (i in 1:length(unique(status.df$Group))) {
-    output[[i]] <- lapply(m, function(m_i) {
+    output[[i]] <- lapply(mat, function(m_i) {
       if (is.na(fixed.efficiency[grepl(colnames(m_i[[1]])[2], names(fixed.efficiency))]))
         array.efficiency <- NULL
       else
@@ -484,7 +489,7 @@ mbGroupCJS <- function(m, status.df, fixed.efficiency = NULL) {
         return(NULL)
       }
     })
-    names(output[[i]]) <- names(m)
+    names(output[[i]]) <- names(mat)
   } 
   output <- lapply(output, function(x) x[!unlist(lapply(x, is.null))])
   names(output) <- unique(status.df$Group)
