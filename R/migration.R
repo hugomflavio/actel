@@ -65,8 +65,10 @@
 #'    }
 #'  \item \code{section.overview}: Summary table of the number of fish that 
 #'    disappeared in each section;
-#'  \item \code{array.overview}: Number of known and estimated fish to have
-#'    passed through each array;
+#'  \item \code{group.overview}: Number of known and estimated fish to have
+#'    passed through each array, divided by group;
+#'  \item \code{release.overview}: Number of known and estimated fish to have
+#'    passed through each array, divided by group and release sites;
 #'  \item \code{matrices}: CJS matrices used for the efficiency calculations;
 #'  \item \code{overall.CJS}: Results of the inter-array CJS calculations;
 #'  \item \code{intra.array.CJS}: Results of the intra-array CJS calculations;
@@ -449,16 +451,34 @@ migration <- function(path = NULL, tz, sections, success.arrays = NULL, max.inte
     aux <- mbSplitCJS(mat = m.by.array, fixed.efficiency = overall.CJS$efficiency)
     aux <- aux[names(the.matrices)]
     split.CJS <- assembleSplitCJS(mat = the.matrices, CJS = aux, arrays = arrays, releases = release_nodes, intra.CJS = intra.array.CJS)
+    aux <- mbAssembleArrayOverview(input = split.CJS)
+    release.overview <- lapply(names(aux), function(i, releases = spatial$release.sites) {
+      output <- aux[[i]]
+      x <- unlist(stringr::str_split(i, "\\.", 2))
+      output$Release <- c(releases[releases$Station.name == x[2], paste0("n.", x[1])], NA, NA)
+      output <- output[, c(ncol(output), 1:(ncol(output) - 1))]
+      return(output)
+    })
+    names(release.overview) <- names(aux)
     rm(aux)
 
     aux <- mbGroupCJS(mat = m.by.array, status.df = status.df, fixed.efficiency = overall.CJS$efficiency)
     group.CJS <- assembleGroupCJS(mat = the.matrices, CJS = aux, arrays = arrays, releases = release_nodes, intra.CJS = intra.array.CJS)
-    array.overview <- mbAssembleArrayOverview(input = group.CJS)
+    aux <- mbAssembleArrayOverview(input = group.CJS)
+    group.overview <- lapply(names(aux), function(i, releases = spatial$release.sites) {
+      output <- aux[[i]]
+      x <- unlist(stringr::str_split(i, "\\.", 2))[1]
+      output$Release <- c(sum(releases[, paste0("n.", x)]), NA, NA)
+      output <- output[, c(ncol(output), 1:(ncol(output) - 1))]
+      return(output)
+    })
+    names(group.overview) <- names(aux)
     rm(aux)
 } else {
   overall.CJS <- NULL
   intra.array.CJS <- NULL
-  array.overview <- NULL
+  release.overview <- NULL
+  group.overview <- NULL
 }
 # -------------------------------------
 
@@ -492,10 +512,10 @@ migration <- function(path = NULL, tz, sections, success.arrays = NULL, max.inte
 
   if (invalid.dist)
     save(detections, valid.detections, spatial, deployments, arrays, movements, valid.movements, section.movements, status.df,
-      section.overview, array.overview, matrices, overall.CJS, intra.array.CJS, times, rsp.info, file = resultsname)
+      section.overview, group.overview, release.overview, matrices, overall.CJS, intra.array.CJS, times, rsp.info, file = resultsname)
   else
     save(detections, valid.detections, spatial, deployments, arrays, movements, valid.movements, section.movements, status.df,
-      section.overview, array.overview, matrices, overall.CJS, intra.array.CJS, times, rsp.info, dist.mat, file = resultsname)
+      section.overview, group.overview, release.overview, matrices, overall.CJS, intra.array.CJS, times, rsp.info, dist.mat, file = resultsname)
 # ------------
 
 # Print graphics
@@ -512,7 +532,7 @@ migration <- function(path = NULL, tz, sections, success.arrays = NULL, max.inte
     if (calculate.efficiency) {
       printProgression(dot = dot,  sections = sections, overall.CJS = overall.CJS, spatial = spatial, status.df = status.df)
       display.progression <- TRUE
-      array.overview.fragment <- printArrayOverview(array.overview)
+      array.overview.fragment <- printArrayOverview(group.overview)
     } else {
       display.progression <- FALSE
       array.overview.fragment <- ""
@@ -570,12 +590,12 @@ migration <- function(path = NULL, tz, sections, success.arrays = NULL, max.inte
 
   if (invalid.dist)
     return(list(detections = detections, valid.detections = valid.detections, spatial = spatial, deployments = deployments, arrays = arrays,
-      movements = movements, valid.movements = valid.movements, section.movements = section.movements, status.df = status.df, section.overview = section.overview, array.overview = array.overview,
-      matrices = matrices, overall.CJS = overall.CJS, intra.array.CJS = intra.array.CJS, times = times, rsp.info = rsp.info))
+      movements = movements, valid.movements = valid.movements, section.movements = section.movements, status.df = status.df, section.overview = section.overview, group.overview = group.overview,
+      release.overview = release.overview, matrices = matrices, overall.CJS = overall.CJS, intra.array.CJS = intra.array.CJS, times = times, rsp.info = rsp.info))
   else
     return(list(detections = detections, valid.detections = valid.detections, spatial = spatial, deployments = deployments, arrays = arrays,
-      movements = movements, valid.movements = valid.movements, section.movements = section.movements, status.df = status.df, section.overview = section.overview, array.overview = array.overview,
-      matrices = matrices, overall.CJS = overall.CJS, intra.array.CJS = intra.array.CJS, times = times, rsp.info = rsp.info, dist.mat = dist.mat))
+      movements = movements, valid.movements = valid.movements, section.movements = section.movements, status.df = status.df, section.overview = section.overview, group.overview = group.overview,
+      release.overview = release.overview, matrices = matrices, overall.CJS = overall.CJS, intra.array.CJS = intra.array.CJS, times = times, rsp.info = rsp.info, dist.mat = dist.mat))
 }
 
 #' Print Rmd report
@@ -718,7 +738,7 @@ Note:
 
 Note:
   : The progression calculations **do not account for** intra-section backwards movements. This implies that the total number of fish to have been **last seen** at a given array **may be lower** than the displayed below. Please refer to the [section survival overview](#survival) to find out how many fish were considered to have disappeared per section.
-  : The data used in this graphic is stored in the `overall.CJS` object, and the data used in the tables is stored in the `array.overview` object.
+  : The data used in this graphic is stored in the `overall.CJS` object, and the data used in the tables is stored in the `group.overview` object. You can find detailed progressions per release site in the `release.overview` object.
 
 <img src="mb_efficiency.svg" alt="Missing file" style="padding-top: 15px; padding-bottom: 15px;"/>
 
@@ -1211,13 +1231,14 @@ assembleSectionOverview <- function(status.df, sections) {
 #' 
 mbAssembleArrayOverview <- function(input) {
   appendTo("debug", "Starting mbAssembleArrayOverview.")
-  for (i in 1:length(input)) {
-    input[[i]][1, ] <- apply(input[[i]][c(1,3), ], 2, sum, na.rm = TRUE)
-    input[[i]][2, ] <- input[[i]][4, ]
-    input[[i]][3, ] <- input[[i]][2, ] - input[[i]][1, ]
-    input[[i]] <- input[[i]][1:3, ]
-    rownames(input[[i]]) <- c("Known", "Estimated", "Difference")
-  }
+  output <- lapply(input, function(x) {
+    x[1, ] <- apply(x[c(1, 3), ], 2, function(i) sum(i, na.rm = TRUE))
+    x[2, ] <- x[4, ]
+    x[3, ] <- x[2, ] - x[1, ]
+    output <- x[1:3, ]
+    rownames(output) <- c("Known", "Estimated", "Difference")
+    return(output)
+  })
   appendTo("debug", "Terminating mbAssembleArrayOverview.")  
-  return(input)
+  return(output)
 }
