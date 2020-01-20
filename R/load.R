@@ -1242,10 +1242,13 @@ transformSpatial <- function(spatial, bio, arrays, sections = NULL, first.array 
         from.row <- spatial$Type == "Release"
         from.col <- colnames(spatial)[!grepl("Receiver", colnames(spatial))]
         release.sites <- spatial[from.row, from.col]
-        release.sites$n <- 0
-        n <- table(bio$Release.site)
-        link <- match(names(n), release.sites$Standard.name)
-        release.sites$n[link] <- n
+        for (i in unique(bio$Group)) {
+          aux <- bio[bio$Group == i, ]
+          release.sites[, paste0("n.", i)] <- 0
+          n <- table(aux$Release.site)
+          link <- match(names(n), release.sites$Standard.name)
+          release.sites[link, paste0("n.", i)] <- n
+        }
         row.names(release.sites) <- 1:nrow(release.sites)
       }
       A <- unique(stations$Array)
@@ -1271,10 +1274,13 @@ transformSpatial <- function(spatial, bio, arrays, sections = NULL, first.array 
                                 Latitude = NA_real_, 
                                 Array = rep(first.array, length(unique(bio$Release.site))),
                                 Standard.name = unique(bio$Release.site))
-    release.sites$n <- 0
-    n <- table(bio$Release.site)
-    link <- match(names(n), release.sites$Standard.name)
-    release.sites$n[link] <- n
+    for (i in unique(bio$Group)) {
+      aux <- bio[bio$Group == i, ]
+      release.sites[, paste0("n.", i)] <- 0
+      n <- table(aux$Release.site)
+      link <- match(names(n), release.sites$Standard.name)
+      release.sites[link, paste0("n.", i)] <- n
+    }
   }
   # Wrap up
   if (!is.null(sections)) {
