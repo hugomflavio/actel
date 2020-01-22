@@ -339,12 +339,12 @@ checkLinearity <- function(secmoves, fish, sections, arrays) {
   while (try.again) {
     vsm <- secmoves[secmoves$Valid, ]
     back.check <- match(vsm$Section, sections)
-    turn.check <- rev(match(sections, rev(vsm$Section)))
+    turn.check <- rev(match(sections, rev(vsm$Section))) # captures the last event of each section. Note, the values count from the END of the events
     if (is.unsorted(back.check)) {
       if (double.call) {
         appendTo(c("Screen", "Warning"), paste0("The last interaction did not linearise the movements for fish ", fish, ". Trying again."))       
       } else {
-        if (is.unsorted(turn.check))
+        if (is.unsorted(turn.check, na.rm = TRUE))
           appendTo(c("Screen", "Report", "Warning"), paste0("Inter-section backwards movements were detected for fish ", fish, " and the last events are not ordered!"))
         else
           appendTo(c("Screen", "Report", "Warning"), paste0("Inter-section backwards movements were detected for fish ", fish, "."))
