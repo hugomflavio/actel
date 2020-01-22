@@ -1288,12 +1288,22 @@ transformSpatial <- function(spatial, bio, arrays, sections = NULL, first.array 
     for (j in sections) {
       array.order[[j]] <- names(arrays)[grepl(j, names(arrays))]
     }
-    if (any(trigger <- unlist(lapply(array.order,length)) == 0)) {
-      appendTo(c("Screen", "Warning"), decision <- readline(paste0("No arrays were found that match section(s) ",paste(names(array.order)[trigger], collapse = ", "), ". There could be a typing mistake!\n   Continue the analysis?(y/N) ")))
-      if (decision != "y" | decision != "Y" ){
+    if (any(trigger <- unlist(lapply(array.order, length)) == 0)) {
+      appendTo(c("Screen", "Report", "Warning"), paste0("No arrays were found that match section(s) ", paste(names(array.order)[trigger], collapse = ", "), ". There could be a typing mistake!"))
+      decision <- readline("All arrays must be assigned to a section. Attempt to continue the analysis?(y/N) ")
+      if (decision != "y" & decision != "Y" ){
         emergencyBreak()
         stop("Stopping analysis per user command.\n", call. = FALSE)
       }
+    }
+    if (any(link <- is.na(match(stations$Array, unlist(array.order))))) {
+      emergencyBreak()
+      stop(paste0("Array", 
+          ifelse(sum(link) == 1, " '", "(s) '"), 
+          paste(unique(stations$Array[link]), collapse = "', '"),
+          ifelse(sum(link) == 1, "' was", "' were"), 
+          " not assigned to any section. Stopping to prevent function failure.\nYou can either:\n1) Rename these arrays to match a section, \n2) Rename a section to match these arrays, or \n3) Include a new section in the analysis.\n"),
+      call. = FALSE)
     }
   } else {
     array.order <- list(all = names(arrays))
