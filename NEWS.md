@@ -13,6 +13,8 @@ Fixes:
   * Fix estimation of passed fish when using intra-array estimates.
   * Fix split CJS's not receiving information about intra-array estimates.
   * Avoid crash if a fish makes a U turn without being detected in all sections.
+  * Avoid crash if group names have '.' characters in them.
+  * Avoud crash if some group names are entirely contained within other groups.
 
 Changes:
   * `array.overview` is now called `group.overview`.

@@ -694,10 +694,24 @@ loadBio <- function(file, tz){
     appendTo("Screen", "M: No 'Group' column found in the biometrics.csv file. Assigning all fish to group 'All'.")
     bio$Group <- "All"
   } else {
+    bio$Group <- factor(bio$Group)
     if (any(is.na(bio$Group) | bio$Group == "")) {
       appendTo(c("Screen", "Report", "Warning"),"Some fish contain no group information. You may want to double-check the data.\n   Filling the blanks with 'unspecified'.")
       levels(bio$Group) <- c(levels(bio$Group), "unspecified")
       bio$Group[is.na(bio$Group) | bio$Group == ""] <- "unspecified"
+    }
+    if (any(link <- sapply(levels(bio$Group), function(i) length(grep(i, levels(bio$Group)))) > 1)) {
+      appendTo(c("Screen", "Report", "Warning"), paste0(
+        ifelse(sum(link) == 1, "Group '", "Groups '"), 
+        paste(levels(bio$Group)[link], collapse = "', '"), 
+        ifelse(sum(link) == 1, "' is", "' are"), 
+        " contained within other groups. To avoid function failure, a number will be appended to ",
+        ifelse(sum(link) == 1, "this group.", "these groups.")))
+      levels(bio$Group)[link] <- paste(levels(bio$Group)[link], 1:sum(link), sep = "_")
+    }
+    if (any(link <- grepl("\\.", levels(bio$Group)))) {
+      appendTo(c("Screen", "Report"), "M: Some fish groups contain one or more '.' characters. To avoid function failure, these will be replaced with '_'.")
+      levels(bio$Group) <- gsub("\\.", "_", levels(bio$Group))
     }
   }
   bio <- bio[order(bio$Signal),]
