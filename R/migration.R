@@ -200,7 +200,7 @@ migration <- function(path = NULL, tz, sections, success.arrays = NULL, max.inte
 # Store function call
   the.function.call <- paste0("migration(path = ", ifelse(is.null(path), "NULL", paste0("'", path, "'")), 
       ", sections = ", paste0("c('", paste(sections, collapse = "', '"), "')"), 
-      ", success.arrays = ", paste0("c('", paste(success.arrays, collapse = "', '"), "')"), 
+      ", success.arrays = ", ifelse(is.null(success.arrays), "NULL", paste0("c('", paste(success.arrays, collapse = "', '"), "')")), 
       ", minimum.detections = ", minimum.detections,
       ", max.interval = ", max.interval,
       ", speed.method = ", paste0("c('", speed.method, "')"),
