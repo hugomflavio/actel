@@ -110,7 +110,7 @@ loadDot <- function(string = NULL, input = NULL, spatial, sections = NULL, disre
     tryCatch(dot <- readDot(input = input), 
       error = function(e) {
         emergencyBreak()
-        stop("The contents of the '", input, "' file  could not be recognised by the readDot function.\n", call. = FALSE)
+        stop("The contents of the '", input, "' file could not be recognised by the readDot function.\n", call. = FALSE)
         })
   } else {
     dot <- readDot(string = string)
@@ -142,8 +142,11 @@ loadDot <- function(string = NULL, input = NULL, spatial, sections = NULL, disre
 readDot <- function (input = NULL, string = NULL) {
   if (is.null(string) & is.null(input))
     stop("No dot file or data were specified.")
-  if (is.null(string))
+  if (is.null(string)) {
+    if (!file.exists(input))
+      stop("Could not find a '", input, "' file in the working directory.\n", call. = FALSE)
     lines <- readLines(input)
+  }
   else
     lines <- unlist(strsplit(string, "\n|\t"))
   paths <- lines[grepl("[<-][->]", lines)]
@@ -644,6 +647,10 @@ loadSpatial <- function(file = "spatial.csv", report = FALSE){
 #' 
 loadBio <- function(file, tz){
   appendTo("debug", "Running loadBio.")
+  if (missing(file))
+    stop("'file' is missing.")
+  if (missing(tz))
+    stop("'tz' is missing.")
   if (file.exists(file))
     bio <- as.data.frame(data.table::fread(file), stringsAsFactors = FALSE)
   else {
@@ -651,7 +658,7 @@ loadBio <- function(file, tz){
     stop("Could not find a '", file, "' file in the working directory.\n", call. = FALSE)
   }  
   if (any(link <- duplicated(colnames(bio))))
-    stop("The following columns are duplicated in the file 'biometrics.csv': '", paste(unique(colnames(bio)[link]), sep = "', '"), "'.", call. = FALSE)
+    stop("The following columns are duplicated in the file 'biometrics.csv': '", paste(unique(colnames(bio)[link]), sep = "', '"), "'.\n", call. = FALSE)
 
   if (!any(grepl("Release.date", colnames(bio)))) {
     emergencyBreak()
