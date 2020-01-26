@@ -299,21 +299,30 @@ findPeers <- function(input, dotmat, type = c("before", "after"), disregard.para
     while (!is.null(to.check)) {
       new.check <- NULL
       for (b in to.check) {
-        # If A and B are adjacent, check that there are no more paths leading to B
-        if (dotmat[a, b] == 1 && length(input[[b]][[opposite]]) == 1) {
-          # IF B has no parallel arrays, or disregard parallels is set to TRUE
-          if (is.null(input[[b]]$parallel) || disregard.parallels) {
-            if (is.null(peers) || !grepl(b, peers)) {
-              peers <- c(peers, b)
-              new.check <- c(new.check, input[[b]][[type]])
-            }
-          } else {
-            # Else find out which arrays lead to the parallels
-            leading.to.parallels <- unique(unlist(sapply(input[[b]]$parallel, function(x) input[[x]][[opposite]])))
-            # as this is a distance 1 case, verify that only array A leads ot the parallels.
-            if (all(!is.na(match(leading.to.parallels, a)))) {
-              peers <- c(peers, b)
-              new.check <- c(new.check, input[[b]][[type]])              
+        # IF A and B are adjacent
+        if (dotmat[a, b] == 1) {
+          # prepare to check paths leading to B
+          if (disregard.parallels)
+            check.paths.to.b <- all(!is.na(match(input[[b]][[opposite]], c(a, input[[a]]$parallel))))
+          else
+            check.paths.to.b <- length(input[[b]][[opposite]]) == 1
+          # IF there are no third-party paths leading to B
+          if (check.paths.to.b) {
+            # IF B has no parallels or parallels are being discarded
+            if (is.null(input[[b]]$parallel) || disregard.parallels) {
+              if (is.null(peers) || !grepl(b, peers)) {
+                peers <- c(peers, b)
+                new.check <- c(new.check, input[[b]][[type]])
+              }
+            # IF B has parallels
+            } else {
+              # Find out which arrays lead to the parallels
+              leading.to.parallels <- unique(unlist(sapply(input[[b]]$parallel, function(x) input[[x]][[opposite]])))
+              # as this is a distance 1 case, verify that only array A leads to the parallels.
+              if (all(!is.na(match(leading.to.parallels, a)))) {
+                peers <- c(peers, b)
+                new.check <- c(new.check, input[[b]][[type]])              
+              }
             }
           }
         }
@@ -325,8 +334,9 @@ findPeers <- function(input, dotmat, type = c("before", "after"), disregard.para
               peers <- c(peers, b)
               new.check <- c(new.check, input[[b]][[type]])
             }
+            # IF B has paralles
           } else {
-            # Else find out which arrays lead to the parallels
+            # Find out which arrays lead to the parallels
             leading.to.parallels <- unique(unlist(sapply(input[[b]]$parallel, function(x) input[[x]][[opposite]])))
             # as this is a distance >1 case, verify that all arrays leading to the parallels are contained in the peers
             if (all(!is.na(match(leading.to.parallels, peers)))) {
