@@ -6,6 +6,10 @@ r:
   - release
   - devel
 
+apt_packages:
+  - libv8-dev
+  - librsvg2-dev
+
 r_github_packages: 
   - r-lib/testthat
   - r-lib/covr
