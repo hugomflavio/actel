@@ -3,8 +3,7 @@ Jump to [**installation instructions**](#installing-actel)
 # actel<img src="vignettes/actel_logo.png" align="right" width="120" />
 
 [![Travis Build Status](https://travis-ci.com/hugomflavio/actel.svg?branch=dev)](https://travis-ci.org/hugomflavio/actel)
-
-Read the [latest news here!](https://github.com/hugomflavio/actel/blob/master/NEWS.md#news)
+[![codecov](https://codecov.io/github/hugomflavio/actel/branch/dev/graphs/badge.svg)](https://codecov.io/github/hugomflavio/actel) 
 
 ## Overview
 
