@@ -49,6 +49,7 @@ test_that("loadBio fails if needed columns are missing", {
 test_that("loadBio stops if column content is unexpected", {
 	# Badly formated release date
 	bio <- example.biometrics
+	bio$Release.date <- as.character(bio$Release.date)
 	bio$Release.date[1] <- "test"
 	write.csv(bio, "biometrics.csv", row.names = FALSE)
 	expect_error(loadBio("biometrics.csv", tz = "Europe/Copenhagen"), 
@@ -145,3 +146,5 @@ test_that("loadBio output matches example.biometrics", {
 	expect_equal(bio, example.biometrics)
 	file.remove("biometrics.csv")
 })
+
+file.remove(list.files(pattern = "*txt$"))

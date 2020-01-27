@@ -4,10 +4,10 @@ test_that("loadDot stops if arguments or file are missing", {
 
 test_that("loadDot stops if file is badly formatted or missing", {
 	expect_error(loadDot(input = "test"), 
-		"The contents of the 'test' file  could not be recognised by the readDot function.", fixed = TRUE)
+		"The contents of the 'test' file could not be recognised by the readDot function.", fixed = TRUE)
 	write.table("abcd\n", "spatial.dot")
 	expect_error(loadDot(input = "spatial.dot"), 
-		"The contents of the 'spatial.dot' file  could not be recognised by the readDot function.", fixed = TRUE)
+		"The contents of the 'spatial.dot' file could not be recognised by the readDot function.", fixed = TRUE)
 	file.remove("spatial.dot")
 })
 
@@ -348,3 +348,5 @@ test_that("loadDot handles parallel arrays properly when disregard.parallels = F
 	expect_equal(output$arrays$River2$after.peers, NULL)
 	expect_equal(output$arrays$River1$after.peers, c('River2', 'River3', 'River4', 'River5', 'River6', 'Fjord1', 'Fjord2', 'Sea1'))
 })
+
+file.remove(list.files(pattern = "*txt$"))
