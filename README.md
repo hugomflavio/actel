@@ -5,6 +5,8 @@ Jump to [**installation instructions**](#installing-actel)
 [![Travis Build Status](https://travis-ci.com/hugomflavio/actel.svg?branch=dev)](https://travis-ci.org/hugomflavio/actel)
 [![codecov](https://codecov.io/github/hugomflavio/actel/branch/dev/graphs/badge.svg)](https://codecov.io/github/hugomflavio/actel) 
 
+Read the [latest news here!](https://github.com/hugomflavio/actel/blob/master/NEWS.md#news)
+
 ## Overview
 
 If you are using acoustic telemetry to track animals as they move inside a study area or as they migrate somewhere, actel is the package for you. 
