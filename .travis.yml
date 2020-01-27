@@ -14,6 +14,9 @@ r_github_packages:
   - r-lib/testthat
   - r-lib/covr
 
+script:
+  - Rscript -e "library(testthat); testthat::test_dir('tests/testthat', reporter = "fail")"
+
 # environment variables set for all builds
 env:
   global:
