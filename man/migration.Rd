@@ -172,8 +172,10 @@ changes to the validity of the events,
 }
 \item \code{section.overview}: Summary table of the number of fish that
 disappeared in each section;
-\item \code{array.overview}: Number of known and estimated fish to have
-passed through each array;
+\item \code{group.overview}: Number of known and estimated fish to have
+passed through each array, divided by group;
+\item \code{release.overview}: Number of known and estimated fish to have
+passed through each array, divided by group and release sites;
 \item \code{matrices}: CJS matrices used for the efficiency calculations;
 \item \code{overall.CJS}: Results of the inter-array CJS calculations;
 \item \code{intra.array.CJS}: Results of the intra-array CJS calculations;

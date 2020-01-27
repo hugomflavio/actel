@@ -2,3 +2,4 @@
 ^Meta$
 ^compiled_vignettes$
 ^compiled_vignettes.zip
+^.travis.yml$
