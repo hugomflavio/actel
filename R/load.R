@@ -146,10 +146,12 @@ readDot <- function (input = NULL, string = NULL) {
     if (!file.exists(input))
       stop("Could not find a '", input, "' file in the working directory.\n", call. = FALSE)
     lines <- readLines(input)
-  }
-  else
+  } else {
     lines <- unlist(strsplit(string, "\n|\t"))
+  }
   paths <- lines[grepl("[<-][->]", lines)]
+  if (length(paths) == 0)
+    stop("Could not recognise the input contents as DOT formatted connections.\n", call. = FALSE)
   paths <- gsub("[ ;]", "", paths)
   paths <- gsub("\\[label=[^\\]]","", paths)
   nodes <- strsplit(paths,"[<-][->]")
@@ -229,9 +231,9 @@ dotMatrix <- function(input) {
 #' @keywords internal
 #' 
 dotList <- function(input, sections = NULL) {
-  input$SectionA <- rep(NA_character_, nrow(input))
-  input$SectionB <- rep(NA_character_, nrow(input))
   if (!is.null(sections)) {
+    input$SectionA <- rep(NA_character_, nrow(input))
+    input$SectionB <- rep(NA_character_, nrow(input))
     for (section in sections) {
        input$SectionA[grepl(section, input$A)] <- section
        input$SectionB[grepl(section, input$B)] <- section
