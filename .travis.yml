@@ -1,0 +1,15 @@
+# Use R language
+language: r
+
+#Define R-versions
+r:
+  - release
+  - devel
+
+r_github_packages: 
+  - r-lib/testthat
+  - r-lib/covr
+
+after_success:
+  - Rscript -e 'covr::codecov()'
+
