@@ -1,31 +1,31 @@
 test_that("loadDot stops if arguments or file are missing", {
-	expect_error(actel:::loadDot(), "No dot file or dot string were specified.", fixed = TRUE)
+	expect_error(loadDot(), "No dot file or dot string were specified.", fixed = TRUE)
 })
 
 test_that("loadDot stops if file is badly formatted or missing", {
-	expect_error(actel:::loadDot(input = "test"), 
+	expect_error(loadDot(input = "test"), 
 		"The contents of the 'test' file could not be recognised by the readDot function.", fixed = TRUE)
 	write.table("abcd\n", "spatial.dot")
-	expect_error(actel:::loadDot(input = "spatial.dot"), 
+	expect_error(loadDot(input = "spatial.dot"), 
 		"The contents of the 'spatial.dot' file could not be recognised by the readDot function.", fixed = TRUE)
 	file.remove("spatial.dot")
 })
 
 test_that("loadDot stops if contents of file do not match spatial", {
-	expect_error(actel:::loadDot(string = "River1--River2--River3--River4--River5--River6\n", spatial = actel::example.spatial, disregard.parallels = TRUE),
+	expect_error(loadDot(string = "River1--River2--River3--River4--River5--River6\n", spatial = example.spatial, disregard.parallels = TRUE),
 		"Something went wrong when compiling the dot file. Try restarting R and trying again. If the problem persists, contact the developer.", fixed = TRUE)
 
 	sink("spatial.dot")
 	cat("River1--River2--River3--River4--River5--River6\n")
 	sink()
-	expect_error(actel:::loadDot(input = "spatial.dot", spatial = actel::example.spatial, disregard.parallels = TRUE),
+	expect_error(loadDot(input = "spatial.dot", spatial = example.spatial, disregard.parallels = TRUE),
 		"Not all the arrays listed in the spatial.csv file are present in the spatial.dot.", fixed = TRUE)
 	file.remove("spatial.dot")
 
 	sink("spatial.txt")
 	cat("River1--River2--River3--River4--River5--River6\n")
 	sink()
-	expect_error(actel:::loadDot(input = "spatial.txt", spatial = actel::example.spatial, disregard.parallels = TRUE),
+	expect_error(loadDot(input = "spatial.txt", spatial = example.spatial, disregard.parallels = TRUE),
 		"Not all the arrays listed in the spatial.csv file are present in the spatial.txt.", fixed = TRUE)
 	file.remove("spatial.txt")
 })
@@ -34,7 +34,7 @@ test_that("loadDot output is as expected for simple single channel study areas",
 	sink("spatial.txt")
 	cat("River0--River1--River2--River3--River4--River5--River6--Fjord1--Fjord2--Sea1\n")
 	sink()
-	output <- actel:::loadDot(input = "spatial.txt", spatial = actel::example.spatial, disregard.parallels = TRUE)	
+	output <- loadDot(input = "spatial.txt", spatial = example.spatial, disregard.parallels = TRUE)	
 	file.remove("spatial.txt")
 
 	expect_equal(names(output), c("dot", "arrays", "dotmat", "paths"))
@@ -96,7 +96,7 @@ test_that("loadDot output is as expected for single channel study areas with a b
 	sink("spatial.txt")
 	cat("River0--River1--River2--River3--River4--River5->River6--Fjord1--Fjord2--Sea1\n")
 	sink()
-	output <- actel:::loadDot(input = "spatial.txt", spatial = actel::example.spatial, disregard.parallels = TRUE)	
+	output <- loadDot(input = "spatial.txt", spatial = example.spatial, disregard.parallels = TRUE)	
 	file.remove("spatial.txt")
 
 	expect_equal(names(output), c("dot", "arrays", "dotmat", "paths"))
@@ -155,7 +155,7 @@ test_that("loadDot output is as expected for simple multi channel study areas", 
 	cat("River1--River3--River4\n")
 	cat("River2--River3--River2\n")
 	sink()
-	output <- actel:::loadDot(input = "spatial.txt", spatial = actel::example.spatial, disregard.parallels = TRUE)	
+	output <- loadDot(input = "spatial.txt", spatial = example.spatial, disregard.parallels = TRUE)	
 	file.remove("spatial.txt")
 
 	expect_equal(names(output), c("dot", "arrays", "dotmat", "paths"))
@@ -222,7 +222,7 @@ test_that("loadDot output is as expected for multi channel study areas with barr
 	cat("River1--River3->River4\n")
 	cat("River2--River3--River2\n")
 	sink()
-	output <- actel:::loadDot(input = "spatial.txt", spatial = actel::example.spatial, disregard.parallels = TRUE)	
+	output <- loadDot(input = "spatial.txt", spatial = example.spatial, disregard.parallels = TRUE)	
 	file.remove("spatial.txt")
 
 	expect_equal(names(output), c("dot", "arrays", "dotmat", "paths"))
@@ -286,7 +286,7 @@ test_that("loadDot correctly identifies edge arrays", {
 	sink("spatial.txt")
 	cat("River0--River1--River2--River3--River4--River5--River6--Fjord1--Fjord2--Sea1\n")
 	sink()
-	output <- actel:::loadDot(input = "spatial.txt", spatial = actel::example.spatial, 
+	output <- loadDot(input = "spatial.txt", spatial = example.spatial, 
 		sections = c("River", "Fjord", "Sea"), disregard.parallels = TRUE)	
 	file.remove("spatial.txt")
 
@@ -303,7 +303,7 @@ test_that("loadDot handles parallel arrays properly when disregard.parallels = T
 	cat("River1--River3--River4\n")
 	cat("River2--River3--River2\n")
 	sink()
-	output <- actel:::loadDot(input = "spatial.txt", spatial = actel::example.spatial, 
+	output <- loadDot(input = "spatial.txt", spatial = example.spatial, 
 		sections = c("River", "Fjord", "Sea"), disregard.parallels = TRUE)	
 	file.remove("spatial.txt")
 
@@ -329,7 +329,7 @@ test_that("loadDot handles parallel arrays properly when disregard.parallels = F
 	cat("River1--River3--River4\n")
 	cat("River2--River3--River2\n")
 	sink()
-	output <- actel:::loadDot(input = "spatial.txt", spatial = actel::example.spatial, 
+	output <- loadDot(input = "spatial.txt", spatial = example.spatial, 
 		sections = c("River", "Fjord", "Sea"), disregard.parallels = FALSE)	
 	file.remove("spatial.txt")
 

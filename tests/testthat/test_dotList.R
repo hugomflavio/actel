@@ -1,6 +1,6 @@
 test_that("dotList correctly assigns before, after and neighbours", {
-	dot <- actel::readDot(string = "A1--A2--B1--B2--B3--C1--C2")
-	output <- actel:::dotList(input = dot)
+	dot <- readDot(string = "A1--A2--B1--B2--B3--C1--C2")
+	output <- dotList(input = dot)
 	expect_equal(names(output), c('A1', 'A2', 'B1', 'B2', 'B3', 'C1', 'C2'))
 	
 	expect_null(output$A1$before)
@@ -17,8 +17,8 @@ test_that("dotList correctly assigns before, after and neighbours", {
 })
 
 test_that("dotList correctly handles parallels", {
-	dot <- actel::readDot(string = "A1--A2--B1--B2--B3--C1--C2\nB1--B4--B3\nB4--B2--B4")
-	output <- actel:::dotList(input = dot)
+	dot <- readDot(string = "A1--A2--B1--B2--B3--C1--C2\nB1--B4--B3\nB4--B2--B4")
+	output <- dotList(input = dot)
 	expect_equal(names(output), c('A1', 'A2', 'B1', 'B2', 'B3', 'C1', 'B4', 'C2'))
 	
 	expect_null(output$A1$before)
@@ -50,23 +50,23 @@ test_that("dotList correctly handles parallels", {
 
 test_that("dotList includes edge information if sections are provided", {
 	# without parallels
-	dot <- actel::readDot(string = "A1--A2--B1--B2--B3--C1--C2")
-	output <- actel:::dotList(input = dot, sections = c("A", "B", "C"))	
+	dot <- readDot(string = "A1--A2--B1--B2--B3--C1--C2")
+	output <- dotList(input = dot, sections = c("A", "B", "C"))	
 	expect_true(output$A2$edge)
 	expect_true(output$B3$edge)
 	expect_false(output$A1$edge)
 	expect_false(output$B2$edge)
 	expect_false(output$C2$edge)
 
-	dot <- actel::readDot(string = "A1--A2--B1--B2--B3--C1--C2\nB2--B4--C1\nB4--B3--B4")
-	output <- actel:::dotList(input = dot, sections = c("A", "B", "C"))	
+	dot <- readDot(string = "A1--A2--B1--B2--B3--C1--C2\nB2--B4--C1\nB4--B3--B4")
+	output <- dotList(input = dot, sections = c("A", "B", "C"))	
 	expect_true(output$B3$edge)
 	expect_true(output$B4$edge)
 	expect_false(output$C1$edge)
 	expect_false(output$B2$edge)
 
-	dot <- actel::readDot(string = "A1--A2--B1--B2--B3--C1--C2\nA2--B4--B2\nB4--B1--B4")
-	output <- actel:::dotList(input = dot, sections = c("A", "B", "C"))	
+	dot <- readDot(string = "A1--A2--B1--B2--B3--C1--C2\nA2--B4--B2\nB4--B1--B4")
+	output <- dotList(input = dot, sections = c("A", "B", "C"))	
 	expect_true(output$A2$edge)
 	expect_true(output$B3$edge)
 	expect_false(output$B1$edge)
