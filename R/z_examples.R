@@ -137,3 +137,14 @@ And follow the instructions as they come. Once finished, explore the object 'res
 #' @keywords internal
 #' 
 "example.deployments"
+
+#' Example distances matrix
+#'
+#' A matrix containing the distances between stations and release sites
+#'
+#' @format A 18 * 18 matrix
+#' @source Data collected by the authors.
+#' 
+#' @keywords internal
+#' 
+"example.distances"

@@ -315,7 +315,7 @@ findPeers <- function(input, dotmat, type = c("before", "after"), disregard.para
           if (check.paths.to.b) {
             # IF B has no parallels or parallels are being discarded
             if (is.null(input[[b]]$parallel) || disregard.parallels) {
-              if (is.null(peers) || !grepl(b, peers)) {
+              if (is.null(peers) || all(!grepl(b, peers))) {
                 peers <- c(peers, b)
                 new.check <- c(new.check, input[[b]][[type]])
               }
@@ -335,7 +335,7 @@ findPeers <- function(input, dotmat, type = c("before", "after"), disregard.para
         if (dotmat[a, b] > 1 && all(!is.na(match(input[[b]][[opposite]], peers)))) {
           # IF B has no parallel arrays, or disregard parallels is set to TRUE
           if (is.null(input[[b]]$parallel) || disregard.parallels) {
-            if (is.null(peers) || !grepl(b, peers)) {
+            if (is.null(peers) || all(!grepl(b, peers))) {
               peers <- c(peers, b)
               new.check <- c(new.check, input[[b]][[type]])
             }
@@ -376,7 +376,7 @@ findDirectChains <- function(input, dotmat, type = c("before", "after")) {
     while (!is.null(to.check)) {
       new.check <- NULL
       for (b in to.check) {
-          if (is.null(chain) || !grepl(b, chain)) {
+          if (is.null(chain) || all(!grepl(b, chain))) {
             chain <- c(chain, b)
             parallel.aux <- c(parallel.aux, input[[b]]$parallel)
             new.check <- c(new.check, input[[b]][[type]])
@@ -530,29 +530,37 @@ loadDeployments <- function(file, tz){
   if (!is.na(link <- match("Station.Name", colnames(input))))
     colnames(input)[link] <- "Station.name"
   if (any(link <- duplicated(colnames(input))))
-    stop("The following columns are duplicated in the file 'deployments.csv': '", paste(unique(colnames(input)[link]), sep = "', '"), "'.", call. = FALSE)
+    stop("The following columns are duplicated in the file '", file, "': '", paste(unique(colnames(input)[link]), sep = "', '"), "'.", call. = FALSE)
   default.cols <- c("Receiver", "Station.name", "Start", "Stop")
   link <- match(default.cols, colnames(input))
   if (any(is.na(link))) {
-    appendTo("Report", paste0("Error: Column(s) '", paste(default.cols[is.na(link)], collapse = "', '"), "' are missing in the deployments.csv file."))
+    appendTo("Report", paste0("Error: Column", 
+      ifelse(sum(is.na(link)) > 1, "(s) '", " '"),
+      paste(default.cols[is.na(link)], collapse = "', '"), 
+      ifelse(sum(is.na(link)) > 1, "' are", "' is"),
+      " missing in the ", file, " file."))
     emergencyBreak()
-    stop(paste0("Column(s) '", paste(default.cols[is.na(link)], collapse = "', '"), "' are missing in the deployments.csv file.\n"), call. = FALSE)
+    stop(paste0("Column", 
+      ifelse(sum(is.na(link)) > 1, "(s) '", " '"),
+      paste(default.cols[is.na(link)], collapse = "', '"), 
+      ifelse(sum(is.na(link)) > 1, "' are", "' is"),
+      " missing in the ", file, " file."), call. = FALSE)
   }
   if (any(!grepl("^[1-2][0-9][0-9][0-9]-[0-1][0-9]-[0-3][0-9] [0-2][0-9]:[0-5][0-9]", input$Start))) {
     emergencyBreak()
-    stop("Not all values in the 'Start' column appear to be in a 'yyyy-mm-dd hh:mm' format (seconds are optional). Please double-check the deployments.csv file.\n", call. = FALSE)
+    stop("Not all values in the 'Start' column appear to be in a 'yyyy-mm-dd hh:mm' format (seconds are optional). Please double-check the ", file, " file.\n", call. = FALSE)
   }
   if (any(!grepl("^[1-2][0-9][0-9][0-9]-[0-1][0-9]-[0-3][0-9] [0-2][0-9]:[0-5][0-9]", input$Stop))) {
     emergencyBreak()
-    stop("Not all values in the 'Stop' column appear to be in a 'yyyy-mm-dd hh:mm' format (seconds are optional). Please double-check the deployments.csv file.\n", call. = FALSE)
+    stop("Not all values in the 'Stop' column appear to be in a 'yyyy-mm-dd hh:mm' format (seconds are optional). Please double-check the ", file, " file.\n", call. = FALSE)
   }
   if (inherits(try(as.POSIXct(input$Start), silent = TRUE), "try-error")){
     emergencyBreak()
-    stop("Could not recognise the data in the 'Start' column as POSIX-compatible timestamps. Please double-check the deployments.csv file.\n", call. = FALSE)
+    stop("Could not recognise the data in the 'Start' column as POSIX-compatible timestamps. Please double-check the ", file," file.\n", call. = FALSE)
   }
   if (inherits(try(as.POSIXct(input$Stop), silent = TRUE),"try-error")){
     emergencyBreak()
-    stop("Could not recognise the data in the 'Stop' column as POSIX-compatible timestamps. Please double-check the deployments.csv file.\n", call. = FALSE)
+    stop("Could not recognise the data in the 'Stop' column as POSIX-compatible timestamps. Please double-check the ", file, " file.\n", call. = FALSE)
   }
   input$Receiver <- as.character(input$Receiver)
   input$Receiver <- sapply(input$Receiver, function(x) tail(unlist(strsplit(x, "-")), 1))
@@ -572,7 +580,7 @@ loadDeployments <- function(file, tz){
 #' 
 loadSpatial <- function(file = "spatial.csv", report = FALSE){
   if (report)
-    appendTo("debug","Running loadSpatial.")
+    appendTo("debug", "Running loadSpatial.")
   if (file.exists(file))
     input <- as.data.frame(data.table::fread(file))
   else {
@@ -585,49 +593,36 @@ loadSpatial <- function(file = "spatial.csv", report = FALSE){
     colnames(input)[link] <- "Station.name"
   if (!any(grepl("Station.name", colnames(input)))) {
     emergencyBreak()
-    stop("The spatial.csv file must contain a 'Station.name' column.\n", call. = FALSE)
+    stop("The ", file, " file must contain a 'Station.name' column.\n", call. = FALSE)
   } else {
     if (any(link <- table(input$Station.name) > 1)) {
       if (report)
-        appendTo(c("Screen", "Warning", "Report"), "The 'Station.name' column in the spatial.csv file must not have duplicated values.")
-      else
-        message("Error: The 'Station.name' column in the spatial.csv file must not have duplicated values.")
-      message("Stations appearing more than once:", paste(names(table(input$Station.name))[link], collapse = ", "), "\n")
-      if (report)
         emergencyBreak()
-      stop("Fatal exception found. Read lines above for more details.\n", call. = FALSE)
+      stop("The 'Station.name' column in the ", file, " file must not have duplicated values.\nStations appearing more than once: ", paste(names(table(input$Station.name))[link], collapse = ", "), "\n", call. = FALSE)
     }
   }
   if (!any(grepl("Array", colnames(input)))) {
-    if (any(grepl("Group", colnames(input)))) {
-      decision <- readline("Error: No 'Array' column found in the spatial.csv file, but a 'Group' column is present. Use the 'Group' column to define the arrays? (Y/n) ")
-      appendTo("UD", decision)
-      if (decision == "N" & decision == "n") {
-        if (report)
-          emergencyBreak()
-        stop("The spatial.csv file must contain an 'Array' column.\n", call. = FALSE)
-      } else {
-        if (report)
-          appendTo("Report", "Error: No 'Array' column found in the spatial.csv file, but a 'Group' column is present. Using the 'Group' column to define the arrays.")  
-        colnames(input)[grepl("Group", colnames(input))] <- "Array"
-      }
-    }
+    if (report)
+      emergencyBreak()
+    stop("The ", file, " file must contain an 'Array' column.\n", call. = FALSE)
   }
   if (any(is.na(input$Array)))
-    stop("Some rows do not contain 'Array' information in the spatial.csv file. Please double-check the input files.")
+    stop("Some rows do not contain 'Array' information in the ",file, " file. Please double-check the input files.")
   if (any(grepl(" ", input$Array))) {
     appendTo("Screen", "M: Replacing spaces in array names to prevent function failure.")
     input$Array <- gsub(" ", "_", input$Array)
   }
   if (!any(grepl("Type", colnames(input)))) {
     if (report)
-      appendTo("Screen", "M: No 'Type' column found in the spatial.csv file. Assigning all rows as hydrophones.")
+      appendTo(c("Screen", "Report"), paste0("M: No 'Type' column found in the ", file, " file. Assigning all rows as hydrophones."))
+    else
+      message("M: No 'Type' column found in the ", file, " file. Assigning all rows as hydrophones.")
     input$Type <- "Hydrophone"
   } else {
     if (any(is.na(match(unique(input$Type), c("Hydrophone","Release"))))){
       if (report)
         emergencyBreak()
-      stop("Could not recognise the data in the 'Type' column as only one of 'Hydrophone' or 'Release'. Please double-check the spatial.csv file.\n", call. = FALSE)
+      stop("Could not recognise the data in the 'Type' column as only one of 'Hydrophone' or 'Release'. Please double-check the ", file," file.\n", call. = FALSE)
     }
   }
   input <- setSpatialStandards(input = input) # Create Standard.name for each station  

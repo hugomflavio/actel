@@ -38,7 +38,8 @@ Suggests:
     gdistance,
     sp,
     tools,
-    rgdal
+    rgdal,
+    testthat
 VignetteBuilder: knitr
 URL: https://github.com/hugomflavio/actel
 BugReports: https://github.com/hugomflavio/actel/issues
