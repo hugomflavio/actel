@@ -1261,11 +1261,12 @@ transformSpatial <- function(spatial, bio, arrays, sections = NULL, first.array 
       A <- spatial$Standard.name[spatial$Type == "Release"]
       B <- unique(bio$Release.site)
       if (any(is.na(match(B, A)))) {
-        appendTo(c("Screen", "Report", "Warning"), "There is a mismatch between the release sites reported and the release locations for the fish.")
-        message("   Release sites listed in the spatial.csv file:", paste(A, collapse = ", "))
-        message("   Sites listed in the biometrics.csv file 'Release.site' column:", paste(B, collapse = ", "))
+        appendTo(c("Report", "Warning"), "There is a mismatch between the release sites reported and the release locations for the fish.")
         emergencyBreak()
-        stop("The release names should be identical in the spatial.csv file and in the biometrics.csv file.\n", call. = FALSE)
+        stop("There is a mismatch between the release sites reported in the spatial.csv file and the release locations for the fish in the biometrics.csv file.\n       Release sites listed in the spatial.csv file: ", 
+          paste(A, collapse = ", "), "\n       Sites listed in the biometrics.csv file 'Release.site' column: ", 
+          paste(B, collapse = ", "), 
+          call. = FALSE)
       } else {
         from.row <- spatial$Type == "Release"
         from.col <- colnames(spatial)[!grepl("Receiver", colnames(spatial))]
@@ -1282,20 +1283,21 @@ transformSpatial <- function(spatial, bio, arrays, sections = NULL, first.array 
       A <- unique(stations$Array)
       B <- unique(release.sites$Array)
       if (any(is.na(match(B, A)))) {
-        appendTo(c("Screen", "Report", "Warning"), "There is a mismatch between the expected first array of a release site and the list of arrays.")
-        message("   Arrays listed in the spatial.csv file:", paste(A, collapse = ", "))
-        message("   Expected first arrays of the release sites:", paste(B, collapse = ", "))
+        appendTo(c("Report", "Warning"), "There is a mismatch between the expected first array of a release site and the list of arrays.")
         emergencyBreak()
-        stop("The expected first arrays should match the arrays where stations where deployed in the spatial.csv file.\n", call. = FALSE)
+        stop("There is a mismatch between the expected first array of a release site and the list of arrays.\n       Arrays listed in the spatial.csv file: ", 
+          paste(A, collapse = ", "), 
+          "\n       Expected first arrays of the release sites: ", 
+          paste(B, collapse = ", "), 
+          "\nThe expected first arrays should match the arrays where stations where deployed in the spatial.csv file.\n", 
+          call. = FALSE)
       }
     }
   } else {
-    if (length(unique(bio$Release.site)) > 1){
-      appendTo(c("Screen", "Report", "Warning"), "Release sites were not specified in the spatial.csv file but more than one release site is reported in the biometrics.csv file.\n   Assuming all released fish start at the top level array.")
-      if (is.null(first.array)) {
-        emergencyBreak()
-        stop("There is more than one top level array in the study area. Please specify release site(s) in the spatial.csv file and in the biometrics.csv file.\n", call. = FALSE)
-      }
+    appendTo(c("Screen", "Report", "Warning"), "Release sites were not specified in the spatial.csv file. Attempting to assume all released fish start at the top level array.")
+    if (is.null(first.array)) {
+      emergencyBreak()
+      stop("There is more than one top level array in the study area. Please specify release site(s) in the spatial.csv file and in the biometrics.csv file.\n", call. = FALSE)
     }
     release.sites <- data.frame(Station.name = unique(bio$Release.site), 
                                 Longitude = NA_real_,
@@ -1318,19 +1320,23 @@ transformSpatial <- function(spatial, bio, arrays, sections = NULL, first.array 
     }
     if (any(trigger <- unlist(lapply(array.order, length)) == 0)) {
       appendTo(c("Screen", "Report", "Warning"), paste0("No arrays were found that match section(s) ", paste(names(array.order)[trigger], collapse = ", "), ". There could be a typing mistake!"))
-      decision <- readline("All arrays must be assigned to a section. Attempt to continue the analysis?(y/N) ")
+      if (interactive())
+        decision <- readline("All arrays must be assigned to a section. Attempt to continue the analysis?(y/N) ")
+      else
+        decision <- "y"
       if (decision != "y" & decision != "Y" ){
         emergencyBreak()
         stop("Stopping analysis per user command.\n", call. = FALSE)
       }
     }
     if (any(link <- is.na(match(stations$Array, unlist(array.order))))) {
+      the.arrays <- unique(stations$Array[link])
       emergencyBreak()
       stop(paste0("Array", 
-          ifelse(sum(link) == 1, " '", "(s) '"), 
-          paste(unique(stations$Array[link]), collapse = "', '"),
-          ifelse(sum(link) == 1, "' was", "' were"), 
-          " not assigned to any section. Stopping to prevent function failure.\nYou can either:\n1) Rename these arrays to match a section, \n2) Rename a section to match these arrays, or \n3) Include a new section in the analysis.\n"),
+          ifelse(length(the.arrays) == 1, " '", "(s) '"), 
+          paste(the.arrays, collapse = "', '"),
+          ifelse(length(the.arrays) == 1, "' was", "' were"), 
+          " not assigned to any section. Stopping to prevent function failure.\nYou can either:\n   1) Rename these arrays to match a section, \n   2) Rename a section to match these arrays, or \n   3) Include a new section in the analysis.\n"),
       call. = FALSE)
     }
   } else {
