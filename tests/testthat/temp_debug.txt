@@ -1,3 +1,0 @@
-Creating 'dist.mat' if a distances.csv file is present.
-Creating 'dist.mat' if a distances.csv file is present.
-Running setSpatialStandards
