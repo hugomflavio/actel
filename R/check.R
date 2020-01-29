@@ -841,9 +841,9 @@ checkNoDetections <- function(input, bio){
   tag.list <- stripCodeSpaces(names(input))
   link <- match(bio$Signal, tag.list)
   if (all(is.na(link))) {
-    appendTo(c("Screen", "Report"), "M: No detections were found in the input data which matched the target signals.")
+    appendTo(c("Report"), "Error: No detections were found in the input data which matched the target signals.")
     emergencyBreak()
-    stop("Stopping analysis due to absence of valid detections.\n", call. = FALSE)
+    stop("No detections were found in the input data which matched the target signals.\n", call. = FALSE)
   }
   return(list(list = tag.list,link = link))
 }
@@ -860,17 +860,23 @@ checkDupSignals <- function(input, bio, tag.list){
   appendTo("debug", "Running dupSignalsCheck.")  
   failsafe <- match(tag.list, bio$Signal)
   if (any(table(failsafe) > 1)) {
-    appendTo(c("Screen", "Report"), "Error: One or more signals match more than one tag in the detections! Showing relevant signals/tags.")
+    appendTo(c("Report"), "Error: One or more signals match more than one tag in the detections! Showing relevant signals/tags.")
     t1 <- cbind(names(input), bio$Signal[failsafe])
     t2 <- t1[complete.cases(t1), ]
     t3 <- table(t2[, 1], t2[, 2])
     rm(t1, t2)
     dupsig <- data.frame(Signal = colnames(t3)[apply(t3, 2, sum) > 1], Tags = NA, stringsAsFactors = FALSE)
-    for (i in seq_len(nrow(dupsig))) dupsig$Tags[i] <- paste(row.names(t3)[t3[, dupsig$Signal[i]] == 1], collapse = ", ")
+    for (i in seq_len(nrow(dupsig))) {
+      dupsig$Tags[i] <- paste(row.names(t3)[t3[, dupsig$Signal[i]] == 1], collapse = ", ")
+    }
     rm(t3)
-    for (i in seq_len(nrow(dupsig))) appendTo(c("Screen", "Report"), paste0("   Signal ", dupsig$Signal[i], " was found on tags ", dupsig$Tags[i], "."))
+    rest.of.message <- NULL
+    for (i in seq_len(nrow(dupsig))) {
+      rest.of.message <- paste0(rest.of.message, "\n   Signal ", dupsig$Signal[i], " was found on tags ", dupsig$Tags[i], ".")
+    }
+    appendTo(c("Report"), rest.of.message)
+    stop(paste0("One or more signals match more than one tag in the detections! Showing relevant signals/tags.", rest.of.message, "\n"), call. = FALSE)
     emergencyBreak()
-    stop("Fatal exception found. Stopping analysis.\n", call. = FALSE)
   }
 }
 

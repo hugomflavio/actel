@@ -15,7 +15,7 @@ loadStudyData <- function(tz, override = NULL, start.time, stop.time,
   
   # Check that all the overriden fish are part of the study
   if (!is.null(override) && any(link <- is.na(match(unlist(lapply(strsplit(override, "-"), function(x) tail(x, 1))), bio$Signal))))
-    stop("Some tag signals listed in 'override' ('", paste0(override[link], collapse = "', '"), "') are not listed in the biometrics file.\n")
+    stop("Some tag signals listed in 'override' ('", paste0(override[link], collapse = "', '"), "') are not listed in the biometrics file.\n", call. = FALSE)
   deployments <- loadDeployments(file = "deployments.csv", tz = tz)
   checkDeploymentTimes(input = deployments) # check that receivers are not deployed before being retrieved
   spatial <- loadSpatial(file = "spatial.csv", report = TRUE)
@@ -801,7 +801,9 @@ compileDetections <- function(path = "detections", start.time = NULL, stop.time 
   appendTo("Screen", "M: Compiling detections...")
   # Find the detection files
   if (file_test("-d", path)) {
-    file.list <- findFiles(path = path, pattern = "*.csv")
+    file.list <- list.files(path = path, pattern = "*.csv", full.names = TRUE)
+    if (length(file.list) == 0)
+      stop("A 'detections' folder is present but appears to be empty.\n", call. = FALSE)
   } else {
     if (file.exists("detections.csv"))
       file.list <- "detections.csv"
@@ -856,46 +858,23 @@ compileDetections <- function(path = "detections", start.time = NULL, stop.time 
   output$CodeSpace <- as.factor(output$CodeSpace)
   # Convert codespaces
   output <- convertCodes(input = output)
+
+  # save detections in UTC
+  actel.detections <- list(detections = output, timestamp = Sys.time())
+  save(actel.detections, file = ifelse(file_test("-d", path), paste0(path, "/actel.detections.RData"), "actel.detections.RData"))
+  
   # Convert time-zones
   output <- convertTimes(input = output, start.time = start.time, 
     stop.time = stop.time, tz = tz)
 
-  actel.detections <- list(detections = output, timestamp = Sys.time())
-  save(actel.detections, file = ifelse(file_test("-d", path), paste0(path, "/actel.detections.RData"), "actel.detections.RData"))
-  
   return(output)
-}
-
-#' Find file names
-#'
-#' @inheritParams loadDetections
-#' 
-#' @return A vector of the file names.
-#'
-#' @keywords internal
-#' 
-findFiles <- function(path = NULL, pattern = NULL) {
-  appendTo("debug", "Running findFiles.")
-  if (is.null(path)) {
-      file.list <- list.files(pattern = pattern)
-  } else {
-    file.list <- NULL
-    for (folder in path) {
-      if (file_test("-d", folder)) {
-        file.list <- c(file.list, paste0(folder, "/", list.files(folder, pattern = pattern)))
-      } else {
-        stop("Could not find a '", folder, "' directory in the current working directory.\n", call. = FALSE)
-      }
-    }
-  }
-  return(file.list)
 }
 
 #' Thelma files
 #' 
 #' Processes Thelma ALS files.
 #' 
-#' @param input the file name, supplied by findFiles.
+#' @param input the file name.
 #'
 #' @return A data frame of standardized detections from the input file.
 #'
@@ -1010,6 +989,8 @@ convertTimes <- function(input, start.time, stop.time, tz) {
   input$Transmitter <- as.factor(paste(input$CodeSpace, input$Signal, sep = "-"))
   return(input)
 }
+
+### END OF loadDetections HELPERS
 
 #' Include the deployment in the serial number of the receive
 #' 
@@ -1196,7 +1177,11 @@ createStandards <- function(detections, spatial, deployments) {
         message("Possible options:\n   a) Stop and double-check the data (recommended)\n   b) Discard orphan detections.")
         check <- TRUE
         while (check) {
-          decision <- readline("Which option should be followed?(a/b) ")
+          if (interactive()) {
+            decision <- readline("Which option should be followed?(a/b) ")
+          } else {
+            decision <- "b"
+          }
           if (decision == "a" | decision == "A" | decision == "b" | decision == "B") 
             check <- FALSE 
           else 

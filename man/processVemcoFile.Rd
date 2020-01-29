@@ -7,7 +7,7 @@
 processVemcoFile(input)
 }
 \arguments{
-\item{input}{the file name, supplied by findFiles.}
+\item{input}{the file name.}
 }
 \value{
 A data frame of standardized detections from the input file.

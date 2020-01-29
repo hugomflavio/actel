@@ -37,7 +37,7 @@ std.error.circular <- function(x, na.rm = TRUE, silent = FALSE){
   x <- x[!is.na(x)]
  output <- circular::sd.circular(x) / sqrt(length(x))
  if (!silent && a != length(x)) 
-  message("M: Ommited", a - length(x), "missing values.")
+  message("M: Ommited ", a - length(x), " missing ", ifelse((a - length(x)) > 1, "values.", "value."))
  return(output)
 }
 
@@ -67,12 +67,14 @@ decimalTime <- function(input, unit = c("h", "m", "s")) {
     if (unit == "s")
       return(x * 3600)
   }
-  if (length(input) < 1) 
+  if (missing(input)) 
     stop("Input appears to be empty.")
-  if (length(input) == 1) 
+  if (length(input) == 1) {
     output <- .converter(input, unit = unit)
+    names(output) <- input
+  }
   if (length(input) > 1) 
-    output <- unlist(lapply(input, function(i) .converter(i, unit = unit)))
+    output <- sapply(input, function(i) .converter(i, unit = unit))
   return(output)
 }
 
