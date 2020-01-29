@@ -1,11 +1,13 @@
 
-	write.csv(example.spatial, "spatial.csv", row.names = FALSE)
-	spatial <- loadSpatial()
-	file.remove("spatial.csv")
-	write.csv(example.biometrics, "biometrics.csv", row.names = FALSE)
-	bio <- loadBio(file = "biometrics.csv", tz = "Europe/Copenhagen")
-	file.remove("biometrics.csv")
-	dot <- loadDot(string = paste(unique(spatial$Array), collapse = "--"), spatial = spatial, disregard.parallels = TRUE)
+write.csv(example.spatial, "spatial.csv", row.names = FALSE)
+spatial <- loadSpatial()
+file.remove("spatial.csv")
+
+write.csv(example.biometrics, "biometrics.csv", row.names = FALSE)
+bio <- loadBio(file = "biometrics.csv", tz = "Europe/Copenhagen")
+file.remove("biometrics.csv")
+
+dot <- loadDot(string = paste(unique(spatial$Array), collapse = "--"), spatial = spatial, disregard.parallels = TRUE)
 
 test_that("transformSpatial handles release site mismatches properly and stops when needed", {
 
@@ -74,7 +76,7 @@ test_that("transformSpatial handles sections properly", {
 	expect_warning(transformSpatial(spatial = spatial, bio = bio, arrays = dot$arrays, sections = c("River", "Fjord", "Sea", "test")),
 		"No arrays were found that match section(s) test. There could be a typing mistake!", fixed = TRUE)
 
-	expect_error(transformSpatial(spatial = spatial, bio = bio, arrays = dot$arrays, sections = c("River", "Fjord")),
+	expect_error(suppressWarnings(transformSpatial(spatial = spatial, bio = bio, arrays = dot$arrays, sections = c("River", "Fjord"))),
 		"Array 'Sea1' was not assigned to any section. Stopping to prevent function failure.\nYou can either:\n   1) Rename these arrays to match a section, \n   2) Rename a section to match these arrays, or \n   3) Include a new section in the analysis.", fixed = TRUE)
 })
 

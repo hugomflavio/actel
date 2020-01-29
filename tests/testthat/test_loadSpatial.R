@@ -24,7 +24,7 @@ test_that("loadSpatial stops if columns are missing or duplicated", {
 	spatial <- example.spatial
 	colnames(spatial)[4] <- "test"
 	write.csv(spatial, "spatial.csv", row.names = FALSE)
-	expect_error(loadSpatial(),
+	expect_error(loadSpatial(report = TRUE),
 		"The spatial.csv file must contain an 'Array' column.", fixed = TRUE)
 	})
 
