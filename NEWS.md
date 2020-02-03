@@ -36,6 +36,7 @@ Enhancements:
   * Movement tables can now be visualised in a new window with the argument GUI.
   * Improve handling of partially empty groups and release sites in the biometrics file.
   * Improve flexibility in handling shape files with dimensions incompatible with the requested pixel size.
+  * Improve the distances matrix so it can cope with unspeficied release sites.
 
 ## actel 0.1.2
 

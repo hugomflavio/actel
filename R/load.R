@@ -488,6 +488,13 @@ loadDistances <- function(spatial) {
         message(paste0("   Column names missing in the rows: '", paste(colnames(dist.mat)[link], collapse = "', '"), "'."))
       invalid.dist <- TRUE
     }
+    # Failsafe for the case of unspecified release sites
+    if (any(grepl("^unspecified$", spatial$release.sites$Standard.name))) {
+      dist.mat[nrow(dist.mat) + 1, ] <- NA
+      dist.mat[, ncol(dist.mat) + 1] <- NA
+      colnames(dist.mat)[ncol(dist.mat)] <- "unspecified"      
+      rownames(dist.mat)[nrow(dist.mat)] <- "unspecified"      
+    }
     if (!invalid.dist && sum(nrow(spatial$stations), nrow(spatial$release.sites)) != nrow(dist.mat)) {
       appendTo(c("Screen", "Report", "Warning"), "The number of spatial points does not match the number of rows in the distance matrix. Deactivating speed calculation to avoid function failure.")
       message("   Number of stations and release sites listed: ", sum(nrow(spatial$stations), nrow(spatial$release.sites)))
