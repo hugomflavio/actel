@@ -29,6 +29,7 @@ Enhancements:
   * Detailed progression per group and release site is now exported through a `release.overview` object.
   * Prevent migration from continuing if some arrays are not associated to a section.
   * Warn user if override is requested for a fish that is not detected.
+  * Improve mechanics behind suggestions to linearise movements.
 
 
 ## actel 0.1.2

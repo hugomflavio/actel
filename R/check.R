@@ -349,10 +349,6 @@ checkLinearity <- function(secmoves, fish, sections, arrays) {
         else
           appendTo(c("Screen", "Report", "Warning"), paste0("Inter-section backwards movements were detected for fish ", fish, "."))
       }
-      aux <- data.frame(
-        A = back.check[-length(back.check)], 
-        B = back.check[-1])
-      suggestion <- which(aux$A > aux$B) + 1
       appendTo("Screen", paste0("M: Opening section movements for fish ", fish," for inspection:"))
       print(vsm, topn = nrow(vsm))
       message("")
@@ -377,8 +373,14 @@ checkLinearity <- function(secmoves, fish, sections, arrays) {
         if (unknown.input) {
           appendTo("Screen", "Option not recognized, please input either 'a', 'b' or 'comment'.")
         }
+      suggestion <- rep(FALSE, length(back.check))
+      for(i in unique(back.check)) {
+        first.time <- match(i, back.check)
+        to.remove <- back.check[first.time:length(back.check)] < i
+        suggestion[first.time:length(back.check)][to.remove] <- TRUE
       }
       # Transfer invalidated events to secmoves
+      suggestion <- which(suggestion)
       secmoves <- transferValidity(from = aux, to = secmoves)
       # Prepare double call warning
       double.call <- TRUE
