@@ -17,6 +17,7 @@ Fixes:
   * Avoid crash if some group names are entirely contained within other groups.
   * Fix bug where 'disregard.parallels' was ironically disregarded and parallels always blocked peer assignment.
   * Prevent crash if the spatial.csv file cannot be updated due to being open elsewhere.
+  * Fix bug where the presence of multiple instantaneous shifts in section would mess up the residency lists.
 
 Changes:
   * `array.overview` is now called `group.overview`.

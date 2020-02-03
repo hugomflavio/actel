@@ -1164,6 +1164,7 @@ blameArrays <- function(from, to, paths) {
 getResidency <- function(movements, spatial){
   output <- lapply(movements, function(x) {
       recipient <- as.data.frame(x)[, c("Section", "First.time", "Last.time")]
+      recipient$Index <- (1:nrow(recipient) * 2) - 1
       if (nrow(recipient) > 1) {
         to.add <- data.frame(
           A = match(recipient$Section[-nrow(recipient)], names(spatial$array.order)),
@@ -1177,8 +1178,11 @@ getResidency <- function(movements, spatial){
             return(paste0(names(spatial$array.order)[as.numeric(xi[2])], "-", names(spatial$array.order)[as.numeric(xi[1])]))
         })
         to.add <- to.add[, c("Section", "First.time", "Last.time")]
+        to.add$Index <- 1:nrow(to.add) * 2
         output <- rbind(recipient, to.add)
-        output <- output[order(output$First.time), ]
+        output <- output[order(output$Index), ]
+        output <- output[, -ncol(output)]
+        row.names(output) <- 1:nrow(output)
       } else {
         output <- recipient
       }
