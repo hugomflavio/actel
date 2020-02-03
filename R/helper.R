@@ -628,7 +628,7 @@ distancesMatrix <- function(t.layer = "transition.layer.RData", starters = NULL,
   sp::coordinates(targets) <- ~ longitude + latitude # converts the file to a spatialPoints object
   raster::crs(targets) <- raster::crs(data.crs)
   #### Calculate a matrix of distances to each object
-  dist.mat <- data.frame(gdistance::costDistance(t.layer, starters, targets))
+  dist.mat <- data.frame(gdistance::costDistance(transition.layer, starters, targets))
   if (rename) {
     rownames(dist.mat) <- outputRows
     colnames(dist.mat) <- outputCols
