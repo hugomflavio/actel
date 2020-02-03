@@ -525,16 +525,32 @@ transitionLayer <- function(shape, size, EPSGcode, directions = c(16, 8, 4), for
     stop("'shape' must be a .shp file.\n", call. = FALSE)
   }
   data.crs <- raster::crs(paste0("+init=epsg:", EPSGcode))
-  raster::crs(shape)<-raster::crs(data.crs) # Set CRS 
-  pixel.res <- (shape@bbox[,2] - shape@bbox[,1]) / size
-  if (any(pixel.res %% 1 != 0)) {
-    message("The chosen pixel size does not allow for an integer number of pixels\n\nShapefile resolution:")
-    print(shape@bbox)
-    message(paste("\nChosen pixel size:", size, "\nNumber of resulting pixels:"))
-    print(pixel.res)
-    message("")
-    stop("The extent of the shapefile divided by the pixel size must result in an integer.\n", call. = FALSE)
+  raster::crs(shape) <- raster::crs(data.crs) # Set CRS 
+
+  fix.x <- ((shape@bbox[1, 2] - shape@bbox[1, 1]) %% size) / 2
+  if (fix.x != 0) {
+    message("M: Applying a correction of +- ", fix.x, " metres on each X edge of the shape to ensure an integer number of pixels.")
+    shape@bbox[1, 2] <- shape@bbox[1, 2] - fix.x
+    shape@bbox[1, 1] <- shape@bbox[1, 1] + fix.x
   }
+
+  fix.y <- ((shape@bbox[2, 2] - shape@bbox[2, 1]) %% size) / 2
+  if (fix.y != 0) {
+    message("M: Applying a correction of +- ", fix.y, " metres on each Y edge of the shape to ensure an integer number of pixels.")
+    shape@bbox[2, 2] <- shape@bbox[2, 2] - fix.y
+    shape@bbox[2, 1] <- shape@bbox[2, 1] + fix.y
+  }
+
+  if (fix.y != 0 | fix.y != 0) {
+    message("M: New shape extent:\n")
+    print(shape@bbox)
+  }
+  
+  pixel.res <- (shape@bbox[,2] - shape@bbox[,1]) / size
+  message(paste("\nChosen pixel size:", size, "\n\nNumber of resulting pixels:\n"))
+  print(pixel.res)
+  message("")
+
   if (!force && any(pixel.res > 2000)) {
     warning("The chosen pixel size creates a transition layer with one or two axes greater 
   than 2000 pixels. This can lead to very long computing times and ultimately the function 
@@ -579,7 +595,7 @@ distancesMatrix <- function(t.layer = "transition.layer.RData", starters = NULL,
   coord.x = "x", coord.y = "y", PointIDCol = NA, actel = TRUE){
   list.of.packages <- c("raster", "gdistance", "sp", "tools", "rgdal")
   new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[, "Package"])]
-  if (length(new.packages)>0) {
+  if (length(new.packages) > 0) {
     stop(paste0("This function requires packages '", paste(new.packages,collapse="', '"), 
       "' to operate. Please install them before proceeding.\n"), call. = FALSE)
   }
@@ -587,7 +603,8 @@ distancesMatrix <- function(t.layer = "transition.layer.RData", starters = NULL,
 
   if (tools::file_ext(t.layer) == "RData") {
     load(t.layer)
-    if (!exists("transition.layer")) stop(paste0("Could not find a transition layer in '", t.layer, "'.\n"), call. = FALSE)
+    if (!exists("transition.layer")) 
+      stop(paste0("Could not find a transition layer in '", t.layer, "'.\n"), call. = FALSE)
   } else {
     stop(paste0("'", t.layer, "' could not be recognised as .RData file, please make sure the file name is correct.\n"), call. = FALSE)
   }
@@ -595,9 +612,9 @@ distancesMatrix <- function(t.layer = "transition.layer.RData", starters = NULL,
   if (actel)
     starters <- targets <- "spatial.csv"
 
-  if (tools::file_ext(starters) != "csv" | tools::file_ext(targets) != "csv"){
+  if (tools::file_ext(starters) != "csv" | tools::file_ext(targets) != "csv")
     stop("One of the point files (starters or targets) does not appear to be writen in csv format.\n", call. = FALSE)
-  }
+
   starters <- read.csv(starters) 
   
   if (actel) {
@@ -606,7 +623,7 @@ distancesMatrix <- function(t.layer = "transition.layer.RData", starters = NULL,
     starters$Standard.name <- as.character(starters$Station.name)
     link <- starters$Type == "Hydrophone"
     starters$Standard.name[link] <- paste0("St.", seq_len(sum(starters$Type == "Hydrophone")))
-    targets = starters
+    targets <- starters
   } else {
     targets <- read.csv(targets)
   }
@@ -616,8 +633,14 @@ distancesMatrix <- function(t.layer = "transition.layer.RData", starters = NULL,
   colnames(targets)[colnames(targets) == coord.y] <- "latitude"
   if (!is.na("PointIDCol")) {
     rename <- TRUE
-    if (!is.na(match(PointIDCol, colnames(starters)))) outputRows <- starters[, PointIDCol] else rename <- FALSE
-    if (!is.na(match(PointIDCol, colnames(targets )))) outputCols <- targets[, PointIDCol] else rename <- FALSE
+    if (!is.na(match(PointIDCol, colnames(starters)))) 
+      outputRows <- starters[, PointIDCol] 
+    else 
+      rename <- FALSE
+    if (!is.na(match(PointIDCol, colnames(targets)))) 
+      outputCols <- targets[, PointIDCol] 
+    else 
+      rename <- FALSE
   } else {
     rename <- FALSE
   }

@@ -119,10 +119,9 @@ If you are not familiar with shapefiles and GIS, it might be a good idea to ask 
 
 #### Preparing the shapefile
 
-To begin, you need to create a shapefile that extends over all your receivers and release sites. This shapefile is expected to contain polygons of the land masses, which means that your rivers, lakes, fjords and any water bodies must be "empty space". The width of your water channels is important, as the shapefile will be converted into a raster later on (i.e. a image made of pixels). If your pixels represent squares of 30 by 30 metres, and your channel width originally was of five metres, then the river path will be lost during the conversion process.
+To begin, you need to create a shapefile that extends over all your receivers and release sites. This shapefile is expected to contain polygons of the land masses, which means that your rivers, lakes, fjords and any water bodies must be "empty space". The width of your water channels is important, as the shapefile will be converted into a raster later on (i.e. a image made of pixels). If your pixels represent squares of 30 by 30 metres, and your channel width originally was of five metres, then the river path will be lost during the conversion process. Try to ensure, as best as possible, that the corners of your shapefile are aligned (i.e. the shape as a rectangular/quadrangular form).
 
 Note:
-  : The shapefile extent **must** be rounded (e.g. 20100 by 7500 metres instead of 20089 by 7499 metres). You will find out why later on.
   : You **must** save the shapefile in a metric coordinate system, or otherwise the distance calculation will return wrong measurements.
 
 Below is an example of the study area in the left, and the respective shapefile in the right:
@@ -150,8 +149,6 @@ transitionLayer(shape, size, EPSGcode, directions)
     For example, if `size = 20`, then each pixel will have 20 by 20 meters. 
 
     Keep in mind that your pixel size must allow R to still capture the presence of your river channels. If the river channels are too slim, you can go back to your shapefile and artificially enlarge them.
-    
-    Note that the chosen `size` **must** allow for an integer number of pixels to cover your shapefile (i.e., `size` must be a divisor of your shapefile's resolution). If you pick a wrong number, don't worry, actel will let you know.
 
 1. The `EPSGcode` is the code of the coordinate system that the shapefile was saved in.
 1. The `directions` determine the complexity of R's distance tracking techniques. It can take one of four values: four, eight or sixteen, defaulting to the latter.
