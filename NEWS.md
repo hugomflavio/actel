@@ -16,6 +16,7 @@ Fixes:
   * Avoid crash if group names have '.' characters in them.
   * Avoid crash if some group names are entirely contained within other groups.
   * Fix bug where 'disregard.parallels' was ironically disregarded and parallels always blocked peer assignment.
+  * Prevent crash if the spatial.csv file cannot be updated due to being open elsewhere.
 
 Changes:
   * `array.overview` is now called `group.overview`.

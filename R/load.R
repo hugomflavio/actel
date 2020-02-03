@@ -453,7 +453,7 @@ setSpatialStandards <- function(input){
   input$Standard.name <- gsub(" ", "", input$Standard.name)
   link <- input$Type == "Hydrophone"
   input$Standard.name[link] <- paste0("St.", seq_len(sum(input$Type == "Hydrophone")))
-  write.csv(input, "spatial.csv", row.names = FALSE)
+  try(suppressWarnings(write.csv(input, "spatial.csv", row.names = FALSE)), silent = TRUE)
   return(input)
 }
 
