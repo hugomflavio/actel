@@ -698,10 +698,11 @@ loadBio <- function(file, tz){
   } else {
     bio$Release.site <-  gsub(" ", "", bio$Release.site)
     bio$Release.site <- factor(bio$Release.site)
-    if (any(is.na(bio$Release.site) | bio$Release.site == "")) {
+    if (any(link <- is.na(bio$Release.site) | bio$Release.site == "")) {
       appendTo(c("Screen","Report","Warning"),"Some fish contain no release site information. You may want to double-check the data.\n   Filling the blanks with 'unspecified'.")
       levels(bio$Release.site) <- c(levels(bio$Release.site), "unspecified")
-      bio$Release.site[is.na(bio$Release.site)] <- "unspecified"
+      bio$Release.site[link] <- "unspecified"
+      bio$Release.site <- droplevels(bio$Release.site)
     }
   }
   if (!any(grepl("Group", colnames(bio)))) {
@@ -709,10 +710,11 @@ loadBio <- function(file, tz){
     bio$Group <- "All"
   } else {
     bio$Group <- factor(bio$Group)
-    if (any(is.na(bio$Group) | bio$Group == "")) {
+    if (any(link <- is.na(bio$Group) | bio$Group == "")) {
       appendTo(c("Screen", "Report", "Warning"),"Some fish contain no group information. You may want to double-check the data.\n   Filling the blanks with 'unspecified'.")
       levels(bio$Group) <- c(levels(bio$Group), "unspecified")
-      bio$Group[is.na(bio$Group) | bio$Group == ""] <- "unspecified"
+      bio$Group[link] <- "unspecified"
+      bio$Group <- droplevels(bio$Group)
     }
     if (any(link <- sapply(levels(bio$Group), function(i) length(grep(i, levels(bio$Group)))) > 1)) {
       appendTo(c("Screen", "Report", "Warning"), paste0(

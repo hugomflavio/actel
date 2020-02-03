@@ -31,8 +31,8 @@ Enhancements:
   * Prevent migration from continuing if some arrays are not associated to a section.
   * Warn user if override is requested for a fish that is not detected.
   * Improve mechanics behind suggestions to linearise movements.
-
   * Movement tables can now be visualised in a new window with the argument GUI.
+  * Improve handling of partially emptry groups and release sites in the biometrics file.
 
 ## actel 0.1.2
 
