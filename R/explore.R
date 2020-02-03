@@ -12,6 +12,13 @@
 #'  detection data before any analyses are performed. Intended to be used if 
 #'  stray tags from a different code space but with the same signal as a target
 #'  tag are detected in the study area.
+#' @param GUI One of "needed", "always" or "never". If "needed", a new window is
+#'  opened to inspect the movements only if the movements table is too big to be
+#'  displayed in R's console. If "always", a graphical interface is always created
+#'  when the possibility to invalidate events emerges. If "never", a graphical
+#'  interface is never invoqued. In this case, if the table to be displayed does
+#'  not fit in R's console, a temporary file will be saved and the user will be
+#'  prompted to open and examine that file. Defaults to "needed".
 #' @param inactive.error If a fish spends a number of days equal or greater than 
 #'  \code{inactive.error} in a given array at the tail of the respective 
 #'  detections, user intervention is suggested. If left NULL (default), user 
@@ -83,7 +90,7 @@
 explore <- function(path = NULL, tz, max.interval = 60, minimum.detections = 2, start.time = NULL, stop.time = NULL, 
   speed.method = c("last to first", "first to first"), speed.warning = NULL, speed.error = NULL, 
   jump.warning = 2, jump.error = 3, inactive.warning = NULL, inactive.error = NULL, 
-  exclude.tags = NULL, override = NULL, report = TRUE, debug = FALSE,
+  exclude.tags = NULL, override = NULL, report = TRUE, GUI = c("needed", "always", "never"), debug = FALSE,
   maximum.time = 60, tz.study.area = NULL, start.timestamp = NULL, end.timestamp = NULL) {
 
 # Temporary: check deprecated options
@@ -167,6 +174,8 @@ explore <- function(path = NULL, tz, max.interval = 60, minimum.detections = 2, 
   if (!is.null(inactive.warning) & is.null(inactive.error))
     inactive.error <- Inf
   
+  GUI <- checkGUI(GUI)
+
   if (!is.logical(debug))
     stop("'debug' must be logical.\n", call. = FALSE)
 # ------------------------
@@ -200,8 +209,9 @@ explore <- function(path = NULL, tz, max.interval = 60, minimum.detections = 2, 
       ", override = ", ifelse(is.null(override), "NULL", paste0("c('", paste(override, collapse = "', '"), "')")),
       ", jump.warning = ", jump.warning,
       ", jump.error = ", jump.error,
-      ", inactive.warning = ", ifelse(is.null(inactive.warning), "NULL", inactive.warning), 
+      ", inactive.warning = ", ifelse(is.null(inactive.warning), "NULL", inactive.warning),
       ", inactive.error = ", ifelse(is.null(inactive.error), "NULL", inactive.error), 
+      ", GUI = ", GUI,
       ", debug = ", ifelse(debug, "TRUE", "FALSE"), 
       ")")
 # --------------------
@@ -295,26 +305,26 @@ detections.list <- study.data$detections.list
 
       output <- checkMinimumN(movements = movements[[i]], fish = fish, minimum.detections = minimum.detections)
 
-      output <- checkImpassables(movements = output, fish = fish, dotmat = dotmat)
+      output <- checkImpassables(movements = output, fish = fish, dotmat = dotmat, GUI = GUI)
 
       output <- checkJumpDistance(movements = output, release = release, fish = fish, dotmat = dotmat, 
-                                  jump.warning = jump.warning, jump.error = jump.error)
+                                  jump.warning = jump.warning, jump.error = jump.error, GUI = GUI)
 
       if (do.checkSpeeds) {
         temp.valid.movements <- simplifyMovements(movements = output, fish = fish, bio = bio, 
           speed.method = speed.method, dist.mat = dist.mat, invalid.dist = invalid.dist)
         output <- checkSpeeds(movements = output, fish = fish, valid.movements = temp.valid.movements, 
-          speed.warning = speed.warning, speed.error = speed.error)
+          speed.warning = speed.warning, speed.error = speed.error, GUI = GUI)
         rm(temp.valid.movements)
       }
 
       if (do.checkInactiveness) {
         output <- checkInactiveness(movements = output, fish = fish, detections.list = detections.list[[fish]], 
           inactive.warning = inactive.warning, inactive.error = inactive.error, 
-          dist.mat = dist.mat, invalid.dist = invalid.dist)
+          dist.mat = dist.mat, invalid.dist = invalid.dist, GUI = GUI)
       }
     } else {
-      output <- overrideValidityChecks(moves = movements[[i]], fish = names(movements)[i])
+      output <- overrideValidityChecks(moves = movements[[i]], fish = names(movements)[i], GUI = GUI)
     }
     return(output)
   })

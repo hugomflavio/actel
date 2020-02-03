@@ -86,8 +86,8 @@ migration <- function(path = NULL, tz, sections, success.arrays = NULL, max.inte
   start.time = NULL, stop.time = NULL, speed.method = c("last to first", "first to first"), 
   speed.warning = NULL, speed.error = NULL, jump.warning = 2, jump.error = 3, 
   inactive.warning = NULL, inactive.error = NULL, exclude.tags = NULL, override = NULL, report = TRUE,
-  if.last.skip.section = TRUE, replicates = NULL, disregard.parallels = TRUE, debug = FALSE,
-  maximum.time = 60, tz.study.area = NULL, start.timestamp = NULL, end.timestamp = NULL) {
+  if.last.skip.section = TRUE, replicates = NULL, disregard.parallels = TRUE, GUI = c("needed", "always", "never"), 
+  debug = FALSE, maximum.time = 60, tz.study.area = NULL, start.timestamp = NULL, end.timestamp = NULL) {
 
 # Temporary: check deprecated options
   dep.warning <- "------------------------------------------------------------------\n!!! Deprecated arguments used!\n!!!\n"
@@ -179,6 +179,8 @@ migration <- function(path = NULL, tz, sections, success.arrays = NULL, max.inte
   if (!is.null(inactive.warning) & is.null(inactive.error))
     inactive.error <- Inf
   
+  GUI <- checkGUI(GUI)
+
   if (!is.logical(debug))
     stop("'debug' must be logical.\n", call. = FALSE)
 # ------------------------
@@ -219,6 +221,7 @@ migration <- function(path = NULL, tz, sections, success.arrays = NULL, max.inte
       ", jump.error = ", jump.error,
       ", inactive.warning = ", ifelse(is.null(inactive.warning), "NULL", inactive.warning), 
       ", inactive.error = ", ifelse(is.null(inactive.error), "NULL", inactive.error), 
+      ", GUI = ", GUI,
       ", debug = ", ifelse(debug, "TRUE", "FALSE"), 
       ")")
 # --------------------
@@ -331,28 +334,28 @@ migration <- function(path = NULL, tz, sections, success.arrays = NULL, max.inte
 
       output <- checkMinimumN(movements = movements[[i]], fish = fish, minimum.detections = minimum.detections)
 
-      output <- checkUpstream(movements = output, fish = fish, release = release, arrays = arrays)
+      output <- checkUpstream(movements = output, fish = fish, release = release, arrays = arrays, GUI = GUI)
     
-      output <- checkImpassables(movements = output, fish = fish, dotmat = dotmat)
+      output <- checkImpassables(movements = output, fish = fish, dotmat = dotmat, GUI = GUI)
 
       output <- checkJumpDistance(movements = output, release = release, fish = fish, dotmat = dotmat, 
-                                  jump.warning = jump.warning, jump.error = jump.error)
+                                  jump.warning = jump.warning, jump.error = jump.error, GUI = GUI)
 
       if (do.checkSpeeds) {
         temp.valid.movements <- simplifyMovements(movements = output, fish = fish, bio = bio, 
-          speed.method = speed.method, dist.mat = dist.mat, invalid.dist = invalid.dist)
+          speed.method = speed.method, dist.mat = dist.mat, invalid.dist = invalid.dist, GUI = GUI)
         output <- checkSpeeds(movements = output, fish = fish, valid.movements = temp.valid.movements, 
-          speed.warning = speed.warning, speed.error = speed.error)
+          speed.warning = speed.warning, speed.error = speed.error, GUI = GUI)
         rm(temp.valid.movements)
       }
 
       if (do.checkInactiveness) {
         output <- checkInactiveness(movements = output, fish = fish, detections.list = detections.list[[fish]], 
           inactive.warning = inactive.warning, inactive.error = inactive.error, 
-          dist.mat = dist.mat, invalid.dist = invalid.dist)
+          dist.mat = dist.mat, invalid.dist = invalid.dist, GUI = GUI)
       }
     } else {
-      output <- overrideValidityChecks(moves = movements[[i]], fish = names(movements)[i])
+      output <- overrideValidityChecks(moves = movements[[i]], fish = names(movements)[i], GUI = GUI)
     }
     return(output)
   })
@@ -365,7 +368,7 @@ migration <- function(path = NULL, tz, sections, success.arrays = NULL, max.inte
     fish <- names(movements)[i]
     appendTo("debug", paste0("debug: Compiling section movements for fish ", fish,"."))
     aux <- sectionMovements(movements = movements[[i]], sections = sections, invalid.dist = invalid.dist)
-    output <- checkLinearity(secmoves = aux, fish = fish, sections = sections, arrays = arrays)
+    output <- checkLinearity(secmoves = aux, fish = fish, sections = sections, arrays = arrays, GUI = GUI)
     return(output)
   })
   names(section.movements) <- names(movements)

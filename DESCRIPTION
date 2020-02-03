@@ -39,7 +39,10 @@ Suggests:
     sp,
     tools,
     rgdal,
-    testthat
+    testthat,
+    RGtk2,
+    gWidgetsRGtk2,
+    gWidgets    
 VignetteBuilder: knitr
 URL: https://github.com/hugomflavio/actel
 BugReports: https://github.com/hugomflavio/actel/issues

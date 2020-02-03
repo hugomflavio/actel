@@ -335,7 +335,7 @@ commentCheck <- function(line, tag) {
     if (any(matchl(decision, c("Comment", "comment")))) {
       appendTo(c("UD"), "Comment")
       {
-        appendTo(c("UD", "Comment"), readline(paste0("New comment on fish ", tag, ":")), tag)
+        appendTo(c("UD", "Comment"), readline(paste0("New comment on fish ", tag, ": ")), tag)
       }
       appendTo("Screen", "M: Comment successfully stored, returning to the previous interaction.")
     } else {

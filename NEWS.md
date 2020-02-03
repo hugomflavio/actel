@@ -31,6 +31,7 @@ Enhancements:
   * Warn user if override is requested for a fish that is not detected.
   * Improve mechanics behind suggestions to linearise movements.
 
+  * Movement tables can now be visualised in a new window with the argument GUI.
 
 ## actel 0.1.2
 

@@ -4,6 +4,13 @@
 #' @param detections.list A list of the detections split by each target tag, created by splitDetections.
 #' @param dotmat The matrix of distances between arrays
 #' @param fish The fish being analysed
+#' @param GUI One of "needed", "always" or "never". If "needed", a new window is
+#'  opened to inspect the movements only if the movements table is too big to be
+#'  displayed in R's console. If "always", a graphical interface is always created
+#'  when the possibility to invalidate events emerges. If "never", a graphical
+#'  interface is never invoqued. In this case, if the table to be displayed does
+#'  not fit in R's console, a temporary file will be saved and the user will be
+#'  prompted to open and examine that file. Defaults to "needed".
 #' @param movements,moves The movements table
 #' @param release The release location of the fish
 #' @param secmoves the section movements list
@@ -12,6 +19,120 @@
 #' @name check_args
 #' @keywords internal
 NULL
+
+#' handler for table interaction events
+#' 
+#' @inheritParams check_args
+#' @param trigger The message/warning that triggered the interaction
+#' 
+#' @return the updated movements table
+#' 
+#' @keywords internal
+#' 
+tableInteraction <- function(moves, fish, trigger, GUI) {
+  if (GUI == "never")
+    popup <- FALSE
+  if (GUI == "needed") {
+    if (nrow(moves) > 800)
+      popup <- TRUE
+    else
+      popup <- FALSE
+  }
+  if (GUI == "always")
+    popup <- TRUE
+
+  if (popup) {
+    output <- graphicalInvalidate(moves = moves, fish = fish, trigger = trigger)
+    decision <- readline(paste0("Would you like to leave a comment for fish ", fish, "?(y/N) "))
+    appendTo(c("UD"), "Comment")
+    if (decision == "y" | decision == "Y") {
+      appendTo(c("UD", "Comment"), readline(paste0("New comment on fish ", fish, ":" )), fish)
+      appendTo("Screen", "M: Comment successfully stored, returning to the previous interaction.")
+    }
+  } else {
+    if (nrow(moves) > 800) {
+      message("The movements table for fish '", fish, "' is too large to display on the console and GUI is set to 'never'.\nTemporarily saving the table to 'actel_inspect_movements.csv'. Please inspect this file and decide if any events should be considered invalid.\nPlease use the 'Event' column as a reference for the event number.")
+      to.print <- cbind(data.frame(Event = 1:nrow(moves)), to.print)
+      write.csv(to.print, "actel_inspect_movements.csv", row.names = FALSE)
+
+      decision <- commentCheck(line = "Would you like to render any movement event invalid?(y/N/comment) ", tag = fish)
+      appendTo("UD", decision)
+      if (decision == "y" | decision == "Y") {
+        output <- invalidateEvents(movements = moves, fish = fish)
+      } else {
+        output <- moves
+      }
+
+      first.try <- TRUE
+      while (file.exists("actel_inspect_movements.csv")) {
+        if (!suppressWarnings(file.remove("actel_inspect_movements.csv"))) {
+          if (first.try) {
+            warning("Please close the currently open 'actel_inspect_movements.csv' so the analysis can continue", immediate. = TRUE, call. = FALSE); flush.console()
+            first.try <- FALSE
+          }
+        }
+      }
+    } else {
+      message("Opening movements list for inspection:\n")
+      print(moves, topn = nrow(moves))
+      if (nrow(moves) >= 100)
+        message("\nM: Long table detected, repeating warning(s) that triggered the interaction:\n-----\n", trigger, "\n-----")
+      if (nrow(moves) < 100 & nrow(moves) >= 30)
+        message("\nM: Please find the exception which triggered this interaction at the top of the table.")
+        message("")
+      decision <- commentCheck(line = "Would you like to render any movement event invalid?(y/N/comment) ", tag = fish)
+      appendTo("UD", decision)
+      if (decision == "y" | decision == "Y") {
+        output <- invalidateEvents(movements = moves, fish = fish)
+      } else {
+        output <- moves
+      }
+    }
+  }
+  return(output)
+}
+
+#' Check if the dependencies required to open a GUI are installed, and if
+#' opening a GUI does not throw an error. Some ode adapted from RGtk2's 
+#' .onLoad function.
+#' 
+#' @inheritParams explore
+#' 
+#' @return An updated GUI argument
+#'
+#' 
+checkGUI <- function(GUI = c("needed", "always", "never")) {
+  GUI <- match.arg(GUI)
+  if (GUI != "never") {
+    if (any(link <- !(c("gWidgetsRGtk2", "gWidgets", "RGtk2") %in% installed.packages()))) {
+      appendTo(c("Screen", "Warning", "Report"), 
+        paste0("GUI is set to '", GUI, "' but ", 
+          ifelse(sum(link) == 1, "package '", "packages '"),
+          paste(c("gWidgetsRGtk2", "gWidgets", "RGtk2")[link], collapse = "', '"),
+          ifelse(sum(link) == 1, "' is", "' are"),
+          " not available. Please install ",
+          ifelse(sum(link) == 1, "it", "them"),
+          " if you intend to run GUI.\n         Disabling GUI (i.e. GUI = 'never') for the current run."))
+      GUI <- "never"
+    } else {
+      if (.Platform$OS.type == "windows") {
+        dllpath <- Sys.getenv("RGTK2_GTK2_PATH")
+        if (!nzchar(dllpath))
+          dllpath <- file.path(file.path(system.file(package = "RGtk2"), "gtk", .Platform$r_arch), "bin")
+        dll <- try(library.dynam("RGtk2", "RGtk2", sub("/RGtk2", "", find.package("RGtk2")), DLLpath = dllpath), silent = TRUE)
+      } else {
+       dll <- try(library.dynam("RGtk2", pkgname, libname), silent = TRUE)
+      }
+      if (is.character(dll)) {
+       appendTo(c("Screen", "Warning", "Report"), 
+        paste0("GUI is set to '", GUI,
+        "' but loading of RGtk2 dll failed. Please run e.g. gWidgets::gtext() to trigger the installation of RGtk2's dll and then restart R.\n         Disabling GUI (i.e. GUI = 'never') for the current run."))
+       GUI <- "never"
+      }
+    }
+  }
+  return(GUI)
+}
 
 #' Check if there are duplicated detection in the input data
 #' 
@@ -50,12 +171,11 @@ checkDupDetections <- function(input) {
         output <- input[!dups, ]
       }
       if (decision == "c" | decision == "C") {
-        # Trigger user interaction
         appendTo("UD", decision)
         unknown.input = FALSE
         appendTo(c("Screen", "Report"), "M: Continuing analysis with duplicated detections per user command.")
         output <- input
-      } # end trigger error
+      }
       if (unknown.input) {
         appendTo("Screen", "Option not recognized, please input either 'a', 'b', 'c' or 'comment'.")
       }
@@ -72,15 +192,11 @@ checkDupDetections <- function(input) {
 #' @inheritParams check_args
 #' @keywords internal
 #' 
-overrideValidityChecks <- function(moves, fish) {
+overrideValidityChecks <- function(moves, fish, GUI) {
   appendTo("debug", "Starting overrideDefaults.")
   message("----------------------------")
-  appendTo(c("Screen", "Report"), paste0("M: Override has been triggered for fish ", fish, ". Entering full manual mode."))
-  message("Opening movements list for inspection.\n")
-  print(moves, topn = nrow(moves))
-  message("")
-  aux <- invalidateEvents(movements = moves, fish = fish)
-  moves <- transferValidity(from = aux, to = moves)
+  appendTo(c("Screen", "Report"), trigger <- paste0("M: Override has been triggered for fish ", fish, ". Entering full manual mode."))
+  moves <- tableInteraction(moves = moves, fish = fish, trigger = trigger, GUI = GUI)
   attributes(moves)$p.type <- "Overridden"
   message("Terminating full manual mode\n----------------------------")
   return(moves)
@@ -112,9 +228,8 @@ checkMinimumN <- function(movements, minimum.detections, fish) {
 #' 
 #' @keywords internal
 #' 
-checkSpeeds <- function(movements, fish, valid.movements, speed.warning, speed.error) {
+checkSpeeds <- function(movements, fish, valid.movements, speed.warning, speed.error, GUI) {
   appendTo("debug", "Running checkSpeeds")
-  Valid <- NULL
   the.warning <- NULL
   vm <- valid.movements
   if (any(na.as.false(vm$Average.speed.m.s >= speed.warning))) {
@@ -132,26 +247,14 @@ checkSpeeds <- function(movements, fish, valid.movements, speed.warning, speed.e
           other.warning <- paste0("Fish ", fish, " had an average speed of ", round(vm$Average.speed.m.s[link[i]], 2),
             " m/s from valid event ", link[i] - 1, " to ", link[i], " (",vm$Array[link[i] - 1], " -> ", vm$Array[link[i]], ")."))
         other.warning <- paste("Warning:", other.warning)
-        the.warning <- c(the.warning, other.warning)
+        the.warning <- paste0(the.warning, "\n", other.warning)
       }
     }
   }
   # Trigger user interaction
   if (any(na.as.false(vm$Average.speed.m.s >= speed.error))) {
-    appendTo("Screen", paste0("M: Opening valid movements table of fish ", fish, " for inspection:"))
-    print(vm, topn = nrow(vm))
-    if (nrow(vm) >= 100 & length(the.warning) <= 10)
-      message("\nM: Long table detected, repeating warning(s) that triggered the interaction:\n-----\n", the.warning, "\n-----")
-    if (nrow(vm) >= 100 & length(the.warning) < 10)
-      message("\nM: Long table detected, but the number of related warnings is higher than 10, so they will not be pasted again. Please check them above the table.")
-    if (nrow(vm) < 100 & nrow(vm) >= 30)
-      message("\nM: Please find the exception which triggered this interaction at the top of the table.")
-    decision <- commentCheck(line = "Would you like to render any movement event invalid?(y/N/comment) ", tag = fish)
-    appendTo("UD", decision)
-    if (decision == "y" | decision == "Y") {
-      aux <- invalidateEvents(movements = vm, fish = fish)
-      movements <- transferValidity(from = aux, to = movements)
-    }
+    aux <- tableInteraction(moves = movements, fish = fish, trigger = the.warning, GUI = GUI)
+    movements <- transferValidity(from = aux, to = movements)
   } # end trigger error
   return(movements)   
 }
@@ -165,7 +268,8 @@ checkSpeeds <- function(movements, fish, valid.movements, speed.warning, speed.e
 #' 
 #' @keywords internal
 #' 
-checkInactiveness <- function(movements, fish, detections.list, inactive.warning, inactive.error, invalid.dist, dist.mat) {
+checkInactiveness <- function(movements, fish, detections.list, 
+  inactive.warning, inactive.error, invalid.dist, dist.mat, GUI) {
   Valid <- NULL
   appendTo("debug", "Running checkInactiveness")
   if (any(movements$Valid)) {
@@ -229,18 +333,9 @@ checkInactiveness <- function(movements, fish, detections.list, inactive.warning
       }
       # Trigger user interaction
       if (trigger.error) {
-        appendTo("Screen", paste0("M: Opening valid movement table of fish ", fish, " for inspection (inactiveness started on ", as.Date(valid.moves$First.time[start_i]),"):"))
-        print(valid.moves, topn = nrow(valid.moves))
-        if (nrow(valid.moves) >= 100)
-          message("\nM: Long table detected, repeating warning that triggered the interaction:\n-----\n", the.warning, "\n  (inactiveness started on ", as.Date(valid.moves$First.time[start_i]),")\n-----")
-        if (nrow(valid.moves) < 100 & nrow(valid.moves) >= 30)
-          message("\nM: Please find the exception which triggered this interaction at the top of the table.")          
-        decision <- commentCheck(line = "Would you like to render any movement event invalid?(y/N/comment) ", tag = fish)
-        appendTo("UD", decision)
-        if (decision == "y" | decision == "Y") {
-          aux <- invalidateEvents(movements = valid.moves, fish = fish)
-          movements <- transferValidity(from = aux, to = movements)
-        }
+        appendTo("Screen", paste0("M: ", fish, " has been inactive for more than ", inactive.error," days (inactiveness started on ", as.Date(valid.moves$First.time[start_i]),")"))
+        aux <- tableInteraction(moves = valid.moves, fish = fish, trigger = the.warning, GUI = GUI)
+        movements <- transferValidity(from = aux, to = movements)
       }
       iteration <- iteration + 1
     }
@@ -256,7 +351,7 @@ checkInactiveness <- function(movements, fish, detections.list, inactive.warning
 #' 
 #' @keywords internal
 #' 
-checkImpassables <- function(movements, fish, dotmat){
+checkImpassables <- function(movements, fish, dotmat, GUI){
   appendTo("debug", "Running checkImpassables")
   Valid <- NULL
   restart <- TRUE
@@ -270,28 +365,12 @@ checkImpassables <- function(movements, fish, dotmat){
       distances <- apply(shifts, 1, function(x) dotmat[x[1], x[2]])
       if (any(is.na(distances))) {
         sapply(which(is.na(distances)), function(i) {
-          appendTo(c("Screen", "Warning", "Report"), paste0("Fish ", fish, " made an impassable jump: It is not possible to go from array ", shifts[i, 1], " to ", shifts[i, 2], "."))
+          appendTo(c("Screen", "Warning", "Report"), the.warning <- paste0("Fish ", fish, " made an impassable jump: It is not possible to go from array ", shifts[i, 1], " to ", shifts[i, 2], "."))
         })
-        message("\nOpening valid movement table for inspection:\n")
-        print(valid.moves)
-        message("\nYou may either:\n\na) Render movement events invalid to resolve the impassable exception.\nb) Stop the analysis and modify the spatial.txt file.\n")
-        check <- TRUE
-        while(check) {
-          decision <- commentCheck(line = "Decision:(a/b/comment) ", tag = fish)
-          appendTo("UD", decision)
-          if (decision == "b" | decision == "B") {
-            emergencyBreak()
-            stop("Analysis stopped per user command.\n", call. = FALSE)
-          }
-          if (decision == "a" | decision == "A") {
-            aux <- invalidateEvents(movements = valid.moves, fish = fish)
-            movements <- transferValidity(from = aux, to = movements)
-            restart <- TRUE
-            check <- FALSE
-          } else {
-            message("Option not recognized, please choose either 'a' or 'b'.")
-          }
-        }
+        te.warning <- paste("Warning:", the.warning)
+        aux <- tableInteraction(moves = valid.moves, fish = fish, trigger = the.warning, GUI = GUI)
+        movements <- transferValidity(from = aux, to = movements)
+        restart <- TRUE
       }
     }
   }
@@ -307,19 +386,11 @@ checkImpassables <- function(movements, fish, dotmat){
 #' 
 #' @keywords internal
 #' 
-checkSMovesN <- function(secmoves, fish, section.minimum) {
+checkSMovesN <- function(secmoves, fish, section.minimum, GUI) {
   appendTo("debug", "Running checkSMovesN")
   if (any(link <- secmoves$Detections < section.minimum)) {
     appendTo(c("Screen", "Report", "Warning"), paste0("Section movements with less than ", section.minimum, " detections are present for fish ", fish, "."))
-    appendTo("Screen", paste0("M: Opening section movements for fish ", fish," for inspection:"))
-    print(secmoves, topn = nrow(secmoves))
-    message("")
-    decision <- commentCheck(line = "Would you like to render any movement event invalid?(y/N/comment) ", tag = fish)
-    appendTo("UD", decision)
-    if (decision == "y" | decision == "Y") {
-      aux <- invalidateEvents(movements = secmoves, fish = fish)
-      secmoves <- transferValidity(from = aux, to = secmoves)
-    }
+    secmoves <- tableInteraction(moves = secmoves, fish = fish, trigger = the.warning, GUI = GUI)
   }
   return(secmoves)
 }
@@ -333,7 +404,7 @@ checkSMovesN <- function(secmoves, fish, section.minimum) {
 #' 
 #' @keywords internal
 #' 
-checkLinearity <- function(secmoves, fish, sections, arrays) {
+checkLinearity <- function(secmoves, fish, sections, arrays, GUI) {
   try.again <- TRUE
   double.call <- FALSE
   while (try.again) {
@@ -342,45 +413,23 @@ checkLinearity <- function(secmoves, fish, sections, arrays) {
     turn.check <- rev(match(sections, rev(vsm$Section))) # captures the last event of each section. Note, the values count from the END of the events
     if (is.unsorted(back.check)) {
       if (double.call) {
-        appendTo(c("Screen", "Warning"), paste0("The last interaction did not linearise the movements for fish ", fish, ". Trying again."))       
+        appendTo(c("Screen", "Warning"), the.warning <- paste0("The last interaction did not linearise the movements for fish ", fish, ". Trying again."))       
       } else {
         if (is.unsorted(turn.check, na.rm = TRUE))
-          appendTo(c("Screen", "Report", "Warning"), paste0("Inter-section backwards movements were detected for fish ", fish, " and the last events are not ordered!"))
+          appendTo(c("Screen", "Report", "Warning"), the.warning <- paste0("Inter-section backwards movements were detected for fish ", fish, " and the last events are not ordered!"))
         else
-          appendTo(c("Screen", "Report", "Warning"), paste0("Inter-section backwards movements were detected for fish ", fish, "."))
+          appendTo(c("Screen", "Report", "Warning"), the.warning <- paste0("Inter-section backwards movements were detected for fish ", fish, "."))
       }
-      appendTo("Screen", paste0("M: Opening section movements for fish ", fish," for inspection:"))
-      print(vsm, topn = nrow(vsm))
-      message("")
-      appendTo("Screen", paste0("M: migration() expects the movements to be linear, from release to success arrays.\n   To linearise the movements, actel suggests invalidating the following events: ",
-      paste(suggestion, collapse = ", "), "\n\nWould you like to:\na) Accept the suggestion\nb) Manually choose other events to be invalidated\n"))
-
-      unknown.input = TRUE
-      while (unknown.input) {
-        decision <- commentCheck(line = paste0("Decision:(a/b/comment) "), tag = fish)
-        if (decision == "a" | decision == "A") {
-          unknown.input = FALSE
-          appendTo("UD", decision)
-          aux <- vsm
-          aux$Valid[suggestion] <- FALSE
-        }
-        if (decision == "b" | decision == "B") {
-          # Trigger user interaction
-          appendTo("UD", decision)
-          unknown.input = FALSE
-          aux <- invalidateEvents(movements = vsm, fish = fish)
-        } # end trigger error
-        if (unknown.input) {
-          appendTo("Screen", "Option not recognized, please input either 'a', 'b' or 'comment'.")
-        }
       suggestion <- rep(FALSE, length(back.check))
       for(i in unique(back.check)) {
         first.time <- match(i, back.check)
         to.remove <- back.check[first.time:length(back.check)] < i
         suggestion[first.time:length(back.check)][to.remove] <- TRUE
       }
-      # Transfer invalidated events to secmoves
       suggestion <- which(suggestion)
+      appendTo("Screen", aux <- paste0("To linearise the movements, actel suggests invalidating the following events: ", paste(suggestion, collapse = ", ")))
+      the.warning <- paste0("Warning: ", the.warning, "\n", aux)
+      aux <- tableInteraction(moves = vsm, fish = fish, trigger = the.warning, GUI = GUI)
       secmoves <- transferValidity(from = aux, to = secmoves)
       # Prepare double call warning
       double.call <- TRUE
@@ -493,7 +542,7 @@ checkPath <- function(my.home, path) {
 #' 
 #' @keywords internal
 #' 
-checkUpstream <- function(movements, fish, release, arrays) {
+checkUpstream <- function(movements, fish, release, arrays, GUI) {
   appendTo("debug", "Running checkUpstream")
   # NOTE: The NULL variables below are actually column names used by data.table.
   # This definition is just to prevent the package check from issuing a note due unknown variables.
@@ -509,44 +558,10 @@ checkUpstream <- function(movements, fish, release, arrays) {
     return(movements)
 
   if (any(is.na(match(vm$Array, after.arrays)))) {
-    message("")
-    appendTo(c("Screen", "Report", "Warning"), the.warning <- paste0("Fish ", fish, " was detected in an array that is not after its release site! Opening relevant data for inspection."))
+    appendTo(c("Screen", "Report", "Warning"), the.warning <- paste0("Fish ", fish, " was detected in an array that is not after its release site! Opening relevant data for inspection.\n   Expected first array:", release))
     the.warning <- paste("Warning:", the.warning)
-    appendTo("Screen", paste("   Expected first array:", release))
-    message("\nMovement table for fish ", fish, ":")
-    print(vm, topn = nrow(vm))
-    if (nrow(vm) >= 100)
-      message("\nM: Long table detected, repeating warning that triggered the interaction:\n-----\n", 
-        the.warning, "\n   Expected first array: ", release, "\n-----")
-    if (nrow(vm) < 100 & nrow(vm) >= 30)
-      message("\nM: Please find the exception which triggered this interaction at the top of the table.")          
-    message("")
-    appendTo("Screen", "You may either:\n  a) Stop the analysis if the expected first array is wrong;\n  b) Continue as is (does not impact the results);\n  c) Render a movement event invalid, if you are confident it is a false detection.")
-    message("")
-    unknown.input = TRUE
-    while (unknown.input) {
-      decision <- commentCheck(line = "Decision:(a/b/c/comment) ", tag = fish)
-      if (decision == "a" | decision == "A") {
-        unknown.input = FALSE
-        appendTo("UD", decision)
-        emergencyBreak()
-        stop("Function stopped by user command.", call. = FALSE)
-      }
-      if (decision == "b" | decision == "B") {
-        appendTo("UD", decision)
-        unknown.input = FALSE
-      }
-      if (decision == "c" | decision == "C") {
-        # Trigger user interaction
-        appendTo("UD", decision)
-        unknown.input = FALSE
-        aux <- invalidateEvents(movements = vm, fish = fish)
-        movements <- transferValidity(from = aux, to = movements)
-      } # end trigger error
-      if (unknown.input) {
-        appendTo("Screen", "Option not recognized, please input either 'a', 'b', 'c' or 'comment'.")
-      }
-    }
+    aux <- tableInteraction(moves = vm, fish = fish, trigger = the.warning, GUI = GUI)
+    movements <- transferValidity(from = aux, to = movements)
   }
   return(movements)
 }
@@ -560,7 +575,7 @@ checkUpstream <- function(movements, fish, release, arrays) {
 #' 
 #' @keywords internal
 #' 
-checkJumpDistance <- function(movements, fish, release, dotmat, jump.warning, jump.error) {
+checkJumpDistance <- function(movements, fish, release, dotmat, jump.warning, jump.error, GUI) {
   appendTo("debug", "Running checkJumpDistance")
   # NOTE: The NULL variables below are actually column names used by data.table.
   # This definition is just to prevent the package check from issuing a note due unknown variables.
@@ -602,7 +617,7 @@ checkJumpDistance <- function(movements, fish, release, dotmat, jump.warning, ju
               ifelse(jumps[link[i]] > 2, " arrays ", " array "), 
               "in events ", link[i], " -> ", link[i] + 1, " (", names(jumps)[link[i]], ")."))
           other.warning <- paste("Warning:", other.warning)
-          the.warning <- c(the.warning, other.warning)
+        the.warning <- paste0(the.warning, "\n", other.warning)
         }
       if (any(jumps[link] > jump.error))
         trigger.error <- TRUE
@@ -610,18 +625,8 @@ checkJumpDistance <- function(movements, fish, release, dotmat, jump.warning, ju
     }
     # Trigger user interaction
     if (trigger.error) {
-      appendTo("Screen", paste0("M: Opening movement table of fish ", fish, " for inspection:"))
-      print(vm, topn = nrow(vm))
-      if (nrow(vm) >= 100)
-        message("\nM: Long table detected, repeating warning that triggered the interaction:\n-----\n", the.warning, "\n-----")
-      if (nrow(vm) < 100 & nrow(vm) >= 30)
-        message("\nM: Please find the exception which triggered this interaction at the top of the table.")          
-      decision <- commentCheck(line = "Would you like to render any movement event invalid?(y/N/comment) ", tag = fish)
-      appendTo("UD", decision)
-      if (decision == "y" | decision == "Y") {
-        aux <- invalidateEvents(movements = vm, fish = fish)
-        movements <- transferValidity(from = aux, to = movements)
-      }
+      aux <- tableInteraction(moves = vm, fish = fish, trigger = the.warning, GUI = GUI)
+      movements <- transferValidity(from = aux, to = movements)
     } # end trigger error
   }
   return(movements)
@@ -963,6 +968,63 @@ invalidateEvents <- function(movements, fish) {
       }
     } # end while
   return(movements)
+}
+
+#' Opens a new winder that allows the user to determine movement event invalidity
+#' 
+#' @inheritParams check_args
+#' @param trigger The warning/message that triggered the interaction
+#' 
+#' @return the movement table with valid/invalid notes
+#' 
+#' @keywords internal
+#' 
+graphicalInvalidate <- function(moves, fish, trigger) {
+  graphical_valid <- NULL
+  to.print <- cbind(data.frame(Event = 1:nrow(moves)), moves)
+  to.print$First.time <- as.character(to.print$First.time)
+  to.print$Last.time <- as.character(to.print$Last.time)
+  w <- gWidgets::gwindow(paste("Events for fish", fish), width = 500)
+  g <- gWidgets::ggroup(horizontal = FALSE, container = w)
+  lbl <- gWidgets::glabel("<b>Warning message:</b>", markup = TRUE, container = g)
+  lbl <- gWidgets::gtext(trigger, container = g)
+  lbl <- gWidgets::glabel("<b>Usage notes:\n1)</b> Click on events to set 'Valid' to FALSE, <b>2)</b> Hold shift to invalidate sequential events, <b>3)</b> Reset 'Valid' to TRUE by double clicking an event.", markup = TRUE, container = g)
+  tbl <- gWidgets::gtable(to.print, container = g, multiple = TRUE, expand = TRUE)
+  btn_function <- function(h, ...) {
+    x <- as.data.frame(tbl[, c("Event", "Valid")])
+    graphical_valid <<- x$Valid[order(x$Event)]
+    gWidgets::dispose(w)
+  }
+  btn <- gWidgets::gbutton(text = "Submit and close", border = TRUE, handler = btn_function, action = NULL, container = g)
+
+  ## add handlers
+  gWidgets::addHandlerClicked(tbl, handler = function(h,...) {
+    tbl[svalue(h$obj)]$Valid <- FALSE
+  })
+  gWidgets::addHandlerDoubleclick(tbl, handler = function(h,...) {
+    tbl[svalue(h$obj)]$Valid <- TRUE
+  })
+  
+  message("M: Make any necessary edits in the external visualization window and submit the result to continue the analysis."); flush.console()
+  while (gWidgets::isExtant(w)) {}
+
+  if (is.null(graphical_valid)) {
+    appendTo(c("Screen", "Report"), "External visualization window was closed before result submission. Assuming all movement events are valid.")
+    graphical_valid <- rep(TRUE, nrow(moves))
+  }
+
+  moves$Valid <- graphical_valid
+
+  aux <- rle(!graphical_valid)
+  aux <- data.frame(Value = aux[[2]], n = aux[[1]])
+  aux$stop <- cumsum(aux$n)
+  aux$start <- c(1, aux$stop[-1] - (aux$n[-1] - 1))
+  aux <- aux[aux$Value, ]
+  aux$combine <- aux$start != aux$stop
+  aux$final <- aux$start
+  aux$final[aux$combine] <- paste(aux$start[aux$combine], aux$stop[aux$combine], sep = ":")
+  appendTo("UD", paste("from_gui:", aux$final, collapse = " "))
+  return(moves)
 }
 
 #' Transfer validity updates from valid movements to all movements
