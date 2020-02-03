@@ -7,7 +7,9 @@
 #' @export
 #' 
 createWorkspace <- function(dir = "actel_workspace") {
-  if (!dir.exists(dir)) 
+  if (dir.exists(dir))
+    stop("Directory '", dir, "' already exists. Stopping to prevent file overwrite. Please choose a new target directory.\n", call. = FALSE)
+  else
     dir.create(dir)
   spatial <- data.frame(
     Station.name = c("Example station1", "Example station2", "Example station3", "Example release1", "Example release2"),
