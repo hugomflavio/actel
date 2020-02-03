@@ -314,6 +314,13 @@ migration <- function(path = NULL, tz, sections, success.arrays = NULL, max.inte
   }
 
   movement.names <- names(movements)
+  
+  if (any(link <- !override %in% movement.names)) {
+    appendTo(c("Screen", "Warning", "Report"), paste0("Override has been triggered for fish ", paste(override[link], collapse = ", "), " but ", 
+      ifelse(sum(link) == 1, "this", "these"), " fish ", ifelse(sum(link) == 1, "was", "were")," not detected."))
+    override <- override[!link]
+  }
+
   movements <- lapply(seq_along(movements), function(i) {
     fish <- names(movements)[i]
     appendTo("debug", paste0("debug: Checking movement quality for fish ", fish,"."))

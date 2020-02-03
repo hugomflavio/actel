@@ -28,6 +28,7 @@ Enhancements:
   * Show number of released fish per release location in the release sites table.
   * Detailed progression per group and release site is now exported through a `release.overview` object.
   * Prevent migration from continuing if some arrays are not associated to a section.
+  * Warn user if override is requested for a fish that is not detected.
 
 
 ## actel 0.1.2
