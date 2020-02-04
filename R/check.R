@@ -283,9 +283,8 @@ checkInactiveness <- function(movements, fish, detections.list,
     }
     stop <- nrow(valid.moves)
     # Fetch respective detection rows
-    aux <- detections.list
     valid.row.list <- lapply(start:stop, function(j) {
-      start <- min(which(aux$Timestamp == valid.moves$First.time[j] & aux$Standard.name == valid.moves$First.station[j]))
+      start <- min(which(detections.list$Timestamp == valid.moves$First.time[j] & detections.list$Standard.name == valid.moves$First.station[j]))
       stop <- start + (valid.moves$Detections[j] - 1)
       return(start:stop)
     })
@@ -304,7 +303,7 @@ checkInactiveness <- function(movements, fish, detections.list,
       if (days.spent < inactive.warning)
         break()
       valid.rows <- unlist(valid.row.list[iteration:length(valid.row.list)])
-      the.detections <- aux[valid.rows, ]
+      the.detections <- detections.list[valid.rows, ]
       # find all stations
       the.stations <- as.character(sort(unique(the.detections$Standard.name)))
       trigger.error <- FALSE
@@ -313,7 +312,10 @@ checkInactiveness <- function(movements, fish, detections.list,
         if (length(the.stations) <= 3) {
           n.detections <- sum(valid.moves$Detections[start_i:stop])
           appendTo(c("Report", "Warning", "Screen"), 
-            the.warning <- paste0("Fish ", fish, " was detected ", n.detections, " times at three or less stations of array '", tail(breaks$values, 1), "' (",paste(the.stations, collapse = ", "), ") over ", days.spent, " days and then disappeared. Could it be inactive?"))
+            the.warning <- paste0("Fish ", fish, " was detected ", n.detections, 
+              " times at three or less stations of array '", tail(breaks$values, 1), 
+              "' (", paste(the.stations, collapse = ", "), ") over ", days.spent, 
+              " days and then disappeared. Could it be inactive?"))
           the.warning <- paste("Warning:", the.warning)
           continue <- FALSE
         }
@@ -324,7 +326,10 @@ checkInactiveness <- function(movements, fish, detections.list,
         if (all(aux <= 1500)) {
           n.detections <- sum(valid.moves$Detections[start_i:stop])
           appendTo(c("Report", "Warning", "Screen"), 
-            the.warning <- paste0("Fish ", fish, " was detected ", n.detections, " times at stations less than 1.5 km apart in array '", tail(breaks$values, 1), "' (",paste(the.stations, collapse = ", "), "), over ", days.spent, " days and then disappeared. Could it be inactive?"))
+            the.warning <- paste0("Fish ", fish, " was detected ", n.detections, 
+              " times at stations less than 1.5 km apart in array '", tail(breaks$values, 1), 
+              "' (", paste(the.stations, collapse = ", "), "), over ", days.spent, 
+              " days and then disappeared. Could it be inactive?"))
           the.warning <- paste("Warning:", the.warning)
           continue <- FALSE
         }
