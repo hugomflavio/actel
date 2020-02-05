@@ -625,8 +625,9 @@ migration <- function(path = NULL, tz, sections, success.arrays = NULL, max.inte
 #' 
 #' @keywords internal
 #' 
-printMigrationRmd <- function(override.fragment, biometric.fragment, section.overview, efficiency.fragment, display.progression, array.overview.fragment,
-  survival.graph.size, individual.plots, circular.plots, spatial, deployments, valid.detections, detections){
+printMigrationRmd <- function(override.fragment, biometric.fragment, section.overview, # nocov start
+  efficiency.fragment, display.progression, array.overview.fragment, survival.graph.size, 
+  individual.plots, circular.plots, spatial, deployments, valid.detections, detections){
   inst.ver <- utils::packageVersion("actel")
   inst.ver.short <- substr(inst.ver, start = 1, stop = nchar(as.character(inst.ver)) - 5) 
   if (file.exists(reportname <- "Report/actel_migration_report.Rmd")) {
@@ -901,7 +902,7 @@ img[src*="#diagram"] {
 ', fill = TRUE)
 sink()
 return(reportname)
-}
+} # nocov end
 
 #' Create the timetable
 #'

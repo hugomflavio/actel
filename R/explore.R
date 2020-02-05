@@ -454,7 +454,8 @@ detections.list <- study.data$detections.list
 #' 
 #' @keywords internal
 #' 
-printExploreRmd <- function(override.fragment, biometric.fragment, individual.plots, circular.plots, spatial, deployments, detections, valid.detections){
+printExploreRmd <- function(override.fragment, biometric.fragment, individual.plots, # nocov start
+  circular.plots, spatial, deployments, detections, valid.detections){
   inst.ver <- utils::packageVersion("actel")
   inst.ver.short <- substr(inst.ver, start = 1, stop = nchar(as.character(inst.ver)) - 5) 
   if (file.exists(reportname <- "Report/actel_explore_report.Rmd")) {
@@ -671,7 +672,7 @@ h4 {
 ', fill = TRUE)
 sink()
 return(reportname)
-}
+} # nocov end
 
 #' Compare original detections with the valid movements and exclude invalid detections
 #' 

@@ -557,8 +557,10 @@ residency <- function(path = NULL, tz, sections, success.arrays = NULL, max.inte
 #' 
 #' @keywords internal
 #' 
-printResidencyRmd <- function(override.fragment, biometric.fragment, efficiency.fragment, individual.detection.plots, individual.residency.plots, array.circular.plots, 
-  section.arrival.circular.plots, section.departure.circular.plots, spatial, deployments, detections, valid.detections, last.seen, last.seen.graph.size){
+printResidencyRmd <- function(override.fragment, biometric.fragment, efficiency.fragment, # nocov start
+  individual.detection.plots, individual.residency.plots, array.circular.plots, 
+  section.arrival.circular.plots, section.departure.circular.plots, spatial, 
+  deployments, detections, valid.detections, last.seen, last.seen.graph.size){
   inst.ver <- utils::packageVersion("actel")
   inst.ver.short <- substr(inst.ver, start = 1, stop = nchar(as.character(inst.ver)) - 5) 
   if (file.exists(reportname <- "Report/actel_residency_report.Rmd")) {
@@ -876,7 +878,7 @@ img[src*="#diagram"] {
 ', fill = TRUE)
 sink()
 return(reportname)
-}
+} # nocov end
 
 
 #' Collect summary information for the residency analysis
