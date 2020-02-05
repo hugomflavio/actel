@@ -1099,49 +1099,6 @@ storeStrays <- function(){
   }
 }
 
-#' Temporarily include unknown receivers with target detections in the study area
-#' 
-#' @param detections.list a list of the detections for each target tag
-#' 
-#' @return The detections.list with the unknown receivers labelled
-#' 
-#' @keywords internal
-#' 
-labelUnknowns <- function(detections.list) {
-  if (any(unlist(lapply(detections.list, function(x) any(is.na(x$Array)))))) {
-    tags <- NULL
-    receivers <- NULL
-    lapply(detections.list, function(x) {
-      if (any(is.na(x$Array))) {
-        tags <- c(tags, unique(x$Transmitter))
-        receivers <- c(receivers, unique(x$Transmitter[is.na(x$Array)]))
-      }})
-    appendTo(c("Screen", "Report", "Warning"), paste0("Fish ", paste(tags, collapse = ", ") , ifelse(length(tags) > 1, " were", " was"), " detected in one or more receivers that are not listed in the study area (receiver(s): ", paste(unique(receivers), collapse = ", "), ")!"))
-    message("Possible options:\n   a) Stop and double-check the data (recommended)\n   b) Temporary include the unknown hydrophone(s) in the analysis")
-    check <- TRUE
-    while (check) {
-      decision <- readline("Which option should be followed?(a/b) ")
-      if (decision == "a" | decision == "A" | decision == "b" | decision == "B") 
-        check <- FALSE 
-      else 
-        message("Option not recognized, please try again."); flush.console()
-      appendTo("UD", decision)
-    }
-    if (decision == "a" | decision == "A") {
-      emergencyBreak()
-      stop("Stopping analysis per user command.\n", call. = FALSE)
-    }
-    detections.list <- lapply(detections.list, function(x) {
-      levels(x$Standard.name) <- c(levels(x$Standard.name), "Unknown")
-      x$Standard.name[is.na(x$Standard.name)] <- "Unknown"
-      levels(x$Array) <- c(levels(x$Array), "Unknown")
-      x$Array[is.na(x$Array)] <- "Unknown"
-      return(x)
-    })
-  }
-  return(detections.list)
-}
-
 #' Standardize serial numbers, stations and arrays in the detections
 #' 
 #' Matches the ALS serial number to the deployments to rename the serial number.
