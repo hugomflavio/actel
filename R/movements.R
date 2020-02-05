@@ -51,29 +51,30 @@ groupMovements <- function(detections.list, bio, spatial, speed.method, max.inte
           stringsAsFactors = FALSE
           )
       }
-      z = 1
+      z <- 1
       array.shifts <- c(which(detections.list[[i]]$Array[-1] != detections.list[[i]]$Array[-length(detections.list[[i]]$Array)]), nrow(detections.list[[i]]))
       time.shifts <- which(difftime(detections.list[[i]]$Timestamp[-1], detections.list[[i]]$Timestamp[-length(detections.list[[i]]$Timestamp)], units = "mins") > max.interval)
       all.shifts <- sort(unique(c(array.shifts, time.shifts)))
-      for (j in seq_len(length(all.shifts))) {
+      capture <- lapply(seq_len(length(all.shifts)), function(j) {
         if (j == 1)
           start <- 1
         else
           start <- all.shifts[j - 1] + 1
         stop <- all.shifts[j]
-        recipient[z, "Array"] = paste(detections.list[[i]]$Array[start])
-        recipient[z, "Detections"] = stop - start + 1
-        recipient[z, "First.station"] = paste(detections.list[[i]]$Standard.name[start])
-        recipient[z, "First.time"] = detections.list[[i]]$Timestamp[start]
-        recipient[z, "Last.station"] = paste(detections.list[[i]]$Standard.name[stop])
-        recipient[z, "Last.time"] = detections.list[[i]]$Timestamp[stop]
-        z = z + 1
+        recipient[z, "Array"] <<- paste(detections.list[[i]]$Array[start])
+        recipient[z, "Detections"] <<- stop - start + 1
+        recipient[z, "First.station"] <<- paste(detections.list[[i]]$Standard.name[start])
+        recipient[z, "First.time"] <<- detections.list[[i]]$Timestamp[start]
+        recipient[z, "Last.station"] <<- paste(detections.list[[i]]$Standard.name[stop])
+        recipient[z, "Last.time"] <<- detections.list[[i]]$Timestamp[stop]
+        z <<- z + 1
         counter <<- counter + stop - start + 1
         if (i == tail(names(detections.list), 1)) 
           counter <<- sum(unlist(lapply(detections.list, nrow)))
         setTxtProgressBar(pb, counter)
         flush.console()
-      }
+      })
+      counter <<- counter
 
       recipient$Valid <- TRUE
       if (any(link <- recipient$Array == "Unknown")) {
@@ -85,7 +86,7 @@ groupMovements <- function(detections.list, bio, spatial, speed.method, max.inte
       recipient <- movementTimes(movements = recipient, type = "array")
       if (!invalid.dist)
         recipient <- movementSpeeds(movements = recipient, 
-          speed.method = speed.method, dist.mat = dist.mat, silent = FALSE)
+          speed.method = speed.method, dist.mat = dist.mat)
       
       attributes(recipient)$p.type <- "Auto"
       return(recipient)
@@ -122,7 +123,7 @@ simplifyMovements <- function(movements, fish, bio, speed.method, dist.mat, inva
     simple.movements <- movements[(Valid), ]
     aux <- movementTimes(movements = simple.movements, type = "array")
     if (!invalid.dist)
-        aux <- movementSpeeds(movements = aux, speed.method = speed.method, dist.mat = dist.mat, silent = FALSE)
+        aux <- movementSpeeds(movements = aux, speed.method = speed.method, dist.mat = dist.mat)
     output <- speedReleaseToFirst(fish = fish, bio = bio, movements = aux,
      dist.mat = dist.mat, invalid.dist = invalid.dist, silent = FALSE)
     return(output)
@@ -139,33 +140,30 @@ simplifyMovements <- function(movements, fish, bio, speed.method, dist.mat, inva
 #' @inheritParams explore
 #' @inheritParams simplifyMovements
 #' @inheritParams groupMovements
-#' @param silent logical: If TRUE, debug messages are issued (only works within actel)
 #' 
 #' @return The movement data frame with time and speed calculations
 #' 
 #' @keywords internal
 #' 
-movementSpeeds <- function(movements, speed.method, dist.mat, silent = TRUE) {
-  if (!silent) 
-    appendTo("debug", "Running movementSpeeds.")
+movementSpeeds <- function(movements, speed.method, dist.mat) {
+  appendTo("debug", "Running movementSpeeds.")
+  movements$Average.speed.m.s[1] <- NA
   if (nrow(movements) > 1) {
-    movements$Average.speed.m.s[1] <- NA
-    for (l in 2:nrow(movements)) {
+    capture <- lapply(2:nrow(movements), function(i) {
       if (movements$Array[i] != movements$Array[i - 1] & all(!grep("^Unknown$", movements$Array[(i - 1):i]))) {
         if (speed.method == "last to first"){
-          a.sec <- as.vector(difftime(movements$First.time[l], movements$Last.time[l - 1], units = "secs"))
-          my.dist <- dist.mat[movements$First.station[l], gsub(" ", ".", movements$Last.station[l - 1])]
+          a.sec <- as.vector(difftime(movements$First.time[i], movements$Last.time[i - 1], units = "secs"))
+          my.dist <- dist.mat[movements$First.station[i], gsub(" ", ".", movements$Last.station[i - 1])]
         }
         if (speed.method == "first to first"){
-          a.sec <- as.vector(difftime(movements$First.time[l], movements$First.time[l - 1], units = "secs"))
-          my.dist <- dist.mat[movements$First.station[l], gsub(" ", ".", movements$First.station[l - 1])]
+          a.sec <- as.vector(difftime(movements$First.time[i], movements$First.time[i - 1], units = "secs"))
+          my.dist <- dist.mat[movements$First.station[i], gsub(" ", ".", movements$First.station[i - 1])]
         }
-        movements[l, 9] <- round(my.dist/a.sec, 6)
+        movements$Average.speed.m.s[i] <<- round(my.dist/a.sec, 6)
         rm(a.sec, my.dist)
       }
-    }
+    })
   }
-  if (!silent) 
   return(movements)
 }
 
@@ -234,7 +232,7 @@ speedReleaseToFirst <- function(fish, bio, movements, dist.mat, invalid.dist = F
   the.row <- match(fish,bio$Transmitter)
   origin.time <- bio[the.row,"Release.date"]
   origin.place <- as.character(bio[the.row,"Release.site"])
-  if (origin.time <= movements$First.time[1]) {
+  if (origin.time <= movements$First.time[1] & movements$Array[1] != "Unknown") {
     a <- as.vector(difftime(movements$First.time[1], origin.time, units = "hours"))
     h <- a%/%1
     m <- ((a%%1) * 60)%/%1

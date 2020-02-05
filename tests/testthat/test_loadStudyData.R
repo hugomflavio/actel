@@ -35,5 +35,27 @@ test_that("loadStudyData recognizes both 'study.dot' and 'study.txt' files.", {
 	file.remove("detections/actel.detections.RData")
 })
 
+test_that("loadStudyData can handle detections in unknown receivers", {
+	aux <- read.csv("spatial.csv")
+	write.csv(aux[-3, ], "spatial.csv", row.names = FALSE)
+	expect_warning(loadStudyData(tz = "Europe/Copenhagen", override = NULL, start.time = NULL, stop.time = NULL, 
+			  sections = NULL, exclude.tags = NULL, disregard.parallels = TRUE),
+		"Detections from receivers 132918 are present in the data, but these receivers are not part of the study's stations. Double-check potential errors.", fixed = TRUE)
+	file.remove("detections/actel.detections.RData")
+	expect_warning(output <- loadStudyData(tz = "Europe/Copenhagen", override = NULL, start.time = NULL, stop.time = NULL, 
+			  sections = NULL, exclude.tags = NULL, disregard.parallels = TRUE),
+		"Fish R64K-4451 was detected in one or more receivers that are not listed in the study area (receiver(s): 132918)!", fixed = TRUE)
+	file.remove("detections/actel.detections.RData")
+	expect_equal(tail(levels(output$detections.list[[1]]$Array), 1), "Unknown")
+	expect_equal(as.character(output$detections.list[[1]]$Array[13]), "Unknown")
+	expect_equal(tail(levels(output$detections.list[[1]]$Standard.name), 1), "Ukn.")
+	expect_equal(as.character(output$detections.list[[1]]$Standard.name[13]), "Ukn.")
+	expect_equal(as.character(output$spatial$stations$Array[17]), "Unknown")
+	expect_equal(as.character(output$spatial$stations$Station.name[17]), "Unknown")
+	expect_equal(as.character(output$spatial$stations$Standard.name[17]), "Ukn.")
+	expect_equal(tail(names(output$deployments), 1), "132918")
+	expect_equal(as.character(output$deployments$`132918`$Station.name), "Unknown")
+})
+
 setwd("..")
 unlink("exampleWorkspace", recursive = TRUE)

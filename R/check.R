@@ -726,14 +726,18 @@ checkTagsInUnknownReceivers <- function(detections.list, deployments, spatial) {
       if (length(unknown.receivers) > 0) {
         appendTo(c("Screen", "Report", "Warning"), paste0("Fish ", i, " was detected in one or more receivers that are not listed in the study area (receiver(s): ", paste(unknown.receivers, collapse = ", "), ")!"))
         message("Possible options:\n   a) Stop and double-check the data (recommended)\n   b) Temporarily include the receiver(s) to the stations list")
-        check <- TRUE
-        while (check) {
-          decision <- commentCheck(line = "Which option should be followed?(a/b/comment) ", tag = i)
-          if (decision == "a" | decision == "A" | decision == "b" | decision == "B") 
-            check <- FALSE 
-          else 
-            message("Option not recognized, please try again.")
-          appendTo("UD", decision)
+        if (interactive()) { # nocov start
+          check <- TRUE
+          while (check) {
+            decision <- commentCheck(line = "Which option should be followed?(a/b/comment) ", tag = i)
+            if (decision == "a" | decision == "A" | decision == "b" | decision == "B") 
+              check <- FALSE 
+            else 
+              message("Option not recognized, please try again.")
+            appendTo("UD", decision)
+          }
+        } else { # nocov end
+          decision <- "b"
         }
         if (decision == "a" | decision == "A") {
           emergencyBreak()
@@ -746,8 +750,8 @@ checkTagsInUnknownReceivers <- function(detections.list, deployments, spatial) {
         }
       }
       link <- is.na(detections.list[[i]]$Standard.name)
-      levels(detections.list[[i]]$Standard.name) <- c(levels(detections.list[[i]]$Standard.name), "Ukn")
-      detections.list[[i]]$Standard.name[link] <- "Ukn"
+      levels(detections.list[[i]]$Standard.name) <- c(levels(detections.list[[i]]$Standard.name), "Ukn.")
+      detections.list[[i]]$Standard.name[link] <- "Ukn."
       levels(detections.list[[i]]$Array) <- c(levels(detections.list[[i]]$Array), "Unknown")
       detections.list[[i]]$Array[link] <- "Unknown"
     }
@@ -764,13 +768,13 @@ checkTagsInUnknownReceivers <- function(detections.list, deployments, spatial) {
 #' 
 includeUnknownReceiver <- function(spatial, deployments, unknown.receivers){
   appendTo("debug", "Running includeUnknownReceiver.")
-  appendTo(c("Screen", "Report"), "M: Including missing receiver(s) in the deployments and stations. Assigning to array 'Unknown' and standard name 'Ukn'.")
+  appendTo(c("Screen", "Report"), "M: Including missing receiver(s) in the deployments and stations. Assigning to array 'Unknown' and standard name 'Ukn.'.")
   if (is.na(match("Unknown", levels(spatial$stations$Station.name)))) {
     levels(spatial$stations$Station.name) <- c(levels(spatial$stations$Station.name), "Unknown")
     levels(spatial$stations$Array) <- c(levels(spatial$stations$Array), "Unknown")
     spatial$stations[nrow(spatial$stations) + 1, "Station.name"] <- "Unknown"
     spatial$stations[nrow(spatial$stations), "Array"] <- "Unknown"
-    spatial$stations[nrow(spatial$stations), "Standard.name"] <- "Ukn"
+    spatial$stations[nrow(spatial$stations), "Standard.name"] <- "Ukn."
   }
   for (i in unknown.receivers) {
     if (is.na(match(i, names(deployments)))) {
