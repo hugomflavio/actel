@@ -151,7 +151,7 @@ movementSpeeds <- function(movements, speed.method, dist.mat, silent = TRUE) {
   if (nrow(movements) > 1) {
     movements$Average.speed.m.s[1] <- NA
     for (l in 2:nrow(movements)) {
-      if (movements$Array[l] != movements$Array[l - 1]) {
+      if (movements$Array[i] != movements$Array[i - 1] & all(!grep("^Unknown$", movements$Array[(i - 1):i]))) {
         if (speed.method == "last to first"){
           a.sec <- as.vector(difftime(movements$First.time[l], movements$Last.time[l - 1], units = "secs"))
           my.dist <- dist.mat[movements$First.station[l], gsub(" ", ".", movements$Last.station[l - 1])]

@@ -20,6 +20,7 @@ Fixes:
   * Fix bug where the presence of multiple instantaneous shifts in section would mess up the residency lists.
   * Fix bug preventing distancesMatrix from recognising the transition layer object.
   * Fix bug where the temporary detections object would be overwritten during inactiveness checks with a distance matrix present.
+  * Fix bug causing speed calculations  to crash in the presence of unknown detections.
 
 Changes:
   * `array.overview` is now called `group.overview`.
