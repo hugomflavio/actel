@@ -48,7 +48,7 @@ loadStudyData <- function(tz, override = NULL, start.time, stop.time,
   dotmat <- recipient$dotmat
   paths <- recipient$paths
   if (is.null(dot) | is.null(arrays) | is.null(dotmat) | is.null(paths))
-    stop("Something went wrong when assigning recipient objects (loadDot). If this error persists, contact the developer.")
+    stop("Something went wrong when assigning recipient objects (loadDot). If this error persists, contact the developer.") # nocov
 
   rm(use.fakedot, recipient)
 
@@ -67,14 +67,14 @@ loadStudyData <- function(tz, override = NULL, start.time, stop.time,
   dist.mat <- recipient$dist.mat
   invalid.dist <- recipient$invalid.dist
   if (is.null(dist.mat) | is.null(invalid.dist))
-    stop("Something went wrong when assigning recipient objects (loadDistances). If this error persists, contact the developer.\n", call. = FALSE)
+    stop("Something went wrong when assigning recipient objects (loadDistances). If this error persists, contact the developer.\n", call. = FALSE) # nocov
   rm(recipient)
 
   recipient <- splitDetections(detections = detections, bio = bio, exclude.tags = exclude.tags) # Split the detections by tag, store full transmitter names in bio
   detections.list <- recipient$detections.list
   bio <- recipient$bio
   if (is.null(detections.list) | is.null(bio))
-    stop("Something went wrong when assigning recipient objects (splitDetections). If this error persists, contact the developer.\n", call. = FALSE)
+    stop("Something went wrong when assigning recipient objects (splitDetections). If this error persists, contact the developer.\n", call. = FALSE) # nocov
   rm(recipient)
 
   recipient <- checkTagsInUnknownReceivers(detections.list = detections.list, deployments = deployments, spatial = spatial) # Check if there is any data loss due to unknown receivers
@@ -82,7 +82,7 @@ loadStudyData <- function(tz, override = NULL, start.time, stop.time,
   deployments <- recipient$deployments
   detections.list <- recipient$detections.list
   if (is.null(spatial) | is.null(deployments) | is.null(detections.list))
-    stop("Something went wrong when assigning recipient objects (unknownReceivers). If this error persists, contact the developer.\n", call. = FALSE)
+    stop("Something went wrong when assigning recipient objects (unknownReceivers). If this error persists, contact the developer.\n", call. = FALSE)# nocov
   rm(recipient)
 
   detections.list <- checkDetectionsBeforeRelease(input = detections.list, bio = bio)
@@ -768,10 +768,10 @@ loadDetections <- function(start.time = NULL, stop.time = NULL, tz, force = FALS
       load("actel.detections.RData")
     if (force) {
       decision <- "Y"
-    } else {
+    } else { # nocov start
       appendTo("Screen", paste0("M: The detections have been processed on ", actel.detections$timestamp, ".\n   If the input detection files were not changed, it is safe to use these again."))
       decision <- readline("   Reuse processed detections?(Y/n) ")
-    }
+    } # nocov end
     appendTo("UD", decision)
     if (decision != "N" & decision != "n"){
       appendTo(c("Screen","Report"), paste0("M: Using detections previously compiled on ", actel.detections$timestamp, "..."))
@@ -779,9 +779,9 @@ loadDetections <- function(start.time = NULL, stop.time = NULL, tz, force = FALS
       attributes(detections$Timestamp)$tzone <- "UTC"
       detections <- convertTimes(input = detections, start.time = start.time, stop.time = stop.time, tz = tz)
       recompile <- FALSE
-    } else {
-      appendTo("Screen", "M: Reprocessing the detections.")
-    }
+    } else {  # nocov start
+      appendTo("Screen", "M: Reprocessing the detections.") 
+    } # nocov end
     rm(actel.detections)
   }
 
@@ -1186,9 +1186,9 @@ createStandards <- function(detections, spatial, deployments) {
         message("Possible options:\n   a) Stop and double-check the data (recommended)\n   b) Discard orphan detections.")
         check <- TRUE
         while (check) {
-          if (interactive()) {
+          if (interactive()) { # nocov start
             decision <- readline("Which option should be followed?(a/b) ")
-          } else {
+          } else { # nocov end
             decision <- "b"
           }
           if (decision == "a" | decision == "A" | decision == "b" | decision == "B") 
@@ -1197,10 +1197,10 @@ createStandards <- function(detections, spatial, deployments) {
             message("Option not recognized, please try again."); flush.console()
           appendTo("UD", decision)
         }
-        if (decision == "a" | decision == "A") {
+        if (decision == "a" | decision == "A") { # nocov start
           emergencyBreak()
           stop("Stopping analysis per user command.\n", call. = FALSE)
-        } else {
+        } else { # nocov end
           rows.to.remove <- detections[receiver.link, which = TRUE][the.error]
           detections <- detections[-rows.to.remove]
         }
@@ -1314,14 +1314,14 @@ transformSpatial <- function(spatial, bio, arrays, sections = NULL, first.array 
     }
     if (any(trigger <- unlist(lapply(array.order, length)) == 0)) {
       appendTo(c("Screen", "Report", "Warning"), paste0("No arrays were found that match section(s) ", paste(names(array.order)[trigger], collapse = ", "), ". There could be a typing mistake!"))
-      if (interactive())
+      if (interactive()) # nocov start
         decision <- readline("All arrays must be assigned to a section. Attempt to continue the analysis?(y/N) ")
-      else
+      else # nocov end
         decision <- "y"
-      if (decision != "y" & decision != "Y" ){
+      if (decision != "y" & decision != "Y" ){ # nocov start
         emergencyBreak()
         stop("Stopping analysis per user command.\n", call. = FALSE)
-      }
+      } # nocov end
     }
     if (any(link <- is.na(match(stations$Array, unlist(array.order))))) {
       the.arrays <- unique(stations$Array[link])
