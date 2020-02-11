@@ -37,3 +37,4 @@ test_that("createStandards removes detections outside deployments", {
 })
 
 file.remove(list.files(pattern = "*txt$"))
+rm(list = ls())

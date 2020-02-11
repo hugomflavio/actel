@@ -10,7 +10,6 @@ spatial <- study.data$spatial
 dist.mat <- study.data$dist.mat
 invalid.dist <- study.data$invalid.dist
 
-
 output <- groupMovements(detections.list = detections.list[1:2], bio = bio, spatial = spatial,
     speed.method = "last to first", max.interval = 60, tz = "Europe/Copenhagen", 
     dist.mat = dist.mat, invalid.dist = invalid.dist)
@@ -57,8 +56,8 @@ test_that("groupMovements can handle unknown detections", {
 	levels(d[[1]]$Standard.name) <- c(levels(d[[1]]$Standard.name), "Ukn.")
 	d[[1]]$Standard.name[1] <- "Ukn."
 	expect_warning(aux <- groupMovements(detections.list = d, bio = bio, spatial = spatial,
-    	speed.method = "last to first", max.interval = 60, tz = "Europe/Copenhagen", 
-    	dist.mat = dist.mat, invalid.dist = invalid.dist),
+	  	speed.method = "last to first", max.interval = 60, tz = "Europe/Copenhagen", 
+	  	dist.mat = dist.mat, invalid.dist = invalid.dist),
 		"Movement events at 'Unknown' locations have been rendered invalid.", fixed = TRUE)
 	expect_equal(names(aux), c("R64K-4451", "R64K-4453"))
 	expect_equal(colnames(aux[[1]]), c('Array', 'Detections', 'First.station', 'Last.station', 'First.time', 'Last.time', 'Time.travelling', 'Time.in.array', 'Average.speed.m.s', 'Valid'))
@@ -67,7 +66,58 @@ test_that("groupMovements can handle unknown detections", {
 	expect_equal(aux[[1]]$Last.station[1], "Ukn.")
 	expect_equal(aux[[1]]$Average.speed.m.s[1], NA_real_)
 	expect_equal(aux[[1]]$Average.speed.m.s[2], NA_real_)
+	moves <<- aux
+})
+
+test_that("Switching speed.method leads to different speed results.", {
+	aux <- groupMovements(detections.list = detections.list[1:2], bio = bio, spatial = spatial,
+	    speed.method = "first to first", max.interval = 60, tz = "Europe/Copenhagen", 
+	    dist.mat = dist.mat, invalid.dist = invalid.dist)
+	expect_true(aux[[1]]$Average.speed.m.s[3] != moves[[1]]$Average.speed.m.s[3])
+})
+
+test_that("Movement events with one detection have '0:00' residency time.", {
+	d <- detections.list[1:2]
+	d[[1]] <- d[[1]][-c(2:12, 14:17), ] 
+	aux <- groupMovements(detections.list = d, bio = bio, spatial = spatial,
+	    speed.method = "first to first", max.interval = 60, tz = "Europe/Copenhagen", 
+	    dist.mat = dist.mat, invalid.dist = invalid.dist)
+	# First event
+	expect_equal(aux[[1]]$Detections[1], 1)
+	expect_equal(aux[[1]]$Time.in.array[1], "0:00")
+	# Following events
+	expect_equal(aux[[1]]$Detections[2], 1)
+	expect_equal(aux[[1]]$Time.in.array[2], "0:00")
+})
+
+test_that("speedReleaseToFirst can handle unknown events", {
+  aux <- names(moves)
+  output <- lapply(names(moves), function(fish) {
+      speedReleaseToFirst(fish = fish, bio = bio, movements = moves[[fish]],
+                          dist.mat = dist.mat, invalid.dist = invalid.dist)
+    })
+  names(output) <- aux
+  rm(aux)
+  expect_equal(output[[1]]$Time.travelling[1], "295:44")
+  expect_equal(output[[1]]$Average.speed.m.s[1], NA_real_)
+  expect_equal(output[[2]]$Time.travelling[1], "334:00")
+  expect_equal(output[[2]]$Average.speed.m.s[1], 0.001759)
+})
+
+test_that("speedReleaseToFirst can handle a first detection previous to release", {
+  xbio <- bio
+  xbio$Release.date[4] <- xbio$Release.date[4] + (40 * 24 * 3600)
+  aux <- names(moves)
+  output <- lapply(names(moves), function(fish) {
+      speedReleaseToFirst(fish = fish, bio = xbio, movements = moves[[fish]],
+                          dist.mat = dist.mat, invalid.dist = invalid.dist)
+    })
+  names(output) <- aux
+  rm(aux)
+  expect_equal(output[[2]]$Time.travelling[1], NA_character_)
+  expect_equal(output[[2]]$Average.speed.m.s[1], NA_real_)
 })
 
 setwd("..")
 unlink("exampleWorkspace", recursive = TRUE)
+rm(list = ls())

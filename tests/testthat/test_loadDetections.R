@@ -114,3 +114,4 @@ test_that("loadDetections' start.time and stop.time arguments are working", {
 
 
 file.remove(list.files(pattern = "*txt$"))
+rm(list = ls())

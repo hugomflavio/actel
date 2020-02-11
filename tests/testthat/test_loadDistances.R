@@ -45,3 +45,4 @@ test_that("loadDistances output imports data correctly", {
 })
 
 file.remove(list.files(pattern = "*txt$"))
+rm(list = ls())

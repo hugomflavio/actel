@@ -50,3 +50,4 @@ test_that("splitDetections stops analysis if duplicated signals are present", {
 })
 
 file.remove(list.files(pattern = "*txt$"))
+rm(list = ls())
