@@ -102,6 +102,8 @@ tableInteraction <- function(moves, fish, trigger, GUI) {
 #'
 #' 
 checkGUI <- function(GUI = c("needed", "always", "never")) {
+  if (!is.character(GUI))
+    stop("'GUI' should be one of 'needed', 'always' or 'never'.\n", call. = FALSE)
   GUI <- match.arg(GUI)
   if (GUI != "never") {
     if (any(link <- !(c("gWidgetsRGtk2", "gWidgets", "RGtk2") %in% installed.packages()))) {
@@ -516,23 +518,8 @@ checkPath <- function(my.home, path) {
     if (dir.exists(path)) {
       setwd(path)
     } else {
-      appendTo(c("Screen", "Report"), paste0("Error: The selected path does not exist. Details:\n  Current directory: ", getwd(), "\n  Path: ", path, "\n\nYou may either:\n  a) continue the analysis in the current directory;\n  b) restart the function."))
-      unknown.input = TRUE
-      while (unknown.input) {
-        decision <- readline("Decision:(a/b) ")
-        if (decision == "a" | decision == "A") {
-          unknown.input = FALSE
-          path <- my.home
-        }
-        if (decision == "b" | decision == "B") {
-          unknown.input = FALSE
-          emergencyBreak()
-          stop("Analysis stopped per user command.\n", call. = FALSE)
-        }
-        if (unknown.input) {
-          message("Option not recognised, please input either 'a' or 'b'.")
-        }
-      }
+      emergencyBreak()
+      stop("The selected path does not exist.\n", call. = FALSE)
     }
   } else {
     path <- my.home

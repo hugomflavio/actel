@@ -94,7 +94,7 @@ explore <- function(path = NULL, tz, max.interval = 60, minimum.detections = 2, 
   maximum.time = 60, tz.study.area = NULL, start.timestamp = NULL, end.timestamp = NULL) {
 
 # Temporary: check deprecated options
-  dep.warning <- "------------------------------------------------------------------\n!!! Deprecated arguments used!\n!!!\n"
+  dep.warning <- "------------------------------------------------------------------\n!!! Deprecated arguments used!\n!!!\n" # nocov start
   trigger.dep <- FALSE
   if (maximum.time != 60) {
     dep.warning <- paste0(dep.warning, "!!! 'maximum.time' is now 'max.interval'\n")
@@ -119,22 +119,37 @@ explore <- function(path = NULL, tz, max.interval = 60, minimum.detections = 2, 
   if (trigger.dep)
     warning(paste0("\n", dep.warning, "!!!\n!!! Please switch to the new arguments as soon as possible.\n!!! The deprecated arguments will stop working in future versions.\n------------------------------------------------------------------"),
       immediate. = TRUE, call. = FALSE)
-  rm(maximum.time, tz.study.area, start.timestamp, end.timestamp)
+  rm(maximum.time, tz.study.area, start.timestamp, end.timestamp) # nocov end
 
 # check arguments quality
   my.home <- getwd()
+  if (!is.null(path) && !is.character(path))
+    path <- as.character(path)
   if (is.null(tz) || is.na(match(tz, OlsonNames())))
     stop("'tz' could not be recognized as a timezone. Check available timezones with OlsonNames()\n", call. = FALSE)
   if (!is.numeric(minimum.detections))
     stop("'minimum.detections' must be numeric.\n", call. = FALSE)
+  if (minimum.detections <= 0)
+    stop("'minimum.detections' must be positive.\n", call. = FALSE)
   if (!is.numeric(max.interval))
-    stop("'max.interval' must be numerical.\n", call. = FALSE)
+    stop("'max.interval' must be numeric.\n", call. = FALSE)
+  if (max.interval <= 0)
+    stop("'max.interval' must be positive.\n", call. = FALSE)
 
+  if (!is.character(speed.method))
+    stop("'speed.method' should be one of 'first to first' or 'last to first'.\n", call. = FALSE)
   speed.method <- match.arg(speed.method)
+
   if (!is.null(speed.warning) && !is.numeric(speed.warning))
-    stop("'speed.warning' must be numeric.\n", call. = FALSE)    
+    stop("'speed.warning' must be numeric.\n", call. = FALSE)
+  if (!is.null(speed.warning) && speed.warning <= 0)
+    stop("'speed.warning' must be positive.\n", call. = FALSE) 
+
   if (!is.null(speed.error) && !is.numeric(speed.error))
     stop("'speed.error' must be numeric.\n", call. = FALSE)    
+  if (!is.null(speed.error) && speed.error <= 0)
+    stop("'speed.error' must be positive.\n", call. = FALSE)
+
   if (!is.null(speed.error) & is.null(speed.warning))
     speed.warning <- speed.error
   if (!is.null(speed.error) && speed.error < speed.warning)
@@ -165,8 +180,14 @@ explore <- function(path = NULL, tz, max.interval = 60, minimum.detections = 2, 
   
   if (!is.null(inactive.warning) && !is.numeric(inactive.warning))
     stop("'inactive.warning' must be numeric.\n", call. = FALSE)    
+  if (!is.null(inactive.warning) && inactive.warning <= 0)
+    stop("'inactive.warning' must be positive.\n", call. = FALSE)
+
   if (!is.null(inactive.error) && !is.numeric(inactive.error))
     stop("'inactive.error' must be numeric.\n", call. = FALSE)    
+  if (!is.null(inactive.error) && inactive.error <= 0)
+    stop("'inactive.error' must be positive.\n", call. = FALSE)
+
   if (!is.null(inactive.error) & is.null(inactive.warning))
     inactive.warning <- inactive.error
   if (!is.null(inactive.error) && inactive.error < inactive.warning)
@@ -174,6 +195,11 @@ explore <- function(path = NULL, tz, max.interval = 60, minimum.detections = 2, 
   if (!is.null(inactive.warning) & is.null(inactive.error))
     inactive.error <- Inf
   
+  if (!is.null(exclude.tags) && any(!grepl("-", exclude.tags, fixed = TRUE)))
+    stop("Not all contents in 'exclude.tags' could be recognized as tags (i.e. 'codespace-signal'). Valid examples: 'R64K-1234', A69-1303-1234'\n", call. = FALSE)
+  if (!is.null(override) && any(!grepl("-", override, fixed = TRUE)))
+    stop("Not all contents in 'override' could be recognized as tags (i.e. 'codespace-signal'). Valid examples: 'R64K-1234', A69-1303-1234'\n", call. = FALSE)
+
   GUI <- checkGUI(GUI)
 
   if (!is.logical(debug))
@@ -397,7 +423,7 @@ detections.list <- study.data$detections.list
 # wrap up the txt report
   appendTo("Report", "\n-------------------")
   if (file.exists("temp_UD.txt")) 
-    appendTo("Report", paste0("User interventions:\n-------------------\n", gsub("\r", "", readr::read_file("temp_UD.txt")), "-------------------"))
+    appendTo("Report", paste0("User interventions:\n-------------------\n", gsub("\r", "", readr::read_file("temp_UD.txt")), "-------------------")) # nocov
   
   appendTo("Report", paste0("Function call:\n-------------------\n", the.function.call, "\n-------------------"))
 # ------------------
@@ -417,8 +443,10 @@ detections.list <- study.data$detections.list
       quiet = TRUE)
     appendTo("debug", "debug: Moving report")
     fs::file_move(sub("Rmd", "html", reportname), sub("Report/", "", sub("Rmd", "html", reportname)))
-    appendTo("debug", "debug: Opening report if the pc has internet.")
-    openReport(file.name = sub("Report/", "", sub("Rmd", "html", reportname)))
+    if (interactive()) { # nocov start
+      appendTo("debug", "debug: Opening report if the pc has internet.")
+      openReport(file.name = sub("Report/", "", sub("Rmd", "html", reportname)))
+    } # nocov end
   }
   appendTo("Screen", "M: Process finished successfully.")
 # ------------------
@@ -454,7 +482,7 @@ detections.list <- study.data$detections.list
 #' 
 #' @keywords internal
 #' 
-printExploreRmd <- function(override.fragment, biometric.fragment, individual.plots, # nocov start
+printExploreRmd <- function(override.fragment, biometric.fragment, individual.plots,
   circular.plots, spatial, deployments, detections, valid.detections){
   inst.ver <- utils::packageVersion("actel")
   inst.ver.short <- substr(inst.ver, start = 1, stop = nchar(as.character(inst.ver)) - 5) 
@@ -672,7 +700,7 @@ h4 {
 ', fill = TRUE)
 sink()
 return(reportname)
-} # nocov end
+}
 
 #' Compare original detections with the valid movements and exclude invalid detections
 #' 
