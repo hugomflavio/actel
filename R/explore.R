@@ -260,7 +260,7 @@ detections.list <- study.data$detections.list
   aux <- names(movements)
   movements <- lapply(names(movements), function(fish) {
       speedReleaseToFirst(fish = fish, bio = bio, movements = movements[[fish]],
-                          dist.mat = dist.mat, invalid.dist = invalid.dist, silent = FALSE)
+                          dist.mat = dist.mat, invalid.dist = invalid.dist)
     })
   names(movements) <- aux
   rm(aux)
@@ -338,7 +338,7 @@ detections.list <- study.data$detections.list
   names(valid.movements) <- names(movements)
   valid.movements <- valid.movements[!unlist(lapply(valid.movements, is.null))]
 
-  times <- getTimes(movements = valid.movements, spatial = spatial, type = "arrival", events = "all")
+  times <- getTimes(movements = valid.movements, spatial = spatial, type = "arrival", events = "first")
 
   appendTo("Screen", "M: Validating detections...")
 

@@ -289,7 +289,7 @@ migration <- function(path = NULL, tz, sections, success.arrays = NULL, max.inte
   aux <- names(movements)
   movements <- lapply(names(movements), function(fish) {
       speedReleaseToFirst(fish = fish, bio = bio, movements = movements[[fish]],
-                          dist.mat = dist.mat, invalid.dist = invalid.dist, silent = FALSE)
+                          dist.mat = dist.mat, invalid.dist = invalid.dist)
     })
   names(movements) <- aux
   rm(aux)
@@ -407,7 +407,7 @@ migration <- function(path = NULL, tz, sections, success.arrays = NULL, max.inte
   
   section.overview <- assembleSectionOverview(status.df = status.df, sections = sections)
 
-  times <- getTimes(movements = valid.movements, spatial = spatial, type = "arrival", events = "one")
+  times <- getTimes(movements = valid.movements, spatial = spatial, type = "arrival", events = "first")
 
   appendTo("Screen", "M: Validating detections...")
 

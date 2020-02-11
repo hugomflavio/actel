@@ -401,17 +401,17 @@ updateActel <- function() {
 #' 
 #' @return A data frame with the timestamps for each fish (rows) and array (columns)
 #' 
-getTimes <- function(movements, spatial, type = c("arrival", "departure"), events = c("one", "all")){
+getTimes <- function(movements, spatial, type = c("arrival", "departure"), events = c("first", "all", "last")){
   # appendTo("Debug", "Running getTimes.")
   type <- match.arg(type)
   events <- match.arg(events)
-
-  the.times <- list()
 
   if (type == "arrival")
     the.column <- "First.time"
   else
     the.column <- "Last.time"
+
+  the.times <- list()
 
   # extrat arrivals or departures
   capture.output <- lapply(movements, function(x) {
@@ -429,24 +429,31 @@ getTimes <- function(movements, spatial, type = c("arrival", "departure"), event
   else
     col.order <- names(spatial$array.order)
 
+  # find maximum nchar for each tag
+  max.char <- sapply(the.times, function(x) nchar(max(table(names(x)))))
+
   # shuffle data into the right format
   aux <- lapply(col.order, function(i) {
     aux <- lapply(names(the.times), function(j) {
       # cat(j, "\n")
       if (any(link <- names(the.times[[j]]) == i)) {
         output <- data.frame(
-          Event = paste(j, 1:sum(link), sep = "_"),
+          Event = paste(j, stringr::str_pad(1:sum(link), max.char[j], pad = "0"), sep = "_"),
           V1 = the.times[[j]][link]
         )
         colnames(output)[2] <- i
-        if (events == "one") {
-          if (type == "arrival")
-            return(output[1, , drop = FALSE])
-          else
-            return(output[nrow(output), , drop = FALSE])
-        } else {
-          return(output)
+        if (events == "first") {
+          first.row <- output[1, , drop = FALSE]
+          first.row$Event <- j
+          return(first.row)
         }
+        if (events == "last") {
+          last.row <- output[nrow(output), , drop = FALSE]
+          last.row$Event <- j
+          return(last.row)
+        }
+        if (events == "all")
+          return(output)
       } else {
         return(NULL)
       }

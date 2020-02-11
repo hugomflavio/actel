@@ -192,14 +192,14 @@ checkDupDetections <- function(input) {
 #' @inheritParams check_args
 #' @keywords internal
 #' 
-overrideValidityChecks <- function(moves, fish, GUI) {
+overrideValidityChecks <- function(moves, fish, GUI) { # nocov start
   appendTo("debug", "Starting overrideDefaults.")
   message("----------------------------")
   appendTo(c("Screen", "Report"), trigger <- paste0("M: Override has been triggered for fish ", fish, ". Entering full manual mode."))
   moves <- tableInteraction(moves = moves, fish = fish, trigger = trigger, GUI = GUI)
   attributes(moves)$p.type <- "Overridden"
   message("Terminating full manual mode\n----------------------------")
-  return(moves)
+  return(moves) # nocov end
 }
 
 #' Check that the fish have enough detections to be valid
@@ -252,10 +252,10 @@ checkSpeeds <- function(movements, fish, valid.movements, speed.warning, speed.e
     }
   }
   # Trigger user interaction
-  if (any(na.as.false(vm$Average.speed.m.s >= speed.error))) {
+  if (any(na.as.false(vm$Average.speed.m.s >= speed.error))) { # nocov start
     aux <- tableInteraction(moves = movements, fish = fish, trigger = the.warning, GUI = GUI)
     movements <- transferValidity(from = aux, to = movements)
-  } # end trigger error
+  } # nocov end
   return(movements)   
 }
 
@@ -277,29 +277,29 @@ checkInactiveness <- function(movements, fish, detections.list,
     # Find first and last potentially inactive movement
     breaks <- rle(valid.moves$Array)
     if(length(breaks$lengths) > 1) {
-      start <- sum(breaks$lengths[1:(length(breaks$lengths) - 1)]) + 1
+      Start <- sum(breaks$lengths[1:(length(breaks$lengths) - 1)]) + 1
     } else {
-      start <- 1
+      Start <- 1
     }
-    stop <- nrow(valid.moves)
+    Stop <- nrow(valid.moves)
     # Fetch respective detection rows
-    valid.row.list <- lapply(start:stop, function(j) {
-      start <- min(which(detections.list$Timestamp == valid.moves$First.time[j] & detections.list$Standard.name == valid.moves$First.station[j]))
-      stop <- start + (valid.moves$Detections[j] - 1)
-      return(start:stop)
+    valid.row.list <- lapply(Start:Stop, function(j) {
+      Start <- min(which(detections.list$Timestamp == valid.moves$First.time[j] & detections.list$Standard.name == valid.moves$First.station[j]))
+      Stop <- Start + (valid.moves$Detections[j] - 1)
+      return(Start:Stop)
     })
-    # start trimming from the start to see if a period of inactiveness is present
+    # Start trimming from the Start to see if a period of inactiveness is present
     continue <- TRUE
     iteration <- 1
     while (continue) {
       the.warning <- NULL
       # count days spent to compare with arguments
-      start_i <- start + iteration - 1
-      # stop if we have reached the end of the possible iterations
-      if (start_i > stop)
+      start_i <- Start + iteration - 1
+      # Stop if we have reached the end of the possible iterations
+      if (start_i > Stop)
         break()
-      days.spent <- round(as.numeric(difftime(valid.moves$Last.time[stop], valid.moves$First.time[start_i], units = "days")), 2)
-      # stop if the days.spent are lesser than enough to trigger a warning
+      days.spent <- round(as.numeric(difftime(valid.moves$Last.time[Stop], valid.moves$First.time[start_i], units = "days")), 2)
+      # Stop if the days.spent are lesser than enough to trigger a warning
       if (days.spent < inactive.warning)
         break()
       valid.rows <- unlist(valid.row.list[iteration:length(valid.row.list)])
@@ -310,7 +310,7 @@ checkInactiveness <- function(movements, fish, detections.list,
       if (invalid.dist) {
         # Trigger warning
         if (length(the.stations) <= 3) {
-          n.detections <- sum(valid.moves$Detections[start_i:stop])
+          n.detections <- sum(valid.moves$Detections[start_i:Stop])
           appendTo(c("Report", "Warning", "Screen"), 
             the.warning <- paste0("Fish ", fish, " was detected ", n.detections, 
               " times at three or less stations of array '", tail(breaks$values, 1), 
@@ -320,11 +320,11 @@ checkInactiveness <- function(movements, fish, detections.list,
           continue <- FALSE
         }
         if (length(the.stations) <= 3 & days.spent >= inactive.error)
-          trigger.error <- TRUE        
+          trigger.error <- TRUE # nocov
       } else {
         aux <- dist.mat[the.stations, the.stations]
         if (all(aux <= 1500)) {
-          n.detections <- sum(valid.moves$Detections[start_i:stop])
+          n.detections <- sum(valid.moves$Detections[start_i:Stop])
           appendTo(c("Report", "Warning", "Screen"), 
             the.warning <- paste0("Fish ", fish, " was detected ", n.detections, 
               " times at stations less than 1.5 km apart in array '", tail(breaks$values, 1), 
@@ -334,14 +334,14 @@ checkInactiveness <- function(movements, fish, detections.list,
           continue <- FALSE
         }
         if (all(aux <= 1500) & days.spent >= inactive.error)
-          trigger.error <- TRUE
+          trigger.error <- TRUE # nocov
       }
       # Trigger user interaction
-      if (trigger.error) {
+      if (trigger.error) { # nocov start
         appendTo("Screen", paste0("M: ", fish, " has been inactive for more than ", inactive.error," days (inactiveness started on ", as.Date(valid.moves$First.time[start_i]),")"))
         aux <- tableInteraction(moves = valid.moves, fish = fish, trigger = the.warning, GUI = GUI)
         movements <- transferValidity(from = aux, to = movements)
-      }
+      } # nocov end
       iteration <- iteration + 1
     }
   }
@@ -369,13 +369,19 @@ checkImpassables <- function(movements, fish, dotmat, GUI){
         B = valid.moves$Array[-1])
       distances <- apply(shifts, 1, function(x) dotmat[x[1], x[2]])
       if (any(is.na(distances))) {
+        the.warning <- NULL
         sapply(which(is.na(distances)), function(i) {
-          appendTo(c("Screen", "Warning", "Report"), the.warning <- paste0("Fish ", fish, " made an impassable jump: It is not possible to go from array ", shifts[i, 1], " to ", shifts[i, 2], "."))
+          appendTo(c("Screen", "Warning", "Report"), aux <- paste0("Fish ", fish, " made an impassable jump: It is not possible to go from array ", shifts[i, 1], " to ", shifts[i, 2], "."))
+          the.warning <- c(the.warning, aux)
         })
-        te.warning <- paste("Warning:", the.warning)
-        aux <- tableInteraction(moves = valid.moves, fish = fish, trigger = the.warning, GUI = GUI)
-        movements <- transferValidity(from = aux, to = movements)
-        restart <- TRUE
+        if (interactive()) { # nocov start
+          the.warning <- paste("Warning:", the.warning, collapse = "\n")
+          aux <- tableInteraction(moves = valid.moves, fish = fish, trigger = the.warning, GUI = GUI)
+          movements <- transferValidity(from = aux, to = movements)
+          restart <- TRUE
+        } else { # nocov end
+          stop("Preventing analysis from entering interactive mode in a non-interactive session.\n", call. = FALSE)
+        }
       }
     }
   }
@@ -595,11 +601,11 @@ checkJumpDistance <- function(movements, fish, release, dotmat, jump.warning, ju
       appendTo(c("Report", "Warning", "Screen"), 
         the.warning <- paste0("Fish ", fish, " jumped through ", release.jump - 1, 
           ifelse(release.jump > 2, " arrays ", " array "), 
-          "from release to first event (Release -> ", vm$Array[1], ")."))
+          "from release to first valid event (Release -> ", vm$Array[1], ")."))
       the.warning <- paste("Warning:", the.warning)
     }
     if (release.jump > jump.error)
-      trigger.error <- TRUE
+      trigger.error <- TRUE # nocov
     else
       trigger.error <- FALSE
     # Check event-to-event
@@ -620,19 +626,19 @@ checkJumpDistance <- function(movements, fish, release, dotmat, jump.warning, ju
           appendTo(c("Report", "Warning", "Screen"), 
             other.warning <- paste0("Fish ", fish, " jumped through ", jumps[link[i]] - 1, 
               ifelse(jumps[link[i]] > 2, " arrays ", " array "), 
-              "in events ", link[i], " -> ", link[i] + 1, " (", names(jumps)[link[i]], ")."))
+              "in valid events ", link[i], " -> ", link[i] + 1, " (", names(jumps)[link[i]], ")."))
           other.warning <- paste("Warning:", other.warning)
         the.warning <- paste0(the.warning, "\n", other.warning)
         }
       if (any(jumps[link] > jump.error))
-        trigger.error <- TRUE
+        trigger.error <- TRUE # nocov
       }
     }
     # Trigger user interaction
-    if (trigger.error) {
+    if (trigger.error) { # nocov start
       aux <- tableInteraction(moves = vm, fish = fish, trigger = the.warning, GUI = GUI)
       movements <- transferValidity(from = aux, to = movements)
-    } # end trigger error
+    } # nocov end
   }
   return(movements)
 }

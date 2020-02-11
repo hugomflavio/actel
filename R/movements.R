@@ -125,7 +125,7 @@ simplifyMovements <- function(movements, fish, bio, speed.method, dist.mat, inva
     if (!invalid.dist)
         aux <- movementSpeeds(movements = aux, speed.method = speed.method, dist.mat = dist.mat)
     output <- speedReleaseToFirst(fish = fish, bio = bio, movements = aux,
-     dist.mat = dist.mat, invalid.dist = invalid.dist, silent = FALSE)
+     dist.mat = dist.mat, invalid.dist = invalid.dist)
     return(output)
   } else {
     return(NULL)
@@ -226,20 +226,19 @@ movementTimes <- function(movements, type = c("array", "section")){
 #' 
 #' @keywords internal
 #' 
-speedReleaseToFirst <- function(fish, bio, movements, dist.mat, invalid.dist = FALSE, silent = TRUE){
-  if (!silent) 
-    appendTo("debug", "Running speedReleaseToFirst.")
+speedReleaseToFirst <- function(fish, bio, movements, dist.mat, invalid.dist = FALSE){
+  appendTo("debug", "Running speedReleaseToFirst.")
   the.row <- match(fish,bio$Transmitter)
   origin.time <- bio[the.row,"Release.date"]
   origin.place <- as.character(bio[the.row,"Release.site"])
-  if (origin.time <= movements$First.time[1] & movements$Array[1] != "Unknown") {
+  if (origin.time <= movements$First.time[1]) {
     a <- as.vector(difftime(movements$First.time[1], origin.time, units = "hours"))
     h <- a%/%1
     m <- ((a%%1) * 60)%/%1
     if (m < 10) 
       m <- paste0("0", m)
     movements$Time.travelling[1] <- paste(h, m, sep = ":")
-    if (!invalid.dist) {
+    if (!invalid.dist & movements$Array[1] != "Unknown") {
       a.sec <- as.vector(difftime(movements$First.time[1], origin.time, units = "secs"))
       my.dist <- dist.mat[movements$First.station[1], origin.place]
       movements$Average.speed.m.s[1] <- round(my.dist/a.sec, 6)
@@ -248,8 +247,6 @@ speedReleaseToFirst <- function(fish, bio, movements, dist.mat, invalid.dist = F
     movements$Time.travelling[1] <- NA
     movements$Average.speed.m.s[1] <- NA
   }
-  if (!silent)
-    appendTo("debug", "Done.")
   return(movements)
 } 
 
