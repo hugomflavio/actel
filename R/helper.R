@@ -462,8 +462,6 @@ getTimes <- function(movements, spatial, type = c("arrival", "departure"), event
     output <- as.data.frame(data.table::rbindlist(aux))
     rownames(output) <- output$Event
     output <- output[, -1, drop = FALSE]
-    if (events == "one")
-      rownames(output) <- gsub("_[0-9]*$", "", rownames(output))
     return(output)
   })
   # Ensure all data frames contain the same rows, by the same order
