@@ -894,9 +894,9 @@ processThelmaFile <- function(input) {
   input <- as.data.frame(input)
   output <- data.table(
     Timestamp = fasttime::fastPOSIXct(sapply(input[, 1], function(x) gsub("Z", "", gsub("T", " ", x))), tz = "UTC"),
-    Receiver = input[, 8],
-    CodeSpace = input[, 3],
-    Signal = input[, 4])
+    Receiver = input$`TBR Serial Number`,
+    CodeSpace = input$CodeType,
+    Signal = input$Id)
   return(output)
 }
 
