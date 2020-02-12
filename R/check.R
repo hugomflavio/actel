@@ -157,30 +157,35 @@ checkDupDetections <- function(input) {
     message("")
     appendTo("Screen", "Possible options:\n   a) Stop and double-check the data\n   b) Remove duplicated detections\n   c) Continue without changes")
     message("")
-    unknown.input = TRUE
-    while (unknown.input) {
-      decision <- readline("Decision:(a/b/c) ")
-      if (decision == "a" | decision == "A") {
-        unknown.input = FALSE
-        appendTo("UD", decision)
-        emergencyBreak()
-        stop("Function stopped by user command.", call. = FALSE)
-      }
-      if (decision == "b" | decision == "B") {
-        appendTo("UD", decision)
-        unknown.input = FALSE
-        appendTo(c("Screen", "Report"), "M: Removing duplicated detections from the analysis per user command.")
-        output <- input[!dups, ]
-      }
-      if (decision == "c" | decision == "C") {
-        appendTo("UD", decision)
-        unknown.input = FALSE
-        appendTo(c("Screen", "Report"), "M: Continuing analysis with duplicated detections per user command.")
-        output <- input
-      }
-      if (unknown.input) {
-        appendTo("Screen", "Option not recognized, please input either 'a', 'b', 'c' or 'comment'.")
-      }
+    if (interactive()) { # nocov start
+      unknown.input = TRUE
+      while (unknown.input) {
+        decision <- readline("Decision:(a/b/c) ")
+        if (decision == "a" | decision == "A") {
+          unknown.input = FALSE
+          appendTo("UD", decision)
+          emergencyBreak()
+          stop("Function stopped by user command.", call. = FALSE)
+        }
+        if (decision == "b" | decision == "B") {
+          appendTo("UD", decision)
+          unknown.input = FALSE
+          appendTo(c("Screen", "Report"), "M: Removing duplicated detections from the analysis per user command.")
+          output <- input[!dups, ]
+        }
+        if (decision == "c" | decision == "C") {
+          appendTo("UD", decision)
+          unknown.input = FALSE
+          appendTo(c("Screen", "Report"), "M: Continuing analysis with duplicated detections per user command.")
+          output <- input
+        }
+        if (unknown.input) {
+          appendTo("Screen", "Option not recognized, please input either 'a', 'b', 'c' or 'comment'.")
+        }
+      } 
+    } else { # nocov end
+      appendTo("Report", "M: Not running in interactive mode, deleting duplicated detections by default.")
+      output <- input[!dups, ]
     }
   } else {
     output <- input
@@ -440,10 +445,15 @@ checkLinearity <- function(secmoves, fish, sections, arrays, GUI) {
         suggestion[first.time:length(back.check)][to.remove] <- TRUE
       }
       suggestion <- which(suggestion)
-      appendTo("Screen", aux <- paste0("To linearise the movements, actel suggests invalidating the following events: ", paste(suggestion, collapse = ", ")))
-      the.warning <- paste0("Warning: ", the.warning, "\n", aux)
-      aux <- tableInteraction(moves = vsm, fish = fish, trigger = the.warning, GUI = GUI)
-      secmoves <- transferValidity(from = aux, to = secmoves)
+      if (interactive()) { # nocov start
+        appendTo("Screen", aux <- paste0("To linearise the movements, actel suggests invalidating the following events: ", paste(suggestion, collapse = ", ")))
+        the.warning <- paste0("Warning: ", the.warning, "\n", aux)
+        aux <- tableInteraction(moves = vsm, fish = fish, trigger = the.warning, GUI = GUI)
+        secmoves <- transferValidity(from = aux, to = secmoves)
+      } else { # nocov end
+        vsm$Valid[suggestion] <- FALSE
+        secmoves <- transferValidity(from = vsm, to = secmoves)
+      }
       # Prepare double call warning
       double.call <- TRUE
     } else {
@@ -556,10 +566,12 @@ checkUpstream <- function(movements, fish, release, arrays, GUI) {
     return(movements)
 
   if (any(is.na(match(vm$Array, after.arrays)))) {
-    appendTo(c("Screen", "Report", "Warning"), the.warning <- paste0("Fish ", fish, " was detected in an array that is not after its release site! Opening relevant data for inspection.\n   Expected first array:", release))
+    appendTo(c("Screen", "Report", "Warning"), the.warning <- paste0("Fish ", fish, " was detected in an array that is not after its release site! Opening relevant data for inspection.\nExpected first array: ", release))
     the.warning <- paste("Warning:", the.warning)
-    aux <- tableInteraction(moves = vm, fish = fish, trigger = the.warning, GUI = GUI)
-    movements <- transferValidity(from = aux, to = movements)
+    if (interactive()) {
+      aux <- tableInteraction(moves = vm, fish = fish, trigger = the.warning, GUI = GUI)
+      movements <- transferValidity(from = aux, to = movements)
+    }
   }
   return(movements)
 }
