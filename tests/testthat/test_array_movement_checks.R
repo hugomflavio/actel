@@ -10,6 +10,7 @@ spatial <- study.data$spatial
 dist.mat <- study.data$dist.mat
 invalid.dist <- study.data$invalid.dist
 dotmat <- study.data$dotmat
+arrays <- study.data$arrays
 
 moves <- groupMovements(detections.list = detections.list[1:2], bio = bio, spatial = spatial,
     speed.method = "last to first", max.interval = 60, tz = "Europe/Copenhagen", 
@@ -106,29 +107,36 @@ test_that("checkSpeeds reacts as expected.", {
 })
 
 test_that("checkInactiveness reacts as expected.", {
-	xmoves <- moves[[1]][-c(17, 18), ]
-	# With distances
+  xmoves <- moves[[1]][-c(17, 18), ]
+  # With distances
   expect_warning(output <- checkInactiveness(movements = xmoves, fish = "test", detections.list = detections.list[[1]], 
-		inactive.warning = 1, inactive.error = Inf, dist.mat = dist.mat, invalid.dist = invalid.dist, GUI = "never"),
+    inactive.warning = 1, inactive.error = Inf, dist.mat = dist.mat, invalid.dist = invalid.dist, GUI = "never"),
   "Fish test was detected 292 times at stations less than 1.5 km apart in array 'Fjord1' (St.9, St.10, St.11), over 2.57 days and then disappeared. Could it be inactive?", fixed = TRUE)
   expect_equal(output, xmoves)
 
   # Without distances
   expect_warning(output <- checkInactiveness(movements = xmoves, fish = "test", detections.list = detections.list[[1]], 
-		inactive.warning = 1, inactive.error = Inf, dist.mat = dist.mat, invalid.dist = TRUE, GUI = "never"),
+    inactive.warning = 1, inactive.error = Inf, dist.mat = dist.mat, invalid.dist = TRUE, GUI = "never"),
   "Fish test was detected 292 times at three or less stations of array 'Fjord1' (St.9, St.10, St.11) over 2.57 days and then disappeared. Could it be inactive?", fixed = TRUE)
   expect_equal(output, xmoves)
 
   # no warnings
   output <- checkInactiveness(movements = xmoves, fish = "test", detections.list = detections.list[[1]], 
-		inactive.warning = Inf, inactive.error = Inf, dist.mat = dist.mat, invalid.dist = TRUE, GUI = "never")
+    inactive.warning = Inf, inactive.error = Inf, dist.mat = dist.mat, invalid.dist = TRUE, GUI = "never")
   expect_equal(output, xmoves)
 
   # internal code option for no shifts
-	xmoves <- moves[[1]][-c(1:6, 17, 18), ]
+  xmoves <- moves[[1]][-c(1:6, 17, 18), ]
   output <- checkInactiveness(movements = xmoves, fish = "test", detections.list = detections.list[[1]], 
-		inactive.warning = Inf, inactive.error = Inf, dist.mat = dist.mat, invalid.dist = TRUE, GUI = "never")
+    inactive.warning = Inf, inactive.error = Inf, dist.mat = dist.mat, invalid.dist = TRUE, GUI = "never")
   expect_equal(output, xmoves)
+})
+
+test_that("checkUpstream reacts as expected.", {
+  tryCatch(x <- checkUpstream(movements = moves[[1]], fish = "test", release = "River1", arrays = arrays, GUI = "never"), 
+    warning = function(w) stop("A warning was issued where it should not have been."))
+  expect_warning(checkUpstream(movements = moves[[1]], fish = "test", release = "River2", arrays = arrays, GUI = "never"),
+    "Fish test was detected in an array that is not after its release site! Opening relevant data for inspection.\nExpected first array: River2", fixed = TRUE)
 })
 
 test_that("simplifyMovements works as expected.", {
