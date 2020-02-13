@@ -439,7 +439,7 @@ migration <- function(path = NULL, tz, sections, success.arrays = NULL, max.inte
         simpleCJS(m[[1]])
       else
         combineCJS(m)
-      })
+    })
 
     release_nodes <- as.data.frame(table(bio$Group, bio$Release.site))
     colnames(release_nodes) <- c("Group", "Release.site", "n")
