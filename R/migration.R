@@ -278,6 +278,12 @@ migration <- function(path = NULL, tz, sections, success.arrays = NULL, max.inte
       appendTo(c("Screen", "Warning", "Report"), paste0("'success.arrays' was not defined. Assuming success if fish are last detected at array ", success.arrays, "."))
     else
       appendTo(c("Screen", "Warning", "Report"), paste0("'success.arrays' was not defined. Assuming success if fish are last detected at arrays ", paste(success.arrays[-length(success.arrays)], collapse = ", "), " or ", tail(success.arrays, 1), "."))
+  } else {
+    if (any(link <- is.na(match(success.arrays, unlist(spatial$array.order))))) {
+      stop(ifelse(sum(link) > 1, "Arrays '", "Array '"), paste(success.arrays[link], collapse = "', '"),
+        ifelse(sum(link) > 1, "' are ", "' is "), "listed in the 'success.arrays' argument, but ",
+        ifelse(sum(link) > 1, "these arrays are", "this array is"), " not part of the study arrays.\n", call. = FALSE)
+    }
   }
 # -------------------------------------
   
