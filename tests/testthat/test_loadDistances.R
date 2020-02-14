@@ -8,7 +8,7 @@ file.remove("biometrics.csv")
 
 dot <- loadDot(string = paste(unique(spatial$Array), collapse = "--"), spatial = spatial, disregard.parallels = TRUE)
 
-spatial <- transformSpatial(spatial = spatial, bio = bio, arrays = dot$arrays, sections = NULL)
+spatial <- transformSpatial(spatial = spatial, bio = bio, arrays = dot$arrays, sections = NULL)[[1]]
 
 test_that("loadDistances returns correct output if distances.csv is not present", {
 	expect_equal(loadDistances(spatial = spatial), list(dist.mat = NA, invalid.dist = TRUE))

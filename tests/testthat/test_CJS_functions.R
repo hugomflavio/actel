@@ -164,6 +164,7 @@ test_that("assembleArrayCJS works as expected.",{
   colnames(release_nodes) <- c("Group", "Release.site", "n")
   release_nodes$Array <- spatial$release.sites$Array[match(release_nodes$Release.site, spatial$release.sites$Standard.name)]
   release_nodes$Combined <- paste(release_nodes[, 1], release_nodes[, 2], sep = ".")
+  release_nodes <<- release_nodes
 
   output <- assembleArrayCJS(mat = the.matrices, CJS = CJS.list, arrays = arrays, releases = release_nodes)
 
@@ -182,7 +183,7 @@ test_that("assembleArrayCJS works as expected.",{
 })
 
 test_that("replicate functions work as expected.", {
-  intra.array.matrices <- getDualMatrices(replicates = list(Sea1 = c("St.16", "St.17")), CJS = overall.CJS, spatial = spatial, detections.list = detections.list)
+  intra.array.matrices <<- getDualMatrices(replicates = list(Sea1 = c("St.16", "St.17")), CJS = overall.CJS, spatial = spatial, detections.list = detections.list)
 
   check <- read.csv(text = '"","original","replicates"
 "R64K-4451",TRUE,TRUE
@@ -269,21 +270,102 @@ test_that("replicate functions work as expected.", {
 	expect_equal(round(recipient$intra.CJS$Sea1$single.efficiency, 5), c(original = 0.77419, replicates = 0.85714))
 
 	expect_equal(round(recipient$intra.CJS$Sea1$combined.efficiency, 5), 0.96774)
+
+	overall.CJS <<- recipient[[1]]
+	intra.array.CJS <<- recipient[[2]]
+
 })
 
 
-# test_that("split CJS functions work as expected.", {
-#   aux <- mbSplitCJS(mat = m.by.array, fixed.efficiency = overall.CJS$efficiency)
-#   aux <- aux[names(the.matrices)]
-#   split.CJS <- assembleSplitCJS(mat = the.matrices, CJS = aux, arrays = arrays, releases = release_nodes, intra.CJS = intra.array.CJS)
-#   aux <- mbAssembleArrayOverview(input = split.CJS)
-# })
+test_that("split CJS functions work as expected.", {
+  aux <- mbSplitCJS(mat = m.by.array, fixed.efficiency = overall.CJS$efficiency)
+  ### ONLY RUN TO REPLACE REFERENCE
+  # aux_mbSplitCJS <- aux
+  # save(aux_mbSplitCJS, file = "../aux_mbSplitCJS.RData")
+  load("../aux_mbSplitCJS.RData")
+  expect_equal(aux, aux_mbSplitCJS)
 
-# test_that("group CJS functions work as expected.", {
-#   aux <- mbGroupCJS(mat = m.by.array, status.df = status.df, fixed.efficiency = overall.CJS$efficiency)
-#   group.CJS <- assembleGroupCJS(mat = the.matrices, CJS = aux, arrays = arrays, releases = release_nodes, intra.CJS = intra.array.CJS)
-#   aux <- mbAssembleArrayOverview(input = group.CJS)
-# })
+  aux <- aux[names(the.matrices)]
+  split.CJS <- assembleSplitCJS(mat = the.matrices, CJS = aux, arrays = arrays, releases = release_nodes, intra.CJS = intra.array.CJS)
+
+  expect_equal(names(split.CJS), c("A.RS1", "B.RS1"))
+
+  check <- read.csv(text = '"","River0","River1","River2","River3","River4","River5","River6","Fjord1","Fjord2","Sea1"
+"detected",0,26,26,25,26,26,26,26,25,19
+"here plus on peers",NA,26,26,25,26,26,26,25,19,NA
+"not here but on peers",NA,0,0,1,0,0,0,0,0,NA
+"estimated",NA,26,26,26,26,26,26,26,25,20
+', row.names = 1)
+  expect_equal(split.CJS[[1]], check)
+
+  check <- read.csv(text = '"","River0","River1","River2","River3","River4","River5","River6","Fjord1","Fjord2","Sea1"
+"detected",0,28,28,27,26,26,26,23,19,15
+"here plus on peers",NA,28,28,25,26,26,24,18,15,NA
+"not here but on peers",NA,0,0,1,0,0,0,1,0,NA
+"estimated",NA,28,28,28,26,26,26,24,19,16
+', row.names = 1)
+  expect_equal(split.CJS[[2]], check)
+
+  aux <- mbAssembleArrayOverview(input = split.CJS)
+
+  check <- read.csv(text = '"","River0","River1","River2","River3","River4","River5","River6","Fjord1","Fjord2","Sea1"
+"Known",0,26,26,26,26,26,26,26,25,19
+"Estimated",NA,26,26,26,26,26,26,26,25,20
+"Difference",NA,0,0,0,0,0,0,0,0,1
+', row.names = 1)
+  expect_equal(aux[[1]], check)
+
+  check <- read.csv(text = '"","River0","River1","River2","River3","River4","River5","River6","Fjord1","Fjord2","Sea1"
+"Known",0,28,28,28,26,26,26,24,19,15
+"Estimated",NA,28,28,28,26,26,26,24,19,16
+"Difference",NA,0,0,0,0,0,0,0,0,1
+', row.names = 1)
+  expect_equal(aux[[2]], check) 
+})
+
+test_that("group CJS functions work as expected.", {
+  aux <- mbGroupCJS(mat = m.by.array, status.df = status.df, fixed.efficiency = overall.CJS$efficiency)
+  ### ONLY RUN TO REPLACE REFERENCE
+  # aux_mbGroupCJS <- aux
+  # save(aux_mbGroupCJS, file = "../aux_mbGroupCJS.RData")
+  load("../aux_mbGroupCJS.RData")
+  expect_equal(aux, aux_mbGroupCJS)
+
+  group.CJS <- assembleGroupCJS(mat = the.matrices, CJS = aux, arrays = arrays, releases = release_nodes, intra.CJS = intra.array.CJS)
+
+  expect_equal(names(group.CJS), c("A", "B"))
+
+  check <- read.csv(text = '"","River0","River1","River2","River3","River4","River5","River6","Fjord1","Fjord2","Sea1"
+"detected",0,26,26,25,26,26,26,26,25,19
+"here plus on peers",NA,26,26,25,26,26,26,25,19,NA
+"not here but on peers",NA,0,0,1,0,0,0,0,0,NA
+"estimated",NA,26,26,26,26,26,26,26,25,20
+', row.names = 1)
+  expect_equal(group.CJS[[1]], check)
+
+  check <- read.csv(text = '"","River0","River1","River2","River3","River4","River5","River6","Fjord1","Fjord2","Sea1"
+"detected",0,28,28,27,26,26,26,23,19,15
+"here plus on peers",NA,28,28,25,26,26,24,18,15,NA
+"not here but on peers",NA,0,0,1,0,0,0,1,0,NA
+"estimated",NA,28,28,28,26,26,26,24,19,16
+', row.names = 1)
+  expect_equal(group.CJS[[2]], check)
+
+  aux <- mbAssembleArrayOverview(input = group.CJS)
+ check <- read.csv(text = '"","River0","River1","River2","River3","River4","River5","River6","Fjord1","Fjord2","Sea1"
+"Known",0,26,26,26,26,26,26,26,25,19
+"Estimated",NA,26,26,26,26,26,26,26,25,20
+"Difference",NA,0,0,0,0,0,0,0,0,1
+', row.names = 1)
+  expect_equal(aux[[1]], check)
+
+  check <- read.csv(text = '"","River0","River1","River2","River3","River4","River5","River6","Fjord1","Fjord2","Sea1"
+"Known",0,28,28,28,26,26,26,24,19,15
+"Estimated",NA,28,28,28,26,26,26,24,19,16
+"Difference",NA,0,0,0,0,0,0,0,0,1
+', row.names = 1)
+  expect_equal(aux[[2]], check) 
+})
 
 setwd("..")
 unlink("exampleWorkspace", recursive = TRUE)
