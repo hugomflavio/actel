@@ -350,7 +350,7 @@ migration <- function(path = NULL, tz, sections, success.arrays = NULL, max.inte
 
       if (do.checkSpeeds) {
         temp.valid.movements <- simplifyMovements(movements = output, fish = fish, bio = bio, 
-          speed.method = speed.method, dist.mat = dist.mat, invalid.dist = invalid.dist, GUI = GUI)
+          speed.method = speed.method, dist.mat = dist.mat, invalid.dist = invalid.dist)
         output <- checkSpeeds(movements = output, fish = fish, valid.movements = temp.valid.movements, 
           speed.warning = speed.warning, speed.error = speed.error, GUI = GUI)
         rm(temp.valid.movements)
