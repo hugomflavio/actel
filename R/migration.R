@@ -250,6 +250,7 @@ migration <- function(path = NULL, tz, sections, success.arrays = NULL, max.inte
                               start.time = start.time, stop.time = stop.time,
                               sections = sections, exclude.tags = exclude.tags, disregard.parallels = disregard.parallels)
   bio <- study.data$bio
+  sections <- study.data$sections
   deployments <- study.data$deployments
   spatial <- study.data$spatial
   dot <- study.data$dot

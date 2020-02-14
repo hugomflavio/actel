@@ -57,7 +57,9 @@ loadStudyData <- function(tz, override = NULL, start.time, stop.time,
     first.array <- names(arrays)[unlist(lapply(arrays, function(a) is.null(a$before)))]
   else
     first.array <- NULL
-  spatial <- transformSpatial(spatial = spatial, bio = bio, sections = sections, arrays = arrays, first.array = first.array) # Finish structuring the spatial file
+  recipient <- transformSpatial(spatial = spatial, bio = bio, sections = sections, arrays = arrays, first.array = first.array) # Finish structuring the spatial file
+  spatial <- recipient$spatial
+  sections <- recipient$sections
   detections$Array <- factor(detections$Array, levels = unlist(spatial$array.order)) # Fix array levels
   link <- match(names(arrays), unlist(spatial$array.order))
   arrays <- arrays[link] # Reorder arrays by spatial order
@@ -87,9 +89,9 @@ loadStudyData <- function(tz, override = NULL, start.time, stop.time,
 
   detections.list <- checkDetectionsBeforeRelease(input = detections.list, bio = bio)
   appendTo(c("Screen", "Report"), "M: Data successfully imported!")
-  return(list(bio = bio, deployments = deployments, spatial = spatial, dot = dot,
-   arrays = arrays, dotmat = dotmat, detections = detections, dist.mat = dist.mat,
-    invalid.dist = invalid.dist, detections.list = detections.list, paths = paths))
+  return(list(bio = bio, sections = sections, deployments = deployments, spatial = spatial, dot = dot,
+   arrays = arrays, dotmat = dotmat, detections = detections, dist.mat = dist.mat, invalid.dist = invalid.dist, 
+   detections.list = detections.list, paths = paths))
 }
 
 #' Load spatial.dot
@@ -1270,7 +1272,9 @@ transformSpatial <- function(spatial, bio, arrays, sections = NULL, first.array 
       array.order[[j]] <- names(arrays)[grepl(j, names(arrays))]
     }
     if (any(trigger <- unlist(lapply(array.order, length)) == 0)) {
-      appendTo(c("Screen", "Report", "Warning"), paste0("No arrays were found that match section(s) ", paste(names(array.order)[trigger], collapse = ", "), ". There could be a typing mistake!"))
+      appendTo(c("Screen", "Report", "Warning"), paste0("No arrays were found that match section(s) ", paste(names(array.order)[trigger], collapse = ", "), ". There could be a typing mistake! Section(s) ", paste(names(array.order)[trigger], collapse = ", "), " will be removed."))
+      array.order <- array.order[!trigger]
+      sections <- sections[!trigger]
       if (interactive()) # nocov start
         decision <- readline("All arrays must be assigned to a section. Attempt to continue the analysis?(y/N) ")
       else # nocov end
@@ -1287,7 +1291,7 @@ transformSpatial <- function(spatial, bio, arrays, sections = NULL, first.array 
           ifelse(length(the.arrays) == 1, " '", "(s) '"), 
           paste(the.arrays, collapse = "', '"),
           ifelse(length(the.arrays) == 1, "' was", "' were"), 
-          " not assigned to any section. Stopping to prevent function failure.\nYou can either:\n   1) Rename these arrays to match a section, \n   2) Rename a section to match these arrays, or \n   3) Include a new section in the analysis.\n"),
+          " not assigned to any section. Stopping to prevent function failure.\nPlease either...\n   1) Rename these arrays to match a section,\n   2) Rename a section to match these arrays, or\n   3) Include a new section in the analysis.\n... and restart the analysis.\n"),
       call. = FALSE)
     }
   } else {
@@ -1300,7 +1304,7 @@ transformSpatial <- function(spatial, bio, arrays, sections = NULL, first.array 
   output <- list(stations = stations, 
                  release.sites = release.sites, 
                  array.order = array.order)
-  return(output)
+  return(list(spatial = output, sections = sections))
 }
 
 #' Collect summary information on the tags detected but that are not part of the study.

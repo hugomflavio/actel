@@ -266,6 +266,7 @@ study.data <- loadStudyData(tz = tz, override = override,
                             start.time = start.time, stop.time = stop.time,
                             sections = NULL, exclude.tags = exclude.tags)
 bio <- study.data$bio
+sections <- study.data$sections
 deployments <- study.data$deployments
 spatial <- study.data$spatial
 dot <- study.data$dot

@@ -242,6 +242,7 @@ residency <- function(path = NULL, tz, sections, success.arrays = NULL, max.inte
                               start.time = start.time, stop.time = stop.time,
                               sections = sections, exclude.tags = exclude.tags)
   bio <- study.data$bio
+  sections <- study.data$sections
   deployments <- study.data$deployments
   spatial <- study.data$spatial
   dot <- study.data$dot
@@ -523,8 +524,10 @@ residency <- function(path = NULL, tz, sections, success.arrays = NULL, max.inte
       quiet = TRUE)
     appendTo("debug", "debug: Moving report")
     fs::file_move(sub("Rmd", "html", reportname), sub("Report/", "", sub("Rmd", "html", reportname)))
-    appendTo("debug", "debug: Opening report if the pc has internet.")
-    openReport(file.name = sub("Report/", "", sub("Rmd", "html", reportname)))
+    if (interactive()) { # nocov start
+      appendTo("debug", "debug: Opening report if the pc has internet.")
+      openReport(file.name = sub("Report/", "", sub("Rmd", "html", reportname)))
+    } # nocov end
   }
   appendTo("Screen", "M: Process finished successfully.")
 # ------------------
