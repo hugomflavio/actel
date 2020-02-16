@@ -25,6 +25,7 @@ Fixes:
 
 Changes:
   * `array.overview` is now called `group.overview`.
+  * Fish that never entered a section now have NA total and average times for that section during residency analysis. This allows to distinguish between fish that never entered a section (NA time) and fish that only had one detection at a section (0 time).
 
 Enhancements:
   * The object `detections` now contains a "Valid" column, similarly to the `movements` objects.

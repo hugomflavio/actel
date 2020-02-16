@@ -937,8 +937,9 @@ assembleResidency <- function(secmoves, movements, sections) {
   		return(recipient)
   	})
   	recipient <- as.data.frame(combine(recipient), stringsAsFactors = FALSE)
-    # replace NAs
-    the.cols <- which(grepl("Total.time|Times.entered|Average.time", colnames(recipient)))
+    # convert Total.times to numeric and replace NAs
+    the.cols <- which(grepl("Times.entered", colnames(recipient)))
+    recipient[, the.cols] <- as.numeric(recipient[, the.cols])
     recipient[, the.cols[which(is.na(recipient[, the.cols]))]] <- 0
     # --
   	recipient$Very.last.array <- secmoves[[fish]][.N, Last.array]
