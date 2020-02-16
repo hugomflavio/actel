@@ -1,15 +1,15 @@
 exampleWorkspace()
 setwd("exampleWorkspace")
 write.csv(example.distances, "distances.csv")
-
 study.data <- suppressWarnings(loadStudyData(tz = "Europe/Copenhagen", start.time = NULL, 
-	stop.time = NULL, sections = NULL, exclude.tags = NULL))
+	stop.time = NULL, sections = c("River", "Fjord", "Sea"), exclude.tags = NULL))
 detections.list <- study.data$detections.list
 bio <- study.data$bio
 spatial <- study.data$spatial
 dist.mat <- study.data$dist.mat
 invalid.dist <- study.data$invalid.dist
 arrays <- study.data$arrays
+sections <- study.data$sections
 
 moves <- groupMovements(detections.list = detections.list[1:2], bio = bio, spatial = spatial,
     speed.method = "last to first", max.interval = 60, tz = "Europe/Copenhagen", 
@@ -23,7 +23,6 @@ moves <- lapply(names(moves), function(fish) {
 names(moves) <- aux
 rm(aux)
 
-sections <- c("River", "Fjord", "Sea")
 
 test_that("sectionMovements correctly compresses array movements", {
 	output <- sectionMovements(movements = moves[[1]], sections = sections, invalid.dist = invalid.dist)
@@ -74,6 +73,17 @@ test_that("updateValidity correctly transfers invalid events.", {
 	expect_type(output, "list")
 	expect_equal(names(output), "test")
 	expect_equal(sum(!output[[1]]$Valid), 13)
+})
+
+
+test_that("checkSMovesN throws warning only if movements are not ordered", {
+	aux <- sectionMovements(movements = moves[[1]], sections = sections, invalid.dist = invalid.dist)
+
+  tryCatch(checkSMovesN(secmoves = aux, fish = "test", section.minimum = 1, GUI = "never"),
+    warning = function(w) stop("A warning was issued where it should not have been."))
+
+	expect_warning(checkSMovesN(secmoves = aux, fish = "test", section.minimum = 15, GUI = "never"),
+		"Section movements with less than 15 detections are present for fish test.", fixed = TRUE)
 })
 
 setwd("..")

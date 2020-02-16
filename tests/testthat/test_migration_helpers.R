@@ -25,13 +25,12 @@ moves <- lapply(names(moves), function(fish) {
 names(moves) <- aux
 rm(aux)
 
-
 test_that("assembleTimetable correctly extracts fish information", {
   xmoves <- moves
-	attributes(xmoves[[1]])$p.type <- "Manual"
-	xmoves[[1]]$Valid[18] <- FALSE
-	vm <- xmoves
-	vm[[1]] <- vm[[1]][-18, ]
+  attributes(xmoves[[1]])$p.type <- "Manual"
+  xmoves[[1]]$Valid[18] <- FALSE
+  vm <- xmoves
+  vm[[1]] <- vm[[1]][-18, ]
 
   output <- assembleTimetable(vm = vm, all.moves = xmoves, sections = sections, 
     arrays = arrays, dist.mat = dist.mat, invalid.dist = invalid.dist, speed.method = "last to first", 
@@ -39,11 +38,11 @@ test_that("assembleTimetable correctly extracts fish information", {
   timetable <<- output
 
   expect_equal(colnames(output), c('Time.until.River', 'Speed.to.River', 'First.station.River', 'Arrived.River', 
-  	'Time.in.River', 'Speed.in.River', 'Last.station.River', 'Left.River', 'Time.until.Fjord', 'Speed.to.Fjord', 
-  	'First.station.Fjord', 'Arrived.Fjord', 'Time.in.Fjord', 'Speed.in.Fjord', 'Last.station.Fjord', 'Left.Fjord', 
-  	'Time.until.Sea', 'Speed.to.Sea', 'First.station.Sea', 'Arrived.Sea', 'Time.in.Sea', 'Speed.in.Sea', 
-  	'Last.station.Sea', 'Left.Sea', 'Very.last.array', 'Status', 'Valid.detections', 'Invalid.detections', 
-  	'Backwards.movements', 'Max.cons.back.moves', 'P.type', 'Transmitter'))
+    'Time.in.River', 'Speed.in.River', 'Last.station.River', 'Left.River', 'Time.until.Fjord', 'Speed.to.Fjord', 
+    'First.station.Fjord', 'Arrived.Fjord', 'Time.in.Fjord', 'Speed.in.Fjord', 'Last.station.Fjord', 'Left.Fjord', 
+    'Time.until.Sea', 'Speed.to.Sea', 'First.station.Sea', 'Arrived.Sea', 'Time.in.Sea', 'Speed.in.Sea', 
+    'Last.station.Sea', 'Left.Sea', 'Very.last.array', 'Status', 'Valid.detections', 'Invalid.detections', 
+    'Backwards.movements', 'Max.cons.back.moves', 'P.type', 'Transmitter'))
   expect_equal(output$Arrived.River[1], as.character(moves[[1]]$First.time[1]))
   expect_equal(output$Left.River[2], as.character(moves[[2]]$Last.time[6]))
   expect_equal(output$Arrived.Fjord[1], as.character(moves[[1]]$First.time[7]))
@@ -65,11 +64,11 @@ test_that("assembleTimetable correctly extracts fish information", {
     arrays = arrays, dist.mat = dist.mat, invalid.dist = invalid.dist, speed.method = "first to first", 
     if.last.skip.section = FALSE, success.arrays = "Sea1")
   expect_equal(colnames(output), c('Time.until.River', 'Speed.to.River', 'First.station.River', 'Arrived.River', 
-  	'Time.in.River', 'Last.station.River', 'Left.River', 'Time.until.Fjord', 'Speed.to.Fjord', 
-  	'First.station.Fjord', 'Arrived.Fjord', 'Time.in.Fjord', 'Last.station.Fjord', 'Left.Fjord', 
-  	'Time.until.Sea', 'Speed.to.Sea', 'First.station.Sea', 'Arrived.Sea', 'Time.in.Sea', 
-  	'Last.station.Sea', 'Left.Sea', 'Very.last.array', 'Status', 'Valid.detections', 'Invalid.detections', 
-  	'Backwards.movements', 'Max.cons.back.moves', 'P.type', 'Transmitter'))
+    'Time.in.River', 'Last.station.River', 'Left.River', 'Time.until.Fjord', 'Speed.to.Fjord', 
+    'First.station.Fjord', 'Arrived.Fjord', 'Time.in.Fjord', 'Last.station.Fjord', 'Left.Fjord', 
+    'Time.until.Sea', 'Speed.to.Sea', 'First.station.Sea', 'Arrived.Sea', 'Time.in.Sea', 
+    'Last.station.Sea', 'Left.Sea', 'Very.last.array', 'Status', 'Valid.detections', 'Invalid.detections', 
+    'Backwards.movements', 'Max.cons.back.moves', 'P.type', 'Transmitter'))
   expect_false(any(to.match$Speed.to.Fjord == output$Speed.to.Fjord))
   expect_true(to.match$Speed.to.Sea[2] != output$Speed.to.Sea[2])
   expect_equal(output$Status, c("Disap. in Fjord", "Succeeded"))
@@ -78,11 +77,11 @@ test_that("assembleTimetable correctly extracts fish information", {
     arrays = arrays, dist.mat = dist.mat, invalid.dist = TRUE, speed.method = "first to first", 
     if.last.skip.section = FALSE, success.arrays = "Sea1")
   expect_equal(colnames(output), c('Time.until.River', 'First.station.River', 'Arrived.River', 
-  	'Time.in.River', 'Last.station.River', 'Left.River', 'Time.until.Fjord', 
-  	'First.station.Fjord', 'Arrived.Fjord', 'Time.in.Fjord', 'Last.station.Fjord', 'Left.Fjord', 
-  	'Time.until.Sea', 'First.station.Sea', 'Arrived.Sea', 'Time.in.Sea', 
-  	'Last.station.Sea', 'Left.Sea', 'Very.last.array', 'Status', 'Valid.detections', 'Invalid.detections', 
-  	'Backwards.movements', 'Max.cons.back.moves', 'P.type', 'Transmitter'))
+    'Time.in.River', 'Last.station.River', 'Left.River', 'Time.until.Fjord', 
+    'First.station.Fjord', 'Arrived.Fjord', 'Time.in.Fjord', 'Last.station.Fjord', 'Left.Fjord', 
+    'Time.until.Sea', 'First.station.Sea', 'Arrived.Sea', 'Time.in.Sea', 
+    'Last.station.Sea', 'Left.Sea', 'Very.last.array', 'Status', 'Valid.detections', 'Invalid.detections', 
+    'Backwards.movements', 'Max.cons.back.moves', 'P.type', 'Transmitter'))
 
   xmoves <- moves
   xmoves[[1]]$Array[7] <- "River5"
@@ -133,6 +132,31 @@ test_that("assembleOutput correctly combines the timetable and the biometrics", 
   expect_equal(levels(output$Very.last.array), c("Release", names(arrays)))
   expect_equal(levels(output$Status), c("Disap. in River", "Disap. in Fjord", "Disap. in Sea", "Succeeded"))
   expect_equal(unique(output$P.type), c("Manual", "Auto", "Skipped"))
+})
+
+xmoves <- moves
+attributes(xmoves[[1]])$p.type <- "Manual"
+xmoves[[1]]$Valid[18] <- FALSE
+vm <- xmoves
+vm[[1]] <- vm[[1]][-18, ]
+
+timetable <- assembleTimetable(vm = vm, all.moves = xmoves, sections = sections, 
+  arrays = arrays, dist.mat = dist.mat, invalid.dist = invalid.dist, speed.method = "last to first", 
+  if.last.skip.section = TRUE, success.arrays = "Sea1")
+
+status.df <- assembleOutput(timetable = timetable, bio = bio, spatial = spatial, 
+  sections = sections, dist.mat = dist.mat, invalid.dist = invalid.dist, tz = "Europe/Copenhagen")
+
+test_that("assembleGroupOverview is working as expected", {
+  output <- assembleSectionOverview(status.df = status.df, sections = sections)
+  expect_equal(rownames(output), as.character(unique(bio$Group)))
+  expect_equal(output$Total, c(30, 30))
+  expect_equal(output$Disap..in.River, c(28, 30))
+  expect_equal(output$Migrated.to.Fjord, c(2, 0))
+  expect_equal(output$Disap..in.Fjord, c(0, 0))
+  expect_equal(output$Migrated.to.Sea, c(2, 0))
+  expect_equal(output$Disap..in.Sea, c(1, 0))
+  expect_equal(output$Succeeded, c(1, 0))
 })
 
 setwd("..")

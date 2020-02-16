@@ -45,6 +45,7 @@ test_that("migration stops when any argument does not make sense", {
 	expect_error(migration(sections = c("River", "Fjord", "Sea"), tz = "Europe/Copenhagen", GUI = "abc"), "'arg' should be one of ", fixed = TRUE)
 	expect_error(migration(sections = c("River", "Fjord"), tz = "Europe/Copenhagen", GUI = "never"),
 		"Array 'Sea1' was not assigned to any section. Stopping to prevent function failure.\nPlease either...\n   1) Rename these arrays to match a section,\n   2) Rename a section to match these arrays, or\n   3) Include a new section in the analysis.\n... and restart the analysis.", fixed = TRUE)
+	file.remove("detections/actel.detections.RData")
 	expect_warning(migration(sections = c("River", "Fjord", "Sea", "test"), tz = "Europe/Copenhagen", GUI = "never", report = FALSE), "No arrays were found that match section(s) test. There could be a typing mistake! Section(s) test will be removed.", fixed = TRUE)
 	expect_error(migration(sections = c("River", "Fjord", "Sea"), tz = "Europe/Copenhagen", GUI = "never", report = FALSE, success.arrays = 1),
 		"Array '1' is listed in the 'success.arrays' argument, but this array is not part of the study arrays.", fixed = TRUE)
