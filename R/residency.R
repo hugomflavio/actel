@@ -371,7 +371,7 @@ residency <- function(path = NULL, tz, sections, success.arrays = NULL, max.inte
   names(section.movements) <- names(valid.movements)
 
   # Grab summary information
-  res.df <- assembleResidency(secmoves = section.movements, movements = valid.movements, sections = sections)
+  res.df <- assembleResidency(secmoves = section.movements, movements = movements, sections = sections)
   
   appendTo(c("Screen", "Report"), "M: Timetable successfully filled. Fitting in the remaining variables.")
   
