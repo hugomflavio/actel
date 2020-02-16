@@ -408,7 +408,8 @@ checkSMovesN <- function(secmoves, fish, section.minimum, GUI) {
   appendTo("debug", "Running checkSMovesN")
   if (any(link <- secmoves$Detections < section.minimum)) {
     appendTo(c("Screen", "Report", "Warning"), paste0("Section movements with less than ", section.minimum, " detections are present for fish ", fish, "."))
-    secmoves <- tableInteraction(moves = secmoves, fish = fish, trigger = the.warning, GUI = GUI)
+    if (interactive())
+      secmoves <- tableInteraction(moves = secmoves, fish = fish, trigger = the.warning, GUI = GUI) # nocov
   }
   return(secmoves)
 }

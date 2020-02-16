@@ -114,20 +114,35 @@ residency <- function(path = NULL, tz, sections, success.arrays = NULL, max.inte
   
 # check argument quality
   my.home <- getwd()
+  if (!is.null(path) && !is.character(path))
+    path <- as.character(path)
   if (is.null(tz) || is.na(match(tz, OlsonNames())))
     stop("'tz' could not be recognized as a timezone. Check available timezones with OlsonNames()\n", call. = FALSE)
   if (!is.numeric(section.minimum))
     stop("'section.minimum' must be numeric.\n", call. = FALSE)
   if (!is.numeric(minimum.detections))
     stop("'minimum.detections' must be numeric.\n", call. = FALSE)
+  if (minimum.detections <= 0)
+    stop("'minimum.detections' must be positive.\n", call. = FALSE)
   if (!is.numeric(max.interval))
     stop("'max.interval' must be numeric.\n", call. = FALSE)
+  if (max.interval <= 0)
+    stop("'max.interval' must be positive.\n", call. = FALSE)
 
+  if (!is.character(speed.method))
+    stop("'speed.method' should be one of 'first to first' or 'last to first'.\n", call. = FALSE)
   speed.method <- match.arg(speed.method)
+
   if (!is.null(speed.warning) && !is.numeric(speed.warning))
     stop("'speed.warning' must be numeric.\n", call. = FALSE)    
+  if (!is.null(speed.warning) && speed.warning <= 0)
+    stop("'speed.warning' must be positive.\n", call. = FALSE) 
+
   if (!is.null(speed.error) && !is.numeric(speed.error))
     stop("'speed.error' must be numeric.\n", call. = FALSE)    
+  if (!is.null(speed.error) && speed.error <= 0)
+    stop("'speed.error' must be positive.\n", call. = FALSE)
+
   if (!is.null(speed.error) & is.null(speed.warning))
     speed.warning <- speed.error
   if (!is.null(speed.error) && speed.error < speed.warning)
@@ -164,14 +179,25 @@ residency <- function(path = NULL, tz, sections, success.arrays = NULL, max.inte
   
   if (!is.null(inactive.warning) && !is.numeric(inactive.warning))
     stop("'inactive.warning' must be numeric.\n", call. = FALSE)    
+  if (!is.null(inactive.warning) && inactive.warning <= 0)
+    stop("'inactive.warning' must be positive.\n", call. = FALSE)
+
   if (!is.null(inactive.error) && !is.numeric(inactive.error))
     stop("'inactive.error' must be numeric.\n", call. = FALSE)    
+  if (!is.null(inactive.error) && inactive.error <= 0)
+    stop("'inactive.error' must be positive.\n", call. = FALSE)
+
   if (!is.null(inactive.error) & is.null(inactive.warning))
     inactive.warning <- inactive.error
   if (!is.null(inactive.error) && inactive.error < inactive.warning)
     stop("'inactive.error' must not be lower than 'inactive.warning'.\n", call. = FALSE)
   if (!is.null(inactive.warning) & is.null(inactive.error))
     inactive.error <- Inf
+
+  if (!is.null(exclude.tags) && any(!grepl("-", exclude.tags, fixed = TRUE)))
+    stop("Not all contents in 'exclude.tags' could be recognized as tags (i.e. 'codespace-signal'). Valid examples: 'R64K-1234', A69-1303-1234'\n", call. = FALSE)
+  if (!is.null(override) && any(!grepl("-", override, fixed = TRUE)))
+    stop("Not all contents in 'override' could be recognized as tags (i.e. 'codespace-signal'). Valid examples: 'R64K-1234', A69-1303-1234'\n", call. = FALSE)
 
   GUI <- checkGUI(GUI)
 
@@ -560,7 +586,7 @@ residency <- function(path = NULL, tz, sections, success.arrays = NULL, max.inte
 #' 
 #' @keywords internal
 #' 
-printResidencyRmd <- function(override.fragment, biometric.fragment, efficiency.fragment, # nocov start
+printResidencyRmd <- function(override.fragment, biometric.fragment, efficiency.fragment,
   individual.detection.plots, individual.residency.plots, array.circular.plots, 
   section.arrival.circular.plots, section.departure.circular.plots, spatial, 
   deployments, detections, valid.detections, last.seen, last.seen.graph.size){
@@ -881,13 +907,13 @@ img[src*="#diagram"] {
 ', fill = TRUE)
 sink()
 return(reportname)
-} # nocov end
+}
 
 
 #' Collect summary information for the residency analysis
 #' 
 #' @param secmoves the section-movements
-#' @param movements the array-movements
+#' @param movements the array-movements (Valid and invalid)
 #' @inheritParams migration
 #' 
 #' @return A residency summary table
@@ -913,7 +939,6 @@ assembleResidency <- function(secmoves, movements, sections) {
   rm(recipient)
   rownames(res.df) <- names(secmoves)
 	  
-  # for (fish in names(secmoves)) {
   capture <- lapply(names(secmoves), function(fish) {
     # cat(fish, "\n")
   	aux <- split(secmoves[[fish]], secmoves[[fish]]$Section)
