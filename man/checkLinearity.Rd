@@ -4,7 +4,7 @@
 \alias{checkLinearity}
 \title{Check that the fish linearly moved along the sections}
 \usage{
-checkLinearity(secmoves, fish, sections, arrays)
+checkLinearity(secmoves, fish, sections, arrays, GUI)
 }
 \arguments{
 \item{secmoves}{the section movements list}
@@ -16,6 +16,14 @@ coincident with the names given to the arrays. See the vignettes for more
 details.}
 
 \item{arrays}{a list containing information for each array}
+
+\item{GUI}{One of "needed", "always" or "never". If "needed", a new window is
+opened to inspect the movements only if the movements table is too big to be
+displayed in R's console. If "always", a graphical interface is always created
+when the possibility to invalidate events emerges. If "never", a graphical
+interface is never invoqued. In this case, if the table to be displayed does
+not fit in R's console, a temporary file will be saved and the user will be
+prompted to open and examine that file. Defaults to "needed".}
 }
 \value{
 the section movements with valid/invalid notes

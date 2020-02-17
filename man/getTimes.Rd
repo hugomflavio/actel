@@ -8,7 +8,7 @@ getTimes(
   movements,
   spatial,
   type = c("arrival", "departure"),
-  events = c("one", "all")
+  events = c("first", "all", "last")
 )
 }
 \arguments{

@@ -26,6 +26,7 @@ migration(
   if.last.skip.section = TRUE,
   replicates = NULL,
   disregard.parallels = TRUE,
+  GUI = c("needed", "always", "never"),
   debug = FALSE,
   maximum.time = 60,
   tz.study.area = NULL,
@@ -116,6 +117,14 @@ used as a replicate. See the vignettes for more details.}
 
 \item{disregard.parallels}{Logical:  Should the presence of parallel arrays
 invalidate potential efficiency peers? See the vignettes for more details.}
+
+\item{GUI}{One of "needed", "always" or "never". If "needed", a new window is
+opened to inspect the movements only if the movements table is too big to be
+displayed in R's console. If "always", a graphical interface is always created
+when the possibility to invalidate events emerges. If "never", a graphical
+interface is never invoqued. In this case, if the table to be displayed does
+not fit in R's console, a temporary file will be saved and the user will be
+prompted to open and examine that file. Defaults to "needed".}
 
 \item{debug}{Logical: Should temporary files be kept at the end of the
 analysis?}

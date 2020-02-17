@@ -725,34 +725,34 @@ printCircular <- function(times, bio, suffix = NULL){
   return(circular.plots)
 }
 
-#' Draw a section on the outside of the circle
-#' 
-#' @param from value where the section should start
-#' @param to value where the section should end
-#' @param units units of the from and to variables, defaults to "hours"
-#' @param template variable to feed into the circular package base functions
-#' @param limits two values controlling the vertical start and end points of the section
-#' @param fill The colour of the section
-#' @param border The colour of the section's border
-#' 
-#' @keywords internal
-#' 
-circularSection <- function(from, to, units = "hours", template = "clock24", limits = c(1, 0), fill = "white", border = "black"){
-  if( inherits(from,"character") ){
-    hour.from <- circular::circular(decimalTime(from), units = units, template = template)
-    hour.to <- circular::circular(decimalTime(to), units = units, template = template)
-  } else {
-    hour.from <- circular::circular(from, units = units, template = template)
-    hour.to <- circular::circular(to, units = units, template = template)
-  }
-  if(hour.to < hour.from) hour.to <- hour.to + 24
-  zero <- attr(hour.from,"circularp")$zero # extracted from the circular data
-  xmin <- as.numeric(circular::conversion.circular(hour.from, units = "radians")) * -1
-  xmax <- as.numeric(circular::conversion.circular(hour.to, units = "radians")) * -1
-  xx <- c(limits[1] * cos(seq(xmin, xmax, length = 1000) + zero), rev(limits[2] * cos(seq(xmin, xmax, length = 1000) + zero)))
-  yy <- c(limits[1] * sin(seq(xmin, xmax, length = 1000) + zero), rev(limits[2] * sin(seq(xmin, xmax, length = 1000) + zero)))
-  polygon(xx, yy, col = fill, border = border)
-}
+# #' Draw a section on the outside of the circle
+# #' 
+# #' @param from value where the section should start
+# #' @param to value where the section should end
+# #' @param units units of the from and to variables, defaults to "hours"
+# #' @param template variable to feed into the circular package base functions
+# #' @param limits two values controlling the vertical start and end points of the section
+# #' @param fill The colour of the section
+# #' @param border The colour of the section's border
+# #' 
+# #' @keywords internal
+# #' 
+# circularSection <- function(from, to, units = "hours", template = "clock24", limits = c(1, 0), fill = "white", border = "black"){
+#   if( inherits(from,"character") ){
+#     hour.from <- circular::circular(decimalTime(from), units = units, template = template)
+#     hour.to <- circular::circular(decimalTime(to), units = units, template = template)
+#   } else {
+#     hour.from <- circular::circular(from, units = units, template = template)
+#     hour.to <- circular::circular(to, units = units, template = template)
+#   }
+#   if(hour.to < hour.from) hour.to <- hour.to + 24
+#   zero <- attr(hour.from,"circularp")$zero # extracted from the circular data
+#   xmin <- as.numeric(circular::conversion.circular(hour.from, units = "radians")) * -1
+#   xmax <- as.numeric(circular::conversion.circular(hour.to, units = "radians")) * -1
+#   xx <- c(limits[1] * cos(seq(xmin, xmax, length = 1000) + zero), rev(limits[2] * cos(seq(xmin, xmax, length = 1000) + zero)))
+#   yy <- c(limits[1] * sin(seq(xmin, xmax, length = 1000) + zero), rev(limits[2] * sin(seq(xmin, xmax, length = 1000) + zero)))
+#   polygon(xx, yy, col = fill, border = border)
+# }
 
 #' Edited rose diagram function
 #' 

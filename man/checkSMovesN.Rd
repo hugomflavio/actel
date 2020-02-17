@@ -4,7 +4,7 @@
 \alias{checkSMovesN}
 \title{Verify number of detections in section movements}
 \usage{
-checkSMovesN(secmoves, fish, section.minimum)
+checkSMovesN(secmoves, fish, section.minimum, GUI)
 }
 \arguments{
 \item{secmoves}{the section movements list}
@@ -13,6 +13,14 @@ checkSMovesN(secmoves, fish, section.minimum)
 
 \item{section.minimum}{If a fish has less than \code{section.minimum}
 consecutive detections in a section, a warning is issued. Defaults to 2.}
+
+\item{GUI}{One of "needed", "always" or "never". If "needed", a new window is
+opened to inspect the movements only if the movements table is too big to be
+displayed in R's console. If "always", a graphical interface is always created
+when the possibility to invalidate events emerges. If "never", a graphical
+interface is never invoqued. In this case, if the table to be displayed does
+not fit in R's console, a temporary file will be saved and the user will be
+prompted to open and examine that file. Defaults to "needed".}
 }
 \value{
 the section movements with valid/invalid notes

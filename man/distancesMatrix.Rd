@@ -11,7 +11,7 @@ distancesMatrix(
   EPSGcode,
   coord.x = "x",
   coord.y = "y",
-  PointIDCol = NA,
+  id.col = NULL,
   actel = TRUE
 )
 }
@@ -26,7 +26,7 @@ distancesMatrix(
 
 \item{coord.x, coord.y}{The names of the columns containing the x and y information. Must be identical in the starters and targets.}
 
-\item{PointIDCol}{The name of the column containing the IDs of the points to be used as starters and targets. Must be identical in both files.}
+\item{id.col}{The name of the column containing the IDs of the points to be used as starters and targets. Must be identical in both files.}
 
 \item{actel}{Logical: Should the distance matrix be optimized for actel and saved in the working directory?}
 }
