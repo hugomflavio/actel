@@ -511,6 +511,8 @@ convertTimesToCircular <- function(times) {
 #' @param shape A shape file projected in a metric coordinate system.
 #' @param size The pixel size, in metres.
 #' @param EPSGcode The EPSG code of the shape file's coordinate system. DO NOT USE degree-based coordinate systems.
+#' @param coord.x,coord.y The names of the columns containing the x and y information. Must be identical in the starters and targets.
+#' @param buffer Artificially expand the shape file edges. Can be a single value (applied to all edges) or four values (xmin, xmax, ymin, ymax).
 #' @param directions The number of directions considered for every movement situation during cost calculation. See the vignettes for more details.
 #' @param force Logical: Should the process continue even if the transition layer has 2000 pixels on one or both axes?
 #' 
@@ -518,9 +520,45 @@ convertTimesToCircular <- function(times) {
 #' 
 #' @return A RData file with the transition layer is stored in the current directory.
 #' 
-transitionLayer <- function(shape, size, EPSGcode, directions = c(16, 8, 4), force = FALSE){
+transitionLayer <- function(shape, size, EPSGcode, coord.x = NULL, coord.y = NULL, buffer = NULL, directions = c(16, 8, 4), force = FALSE){
+  list.of.packages <- c("raster", "gdistance", "sp", "tools", "rgdal")
+  new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[, "Package"])]
+  if (length(new.packages) > 0) {
+    stop(paste0("This function requires packages '", paste(new.packages,collapse="', '"), 
+      "' to operate. Please install them before proceeding.\n"), call. = FALSE)
+  }
   directions <- as.character(directions)
   directions <- match.arg(directions)
+  if (!is.null(buffer) & length(buffer) != 4 & length(buffer) != 1)
+    stop("'buffer' must either contain one value (applied to all four corners), or four values (applied to xmin, xmax, ymin and ymax, respectively).\n", call. = FALSE)
+  if (!is.null(buffer) & !is.numeric(buffer))
+    stop("'buffer' must be numeric (in metres).\n", call. = FALSE)
+  if (any(buffer < 0))
+    stop("'buffer' values cannot be negative.\n", call. = FALSE)
+
+  spatial <- NULL
+  if (is.null(coord.x) & !is.null(coord.y))
+    warning("'coord.y' was set but 'coord.x' was not. Skipping spatial.csv check.", call. = FALSE, immediate. = TRUE)
+  if (!is.null(coord.x) & is.null(coord.y))
+    warning("'coord.x' was set but 'coord.y' was not. Skipping spatial.csv check.", call. = FALSE, immediate. = TRUE)
+  if (!is.null(coord.x) & !is.null(coord.y)) {
+    if (file.exists("spatial.csv")) {
+      spatial <- loadSpatial()
+      if (any(is.na(xy <- match(c(coord.x, coord.y), colnames(spatial))))) {
+        if (all(is.na(xy))) {
+          warning("Could not find columns '", coord.x,"' and '", coord.y,"' in the spatial.csv file. Skipping spatial.csv check.", call. = FALSE, immediate. = TRUE)
+        } else {
+          if (is.na(xy[1]))
+            warning("Could not find column '", coord.x,"' in the spatial.csv file. Skipping spatial.csv check.", call. = FALSE, immediate. = TRUE)
+          else
+            warning("Could not find column '", coord.y,"' in the spatial.csv file. Skipping spatial.csv check.", call. = FALSE, immediate. = TRUE)
+        }
+        spatial <- NULL
+      }
+    } else {
+      warning("'coord.x' and 'coord.y' were set but could not find a spatial.csv file in the current working directory. Skipping spatial.csv check.", call. = FALSE, immediate. = TRUE)
+    }
+  }
   if (!file.exists(shape))
     stop(paste0("Could not find file '", shape, "' in the working directory.\n"), call. = FALSE)
   if (tools::file_ext(shape) == "shp") {
@@ -532,6 +570,44 @@ transitionLayer <- function(shape, size, EPSGcode, directions = c(16, 8, 4), for
   data.crs <- raster::crs(paste0("+init=epsg:", EPSGcode))
   raster::crs(shape) <- raster::crs(data.crs) # Set CRS 
 
+  if (!is.null(buffer)) {
+    if (length(buffer) == 1){
+      shape@bbox[, 1] <- shape@bbox[, 1] - buffer
+      shape@bbox[, 2] <- shape@bbox[, 2] + buffer
+    } else {
+      shape@bbox[1, 1] <- shape@bbox[1, 1] - buffer[1]
+      shape@bbox[1, 2] <- shape@bbox[1, 2] + buffer[2]
+      shape@bbox[2, 1] <- shape@bbox[2, 1] - buffer[3]
+      shape@bbox[2, 2] <- shape@bbox[2, 2] + buffer[4]
+    }
+  }
+
+  # Compare shape range with station positioning
+  if (!is.null(spatial)) {
+    xmax <- max(spatial[, xy[1]]) + size
+    xmin <- min(spatial[, xy[1]]) - size
+    ymax <- max(spatial[, xy[2]]) + size
+    ymin <- min(spatial[, xy[2]]) - size
+
+    if (shape@bbox[1, 1] > xmin) {
+      message("Extending shape's minimum X range to ensure the stations fit in the range."); flush.console()
+      shape@bbox[1, 1] <- xmin
+    }
+    if (shape@bbox[1, 2] < xmax) {
+      message("Extending shape's maximum X range to ensure the stations fit in the range."); flush.console()
+      shape@bbox[1, 2] <- xmax
+    }
+    if (shape@bbox[2, 1] > ymin) {
+      message("Extending shape's minimum Y range to ensure the stations fit in the range."); flush.console()
+      shape@bbox[2, 1] <- ymin
+    }
+    if (shape@bbox[2, 2] < ymax) {
+      message("Extending shape's maximum Y range to ensure the stations fit in the range."); flush.console()
+      shape@bbox[2, 2] <- ymax
+    }
+  }
+
+  # ensure range allows for integer pixels
   fix.x <- ((shape@bbox[1, 2] - shape@bbox[1, 1]) %% size) / 2
   if (fix.x != 0) {
     message("M: Applying a correction of +- ", fix.x, " metres on each X edge of the shape to ensure an integer number of pixels.")
@@ -597,7 +673,7 @@ transitionLayer <- function(shape, size, EPSGcode, directions = c(16, 8, 4), for
 #' @export
 #' 
 distancesMatrix <- function(t.layer = "transition.layer.RData", starters = NULL, targets = starters, EPSGcode, 
-  coord.x = "x", coord.y = "y", PointIDCol = NA, actel = TRUE){
+  coord.x = "x", coord.y = "y", id.col = NULL, actel = TRUE){
   list.of.packages <- c("raster", "gdistance", "sp", "tools", "rgdal")
   new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[, "Package"])]
   if (length(new.packages) > 0) {
@@ -658,6 +734,13 @@ distancesMatrix <- function(t.layer = "transition.layer.RData", starters = NULL,
   #### Calculate a matrix of distances to each object
   dist.mat <- data.frame(gdistance::costDistance(transition.layer, starters, targets))
   if (rename) {
+  if (any(dist.mat == Inf)) {
+    warning("At least one station is completely blocked off from the remaining stations by land. Filling 
+the respective fields with NA. If your fish was expected to travel around the areas present 
+in the shape file, consider applying a 'buffer' when calculating the transition layer. This
+will artificially add water space around the shape file.", call. = FALSE)
+    dist.mat[dist.mat == Inf] <- NA
+  }
     rownames(dist.mat) <- outputRows
     colnames(dist.mat) <- outputCols
   }

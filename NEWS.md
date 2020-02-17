@@ -40,7 +40,11 @@ Enhancements:
   * Movement tables can now be visualised in a new window with the argument GUI.
   * Improve handling of partially empty groups and release sites in the biometrics file.
   * Improve flexibility in handling shape files with dimensions incompatible with the requested pixel size.
-  * Improve the distances matrix so it can cope with unspeficied release sites.
+  * Improve the distances matrix so it can cope with unspecified release sites.
+  * transitionLayer can now take into account the station positions and expand the study area as needed.
+  * transitionLayer now has a "buffer" argument, which can be used to expand the study area beyond the limits of the shape file.
+  * distanceMatrix will now warn the user if some stations are complete cut off from the rest (i.e. there is no water path).
+  
 
 ## actel 0.1.2
 
