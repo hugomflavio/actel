@@ -17,7 +17,7 @@ gg_colour_hue <- function(n) {
 #' 
 #' @keywords internal
 #' 
-openReport <- function(file.name){
+openReport <- function(file.name){ # nocov start
   # The internet connection check is made only because R was freezing when opening the html without internet in my pc.
   rep.ver <- tryCatch(unlist(strsplit(readLines('https://raw.githubusercontent.com/hugomflavio/actel/master/DESCRIPTION')[3], " "))[2], error = function(e) NULL, warning = function(w) NULL)
   if (!is.null(rep.ver)) {
@@ -32,7 +32,7 @@ openReport <- function(file.name){
   if(file.exists("Report/toc_menu_explore.html"))
     file.remove("Report/toc_menu_explore.html")
   return(NULL)
-}
+} # nocov end
 
 #' Print progression diagram
 #'
@@ -49,12 +49,12 @@ printProgression <- function(dot, sections, overall.CJS, spatial, status.df) {
   names(cbPalette) <- c("Orange", "Blue", "Green", "Yellow", "Darkblue", "Darkorange", "Pink", "Grey")
 
   # Prepare node data frame
-    diagram_nodes <- data.frame(
-    id = 1:length(unique(unlist(dot[, c(1, 3)]))),
-    original.label = unique(unlist(dot[, c(1, 3)])),
-    label = unique(unlist(dot[, c(1, 3)])),
-    stringsAsFactors = FALSE)
-    if (length(sections) <= length(cbPalette)) {
+  diagram_nodes <- data.frame(
+  id = 1:length(unique(unlist(dot[, c(1, 3)]))),
+  original.label = unique(unlist(dot[, c(1, 3)])),
+  label = unique(unlist(dot[, c(1, 3)])),
+  stringsAsFactors = FALSE)
+  if (length(sections) <= length(cbPalette)) {
     diagram_nodes$fillcolor <- rep(NA_character_, nrow(diagram_nodes))
     for (i in 1:length(sections)) {
        diagram_nodes$fillcolor[grepl(sections[i], diagram_nodes$label)] <- cbPalette[i]

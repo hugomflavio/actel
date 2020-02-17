@@ -29,7 +29,7 @@ NULL
 #' 
 #' @keywords internal
 #' 
-tableInteraction <- function(moves, fish, trigger, GUI) {
+tableInteraction <- function(moves, fish, trigger, GUI) { # nocov start
   if (GUI == "never")
     popup <- FALSE
   if (GUI == "needed") {
@@ -90,7 +90,7 @@ tableInteraction <- function(moves, fish, trigger, GUI) {
     }
   }
   return(output)
-}
+} # nocov end
 
 #' Check if the dependencies required to open a GUI are installed, and if
 #' opening a GUI does not throw an error. Some ode adapted from RGtk2's 
@@ -432,7 +432,7 @@ checkLinearity <- function(secmoves, fish, sections, arrays, GUI) {
     turn.check <- rev(match(sections, rev(vsm$Section))) # captures the last event of each section. Note, the values count from the END of the events
     if (is.unsorted(back.check)) {
       if (double.call) {
-        appendTo(c("Screen", "Warning"), the.warning <- paste0("The last interaction did not linearise the movements for fish ", fish, ". Trying again."))       
+        appendTo(c("Screen", "Warning"), the.warning <- paste0("The last interaction did not linearise the movements for fish ", fish, ". Trying again.")) # nocov
       } else {
         if (is.unsorted(turn.check, na.rm = TRUE))
           appendTo(c("Screen", "Report", "Warning"), the.warning <- paste0("Inter-section backwards movements were detected for fish ", fish, " and the last events are not ordered!"))
@@ -485,21 +485,25 @@ checkReport <- function(report){
     if (!rmarkdown::pandoc_available()) {
       appendTo(c("Screen", "Report", "Warning"), "'report' can only be activated if pandoc is installed. You can find how to install pandoc at: https://pandoc.org/installing.html\n   You can also check if pandoc is available to R by running rmarkdown::pandoc_available()")
       message("Would you like to:\n\n  a) Continue with 'report' set to FALSE\n  b) Stop the analysis and install pandoc.\n")
-      check <- TRUE
-      while (check) {
-        decision <- readline("Decision:(a/b) ")
-        appendTo("UD", decision)
-        if (decision == "a" | decision == "A") {
-          appendTo(c("Screen", "Report", "Warning"), "Deactivating 'report' to prevent function failure.")
-          report <- FALSE
-          check <- FALSE
+      if (interactive()) { # nocov start
+        check <- TRUE
+        while (check) {
+          decision <- readline("Decision:(a/b) ")
+          appendTo("UD", decision)
+          if (decision == "a" | decision == "A") {
+            appendTo(c("Screen", "Report", "Warning"), "Deactivating 'report' to prevent function failure.")
+            report <- FALSE
+            check <- FALSE
+          }
+          if (decision == "b" | decision == "B") {
+            emergencyBreak()
+            stop("Analysis stopped per user command.\n", call. = FALSE)        
+          }
+          if (check)
+            appendTo("Screen", "Option not recognised; please input either 'a' or 'b'.\n")
         }
-        if (decision == "b" | decision == "B") {
-          emergencyBreak()
-          stop("Analysis stopped per user command.\n", call. = FALSE)        
-        }
-        if (check)
-          appendTo("Screen", "Option not recognised; please input either 'a' or 'b'.\n")
+      } else { # nocov end
+        report <- FALSE
       }
     }
     if (report) {
@@ -569,10 +573,10 @@ checkUpstream <- function(movements, fish, release, arrays, GUI) {
   if (any(is.na(match(vm$Array, after.arrays)))) {
     appendTo(c("Screen", "Report", "Warning"), the.warning <- paste0("Fish ", fish, " was detected in an array that is not after its release site! Opening relevant data for inspection.\nExpected first array: ", release))
     the.warning <- paste("Warning:", the.warning)
-    if (interactive()) {
+    if (interactive()) { # nocov start
       aux <- tableInteraction(moves = vm, fish = fish, trigger = the.warning, GUI = GUI)
       movements <- transferValidity(from = aux, to = movements)
-    }
+    } # nocov end
   }
   return(movements)
 }
@@ -819,28 +823,28 @@ checkDetectionsBeforeRelease <- function(input, bio){
         message("")
         appendTo("Screen", "You may either:\n  a) Stop the analysis and check the data;\n  b) Discard the before-release detections and continue.")
         message("")
-        unknown.input = TRUE
-        while (unknown.input) {
-          decision <- commentCheck(line = "Decision:(a/b/comment) ", tag = bio$Transmitter[i])
-          if (decision == "a" | decision == "A") {
-            unknown.input = FALSE
-            emergencyBreak()
-            stop("Function stopped by user command.", call. = FALSE)
+        if (interactive()) { # nocov start
+          unknown.input = TRUE
+          while (unknown.input) {
+            decision <- commentCheck(line = "Decision:(a/b/comment) ", tag = bio$Transmitter[i])
+            if (decision == "a" | decision == "A") {
+              unknown.input = FALSE
+              emergencyBreak()
+              stop("Function stopped by user command.", call. = FALSE)
+            }
+            if (decision == "b" | decision == "B")
+              unknown.input = FALSE
+            if (unknown.input)
+              message("Option not recognised, please input either 'a' or 'b'.")
           }
-          if (decision == "b" | decision == "B")
-            unknown.input = FALSE
-          if (unknown.input)
-            message("Option not recognised, please input either 'a' or 'b'.")
-        }
-        appendTo("UD", decision)
-        if (decision == "b" | decision == "B") {
-          if (all(to.remove)) {
-            appendTo(c("Screen", "Report"), paste0("ALL detections from Fish ", names(input)[link[i]], " were removed per user command."))
-            remove.tag <- c(remove.tag, link[i])
-          } else {
-            input[[link[i]]] <- input[[link[i]]][!to.remove, ]
-            appendTo(c("Screen", "Report"), paste0("M: ", sum(to.remove), " detections from Fish ", names(input)[link[i]], " were removed per user command."))
-          }
+          appendTo("UD", decision)
+        } # nocov end
+        if (all(to.remove)) {
+          appendTo(c("Screen", "Report"), paste0("ALL detections from Fish ", names(input)[link[i]], " were removed per user command."))
+          remove.tag <- c(remove.tag, link[i])
+        } else {
+          input[[link[i]]] <- input[[link[i]]][!to.remove, ]
+          appendTo(c("Screen", "Report"), paste0("M: ", sum(to.remove), " detections from Fish ", names(input)[link[i]], " were removed per user command."))
         }
       }
     }
@@ -910,7 +914,7 @@ checkDupSignals <- function(input, bio, tag.list){
 #' 
 #' @keywords internal
 #' 
-invalidateEvents <- function(movements, fish) {
+invalidateEvents <- function(movements, fish) { # nocov start
     appendTo("Screen", "Note: You can select event ranges by separating them with a ':' and/or multiple events at once by separating them with a space.")
     check <- TRUE
     while (check) {
@@ -983,7 +987,7 @@ invalidateEvents <- function(movements, fish) {
       }
     } # end while
   return(movements)
-}
+} # nocov end
 
 #' Opens a new winder that allows the user to determine movement event invalidity
 #' 
@@ -994,7 +998,7 @@ invalidateEvents <- function(movements, fish) {
 #' 
 #' @keywords internal
 #' 
-graphicalInvalidate <- function(moves, fish, trigger) {
+graphicalInvalidate <- function(moves, fish, trigger) { # nocov start
   graphical_valid <- NULL
   to.print <- cbind(data.frame(Event = 1:nrow(moves)), moves)
   to.print$First.time <- as.character(to.print$First.time)
@@ -1040,7 +1044,7 @@ graphicalInvalidate <- function(moves, fish, trigger) {
   aux$final[aux$combine] <- paste(aux$start[aux$combine], aux$stop[aux$combine], sep = ":")
   appendTo("UD", paste("from_gui:", aux$final, collapse = " "))
   return(moves)
-}
+} # nocov end
 
 #' Transfer validity updates from valid movements to all movements
 #' 
