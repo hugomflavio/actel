@@ -43,7 +43,7 @@ Enhancements:
   * Improve the distances matrix so it can cope with unspecified release sites.
   * transitionLayer can now take into account the station positions and expand the study area as needed.
   * transitionLayer now has a "buffer" argument, which can be used to expand the study area beyond the limits of the shape file.
-  * distanceMatrix will now warn the user if some stations are complete cut off from the rest (i.e. there is no water path).
+  * distanceMatrix will now warn the user if some stations are completely cut off from the rest (i.e. there is no water path).
   
 
 ## actel 0.1.2
