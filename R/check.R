@@ -24,12 +24,13 @@ NULL
 #' 
 #' @inheritParams check_args
 #' @param trigger The message/warning that triggered the interaction
+#' @param force Logical: If TRUE, the user is moved directly to indicating which movements should be invalidated.
 #' 
 #' @return the updated movements table
 #' 
 #' @keywords internal
 #' 
-tableInteraction <- function(moves, fish, trigger, GUI) { # nocov start
+tableInteraction <- function(moves, fish, trigger, GUI, force = FALSE) { # nocov start
   if (GUI == "never")
     popup <- FALSE
   if (GUI == "needed") {
@@ -54,15 +55,17 @@ tableInteraction <- function(moves, fish, trigger, GUI) { # nocov start
       message("The movements table for fish '", fish, "' is too large to display on the console and GUI is set to 'never'.\nTemporarily saving the table to 'actel_inspect_movements.csv'. Please inspect this file and decide if any events should be considered invalid.\nPlease use the 'Event' column as a reference for the event number.")
       to.print <- cbind(data.frame(Event = 1:nrow(moves)), to.print)
       write.csv(to.print, "actel_inspect_movements.csv", row.names = FALSE)
-
-      decision <- commentCheck(line = "Would you like to render any movement event invalid?(y/N/comment) ", tag = fish)
-      appendTo("UD", decision)
-      if (decision == "y" | decision == "Y") {
+      if (force) {
         output <- invalidateEvents(movements = moves, fish = fish)
-      } else {
-        output <- moves
-      }
-
+      } else {  
+        decision <- commentCheck(line = "Would you like to render any movement event invalid?(y/N/comment) ", tag = fish)
+        appendTo("UD", decision)
+        if (decision == "y" | decision == "Y") {
+          output <- invalidateEvents(movements = moves, fish = fish)
+        } else {
+          output <- moves
+        }
+      }  
       first.try <- TRUE
       while (file.exists("actel_inspect_movements.csv")) {
         if (!suppressWarnings(file.remove("actel_inspect_movements.csv"))) {
@@ -80,12 +83,16 @@ tableInteraction <- function(moves, fish, trigger, GUI) { # nocov start
       if (nrow(moves) < 100 & nrow(moves) >= 30)
         message("\nM: Please find the exception which triggered this interaction at the top of the table.")
         message("")
-      decision <- commentCheck(line = "Would you like to render any movement event invalid?(y/N/comment) ", tag = fish)
-      appendTo("UD", decision)
-      if (decision == "y" | decision == "Y") {
+      if (force) {
         output <- invalidateEvents(movements = moves, fish = fish)
       } else {
-        output <- moves
+        decision <- commentCheck(line = "Would you like to render any movement event invalid?(y/N/comment) ", tag = fish)
+        appendTo("UD", decision)
+        if (decision == "y" | decision == "Y") {
+          output <- invalidateEvents(movements = moves, fish = fish)
+        } else {
+          output <- moves
+        }
       }
     }
   }
@@ -449,7 +456,7 @@ checkLinearity <- function(secmoves, fish, sections, arrays, GUI) {
       if (interactive()) { # nocov start
         appendTo("Screen", aux <- paste0("To linearise the movements, actel suggests invalidating the following events: ", paste(suggestion, collapse = ", ")))
         the.warning <- paste0("Warning: ", the.warning, "\n", aux)
-        aux <- tableInteraction(moves = vsm, fish = fish, trigger = the.warning, GUI = GUI)
+        aux <- tableInteraction(moves = vsm, fish = fish, trigger = the.warning, GUI = GUI, force = TRUE)
         secmoves <- transferValidity(from = aux, to = secmoves)
       } else { # nocov end
         vsm$Valid[suggestion] <- FALSE
@@ -915,7 +922,7 @@ checkDupSignals <- function(input, bio, tag.list){
 #' @keywords internal
 #' 
 invalidateEvents <- function(movements, fish) { # nocov start
-    appendTo("Screen", "Note: You can select event ranges by separating them with a ':' and/or multiple events at once by separating them with a space.")
+    appendTo("Screen", "Note: You can select event ranges by separating them with a ':' and/or multiple events at once by separating them with a space or a comma.")
     check <- TRUE
     while (check) {
       the.string <- commentCheck(line = "Events to be rendered invalid: ", tag = fish)
