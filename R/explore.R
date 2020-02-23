@@ -358,6 +358,8 @@ detections.list <- study.data$detections.list
   names(movements) <- movement.names
   rm(movement.names)
 
+  appendTo(c("Screen", "Report"), "M: Filtering valid array movements.")
+
   valid.movements <- lapply(seq_along(movements), function(i){
     output <- simplifyMovements(movements = movements[[i]], fish = names(movements)[i], bio = bio, 
       speed.method = speed.method, dist.mat = dist.mat, invalid.dist = invalid.dist)

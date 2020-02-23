@@ -368,6 +368,8 @@ residency <- function(path = NULL, tz, sections, success.arrays = NULL, max.inte
   
 
 # Compile section movements
+  appendTo(c("Screen", "Report"), "M: Compiling and checking section movements for the valid tags.")
+
   section.movements <- lapply(seq_along(movements), function(i) {
     fish <- names(movements)[i]
     appendTo("debug", paste0("debug: Compiling section movements for fish ", fish,"."))
@@ -381,6 +383,8 @@ residency <- function(path = NULL, tz, sections, success.arrays = NULL, max.inte
   movements <- updateValidity(arrmoves = movements, secmoves = section.movements)
 
   # compile valid movements
+  appendTo(c("Screen", "Report"), "M: Filtering valid array and section movements.")
+
   valid.movements <- lapply(seq_along(movements), function(i){
     output <- simplifyMovements(movements = movements[[i]], fish = names(movements)[i], bio = bio, 
       speed.method = speed.method, dist.mat = dist.mat, invalid.dist = invalid.dist)
