@@ -19,7 +19,7 @@ file.remove("deployments.csv")
 test_that("createStandards is working as expected", {
 	expect_warning(output <- createStandards(detections = det, spatial = spatial, deployments = dep),
 		"No detections were found for receiver(s) 132907, 132915, 132916, 132917, 132918, 133205, 133206, 133209, 133210, 133215, 133220, 133221, 133222, 133224.", fixed = TRUE)
-	expect_equal(colnames(output), c('Timestamp', 'Receiver', 'CodeSpace', 'Signal', 'Transmitter', 'Standard.name', 'Array'))
+	expect_equal(colnames(output), c('Timestamp', 'Receiver', 'CodeSpace', 'Signal', 'Sensor.Value', 'Sensor.Unit', 'Transmitter', 'Standard.name', 'Array'))
 	expect_equal(as.character(unique(output$Standard.name)), c("St.2", "St.6", "St.8"))
 })
 
@@ -32,7 +32,7 @@ file.remove("deployments.csv")
 test_that("createStandards removes detections outside deployments", {
 	expect_message(suppressWarnings(output <- createStandards(detections = det, spatial = spatial, deployments = dep)),
 		"Error: 232 detections for receiver 132908 do not fall within deployment periods.", fixed = TRUE)
-	expect_equal(colnames(output), c('Timestamp', 'Receiver', 'CodeSpace', 'Signal', 'Transmitter', 'Standard.name', 'Array'))
+	expect_equal(colnames(output), c('Timestamp', 'Receiver', 'CodeSpace', 'Signal', 'Sensor.Value', 'Sensor.Unit', 'Transmitter', 'Standard.name', 'Array'))
 	expect_equal(as.character(unique(output$Standard.name)), c("St.2", "St.6", "St.8"))
 })
 

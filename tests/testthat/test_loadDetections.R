@@ -18,7 +18,7 @@ for (i in names(aux)[1:3]) {
 test_that("loadDetections output is as expected", {
 	output <- loadDetections(start.time = NULL, stop.time = NULL, tz = "Europe/Copenhagen", force = FALSE)
 	expect_equal(attributes(output$Timestamp)$tz, "Europe/Copenhagen")
-	expect_equal(colnames(output), c("Timestamp", "Receiver", "CodeSpace", "Signal", "Transmitter"))
+	expect_equal(colnames(output), c("Timestamp", "Receiver", "CodeSpace", "Signal", 'Sensor.Value', 'Sensor.Unit', "Transmitter"))
 	expect_equal(factor(paste(output$CodeSpace, output$Signal, sep = "-")), output$Transmitter)
 	expect_equal(nrow(output), 1369)
 
@@ -26,7 +26,7 @@ test_that("loadDetections output is as expected", {
 	write.csv(aux[[1]], "detections.csv", row.names = FALSE)
 	output <- loadDetections(start.time = NULL, stop.time = NULL, tz = "Europe/Copenhagen", force = FALSE)
 	expect_equal(attributes(output$Timestamp)$tz, "Europe/Copenhagen")
-	expect_equal(colnames(output), c("Timestamp", "Receiver", "CodeSpace", "Signal", "Transmitter"))
+	expect_equal(colnames(output), c("Timestamp", "Receiver", "CodeSpace", "Signal", 'Sensor.Value', 'Sensor.Unit', "Transmitter"))
 	expect_equal(factor(paste(output$CodeSpace, output$Signal, sep = "-")), output$Transmitter)
 	expect_equal(nrow(output), 708)
 	file.remove("detections.csv")
