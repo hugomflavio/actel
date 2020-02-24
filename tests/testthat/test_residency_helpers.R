@@ -7,6 +7,8 @@ detections.list <- study.data$detections.list
 bio <- study.data$bio
 spatial <- study.data$spatial
 dist.mat <- study.data$dist.mat
+dotmat <- study.data$dotmat
+paths <- study.data$paths
 invalid.dist <- study.data$invalid.dist
 arrays <- study.data$arrays
 sections <- study.data$sections
@@ -150,6 +152,32 @@ test_that("globalRatios works as expected.", {
 
   load("../aux_globalRatios.RData")
   expect_equal(global.ratios, aux_globalRatios)
+})
+
+test_that("res_efficiency works as expected, and can include intra array estimates", {
+  efficiency <- res_efficiency(arrmoves = moves, bio = bio, spatial = spatial, arrays = arrays, paths = paths, dotmat = dotmat)
+  expect_equal(names(efficiency), c("absolutes", "max.efficiency", "min.efficiency",  "values.per.fish"))
+  ### ONLY RUN THIS TO RESET REFERENCE
+  # aux_res_efficiency <- efficiency
+  # save(aux_res_efficiency, file = "../aux_res_efficiency.RData")
+  load("../aux_res_efficiency.RData")
+  expect_equal(efficiency, aux_res_efficiency)
+
+  tryCatch(x <- getDualMatrices(replicates = list(Sea1 = c("St.16")), CJS = efficiency, spatial = spatial, detections.list = detections.list), 
+    warning = function(w) stop("A warning was issued where it should not have been."))
+
+  expect_warning(intra.array.matrices <- getDualMatrices(replicates = list(Fjord1 = c("St.10", "St.11")), CJS = efficiency, spatial = spatial, detections.list = detections.list),
+    "An inter-array efficiency has already been calculated for array Fjord1", fixed = TRUE)
+  
+  output <- includeIntraArrayEstimates(m = intra.array.matrices, efficiency = efficiency, CJS = NULL)
+  ### ONLY RUN THIS TO RESET REFERENCE
+  # aux_includeIntraArrayEstimates <- output
+  # save(aux_includeIntraArrayEstimates, file = "../aux_includeIntraArrayEstimates.RData")
+  load("../aux_includeIntraArrayEstimates.RData")
+  expect_equal(output, aux_includeIntraArrayEstimates)
+
+  output <- includeIntraArrayEstimates(m = list(), efficiency = efficiency, CJS = NULL)
+  expect_equal(output$intra.CJS, NULL)
 })
 
 setwd("..")

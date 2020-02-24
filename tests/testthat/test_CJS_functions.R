@@ -105,6 +105,13 @@ test_that("breakMatricesByArray works as expected.", {
   expect_warning(output <- breakMatricesByArray(m = the.matrices, arrays = arrays, type = "all"),
   	"No fish passed through array River0. Skipping efficiency estimations for this array.", fixed = TRUE)
 
+  xmatrices <- the.matrices
+  xmatrices[[1]][, "Sea1"] <- 0
+	xmatrices[[2]][, "Sea1"] <- 0
+
+	expect_warning(output <- breakMatricesByArray(m = xmatrices, arrays = arrays, type = "all"),
+  	"No fish passed through any of the efficiency peers of array Fjord2. Skipping efficiency estimations for this array.", fixed = TRUE)
+
   xarrays <- lapply(arrays, function(x) {
   	x$after.peers <- NULL
   	return(x)
@@ -115,6 +122,66 @@ test_that("breakMatricesByArray works as expected.", {
 })
 
 test_that("simpleCJS works as expected.", {
+	expect_error(simpleCJS("test"), "input must be a matrix or data frame containing only 0's and 1's.", fixed = TRUE)
+
+	xm <- m.by.array[[1]][[1]]
+	xm[1, 1] <- 2
+	expect_error(simpleCJS(xm), "input must be a matrix or data frame containing only 0's and 1's.", fixed = TRUE)
+
+	xm <- m.by.array[[1]][[1]]
+	xm[1:5, 1] <- 0
+	expect_error(simpleCJS(xm), 
+		"The first column of the input should only contain 1's (i.e. release point).", fixed = TRUE)
+
+	expect_error(simpleCJS(m.by.array[[1]][[1]], estimate = 1, fixed.efficiency = 1), 
+		"Please choose only one of 'estimate' or 'fixed.efficiency'.", fixed = TRUE)
+
+	expect_error(simpleCJS(m.by.array[[1]][[1]], estimate = 1:5), 
+		"Please use only one value for estimate.", fixed = TRUE)
+	
+	expect_error(simpleCJS(m.by.array[[1]][[1]], estimate = 2), 
+		"'estimate' must be between 0 and 1.", fixed = TRUE)
+	
+
+	expect_error(simpleCJS(m.by.array[[1]][[1]], fixed.efficiency = 1), 
+		"Fixed efficiency was set but its length is not the same as the number of columns in the input.", fixed = TRUE)
+
+	expect_error(simpleCJS(m.by.array[[1]][[1]], fixed.efficiency = 1:3), 
+		"Fixed efficiency estimates must be between 0 and 1.", fixed = TRUE)
+	
+	expect_message(simpleCJS(m.by.array[[1]][[1]], fixed.efficiency = c(1,1,1), silent = FALSE), 
+		"M: Running CJS with fixed efficiency estimates.", fixed = TRUE)
+
+
+	xm <- m.by.array[[1]][[1]]
+	xm[, 3] <- 0
+	expect_warning(simpleCJS(xm, silent = FALSE), 
+		"Array 'River1' had 0% efficiency. Skipping survival estimation.", fixed = TRUE)
+
+	xm <- m.by.array[[1]][[1]]
+	xm[, 2] <- 0
+	expect_warning(simpleCJS(xm, silent = FALSE), 
+		"No fish were detected at array 'River1'. Skipping survival estimation.", fixed = TRUE)
+
+	xm <- m.by.array[[1]][[1]]
+	xm[1:20, 2] <- 0
+	expect_warning(simpleCJS(xm, fixed.efficiency = c(1, 1, 1), silent = FALSE), 
+		"The fixed efficiency caused a too low estimate at iteration 2. Forcing higher estimate.", fixed = TRUE)
+
+	xm <- m.by.array[[1]][[1]]
+	output <- simpleCJS(xm, fixed.efficiency = c(1, 0.2, 1), silent = FALSE)
+	expect_equal(output$absolutes[4, "River1"], 30)
+	expect_equal(output$efficiency, c(FakeStart = 1.0, River1 = 0.2, AnyPeer = 1.0))
+
+	output <- simpleCJS(xm, estimate = 0, silent = FALSE)
+	expect_equal(output$absolutes[4, "AnyPeer"], 26)
+	expect_equal(output$efficiency, c(FakeStart = 1, River1 = 1, AnyPeer = 0))
+
+	output <- simpleCJS(xm, estimate = 0.2, silent = FALSE)
+	expect_equal(output$absolutes[4, "AnyPeer"], 26)
+	expect_equal(output$efficiency, c(FakeStart = 1.0, River1 = 1.0, AnyPeer = 0.2))
+	expect_equal(output$survival[2], 1)
+
 	output <- simpleCJS(m.by.array[[1]][[1]])
 	expect_equal(names(output), c("absolutes", "efficiency", "survival", "lambda"))
 	check <- read.csv(text = ',FakeStart,River1,AnyPeer
@@ -134,7 +201,41 @@ test_that("simpleCJS works as expected.", {
 })
 
 test_that("combineCJS works as expected.", {
+	expect_error(combineCJS(estimate = 1, fixed.efficiency = 1),
+		"Please choose only one of 'estimate' or 'fixed.efficiency'.", fixed = TRUE)
+	
+	expect_error(combineCJS(estimate = 1:2),
+		"Please use only one value for estimate.", fixed = TRUE)
+
+	expect_error(combineCJS(estimate = 2),
+		"'estimate' must be between 0 and 1.", fixed = TRUE)
+
+	expect_error(combineCJS(fixed.efficiency = 2),
+		"Fixed efficiency estimates must be between 0 and 1.", fixed = TRUE)
+
+	expect_error(combineCJS(list(A = 1)), 
+		"Input appears to contain a list with only one element.", fixed = TRUE)
+
+	expect_error(combineCJS("test"), 
+		"Only one object provided but it is not a list.", fixed = TRUE)
+
+	expect_error(combineCJS(list(A = "a", B = "b")), 
+		"Not all objects provided are matrices or data frames. Please use either one list of matrices/data frames or multiple matrices/data frames.", fixed = TRUE)
+
+	xm <- m.by.array[[1]]
+	colnames(xm[[1]])[3] <- "test"
+
+	expect_error(combineCJS(xm), 
+		"The last array is not the same in all input matrices.", fixed = TRUE)
+
+	expect_error(combineCJS(m.by.array[[1]], fixed.efficiency = c(1, 1)),
+		"Fixed efficiency was set but its length is not the same as the maximum number of columns in the input.", fixed = TRUE)
+
+	expect_message(combineCJS(m.by.array[[1]], fixed.efficiency = c(1, 1, 1), silent = FALSE),
+		"M: Running CJS with fixed efficiency values.", fixed = TRUE)
+
 	output <- combineCJS(m.by.array[[1]])
+	
 	expect_equal(names(output), c("absolutes", "efficiency", "survival", "lambda"))
 	check <- read.csv(text = ',FakeStart,River1,AnyPeer
 "detected",60,54,54
@@ -180,6 +281,25 @@ test_that("assembleArrayCJS works as expected.",{
 	expect_equal(round(output$efficiency, 5), check)
 
 	overall.CJS <<- output
+})
+
+test_that("getDualMatrices throws a warning if efficiency has already been calculated", {
+	expect_warning(getDualMatrices(replicates = list(Fjord1 = c("St.10", "St.11")), CJS = overall.CJS, spatial = spatial, detections.list = detections.list),
+		"An inter-array efficiency has already been calculated for array Fjord1", fixed = TRUE)
+})
+
+test_that("dualMatrix stops if stations that do not belong to the array are used as replicates (tested through getDualMatrices)", {
+	expect_error(getDualMatrices(replicates = list(Sea1 = c("St.14", "St.15")), CJS = overall.CJS, spatial = spatial, detections.list = detections.list),
+		"In replicates: Station St.14 is not part of Sea1 (available stations: St.15, St.16, St.17).", fixed = TRUE)
+	expect_error(getDualMatrices(replicates = list(Sea1 = c("St.13", "St.14", "St.15")), CJS = overall.CJS, spatial = spatial, detections.list = detections.list),
+		"In replicates: Stations St.13, St.14 are not part of Sea1 (available stations: St.15, St.16, St.17).", fixed = TRUE)
+})
+
+test_that("includeIntraArrayEstimates throws errors if expected conditions are not met", {
+  expect_error(includeIntraArrayEstimates(m = intra.array.matrices, CJS = overall.CJS, efficiency  = "test"),
+  	"Use only one of 'efficiency' or 'CJS' at a time.", fixed = TRUE)
+  expect_error(includeIntraArrayEstimates(m = intra.array.matrices),
+  	"Include a 'efficiency' or 'CJS' argument.", fixed = TRUE)
 })
 
 test_that("replicate functions work as expected.", {
@@ -285,6 +405,11 @@ test_that("split CJS functions work as expected.", {
   load("../aux_mbSplitCJS.RData")
   expect_equal(aux, aux_mbSplitCJS)
 
+  xefficiency <- overall.CJS$efficiency
+  xefficiency[4] <- NA
+  output <- mbSplitCJS(mat = m.by.array, fixed.efficiency = xefficiency)
+  expect_equal(round(output$A.RS1$River3$efficiency, 7), c(FakeStart = 1, River3 = 0.9615385, AnyPeer = NA))
+
   aux <- aux[names(the.matrices)]
   split.CJS <- assembleSplitCJS(mat = the.matrices, CJS = aux, arrays = arrays, releases = release_nodes, intra.CJS = intra.array.CJS)
 
@@ -331,6 +456,11 @@ test_that("group CJS functions work as expected.", {
   load("../aux_mbGroupCJS.RData")
   expect_equal(aux, aux_mbGroupCJS)
 
+  xefficiency <- overall.CJS$efficiency
+  xefficiency[4] <- NA
+  output <- mbGroupCJS(mat = m.by.array, status.df = status.df, fixed.efficiency = xefficiency)
+  expect_equal(round(output$A$River3$efficiency, 7), c(FakeStart = 1, River3 = 0.9615385, AnyPeer = NA))
+
   group.CJS <- assembleGroupCJS(mat = the.matrices, CJS = aux, arrays = arrays, releases = release_nodes, intra.CJS = intra.array.CJS)
 
   expect_equal(names(group.CJS), c("A", "B"))
@@ -366,6 +496,12 @@ test_that("group CJS functions work as expected.", {
 ', row.names = 1)
   expect_equal(aux[[2]], check) 
 })
+
+
+test_that("special cases in oneWayMoves are working as expected", {
+	expect_equal(oneWayMoves(moves[[1]][1, ], arrays), NULL)
+})
+
 
 setwd("..")
 unlink("exampleWorkspace", recursive = TRUE)

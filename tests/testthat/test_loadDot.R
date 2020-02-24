@@ -297,7 +297,7 @@ test_that("loadDot correctly identifies edge arrays", {
 	expect_equal(output$arrays$Fjord2$edge, TRUE)
 })
 
-test_that("loadDot handles parallel arrays properly when disregard.parallels = TRUE", {
+test_that("loadDot handles parallel arrays properly", {
 	sink("spatial.txt")
 	cat("River0--River1--River2--River4--River5--River6--Fjord1--Fjord2--Sea1\n")
 	cat("River1--River3--River4\n")
@@ -318,35 +318,52 @@ test_that("loadDot handles parallel arrays properly when disregard.parallels = T
 	expect_equal(output$arrays$River1$parallel, NULL)
 
 	# check peers
-	expect_equal(output$arrays$River2$after.peers, c('River4', 'River5', 'River6', 'Fjord1', 'Fjord2', 'Sea1'))
-	expect_equal(output$arrays$River3$after.peers, c('River4', 'River5', 'River6', 'Fjord1', 'Fjord2', 'Sea1'))		
+	expect_equal(output$arrays$River2$after.peers, NULL)
+	expect_equal(output$arrays$River3$after.peers, NULL)		
 	expect_equal(output$arrays$River1$after.peers, c('River2', 'River3', 'River4', 'River5', 'River6', 'Fjord1', 'Fjord2', 'Sea1'))
 })
 
-test_that("loadDot handles parallel arrays properly when disregard.parallels = FALSE", {
-	sink("spatial.txt")
-	cat("River0--River1--River2--River4--River5--River6--Fjord1--Fjord2--Sea1\n")
-	cat("River1--River3--River4\n")
-	cat("River2--River3--River2\n")
-	sink()
-	output <- loadDot(input = "spatial.txt", spatial = example.spatial, 
-		sections = c("River", "Fjord", "Sea"), disregard.parallels = FALSE)	
-	file.remove("spatial.txt")
 
-	expect_equal(names(output), c("dot", "arrays", "dotmat", "paths"))
-	
-	expect_equal(names(output$arrays), c('River0', 'River1', 'River2', 'River4', 
-		'River5', 'River6', 'Fjord1', 'Fjord2', 'River3', 'Sea1'))
+# Push dot functions to the limit with additional connections to make sure everything is working
 
-	# check parallels
-	expect_equal(output$arrays$River3$parallel, "River2")
-	expect_equal(output$arrays$River2$parallel, "River3")
-	expect_equal(output$arrays$River1$parallel, NULL)
+test_that("dot mechanisms are handling multipaths and parallels properly", {
+	# cannot be run directly through loadDot because it would require a spatial object
+	dot <- readDot(string = "River1 -- River2
+River2 -- River3
+River3 -- Fjord
+Fjord -- Sea1
+Sea1 -- Sea2
+Sea2 -- Sea3
+Sea3 -- Sea4
+Sea2 -- Sea5
+Sea3 -- Sea5 -- Sea3
+River1 -- River4
+River4 -- River5
+River5 -- Fjord
+River4 -- River6
+River6 -- Fjord
+River3 -- River5
+River5 -- River3
+River5 -- River6
+River6 -- River5
+River6 -- River3
+River3 -- River6")
+	mat <- dotMatrix(input = dot)
+	arrays <- dotList(input = dot, sections = c("River", "Fjord", "Sea"))
+	arrays <- dotPaths(input = arrays, dotmat = mat, disregard.parallels = TRUE)
+	# ONLY RUN THIS TO RESET REFERENCE
+	# aux_dotPaths_complex_text_disregard_parallels_true <- arrays
+	# save(aux_dotPaths_complex_text_disregard_parallels_true, file = "aux_dotPaths_complex_text_disregard_parallels_true.RData")
+	load("aux_dotPaths_complex_text_disregard_parallels_true.RData")
+	expect_equal(arrays, aux_dotPaths_complex_text_disregard_parallels_true)
 
-	# check peers
-	expect_equal(output$arrays$River2$after.peers, NULL)
-	expect_equal(output$arrays$River2$after.peers, NULL)
-	expect_equal(output$arrays$River1$after.peers, c('River2', 'River3', 'River4', 'River5', 'River6', 'Fjord1', 'Fjord2', 'Sea1'))
+	arrays <- dotList(input = dot, sections = c("River", "Fjord", "Sea"))
+	arrays <- dotPaths(input = arrays, dotmat = mat, disregard.parallels = FALSE)
+	# ONLY RUN THIS TO RESET REFERENCE
+	# aux_dotPaths_complex_text_disregard_parallels_false <- arrays
+	# save(aux_dotPaths_complex_text_disregard_parallels_false, file = "aux_dotPaths_complex_text_disregard_parallels_false.RData")
+	load("aux_dotPaths_complex_text_disregard_parallels_false.RData")
+	expect_equal(arrays, aux_dotPaths_complex_text_disregard_parallels_false)
 })
 
 file.remove(list.files(pattern = "*txt$"))
