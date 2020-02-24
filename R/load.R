@@ -898,7 +898,9 @@ processThelmaFile <- function(input) {
     Timestamp = fasttime::fastPOSIXct(sapply(input[, 1], function(x) gsub("Z", "", gsub("T", " ", x))), tz = "UTC"),
     Receiver = input$`TBR Serial Number`,
     CodeSpace = input$CodeType,
-    Signal = input$Id)
+    Signal = input$Id,
+    Sensor.Value = rep(NA_real_, nrow(input)),
+    Sensor.Unit = rep(NA_character_, nrow(input)))
   return(output)
 }
 
@@ -922,7 +924,14 @@ processVemcoFile <- function(input) {
   input[, "Receiver"] <- unlist(lapply(receiver_aux, function(x) x[2])) # extract only the serial
   appendTo("Debug", "Done!")
   colnames(input)[1] <- c("Timestamp")
-  input <- input[, c("Timestamp", "Receiver", "CodeSpace", "Signal")]
+  colnames(input) <- gsub(" ", ".", colnames(input))
+  if (any(grepl("^Sensor.Value$", colnames(input)))) {
+    input <- input[, c("Timestamp", "Receiver", "CodeSpace", "Signal", "Sensor.Value", "Sensor.Unit")]  
+  } else {
+    input <- input[, c("Timestamp", "Receiver", "CodeSpace", "Signal")]
+    input$Sensor.Value <- rep(NA_real_, nrow(input))
+    input$Sensor.Unit <- rep(NA_character_, nrow(input))
+  }
   input$Timestamp <- fasttime::fastPOSIXct(input$Timestamp, tz = "UTC")
   return(input)
 }

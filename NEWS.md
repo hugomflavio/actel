@@ -45,6 +45,7 @@ Enhancements:
   * transitionLayer now has a "buffer" argument, which can be used to expand the study area beyond the limits of the shape file.
   * distanceMatrix will now warn the user if some stations are complete cut off from the rest (i.e. there is no water path).
   * Reports are now opened using utils::browseURL, allowing the report to be open even when the computer is not connected to the internet.
+  * Sensor values are now transported through the analysis and returned in the valid detections (for Vemco loggers only for now).
   
 
 ## actel 0.1.2
