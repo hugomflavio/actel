@@ -30,15 +30,25 @@ getDualMatrices <- function(replicates, CJS = NULL, spatial, detections.list) {
 output <- list()
   for(i in 1:length(replicates)) {
     continue <- TRUE
-    if (!is.null(CJS) && !is.na(CJS$efficiency[names(replicates)[i]])) {
-      appendTo(c("Screen", "Warning", "Report"), paste0("An inter-array efficiency has already been calculated for array ", names(replicates)[i],"."))
-      decision <- readline("   Do you want to replace this with an intra-array efficiency estimate?(y/N) ")
-      if (decision == "y" | decision == "Y") {
-        appendTo("Report", paste0("   Replacing efficiency estimation."))
-        continue <- TRUE
-      } else {
-        appendTo("Report", paste0("   Keeping inter-array efficiency estimation."))     
-        continue <- FALSE
+    if (!is.null(CJS)) {
+      if (any(grepl("^max.efficiency$", names(CJS)))) 
+        already.calculated <- !is.na(CJS$max.efficiency[names(replicates)[i]])
+      else
+        already.calculated <- !is.na(CJS$efficiency[names(replicates)[i]])
+      if (already.calculated) {
+        appendTo(c("Screen", "Warning", "Report"), paste0("An inter-array efficiency has already been calculated for array ", names(replicates)[i],"."))
+        if (interactive()) {
+          decision <- readline("Do you want to replace this with an intra-array efficiency estimate?(y/N) ") # nocov
+        } else {
+          decision <- "y"
+        }
+        if (decision == "y" | decision == "Y") {
+          appendTo("Report", paste0("Replacing efficiency estimation."))
+          continue <- TRUE
+        } else { # nocov start
+          appendTo("Report", paste0("Keeping inter-array efficiency estimation."))
+          continue <- FALSE
+        } # nocov end
       }
     }
     if (continue) {
@@ -175,13 +185,13 @@ breakMatricesByArray <- function(m, arrays, type = c("peers", "all"), verbose = 
       # If all peers are 0, the CJS functions will crash. The same happens if the array is all 0's
       own.zero.check <- unlist(lapply(aux, function(x) sum(x[, 2]) == 0))
       peer.zero.check <- unlist(lapply(aux, function(x) sum(x$AnyPeer) == 0))
-      zero.check <- own.zero.check | peer.zero.check
+      zero.check <- all(own.zero.check) | all(peer.zero.check)
       if (all(zero.check)) {
         if (all(own.zero.check) & verbose) {
           appendTo(c("Screen", "Warning", "Report"), paste0("No fish passed through array ", names(arrays)[i], ". Skipping efficiency estimations for this array."))
         } else {
           if (all(peer.zero.check) & verbose)
-            appendTo(c("Screen", "Warning", "Report"), paste0("No fish passed through any of the efficiency peers of array ", names(arrays)[i], ". Skipping efficiency estimations for this array"))
+            appendTo(c("Screen", "Warning", "Report"), paste0("No fish passed through any of the efficiency peers of array ", names(arrays)[i], ". Skipping efficiency estimations for this array."))
           }
       } else {
         recipient[[length(recipient) + 1]] <- aux
@@ -296,13 +306,19 @@ assembleMatrices <- function(spatial, movements, status.df, arrays, paths, dotma
 #' @keywords internal
 #' 
 simpleCJS <- function(input, estimate = NULL, fixed.efficiency = NULL, silent = TRUE){
+  if (!is.matrix(input) & !is.data.frame(input))
+    stop("input must be a matrix or data frame containing only 0's and 1's.\n")
+
   # stop if there is weird data in the input
   if (any(input != 0 & input != 1))
-    stop("input must be a matrix containing only 0's and 1's\n")
+    stop("input must be a matrix or data frame containing only 0's and 1's.\n")
   
   # stop if both estimate and fixed efficiency are present
   if (!is.null(estimate) & !is.null(fixed.efficiency))
     stop("Please choose only one of 'estimate' or 'fixed.efficiency'.\n")
+
+  if (any(input[, 1] == 0))
+    stop("The first column of the input should only contain 1's (i.e. release point).\n")
   
   # Only check below if estimate is set
   if (!is.null(estimate)) {
@@ -311,7 +327,7 @@ simpleCJS <- function(input, estimate = NULL, fixed.efficiency = NULL, silent = 
       stop("Please use only one value for estimate.\n")
     # stop if estimate exceeds 1
     if (!is.null(estimate) && (estimate < 0 | estimate > 1))
-      stop("estimate must be between 0 and 1.\n")
+      stop("'estimate' must be between 0 and 1.\n")
     # all good
   }
 
@@ -319,7 +335,7 @@ simpleCJS <- function(input, estimate = NULL, fixed.efficiency = NULL, silent = 
   if (!is.null(fixed.efficiency)) {
     # stop if there are not enough efficiency values
     if (length(fixed.efficiency) != ncol(input))
-     stop("Fixed efficiency was set but its length is not the same as the maximum number of columns in the input.\n")
+     stop("Fixed efficiency was set but its length is not the same as the number of columns in the input.\n")
     # stop if any efficiency exceeds 1
     if (any(fixed.efficiency > 1, na.rm = TRUE))
       stop("Fixed efficiency estimates must be between 0 and 1.\n")
@@ -332,6 +348,14 @@ simpleCJS <- function(input, estimate = NULL, fixed.efficiency = NULL, silent = 
   }
 
   # Start the calculations
+
+  # S: Survival probability between arrays
+  # m: tags detected at i
+  # r: tags detected at i and downstream
+  # z: tags NOT detected at i but detected downstream
+  # p: probability of detection (efficiency)
+  # M: fish estimated to be alive at i
+
   S <- rep(NA, ncol(input) - 1)
   r <- z <- p <- m <- M <- rep(NA, ncol(input))
   for(i in 1:(ncol(input) - 1)){
@@ -378,12 +402,6 @@ simpleCJS <- function(input, estimate = NULL, fixed.efficiency = NULL, silent = 
           warning("The fixed efficiency caused a too low estimate at iteration ", i,". Forcing higher estimate.")
         M[i] = sum(m[i], z[i])
       }
-      if (i == 1 && M[i] > nrow(input)){
-        M[i] = nrow(input)
-      }
-      # Correct M if the efficiency in the previous array was 0
-      if (i > 1 && is.na(M[i - 1]))
-          M[i - 1] = M[i]
       # Correct M if the estimate at i is bigger than the estimate at i - 1
       if (i > 1 && M[i] > M[i - 1])
         M[i] = M[i - 1]
@@ -639,68 +657,30 @@ dualMatrix <- function(array, replicates, spatial, detections.list){
 #' 
 #' @keywords internal
 #' 
-dualArrayCJS <- function(input, silent = TRUE){
-  if(!silent) appendTo("debug", "Starting dualArrayCJS.")
-  r <- z <- p <- m <- M <- rep(NA, ncol(input))
-  for(i in 1:(ncol(input))){
+dualArrayCJS <- function(input){
+  appendTo("debug", "Running dualArrayCJS.")
+  # r: tags detected at i and on other pair
+  # z: tags NOT detected at i but detected on other pair
+  # p: probability of detection (efficiency)
+  r <- z <- p <- rep(NA, 2)
+  for(i in 1:2){ 
     # number of tags detected at i and elsewhere (r)
     tr <- input[input[, i] == 1, -i]
-    if (is.data.frame(tr))
-      r[i] = sum(apply(tr, 1, function(f) any(f == 1)))
     if (is.vector(tr))
       r[i] = sum(tr)
     # number of tags NOT detected at i but detected elsewhere (z)
     tz <- input[input[, i] == 0, -i]
-    if (is.data.frame(tz))
-      z[i] = sum(apply(tz, 1, function(f) any(f == 1)))
     if (is.vector(tz))
       z[i] = sum(tz)
     # probability of detection (p)
     p[i] <- r[i] / (r[i] + z[i])
-    # number of detected tags at i (m)
-    m[i] = sum(input[, i])
-    # number of fish estimated alive at i (M)
-    M[i] = m[i] / p[i]
-    if (M[i] > nrow(input))
-      M[i] = nrow(input)
   }
   combined.p <- 1 - prod(1 - p)
   absolutes <- matrix(c(apply(input, 2, sum), r[1]), nrow = 3)
   colnames(absolutes) <- ""
   rownames(absolutes) <- c("detected at original:", "detected at replicates: ", "detected at both:")
   names(p) <- c("original", "replicates")
-  if(!silent) appendTo("debug", "Terminating dualArrayCJS.")
   return(list(absolutes = absolutes, single.efficiency = p, combined.efficiency = combined.p))
-}
-
-#' Split CJS matrix and calculate separate CJS
-#' 
-#' @param by a grouping vector with the same length has the number of rows in input
-#' @inheritParams cjs_args
-#' 
-#' @return The split CJS
-#' 
-#' @keywords internal
-#' 
-splitCJS <- function(input, by, estimate = NULL, fixed.efficiency = TRUE){
-  if (!is.matrix(input))
-    stop("'input' must be a matrix object\n")
-  if (!is.vector(by))
-    stop("'by' must be a vector\n")
-  if (nrow(input) != length(by))
-    stop("Length of 'by' is not equal to the number of rows in 'input'.\n")
-
-  recipient <- split(input, by = by)
-
-  if (fixed.efficiency)
-    fixed.efficiency <- simpleCJS(input, estimate = estimate)$efficiency
-  output <- list()
-  for (i in names(recipient)) {
-    results <- simpleCJS(recipient[[i]], estimate = estimate, fixed.efficiency = fixed.efficiency)
-    output[[length(output) + 1]] <- list(results = results, matrix = recipient[[i]])
-  }
-  names(output) <- names(recipient)
-  return(output)
 }
 
 #' Combine multiple CJS models
@@ -716,22 +696,25 @@ combineCJS <- function(..., estimate = NULL, fixed.efficiency = NULL, silent = F
   # stop if both estimate and fixed efficiency are present
   if (!is.null(estimate) & !is.null(fixed.efficiency))
     stop("Please choose only one of 'estimate' or 'fixed.efficiency'.\n")
+  
   # stop if multiple estimate values are provided.
   if (!is.null(estimate) && length(estimate) != 1)
     stop("Please use only one value for estimate.\n")
+  
   # stop if any efficiency exceeds 1
-  if (any(fixed.efficiency > 1, na.rm = TRUE))
+  if (!is.null(fixed.efficiency) && any(fixed.efficiency > 1 | fixed.efficiency < 0, na.rm = TRUE))
     stop("Fixed efficiency estimates must be between 0 and 1.\n")
+  
+  if (!is.null(estimate) && (estimate > 1 | estimate < 0))
+    stop("'estimate' must be between 0 and 1.\n")
 
   # hack to figure the number of arguments in the dots, because I could not find a better way around it.
   arg.names <- names(match.call())
-  discount <- 1
-  if (!is.null(arg.names)) {
-    for (i in c("estimate", "fixed.efficiency", "silent")) {
-      if(any(arg.names == i))
-        discount = discount + 1
-    }
-  }
+  if (is.null(arg.names))
+    discount <- 1
+  else
+    discount <- 1 + sum(!is.na(match(c("estimate", "fixed.efficiency", "silent"), arg.names)))
+
   rm(arg.names)
 
   # Prepare input
@@ -745,21 +728,21 @@ combineCJS <- function(..., estimate = NULL, fixed.efficiency = NULL, silent = F
     }
   } else {
     input <- list(...)
-    if(any(unlist(lapply(input, function(x) !is.matrix(x) & !is.data.frame(x)))))
-      stop("Not all objects provided are matrices or dataframes. Please use either one list of matrices/dataframes or multiple matrices/dataframes.\n")
   }
-
+  if(any(unlist(lapply(input, function(x) !is.matrix(x) & !is.data.frame(x)))))
+    stop("Not all objects provided are matrices or data frames. Please use either one list of matrices/data frames or multiple matrices/data frames.\n")
+ 
   # stop if not all matrices finish in the same array
   the.last <- unlist(lapply(input, function(x) tail(colnames(x),1)))
   if (length(unique(the.last)) > 1)
     stop("The last array is not the same in all input matrices.\n")
 
-  ncols <- unlist(lapply(input, ncol))
+  ncols <- sapply(input, ncol)
   groups <- rev(sort(unique(ncols)))
 
   if (!is.null(fixed.efficiency)){
     # stop if there are not enough efficiency values
-    if (length(fixed.efficiency) != max(ncols)) {
+    if (length(fixed.efficiency) != max(sapply(input, ncol))) {
       stop("Fixed efficiency was set but its length is not the same as the maximum number of columns in the input.\n")
     } else {
       if (!silent)
@@ -767,221 +750,6 @@ combineCJS <- function(..., estimate = NULL, fixed.efficiency = NULL, silent = F
     }
   }
 
-  combinedmatrices <- list()
-  for (i in 1:length(groups)) {
-    to.join <- which(ncols == groups[i])
-    if (length(unique(table(unlist(lapply(input[to.join], colnames))))) != 1)
-      stop(paste("matrices", paste(to.join, collapse = ", "), "both contain", groups[i], "columns but the column names differ.\n"))
-    output <- input[[to.join[1]]]
-    if (length(to.join) > 1) {
-      for (j in 2:length(to.join))
-        output <- rbind(output, input[[to.join[j]]])
-    }
-    combinedmatrices[[i]] <- output
-  }
-
-  if(length(combinedmatrices) == 1)
-    return(simpleCJS(combinedmatrices[[1]], estimate = estimate, fixed.efficiency = fixed.efficiency))
-
-  the.CJSs <- list()
-  for (i in combinedmatrices) {
-    the.efficiency <- fixed.efficiency[match(colnames(i), names(fixed.efficiency))]
-    the.CJSs[[length(the.CJSs) + 1]] <- simpleCJS(i, estimate = estimate, fixed.efficiency = the.efficiency)
-  }
-
-  return(recalculateCJS(input = the.CJSs, estimate = estimate, fixed.efficiency = fixed.efficiency))
-}
-
-#' Combine CJS model results
-#' 
-#' @param input A list of CJS results to be combined
-#' @inheritParams cjs_args
-#' 
-#' @return The combined CJS
-#' 
-#' @keywords internal
-#' 
-recalculateCJS <- function(input, estimate = NULL, fixed.efficiency = NULL){
-  # Fake estimate to avoid further changes below.
-  if (!is.null(fixed.efficiency) && !is.na(tail(fixed.efficiency, 1)))
-     estimate <- tail(fixed.efficiency, 1)
-
-  # The first CJS starts the process
-  absolutes <- input[[1]]$absolutes
-  # Determine how many fish enter and where on the remaining CJSs
-  exN <- c()
-  for (i in input[-1]){
-    the.cols <- match(colnames(i$absolutes), colnames(absolutes))[-1]
-    exN[length(exN) + 1] <- i$absolutes[1, 1]
-    names(exN)[length(exN)] <- colnames(absolutes)[the.cols[1]]
-  }
-  # Extract variables from input, for easier handling below
-  m <- absolutes[1,]
-  r <- absolutes[2,]
-  z <- absolutes[3,]
-  p <- M <- rep(NA, ncol(absolutes))
-  S <- c()
-  counter <- 1
-  for (i in 1:(ncol(absolutes) - 1)) {
-    # probability of detection (p)
-    if (is.null(fixed.efficiency)) {
-      if (r[i] == 0 & z[i] == 0)
-        p[i] <- 0
-      else
-        p[i] <- r[i] / (r[i] + z[i])
-    } else {
-      p[i] <- fixed.efficiency[i]
-    }
-    # number of fish estimated alive at i before inclusion of new (M)
-    if (p[i] == 0) {
-      if (counter == 1) {
-        warning("Array'", colnames(input[[1]])[i],"' detected 0 fish. Skipping survival estimation.")
-        M[i] = input[[1]][4, i]
-      } else {
-        stop("You reached a safety stop. The code for this exception does not exist yet. Contact the development team.\n")
-      }
-      S[length(S) + 1] = -999
-    } else {
-      M[i] = round(m[i] / p[i], 0)
-      if (!is.null(fixed.efficiency) && M[i] < sum(m[i], z[i])){
-        warning("The fixed efficiency caused a too low estimate at iteration ", i,". Forcing higher estimate. [1]")
-        M[i] = sum(m[i], z[i])
-      }
-      # Initial estimated number is the number of released fish
-      if (i == 1 && M[i] > absolutes[1, 1])
-        M[i] = absolutes[1, 1]
-
-      if (i > 1 && M[i] > M[i - 1]){
-        # If new fish entered the CJS in the last round, account for that
-        if (grepl(colnames(absolutes)[i - 1], names(exN))){
-          if (M[i] > M[i - 1] + input[[counter]]$absolutes[4, 2])
-            M[i] = M[i - 1] + input[[counter]]$absolutes[4, 2]
-        } else {
-          M[i] = M[i - 1]
-        }
-      }
-      # survival probability from i-1 to i (S)
-      if (i > 1) {
-        # If new fish entered the CJS in the last round, account for that
-        if(grepl(colnames(absolutes)[i - 1], names(exN)))
-          S[length(S) + 1] <- M[i] / (M[i - 1] + exN[colnames(absolutes)[i - 1]])
-        else
-          S[length(S) + 1] <- M[i] / M[i - 1]
-      } 
-    }
-    # NEW CJS ENTRY POINT
-    if (grepl(colnames(absolutes)[i], names(exN))) {
-      counter <- counter + 1
-      # Calculate survival from above release to release
-      if (input[[counter]]$efficiency[2] == 0) {
-        S[length(S) + 1] <- -999
-      } else {
-        tempS <- input[[counter]]$survival[1]
-        if (S[length(S)] != -999) {
-          S[length(S)] <- tail(S,1)/tempS
-          if (S[length(S)] > 1)
-            S[length(S)] <- 1
-        }
-        S[length(S) + 1] <- tempS
-      }
-      # update absolutes with new CJS numbers
-      to.add <- input[[counter]]$absolutes
-      the.cols <- match(colnames(to.add), colnames(absolutes))[-1]
-      absolutes[, the.cols] <- absolutes[, the.cols] + to.add[, -1]
-      m <- absolutes[1,]
-      r <- absolutes[2,]
-      z <- absolutes[3,]
-      # update p for the array of inclusion
-      if (is.null(fixed.efficiency)) {
-        if (r[i] == 0 & z[i] == 0)
-          p[i] <- 0
-        else
-          p[i] <- r[i] / (r[i] + z[i])
-      }
-      # update M based on new p
-      M[i] = round(m[i] / p[i], 0)
-      if(M[i] < sum(absolutes[c(1, 3), i])) {
-        warning("The combined efficiency caused a too low estimate at iteration ", i,". Forcing higher estimate. [2]")
-        M[i] <- sum(absolutes[c(1, 3), i])
-      }
-    }
-    # lambda (last S * last P) 
-    if (i == (ncol(absolutes) - 1)){
-      if(m[i] > 0)
-        l <- r[i] / m[i]
-      else 
-        l <- 0
-    }
-  }
-
-  # Calculate last S and last M if estimate is present
-  if (!is.null(estimate)) {
-    if (estimate == 0) {
-      S[length(S) + 1] <- -999
-    } else {
-      S[length(S) + 1] <- l / estimate
-      if (tail(S, 1) > 1)
-        S[length(S)] = 1
-    }
-    M[ncol(absolutes)] <- round(m[ncol(absolutes)] / estimate, 0)
-    if (M[ncol(absolutes)] > M[ncol(absolutes) - 1])
-      M[ncol(absolutes)] = M[ncol(absolutes) - 1]
-  } else {
-    S[length(S) + 1] <- NA
-  }
-
-  # Exchange initial absolutes by final absolutes
-  absolutes[1,] <- m
-  absolutes[2,] <- r
-  absolutes[3,] <- z
-  absolutes[4,] <- M
-
-  # Give names to the efficiency estimates
-  names(p) <- colnames(absolutes)
-
-  # Compile final survival matrix
-  link <- is.na(S) | S >= 0
-  survival <- matrix(S[link], nrow = sum(link))
-
-  the.names <- colnames(absolutes)
-  the.names[1] <- "RS1"
-  for (i in 1:length(exN)) {
-    pos <- match(names(exN)[i], the.names)
-    the.names <- c(the.names[1:(pos - 1)], paste0("RS", i + 1), the.names[pos:length(the.names)])
-  }
-  if (any(!link)) {
-    to.check <- which(!link)
-    to.remove <- c()
-    for (i in to.check) {
-      if (grepl("^RS[0-9]*", the.names[i]))
-        to.remove <- c(to.remove, i)
-      else
-        to.remove <- c(to.remove, i + 1)
-    }
-    the.names <- the.names[-to.remove]
-  }
-  maxcharA <- max(nchar(the.names[-length(the.names)]))
-  maxcharB <- max(nchar(the.names[-1]))
-  the.rows <- c()
-  for (i in 1:(length(the.names) - 1)) {
-    if(nchar(the.names[i] != maxcharA))
-      centeringA <- paste(rep(" ", maxcharA - nchar(the.names[i])), collapse = "")
-    else
-      centeringA <- ""
-    if(nchar(the.names[i] != maxcharB))
-      centeringB <- paste(rep(" ", maxcharB - nchar(the.names[i + 1])), collapse = "")
-    else
-      centeringB <- ""
-    the.rows[length(the.rows) + 1] <- paste0(centeringA, the.names[i], " -> ", the.names[i + 1], centeringB, " =")
-  }
-  rownames(survival) <- the.rows
-  colnames(survival) <- ""
-  if (is.null(fixed.efficiency)){
-    if (is.null(estimate))
-      return(list(absolutes = absolutes, additions = exN, efficiency = p, survival = survival, lambda = l))
-    else
-      return(list(absolutes = absolutes, additions = exN, efficiency = p, survival = survival, lambda = l, estimate = estimate))  
-  } else {
-      return(list(absolutes = absolutes, additions = exN, fixed.efficiency = p, survival = survival, lambda = l))    
-  }
+  combinedmatrices <- as.data.frame(data.table::rbindlist(input))
+  return(simpleCJS(combinedmatrices, estimate = estimate, fixed.efficiency = fixed.efficiency))
 }
