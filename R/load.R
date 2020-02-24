@@ -308,13 +308,8 @@ findPeers <- function(input, dotmat, type = c("before", "after"), disregard.para
       for (b in to.check) {
         # IF A and B are adjacent
         if (dotmat[a, b] == 1) {
-          # prepare to check paths leading to B
-          if (disregard.parallels)
-            check.paths.to.b <- all(!is.na(match(input[[b]][[opposite]], c(a, input[[a]]$parallel))))
-          else
-            check.paths.to.b <- length(input[[b]][[opposite]]) == 1
           # IF there are no third-party paths leading to B
-          if (check.paths.to.b) {
+          if (length(input[[b]][[opposite]]) == 1) {
             # IF B has no parallels or parallels are being discarded
             if (is.null(input[[b]]$parallel) || disregard.parallels) {
               if (is.null(peers) || all(!grepl(b, peers))) {
