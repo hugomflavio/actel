@@ -1017,27 +1017,27 @@ assembleTimetable <- function(vm, all.moves, sections, arrays,
 
       appendTo("debug", paste0("Deploying values for fish ", fish, "."))
       capture <- lapply(1:length(last.events), function(i) {
-          the.section <- names(last.events)[i]
-          timetable[fish, paste("Arrived", the.section, sep = ".")] <- paste(vm[[fish]][[first.events[i], "First.time"]])
-          timetable[fish, paste("First.station", the.section, sep = ".")] <- vm[[fish]][[first.events[i], "First.station"]]
-          timetable[fish, paste("Left", the.section, sep = ".")] <- paste(vm[[fish]][[last.events[i], "Last.time"]])
-          timetable[fish, paste("Last.station", the.section, sep = ".")] <- vm[[fish]][[last.events[i], "Last.station"]]
-          timetable[fish, paste("Time.in", the.section, sep = ".")] <- 
-            as.vector(
-              difftime(
-                timetable[fish, paste("Left", the.section, sep = ".")], 
-                timetable[fish, paste("Arrived", the.section, sep = ".")], units = "secs"
-                )
-            )
+        the.section <- names(last.events)[i]
+        timetable[fish, paste("Arrived", the.section, sep = ".")] <- paste(vm[[fish]][[first.events[i], "First.time"]])
+        timetable[fish, paste("First.station", the.section, sep = ".")] <- vm[[fish]][[first.events[i], "First.station"]]
+        timetable[fish, paste("Left", the.section, sep = ".")] <- paste(vm[[fish]][[last.events[i], "Last.time"]])
+        timetable[fish, paste("Last.station", the.section, sep = ".")] <- vm[[fish]][[last.events[i], "Last.station"]]
+        timetable[fish, paste("Time.in", the.section, sep = ".")] <- 
+          as.vector(
+            difftime(
+              timetable[fish, paste("Left", the.section, sep = ".")], 
+              timetable[fish, paste("Arrived", the.section, sep = ".")], units = "secs"
+              )
+          )
 
-          # If Time.in is to be calculated
-          if (speed.method == "last to first" && !invalid.dist) {
-            to.col <- paste("Speed.in", the.section, sep = ".")
-            dist.row <- timetable[fish, paste("First.station", the.section, sep = ".")]
-            dist.col <- timetable[fish, paste("Last.station", the.section, sep = ".")]
-            from.col <- paste("Time.in", the.section, sep = ".")
-            timetable[fish, to.col] <- dist.mat[dist.row, dist.col] / timetable[fish, from.col]
-          }
+        # If Time.in is to be calculated
+        if (speed.method == "last to first" && !invalid.dist) {
+          to.col <- paste("Speed.in", the.section, sep = ".")
+          dist.row <- timetable[fish, paste("First.station", the.section, sep = ".")]
+          dist.col <- timetable[fish, paste("Last.station", the.section, sep = ".")]
+          from.col <- paste("Time.in", the.section, sep = ".")
+          timetable[fish, to.col] <- dist.mat[dist.row, dist.col] / timetable[fish, from.col]
+        }
 
         # If this is not the first section
         if (match(the.section, sections) > 1) {
