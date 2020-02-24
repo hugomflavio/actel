@@ -11,28 +11,28 @@ gg_colour_hue <- function(n) {
   grDevices::hcl(h = hues, l = 65, c = 100)[1:n]
 }
 
-#' Open HTML report
-#' 
-#' @param file.name the name of the html file
-#' 
-#' @keywords internal
-#' 
-openReport <- function(file.name){ # nocov start
-  # The internet connection check is made only because R was freezing when opening the html without internet in my pc.
-  rep.ver <- tryCatch(unlist(strsplit(readLines('https://raw.githubusercontent.com/hugomflavio/actel/master/DESCRIPTION')[3], " "))[2], error = function(e) NULL, warning = function(w) NULL)
-  if (!is.null(rep.ver)) {
-    if (.Platform$OS.type == "windows") 
-      hide <- system(paste0('open "', file.name, '"'), show.output.on.console = FALSE)
-    else
-      hide <- system(paste0('xdg-open "', file.name, '"'))
-  }  else {
-    appendTo("Screen", "M: Skipping auto-opening of the report as R has been crashing when opening the html without an internet connection.")
-  }
-  appendTo("debug", "debug: Removing toc_menu_explore.html")
-  if(file.exists("Report/toc_menu_explore.html"))
-    file.remove("Report/toc_menu_explore.html")
-  return(NULL)
-} # nocov end
+# #' Open HTML report
+# #' 
+# #' @param file.name the name of the html file
+# #' 
+# #' @keywords internal
+# #' 
+# openReport <- function(file.name){ # nocov start
+#   # The internet connection check is made only because R was freezing when opening the html without internet in my pc.
+#   rep.ver <- tryCatch(unlist(strsplit(readLines('https://raw.githubusercontent.com/hugomflavio/actel/master/DESCRIPTION')[3], " "))[2], error = function(e) NULL, warning = function(w) NULL)
+#   if (!is.null(rep.ver)) {
+#     if (.Platform$OS.type == "windows") 
+#       hide <- system(paste0('open "', file.name, '"'), show.output.on.console = FALSE)
+#     else
+#       hide <- system(paste0('xdg-open "', file.name, '"'))
+#   }  else {
+#     appendTo("Screen", "M: Skipping auto-opening of the report as R has been crashing when opening the html without an internet connection.")
+#   }
+#   appendTo("debug", "debug: Removing toc_menu_explore.html")
+#   if(file.exists("Report/toc_menu_explore.html"))
+#     file.remove("Report/toc_menu_explore.html")
+#   return(NULL)
+# } # nocov end
 
 #' Print progression diagram
 #'

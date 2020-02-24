@@ -623,9 +623,12 @@ migration <- function(path = NULL, tz, sections, success.arrays = NULL, max.inte
     appendTo("debug", "debug: Moving report")
     fs::file_move(sub("Rmd", "html", reportname), sub("Report/", "", sub("Rmd", "html", reportname)))
     if (interactive()) { # nocov start
-      appendTo("debug", "debug: Opening report if the pc has internet.")
-      openReport(file.name = sub("Report/", "", sub("Rmd", "html", reportname)))
+      appendTo("debug", "debug: Opening report.")
+      browseURL(sub("Report/", "", sub("Rmd", "html", reportname)))
     } # nocov end
+    appendTo("debug", "debug: Removing toc_menu_explore.html")
+    if(file.exists("Report/toc_menu_explore.html"))
+      file.remove("Report/toc_menu_explore.html")
   }
   appendTo("Screen", "M: Process finished successfully.")
 # ------------------
