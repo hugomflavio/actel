@@ -22,6 +22,7 @@ Fixes:
   * Fix bug where the temporary detections object would be overwritten during inactiveness checks with a distance matrix present.
   * Fix bug causing speed calculations  to crash in the presence of unknown detections.
   * Fix bug where the Invalid.detections and Invalid.events columns in the status.df of residency would always return 0.
+  * Prevent invalid detections from being considered during intra-array efficiency estimations.
 
 Changes:
   * `array.overview` is now called `group.overview`.

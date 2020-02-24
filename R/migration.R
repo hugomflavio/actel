@@ -486,7 +486,7 @@ migration <- function(path = NULL, tz, sections, success.arrays = NULL, max.inte
     overall.CJS <- assembleArrayCJS(mat = the.matrices, CJS = CJS.list, arrays = arrays, releases = release_nodes)
 
     if (!is.null(replicates)) {
-      intra.array.matrices <- getDualMatrices(replicates = replicates, CJS = overall.CJS, spatial = spatial, detections.list = detections)
+      intra.array.matrices <- getDualMatrices(replicates = replicates, CJS = overall.CJS, spatial = spatial, detections.list = valid.detections)
       recipient <- includeIntraArrayEstimates(m = intra.array.matrices, CJS = overall.CJS)
       overall.CJS <- recipient[[1]]
       intra.array.CJS <- recipient[[2]]

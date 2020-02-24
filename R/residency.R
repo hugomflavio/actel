@@ -444,7 +444,7 @@ residency <- function(path = NULL, tz, sections, success.arrays = NULL, max.inte
   appendTo(c("Screen", "Report"), "M: Calculating array efficiency.")
   efficiency <- res_efficiency(arrmoves = valid.movements, bio = bio, spatial = spatial, arrays = arrays, paths = paths, dotmat = dotmat)
   if (!is.null(replicates)) {
-    intra.array.matrices <- getDualMatrices(replicates = replicates, CJS = NULL, spatial = spatial, detections.list = detections)
+    intra.array.matrices <- getDualMatrices(replicates = replicates, CJS = NULL, spatial = spatial, detections.list = valid.detections)
     recipient <- includeIntraArrayEstimates(m = intra.array.matrices, efficiency = efficiency, CJS = NULL)
     efficiency <- recipient[[1]]
     intra.array.CJS <- recipient[[2]]
