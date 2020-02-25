@@ -9,10 +9,10 @@ test_that("migration stops when any argument does not make sense", {
 	expect_error(migration(tz = "abc"), 
 		"'tz' could not be recognized as a timezone. Check available timezones with OlsonNames()", fixed = TRUE)
 	
-	expect_error(migration(sections = c("River", "Fjord", "Sea"), path = 1, tz = "Europe/Copenhagen"), 
+	expect_error(migration(sections = c("River", "Fjord", "Sea"), path = 1, tz = "Europe/Copenhagen", GUI = "never"), 
 		"The selected path does not exist.", fixed = TRUE)
 	
-	expect_error(migration(sections = c("River", "Fjord", "Sea"), path = "abc", tz = "Europe/Copenhagen"), 
+	expect_error(migration(sections = c("River", "Fjord", "Sea"), path = "abc", tz = "Europe/Copenhagen", GUI = "never"), 
 		"The selected path does not exist.", fixed = TRUE)
 	
 	expect_error(migration(sections = c("River", "Fjord", "Sea"), tz = "Europe/Copenhagen", max.interval = "a"), 

@@ -10,10 +10,10 @@ test_that("explore stops when any argument does not make sense", {
 	expect_error(explore(tz = "abc"), 
 		"'tz' could not be recognized as a timezone. Check available timezones with OlsonNames()", fixed = TRUE)
 	
-	expect_error(explore(path = 1, tz = "Europe/Copenhagen"), 
+	expect_error(explore(path = 1, tz = "Europe/Copenhagen", GUI = "never"), 
 		"The selected path does not exist.", fixed = TRUE)
 	
-	expect_error(explore(path = "abc", tz = "Europe/Copenhagen"), 
+	expect_error(explore(path = "abc", tz = "Europe/Copenhagen", GUI = "never"), 
 		"The selected path does not exist.", fixed = TRUE)
 	
 	expect_error(explore(tz = "Europe/Copenhagen", max.interval = "a"), 
