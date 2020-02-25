@@ -696,9 +696,11 @@ checkDeploymentStations <- function(input, spatial) {
   }
   link <- match(aux$Station.name, unique(input$Station.name))
   if (any(is.na(link))) {
-    appendTo(c("Screen", "Report"), paste0("Error: Stations '", paste(aux$Station.name[is.na(link)], collapse = "', '"), "' are listed in the spatial file but no receivers were ever deployed there."))
     emergencyBreak()
-    stop("Fatal exception found. Read lines above for more details.\n", call. = FALSE)      
+    stop(paste0(ifelse(sum(is.na(link)) > 1, "Stations '", "Station '"), 
+      paste(aux$Station.name[is.na(link)], collapse = "', '"), 
+      ifelse(sum(is.na(link)) > 1, "' are", "' is"),
+      " listed in the spatial file but no receivers were ever deployed there.\n"), call. = FALSE)      
   }
   return(input)
 }
@@ -904,8 +906,8 @@ checkDupSignals <- function(input, bio, tag.list){
       rest.of.message <- paste0(rest.of.message, "\n   Signal ", dupsig$Signal[i], " was found on tags ", dupsig$Tags[i], ".")
     }
     appendTo(c("Report"), rest.of.message)
-    stop(paste0("One or more signals match more than one tag in the detections! Showing relevant signals/tags.", rest.of.message, "\n"), call. = FALSE)
     emergencyBreak()
+    stop(paste0("One or more signals match more than one tag in the detections! Showing relevant signals/tags.", rest.of.message, "\n"), call. = FALSE)
   }
 }
 
