@@ -87,35 +87,7 @@ migration <- function(path = NULL, tz, sections, success.arrays = NULL, max.inte
   speed.warning = NULL, speed.error = NULL, jump.warning = 2, jump.error = 3, 
   inactive.warning = NULL, inactive.error = NULL, exclude.tags = NULL, override = NULL, report = TRUE,
   if.last.skip.section = TRUE, replicates = NULL, disregard.parallels = TRUE, GUI = c("needed", "always", "never"), 
-  debug = FALSE, maximum.time = 60, tz.study.area = NULL, start.timestamp = NULL, end.timestamp = NULL) {
-
-# Temporary: check deprecated options
-  dep.warning <- "------------------------------------------------------------------\n!!! Deprecated arguments used!\n!!!\n"
-  trigger.dep <- FALSE
-  if (maximum.time != 60) {
-    dep.warning <- paste0(dep.warning, "!!! 'maximum.time' is now 'max.interval'\n")
-    max.interval <- maximum.time
-    trigger.dep <- TRUE
-  }
-  if (!is.null(tz.study.area)) {
-    dep.warning <- paste0(dep.warning, "!!! 'tz.study.area' is now 'tz'\n")
-    tz <- tz.study.area
-    trigger.dep <- TRUE
-  }
-  if (!is.null(start.timestamp)) {
-    dep.warning <- paste0(dep.warning, "!!! 'start.timestamp' is now 'start.time'\n")
-    start.time <- start.timestamp
-    trigger.dep <- TRUE
-  }
-  if (!is.null(end.timestamp)) {
-    dep.warning <- paste0(dep.warning, "!!! 'end.timestamp' is now 'stop.time'\n")
-    stop.time <- end.timestamp
-    trigger.dep <- TRUE
-  }
-  if (trigger.dep)
-    warning(paste0("\n", dep.warning, "!!!\n!!! Please switch to the new arguments as soon as possible.\n!!! The deprecated arguments will stop working in future versions.\n------------------------------------------------------------------"),
-      immediate. = TRUE, call. = FALSE)
-  rm(maximum.time, tz.study.area, start.timestamp, end.timestamp)
+  debug = FALSE) {
   
 # check argument quality
   my.home <- getwd()

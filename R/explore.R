@@ -7,7 +7,6 @@
 #' 
 #' @param debug Logical: Should temporary files be kept at the end of the 
 #'  analysis?
-#' @param end.timestamp DEPRECATED See argument \code{stop.time}
 #' @param exclude.tags A vector of tags that should be excluded from the 
 #'  detection data before any analyses are performed. Intended to be used if 
 #'  stray tags from a different code space but with the same signal as a target
@@ -35,7 +34,6 @@
 #'  NULL (default), no warnings are issued.
 #' @param max.interval The number of minutes that must pass between detections 
 #'  for a new event to be created. Defaults to 60.
-#' @param maximum.time DEPRECATED. See \code{max.interval}.
 #' @param minimum.detections For tags with only one movement event, defines the
 #'  minimum number of times a tag must have been recorded during the study 
 #'  period for it to be considered true detections and not random noise.
@@ -60,13 +58,11 @@
 #' @param start.time Detection data prior to the timestamp set in 
 #'  \code{start.time} (in YYYY-MM-DD HH:MM:SS format) is not considered during 
 #'  the analysis.
-#' @param start.timestamp DEPRECATED. See \code{start.time}.
 #' @param stop.time Detection data posterior to the timestamp set in 
 #'  \code{stop.time} (in YYYY-MM-DD HH:MM:SS format) is not considered during 
 #'  the analysis.
 #' @param tz The time zone of the study area. Must match one of the values
 #'  present in \code{\link[base]{timezones}}.
-#' @param tz.study.area DEPRECATED. See \code{tz}.
 #' 
 #' @return A list containing:
 #' \itemize{
@@ -90,36 +86,7 @@
 explore <- function(path = NULL, tz, max.interval = 60, minimum.detections = 2, start.time = NULL, stop.time = NULL, 
   speed.method = c("last to first", "first to first"), speed.warning = NULL, speed.error = NULL, 
   jump.warning = 2, jump.error = 3, inactive.warning = NULL, inactive.error = NULL, 
-  exclude.tags = NULL, override = NULL, report = TRUE, GUI = c("needed", "always", "never"), debug = FALSE,
-  maximum.time = 60, tz.study.area = NULL, start.timestamp = NULL, end.timestamp = NULL) {
-
-# Temporary: check deprecated options
-  dep.warning <- "------------------------------------------------------------------\n!!! Deprecated arguments used!\n!!!\n" # nocov start
-  trigger.dep <- FALSE
-  if (maximum.time != 60) {
-    dep.warning <- paste0(dep.warning, "!!! 'maximum.time' is now 'max.interval'\n")
-    max.interval <- maximum.time
-    trigger.dep <- TRUE
-  }
-  if (!is.null(tz.study.area)) {
-    dep.warning <- paste0(dep.warning, "!!! 'tz.study.area' is now 'tz'\n")
-    tz <- tz.study.area
-    trigger.dep <- TRUE
-  }
-  if (!is.null(start.timestamp)) {
-    dep.warning <- paste0(dep.warning, "!!! 'start.timestamp' is now 'start.time'\n")
-    start.time <- start.timestamp
-    trigger.dep <- TRUE
-  }
-  if (!is.null(end.timestamp)) {
-    dep.warning <- paste0(dep.warning, "!!! 'end.timestamp' is now 'stop.time'\n")
-    stop.time <- end.timestamp
-    trigger.dep <- TRUE
-  }
-  if (trigger.dep)
-    warning(paste0("\n", dep.warning, "!!!\n!!! Please switch to the new arguments as soon as possible.\n!!! The deprecated arguments will stop working in future versions.\n------------------------------------------------------------------"),
-      immediate. = TRUE, call. = FALSE)
-  rm(maximum.time, tz.study.area, start.timestamp, end.timestamp) # nocov end
+  exclude.tags = NULL, override = NULL, report = TRUE, GUI = c("needed", "always", "never"), debug = FALSE) {
 
 # check arguments quality
   my.home <- getwd()
