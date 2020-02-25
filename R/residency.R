@@ -1251,7 +1251,7 @@ dailyRatios <- function(res) {
       to =  round.POSIXt(x$Last.time[nrow(x)] - 43200, units = "days"), by = 86400)
     days.list <- lapply(dayrange, function(d) {
       # cat(as.character(d), "\n")
-      findSecondsPerSection(res = x, day = d, the.range = range(dayrange))
+      findSecondsPerSection(res = x, day = d, the.range = dayrange[c(1, length(dayrange))])
     })
     setTxtProgressBar(pb, counter)
     names(days.list) <- round.POSIXt(dayrange, units = "days")
