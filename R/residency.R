@@ -145,9 +145,7 @@ residency <- function(path = NULL, tz, sections, success.arrays = NULL, max.inte
     stop("'jump.error' must not be lower than 1.\n", call. = FALSE)
   if (jump.error < jump.warning)
     stop("'jump.error' must not be lower than 'jump.warning'.\n", call. = FALSE)
-  if (!is.null(jump.warning) & is.null(jump.error))
-    jump.error <- Inf
-  
+
   if (!is.null(inactive.warning) && !is.numeric(inactive.warning))
     stop("'inactive.warning' must be numeric.\n", call. = FALSE)    
   if (!is.null(inactive.warning) && inactive.warning <= 0)
