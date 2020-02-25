@@ -1203,7 +1203,7 @@ transformSpatial <- function(spatial, bio, arrays, sections = NULL, first.array 
   # If there is any release site in the spatial file
   if (sum(spatial$Type == "Release") > 0) {
     if (length(unique(bio$Release.site)) == 1 && unique(bio$Release.site) == "unspecified") {
-      appendTo(c("Screen", "Report", "Warning"), "At least one release site has been indicated in the spatial.csv file, but no release sites were specified in the biometrics file.\n   Discarding release site information and assuming all fish were released at the top level array to avoid function failure.\n   Please double-check your data.")
+      appendTo(c("Screen", "Report", "Warning"), "At least one release site has been indicated in the spatial.csv file, but no release sites were specified in the biometrics file.\n         Discarding release site information and assuming all fish were released at the top level array to avoid function failure.\n         Please double-check your data.")
       if (is.null(first.array)) {
         emergencyBreak()
         stop("There is more than one top level array in the study area. Please specify release site(s) in the 'spatial.csv' file and in the 'biometrics.csv' file.\n", call. = FALSE)
