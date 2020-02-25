@@ -1247,11 +1247,11 @@ dailyRatios <- function(res) {
   pb <- txtProgressBar(min = 0, max = length(res), style = 3, width = 60)
   output <- lapply(res, function(x) {
     counter <<- counter + 1
-    cat("\n", counter, "\n")
+    # cat("\n", counter, "\n")
     dayrange <- seq(from = round.POSIXt(x$First.time[1] - 43200, units = "days"), 
       to =  round.POSIXt(x$Last.time[nrow(x)] - 43200, units = "days"), by = 86400)
     days.list <- lapply(dayrange, function(d) {
-      cat(as.character(d), "\n")
+      # cat(as.character(d), "\n")
       findSecondsPerSection(res = x, day = d, the.range = range(dayrange))
     })
     setTxtProgressBar(pb, counter)
