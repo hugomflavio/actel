@@ -121,7 +121,6 @@ test_that("getResidency works as expected", {
 	})
 })
 
-test_that("temporary test to debug seconds", {
   x <- residency.list[[1]]
   dayrange <- seq(from = round.POSIXt(x$First.time[1] - 43200, units = "days"), 
     to = round.POSIXt(x$Last.time[nrow(x)] - 43200, units = "days"), by = 86400)
@@ -225,7 +224,6 @@ test_that("temporary test to debug seconds", {
     aux["Changes"] <- aux["Changes"] - 1
   }
   print(aux)
-})
 
 test_that("dailyRatios works as expected", {
   daily.ratios <<- dailyRatios(res = residency.list)
