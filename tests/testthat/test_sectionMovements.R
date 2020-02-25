@@ -46,6 +46,12 @@ test_that("sectionMovements correctly compresses array movements", {
 	expect_equal(output$Events, c(3, 1, 2, 11, 1))	
 })
 
+test_that("sectionMovements returns NULL if all events are invalid", {
+	xmoves <- moves[[1]]
+	xmoves$Valid <- FALSE
+	expect_equal(sectionMovements(movements = xmoves, sections = sections), NULL)
+})
+
 test_that("checkLinearity throws warning only if movements are not ordered", {
 	aux <- sectionMovements(movements = moves[[1]], sections = sections, invalid.dist = invalid.dist)
 

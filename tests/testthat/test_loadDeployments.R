@@ -52,6 +52,34 @@ test_that("loadDeployments stops if data is missing or badly formatted", {
 	file.remove("deployments.csv")
 })
 
+test_that("checkDeployments kicks in if deployment periods overlap", {
+	dep <- example.deployments
+	dep$Receiver[2] <- dep$Receiver[1]
+	write.csv(dep, "deployments.csv", row.names = FALSE)
+	deployments <- loadDeployments(file = "deployments.csv", tz = "Europe/Copenhagen")
+	sink("temp.txt")
+  expect_message(
+  	expect_error(checkDeploymentTimes(input = deployments),
+  		"Fatal exception found. Read lines above for more details.", fixed = TRUE),
+  "Error: Receiver 132907 was re-deployed before being retrieved:", fixed = TRUE)
+  sink()
+})
+
+test_that("checkDeployments kicks in if deployment periods overlap", {
+	dep <- example.deployments
+	dep$Station.name[2] <- "test"
+	write.csv(dep, "deployments.csv", row.names = FALSE)
+	deployments <- loadDeployments(file = "deployments.csv", tz = "Europe/Copenhagen")
+	write.csv(example.spatial, "spatial.csv", row.names = FALSE)
+  spatial <- loadSpatial(file = "spatial.csv", report = TRUE)
+  expect_warning(
+  	expect_error(checkDeploymentStations(input = deployments, spatial = spatial),
+  		"Station 'Station 1' is listed in the spatial file but no receivers were ever deployed there.", fixed = TRUE),
+  "Station 'test' is listed in the deployments but is not part of the study's stations. Discarding deployments at unknown stations.", fixed = TRUE)
+	file.remove("deployments.csv")
+	file.remove("spatial.csv")  
+})
+
 test_that("loadDeployments output is exactly as expected", {
 	write.csv(example.deployments, "deployments.csv", row.names = FALSE)
 	output <- loadDeployments(file = "deployments.csv", tz = "Europe/Copenhagen")

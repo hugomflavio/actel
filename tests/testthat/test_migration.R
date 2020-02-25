@@ -159,6 +159,24 @@ test_that("migration stops when any argument does not make sense", {
 			"GUI is set to 'needed' but packages 'gWidgetsRGtk2', 'RGtk2' are not available. Please install them if you intend to run GUI.\n         Disabling GUI (i.e. GUI = 'never') for the current run.", fixed = TRUE)
 		file.remove("detections/actel.detections.RData")
 	}
+
+	expect_error(migration(tz = 'Europe/Copenhagen', sections = c("River", "Fjord", "Sea"), report = TRUE, GUI = "never", if.last.skip.section = "a"),
+		"'if.last.skip.section' must be logical.", fixed = TRUE)
+
+	expect_error(migration(tz = 'Europe/Copenhagen', sections = c("River", "Fjord", "Sea"), report = "a", GUI = "never"),
+		"'report' must be logical.", fixed = TRUE)
+
+	expect_error(migration(tz = 'Europe/Copenhagen', sections = c("River", "Fjord", "Sea"), debug = "a", GUI = "never"),
+		"'debug' must be logical.", fixed = TRUE)
+
+	expect_error(migration(tz = 'Europe/Copenhagen', sections = c("River", "Fjord", "Sea"), report = TRUE, GUI = "never", replicates = "a"),
+		"'replicates' must be a list.", fixed = TRUE)
+
+	expect_error(migration(tz = 'Europe/Copenhagen', sections = c("River", "Fjord", "Sea"), report = TRUE, GUI = "never", replicates = list("a")),
+		"All list elements within 'replicates' must be named (i.e. list(Array = 'St.1') rather than list('St.1')).", fixed = TRUE)
+
+	expect_error(migration(tz = 'Europe/Copenhagen', sections = c("River", "Fjord", "Sea"), report = TRUE, GUI = "never", replicates = list(test = "a")),
+		"Some of the array names listed in the 'replicates' argument do not match the study's arrays.", fixed = TRUE)
 })
 
 test_that("migration results contains all the expected elements.", {
@@ -220,7 +238,8 @@ test_that("migration temp files are removed at the end of the analysis", {
 })
 
 test_that("migration is able to run speed and inactiveness checks.", {
-	output <- suppressWarnings(migration(sections = c("River", "Fjord", "Sea"), tz = 'Europe/Copenhagen', report = FALSE, GUI = "never", speed.error = 1000000, inactive.error = 1000000))
+	output <- suppressWarnings(migration(sections = c("River", "Fjord", "Sea"), tz = 'Europe/Copenhagen', report = TRUE, 
+		GUI = "never", speed.warning = 1000000, inactive.warning = 1000000, replicates = list(Sea1 = c("St.16", "St.17"))))
 	
 	file.remove("detections/actel.detections.RData")
 	
@@ -230,7 +249,8 @@ test_that("migration is able to run speed and inactiveness checks.", {
 	
 	file.remove("distances.csv")
 	
-	expect_warning(output <- migration(sections = c("River", "Fjord", "Sea"), tz = 'Europe/Copenhagen', report = TRUE, GUI = "never", speed.error = 1000000, inactive.error = 1000000),
+	expect_warning(output <- migration(sections = c("River", "Fjord", "Sea"), tz = 'Europe/Copenhagen', report = TRUE, 
+			GUI = "never", speed.error = 1000000, inactive.error = 1000000),
 		"Running inactiveness checks without a distance matrix. Performance may be limited.", fixed = TRUE)
 	
 	file.remove("detections/actel.detections.RData")

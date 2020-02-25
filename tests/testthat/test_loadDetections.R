@@ -112,6 +112,48 @@ test_that("loadDetections' start.time and stop.time arguments are working", {
 	unlink("detections", recursive = TRUE)
 })
 
+dir.create("detections")
+aux <- split(example.detections, example.detections$Receiver)
+for (i in names(aux)[1:3]) {
+  write.csv(aux[[i]], paste0("detections/", i, ".csv"), row.names = FALSE)
+}
+  write.csv(aux[[3]], paste0("detections/test.csv"), row.names = FALSE)
+
+test_that("checkDupDetections kicks in if needed.", {
+	detections <- loadDetections(start.time = "2018-04-15 00:00:00", tz = "Europe/Copenhagen", force = FALSE)
+	file.remove("detections/actel.detections.RData")
+  expect_warning(output <- checkDupDetections(input = detections),
+  	"412 duplicated detections were found. Could an input file be duplicated?", fixed = TRUE)
+	unlink("detections", recursive = TRUE)
+})
+
+dir.create("detections")
+aux <- split(example.detections, example.detections$Receiver)
+for (i in names(aux)[1:3]) {
+  write.csv(aux[[i]], paste0("detections/", i, ".csv"), row.names = FALSE)
+}
+test_that("checkDetectionsBeforeRelease kicks in if needed.", {
+	detections <- loadDetections(start.time = "2018-04-15 00:00:00", tz = "Europe/Copenhagen", force = FALSE)
+	file.remove("detections/actel.detections.RData")	
+	bio <- example.biometrics	
+  recipient <- splitDetections(detections = detections, bio = bio, exclude.tags = NULL)
+  detections.list <- recipient[[1]]
+  bio <- recipient[[2]]
+
+  bio$Release.date[2] <- bio$Release.date[2] + (3600 * 24 * 13)
+  expect_message(
+  	expect_warning(checkDetectionsBeforeRelease(input = detections.list, bio = bio),
+  		"Fish R64K-4451 was detected before being released!", fixed = TRUE),
+  "12 detections from Fish R64K-4451 were removed per user command", fixed = TRUE)
+
+  bio$Release.date[2] <- bio$Release.date[2] + (3600 * 24 * 3)
+  expect_message(
+  	expect_warning(output <- checkDetectionsBeforeRelease(input = detections.list, bio = bio),
+  		"Fish R64K-4451 was detected before being released!", fixed = TRUE),
+  "ALL detections from Fish R64K-4451 were removed per user command.", fixed = TRUE)
+
+  expect_equal(length(output), length(detections.list) - 1)
+})
 
 file.remove(list.files(pattern = "*txt$"))
 rm(list = ls())

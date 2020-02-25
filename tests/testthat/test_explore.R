@@ -127,6 +127,12 @@ test_that("explore stops when any argument does not make sense", {
 			"GUI is set to 'needed' but packages 'gWidgetsRGtk2', 'RGtk2' are not available. Please install them if you intend to run GUI.\n         Disabling GUI (i.e. GUI = 'never') for the current run.", fixed = TRUE)
 		file.remove("detections/actel.detections.RData")
 	}
+
+	expect_error(explore(tz = "Europe/Copenhagen", report = "a"),
+		"'report' must be logical.", fixed = TRUE)
+
+	expect_error(explore(tz = "Europe/Copenhagen", GUI = "never", debug = "a"),
+		"'debug' must be logical.", fixed = TRUE)
 })
 
 test_that("explore results contains all the expected elements.", {
@@ -154,17 +160,25 @@ test_that("explore temp files are removed at the end of the analysis", {
 })
 
 test_that("explore is able to run speed and inactiveness checks.", {
-	output <- suppressWarnings(explore(tz = 'Europe/Copenhagen', report = FALSE, GUI = "never", speed.error = 1000000, inactive.error = 1000000))
+	output <- suppressWarnings(explore(tz = 'Europe/Copenhagen', report = FALSE, GUI = "never", speed.warning = 1000000, inactive.warning = 1000000))
 	file.remove("detections/actel.detections.RData")
 	expect_equal(names(output), c('detections', 'valid.detections', 'spatial', 'deployments', 'arrays',
     'movements', 'valid.movements', 'times', 'rsp.info', 'dist.mat'))
 	file.remove("distances.csv")
-	output <- suppressWarnings(explore(tz = 'Europe/Copenhagen', report = TRUE, GUI = "never", speed.error = 1000000, inactive.error = 1000000))
+	output <- suppressWarnings(explore(tz = 'Europe/Copenhagen', report = TRUE, GUI = "never", speed.warning = 1000000, inactive.warning = 1000000))
 	file.remove("detections/actel.detections.RData")
 	expect_equal(names(output), c('detections', 'valid.detections', 'spatial', 'deployments', 'arrays',
     'movements', 'valid.movements', 'times', 'rsp.info'))
 })
 
-setwd("..")
+test_that("checkPath moves the session to the right environment.", {
+	setwd("..")
+	output <- suppressWarnings(explore(path = "exampleWorkspace", tz = 'Europe/Copenhagen', report = FALSE, GUI = "never"))
+	expect_false(file.exists("temp_log.txt"))
+	expect_false(file.exists("temp_warnings.txt"))
+	expect_false(file.exists("temp_UD.txt"))
+	expect_false(file.exists("temp_debug.txt"))
+})
+
 unlink("exampleWorkspace", recursive = TRUE)
 rm(list = ls())

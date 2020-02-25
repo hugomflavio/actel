@@ -118,6 +118,13 @@ test_that("speedReleaseToFirst can handle a first detection previous to release"
   expect_equal(output[[2]]$Average.speed.m.s[1], NA_real_)
 })
 
+test_that("movementTimes correctly handles events with one detection.", {
+	xmoves <- output[[1]]
+	xmoves$Detections <- 1
+	output <- movementTimes(xmoves)
+	expect_equal(unique(output$Time.in.array), "0:00")
+})
+
 setwd("..")
 unlink("exampleWorkspace", recursive = TRUE)
 rm(list = ls())

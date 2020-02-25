@@ -139,6 +139,24 @@ test_that("residency stops when any argument does not make sense", {
 			"GUI is set to 'needed' but packages 'gWidgetsRGtk2', 'RGtk2' are not available. Please install them if you intend to run GUI.\n         Disabling GUI (i.e. GUI = 'never') for the current run.", fixed = TRUE)
 		file.remove("detections/actel.detections.RData")
 	}
+
+	expect_error(residency(tz = 'Europe/Copenhagen', sections = c("River", "Fjord", "Sea"), report = TRUE, GUI = "never", section.minimum = "a"),
+		"'section.minimum' must be numeric", fixed = TRUE)
+
+	expect_error(residency(tz = 'Europe/Copenhagen', sections = c("River", "Fjord", "Sea"), report = "a", GUI = "never"),
+		"'report' must be logical.", fixed = TRUE)
+
+	expect_error(residency(tz = 'Europe/Copenhagen', sections = c("River", "Fjord", "Sea"), debug = "a", GUI = "never"),
+		"'debug' must be logical.", fixed = TRUE)
+
+	expect_error(residency(tz = 'Europe/Copenhagen', sections = c("River", "Fjord", "Sea"), report = TRUE, GUI = "never", replicates = "a"),
+		"'replicates' must be a list.", fixed = TRUE)
+
+	expect_error(residency(tz = 'Europe/Copenhagen', sections = c("River", "Fjord", "Sea"), report = TRUE, GUI = "never", replicates = list("a")),
+		"All list elements within 'replicates' must be named (i.e. list(Array = 'St.1') rather than list('St.1')).", fixed = TRUE)
+
+	expect_error(residency(tz = 'Europe/Copenhagen', sections = c("River", "Fjord", "Sea"), report = TRUE, GUI = "never", replicates = list(test = "a")),
+		"Some of the array names listed in the 'replicates' argument do not match the study's arrays.", fixed = TRUE)
 })
 
 
@@ -178,20 +196,43 @@ test_that("residency temp files are removed at the end of the analysis", {
 })
 
 test_that("residency is able to run speed and inactiveness checks.", {
-	output <- suppressWarnings(residency(sections = c("River", "Fjord", "Sea"), tz = 'Europe/Copenhagen', report = FALSE, GUI = "never", speed.error = 1000000, inactive.error = 1000000))
+	output <- suppressWarnings(residency(sections = c("River", "Fjord", "Sea"), tz = 'Europe/Copenhagen', 
+		report = FALSE, GUI = "never", speed.warning = 1000000, inactive.warning = 1000000, replicates = list(Sea1 = c("St.16", "St.17"))))
 	file.remove("detections/actel.detections.RData")
 	expect_equal(names(output), c('detections', 'valid.detections', 'spatial', 'deployments', 'arrays',
 		'movements', 'valid.movements', 'section.movements', 'status.df', 'efficiency', 'intra.array.CJS', 
 		'array.times', 'section.times', 'residency.list', 'daily.ratios', 'daily.positions', 'global.ratios', 
 		'last.seen', 'rsp.info', 'dist.mat'))
 	file.remove("distances.csv")
-	expect_warning(output <- residency(sections = c("River", "Fjord", "Sea"), tz = 'Europe/Copenhagen', report = TRUE, GUI = "never", speed.error = 1000000, inactive.error = 1000000),
+	expect_warning(output <- residency(sections = c("River", "Fjord", "Sea"), tz = 'Europe/Copenhagen', report = TRUE, 
+			GUI = "never", speed.error = 1000000, inactive.error = 1000000),
 		"Running inactiveness checks without a distance matrix. Performance may be limited.", fixed = TRUE)
 	file.remove("detections/actel.detections.RData")
 	expect_equal(names(output), c('detections', 'valid.detections', 'spatial', 'deployments', 'arrays',
 		'movements', 'valid.movements', 'section.movements', 'status.df', 'efficiency', 'intra.array.CJS', 
 		'array.times', 'section.times', 'residency.list', 'daily.ratios', 'daily.positions', 'global.ratios', 
 		'last.seen', 'rsp.info'))
+})
+
+test_that("residency can handle multiple release sites.", {
+	xbio <- example.biometrics
+	xbio$Release.site <- as.character(xbio$Release.site)
+	xbio$Release.site[c(1:15)] <- "RS2"
+	xbio$Release.site[c(31:45)] <- "RS3"
+	write.csv(xbio, "biometrics.csv")
+
+	xspatial <- example.spatial
+	xspatial[19, ] <- xspatial[18, ]
+	xspatial$Station.name[19] <- "RS2"
+	xspatial$Array[19] <- "River2"
+	xspatial[20, ] <- xspatial[18, ]
+	xspatial$Station.name[20] <- "RS3"
+	xspatial$Array[20] <- "River3"
+	write.csv(xspatial, "spatial.csv")
+
+	output <- suppressWarnings(residency(sections = c("River", "Fjord", "Sea"), tz = 'Europe/Copenhagen', jump.warning = 1,
+		report = TRUE, GUI = "never", speed.warning = 1000000, inactive.warning = 1000000, replicates = list(Sea1 = c("St.16", "St.17"))))
+	file.remove("detections/actel.detections.RData")
 })
 
 setwd("..")

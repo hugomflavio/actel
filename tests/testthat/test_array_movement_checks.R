@@ -137,6 +137,11 @@ test_that("checkUpstream reacts as expected.", {
     warning = function(w) stop("A warning was issued where it should not have been."))
   expect_warning(checkUpstream(movements = moves[[1]], fish = "test", release = "River2", arrays = arrays, GUI = "never"),
     "Fish test was detected in an array that is not after its release site! Opening relevant data for inspection.\nExpected first array: River2", fixed = TRUE)
+  xmoves <- moves[[1]]
+  xmoves$Valid <- FALSE
+  tryCatch(output <- checkUpstream(movements = xmoves, fish = "test", release = "River2", arrays = arrays, GUI = "never"),
+    warning = function(w) stop("A warning was issued where it should not have been."))
+  expect_equal(output, xmoves)
 })
 
 test_that("simplifyMovements works as expected.", {
