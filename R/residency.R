@@ -1252,7 +1252,7 @@ dailyRatios <- function(res) {
       to =  round.POSIXt(x$Last.time[nrow(x)] - 43200, units = "days"), by = 86400)
     days.list <- lapply(dayrange, function(d) {
       cat(as.character(d), "\n")
-      findSecondsPerSection(res = x, day = d, the.range = dayrange[c(1, length(dayrange))])
+      findSecondsPerSection(res = x, day = d, the.range = range(dayrange))
     })
     setTxtProgressBar(pb, counter)
     names(days.list) <- round.POSIXt(dayrange, units = "days")
@@ -1338,7 +1338,7 @@ findSecondsPerSection <- function(res, day, the.range) {
   } else {
     n <- length(e)
     # calculate difference between day start and first time
-    aux[[length(aux) + 1]] <- difftime(res$First.time[e[1]], day, units = "secs")
+    aux[length(aux) + 1] <- difftime(res$First.time[e[1]], day, units = "secs")
     # Exception for if the day being analysed is the first day (in which case this fragment should be excluded at the end)
     if (day == the.range[1])
       names(aux)[length(aux)] <- "TO.EXCLUDE"
@@ -1356,7 +1356,7 @@ findSecondsPerSection <- function(res, day, the.range) {
       names(aux)[length(aux)] <- res$Section[e[n]]
     # otherwise, remove the seconds already accounted for to a full day, and store the result
     } else {
-      aux[length(aux) + 1] <- 86400 - sum(aux)
+      aux[length(aux) + 1] <- 86400 - sum(as.vector(aux))
       names(aux)[length(aux)] <- res$Section[e[n]]        
     }
     # The number of changes will be the number of events - 1
