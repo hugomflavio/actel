@@ -47,6 +47,7 @@ Enhancements:
   * distanceMatrix will now warn the user if some stations are completely cut off from the rest (i.e. there is no water path).
   * Reports are now opened using utils::browseURL, allowing the report to be open even when the computer is not connected to the internet.
   * Sensor values are now transported through the analysis and returned in the valid detections (for Vemco loggers only for now).
+  * Ensure the legend in the residency graphics follows the order specified in the sections argument.
 
 ## actel 0.1.2
 

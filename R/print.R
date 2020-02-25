@@ -1138,18 +1138,20 @@ printSectionTimes <- function(section.times, bio, detections) {
 #' 
 #' @keywords internal
 #' 
-printGlobalRatios <- function(global.ratios, daily.ratios) {
+printGlobalRatios <- function(global.ratios, daily.ratios, sections) {
   Date <- NULL
   Location <- NULL
   n <- NULL
   cbPalette <- c("#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7", "#999999")
   names(cbPalette) <- c("Orange", "Blue", "Green", "Yellow", "Darkblue", "Darkorange", "Pink", "Grey")
 
-  unique.values <- sort(unique(unlist(lapply(daily.ratios, function(x) {
+  unordered.unique.values <- sort(unique(unlist(lapply(daily.ratios, function(x) {
     aux <- which(grepl("^p", colnames(x)))
     aux <- aux[!is.na(match(colnames(x)[aux - 1], sub("p", "", colnames(x)[aux])))]
     return(colnames(x)[aux - 1])    
   }))))
+  link <- unlist(sapply(sections, function(i) which(grepl(paste0("^", i), unordered.unique.values))))
+  unique.values <- unordered.unique.values[link]
 
   capture <- lapply(names(global.ratios), function(i) {
     plotdata <- suppressMessages(reshape2::melt(global.ratios[[i]][, -ncol(global.ratios[[i]])]))
@@ -1186,7 +1188,7 @@ printGlobalRatios <- function(global.ratios, daily.ratios) {
 #' 
 #' @keywords internal
 #' 
-printIndividualResidency <- function(ratios, dayrange) {
+printIndividualResidency <- function(ratios, dayrange, sections) {
   Date <- NULL
   Location <- NULL
   n <- NULL
@@ -1194,11 +1196,15 @@ printIndividualResidency <- function(ratios, dayrange) {
   names(cbPalette) <- c("Orange", "Blue", "Green", "Yellow", "Darkblue", "Darkorange", "Pink", "Grey")
   counter <- 0
   individual.plots <- NULL
-  unique.values <- sort(unique(unlist(lapply(ratios, function(x) {
+  
+  unordered.unique.values <- sort(unique(unlist(lapply(ratios, function(x) {
     aux <- which(grepl("^p", colnames(x)))
     aux <- aux[!is.na(match(colnames(x)[aux - 1], sub("p", "", colnames(x)[aux])))]
     return(colnames(x)[aux - 1])    
   }))))
+  link <- unlist(sapply(sections, function(i) which(grepl(paste0("^", i), unordered.unique.values))))
+  unique.values <- unordered.unique.values[link]
+
   pb <- txtProgressBar(min = 0, max = length(ratios), style = 3, width = 60)
   capture <- lapply(names(ratios), function(i) {
     counter <<- counter + 1

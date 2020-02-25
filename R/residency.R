@@ -476,7 +476,7 @@ residency <- function(path = NULL, tz, sections, success.arrays = NULL, max.inte
     biometric.fragment <- printBiometrics(bio = bio)
     printDot(dot = dot, sections = sections, spatial = spatial)
     printSectionTimes(section.times = section.times, bio = bio, detections = valid.detections)
-    printGlobalRatios(global.ratios = global.ratios, daily.ratios = daily.ratios)
+    printGlobalRatios(global.ratios = global.ratios, daily.ratios = daily.ratios, sections = sections)
     individual.detection.plots <- printIndividuals(detections.list = detections, bio = bio, 
         tz = tz, spatial = spatial, movements = movements, valid.movements = valid.movements)
     array.circular.plots <- printCircular(times = convertTimesToCircular(array.times), bio = bio, suffix = "_array")
@@ -486,7 +486,7 @@ residency <- function(path = NULL, tz, sections, success.arrays = NULL, max.inte
     dayrange <- range(as.Date(global.ratios[[1]]$Date))
     dayrange[1] <- dayrange[1] - 1
     dayrange[2] <- dayrange[2] + 1
-    individual.residency.plots <- printIndividualResidency(ratios = daily.ratios, dayrange = dayrange)
+    individual.residency.plots <- printIndividualResidency(ratios = daily.ratios, dayrange = dayrange, sections = sections)
     efficiency.fragment <- printEfficiency(intra.CJS = intra.array.CJS, type = "residency")
     printLastSeen(input = last.seen, sections = sections)
     if (nrow(last.seen) > 3) 
