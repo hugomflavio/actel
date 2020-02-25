@@ -755,8 +755,8 @@ checkTagsInUnknownReceivers <- function(detections.list, deployments, spatial) {
           decision <- "b"
         }
         if (decision == "a" | decision == "A") {
-          emergencyBreak()
-          stop("Stopping analysis per user command.\n", call. = FALSE)
+          emergencyBreak() # nocov
+          stop("Stopping analysis per user command.\n", call. = FALSE) # nocov
         }
         if (decision == "b" | decision == "B") {
           recipient <- includeUnknownReceiver(spatial = spatial, deployments = deployments, unknown.receivers = unknown.receivers)
