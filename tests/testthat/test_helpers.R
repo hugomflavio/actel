@@ -105,6 +105,8 @@ test_that("clearWorkspace removes target files.", {
 	test <- 1
 	save(test, file = "actel_migration_results.RData")
 	dir.create("Report")
+	sink("temp.txt")
 	clearWorkspace()
+	sink()
 	expect_message(clearWorkspace(), "Workspace already clean.")
 })

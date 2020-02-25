@@ -13,8 +13,10 @@ test_that("transformSpatial handles release site mismatches properly and stops w
 	xbio <- bio
 	xbio$Release.site <- "unspecified"
 
-	expect_error(transformSpatial(spatial = spatial, bio = xbio, arrays = dot$arrays),
-		"There is more than one top level array in the study area. Please specify release site(s) in the 'spatial.csv' file and in the 'biometrics.csv' file.", fixed = TRUE)
+	expect_warning(
+		expect_error(transformSpatial(spatial = spatial, bio = xbio, arrays = dot$arrays),
+			"There is more than one top level array in the study area. Please specify release site(s) in the 'spatial.csv' file and in the 'biometrics.csv' file.", fixed = TRUE),
+	"At least one release site has been indicated in the spatial.csv file, but no release sites were specified in the biometrics file.\n         Discarding release site information and assuming all fish were released at the top level array to avoid function failure.\n         Please double-check your data.", fixed = TRUE)
 
 	xbio <- bio
 	levels(xbio$Release.site) <- c("RS1", "test")
@@ -29,8 +31,10 @@ test_that("transformSpatial handles release site mismatches properly and stops w
 		"There is a mismatch between the expected first array of a release site and the list of arrays.\n       Arrays listed in the spatial.csv file: River0, River1, River2, River3, River4, River5, River6, Fjord1, Fjord2, Sea1\n       Expected first arrays of the release sites: test\nThe expected first arrays should match the arrays where stations where deployed in the spatial.csv file.", fixed = TRUE)
 
 	xspatial <- spatial[-18, ]
-	expect_error(transformSpatial(spatial = xspatial, bio = bio, arrays = dot$arrays, first.array = NULL),
-		"There is more than one top level array in the study area. Please specify release site(s) in the spatial.csv file and in the biometrics.csv file.", fixed = TRUE)
+	expect_warning(
+		expect_error(transformSpatial(spatial = xspatial, bio = bio, arrays = dot$arrays, first.array = NULL),
+			"There is more than one top level array in the study area. Please specify release site(s) in the spatial.csv file and in the biometrics.csv file.", fixed = TRUE),
+		"Release sites were not specified in the spatial.csv file. Attempting to assume all released fish start at the top level array.", fixed = TRUE)
 })
 
 test_that("transformSpatial handles release site mismatches properly and delivers correct output when possible", {
@@ -38,7 +42,7 @@ test_that("transformSpatial handles release site mismatches properly and deliver
 	xbio$Release.site <- "unspecified"
 
 	expect_warning(output <- transformSpatial(spatial = spatial, bio = xbio, arrays = dot$arrays, first.array = "River1"),
-		"At least one release site has been indicated in the spatial.csv file, but no release sites were specified in the biometrics file.\n   Discarding release site information and assuming all fish were released at the top level array to avoid function failure.\n   Please double-check your data.", fixed = TRUE)
+		"At least one release site has been indicated in the spatial.csv file, but no release sites were specified in the biometrics file.\n         Discarding release site information and assuming all fish were released at the top level array to avoid function failure.\n         Please double-check your data.", fixed = TRUE)
 
 	expect_equal(output$spatial$release.sites$Station.name, factor("unspecified"))
 

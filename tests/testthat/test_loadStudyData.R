@@ -13,7 +13,6 @@ test_that("loadStudyData stops if override contains unknown data.", {
 	expect_error(loadStudyData(tz = "Europe/Copenhagen", override = "test", start.time = NULL, stop.time = NULL, 
 	  sections = NULL, exclude.tags = NULL, disregard.parallels = TRUE),
 		"Some tag signals listed in 'override' ('test') are not listed in the biometrics file.", fixed = TRUE)
-	file.remove("detections/actel.detections.RData")
 })
 
 test_that("loadStudyData recognizes both 'study.dot' and 'study.txt' files.", {

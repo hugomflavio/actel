@@ -1,13 +1,19 @@
 test_that("transitionLayer complains if coord.y or coord.x are given and spatial.csv is not present", {
+	sink("temp.txt")
+
 	expect_warning(transitionLayer(shape = "aux_transitionLayer.shp", size = 10, EPSGcode = 32632, 
 			coord.x = "x.32632", coord.y = "y.32632", directions = 4, force = FALSE),
 	"'coord.x' and 'coord.y' were set but could not find a spatial.csv file in the current working directory. Skipping spatial.csv check.", fixed = TRUE)
+
 	expect_warning(transitionLayer(shape = "aux_transitionLayer.shp", size = 10, EPSGcode = 32632, 
 			coord.x = "x.32632", directions = 4, force = FALSE),
 	"'coord.x' was set but 'coord.y' was not. Skipping spatial.csv check.", fixed = TRUE)
+
 	expect_warning(transitionLayer(shape = "aux_transitionLayer.shp", size = 10, EPSGcode = 32632, 
 			coord.y = "x.32632", directions = 4, force = FALSE),
 	"'coord.y' was set but 'coord.x' was not. Skipping spatial.csv check.", fixed = TRUE)
+
+	sink()
 })
 
 xspatial <- example.spatial[8:11, ]
@@ -16,62 +22,91 @@ xspatial$y.32632 <- c(6242912, 6242630, 6242387, 6242169)
 write.csv(xspatial, "spatial.csv", row.names = FALSE)
 
 test_that("transitionLayer complains if coord.y or coord.x are not valid column names", {
+	sink("temp.txt")
+
 	expect_warning(transitionLayer(shape = "aux_transitionLayer.shp", size = 10, EPSGcode = 32632, 
 			coord.x = "test", coord.y = "y.32632", directions = 4, force = FALSE),
 	"Could not find column 'test' in the spatial.csv file. Skipping spatial.csv check.", fixed = TRUE)	
+
 	expect_warning(transitionLayer(shape = "aux_transitionLayer.shp", size = 10, EPSGcode = 32632, 
 			coord.x = "x.32632", coord.y = "test", directions = 4, force = FALSE),
 	"Could not find column 'test' in the spatial.csv file. Skipping spatial.csv check.", fixed = TRUE)
+
 	expect_warning(transitionLayer(shape = "aux_transitionLayer.shp", size = 10, EPSGcode = 32632, 
 			coord.x = "test2", coord.y = "test", directions = 4, force = FALSE),
 	"Could not find columns 'test2' and 'test' in the spatial.csv file. Skipping spatial.csv check.", fixed = TRUE)
+
+	sink()
 })
 
 test_that("transitionLayer only allows valid buffers", {
+	sink("temp.txt")
+
 	expect_error(transitionLayer(shape = "aux_transitionLayer.shp", size = 10, EPSGcode = 32632, 
 			buffer = "a", directions = 4, force = FALSE),
 	"'buffer' must be numeric (in metres).", fixed = TRUE)
+
 	expect_error(transitionLayer(shape = "aux_transitionLayer.shp", size = 10, EPSGcode = 32632, 
 			buffer = 1:2, directions = 4, force = FALSE),
 	"'buffer' must either contain one value (applied to all four corners), or four values (applied to xmin, xmax, ymin and ymax, respectively)", fixed = TRUE)
+	
 	expect_error(transitionLayer(shape = "aux_transitionLayer.shp", size = 10, EPSGcode = 32632, 
 			buffer = -1, directions = 4, force = FALSE),
 	"'buffer' values cannot be negative.", fixed = TRUE)
-	transitionLayer(shape = "aux_transitionLayer.shp", size = 10, EPSGcode = 32632, 
-			buffer = 100, directions = 4, force = FALSE)
-	transitionLayer(shape = "aux_transitionLayer.shp", size = 10, EPSGcode = 32632, 
-		buffer = c(50, 100, 200, 250), directions = 4, force = FALSE)
+	
+	tryCatch(transitionLayer(shape = "aux_transitionLayer.shp", size = 10, EPSGcode = 32632, 
+			buffer = 100, directions = 4, force = FALSE), 
+		warning = function(w) stop("A warning was issued where it should not have been."))
+	
+	tryCatch(transitionLayer(shape = "aux_transitionLayer.shp", size = 10, EPSGcode = 32632, 
+			buffer = c(50, 100, 200, 250), directions = 4, force = FALSE),
+		warning = function(w) stop("A warning was issued where it should not have been."))
 
+	sink()
 })
 
 test_that("transitionLayer stops if shape is not present or is not .shp", {
+	sink("temp.txt")
+
 	expect_error(transitionLayer(shape = "test.shp", size = 10, EPSGcode = 32632, 
 			buffer = 100, directions = 4, force = FALSE),
 	"Could not find file 'test.shp' in the working directory.", fixed = TRUE)
 
 	write.table(1, "test.txt")
+
 	expect_error(transitionLayer(shape = "test.txt", size = 10, EPSGcode = 32632, 
 			buffer = 100, directions = 4, force = FALSE),
 	"'shape' must be a .shp file.", fixed = TRUE)
+
 	file.remove("test.txt")
+
+	sink()
 })
 
 test_that("transitionLayer stops if requested resolution is very high.", {
+	sink("temp.txt")
+
 	expect_error(transitionLayer(shape = "aux_transitionLayer.shp", size = 0.1, EPSGcode = 32632, 
 		directions = 4, force = FALSE),
 	"The chosen pixel size creates a transition layer with one or two axes greater than
 2000 pixels. This can lead to very long computing times and ultimately the function  may
 fail due to lack of free RAM to allocate the results. If you really want to use this pixel
 size, rerun the function with force = TRUE.", fixed = TRUE)
+
+	sink()
 })
 
 test_that("transitionLayer and distancesMatrix stop if more than one value included in 'EPSGcode'", {
+	sink("temp.txt")
+
 	expect_error(transitionLayer(shape = "aux_transitionLayer.shp", size = 5, EPSGcode = 1:2, 
 			coord.x = "x.32632", coord.y = "y.32632", directions = 16, force = FALSE),
 	"Please provide only one EPSG code.", fixed = TRUE)
+
 	expect_error(transitionLayer(shape = "aux_transitionLayer.shp", size = 5, EPSGcode = "a", 
 			coord.x = "x.32632", coord.y = "y.32632", directions = 16, force = FALSE),
 	"'EPSGcode' must be numeric.", fixed = TRUE)
+
 	expect_error(transitionLayer(shape = "aux_transitionLayer.shp", size = 5, EPSGcode = 11234122, 
 			coord.x = "x.32632", coord.y = "y.32632", directions = 16, force = FALSE),
 	"Could not recognize the selected EPSG code. You can find a list of available EPSG codes by running rgdal::make_EPSG()", fixed = TRUE)
@@ -79,17 +114,26 @@ test_that("transitionLayer and distancesMatrix stop if more than one value inclu
 	expect_error(distancesMatrix(t.layer = "transition.layer.RData", EPSGcode = 1:2, 
   		coord.x = "x.32632", coord.y = "y.32632", actel = TRUE),
 	"Please provide only one EPSG code.", fixed = TRUE)
+
 	expect_error(distancesMatrix(t.layer = "transition.layer.RData", EPSGcode = "a", 
   		coord.x = "x.32632", coord.y = "y.32632", actel = TRUE),
 	"'EPSGcode' must be numeric.", fixed = TRUE)
+
 	expect_error(distancesMatrix(t.layer = "transition.layer.RData", EPSGcode = 32612332, 
   		coord.x = "x.32632", coord.y = "y.32632", actel = TRUE),
 	"Could not recognize the selected EPSG code. You can find a list of available EPSG codes by running rgdal::make_EPSG()", fixed = TRUE)
+
+	sink()
 })
 
 test_that("distancesMatrix produces a warning when there are viable passages between stations", {
+	sink("temp.txt")
+
 	transitionLayer(shape = "aux_transitionLayer.shp", size = 5, EPSGcode = 32632, 
 		coord.x = "x.32632", coord.y = "y.32632", directions = 16, force = FALSE)
+
+	sink()
+
 	expect_warning(dist.mat <- distancesMatrix(t.layer = "transition.layer.RData", EPSGcode = 32632, 
   		coord.x = "x.32632", coord.y = "y.32632", actel = TRUE),
 	"At least one station is completely blocked off from the remaining stations by land. Filling 
@@ -136,8 +180,11 @@ test_that("distancesMatrix handles bad data correctly", {
   		coord.x = "x.32632", coord.y = "y.32632", starters = "spatial.csv", targets = "test", id.col = "test", actel = FALSE),
 	"Could not find a 'test' file in the working directory.", fixed = TRUE)
 
+	sink("temp.txt")
 	transitionLayer(shape = "aux_transitionLayer.shp", size = 5, EPSGcode = 32632, 
 		coord.x = "x.32632", coord.y = "y.32632", directions = 16, force = FALSE, buffer = 100)
+	sink()
+
 	expect_warning(distancesMatrix(t.layer = "transition.layer.RData", EPSGcode = 32632, 
   		coord.x = "x.32632", coord.y = "y.32632", starters = "spatial.csv", id.col = "Array", actel = FALSE),
 	"The 'Array' column in the 'spatial.csv' file contains duplicated values; skipping row naming.", fixed = TRUE)
@@ -165,18 +212,25 @@ xspatial$x.32632 <- c(454568, 453400, 452047, 452975)
 xspatial$y.32632 <- c(6243912, 6242630, 6242387, 6241169)
 write.csv(xspatial, "spatial.csv", row.names = FALSE)
 test_that("transitionLayer expands the grid range if the spatial objects are outside the shape range.", {
+	sink("temp.txt")
+
 	expect_message(transitionLayer(shape = "aux_transitionLayer.shp", size = 10, EPSGcode = 32632, 
 			coord.x = "x.32632", coord.y = "y.32632", directions = 4, force = FALSE),
 	"Extending shape's minimum X range to ensure the stations fit in the range.", fixed = TRUE)
+
 	expect_message(transitionLayer(shape = "aux_transitionLayer.shp", size = 10, EPSGcode = 32632, 
 			coord.x = "x.32632", coord.y = "y.32632", directions = 4, force = FALSE),
 	"Extending shape's maximum X range to ensure the stations fit in the range.", fixed = TRUE)
+
 	expect_message(transitionLayer(shape = "aux_transitionLayer.shp", size = 10, EPSGcode = 32632, 
 			coord.x = "x.32632", coord.y = "y.32632", directions = 4, force = FALSE),
 	"Extending shape's minimum Y range to ensure the stations fit in the range.", fixed = TRUE)
+
 	expect_message(transitionLayer(shape = "aux_transitionLayer.shp", size = 10, EPSGcode = 32632, 
 			coord.x = "x.32632", coord.y = "y.32632", directions = 4, force = FALSE),
 	"Extending shape's maximum Y range to ensure the stations fit in the range.", fixed = TRUE)
+
+	sink()
 })
 
 file.remove(list.files(pattern = "*txt$"))

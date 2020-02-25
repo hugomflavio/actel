@@ -82,7 +82,8 @@ test_that("assembleArrayCJS can cope with 0% efficiency", {
   xmatrices$A.RS1$River5 <- c(rep(0, 14), 1)
   xmatrices$B.RS1$River5 <- c(0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0)
 
-  m.by.array <- breakMatricesByArray(m = xmatrices, arrays = arrays, type = "all")
+  expect_warning(m.by.array <- breakMatricesByArray(m = xmatrices, arrays = arrays, type = "all"),
+    "No fish passed through array River0. Skipping efficiency estimations for this array.", fixed = TRUE)
 
   CJS.list <- lapply(m.by.array, function(m) {
     if (length(m) == 1)
@@ -173,7 +174,8 @@ status.df <- assembleOutput(timetable = timetable, bio = bio, spatial = spatial,
 the.matrices <- assembleMatrices(spatial = spatial, movements = vm, status.df = status.df,
     arrays = arrays, paths = paths, dotmat = dotmat)[[2]]
 
-m.by.array <- breakMatricesByArray(m = the.matrices, arrays = arrays, type = "all")
+expect_warning(m.by.array <- breakMatricesByArray(m = the.matrices, arrays = arrays, type = "all"),
+  "No fish passed through array River0. Skipping efficiency estimations for this array.", fixed = TRUE)
 
 CJS.list <- lapply(m.by.array, function(m) {
   if (length(m) == 1)
