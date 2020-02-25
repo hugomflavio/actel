@@ -37,7 +37,11 @@ printProgression <- function(dot, sections, overall.CJS, spatial, status.df) {
        diagram_nodes$fillcolor[grepl(sections[i], diagram_nodes$label)] <- cbPalette[i]
     }
   } else {
-    diagram_nodes$fillcolor <- rep("#56B4E9", nrow(diagram_nodes))
+    diagram_nodes$fillcolor <- rep(NA_character_, nrow(diagram_nodes))
+    new.fill <- gg_colour_hue(length(sections))
+    for (i in 1:length(sections)) {
+       diagram_nodes$fillcolor[grepl(sections[i], diagram_nodes$label)] <- new.fill[i]
+    }
   }
   for (i in 1:nrow(diagram_nodes)) {
     link <- grep(diagram_nodes$label[i], names(overall.CJS$absolutes))
