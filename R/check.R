@@ -485,10 +485,6 @@ checkReport <- function(report){
   appendTo("debug", "Running checkReport")
   if (report) {
     appendTo("Report", "M: 'report' option has been activated.")
-    if (length(setdiff(c("ggplot2", "reshape2"), rownames(installed.packages()))) > 0) {
-      appendTo(c("Screen", "Report", "Warning"), "'report' can only be activated if 'ggplot2' and 'reshape2' are installed. Please install these. Deactivating 'Report' for the current job.")
-      report <- FALSE
-    } 
     if (!rmarkdown::pandoc_available()) {
       appendTo(c("Screen", "Report", "Warning"), "'report' can only be activated if pandoc is installed. You can find how to install pandoc at: https://pandoc.org/installing.html\n   You can also check if pandoc is available to R by running rmarkdown::pandoc_available()")
       message("Would you like to:\n\n  a) Continue with 'report' set to FALSE\n  b) Stop the analysis and install pandoc.\n")
