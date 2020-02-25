@@ -499,7 +499,7 @@ residency <- function(path = NULL, tz, sections, success.arrays = NULL, max.inte
 # wrap up the txt report
   appendTo("Report", "\n-------------------")
   if (file.exists("temp_UD.txt")) 
-    appendTo("Report", paste0("User interventions:\n-------------------\n", gsub("\r", "", readr::read_file("temp_UD.txt")), "-------------------"))
+    appendTo("Report", paste0("User interventions:\n-------------------\n", gsub("\r", "", readr::read_file("temp_UD.txt")), "-------------------")) # nocov
   
   appendTo("Report", paste0("Function call:\n-------------------\n", the.function.call, "\n-------------------"))
 # ------------------
@@ -1016,7 +1016,7 @@ res_assembleOutput <- function(res.df, bio, spatial, sections, tz) {
   status.df$Release.date <- as.POSIXct(status.df$Release.date, tz = tz)
   status.df$Very.last.time <- as.POSIXct(status.df$Very.last.time, tz = tz)
   
-  if (file.exists("temp_comments.txt")) {
+  if (file.exists("temp_comments.txt")) { # nocov start
     temp <- read.table("temp_comments.txt", header = FALSE, sep = "\t")
     status.df[, "Comments"] <- NA_character_
     for (i in seq_len(nrow(temp))) {
@@ -1027,7 +1027,7 @@ res_assembleOutput <- function(res.df, bio, spatial, sections, tz) {
         status.df$Comments[link] <- paste(status.df$Comments[link], temp[i, 2], sep = "// ")
       }
     }
-  }
+  } # nocov end
   appendTo("debug", "Done.")
   return(status.df)
 }

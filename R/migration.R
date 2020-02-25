@@ -360,7 +360,7 @@ migration <- function(path = NULL, tz, sections, success.arrays = NULL, max.inte
           dist.mat = dist.mat, invalid.dist = invalid.dist, GUI = GUI)
       }
     } else {
-      output <- overrideValidityChecks(moves = movements[[i]], fish = names(movements)[i], GUI = GUI)
+      output <- overrideValidityChecks(moves = movements[[i]], fish = names(movements)[i], GUI = GUI) # nocov
     }
     return(output)
   })
@@ -569,7 +569,7 @@ migration <- function(path = NULL, tz, sections, success.arrays = NULL, max.inte
 # wrap up the txt report
   appendTo("Report", "\n-------------------")
   if (file.exists("temp_UD.txt")) 
-    appendTo("Report", paste0("User interventions:\n-------------------\n", gsub("\r", "", readr::read_file("temp_UD.txt")), "-------------------"))
+    appendTo("Report", paste0("User interventions:\n-------------------\n", gsub("\r", "", readr::read_file("temp_UD.txt")), "-------------------")) # no cov
   
   appendTo("Report", paste0("Function call:\n-------------------\n", the.function.call, "\n-------------------"))
 # ------------------
@@ -1189,7 +1189,7 @@ assembleOutput <- function(timetable, bio, spatial, sections, dist.mat, invalid.
     }
   }  
 
-  if (file.exists("temp_comments.txt")) {
+  if (file.exists("temp_comments.txt")) { # nocov start
     temp <- read.table("temp_comments.txt", header = F, sep = "\t")
     status.df[, "Comments"] <- NA
     for (i in seq_len(nrow(temp))) {
@@ -1200,7 +1200,7 @@ assembleOutput <- function(timetable, bio, spatial, sections, dist.mat, invalid.
         status.df$Comments[link] <- paste(status.df$Comments[link], temp[i, 2], sep = "// ")
       }
     }
-  }
+  } # nocov end
   appendTo("debug", "Done.")
   return(status.df)
 }

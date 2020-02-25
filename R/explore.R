@@ -318,7 +318,7 @@ detections.list <- study.data$detections.list
           dist.mat = dist.mat, invalid.dist = invalid.dist, GUI = GUI)
       }
     } else {
-      output <- overrideValidityChecks(moves = movements[[i]], fish = names(movements)[i], GUI = GUI)
+      output <- overrideValidityChecks(moves = movements[[i]], fish = names(movements)[i], GUI = GUI) # nocov
     }
     return(output)
   })
