@@ -1286,22 +1286,22 @@ findSecondsPerSection <- function(res, day, the.range) {
     if (e == 1) {
       # Exception for if the fish was only detected one day, calculates difference between event start and stop.
       if (the.range[2] == the.range[1]) {
-        aux[[length(aux) + 1]] <- difftime(res$Last.time[e], res$First.time[e], units = "secs")
+        aux[length(aux) + 1] <- difftime(res$Last.time[e], res$First.time[e], units = "secs")
         names(aux)[length(aux)] <- res$Section[e]        
-        aux[[length(aux) + 1]] <- 0
+        aux[length(aux) + 1] <- 0
         names(aux)[length(aux)] <- "Changes"
       } else {
         # Exception for if the day being analysed is the last day, calculates difference between day start and event stop.
         if (day == the.range[2]) {
-          aux[[length(aux) + 1]] <- difftime(res$Last.time[e], day, units = "secs")
+          aux[length(aux) + 1] <- difftime(res$Last.time[e], day, units = "secs")
           names(aux)[length(aux)] <- res$Section[e]
         # Otherwise calculate difference between event start and day end, and trim at a full day.
         } else {
-          aux[[length(aux) + 1]] <- min(86400, as.numeric(difftime(day + 86400, res$First.time[e], units = "secs")))
+          aux[length(aux) + 1] <- min(86400, as.numeric(difftime(day + 86400, res$First.time[e], units = "secs")))
           names(aux)[length(aux)] <- res$Section[e]
         }
         # Regardless of path, if length(e) == 1 and the event is the first one, the number of changes is 0
-        aux[[length(aux) + 1]] <- 0
+        aux[length(aux) + 1] <- 0
         names(aux)[length(aux)] <- "Changes"
       }
     # If there is only one event but that event is not the very first one
@@ -1310,26 +1310,26 @@ findSecondsPerSection <- function(res, day, the.range) {
       if (res$First.time[e] < day) {
         # Exception for the last day, calculates difference between day start and event stop.
         if (day == the.range[2]) {
-          aux[[length(aux) + 1]] <- difftime(res$Last.time[e], day, units = "secs")
+          aux[length(aux) + 1] <- difftime(res$Last.time[e], day, units = "secs")
           names(aux)[length(aux)] <- res$Section[e]
         # otherwise, since there are no more 'e', the fish has stayed the whole day in the event
         } else {
-          aux[[length(aux) + 1]] <- 86400
+          aux[length(aux) + 1] <- 86400
           names(aux)[length(aux)] <- res$Section[e]        
         }
         # In either case above the fish spends the whole time in the event, so changes = 0
-        aux[[length(aux) + 1]] <- 0
+        aux[length(aux) + 1] <- 0
         names(aux)[length(aux)] <- "Changes"
       # If the start time of the event is already in the day itself
       } else {
         # Start by storing the time spent in previous event (i.e. difference between day start and event start)
-        aux[[length(aux) + 1]] <- difftime(res$First.time[e], day, units = "secs")
+        aux[length(aux) + 1] <- difftime(res$First.time[e], day, units = "secs")
         names(aux)[length(aux)] <- res$Section[e - 1]
         # Then, since there are no more events, calculate difference between event start and day end.
-        aux[[length(aux) + 1]] <- difftime(day + 86400, res$First.time[e], units = "secs")
+        aux[length(aux) + 1] <- difftime(day + 86400, res$First.time[e], units = "secs")
         names(aux)[length(aux)] <- res$Section[e]
         # Since the day is split in two events, there is 1 change
-        aux[[length(aux) + 1]] <- 1
+        aux[length(aux) + 1] <- 1
         names(aux)[length(aux)] <- "Changes"
       }
     }
@@ -1345,21 +1345,21 @@ findSecondsPerSection <- function(res, day, the.range) {
       names(aux)[length(aux)] <- res$Section[e[1] - 1]
     # For all events except the last, calculate the difference between first and last time of the event.
     for (i in e[-n]) {
-      aux[[length(aux) + 1]] <- difftime(res$Last.time[i], res$First.time[i], units = "secs")
+      aux[length(aux) + 1] <- difftime(res$Last.time[i], res$First.time[i], units = "secs")
       names(aux)[length(aux)] <- res$Section[i]
     }
     # For the very last day
     # exception for if the day being analysed is the last day, where the behaviour should be the same as the above
     if (day == the.range[2]) {
-      aux[[length(aux) + 1]] <- difftime(res$Last.time[e[n]], res$First.time[e[n]], units = "secs")
+      aux[length(aux) + 1] <- difftime(res$Last.time[e[n]], res$First.time[e[n]], units = "secs")
       names(aux)[length(aux)] <- res$Section[e[n]]
     # otherwise, remove the seconds already accounted for to a full day, and store the result
     } else {
-      aux[[length(aux) + 1]] <- 86400 - sum(aux)
+      aux[length(aux) + 1] <- 86400 - sum(aux)
       names(aux)[length(aux)] <- res$Section[e[n]]        
     }
     # The number of changes will be the number of events - 1
-    aux[[length(aux) + 1]] <- length(e) - 1
+    aux[length(aux) + 1] <- length(e) - 1
     names(aux)[length(aux)] <- "Changes"
   }
   # Conclude the exception started above, where the first fragment must be excluded
