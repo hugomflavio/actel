@@ -132,10 +132,11 @@ test_that("getResidency works as expected", {
   candidate.events <- which(res$First.time <= day + 86400)
   potential.events <- which(res$First.time[candidate.events] >= day)
   # IF potential events returns 0, then the only valid event is the very last candidate
-  if (length(potential.events) == 0)
+  if (length(potential.events) == 0) {
     e <- tail(candidate.events, 1)
-  else
+  } else {
     e <- potential.events
+  }
   # IF there is only one event
   if (length(e) == 1) {
     # and that event is the very first one
@@ -195,10 +196,11 @@ test_that("getResidency works as expected", {
     # calculate difference between day start and first time
     aux[[length(aux) + 1]] <- difftime(res$First.time[e[1]], day, units = "secs")
     # Exception for if the day being analysed is the first day (in which case this fragment should be excluded at the end)
-    if (day == the.range[1])
+    if (day == the.range[1]) {
       names(aux)[length(aux)] <- "TO.EXCLUDE"
-    else
+    } else {
       names(aux)[length(aux)] <- res$Section[e[1] - 1]
+    }
     # For all events except the last, calculate the difference between first and last time of the event.
     for (i in e[-n]) {
       aux[length(aux) + 1] <- difftime(res$Last.time[i], res$First.time[i], units = "secs")
