@@ -499,7 +499,7 @@ test_that("group CJS functions work as expected.", {
 
 
 test_that("special cases in oneWayMoves are working as expected", {
-	expect_equal(oneWayMoves(moves[[1]][1, ], arrays), NULL)
+	expect_equal(oneWayMoves(moves[[1]][1, ], arrays), moves[[1]][1, ])
 })
 
 
