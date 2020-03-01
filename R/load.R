@@ -61,7 +61,7 @@ loadStudyData <- function(tz, override = NULL, start.time, stop.time,
   spatial <- recipient$spatial
   sections <- recipient$sections
   detections$Array <- factor(detections$Array, levels = unlist(spatial$array.order)) # Fix array levels
-  link <- match(names(arrays), unlist(spatial$array.order))
+  link <- match(unlist(spatial$array.order), names(arrays))
   arrays <- arrays[link] # Reorder arrays by spatial order
   rm(link)
   
@@ -244,7 +244,7 @@ dotList <- function(input, sections = NULL) {
   }
 
   arrays <- list()
-  for (a in unique(unlist(input[,c(1, 3)]))) {
+  for (a in unique(c(t(input[, c(1, 3)])))) {
     auxA <- input[input$A == a, ]
     auxA <- auxA[auxA$to != "<-", ]
     auxB <- input[input$B == a, ]
