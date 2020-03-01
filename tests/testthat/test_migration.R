@@ -260,6 +260,25 @@ test_that("migration is able to run speed and inactiveness checks.", {
 		'matrices', 'overall.CJS', 'intra.array.CJS', 'times', 'rsp.info'))
 })
 
+test_that("the debug option works as expected", {
+	output <- suppressWarnings(migration(sections = c("River", "Fjord", "Sea"), tz = 'Europe/Copenhagen', report = FALSE, 
+		GUI = "never", debug = TRUE))
+	expect_true(file.exists("migration_debug.RData"))
+	aux <- dataToList("migration_debug.RData")
+	expect_equal(names(aux), c('study.data', 'jump.error', 'speed.error', 'valid.movements', 'valid.detections', 
+		'times', 'success.arrays', 'split.CJS', 'overall.CJS', 'movements', 'replicates', 'invalid.dist', 'detections.list', 
+		'dotmat', 'dist.mat', 'resultsname', 'my.home', 'status.df', 'group.overview', 'section.overview', 'tz', 
+		'the.function.call', 'max.interval', 'detections', 'minimum.detections', 'paths', 'deployments', 'arrays', 
+		'group.CJS', 'override.fragment', 'report', 'CJS.list', 'inst.ver.short', 'timetable', 'the.time', 'override', 
+		'jobname', 'speed.warning', 'inactive.warning', 'release.overview', 'path', 'calculate.efficiency', 'GUI', 
+		'spatial', 'inactive.error', 'the.matrices', 'do.checkInactiveness', 'section.movements', 'sections', 
+		'exclude.tags', 'matrices', 'intra.array.CJS', 'release_nodes', 'disregard.parallels', 'do.checkSpeeds', 
+		'speed.method', 'dot', 'stop.time', 'start.time', 'debug', 'jump.warning', 'm.by.array', 'link', 
+		'if.last.skip.section', 'bio', 'rsp.info'))
+	expect_true(file.exists("temp_warnings.txt"))
+	expect_true(file.exists("temp_debug.txt"))
+})
+
 setwd("..")
 unlink("exampleWorkspace", recursive = TRUE)
 rm(list = ls())

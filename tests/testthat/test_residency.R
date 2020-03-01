@@ -235,6 +235,24 @@ test_that("residency can handle multiple release sites.", {
 	file.remove("detections/actel.detections.RData")
 })
 
+test_that("the debug option works as expected", {
+	output <- suppressWarnings(residency(sections = c("River", "Fjord", "Sea"), tz = 'Europe/Copenhagen', report = FALSE, 
+		GUI = "never", debug = TRUE))
+	expect_true(file.exists("residency_debug.RData"))
+	aux <- dataToList("residency_debug.RData")
+	expect_equal(names(aux), c('study.data', 'jump.error', 'speed.error', 'valid.movements', 'valid.detections', 
+		'success.arrays', 'movements', 'array.times', 'replicates', 'invalid.dist', 'detections.list', 'dotmat', 
+		'dist.mat', 'resultsname', 'my.home', 'status.df', 'efficiency', 'tz', 'the.function.call', 'max.interval', 
+		'section.minimum', 'last.seen', 'daily.positions', 'detections', 'minimum.detections', 'paths', 'global.ratios', 
+		'deployments', 'arrays', 'override.fragment', 'report', 'residency.list', 'inst.ver.short', 'the.time', 
+		'override', 'jobname', 'inactive.warning', 'speed.warning', 'path', 'GUI', 'spatial', 'inactive.error', 
+		'do.checkInactiveness', 'section.movements', 'section.times', 'sections', 'exclude.tags', 'daily.ratios', 
+		'intra.array.CJS', 'do.checkSpeeds', 'speed.method', 'dot', 'stop.time', 'start.time', 'res.df', 'debug', 
+		'jump.warning', 'link', 'bio', 'rsp.info'))
+	expect_true(file.exists("temp_warnings.txt"))
+	expect_true(file.exists("temp_debug.txt"))
+})
+
 setwd("..")
 unlink("exampleWorkspace", recursive = TRUE)
 rm(list = ls())

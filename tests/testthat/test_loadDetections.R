@@ -11,6 +11,34 @@ test_that("loadDetections stops if detections folder is empty", {
 })
 
 aux <- split(example.detections, example.detections$Receiver)
+
+# Force Thelma Old structure
+transmitter_aux <- strsplit(as.character(aux[[2]]$Transmitter), "-", fixed = TRUE)
+receiver_aux <- strsplit(as.character(aux[[2]]$Receiver), "-", fixed = TRUE)
+aux[[2]] <- data.frame(
+	`Date and Time UTC` = aux[[2]]$Date.and.Time.UTC,
+	`TBR Serial Number` = sapply(receiver_aux, function(x) x[2]),
+	`Unix Timestamp UTC` = rep(NA_real_, nrow(aux[[2]])),
+	Millisecond = rep(NA_real_, nrow(aux[[2]])),
+	CodeType = rep("R64K", nrow(aux[[2]])),
+	Id = sapply(transmitter_aux, function(x) x[3]),
+	Data = rep(NA_real_, nrow(aux[[2]])),
+	`Signal to Noise Ratio` = rep(NA_real_, nrow(aux[[2]])))
+colnames(aux[[2]])[2] <- "TBR Serial Number"
+ 
+# Force Thelma New structure
+transmitter_aux <- strsplit(as.character(aux[[3]]$Transmitter), "-", fixed = TRUE)
+receiver_aux <- strsplit(as.character(aux[[3]]$Receiver), "-", fixed = TRUE)
+aux[[3]] <- data.frame(
+Date.and.Time..UTC. = aux[[3]]$Date.and.Time.UTC,
+Unix.Timestamp..UTC. = rep(NA_real_, nrow(aux[[3]])),
+ID = sapply(transmitter_aux, function(x) x[3]),
+Data = rep(NA_real_, nrow(aux[[3]])),
+Protocol = rep("R64K-69kHz", nrow(aux[[3]])),
+SNR = rep(NA_real_, nrow(aux[[3]])),
+Receiver = sapply(receiver_aux, function(x) x[2]))
+
+
 for (i in names(aux)[1:3]) {
   write.csv(aux[[i]], paste0("detections/", i, ".csv"), row.names = FALSE)
 }

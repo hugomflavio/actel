@@ -160,7 +160,7 @@ test_that("explore temp files are removed at the end of the analysis", {
 })
 
 test_that("explore is able to run speed and inactiveness checks.", {
-	output <- suppressWarnings(explore(tz = 'Europe/Copenhagen', report = FALSE, GUI = "never", speed.warning = 1000000, inactive.warning = 1000000))
+	output <- suppressWarnings(explore(tz = 'Europe/Copenhagen', report = FALSE, GUI = "never", speed.error = 1000000, inactive.error = 1000000))
 	file.remove("detections/actel.detections.RData")
 	expect_equal(names(output), c('detections', 'valid.detections', 'spatial', 'deployments', 'arrays',
     'movements', 'valid.movements', 'times', 'rsp.info', 'dist.mat'))
@@ -178,7 +178,24 @@ test_that("checkPath moves the session to the right environment.", {
 	expect_false(file.exists("temp_warnings.txt"))
 	expect_false(file.exists("temp_UD.txt"))
 	expect_false(file.exists("temp_debug.txt"))
+	setwd("exampleWorkspace")
 })
 
+test_that("the debug option works as expected", {
+	output <- suppressWarnings(explore(tz = 'Europe/Copenhagen', report = FALSE, GUI = "never", debug = TRUE))
+	expect_true(file.exists("explore_debug.RData"))
+	aux <- dataToList("explore_debug.RData")
+	expect_equal(names(aux), c('study.data', 'do.checkSpeeds', 'arrays', 'dist.mat', 'dotmat', 'the.time', 
+		'start.time', 'my.home', 'speed.warning', 'GUI', 'jump.error', 'speed.error', 'valid.movements', 
+		'times', 'deployments', 'dot', 'jump.warning', 'tz', 'inactive.error', 'valid.detections', 'max.interval', 
+		'inst.ver.short', 'detections.list', 'stop.time', 'jobname', 'override', 'path', 'minimum.detections', 
+		'movements', 'exclude.tags', 'detections', 'the.function.call', 'report', 'invalid.dist', 'resultsname', 
+		'rsp.info', 'sections', 'link', 'do.checkInactiveness', 'override.fragment', 'spatial', 'speed.method', 
+		'inactive.warning', 'bio', 'debug'))
+	expect_true(file.exists("temp_warnings.txt"))
+	expect_true(file.exists("temp_debug.txt"))
+})
+
+setwd("..")
 unlink("exampleWorkspace", recursive = TRUE)
 rm(list = ls())
