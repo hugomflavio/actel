@@ -23,6 +23,7 @@ Fixes:
   * Fix bug causing speed calculations  to crash in the presence of unknown detections.
   * Fix bug where the Invalid.detections and Invalid.events columns in the status.df of residency would always return 0.
   * Prevent invalid detections from being considered during intra-array efficiency estimations.
+  * Fix bug where fish with only one movement event would not count towards efficiency calculations.
 
 Changes:
   * `array.overview` is now called `group.overview`.

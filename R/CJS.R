@@ -574,28 +574,20 @@ efficiencyMatrix <- function(movements, arrays, paths, dotmat) {
 #' @keywords internal
 #' 
 oneWayMoves <- function(movements, arrays) {
-  check <- TRUE
-  abort <- FALSE
   if (nrow(movements) > 1) {
-    while (check) {
+    while (TRUE) {
       aux <- data.frame(from = movements$Array[-nrow(movements)], to = movements$Array[-1])
       link <- apply(aux, 1, function(x) x[2] %in% arrays[[x[1]]]$all.after)
       if (any(link)) {
         if (all(link))
-          check <- FALSE
+          return(movements)
         else
           movements <- movements[c(TRUE, link), ]
       } else {
-        check <- FALSE
-        abort <- TRUE
+        return(movements[1, , drop = FALSE])
       }
     }
   } else {
-    abort <- TRUE
-  }
-  if (abort)
-    return(NULL)
-  else
     return(movements)
   }
 }
