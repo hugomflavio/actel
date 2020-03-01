@@ -26,11 +26,7 @@ residency(
   section.minimum = 2,
   replicates = NULL,
   GUI = c("needed", "always", "never"),
-  debug = FALSE,
-  maximum.time = 60,
-  tz.study.area = NULL,
-  start.timestamp = NULL,
-  end.timestamp = NULL
+  debug = FALSE
 )
 }
 \arguments{
@@ -124,14 +120,6 @@ prompted to open and examine that file. Defaults to "needed".}
 
 \item{debug}{Logical: Should temporary files be kept at the end of the
 analysis?}
-
-\item{maximum.time}{DEPRECATED. See \code{max.interval}.}
-
-\item{tz.study.area}{DEPRECATED. See \code{tz}.}
-
-\item{start.timestamp}{DEPRECATED. See \code{start.time}.}
-
-\item{end.timestamp}{DEPRECATED See argument \code{stop.time}}
 }
 \value{
 A list containing:

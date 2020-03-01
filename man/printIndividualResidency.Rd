@@ -4,7 +4,7 @@
 \alias{printIndividualResidency}
 \title{print the individual locations per day}
 \usage{
-printIndividualResidency(ratios, dayrange)
+printIndividualResidency(ratios, dayrange, sections)
 }
 \arguments{
 \item{ratios}{the daily ratios}

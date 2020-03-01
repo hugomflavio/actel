@@ -4,12 +4,10 @@
 \alias{dualArrayCJS}
 \title{Calculate estimated last-array efficiency}
 \usage{
-dualArrayCJS(input, silent = TRUE)
+dualArrayCJS(input)
 }
 \arguments{
 \item{input}{A presence/Absence matrix.}
-
-\item{silent}{Logical: Should messages be printed?}
 }
 \value{
 A summary of the CJS results
