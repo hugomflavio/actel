@@ -597,6 +597,29 @@ oneWayMoves <- function(movements, arrays) {
     return(NULL)
   else
     return(movements)
+  }
+}
+
+#' Find and list arrays which failed during the movements of the fish
+#' 
+#' @param moves the valid array movements
+#' @inheritParams res_efficiency
+#' @inheritParams dotPaths
+#' 
+#' @return NULL if no arrays failed, or a list of arrays which failed
+#' 
+#' @keywords internal
+#' 
+countArrayFailures <- function(moves, paths, dotmat) {
+  x <- lapply(1:(nrow(moves) - 1), function(i) {
+    A <- moves$Array[i]
+    B <- moves$Array[i + 1]
+    if (A != B & dotmat[A, B] != 1)
+      blameArrays(from = A, to = B, paths = paths)
+    else
+      NULL
+  })
+  return(unlist(x))
 }
 
 #' Include fish that were never detected

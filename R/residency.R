@@ -1116,28 +1116,6 @@ firstArrayFailure <- function(fish, bio, spatial, first.array, paths, dotmat) {
   }
 }
 
-#' Find and list arrays which failed during the movements of the fish
-#' 
-#' @param moves the simplified array movements
-#' @inheritParams res_efficiency
-#' @inheritParams dotPaths
-#' 
-#' @return NULL if no arrays failed, or a list of arrays which failed
-#' 
-#' @keywords internal
-#' 
-countArrayFailures <- function(moves, paths, dotmat) {
-  x <- lapply(1:(nrow(moves) - 1), function(i) {
-    A <- moves$Array[i]
-    B <- moves$Array[i + 1]
-    if (A != B & dotmat[A, B] != 1)
-      blameArrays(from = A, to = B, paths = paths)
-    else
-      NULL
-  })
-  return(unlist(x))
-}
-
 #' Find which arrays to blame for a jump in movement events
 #' 
 #' @param from The array where the fish started
