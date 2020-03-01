@@ -931,7 +931,7 @@ processThelmaNewFile <- function(input) {
 #' 
 #' Processes Vemco ALS files
 #' 
-#' @inheritParams processThelmaFile
+#' @param input the detections data frame.
 #'
 #' @return A data frame of standardized detections from the input file.
 #'
