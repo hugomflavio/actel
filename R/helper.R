@@ -720,8 +720,9 @@ distancesMatrix <- function(t.layer = "transition.layer.RData", starters = NULL,
     stop(paste0("Could not find file '", t.layer, "' in the working directory.\n"), call. = FALSE)
 
   if (tools::file_ext(t.layer) == "RData") {
+    transition.layer <- NULL
     load(t.layer)
-    if (!exists("transition.layer")) 
+    if (is.null(transition.layer)) 
       stop(paste0("Could not find a transition layer in '", t.layer, "'.\n"), call. = FALSE)
   } else {
     stop(paste0("'", t.layer, "' could not be recognised as .RData file, please make sure the include the file extension in 't.layer'.\n"), call. = FALSE)

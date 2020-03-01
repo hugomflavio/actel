@@ -130,7 +130,7 @@ checkGUI <- function(GUI = c("needed", "always", "never")) {
           dllpath <- file.path(file.path(system.file(package = "RGtk2"), "gtk", .Platform$r_arch), "bin")
         dll <- try(library.dynam("RGtk2", "RGtk2", sub("/RGtk2", "", find.package("RGtk2")), DLLpath = dllpath), silent = TRUE)
       } else {
-       dll <- try(library.dynam("RGtk2", pkgname, libname), silent = TRUE)
+       dll <- try(library.dynam("RGtk2", "RGtk2", sub("/RGtk2", "", find.package("RGtk2"))), silent = TRUE)
       }
       if (is.character(dll)) {
        appendTo(c("Screen", "Warning", "Report"), 
@@ -414,7 +414,7 @@ checkImpassables <- function(movements, fish, dotmat, GUI){
 checkSMovesN <- function(secmoves, fish, section.minimum, GUI) {
   appendTo("debug", "Running checkSMovesN")
   if (any(link <- secmoves$Detections < section.minimum)) {
-    appendTo(c("Screen", "Report", "Warning"), paste0("Section movements with less than ", section.minimum, " detections are present for fish ", fish, "."))
+    appendTo(c("Screen", "Report", "Warning"), the.warning <- paste0("Section movements with less than ", section.minimum, " detections are present for fish ", fish, "."))
     if (interactive())
       secmoves <- tableInteraction(moves = secmoves, fish = fish, trigger = the.warning, GUI = GUI) # nocov
   }
@@ -1023,10 +1023,10 @@ graphicalInvalidate <- function(moves, fish, trigger) { # nocov start
 
   ## add handlers
   gWidgets::addHandlerClicked(tbl, handler = function(h,...) {
-    tbl[svalue(h$obj)]$Valid <- FALSE
+    tbl[gWidgets::svalue(h$obj)]$Valid <- FALSE
   })
   gWidgets::addHandlerDoubleclick(tbl, handler = function(h,...) {
-    tbl[svalue(h$obj)]$Valid <- TRUE
+    tbl[gWidgets::svalue(h$obj)]$Valid <- TRUE
   })
   
   message("M: Make any necessary edits in the external visualization window and submit the result to continue the analysis."); flush.console()

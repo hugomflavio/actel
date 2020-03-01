@@ -894,7 +894,7 @@ processThelmaFile <- function(input) {
     Receiver = input$`TBR Serial Number`,
     CodeSpace = input$CodeType,
     Signal = input$Id,
-    Sensor.Value = rep(NA_real_, nrow(input)),
+    Sensor.Value = input$Data,
     Sensor.Unit = rep(NA_character_, nrow(input)))
   return(output)
 }
