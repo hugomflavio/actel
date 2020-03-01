@@ -263,6 +263,8 @@ test_that("migration is able to run speed and inactiveness checks.", {
 test_that("the debug option works as expected", {
 	output <- suppressWarnings(migration(sections = c("River", "Fjord", "Sea"), tz = 'Europe/Copenhagen', report = FALSE, 
 		GUI = "never", debug = TRUE))
+	file.remove("detections/actel.detections.RData")
+
 	expect_true(file.exists("migration_debug.RData"))
 	aux <- dataToList("migration_debug.RData")
 	expect_equal(names(aux), c('study.data', 'jump.error', 'speed.error', 'valid.movements', 'valid.detections', 

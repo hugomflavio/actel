@@ -174,6 +174,7 @@ test_that("explore is able to run speed and inactiveness checks.", {
 test_that("checkPath moves the session to the right environment.", {
 	setwd("..")
 	output <- suppressWarnings(explore(path = "exampleWorkspace", tz = 'Europe/Copenhagen', report = FALSE, GUI = "never"))
+	file.remove("detections/actel.detections.RData")
 	expect_false(file.exists("temp_log.txt"))
 	expect_false(file.exists("temp_warnings.txt"))
 	expect_false(file.exists("temp_UD.txt"))
@@ -183,6 +184,7 @@ test_that("checkPath moves the session to the right environment.", {
 
 test_that("the debug option works as expected", {
 	output <- suppressWarnings(explore(tz = 'Europe/Copenhagen', report = FALSE, GUI = "never", debug = TRUE))
+	file.remove("detections/actel.detections.RData")
 	expect_true(file.exists("explore_debug.RData"))
 	aux <- dataToList("explore_debug.RData")
 	expect_equal(names(aux), c('study.data', 'do.checkSpeeds', 'arrays', 'dist.mat', 'dotmat', 'the.time', 

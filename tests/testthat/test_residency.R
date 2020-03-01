@@ -238,6 +238,7 @@ test_that("residency can handle multiple release sites.", {
 test_that("the debug option works as expected", {
 	output <- suppressWarnings(residency(sections = c("River", "Fjord", "Sea"), tz = 'Europe/Copenhagen', report = FALSE, 
 		GUI = "never", debug = TRUE))
+	file.remove("detections/actel.detections.RData")
 	expect_true(file.exists("residency_debug.RData"))
 	aux <- dataToList("residency_debug.RData")
 	expect_equal(names(aux), c('study.data', 'jump.error', 'speed.error', 'valid.movements', 'valid.detections', 
