@@ -48,6 +48,7 @@ Enhancements:
   * Reports are now opened using utils::browseURL, allowing the report to be open even when the computer is not connected to the internet.
   * Sensor values are now transported through the analysis and returned in the valid detections (for Vemco loggers only for now).
   * Ensure the legend in the residency graphics follows the order specified in the sections argument.
+  * Improve Thelma .csv file handling for files exported with new column structure.
 
 ## actel 0.1.2
 

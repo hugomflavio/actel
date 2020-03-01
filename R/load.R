@@ -826,10 +826,15 @@ compileDetections <- function(path = "detections", start.time = NULL, stop.time 
       unknown.file <- TRUE
       if (unknown.file && any(grepl("CodeType", colnames(aux)))) {
         appendTo("debug", paste0("File '", i, "' matches a Thelma log."))
-        output <- processThelmaFile(input = aux)
+        output <- processThelmaOldFile(input = aux)
         unknown.file <- FALSE
       }
-      if (unknown.file && any(grepl("Receiver", colnames(aux)))) {
+      if (unknown.file && any(grepl("Protocol", colnames(aux)))) {
+        appendTo("debug", paste0("File '", i, "' matches a Thelma log."))
+        output <- processThelmaNewFile(input = aux)
+        unknown.file <- FALSE
+      }
+      if (unknown.file && any(grepl("Transmitter", colnames(aux)))) {
         appendTo("debug", paste0("File '", i, "' matches a Vemco log."))
         output <- processVemcoFile(input = aux)
         unknown.file <- FALSE
@@ -876,24 +881,47 @@ compileDetections <- function(path = "detections", start.time = NULL, stop.time 
   return(output)
 }
 
-#' Thelma files
+#' Thelma old export files
 #' 
 #' Processes Thelma ALS files.
 #' 
-#' @param input the file name.
+#' @param input the detections data frame.
 #'
 #' @return A data frame of standardized detections from the input file.
 #'
 #' @keywords internal
 #' 
-processThelmaFile <- function(input) {
-  appendTo("debug", "Running processThelmaFile.")
+processThelmaOldFile <- function(input) {
+  appendTo("debug", "Running processThelmaOldFile.")
   input <- as.data.frame(input)
   output <- data.table(
     Timestamp = fasttime::fastPOSIXct(sapply(input[, 1], function(x) gsub("Z", "", gsub("T", " ", x))), tz = "UTC"),
     Receiver = input$`TBR Serial Number`,
     CodeSpace = input$CodeType,
     Signal = input$Id,
+    Sensor.Value = input$Data,
+    Sensor.Unit = rep(NA_character_, nrow(input)))
+  return(output)
+}
+
+#' Thelma new export files
+#' 
+#' Processes Thelma ALS files.
+#' 
+#' @param input the detections data frame.
+#'
+#' @return A data frame of standardized detections from the input file.
+#'
+#' @keywords internal
+#' 
+processThelmaNewFile <- function(input) {
+  appendTo("debug", "Running processThelmaNewFile.")
+  input <- as.data.frame(input)
+  output <- data.table(
+    Timestamp = fasttime::fastPOSIXct(sapply(input[, 1], function(x) gsub("Z", "", gsub("T", " ", x))), tz = "UTC"),
+    Receiver = input$Receiver,
+    CodeSpace = sapply(input$Protocol, function(x) unlist(strsplit(x, "-", fixed = TRUE))[1]),
+    Signal = input$ID,
     Sensor.Value = input$Data,
     Sensor.Unit = rep(NA_character_, nrow(input)))
   return(output)
