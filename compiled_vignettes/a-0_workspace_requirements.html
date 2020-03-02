@@ -8,11 +8,11 @@
 <meta name="generator" content="pandoc" />
 <meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
 
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1" />
 
 <meta name="author" content="Hugo Flávio" />
 
-<meta name="date" content="2020-01-08" />
+<meta name="date" content="2020-03-02" />
 
 <title>1) Preparing your data</title>
 
@@ -31,9 +31,6 @@ padding-right: 2em;
 font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
 font-size: 14px;
 line-height: 1.35;
-}
-#header {
-text-align: center;
 }
 #TOC {
 clear: both;
@@ -202,7 +199,8 @@ code > span.st { color: #d14; }
 code > span.co { color: #888888; font-style: italic; } 
 code > span.ot { color: #007020; } 
 code > span.al { color: #ff0000; font-weight: bold; } 
-code > span.fu { color: #900; font-weight: bold; }  code > span.er { color: #a61717; background-color: #e3d2d2; } 
+code > span.fu { color: #900; font-weight: bold; } 
+code > span.er { color: #a61717; background-color: #e3d2d2; } 
 </style>
 
 
@@ -217,7 +215,7 @@ code > span.fu { color: #900; font-weight: bold; }  code > span.er { color: #a61
 
 <h1 class="title toc-ignore">1) Preparing your data</h1>
 <h4 class="author">Hugo Flávio</h4>
-<h4 class="date">2020-01-08</h4>
+<h4 class="date">2020-03-02</h4>
 
 
 
@@ -618,8 +616,8 @@ C -- E</code></pre>
 </div>
 <div id="exploreresidency-vs-migration" class="section level4">
 <h4>explore()/residency() vs migration()</h4>
-<p>An optimal spatial.txt may differ depending on whether you want to run a migration or an explore/residency analysis. This is because actel interprets the spatial.txt file depending on the analysis:</p>
-<p>In a explore/residency analyses, <code>A -- B</code> should be read as:</p>
+<p>An optimal spatial.txt may differ depending on whether you want to run a migration or an explore/residency analysis. This is because actel interprets the spatial.txt file differently depending on the analysis:</p>
+<p>In an explore/residency analyses, <code>A -- B</code> should be read as:</p>
 <pre><code>It is possible to move from array A to array B and vice-versa</code></pre>
 <p>In a migration analysis, <code>A -- B</code> should be read as:</p>
 <pre><code>It is possible to move from array A to array B and vice-versa, AND the fish are expected to pass through array A before reaching array B</code></pre>
@@ -652,6 +650,7 @@ E -- F -- E</code></pre>
 <p>If the fish can only move from A to B, use either <code>A -&gt; B</code> or <code>B &lt;- A</code>.</p>
 <p>If a fish then actually moves from B to A, actel will try to find an alternative route that the fish could have taken. If there are no alternative routes from B to A, actel will call this situation to your attention.</p>
 <p>This has implications for array efficiency calculations, so be sure to encode your study area carefully.</p>
+<p>You can find more information about <a href="b-1_explore_processes.html#impassables">impassable barriers here.</a></p>
 </div>
 </div>
 <div id="running-the-analysis" class="section level2">

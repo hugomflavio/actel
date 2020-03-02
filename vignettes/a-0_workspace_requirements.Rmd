@@ -276,9 +276,9 @@ If you intend to run an explore or residency analysis, array direction is irrele
 
 #### explore()/residency() vs migration()
 
-An optimal spatial.txt may differ depending on whether you want to run a migration or an explore/residency analysis. This is because actel interprets the spatial.txt file depending on the analysis:
+An optimal spatial.txt may differ depending on whether you want to run a migration or an explore/residency analysis. This is because actel interprets the spatial.txt file differently depending on the analysis:
 
-In a explore/residency analyses, `A -- B` should be read as:
+In an explore/residency analyses, `A -- B` should be read as:
   
     It is possible to move from array A to array B and vice-versa
 
@@ -330,6 +330,8 @@ If the fish can only move from A to B, use either `A -> B` or `B <- A`.
 If a fish then actually moves from B to A, actel will try to find an alternative route that the fish could have taken. If there are no alternative routes from B to A, actel will call this situation to your attention.
 
 This has implications for array efficiency calculations, so be sure to encode your study area carefully.
+
+You can find more information about [impassable barriers here.](b-1_explore_processes.html#impassables)
 
 
 ## Running the analysis

@@ -60,7 +60,7 @@ All the arguments of explore(), which also exist in migration() and residency(),
 explore(path = NULL, tz, max.interval = 60, minimum.detections = 2, start.time = NULL, stop.time = NULL,
   speed.method = c("last to first", "first to first"), speed.warning = NULL, speed.error = NULL, 
   jump.warning = 2, jump.error = 3, inactive.warning = NULL, inactive.error = NULL, exclude.tags = NULL, 
-  override = NULL, report = TRUE)
+  override = NULL, report = TRUE, GUI = c("needed", "always", "never"))
 ```
 
 ### path
@@ -243,6 +243,12 @@ Here are some examples:
 Note:
   : Even if something fails during the report printing, your results will still be saved the *actel_explore_results.RData* file in your working directory!
 
+
+### GUI
+
+actel comes with a graphical interface, intended to allow users to deal with very long movement tables that would otherwise overflow R's output limits. However, this graphical interface requires additional packages installed, so it may not always be an option to rely on it. This is where `GUI` comes in. Defaulting to 'needed', the graphical user interface will only kick in for very long tables. The other two options are 'always' and 'never', both of which are self explanatory.
+
+If you cannot run the GUI on your computer and are faced with a very long table, do not worry! actel has a fall-back system, where the table is saved to a temporary file, which you can open in an external program such as Microsoft Excel of LibreOffice Calc. Have a look at the movements table there, let R know what you want to do, close the file and the analysis will continue automatically.
 
 
 ### All done!
