@@ -161,7 +161,7 @@ test_that("loadDot output is as expected for simple multi channel study areas", 
 	expect_equal(names(output), c("dot", "arrays", "dotmat", "paths"))
 	
 	expect_equal(names(output$arrays), c('River0', 'River1', 'River2', 'River4', 
-		'River5', 'River6', 'Fjord1', 'Fjord2', 'River3', 'Sea1'))
+		'River5', 'River6', 'Fjord1', 'Fjord2', 'Sea1', 'River3'))
 	
 	dot <- read.csv(text = c('"A","to","B"
 "River0","--","River1"
@@ -197,7 +197,7 @@ c('"","River0","River1","River2","River4","River5","River6","Fjord1","Fjord2","R
 	pathnames <- c('River0_to_River2', 'River0_to_River3', 'River0_to_River4', 'River0_to_River5', 
 		'River0_to_River6', 'River0_to_Fjord1', 'River0_to_Fjord2', 'River0_to_Sea1', 'River1_to_River4', 
 		'River1_to_River5', 'River1_to_River6', 'River1_to_Fjord1', 'River1_to_Fjord2', 'River1_to_Sea1', 
-		'River2_to_River0', 'River2_to_River5', 'River2_to_River6', 'River2_to_Fjord1', 'River2_to_Fjord2',
+		'River2_to_River0', 'River2_to_River5', 'River2_to_River6', 'River2_to_Fjord1', 'River2_to_Fjord2', 
 		'River2_to_Sea1', 'River4_to_River1', 'River4_to_River6', 'River4_to_River0', 'River4_to_Fjord1', 
 		'River4_to_Fjord2', 'River4_to_Sea1', 'River5_to_River2', 'River5_to_River3', 'River5_to_Fjord1', 
 		'River5_to_River1', 'River5_to_Fjord2', 'River5_to_River0', 'River5_to_Sea1', 'River6_to_River4', 
@@ -205,9 +205,9 @@ c('"","River0","River1","River2","River4","River5","River6","Fjord1","Fjord2","R
 		'River6_to_River0', 'Fjord1_to_River5', 'Fjord1_to_Sea1', 'Fjord1_to_River4', 'Fjord1_to_River2', 
 		'Fjord1_to_River3', 'Fjord1_to_River1', 'Fjord1_to_River0', 'Fjord2_to_River6', 'Fjord2_to_River5', 
 		'Fjord2_to_River4', 'Fjord2_to_River2', 'Fjord2_to_River3', 'Fjord2_to_River1', 'Fjord2_to_River0', 
-		'River3_to_River0', 'River3_to_River5', 'River3_to_River6', 'River3_to_Fjord1', 'River3_to_Fjord2', 
-		'River3_to_Sea1', 'Sea1_to_Fjord1', 'Sea1_to_River6', 'Sea1_to_River5', 'Sea1_to_River4', 'Sea1_to_River2', 
-		'Sea1_to_River3', 'Sea1_to_River1', 'Sea1_to_River0')
+		'Sea1_to_Fjord1', 'Sea1_to_River6', 'Sea1_to_River5', 'Sea1_to_River4', 'Sea1_to_River2', 
+		'Sea1_to_River3', 'Sea1_to_River1', 'Sea1_to_River0', 'River3_to_River0', 'River3_to_River5', 
+		'River3_to_River6', 'River3_to_Fjord1', 'River3_to_Fjord2', 'River3_to_Sea1')
 	expect_equal(names(output$paths), pathnames)
 	# sample 2 contents
 	expect_equal(output$paths[[3]], c("River1 -> River2", "River1 -> River3"))
@@ -228,7 +228,7 @@ test_that("loadDot output is as expected for multi channel study areas with barr
 	expect_equal(names(output), c("dot", "arrays", "dotmat", "paths"))
 	
 	expect_equal(names(output$arrays), c('River0', 'River1', 'River2', 'River4', 
-		'River5', 'River6', 'Fjord1', 'Fjord2', 'River3', 'Sea1'))
+		'River5', 'River6', 'Fjord1', 'Fjord2', 'Sea1', 'River3'))
 	
 	dot <- read.csv(text = c('"A","to","B"
 "River0","--","River1"
@@ -272,9 +272,9 @@ c('"","River0","River1","River2","River4","River5","River6","Fjord1","Fjord2","R
 		'River6_to_River3', 'River6_to_River0', 'Fjord1_to_River5', 'Fjord1_to_Sea1', 'Fjord1_to_River4', 
 		'Fjord1_to_River2', 'Fjord1_to_River1', 'Fjord1_to_River3', 'Fjord1_to_River0', 'Fjord2_to_River6', 
 		'Fjord2_to_River5', 'Fjord2_to_River4', 'Fjord2_to_River2', 'Fjord2_to_River1', 'Fjord2_to_River3', 
-		'Fjord2_to_River0', 'River3_to_River0', 'River3_to_River5', 'River3_to_River6', 'River3_to_Fjord1', 
-		'River3_to_Fjord2', 'River3_to_Sea1', 'Sea1_to_Fjord1', 'Sea1_to_River6', 'Sea1_to_River5', 'Sea1_to_River4', 
-		'Sea1_to_River2', 'Sea1_to_River1', 'Sea1_to_River3', 'Sea1_to_River0')
+		'Fjord2_to_River0', 'Sea1_to_Fjord1', 'Sea1_to_River6', 'Sea1_to_River5', 'Sea1_to_River4', 
+		'Sea1_to_River2', 'Sea1_to_River1', 'Sea1_to_River3', 'Sea1_to_River0', 'River3_to_River0', 
+		'River3_to_River5', 'River3_to_River6', 'River3_to_Fjord1', 'River3_to_Fjord2', 'River3_to_Sea1')
 	expect_equal(names(output$paths), pathnames)
 	# sample 2 contents
 	expect_equal(output$paths$River0_to_River4, c("River1 -> River2", "River1 -> River3"))
@@ -310,7 +310,7 @@ test_that("loadDot handles parallel arrays properly", {
 	expect_equal(names(output), c("dot", "arrays", "dotmat", "paths"))
 	
 	expect_equal(names(output$arrays), c('River0', 'River1', 'River2', 'River4', 
-		'River5', 'River6', 'Fjord1', 'Fjord2', 'River3', 'Sea1'))
+		'River5', 'River6', 'Fjord1', 'Fjord2', 'Sea1', 'River3'))
 
 	# check parallels
 	expect_equal(output$arrays$River3$parallel, "River2")

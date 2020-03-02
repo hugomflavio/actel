@@ -19,7 +19,7 @@ test_that("dotList correctly assigns before, after and neighbours", {
 test_that("dotList correctly handles parallels", {
 	dot <- readDot(string = "A1--A2--B1--B2--B3--C1--C2\nB1--B4--B3\nB4--B2--B4")
 	output <- dotList(input = dot)
-	expect_equal(names(output), c('A1', 'A2', 'B1', 'B2', 'B3', 'C1', 'B4', 'C2'))
+	expect_equal(names(output), c('A1', 'A2', 'B1', 'B2', 'B3', 'C1', 'C2', 'B4'))
 	
 	expect_null(output$A1$before)
 	expect_equal(output$A1$after, "A2")
