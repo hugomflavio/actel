@@ -28,7 +28,7 @@ test_that("transformSpatial handles release site mismatches properly and stops w
 	xspatial <- spatial
 	xspatial$Array[18] <- "test"
 	expect_error(transformSpatial(spatial = xspatial, bio = bio, arrays = dot$arrays, first.array = NULL),
-		"There is a mismatch between the expected first array of a release site and the list of arrays.\n       Arrays listed in the spatial.csv file: River0, River1, River2, River3, River4, River5, River6, Fjord1, Fjord2, Sea1\n       Expected first arrays of the release sites: test\nThe expected first arrays should match the arrays where stations where deployed in the spatial.csv file.", fixed = TRUE)
+		"There is a mismatch between the expected first array(s) of a release site and the list of arrays.\n       Arrays listed in the spatial.csv file: River0, River1, River2, River3, River4, River5, River6, Fjord1, Fjord2, Sea1\n       Expected first arrays listed for the release sites: test\nThe expected first arrays should match the arrays where stations where deployed in the spatial.csv file.", fixed = TRUE)
 
 	xspatial <- spatial[-18, ]
 	expect_warning(
@@ -82,6 +82,30 @@ test_that("transformSpatial handles sections properly", {
 
 	expect_error(suppressWarnings(transformSpatial(spatial = spatial, bio = bio, arrays = dot$arrays, sections = c("River", "Fjord"))),
 		"Array 'Sea1' was not assigned to any section. Stopping to prevent function failure.\nPlease either...\n   1) Rename these arrays to match a section,\n   2) Rename a section to match these arrays, or\n   3) Include a new section in the analysis.\n... and restart the analysis.", fixed = TRUE)
+})
+
+test_that("transformSpatial handles multiple expected first arrays correctly", {
+	xspatial <- spatial
+	xspatial$Array[18] <- "River1|River2"
+	expect_message(output <- transformSpatial(spatial = xspatial, bio = bio, dotmat = dot$dotmat, arrays = dot$arrays, sections = NULL),
+		"M: Multiple possible first arrays detected for release site 'RS1'.", fixed = TRUE)
+
+	xspatial$Array[18] <- "River1|Sea1"
+	expect_warning(output <- transformSpatial(spatial = xspatial, bio = bio, dotmat = dot$dotmat, arrays = dot$arrays, sections = NULL),
+		"Release site RS1 has multiple possible first arrays (River1, Sea1), but not all of these arrays appear to be directly connected with each other. Could there be a mistake in the input?", fixed = TRUE)
+
+	xspatial$Array[18] <- "River1|River2"
+	xspatial[19:25, ] <- xspatial[18, ]
+	
+	xspatial$Array[25] <- "River1|Sea1"
+
+	xspatial$Standard.name[19:25] <- paste0("RS", 2:8)
+	xspatial$Station.name[19:25] <- paste0("RS", 2:8)
+
+	expect_message(
+		expect_warning(output <- transformSpatial(spatial = xspatial, bio = bio, dotmat = dot$dotmat, arrays = dot$arrays, sections = NULL),
+			"Release site RS8 has multiple possible first arrays (River1, Sea1), but not all of these arrays appear to be directly connected with each other. Could there be a mistake in the input?", fixed = TRUE),
+		"Multiple possible first arrays detected for more than five release sites.", fixed = TRUE)
 })
 
 file.remove(list.files(pattern = "*txt$"))

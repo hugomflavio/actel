@@ -260,8 +260,18 @@ test_that("migration is able to run speed and inactiveness checks.", {
 		'matrices', 'overall.CJS', 'intra.array.CJS', 'times', 'rsp.info'))
 })
 
+test_that("migration can handle multiple expected first arrays", {
+	xspatial <- example.spatial
+	xspatial$Array[18] <- "River1|River2"
+	write.csv(xspatial, "spatial.csv", row.names = FALSE)
+	expect_message(suppressWarnings(output <- migration(sections = c("River", "Fjord", "Sea"), 
+		tz = 'Europe/Copenhagen', report = TRUE, success.arrays = "Sea1", GUI = "never")),
+		"Multiple possible first arrays detected for release site 'RS1'.", fixed = TRUE)
+	file.remove("detections/actel.detections.RData")
+})
+
 test_that("the debug option works as expected", {
-	output <- suppressWarnings(migration(sections = c("River", "Fjord", "Sea"), tz = 'Europe/Copenhagen', report = FALSE, 
+	output <- suppressWarnings(migration(sections = c("River", "Fjord", "Sea"), , tz = 'Europe/Copenhagen', report = FALSE, 
 		GUI = "never", debug = TRUE))
 	file.remove("detections/actel.detections.RData")
 

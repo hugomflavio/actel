@@ -42,6 +42,18 @@ test_that("loadDistances output imports data correctly", {
 		"Some stations and/or release sites are not present in the distance matrix. Deactivating speed calculation to avoid function failure.", fixed = TRUE)
 	expect_true(suppressWarnings(loadDistances(spatial = spatial)$invalid.dist))
 	file.remove("distances.csv")
+
+	spatial$release.sites$Station.name[1] <- "unspecified"
+	spatial$release.sites$Standard.name[1] <- "unspecified"
+
+	write.csv(example.distances[-18, -18], "distances.csv")
+
+	output <- loadDistances(spatial = spatial)
+	expect_equal(nrow(output$dist.mat), 18)
+	expect_equal(colnames(output$dist.mat)[18], "unspecified")
+	expect_equal(rownames(output$dist.mat)[18], "unspecified")
+	expect_true(all(is.na(output$dist.mat[18, ])))
+	expect_true(all(is.na(output$dist.mat[, 18])))
 })
 
 file.remove(list.files(pattern = "*txt$"))

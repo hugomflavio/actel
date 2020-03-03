@@ -157,6 +157,7 @@ test_that("residency stops when any argument does not make sense", {
 
 	expect_error(residency(tz = 'Europe/Copenhagen', sections = c("River", "Fjord", "Sea"), report = TRUE, GUI = "never", replicates = list(test = "a")),
 		"Some of the array names listed in the 'replicates' argument do not match the study's arrays.", fixed = TRUE)
+	file.remove("detections/actel.detections.RData")
 })
 
 
@@ -219,7 +220,7 @@ test_that("residency can handle multiple release sites.", {
 	xbio$Release.site <- as.character(xbio$Release.site)
 	xbio$Release.site[c(1:15)] <- "RS2"
 	xbio$Release.site[c(31:45)] <- "RS3"
-	write.csv(xbio, "biometrics.csv")
+	write.csv(xbio, "biometrics.csv", row.names = FALSE)
 
 	xspatial <- example.spatial
 	xspatial[19, ] <- xspatial[18, ]
@@ -228,11 +229,24 @@ test_that("residency can handle multiple release sites.", {
 	xspatial[20, ] <- xspatial[18, ]
 	xspatial$Station.name[20] <- "RS3"
 	xspatial$Array[20] <- "River3"
-	write.csv(xspatial, "spatial.csv")
+	write.csv(xspatial, "spatial.csv", row.names = FALSE)
 
 	output <- suppressWarnings(residency(sections = c("River", "Fjord", "Sea"), tz = 'Europe/Copenhagen', jump.warning = 1,
 		report = TRUE, GUI = "never", speed.warning = 1000000, inactive.warning = 1000000, replicates = list(Sea1 = c("St.16", "St.17"))))
 	file.remove("detections/actel.detections.RData")
+	write.csv(example.biometrics, "biometrics.csv", row.names = FALSE)
+	write.csv(example.spatial, "spatial.csv", row.names = FALSE)
+})
+
+test_that("residency can handle multiple expected first arrays", {
+	xspatial <- example.spatial
+	xspatial$Array[18] <- "River1|River2"
+	write.csv(xspatial, "spatial.csv", row.names = FALSE)
+	expect_message(suppressWarnings(output <- residency(sections = c("River", "Fjord", "Sea"), 
+		tz = 'Europe/Copenhagen', report = TRUE, GUI = "never")),
+		"Multiple possible first arrays detected for release site 'RS1'.", fixed = TRUE)
+	file.remove("detections/actel.detections.RData")
+	write.csv(example.spatial, "spatial.csv", row.names = FALSE)
 })
 
 test_that("the debug option works as expected", {

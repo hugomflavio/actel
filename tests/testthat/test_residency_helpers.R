@@ -180,6 +180,31 @@ test_that("res_efficiency works as expected, and can include intra array estimat
   expect_equal(output$intra.CJS, NULL)
 })
 
+test_that("firstArrayFailure is able to deal with multile first expected arrays", {
+  xdot <- loadDot(string = 
+"River0 -- River1 -- River0
+River1 -- River2 -- River3 -- River6 -- Fjord1 -- Sea1
+River0 -- River4 -- River5 -- River6 -- Fjord2 -- Sea1
+River5 -- River3 -- River5
+Fjord1 -- Fjord2 -- Fjord1
+", spatial = spatial, disregard.parallels = TRUE, sections = c("River", "Fjord", "Sea"))
+
+  xspatial <- spatial
+  xspatial$release.sites$Array <- "River0|River1"
+
+  first.array <- firstArrayFailure(fish = "R64K-4451", bio = bio, spatial = xspatial, first.array = "River5", paths = xdot$paths, dotmat = xdot$dotmat)
+  expect_equal(first.array,  c(known1 = "River0", known2 = "River4"))
+
+  first.array <- firstArrayFailure(fish = "R64K-4451", bio = bio, spatial = xspatial, first.array = "River6", paths = xdot$paths, dotmat = xdot$dotmat)
+  expect_equal(first.array,  c(unsure1 = "River0", unsure2 = "River1", unsure3 = "River4", unsure4 = "River5", unsure5 = "River2", unsure6 = "River3"))
+
+  first.array <- firstArrayFailure(fish = "R64K-4451", bio = bio, spatial = xspatial, first.array = "Fjord1", paths = xdot$paths, dotmat = xdot$dotmat)
+  expect_equal(first.array,  c(known = "River6", unsure1 = "River0", unsure2 = "River1", unsure3 = "River4", unsure4 = "River5", unsure5 = "River2", unsure6 = "River3"))  
+
+  first.array <- firstArrayFailure(fish = "R64K-4451", bio = bio, spatial = xspatial, first.array = "Sea1", paths = xdot$paths, dotmat = xdot$dotmat)
+  expect_equal(first.array,  c(known = "River6", unsure1 = "River0", unsure2 = "River1", unsure3 = "River4", unsure4 = "River5", unsure5 = "Fjord1", unsure6 = "Fjord2", unsure7 = "River2", unsure8 = "River3"))  
+})
+
 setwd("..")
 unlink("exampleWorkspace", recursive = TRUE)
 rm(list = ls())
