@@ -629,11 +629,21 @@ blameArrays <- function(from, to, paths) {
   the.paths <- paths[[paste0(from, "_to_", to)]]
   if (is.null(the.paths))
     stop("Either 'from' is not connected to 'to', or both are neighbours.\n")
-  output <- unique(unlist(strsplit(the.paths, " -> ")))
-  if (length(the.paths) == 1)
-    return(list(known = output))
-  else
-    return(list(unsure = output))
+  if (length(the.paths) == 1) {
+    return(list(known = unique(unlist(strsplit(the.paths, " -> ")))))
+  } else {
+    aux <- strsplit(the.paths, " -> ")
+    aux <- lapply(aux, unique)
+    combined.unsure <- unique(unlist(aux))
+    ocurrences <- table(unlist(aux))
+    if (any(ocurrences == length(aux))) {
+      combined.knowns <- names(ocurrences)[ocurrences == length(aux)]
+      combined.unsure <- combined.unsure[!combined.unsure %in% combined.knowns]
+    } else {
+      combined.knowns <- NULL
+    }
+    return(list(known = combined.knowns, unsure = combined.unsure))
+  }
 }
 
 #' Include fish that were never detected

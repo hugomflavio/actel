@@ -24,6 +24,7 @@ Fixes:
   * Fix bug where the Invalid.detections and Invalid.events columns in the status.df of residency would always return 0.
   * Prevent invalid detections from being considered during intra-array efficiency estimations.
   * Fix bug where fish with only one movement event would not count towards efficiency calculations.
+  * Fix very specific bug where 8 shaped study areas would not have the bottleneck array accounted as a "known" failure in case a fish moved from one side of the constriction to the other without being detected.
 
 Changes:
   * `array.overview` is now called `group.overview`.
