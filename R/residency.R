@@ -1130,7 +1130,7 @@ firstArrayFailure <- function(fish, bio, spatial, first.array, paths, dotmat) {
         knowns <- table(aux.knowns)
         if (any(knowns == length(aux))) {
           combined.knowns <- names(knowns)[knowns == length(aux)]
-          combined.unsure <- combined.unsure[!combined.unsure == combined.knowns]
+          combined.unsure <- combined.unsure[!combined.unsure %in% combined.knowns]
         } else {
           combined.knowns <- NULL
         }
