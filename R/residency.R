@@ -1046,6 +1046,7 @@ res_assembleOutput <- function(res.df, bio, spatial, sections, tz) {
 #'  
 res_efficiency <- function(arrmoves, bio, spatial, arrays, paths, dotmat) {
   values.per.fish <- lapply(names(arrmoves), function(fish) {
+    # cat(fish, "\n")
       first.array <- firstArrayFailure(fish = fish, bio = bio, spatial = spatial, first.array = arrmoves[[fish]]$Array[1], paths = paths, dotmat = dotmat)
       if (nrow(arrmoves[[fish]]) > 1)
         subsequent <- countArrayFailures(moves = arrmoves[[fish]], paths = paths, dotmat = dotmat)
@@ -1108,7 +1109,10 @@ firstArrayFailure <- function(fish, bio, spatial, first.array, paths, dotmat) {
   if (any(release.arrays == first.array)) {
     return(NULL)
   } else {
-    to.blame <- names(dotmat[release.arrays, first.array])[dotmat[release.arrays, first.array] == min(dotmat[release.arrays, first.array])]
+    if (length(release.arrays) == 1)
+      to.blame <- release.arrays
+    else
+      to.blame <- names(dotmat[release.arrays, first.array])[dotmat[release.arrays, first.array] == min(dotmat[release.arrays, first.array])]
     if (min(dotmat[release.arrays, first.array]) == 1) {
       if (table(dotmat[release.arrays, first.array])["1"] == 1)
         return(unlist(list(known = to.blame)))

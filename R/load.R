@@ -40,7 +40,7 @@ loadStudyData <- function(tz, override = NULL, start.time, stop.time,
     use.fakedot <- FALSE
   }
   if (use.fakedot) {
-    fakedot <- paste(unique(spatial$Array), collapse = "--")
+    fakedot <- paste(unique(spatial$Array[spatial$Type == "Hydrophone"]), collapse = "--")
     recipient <- loadDot(string = fakedot, spatial = spatial, sections = sections, disregard.parallels = disregard.parallels)
   }
   dot <- recipient$dot
@@ -1345,7 +1345,7 @@ transformSpatial <- function(spatial, bio, arrays, dotmat, sections = NULL, firs
     array.order <- list(all = names(arrays))
   }
   # Order release sites by entry point.
-  first.release.arrays <- sapply(release.sites$Array, function(x) unlist(strsplit(x, "|", fixed = TRUE))[1])
+  first.release.arrays <- sapply(as.character(release.sites$Array), function(x) unlist(strsplit(x, "|", fixed = TRUE))[1])
   if (!is.ordered(match(first.release.arrays, unlist(array.order))))
     release.sites <- release.sites[order(match(first.release.arrays, unlist(array.order))),]
   # join everything
