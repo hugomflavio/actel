@@ -615,6 +615,27 @@ countArrayFailures <- function(moves, paths, dotmat) {
   return(unlist(x))
 }
 
+#' Find which arrays to blame for a jump in movement events
+#' 
+#' @param from The array where the fish started
+#' @param to The array where the fish was next detected
+#' @inheritParams res_efficiency
+#' 
+#' @return A list of arrays which failed
+#' 
+#' @keywords internal
+#' 
+blameArrays <- function(from, to, paths) {
+  the.paths <- paths[[paste0(from, "_to_", to)]]
+  if (is.null(the.paths))
+    stop("Either 'from' is not connected to 'to', or both are neighbours.\n")
+  output <- unique(unlist(strsplit(the.paths, " -> ")))
+  if (length(the.paths) == 1)
+    return(list(known = output))
+  else
+    return(list(unsure = output))
+}
+
 #' Include fish that were never detected
 #' 
 #' @param x an efficiency matrix
