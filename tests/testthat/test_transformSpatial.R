@@ -44,9 +44,9 @@ test_that("transformSpatial handles release site mismatches properly and deliver
 	expect_warning(output <- transformSpatial(spatial = spatial, bio = xbio, arrays = dot$arrays, first.array = "River1"),
 		"At least one release site has been indicated in the spatial.csv file, but no release sites were specified in the biometrics file.\n         Discarding release site information and assuming all fish were released at the top level array to avoid function failure.\n         Please double-check your data.", fixed = TRUE)
 
-	expect_equal(output$spatial$release.sites$Station.name, factor("unspecified"))
+	expect_equal(as.character(output$spatial$release.sites$Station.name), "unspecified")
 
-	expect_equal(output$spatial$release.sites$Array, factor("River1"))
+	expect_equal(as.character(output$spatial$release.sites$Array), "River1")
 
 	xspatial <- spatial[-18, -5]
 	xspatial$Array <- factor(xspatial$Array, levels = levels(output$spatial$stations$Array))
@@ -56,8 +56,8 @@ test_that("transformSpatial handles release site mismatches properly and deliver
 	xspatial <- spatial[-18, ]
 	expect_warning(output <- transformSpatial(spatial = xspatial, bio = bio, arrays = dot$arrays, first.array = "River1"),
 	"Release sites were not specified in the spatial.csv file. Attempting to assume all released fish start at the top level array.", fixed = TRUE)
-	expect_equal(output$spatial$release.sites$Station.name, factor("RS1"))
-	expect_equal(output$spatial$release.sites$Array, factor("River1"))
+	expect_equal(as.character(output$spatial$release.sites$Station.name), "RS1")
+	expect_equal(as.character(output$spatial$release.sites$Array), "River1")
 	
 	# check counting of fish released per site
 	expect_equal(output$spatial$release.sites$n.A, 30)
@@ -109,3 +109,4 @@ test_that("transformSpatial handles multiple expected first arrays correctly", {
 })
 
 file.remove(list.files(pattern = "*txt$"))
+rm(list = ls())

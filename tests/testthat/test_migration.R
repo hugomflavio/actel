@@ -175,8 +175,9 @@ test_that("migration stops when any argument does not make sense", {
 	expect_error(migration(tz = 'Europe/Copenhagen', sections = c("River", "Fjord", "Sea"), report = TRUE, GUI = "never", replicates = list("a")),
 		"All list elements within 'replicates' must be named (i.e. list(Array = 'St.1') rather than list('St.1')).", fixed = TRUE)
 
-	expect_error(migration(tz = 'Europe/Copenhagen', sections = c("River", "Fjord", "Sea"), report = TRUE, GUI = "never", replicates = list(test = "a")),
+	expect_error(suppressWarnings(migration(tz = 'Europe/Copenhagen', sections = c("River", "Fjord", "Sea"), report = TRUE, GUI = "never", replicates = list(test = "a"))),
 		"Some of the array names listed in the 'replicates' argument do not match the study's arrays.", fixed = TRUE)
+	file.remove("detections/actel.detections.RData")
 })
 
 test_that("migration results contains all the expected elements.", {
