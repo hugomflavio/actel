@@ -602,7 +602,7 @@ checkJumpDistance <- function(movements, fish, release, dotmat, jump.warning, ju
   if (any(movements$Valid)) {
     vm <- movements[(Valid)]
     # Check release-to-first
-    release.jump <- dotmat[as.character(release), as.character(vm$Array[1])] + 1
+    release.jump <- min(dotmat[as.character(release), as.character(vm$Array[1])] + 1)
     if (release.jump > jump.warning) {
       # Trigger warning
       appendTo(c("Report", "Warning", "Screen"), 

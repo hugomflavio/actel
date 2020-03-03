@@ -57,7 +57,7 @@ loadStudyData <- function(tz, override = NULL, start.time, stop.time,
     first.array <- names(arrays)[unlist(lapply(arrays, function(a) is.null(a$before)))]
   else
     first.array <- NULL
-  recipient <- transformSpatial(spatial = spatial, bio = bio, sections = sections, arrays = arrays, first.array = first.array) # Finish structuring the spatial file
+  recipient <- transformSpatial(spatial = spatial, bio = bio, sections = sections, arrays = arrays, dotmat = dotmat, first.array = first.array) # Finish structuring the spatial file
   spatial <- recipient$spatial
   sections <- recipient$sections
   detections$Array <- factor(detections$Array, levels = unlist(spatial$array.order)) # Fix array levels
@@ -118,7 +118,8 @@ loadDot <- function(string = NULL, input = NULL, spatial, sections = NULL, disre
     dot <- readDot(string = string)
   }
   mat <- dotMatrix(input = dot)
-  if (any(is.na(match(unique(spatial$Array), colnames(mat))))) {
+  unique.arrays <- unique(unlist(sapply(spatial$Array, function(x) unlist(strsplit(x, "|", fixed = TRUE)))))
+  if (any(is.na(match(unique.arrays, colnames(mat))))) {
     emergencyBreak()
     if (file.exists("spatial.txt"))
       stop("Not all the arrays listed in the spatial.csv file are present in the spatial.txt.\n", call. = FALSE)
@@ -1221,7 +1222,7 @@ createStandards <- function(detections, spatial, deployments) {
 #' 
 #' @keywords internal
 #' 
-transformSpatial <- function(spatial, bio, arrays, sections = NULL, first.array = NULL) {
+transformSpatial <- function(spatial, bio, arrays, dotmat, sections = NULL, first.array = NULL) {
   appendTo("debug", "Running transformSpatial.")
   # Break the stations away
   appendTo("debug", "Creating 'stations'.")
@@ -1265,14 +1266,28 @@ transformSpatial <- function(spatial, bio, arrays, sections = NULL, first.array 
         }
         row.names(release.sites) <- 1:nrow(release.sites)
       }
+      if (any(link <- grepl("|", release.sites$Array, fixed = TRUE))) {
+        if (sum(link) >= 6)
+          appendTo(c("Screen", "Report"), "M: Multiple possible first arrays detected for more than five release sites.")
+        for (i in which(link)) {
+          if (sum(link) < 6)
+            appendTo(c("Screen", "Report"), paste0("M: Multiple possible first arrays detected for release site '", release.sites$Standard.name[i], "'."))
+          aux <- unlist(strsplit(release.sites$Array[i], "|", fixed = TRUE))
+          if (any(is.na(dotmat[aux, aux])) ||  any(dotmat[aux, aux] > 1))
+            appendTo(c("Screen", "Report", "Warning"), paste0("Release site ", release.sites$Standard.name[i], " has multiple possible first arrays (",
+              paste(aux, collapse = ", "), "), but not all of these arrays appear to be directly connected with each other. Could there be a mistake in the input?"))
+        }
+        B <- unlist(strsplit(release.sites$Array, "|", fixed = TRUE))
+      } else {
+        B <- unique(release.sites$Array)
+      }
       A <- unique(stations$Array)
-      B <- unique(release.sites$Array)
       if (any(is.na(match(B, A)))) {
-        appendTo(c("Report", "Warning"), "There is a mismatch between the expected first array of a release site and the list of arrays.")
+        appendTo(c("Report", "Warning"), "There is a mismatch between the expected first array(s) of a release site and the list of arrays.")
         emergencyBreak()
-        stop("There is a mismatch between the expected first array of a release site and the list of arrays.\n       Arrays listed in the spatial.csv file: ", 
+        stop("There is a mismatch between the expected first array(s) of a release site and the list of arrays.\n       Arrays listed in the spatial.csv file: ", 
           paste(A, collapse = ", "), 
-          "\n       Expected first arrays of the release sites: ", 
+          "\n       Expected first arrays listed for the release sites: ", 
           paste(B, collapse = ", "), 
           "\nThe expected first arrays should match the arrays where stations where deployed in the spatial.csv file.\n", 
           call. = FALSE)
@@ -1330,8 +1345,9 @@ transformSpatial <- function(spatial, bio, arrays, sections = NULL, first.array 
     array.order <- list(all = names(arrays))
   }
   # Order release sites by entry point.
-  if (!is.ordered(match(release.sites$Array, unlist(array.order))))
-    release.sites <- release.sites[order(match(release.sites$Array, unlist(array.order))),]
+  first.release.arrays <- sapply(release.sites$Array, function(x) unlist(strsplit(x, "|", fixed = TRUE))[1])
+  if (!is.ordered(match(first.release.arrays, unlist(array.order))))
+    release.sites <- release.sites[order(match(first.release.arrays, unlist(array.order))),]
   # join everything
   output <- list(stations = stations, 
                  release.sites = release.sites, 

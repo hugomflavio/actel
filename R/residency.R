@@ -304,7 +304,7 @@ residency <- function(path = NULL, tz, sections, success.arrays = NULL, max.inte
     
     if (is.na(match(fish, override))) {
       release <- as.character(bio$Release.site[na.as.false(bio$Transmitter == fish)])
-      release <- with(spatial, release.sites[release.sites$Standard.name == release, "Array"])
+      release <- unlist(strsplit(with(spatial, release.sites[release.sites$Standard.name == release, "Array"]), "|", fixed = TRUE))
 
       output <- checkMinimumN(movements = movements[[i]], fish = fish, minimum.detections = minimum.detections)
     
@@ -1103,15 +1103,35 @@ res_efficiency <- function(arrmoves, bio, spatial, arrays, paths, dotmat) {
 #' 
 firstArrayFailure <- function(fish, bio, spatial, first.array, paths, dotmat) {
   release <- as.character(bio$Release.site[na.as.false(bio$Transmitter == fish)])
-  release.array <- as.character(with(spatial, release.sites[release.sites$Standard.name == release, "Array"]))
-  if (release.array == first.array) {
+  aux <- as.character(with(spatial, release.sites[release.sites$Standard.name == release, "Array"]))
+  release.arrays <- unlist(strsplit(aux, "|", fixed = TRUE))
+  if (any(release.arrays == first.array)) {
     return(NULL)
   } else {
-    if (dotmat[release.array, first.array] == 1) {
-      return(unlist(list(known = release.array)))
+    to.blame <- names(dotmat[release.arrays, first.array])[dotmat[release.arrays, first.array] == min(dotmat[release.arrays, first.array])]
+    if (min(dotmat[release.arrays, first.array]) == 1) {
+      if (table(dotmat[release.arrays, first.array])["1"] == 1)
+        return(unlist(list(known = to.blame)))
+      else
+        return(unlist(list(unsure = to.blame)))
     } else {
-      aux <- blameArrays(from = release.array, to = first.array, paths = paths)
-      return(unlist(list(known = c(release.array, aux$known), unsure = aux$unsure)))
+      if (table(dotmat[release.arrays, first.array])[1] == 1) {
+        aux <- blameArrays(from = to.blame, to = first.array, paths = paths)
+        return(unlist(list(known = c(to.blame, aux$known), unsure = aux$unsure)))
+      } else {
+        aux <- lapply(to.blame, function(x) blameArrays(from = x, to = first.array, paths = paths))
+        names(aux) <- to.blame
+        combined.unsure <- unique(unlist(aux))
+        aux.knowns <- unlist(lapply(aux, function(x) x$known))
+        knowns <- table(aux.knowns)
+        if (any(knowns == length(aux))) {
+          combined.knowns <- names(knowns)[knowns == length(aux)]
+          combined.unsure <- combined.unsure[!combined.unsure == combined.knowns]
+        } else {
+          combined.knowns <- NULL
+        }
+        return(unlist(list(known = combined.knowns, unsure = c(to.blame, combined.unsure))))
+      }
     }
   }
 }

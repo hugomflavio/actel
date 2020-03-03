@@ -281,12 +281,13 @@ assembleMatrices <- function(spatial, movements, status.df, arrays, paths, dotma
     }
     aux <- aux[order(match(names(aux), the.order))]
     # If the release sites start in different arrays
-    if (length(unique(spatial$release.sites$Array)) > 1) {
+    unique.release.arrays <- unique(unlist(sapply(spatial$release.sites$Array, function(x) unlist(strsplit(x, "|", fixed = TRUE)))))
+    if (length(unique.release.arrays) > 1) {
       for(i in 1:length(aux)){
         r <- sapply(spatial$release.sites$Standard.name, function(x) grepl(x, names(aux)[i]))
         if(sum(r) > 1)
           stop("Multiple release sites match the matrix name. Make sure that the release sites' names are not contained within the fish groups or within themselves.\n")
-        the.col <- which(grepl(spatial$release.sites$Array[r], colnames(aux[[i]])))
+        the.col <- min(which(grepl(spatial$release.sites$Array[r], colnames(aux[[i]]))))
         aux[[i]] <- aux[[i]][, c(1, the.col:ncol(aux[[i]]))]
       }
     }

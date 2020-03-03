@@ -151,8 +151,18 @@ printDot <- function(dot, sections = NULL, spatial) {
 
  # Release nodes
   release_nodes <- spatial$release.sites[, c("Standard.name", "Array")]
+  if (any(link <- grepl( "|", release_nodes$Array, fixed = TRUE))) {
+    expanded <- NULL
+    for(i in which(link)) {
+      aux <- data.frame(Standard.name = release_nodes$Standard.name[i],
+        Array = unlist(strsplit(release_nodes$Array[i], "|", fixed = TRUE)))
+      expanded <- rbind(expanded, aux)
+    }
+    release_nodes <- rbind(release_nodes[-which(link), ], expanded)
+    rm(expanded)
+  }
   colnames(release_nodes)[1] <- "label"
-  release_nodes$id <- nrow(diagram_nodes) + 1:nrow(release_nodes)
+  release_nodes$id <- nrow(diagram_nodes) + as.numeric(as.factor(release_nodes$label))
 
   # node string
   node_list <- split(diagram_nodes, diagram_nodes$fillcolor)
