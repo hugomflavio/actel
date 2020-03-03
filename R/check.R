@@ -566,7 +566,7 @@ checkUpstream <- function(movements, fish, release, arrays, GUI) {
   Array <- NULL
 
   the.warning <- NULL
-  after.arrays <- c(release, arrays[[release]]$all.after.and.par)
+  after.arrays <- unique(c(release, unlist(lapply(release, function(x) arrays[[x]]$all.after.and.par))))
   
   if (any(movements$Valid))
     vm <- movements[(Valid)]

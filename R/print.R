@@ -51,7 +51,7 @@ printProgression <- function(dot, sections, overall.CJS, spatial, status.df) {
       "\\nMax.Est.: ", ifelse(is.na(overall.CJS$absolutes[4, link]), "--",overall.CJS$absolutes[4, link]))
   }
 
-  # Release nodes
+ # Release nodes
   release_nodes <- spatial$release.sites[, c("Standard.name", "Array")]
   release_nodes$n <- 0
   n <- table(status.df$Release.site)
@@ -60,7 +60,20 @@ printProgression <- function(dot, sections, overall.CJS, spatial, status.df) {
   release_nodes$label <- apply(release_nodes, 1, function(s) {
     paste0(s[1], "\\nn = ", s[3])
   })
-  release_nodes$id <- nrow(diagram_nodes) + 1:nrow(release_nodes)
+  if (any(link <- grepl( "|", release_nodes$Array, fixed = TRUE))) {
+    expanded <- NULL
+    for(i in which(link)) {
+      aux <- data.frame(Standard.name = release_nodes$Standard.name[i],
+        Array = unlist(strsplit(release_nodes$Array[i], "|", fixed = TRUE)),
+        n = release_nodes$n[i],
+        label = release_nodes$label[i])
+      expanded <- rbind(expanded, aux)
+    }
+    release_nodes <- rbind(release_nodes[-which(link), ], expanded)
+    rm(expanded)
+  }
+  release_nodes$id <- nrow(diagram_nodes) + as.numeric(as.factor(release_nodes$label))
+  # Release nodes
 
   # node string
   node_list <- split(diagram_nodes, diagram_nodes$fillcolor)
