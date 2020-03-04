@@ -2,7 +2,7 @@
 
 Find out the main highlights of each update.
 
-## development
+## actel 0.1.3
 
 Fixes:
   * Force R to assume detection files are separated by commas (prevents occasional Thelma log crash).
@@ -51,7 +51,7 @@ Enhancements:
   * Sensor values are now transported through the analysis and returned in the valid detections (for Vemco loggers only for now).
   * Ensure the legend in the residency graphics follows the order specified in the sections argument.
   * Improve Thelma .csv file handling for files exported with new column structure.
-  * Allow for multiple expected first arrays (i.e. if fish are released in a lake whose exits are covered with receivers).
+  * Allow for multiple expected first arrays (e.g. if fish are released in a lake whose exits are covered with receivers).
 
 ## actel 0.1.2
 
