@@ -86,7 +86,7 @@ Now you can either install actel sourcing remotely or locally.
 1. Unzip the file and move your R session into the newly created folder
 1. Run: 
 
-        devtools::install("actel-devel", build_vignettes = TRUE)
+        devtools::install("actel-master", build_vignettes = TRUE)
 
 **Have a look at the manual:**
 
@@ -96,7 +96,7 @@ After installing, you should read the package vignettes (i.e. the manual), which
 
 <span style="color:red">**Note:**</span> 
 
-1. If the vignettes are not showing up with the command above, you can download them directly here: [**compiled_vignettes.zip**](https://github.com/hugomflavio/actel/raw/master/compiled_vignettes.zip)
+1. If the vignettes are not showing up with the command above, you can download them directly here: [**actel_vignettes.zip**](https://github.com/hugomflavio/actel/raw/master/actel_vignettes.zip)
 1. If you are getting "pandoc document conversion" errors during the package installation, try installing the [newest version of pandoc](https://pandoc.org/installing.html), restarting R and trying again.
 
 
