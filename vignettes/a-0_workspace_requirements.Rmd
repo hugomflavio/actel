@@ -39,7 +39,7 @@ knitr::opts_chunk$set(
 
 Actel requires that you organise your input files in a specific fashion. Critically, you should have a file named **biometrics.csv**, one named **spatial.csv**, and one named **deployments.csv** (we will look into the file contents in detail soon). Finally, you also need a **detections directory**, containing all your detection files in *.csv*  format. 
 
-To create a blank workspace ready to be used, run `createWorkspace()`, and a template will be generated automatically in your a newly created "actel_workspace" directory. If you would like to, you can change the name of the target directory by using the argument `dir`. Remember to delete the example rows before including your data!
+To create a blank workspace ready to be used, run `createWorkspace()`, and a template will be generated automatically in an "actel_workspace" directory. If you would like to, you can change the name of the target directory by using the argument `dir`. Remember to delete the example rows before including your data!
 
 ## Biometrics file
 
@@ -99,7 +99,7 @@ Array
   : If you are listing a station: 
     The array to which the station belongs. 
   : If you are listing a release site: 
-    The first array that the fish is expected to cross after being released.
+    The first array(s) that the fish is expected to cross after being released.
   : Note:
       - If you are only going to run an `explore()` analysis, you can name your arrays freely. 
       - If you are going to run `migration()` or `residency()`, the names of arrays from a given study section must differ only in number. I.e. arrays **must** have this format: *section#*.
@@ -118,7 +118,7 @@ W: At least one release site has been indicated in the spatial file, but no rele
    Discarding release site information to avoid script failure. Please doublecheck your data.
 ```
 
-**[Click here to learn more about how to organise your study area in an actel-friendly way.](a-1_study_area.html)**
+**[Click here to learn more about how to fit your study area into a spatial.csv file.](a-1_study_area.html)**
 
 ## Deployments file
 
@@ -157,7 +157,7 @@ Note:
   
 ## Optional: Distances matrix
 
-A distances matrix is a table that contains information on  the distance (in metres) between every pair of spatial elements in your study area (i.e. your receivers and your release sites). It looks like the table below:
+A distances matrix is a table that contains information on the distance (in metres) between every pair of spatial elements in your study area (i.e. your stations and your release sites). It looks like the table below:
 
 |        |     St.1|     St.2|     St.3|     St.4|       St.5|       St.6|   Release|
 |:-------|--------:|--------:|--------:|--------:|----------:|----------:|---------:|
@@ -173,7 +173,7 @@ A distances matrix is a table that contains information on  the distance (in met
 
 ## Optional: spatial.txt file
 
-If your study area has multiple branches, then you need to tell actel how your receivers array connect with each other. This file is optional because, if ommitted, actel will assume that your study area is composed by a single branch and that the array order is the one listed in the spatial.csv file.
+If your study area has multiple branches, then you need to tell actel how your arrays connect with each other. This file is optional because, if ommitted, actel will assume that your study area is composed by a single branch and that the array order is the one listed in the spatial.csv file.
 
 The spatial.txt file is very simple; all you need to do is connect your arrays with either dashes or arrows (find out the difference below). You can connect your arrays in pairs or make longer strings. To decide whether or not two arrays should be connected, ask yourself the following: "Can fish move from A to B without having to pass through any other array?" If the answer is yes, then the arrays should be connected. Let's have a look at some examples:
 
@@ -182,7 +182,7 @@ The spatial.txt file is very simple; all you need to do is connect your arrays w
 This is the simplest case, e.g. your fish are migrating through a channel, and your arrays split this channel in sections. Like in the figure below:
 
 <center>
-<img src="spatial_a.svg" alt="drawing" width="600"/>
+<img src="spatialtxt_a.svg" alt="drawing" width="600"/>
 </center>
 
 For this specific case you do not need to include a spatial.txt file, as long as you order the arrays in the spatial.csv file. However, if you wanted to include a spatial.txt file, it would look like this:
@@ -205,7 +205,7 @@ D -- E
 This case is similar to above, but some arrays do not cover the totality. For example, they may cover a specific area of a lake (e.g. a spawning ground), Like in the figure below:
 
 <center>
-<img src="spatial_b.svg" alt="drawing" width="600"/>
+<img src="spatialtxt_b.svg" alt="drawing" width="600"/>
 </center>
 
 In this case, fish can move from B to D without passing through C. As such, a spatial.txt file is now required, and it would look like this:
@@ -224,13 +224,13 @@ Note that now, B, C and D are all directly connected with each other.
 In this case, the water channel branches into multiple paths, which may then merge again or not, like in the figure below:
 
 <center>
-<img src="spatial_c.svg" alt="drawing" width="600"/>
+<img src="spatialtxt_c.svg" alt="drawing" width="600"/>
 </center>
 
 Things are getting a bit more complex now. To make sure you do not miss any connection, it can be useful to draw in a map the links between the arrays as you write them down, so you can check at the end if everything is done. Below, I have marked in purple the connections between all the arrays:
 
 <center>
-<img src="spatial_d.svg" alt="drawing" width="600"/>
+<img src="spatialtxt_d.svg" alt="drawing" width="600"/>
 </center>
 
 And here is the respective spatial.txt:
