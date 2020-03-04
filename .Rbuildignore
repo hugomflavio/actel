@@ -1,5 +1,5 @@
 ^doc$
 ^Meta$
 ^compiled_vignettes$
-^compiled_vignettes.zip
+^actel_vignettes.zip
 ^.travis.yml$
