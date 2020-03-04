@@ -4,7 +4,14 @@
 \alias{transformSpatial}
 \title{Process spatial elements}
 \usage{
-transformSpatial(spatial, bio, arrays, sections = NULL, first.array = NULL)
+transformSpatial(
+  spatial,
+  bio,
+  arrays,
+  dotmat,
+  sections = NULL,
+  first.array = NULL
+)
 }
 \arguments{
 \item{bio}{A table with the tags and biometrics of the studied fish.}
