@@ -2,8 +2,8 @@ Jump to [**installation instructions**](#installing-actel)
 
 # actel<img src="vignettes/actel_logo.png" align="right" width="120" />
 
-[![Travis Build Status](https://travis-ci.com/hugomflavio/actel.svg?branch=dev)](https://travis-ci.org/hugomflavio/actel)
-[![codecov](https://codecov.io/github/hugomflavio/actel/branch/dev/graphs/badge.svg)](https://codecov.io/github/hugomflavio/actel)<sup> of non-interactive code*</sup>
+[![Travis Build Status](https://travis-ci.com/hugomflavio/actel.svg?branch=master)](https://travis-ci.org/hugomflavio/actel)
+[![codecov](https://codecov.io/github/hugomflavio/actel/branch/master/graphs/badge.svg)](https://codecov.io/github/hugomflavio/actel)<sup> of non-interactive code*</sup>
 
 Read the [latest news here!](https://github.com/hugomflavio/actel/blob/master/NEWS.md#news)
 
@@ -67,7 +67,7 @@ Here are some examples:
 
 ## Installing actel 
 
-Current version: 0.1.2
+Current version: 0.1.3
 
 To install actel, you will need to have the devtools package installed.
 
