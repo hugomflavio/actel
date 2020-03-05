@@ -31,7 +31,7 @@ distancesMatrix(
 \item{actel}{Logical: Should the distance matrix be optimized for actel and saved in the working directory?}
 }
 \value{
-If actel = TRUE, The distance matrix is stored in the
+The distances matrix. If actel = TRUE, the distance matrix is also stored in a 'distances.csv' file.
 }
 \description{
 Using a previously created transition layer (see \code{\link{transitionLayer}}), calculates the distances

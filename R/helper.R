@@ -516,7 +516,7 @@ convertTimesToCircular <- function(times) {
 #' @param shape A shape file projected in a metric coordinate system.
 #' @param size The pixel size, in metres.
 #' @param EPSGcode The EPSG code of the shape file's coordinate system. DO NOT USE degree-based coordinate systems.
-#' @param coord.x,coord.y The names of the columns containing the x and y information. Must be identical in the starters and targets.
+#' @param coord.x,coord.y The names of the columns containing the x and y positions of the stations in the spatial.csv file. Must be in the same coordinate system as the shape file.
 #' @param buffer Artificially expand the shape file edges. Can be a single value (applied to all edges) or four values (xmin, xmax, ymin, ymax).
 #' @param directions The number of directions considered for every movement situation during cost calculation. See the vignettes for more details.
 #' @param force Logical: Should the process continue even if the transition layer has 2000 pixels on one or both axes?
@@ -686,7 +686,7 @@ size, rerun the function with force = TRUE.\n", call. = FALSE)
 #' @param id.col The name of the column containing the IDs of the points to be used as starters and targets. Must be identical in both files.
 #' @param actel Logical: Should the distance matrix be optimized for actel and saved in the working directory?
 #'
-#' @return If actel = TRUE, The distance matrix is stored in the 
+#' @return The distances matrix. If actel = TRUE, the distance matrix is also stored in a 'distances.csv' file.
 #' 
 #' @export
 #' 

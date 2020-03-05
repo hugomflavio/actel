@@ -22,7 +22,7 @@ transitionLayer(
 
 \item{EPSGcode}{The EPSG code of the shape file's coordinate system. DO NOT USE degree-based coordinate systems.}
 
-\item{coord.x, coord.y}{The names of the columns containing the x and y information. Must be identical in the starters and targets.}
+\item{coord.x, coord.y}{The names of the columns containing the x and y positions of the stations in the spatial.csv file. Must be in the same coordinate system as the shape file.}
 
 \item{buffer}{Artificially expand the shape file edges. Can be a single value (applied to all edges) or four values (xmin, xmax, ymin, ymax).}
 
