@@ -533,7 +533,7 @@ printIndividuals <- function(detections.list, bio, status.df = NULL, tz,
   appendTo(c("Screen", "Report"), "M: Drawing individual detection graphics.")
 
   # Y axis order
-  link <- match(spatial$stations$Array, unlist(spatial$array.order))
+  link <- match(spatial$stations$Array, c(unlist(spatial$array.order), "Unknown"))
   names(link) <- 1:length(link)
   link <- sort(link)
   link <- as.numeric(names(link))
