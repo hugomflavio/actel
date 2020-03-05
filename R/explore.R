@@ -202,7 +202,7 @@ explore <- function(path = NULL, tz, max.interval = 60, minimum.detections = 2, 
       ", jump.error = ", jump.error,
       ", inactive.warning = ", ifelse(is.null(inactive.warning), "NULL", inactive.warning),
       ", inactive.error = ", ifelse(is.null(inactive.error), "NULL", inactive.error), 
-      ", GUI = ", GUI,
+      ", GUI = '", GUI, "'",
       ", debug = ", ifelse(debug, "TRUE", "FALSE"), 
       ")")
 # --------------------
@@ -478,6 +478,9 @@ printExploreRmd <- function(override.fragment, biometric.fragment, individual.pl
     unknown.fragment <- ""
   } 
   report <- readr::read_file("temp_log.txt")
+
+  options(knitr.kable.NA = "-")
+
   sink(reportname)
   cat(paste0(
 '---

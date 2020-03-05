@@ -208,7 +208,7 @@ residency <- function(path = NULL, tz, sections, success.arrays = NULL, max.inte
       ", jump.error = ", jump.error,
       ", inactive.warning = ", ifelse(is.null(inactive.warning), "NULL", inactive.warning), 
       ", inactive.error = ", ifelse(is.null(inactive.error), "NULL", inactive.error), 
-      ", GUI = ", GUI,
+      ", GUI = '", GUI, "'",
       ", debug = ", ifelse(debug, "TRUE", "FALSE"), 
       ")")
 # --------------------
@@ -589,6 +589,9 @@ printResidencyRmd <- function(override.fragment, biometric.fragment, efficiency.
     unknown.fragment <- ""
   } 
   report <- readr::read_file("temp_log.txt")
+
+  options(knitr.kable.NA = "-")
+
   sink(reportname)
   cat(paste0(
 '---
