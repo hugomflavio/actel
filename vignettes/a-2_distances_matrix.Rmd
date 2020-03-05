@@ -140,7 +140,7 @@ In your spatial file, you must include two columns with the coordinates for your
 Now that both your shapefile and your spatial.csv file are ready, lets get back to R. The first thing you need to do is create a transition layer, which will convert your shapefile into an object that R can use to track distances. The function you will need to run is:
 
 ```r
-transitionLayer(shape, size, EPSGcode, directions)
+transitionLayer(shape, size, EPSGcode, coord.x, coord.y, buffer, directions)
 ```
 
 1. The `shape` is the name of your shapefile, including the ".shp" extension. 
@@ -151,6 +151,8 @@ transitionLayer(shape, size, EPSGcode, directions)
     Keep in mind that your pixel size must allow R to still capture the presence of your river channels. If the river channels are too slim, you can go back to your shapefile and artificially enlarge them.
 
 1. The `EPSGcode` is the code of the coordinate system that the shapefile was saved in.
+1. The `coord.x` and `coord.y` allow actel to search your spatial.csv file and match the station positions with the extent of the shapefile. Write the names of the columns containing the x and y coordinates in these two arguments.
+1. The `buffer` allows you to request an expansion of the shapefile limits (can come in handy to ensure your stations are not cut-off from each other).
 1. The `directions` determine the complexity of R's distance tracking techniques. It can take one of four values: four, eight or sixteen, defaulting to the latter.
 
     * If `directions = 4`, the fish can only in the direction of the cardinal winds (North, South, East and West). 
