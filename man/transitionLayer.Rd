@@ -4,7 +4,16 @@
 \alias{transitionLayer}
 \title{Calculate Transition Layer}
 \usage{
-transitionLayer(shape, size, EPSGcode, directions = c(16, 8, 4), force = FALSE)
+transitionLayer(
+  shape,
+  size,
+  EPSGcode,
+  coord.x = NULL,
+  coord.y = NULL,
+  buffer = NULL,
+  directions = c(16, 8, 4),
+  force = FALSE
+)
 }
 \arguments{
 \item{shape}{A shape file projected in a metric coordinate system.}
@@ -12,6 +21,10 @@ transitionLayer(shape, size, EPSGcode, directions = c(16, 8, 4), force = FALSE)
 \item{size}{The pixel size, in metres.}
 
 \item{EPSGcode}{The EPSG code of the shape file's coordinate system. DO NOT USE degree-based coordinate systems.}
+
+\item{coord.x, coord.y}{The names of the columns containing the x and y information. Must be identical in the starters and targets.}
+
+\item{buffer}{Artificially expand the shape file edges. Can be a single value (applied to all edges) or four values (xmin, xmax, ymin, ymax).}
 
 \item{directions}{The number of directions considered for every movement situation during cost calculation. See the vignettes for more details.}
 

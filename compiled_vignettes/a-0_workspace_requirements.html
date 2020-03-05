@@ -8,11 +8,11 @@
 <meta name="generator" content="pandoc" />
 <meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
 
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1" />
 
 <meta name="author" content="Hugo Flávio" />
 
-<meta name="date" content="2020-01-08" />
+<meta name="date" content="2020-03-04" />
 
 <title>1) Preparing your data</title>
 
@@ -31,9 +31,6 @@ padding-right: 2em;
 font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
 font-size: 14px;
 line-height: 1.35;
-}
-#header {
-text-align: center;
 }
 #TOC {
 clear: both;
@@ -202,7 +199,8 @@ code > span.st { color: #d14; }
 code > span.co { color: #888888; font-style: italic; } 
 code > span.ot { color: #007020; } 
 code > span.al { color: #ff0000; font-weight: bold; } 
-code > span.fu { color: #900; font-weight: bold; }  code > span.er { color: #a61717; background-color: #e3d2d2; } 
+code > span.fu { color: #900; font-weight: bold; } 
+code > span.er { color: #a61717; background-color: #e3d2d2; } 
 </style>
 
 
@@ -217,7 +215,7 @@ code > span.fu { color: #900; font-weight: bold; }  code > span.er { color: #a61
 
 <h1 class="title toc-ignore">1) Preparing your data</h1>
 <h4 class="author">Hugo Flávio</h4>
-<h4 class="date">2020-01-08</h4>
+<h4 class="date">2020-03-04</h4>
 
 
 
@@ -253,7 +251,7 @@ code > span.fu { color: #900; font-weight: bold; }  code > span.er { color: #a61
 <div id="preparing-your-data" class="section level2">
 <h2>Preparing your data</h2>
 <p>Actel requires that you organise your input files in a specific fashion. Critically, you should have a file named <strong>biometrics.csv</strong>, one named <strong>spatial.csv</strong>, and one named <strong>deployments.csv</strong> (we will look into the file contents in detail soon). Finally, you also need a <strong>detections directory</strong>, containing all your detection files in <em>.csv</em> format.</p>
-<p>To create a blank workspace ready to be used, run <code>createWorkspace()</code>, and a template will be generated automatically in your a newly created “actel_workspace” directory. If you would like to, you can change the name of the target directory by using the argument <code>dir</code>. Remember to delete the example rows before including your data!</p>
+<p>To create a blank workspace ready to be used, run <code>createWorkspace()</code>, and a template will be generated automatically in an “actel_workspace” directory. If you would like to, you can change the name of the target directory by using the argument <code>dir</code>. Remember to delete the example rows before including your data!</p>
 </div>
 <div id="biometrics-file" class="section level2">
 <h2>Biometrics file</h2>
@@ -381,7 +379,7 @@ M: No &#39;Group&#39; column found in the biometrics file. Assigning all fish to
 <dt>Array</dt>
 <dd>If you are listing a station: The array to which the station belongs.
 </dd>
-<dd>If you are listing a release site: The first array that the fish is expected to cross after being released.
+<dd>If you are listing a release site: The first array(s) that the fish is expected to cross after being released.
 </dd>
 <dd>Note: - If you are only going to run an <code>explore()</code> analysis, you can name your arrays freely. - If you are going to run <code>migration()</code> or <code>residency()</code>, the names of arrays from a given study section must differ only in number. I.e. arrays <strong>must</strong> have this format: <em>section#</em>.
 </dd>
@@ -396,7 +394,7 @@ M: No &#39;Group&#39; column found in the biometrics file. Assigning all fish to
 </ol>
 <pre><code>W: At least one release site has been indicated in the spatial file, but no release sites were specified in the biometrics file.
    Discarding release site information to avoid script failure. Please doublecheck your data.</code></pre>
-<p><strong><a href="a-1_study_area.html">Click here to learn more about how to organise your study area in an actel-friendly way.</a></strong></p>
+<p><strong><a href="a-1_study_area.html">Click here to learn more about how to fit your study area into a spatial.csv file.</a></strong></p>
 </div>
 <div id="deployments-file" class="section level2">
 <h2>Deployments file</h2>
@@ -456,7 +454,7 @@ M: No &#39;Group&#39; column found in the biometrics file. Assigning all fish to
 </div>
 <div id="optional-distances-matrix" class="section level2">
 <h2>Optional: Distances matrix</h2>
-<p>A distances matrix is a table that contains information on the distance (in metres) between every pair of spatial elements in your study area (i.e. your receivers and your release sites). It looks like the table below:</p>
+<p>A distances matrix is a table that contains information on the distance (in metres) between every pair of spatial elements in your study area (i.e. your stations and your release sites). It looks like the table below:</p>
 <table>
 <thead>
 <tr class="header">
@@ -547,7 +545,7 @@ M: No &#39;Group&#39; column found in the biometrics file. Assigning all fish to
 </div>
 <div id="optional-spatial.txt-file" class="section level2">
 <h2>Optional: spatial.txt file</h2>
-<p>If your study area has multiple branches, then you need to tell actel how your receivers array connect with each other. This file is optional because, if ommitted, actel will assume that your study area is composed by a single branch and that the array order is the one listed in the spatial.csv file.</p>
+<p>If your study area has multiple branches, then you need to tell actel how your arrays connect with each other. This file is optional because, if ommitted, actel will assume that your study area is composed by a single branch and that the array order is the one listed in the spatial.csv file.</p>
 <p>The spatial.txt file is very simple; all you need to do is connect your arrays with either dashes or arrows (find out the difference below). You can connect your arrays in pairs or make longer strings. To decide whether or not two arrays should be connected, ask yourself the following: “Can fish move from A to B without having to pass through any other array?” If the answer is yes, then the arrays should be connected. Let’s have a look at some examples:</p>
 <div id="one-branch-study-area-fully-covering-arrays" class="section level4">
 <h4>One branch study area, fully covering arrays</h4>
@@ -618,8 +616,8 @@ C -- E</code></pre>
 </div>
 <div id="exploreresidency-vs-migration" class="section level4">
 <h4>explore()/residency() vs migration()</h4>
-<p>An optimal spatial.txt may differ depending on whether you want to run a migration or an explore/residency analysis. This is because actel interprets the spatial.txt file depending on the analysis:</p>
-<p>In a explore/residency analyses, <code>A -- B</code> should be read as:</p>
+<p>An optimal spatial.txt may differ depending on whether you want to run a migration or an explore/residency analysis. This is because actel interprets the spatial.txt file differently depending on the analysis:</p>
+<p>In an explore/residency analyses, <code>A -- B</code> should be read as:</p>
 <pre><code>It is possible to move from array A to array B and vice-versa</code></pre>
 <p>In a migration analysis, <code>A -- B</code> should be read as:</p>
 <pre><code>It is possible to move from array A to array B and vice-versa, AND the fish are expected to pass through array A before reaching array B</code></pre>
@@ -652,6 +650,7 @@ E -- F -- E</code></pre>
 <p>If the fish can only move from A to B, use either <code>A -&gt; B</code> or <code>B &lt;- A</code>.</p>
 <p>If a fish then actually moves from B to A, actel will try to find an alternative route that the fish could have taken. If there are no alternative routes from B to A, actel will call this situation to your attention.</p>
 <p>This has implications for array efficiency calculations, so be sure to encode your study area carefully.</p>
+<p>You can find more information about <a href="b-1_explore_processes.html#impassables">impassable barriers here.</a></p>
 </div>
 </div>
 <div id="running-the-analysis" class="section level2">

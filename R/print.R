@@ -11,29 +11,6 @@ gg_colour_hue <- function(n) {
   grDevices::hcl(h = hues, l = 65, c = 100)[1:n]
 }
 
-#' Open HTML report
-#' 
-#' @param file.name the name of the html file
-#' 
-#' @keywords internal
-#' 
-openReport <- function(file.name){
-  # The internet connection check is made only because R was freezing when opening the html without internet in my pc.
-  rep.ver <- tryCatch(unlist(strsplit(readLines('https://raw.githubusercontent.com/hugomflavio/actel/master/DESCRIPTION')[3], " "))[2], error = function(e) NULL, warning = function(w) NULL)
-  if (!is.null(rep.ver)) {
-    if (.Platform$OS.type == "windows") 
-      hide <- system(paste0('open "', file.name, '"'), show.output.on.console = FALSE)
-    else
-      hide <- system(paste0('xdg-open "', file.name, '"'))
-  }  else {
-    appendTo("Screen", "M: Skipping auto-opening of the report as R has been crashing when opening the html without an internet connection.")
-  }
-  appendTo("debug", "debug: Removing toc_menu_explore.html")
-  if(file.exists("Report/toc_menu_explore.html"))
-    file.remove("Report/toc_menu_explore.html")
-  return(NULL)
-}
-
 #' Print progression diagram
 #'
 #' @inheritParams migration
@@ -49,18 +26,22 @@ printProgression <- function(dot, sections, overall.CJS, spatial, status.df) {
   names(cbPalette) <- c("Orange", "Blue", "Green", "Yellow", "Darkblue", "Darkorange", "Pink", "Grey")
 
   # Prepare node data frame
-    diagram_nodes <- data.frame(
-    id = 1:length(unique(unlist(dot[, c(1, 3)]))),
-    original.label = unique(unlist(dot[, c(1, 3)])),
-    label = unique(unlist(dot[, c(1, 3)])),
-    stringsAsFactors = FALSE)
-    if (length(sections) <= length(cbPalette)) {
+  diagram_nodes <- data.frame(
+  id = 1:length(unique(unlist(dot[, c(1, 3)]))),
+  original.label = unique(unlist(dot[, c(1, 3)])),
+  label = unique(unlist(dot[, c(1, 3)])),
+  stringsAsFactors = FALSE)
+  if (length(sections) <= length(cbPalette)) {
     diagram_nodes$fillcolor <- rep(NA_character_, nrow(diagram_nodes))
     for (i in 1:length(sections)) {
        diagram_nodes$fillcolor[grepl(sections[i], diagram_nodes$label)] <- cbPalette[i]
     }
   } else {
-    diagram_nodes$fillcolor <- rep("#56B4E9", nrow(diagram_nodes))
+    diagram_nodes$fillcolor <- rep(NA_character_, nrow(diagram_nodes))
+    new.fill <- gg_colour_hue(length(sections))
+    for (i in 1:length(sections)) {
+       diagram_nodes$fillcolor[grepl(sections[i], diagram_nodes$label)] <- new.fill[i]
+    }
   }
   for (i in 1:nrow(diagram_nodes)) {
     link <- grep(diagram_nodes$label[i], names(overall.CJS$absolutes))
@@ -70,14 +51,29 @@ printProgression <- function(dot, sections, overall.CJS, spatial, status.df) {
       "\\nMax.Est.: ", ifelse(is.na(overall.CJS$absolutes[4, link]), "--",overall.CJS$absolutes[4, link]))
   }
 
-  # Release nodes
+ # Release nodes
   release_nodes <- spatial$release.sites[, c("Standard.name", "Array")]
+  release_nodes$n <- 0
   n <- table(status.df$Release.site)
-  release_nodes$n <- n[match(names(n), release_nodes$Standard.name)]
+  link <- match(names(n), release_nodes$Standard.name)
+  release_nodes$n[link] <- n
   release_nodes$label <- apply(release_nodes, 1, function(s) {
     paste0(s[1], "\\nn = ", s[3])
   })
-  release_nodes$id <- nrow(diagram_nodes) + 1:nrow(release_nodes)
+  if (any(link <- grepl( "|", release_nodes$Array, fixed = TRUE))) {
+    expanded <- NULL
+    for(i in which(link)) {
+      aux <- data.frame(Standard.name = release_nodes$Standard.name[i],
+        Array = unlist(strsplit(release_nodes$Array[i], "|", fixed = TRUE)),
+        n = release_nodes$n[i],
+        label = release_nodes$label[i])
+      expanded <- rbind(expanded, aux)
+    }
+    release_nodes <- rbind(release_nodes[-which(link), ], expanded)
+    rm(expanded)
+  }
+  release_nodes$id <- nrow(diagram_nodes) + as.numeric(as.factor(release_nodes$label))
+  # Release nodes
 
   # node string
   node_list <- split(diagram_nodes, diagram_nodes$fillcolor)
@@ -168,8 +164,18 @@ printDot <- function(dot, sections = NULL, spatial) {
 
  # Release nodes
   release_nodes <- spatial$release.sites[, c("Standard.name", "Array")]
+  if (any(link <- grepl( "|", release_nodes$Array, fixed = TRUE))) {
+    expanded <- NULL
+    for(i in which(link)) {
+      aux <- data.frame(Standard.name = release_nodes$Standard.name[i],
+        Array = unlist(strsplit(release_nodes$Array[i], "|", fixed = TRUE)))
+      expanded <- rbind(expanded, aux)
+    }
+    release_nodes <- rbind(release_nodes[-which(link), ], expanded)
+    rm(expanded)
+  }
   colnames(release_nodes)[1] <- "label"
-  release_nodes$id <- nrow(diagram_nodes) + 1:nrow(release_nodes)
+  release_nodes$id <- nrow(diagram_nodes) + as.numeric(as.factor(release_nodes$label))
 
   # node string
   node_list <- split(diagram_nodes, diagram_nodes$fillcolor)
@@ -512,8 +518,8 @@ cat("No intra-array replicates were indicated.")
 #' 
 #' @keywords internal
 #' 
-printIndividuals <- function(redraw, detections.list, bio, status.df = NULL, tz, 
-  movements, valid.movements = NULL, extension = "png", arrays, spatial) {
+printIndividuals <- function(detections.list, bio, status.df = NULL, tz, 
+  movements, valid.movements = NULL, extension = "png", spatial) {
   # NOTE: The NULL variables below are actually column names used by ggplot.
   # This definition is just to prevent the package check from issuing a note due unknown variables.
   Timestamp <- NULL
@@ -525,12 +531,9 @@ printIndividuals <- function(redraw, detections.list, bio, status.df = NULL, tz,
   names(cbPalette) <- c("Orange", "Blue", "Green", "Yellow", "Darkblue", "Darkorange", "Pink", "Grey")
 
   appendTo(c("Screen", "Report"), "M: Drawing individual detection graphics.")
-  if (exists("redraw") && redraw == FALSE) {
-    appendTo(c("Screen", "Report"), "M: 'redraw' is set to FALSE, only drawing new graphics.")
-  }
 
   # Y axis order
-  link <- match(spatial$stations$Array, names(arrays))
+  link <- match(spatial$stations$Array, c(unlist(spatial$array.order), "Unknown"))
   names(link) <- 1:length(link)
   link <- sort(link)
   link <- as.numeric(names(link))
@@ -544,110 +547,121 @@ printIndividuals <- function(redraw, detections.list, bio, status.df = NULL, tz,
     counter <<- counter + 1
     PlotData <- detections.list[[fish]]
     PlotData$Standard.name <- factor(PlotData$Standard.name, levels = y.order)
-    if (!(exists("redraw") && redraw == FALSE && file.exists(paste0("Report/", fish, ".png")))) {
-      all.moves.line <- data.frame(
-        Station = as.vector(t(movements[[fish]][, c("First.station", "Last.station")])),
-        Timestamp = as.vector(t(movements[[fish]][, c("First.time", "Last.time")]))
-      )
-      all.moves.line$Station <- factor(all.moves.line$Station, levels = levels(PlotData$Standard.name))
-      all.moves.line$Timestamp <- as.POSIXct(all.moves.line$Timestamp, tz = tz)
-      add.valid.movements <- FALSE
-      if (!is.null(valid.movements[[fish]])) {
-        add.valid.movements <- TRUE
-        simple.moves.line <- data.frame(
-          Station = as.vector(t(valid.movements[[fish]][, c("First.station", "Last.station")])),
-          Timestamp = as.vector(t(valid.movements[[fish]][, c("First.time", "Last.time")]))
-          )
-        simple.moves.line$Station <- factor(simple.moves.line$Station, levels = levels(PlotData$Standard.name))
-        simple.moves.line$Timestamp <- as.POSIXct(simple.moves.line$Timestamp, tz = tz)
-      }
-      appendTo("debug", paste0("Debug: Printing graphic for fish", fish, "."))
-      colnames(PlotData)[1] <- "Timestamp"
-      the.row <- which(bio$Transmitter == fish)
-      start.line <- as.POSIXct(bio$Release.date[the.row], tz = tz)
-      first.time <- min(c(as.POSIXct(head(PlotData$Timestamp, 1), tz = tz), start.line))
-      attributes(first.time)$tzone <- tz
-      last.time <- as.POSIXct(tail(PlotData$Timestamp, 1), tz = tz)
-      if (!is.null(status.df)) {
-        status.row <- which(status.df$Transmitter == fish)
-        relevant.line <- status.df[status.row, (grepl("Arrived", colnames(status.df)) | grepl("Left", colnames(status.df)))]
-      }
-      # Start plot
-      p <- ggplot2::ggplot(PlotData, ggplot2::aes(x = Timestamp, y = Standard.name, colour = Array))
-      # Choose background
-      default.cols <- TRUE
-      if (attributes(movements[[fish]])$p.type == "Overridden") {
-        p <- p + ggplot2::theme(
-          panel.background = ggplot2::element_rect(fill = "white"),
-          panel.border = ggplot2::element_rect(fill = NA, colour = "#ef3b32" , size = 2),
-          panel.grid.major = ggplot2::element_line(size = 0.5, linetype = 'solid', colour = "#ffd8d6"), 
-          panel.grid.minor = ggplot2::element_line(size = 0.25, linetype = 'solid', colour = "#ffd8d6"),
-          legend.key = ggplot2::element_rect(fill = "white", colour = "white"),
-          )
-        default.cols <- FALSE
-      } 
-      if (attributes(movements[[fish]])$p.type == "Manual") {
-         p <- p + ggplot2::theme(
-          panel.background = ggplot2::element_rect(fill = "white"),
-          panel.border = ggplot2::element_rect(fill = NA, colour = "#ffd016" , size = 2),
-          panel.grid.major = ggplot2::element_line(size = 0.5, linetype = 'solid', colour = "#f2e4b8"), 
-          panel.grid.minor = ggplot2::element_line(size = 0.25, linetype = 'solid', colour = "#f2e4b8"),
-          legend.key = ggplot2::element_rect(fill = "white", colour = "white"),
-          )
-        default.cols <- FALSE
-      } 
-      if (default.cols) {
-        p <- p + ggplot2::theme_bw()
-      }
-      # Plot starting line
-      p <- p + ggplot2::geom_vline(xintercept = start.line, linetype = "dashed")
-      # Plot entry/exit lines
-      if (!is.null(status.df)) {
-        for (l in 1:length(relevant.line)) {
-          if (!is.na(relevant.line[l])) {
-            p <- p + ggplot2::geom_vline(xintercept = as.POSIXct(relevant.line[[l]], tz = tz), linetype = "dashed", color = "grey")
-          }
-        }
-        rm(l, relevant.line)
-      }
-      # Plot movements
-      p <- p + ggplot2::geom_path(data = all.moves.line, ggplot2::aes(x = Timestamp, y = Station, group = 1), col = "grey40", linetype = "dashed")
-      if (add.valid.movements) {
-        p <- p + ggplot2::geom_path(data = simple.moves.line, ggplot2::aes(x = Timestamp, y = Station, group = 1), col = "grey40")
-      }
-      # Trim graphic
-      p <- p + ggplot2::xlim(first.time, last.time)
-      # Paint
-      if (length(levels(PlotData$Array)) <= 7 | (length(levels(PlotData$Array)) == 8 & any(levels(PlotData$Array) == "Unknown"))) {
-        if (any(levels(PlotData$Array) == "Unknown"))
-          the.colours <- as.vector(cbPalette)[c(1:(length(levels(PlotData$Array)) - 1), 8)]
-        else
-          the.colours <- as.vector(cbPalette)[1:length(levels(PlotData$Array))]
-      } else {
-        if (any(levels(PlotData$Array) == "Unknown"))
-          the.colours <- c(gg_colour_hue(length(levels(PlotData$Array)) - 1), "#999999")
-        else
-          the.colours <- gg_colour_hue(length(levels(PlotData$Array)))
-      }
-      p <- p + ggplot2::scale_color_manual(values = the.colours, drop = FALSE)
-      # Plot points
-      p <- p + ggplot2::geom_point()
-      # Fixate Y axis
-      p <- p + ggplot2::scale_y_discrete(drop = FALSE)
-      # Caption and title
-      p <- p + ggplot2::guides(colour = ggplot2::guide_legend(reverse = TRUE))
-      if (!is.null(status.df))
-        p <- p + ggplot2::labs(title = paste0(fish, " (", status.df[status.df$Transmitter == fish, "Status"], ")"), x = paste("tz:", tz), y = "Station Standard Name")
-      else
-        p <- p + ggplot2::labs(title = paste0(fish, " (", nrow(PlotData), " detections)"), x = paste("tz:", tz), y = "Station Standard Name")
-      # Save
-      if (length(levels(PlotData$Standard.name)) <= 30)
-        the.height <- 4
-      else
-        the.height <- 4 + (length(levels(PlotData$Standard.name)) - 30) * 0.1
-      ggplot2::ggsave(paste0("Report/", fish, ".", extension), width = 5, height = the.height)  # better to save in png to avoid point overlapping issues
-      rm(PlotData, start.line, last.time, first.time)
+
+    if (any(levels(PlotData$Array) == "Unknown"))
+      levels(PlotData$Array)[levels(PlotData$Array) == "Unknown"] = "Invalid"
+    else
+      levels(PlotData$Array) <- c(levels(PlotData$Array), "Invalid")
+    if (any(!PlotData$Valid))
+      PlotData$Array[!PlotData$Valid] <- "Invalid"
+    
+    all.moves.line <- data.frame(
+      Station = as.vector(t(movements[[fish]][, c("First.station", "Last.station")])),
+      Timestamp = as.vector(t(movements[[fish]][, c("First.time", "Last.time")]))
+    )
+    all.moves.line$Station <- factor(all.moves.line$Station, levels = levels(PlotData$Standard.name))
+    all.moves.line$Timestamp <- as.POSIXct(all.moves.line$Timestamp, tz = tz)
+    
+    add.valid.movements <- FALSE
+    if (!is.null(valid.movements[[fish]])) {
+      add.valid.movements <- TRUE
+      simple.moves.line <- data.frame(
+        Station = as.vector(t(valid.movements[[fish]][, c("First.station", "Last.station")])),
+        Timestamp = as.vector(t(valid.movements[[fish]][, c("First.time", "Last.time")]))
+        )
+      simple.moves.line$Station <- factor(simple.moves.line$Station, levels = levels(PlotData$Standard.name))
+      simple.moves.line$Timestamp <- as.POSIXct(simple.moves.line$Timestamp, tz = tz)
     }
+    
+    colnames(PlotData)[1] <- "Timestamp"
+
+    the.row <- which(bio$Transmitter == fish)
+    start.line <- as.POSIXct(bio$Release.date[the.row], tz = tz)
+    first.time <- min(c(as.POSIXct(head(PlotData$Timestamp, 1), tz = tz), start.line))
+    attributes(first.time)$tzone <- tz
+    last.time <- as.POSIXct(tail(PlotData$Timestamp, 1), tz = tz)
+
+    if (!is.null(status.df)) {
+      status.row <- which(status.df$Transmitter == fish)
+      relevant.line <- status.df[status.row, (grepl("Arrived", colnames(status.df)) | grepl("Left", colnames(status.df)))]
+    }
+
+    appendTo("debug", paste0("Debug: Printing graphic for fish", fish, "."))
+    # Start plot
+    p <- ggplot2::ggplot(PlotData, ggplot2::aes(x = Timestamp, y = Standard.name, colour = Array))
+    # Choose background
+    default.cols <- TRUE
+    if (attributes(movements[[fish]])$p.type == "Overridden") { # nocov start
+      p <- p + ggplot2::theme(
+        panel.background = ggplot2::element_rect(fill = "white"),
+        panel.border = ggplot2::element_rect(fill = NA, colour = "#ef3b32" , size = 2),
+        panel.grid.major = ggplot2::element_line(size = 0.5, linetype = 'solid', colour = "#ffd8d6"), 
+        panel.grid.minor = ggplot2::element_line(size = 0.25, linetype = 'solid', colour = "#ffd8d6"),
+        legend.key = ggplot2::element_rect(fill = "white", colour = "white"),
+        )
+      default.cols <- FALSE
+    } # nocov end
+    if (attributes(movements[[fish]])$p.type == "Manual") {
+       p <- p + ggplot2::theme(
+        panel.background = ggplot2::element_rect(fill = "white"),
+        panel.border = ggplot2::element_rect(fill = NA, colour = "#ffd016" , size = 2),
+        panel.grid.major = ggplot2::element_line(size = 0.5, linetype = 'solid', colour = "#f2e4b8"), 
+        panel.grid.minor = ggplot2::element_line(size = 0.25, linetype = 'solid', colour = "#f2e4b8"),
+        legend.key = ggplot2::element_rect(fill = "white", colour = "white"),
+        )
+      default.cols <- FALSE
+    } 
+    if (default.cols) {
+      p <- p + ggplot2::theme_bw()
+    }
+    # Plot starting line
+    p <- p + ggplot2::geom_vline(xintercept = start.line, linetype = "dashed")
+    # Plot entry/exit lines
+    if (!is.null(status.df)) {
+      for (l in 1:length(relevant.line)) {
+        if (!is.na(relevant.line[l])) {
+          p <- p + ggplot2::geom_vline(xintercept = as.POSIXct(relevant.line[[l]], tz = tz), linetype = "dashed", color = "grey")
+        }
+      }
+      rm(l, relevant.line)
+    }
+    # Plot movements
+    p <- p + ggplot2::geom_path(data = all.moves.line, ggplot2::aes(x = Timestamp, y = Station, group = 1), col = "grey40", linetype = "dashed")
+    if (add.valid.movements) {
+      p <- p + ggplot2::geom_path(data = simple.moves.line, ggplot2::aes(x = Timestamp, y = Station, group = 1), col = "grey40")
+    }
+    # Trim graphic
+    p <- p + ggplot2::xlim(first.time, last.time)
+    # Paint
+    if (length(levels(PlotData$Array)) <= 7 | (length(levels(PlotData$Array)) == 8 & any(levels(PlotData$Array) == "Invalid"))) {
+      if (any(levels(PlotData$Array) == "Invalid"))
+        the.colours <- as.vector(cbPalette)[c(1:(length(levels(PlotData$Array)) - 1), 8)]
+      else
+        the.colours <- as.vector(cbPalette)[1:length(levels(PlotData$Array))]
+    } else {
+      if (any(levels(PlotData$Array) == "Invalid"))
+        the.colours <- c(gg_colour_hue(length(levels(PlotData$Array)) - 1), "#999999")
+      else
+        the.colours <- gg_colour_hue(length(levels(PlotData$Array)))
+    }
+    p <- p + ggplot2::scale_color_manual(values = the.colours, drop = FALSE)
+    # Plot points
+    p <- p + ggplot2::geom_point()
+    # Fixate Y axis
+    p <- p + ggplot2::scale_y_discrete(drop = FALSE)
+    # Caption and title
+    p <- p + ggplot2::guides(colour = ggplot2::guide_legend(reverse = TRUE))
+    if (!is.null(status.df))
+      p <- p + ggplot2::labs(title = paste0(fish, " (", status.df[status.df$Transmitter == fish, "Status"], ")"), x = paste("tz:", tz), y = "Station Standard Name")
+    else
+      p <- p + ggplot2::labs(title = paste0(fish, " (", nrow(PlotData), " detections)"), x = paste("tz:", tz), y = "Station Standard Name")
+    # Save
+    if (length(levels(PlotData$Standard.name)) <= 30)
+      the.height <- 4
+    else
+      the.height <- 4 + (length(levels(PlotData$Standard.name)) - 30) * 0.1
+    ggplot2::ggsave(paste0("Report/", fish, ".", extension), width = 5, height = the.height)  # better to save in png to avoid point overlapping issues
+    rm(PlotData, start.line, last.time, first.time)
     if (counter %% 2 == 0) {
       individual.plots <<- paste0(individual.plots, "![](", fish, ".", extension, "){ width=50% }\n")
     } else {
@@ -715,34 +729,34 @@ printCircular <- function(times, bio, suffix = NULL){
   return(circular.plots)
 }
 
-#' Draw a section on the outside of the circle
-#' 
-#' @param from value where the section should start
-#' @param to value where the section should end
-#' @param units units of the from and to variables, defaults to "hours"
-#' @param template variable to feed into the circular package base functions
-#' @param limits two values controlling the vertical start and end points of the section
-#' @param fill The colour of the section
-#' @param border The colour of the section's border
-#' 
-#' @keywords internal
-#' 
-circularSection <- function(from, to, units = "hours", template = "clock24", limits = c(1, 0), fill = "white", border = "black"){
-  if( inherits(from,"character") ){
-    hour.from <- circular::circular(decimalTime(from), units = units, template = template)
-    hour.to <- circular::circular(decimalTime(to), units = units, template = template)
-  } else {
-    hour.from <- circular::circular(from, units = units, template = template)
-    hour.to <- circular::circular(to, units = units, template = template)
-  }
-  if(hour.to < hour.from) hour.to <- hour.to + 24
-  zero <- attr(hour.from,"circularp")$zero # extracted from the circular data
-  xmin <- as.numeric(circular::conversion.circular(hour.from, units = "radians")) * -1
-  xmax <- as.numeric(circular::conversion.circular(hour.to, units = "radians")) * -1
-  xx <- c(limits[1] * cos(seq(xmin, xmax, length = 1000) + zero), rev(limits[2] * cos(seq(xmin, xmax, length = 1000) + zero)))
-  yy <- c(limits[1] * sin(seq(xmin, xmax, length = 1000) + zero), rev(limits[2] * sin(seq(xmin, xmax, length = 1000) + zero)))
-  polygon(xx, yy, col = fill, border = border)
-}
+# #' Draw a section on the outside of the circle
+# #' 
+# #' @param from value where the section should start
+# #' @param to value where the section should end
+# #' @param units units of the from and to variables, defaults to "hours"
+# #' @param template variable to feed into the circular package base functions
+# #' @param limits two values controlling the vertical start and end points of the section
+# #' @param fill The colour of the section
+# #' @param border The colour of the section's border
+# #' 
+# #' @keywords internal
+# #' 
+# circularSection <- function(from, to, units = "hours", template = "clock24", limits = c(1, 0), fill = "white", border = "black"){
+#   if( inherits(from,"character") ){
+#     hour.from <- circular::circular(decimalTime(from), units = units, template = template)
+#     hour.to <- circular::circular(decimalTime(to), units = units, template = template)
+#   } else {
+#     hour.from <- circular::circular(from, units = units, template = template)
+#     hour.to <- circular::circular(to, units = units, template = template)
+#   }
+#   if(hour.to < hour.from) hour.to <- hour.to + 24
+#   zero <- attr(hour.from,"circularp")$zero # extracted from the circular data
+#   xmin <- as.numeric(circular::conversion.circular(hour.from, units = "radians")) * -1
+#   xmax <- as.numeric(circular::conversion.circular(hour.to, units = "radians")) * -1
+#   xx <- c(limits[1] * cos(seq(xmin, xmax, length = 1000) + zero), rev(limits[2] * cos(seq(xmin, xmax, length = 1000) + zero)))
+#   yy <- c(limits[1] * sin(seq(xmin, xmax, length = 1000) + zero), rev(limits[2] * sin(seq(xmin, xmax, length = 1000) + zero)))
+#   polygon(xx, yy, col = fill, border = border)
+# }
 
 #' Edited rose diagram function
 #' 
@@ -1125,21 +1139,24 @@ printSectionTimes <- function(section.times, bio, detections) {
 #' 
 #' @param global.ratios the global ratios
 #' @param daily.ratios the daily ratios
+#' @inheritParams migration
 #' 
 #' @keywords internal
 #' 
-printGlobalRatios <- function(global.ratios, daily.ratios) {
+printGlobalRatios <- function(global.ratios, daily.ratios, sections) {
   Date <- NULL
   Location <- NULL
   n <- NULL
   cbPalette <- c("#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7", "#999999")
   names(cbPalette) <- c("Orange", "Blue", "Green", "Yellow", "Darkblue", "Darkorange", "Pink", "Grey")
 
-  unique.values <- sort(unique(unlist(lapply(daily.ratios, function(x) {
+  unordered.unique.values <- sort(unique(unlist(lapply(daily.ratios, function(x) {
     aux <- which(grepl("^p", colnames(x)))
     aux <- aux[!is.na(match(colnames(x)[aux - 1], sub("p", "", colnames(x)[aux])))]
     return(colnames(x)[aux - 1])    
   }))))
+  link <- unlist(sapply(sections, function(i) which(grepl(paste0("^", i), unordered.unique.values))))
+  unique.values <- unordered.unique.values[link]
 
   capture <- lapply(names(global.ratios), function(i) {
     plotdata <- suppressMessages(reshape2::melt(global.ratios[[i]][, -ncol(global.ratios[[i]])]))
@@ -1176,7 +1193,7 @@ printGlobalRatios <- function(global.ratios, daily.ratios) {
 #' 
 #' @keywords internal
 #' 
-printIndividualResidency <- function(ratios, dayrange) {
+printIndividualResidency <- function(ratios, dayrange, sections) {
   Date <- NULL
   Location <- NULL
   n <- NULL
@@ -1184,11 +1201,15 @@ printIndividualResidency <- function(ratios, dayrange) {
   names(cbPalette) <- c("Orange", "Blue", "Green", "Yellow", "Darkblue", "Darkorange", "Pink", "Grey")
   counter <- 0
   individual.plots <- NULL
-  unique.values <- sort(unique(unlist(lapply(ratios, function(x) {
+  
+  unordered.unique.values <- sort(unique(unlist(lapply(ratios, function(x) {
     aux <- which(grepl("^p", colnames(x)))
     aux <- aux[!is.na(match(colnames(x)[aux - 1], sub("p", "", colnames(x)[aux])))]
     return(colnames(x)[aux - 1])    
   }))))
+  link <- unlist(sapply(sections, function(i) which(grepl(paste0("^", i), unordered.unique.values))))
+  unique.values <- unordered.unique.values[link]
+
   pb <- txtProgressBar(min = 0, max = length(ratios), style = 3, width = 60)
   capture <- lapply(names(ratios), function(i) {
     counter <<- counter + 1

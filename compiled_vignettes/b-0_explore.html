@@ -8,11 +8,11 @@
 <meta name="generator" content="pandoc" />
 <meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
 
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1" />
 
 <meta name="author" content="Hugo Flávio" />
 
-<meta name="date" content="2020-01-08" />
+<meta name="date" content="2020-03-04" />
 
 <title>2) explore()</title>
 
@@ -117,9 +117,6 @@ padding-right: 2em;
 font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
 font-size: 14px;
 line-height: 1.35;
-}
-#header {
-text-align: center;
 }
 #TOC {
 clear: both;
@@ -288,7 +285,8 @@ code > span.st { color: #d14; }
 code > span.co { color: #888888; font-style: italic; } 
 code > span.ot { color: #007020; } 
 code > span.al { color: #ff0000; font-weight: bold; } 
-code > span.fu { color: #900; font-weight: bold; }  code > span.er { color: #a61717; background-color: #e3d2d2; } 
+code > span.fu { color: #900; font-weight: bold; } 
+code > span.er { color: #a61717; background-color: #e3d2d2; } 
 </style>
 
 
@@ -303,7 +301,7 @@ code > span.fu { color: #900; font-weight: bold; }  code > span.er { color: #a61
 
 <h1 class="title toc-ignore">2) explore()</h1>
 <h4 class="author">Hugo Flávio</h4>
-<h4 class="date">2020-01-08</h4>
+<h4 class="date">2020-03-04</h4>
 
 
 
@@ -351,7 +349,7 @@ code > span.fu { color: #900; font-weight: bold; }  code > span.er { color: #a61
 <div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb2-1" title="1"><span class="kw">explore</span>(<span class="dt">path =</span> <span class="ot">NULL</span>, tz, <span class="dt">max.interval =</span> <span class="dv">60</span>, <span class="dt">minimum.detections =</span> <span class="dv">2</span>, <span class="dt">start.time =</span> <span class="ot">NULL</span>, <span class="dt">stop.time =</span> <span class="ot">NULL</span>,</a>
 <a class="sourceLine" id="cb2-2" title="2">  <span class="dt">speed.method =</span> <span class="kw">c</span>(<span class="st">&quot;last to first&quot;</span>, <span class="st">&quot;first to first&quot;</span>), <span class="dt">speed.warning =</span> <span class="ot">NULL</span>, <span class="dt">speed.error =</span> <span class="ot">NULL</span>, </a>
 <a class="sourceLine" id="cb2-3" title="3">  <span class="dt">jump.warning =</span> <span class="dv">2</span>, <span class="dt">jump.error =</span> <span class="dv">3</span>, <span class="dt">inactive.warning =</span> <span class="ot">NULL</span>, <span class="dt">inactive.error =</span> <span class="ot">NULL</span>, <span class="dt">exclude.tags =</span> <span class="ot">NULL</span>, </a>
-<a class="sourceLine" id="cb2-4" title="4">  <span class="dt">override =</span> <span class="ot">NULL</span>, <span class="dt">report =</span> <span class="ot">TRUE</span>)</a></code></pre></div>
+<a class="sourceLine" id="cb2-4" title="4">  <span class="dt">override =</span> <span class="ot">NULL</span>, <span class="dt">report =</span> <span class="ot">TRUE</span>, <span class="dt">GUI =</span> <span class="kw">c</span>(<span class="st">&quot;needed&quot;</span>, <span class="st">&quot;always&quot;</span>, <span class="st">&quot;never&quot;</span>))</a></code></pre></div>
 <div id="path" class="section level3">
 <h3>path</h3>
 <p>The <code>path</code> is the way to the folder where you want to run the analysis. If you are already working in the folder where you have your data files, leave path as <code>NULL</code> and the analysis will be run in the current directory.</p>
@@ -643,6 +641,11 @@ Error in checkDupSignals(input = my.list, bio = bio, tag.list = tags$list) :
 <dd>Even if something fails during the report printing, your results will still be saved the <em>actel_explore_results.RData</em> file in your working directory!
 </dd>
 </dl>
+</div>
+<div id="gui" class="section level3">
+<h3>GUI</h3>
+<p>actel comes with a graphical interface, intended to allow users to deal with very long movement tables that would otherwise overflow R’s output limits. However, this graphical interface requires additional packages installed, so it may not always be an option to rely on it. This is where <code>GUI</code> comes in. Defaulting to ‘needed’, the graphical user interface will only kick in for very long tables. The other two options are ‘always’ and ‘never’, both of which are self explanatory.</p>
+<p>If you cannot run the GUI on your computer and are faced with a very long table, do not worry! actel has a fall-back system, where the table is saved to a temporary file, which you can open in an external program such as Microsoft Excel of LibreOffice Calc. Have a look at the movements table there, let R know what you want to do, close the file and the analysis will continue automatically.</p>
 </div>
 <div id="all-done" class="section level3">
 <h3>All done!</h3>

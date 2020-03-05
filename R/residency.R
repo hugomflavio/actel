@@ -82,52 +82,38 @@ residency <- function(path = NULL, tz, sections, success.arrays = NULL, max.inte
   start.time = NULL, stop.time = NULL, speed.method = c("last to first", "first to first"), 
   speed.warning = NULL, speed.error = NULL, jump.warning = 2, jump.error = 3, 
   inactive.warning = NULL, inactive.error = NULL, exclude.tags = NULL, override = NULL, report = TRUE,
-  section.minimum = 2, replicates = NULL, debug = FALSE,
-  maximum.time = 60, tz.study.area = NULL, start.timestamp = NULL, end.timestamp = NULL) {
-# Temporary: check deprecated options
-  dep.warning <- "------------------------------------------------------------------\n!!! Deprecated arguments used!\n!!!\n"
-  trigger.dep <- FALSE
-  if (maximum.time != 60) {
-    dep.warning <- paste0(dep.warning, "!!! 'maximum.time' is now 'max.interval'\n")
-    max.interval <- maximum.time
-    trigger.dep <- TRUE
-  }
-  if (!is.null(tz.study.area)) {
-    dep.warning <- paste0(dep.warning, "!!! 'tz.study.area' is now 'tz'\n")
-    tz <- tz.study.area
-    trigger.dep <- TRUE
-  }
-  if (!is.null(start.timestamp)) {
-    dep.warning <- paste0(dep.warning, "!!! 'start.timestamp' is now 'start.time'\n")
-    start.time <- start.timestamp
-    trigger.dep <- TRUE
-  }
-  if (!is.null(end.timestamp)) {
-    dep.warning <- paste0(dep.warning, "!!! 'end.timestamp' is now 'stop.time'\n")
-    stop.time <- end.timestamp
-    trigger.dep <- TRUE
-  }
-  if (trigger.dep)
-    warning(paste0("\n", dep.warning, "!!!\n!!! Please switch to the new arguments as soon as possible.\n!!! The deprecated arguments will stop working in future versions.\n------------------------------------------------------------------"),
-      immediate. = TRUE, call. = FALSE)
-  rm(maximum.time, tz.study.area, start.timestamp, end.timestamp)
-  
+  section.minimum = 2, replicates = NULL, GUI = c("needed", "always", "never"), debug = FALSE) {
 # check argument quality
   my.home <- getwd()
+  if (!is.null(path) && !is.character(path))
+    path <- as.character(path)
   if (is.null(tz) || is.na(match(tz, OlsonNames())))
     stop("'tz' could not be recognized as a timezone. Check available timezones with OlsonNames()\n", call. = FALSE)
   if (!is.numeric(section.minimum))
     stop("'section.minimum' must be numeric.\n", call. = FALSE)
   if (!is.numeric(minimum.detections))
     stop("'minimum.detections' must be numeric.\n", call. = FALSE)
+  if (minimum.detections <= 0)
+    stop("'minimum.detections' must be positive.\n", call. = FALSE)
   if (!is.numeric(max.interval))
     stop("'max.interval' must be numeric.\n", call. = FALSE)
+  if (max.interval <= 0)
+    stop("'max.interval' must be positive.\n", call. = FALSE)
 
+  if (!is.character(speed.method))
+    stop("'speed.method' should be one of 'first to first' or 'last to first'.\n", call. = FALSE)
   speed.method <- match.arg(speed.method)
+
   if (!is.null(speed.warning) && !is.numeric(speed.warning))
     stop("'speed.warning' must be numeric.\n", call. = FALSE)    
+  if (!is.null(speed.warning) && speed.warning <= 0)
+    stop("'speed.warning' must be positive.\n", call. = FALSE) 
+
   if (!is.null(speed.error) && !is.numeric(speed.error))
     stop("'speed.error' must be numeric.\n", call. = FALSE)    
+  if (!is.null(speed.error) && speed.error <= 0)
+    stop("'speed.error' must be positive.\n", call. = FALSE)
+
   if (!is.null(speed.error) & is.null(speed.warning))
     speed.warning <- speed.error
   if (!is.null(speed.error) && speed.error < speed.warning)
@@ -146,6 +132,9 @@ residency <- function(path = NULL, tz, sections, success.arrays = NULL, max.inte
   if (!is.null(replicates) && !is.list(replicates))
     stop("'replicates' must be a list.\n", call. = FALSE)
 
+  if (length(names(replicates)) != length(replicates))
+    stop("All list elements within 'replicates' must be named (i.e. list(Array = 'St.1') rather than list('St.1')).\n", call. = FALSE)
+
   if (!is.numeric(jump.warning))
     stop("'jump.warning' must be numeric.\n", call. = FALSE)
   if (jump.warning < 1)
@@ -156,19 +145,30 @@ residency <- function(path = NULL, tz, sections, success.arrays = NULL, max.inte
     stop("'jump.error' must not be lower than 1.\n", call. = FALSE)
   if (jump.error < jump.warning)
     stop("'jump.error' must not be lower than 'jump.warning'.\n", call. = FALSE)
-  if (!is.null(jump.warning) & is.null(jump.error))
-    jump.error <- Inf
-  
+
   if (!is.null(inactive.warning) && !is.numeric(inactive.warning))
     stop("'inactive.warning' must be numeric.\n", call. = FALSE)    
+  if (!is.null(inactive.warning) && inactive.warning <= 0)
+    stop("'inactive.warning' must be positive.\n", call. = FALSE)
+
   if (!is.null(inactive.error) && !is.numeric(inactive.error))
     stop("'inactive.error' must be numeric.\n", call. = FALSE)    
+  if (!is.null(inactive.error) && inactive.error <= 0)
+    stop("'inactive.error' must be positive.\n", call. = FALSE)
+
   if (!is.null(inactive.error) & is.null(inactive.warning))
     inactive.warning <- inactive.error
   if (!is.null(inactive.error) && inactive.error < inactive.warning)
     stop("'inactive.error' must not be lower than 'inactive.warning'.\n", call. = FALSE)
   if (!is.null(inactive.warning) & is.null(inactive.error))
     inactive.error <- Inf
+
+  if (!is.null(exclude.tags) && any(!grepl("-", exclude.tags, fixed = TRUE)))
+    stop("Not all contents in 'exclude.tags' could be recognized as tags (i.e. 'codespace-signal'). Valid examples: 'R64K-1234', A69-1303-1234'\n", call. = FALSE)
+  if (!is.null(override) && any(!grepl("-", override, fixed = TRUE)))
+    stop("Not all contents in 'override' could be recognized as tags (i.e. 'codespace-signal'). Valid examples: 'R64K-1234', A69-1303-1234'\n", call. = FALSE)
+
+  GUI <- checkGUI(GUI)
 
   if (!is.logical(debug))
     stop("'debug' must be logical.\n", call. = FALSE)
@@ -208,6 +208,7 @@ residency <- function(path = NULL, tz, sections, success.arrays = NULL, max.inte
       ", jump.error = ", jump.error,
       ", inactive.warning = ", ifelse(is.null(inactive.warning), "NULL", inactive.warning), 
       ", inactive.error = ", ifelse(is.null(inactive.error), "NULL", inactive.error), 
+      ", GUI = '", GUI, "'",
       ", debug = ", ifelse(debug, "TRUE", "FALSE"), 
       ")")
 # --------------------
@@ -232,20 +233,25 @@ residency <- function(path = NULL, tz, sections, success.arrays = NULL, max.inte
 # -----------------------------------
 
 # Load, structure and check the inputs
-study.data <- loadStudyData(tz = tz, override = override,
-                            start.time = start.time, stop.time = stop.time,
-                            sections = sections, exclude.tags = exclude.tags)
-bio <- study.data$bio
-deployments <- study.data$deployments
-spatial <- study.data$spatial
-dot <- study.data$dot
-arrays <- study.data$arrays
-dotmat <- study.data$dotmat
-paths <- study.data$paths
-detections <- study.data$detections
-dist.mat <- study.data$dist.mat
-invalid.dist <- study.data$invalid.dist
-detections.list <- study.data$detections.list
+  study.data <- loadStudyData(tz = tz, override = override,
+                              start.time = start.time, stop.time = stop.time,
+                              sections = sections, exclude.tags = exclude.tags)
+  bio <- study.data$bio
+  sections <- study.data$sections
+  deployments <- study.data$deployments
+  spatial <- study.data$spatial
+  dot <- study.data$dot
+  arrays <- study.data$arrays
+  dotmat <- study.data$dotmat
+  paths <- study.data$paths
+  detections <- study.data$detections
+  dist.mat <- study.data$dist.mat
+  invalid.dist <- study.data$invalid.dist
+  detections.list <- study.data$detections.list
+
+  if (!is.null(replicates) && any(is.na(match(names(replicates), names(arrays)))))
+    stop("Some of the array names listed in the 'replicates' argument do not match the study's arrays.\n", call. = FALSE)
+
 # -------------------------------------
   
 # Compile array movements
@@ -257,7 +263,7 @@ detections.list <- study.data$detections.list
   aux <- names(movements)
   movements <- lapply(names(movements), function(fish) {
       speedReleaseToFirst(fish = fish, bio = bio, movements = movements[[fish]],
-                          dist.mat = dist.mat, invalid.dist = invalid.dist, silent = FALSE)
+                          dist.mat = dist.mat, invalid.dist = invalid.dist)
     })
   names(movements) <- aux
   rm(aux)
@@ -285,36 +291,43 @@ detections.list <- study.data$detections.list
   }
 
   movement.names <- names(movements)
+  
+  if (any(link <- !override %in% movement.names)) {
+    appendTo(c("Screen", "Warning", "Report"), paste0("Override has been triggered for fish ", paste(override[link], collapse = ", "), " but ", 
+      ifelse(sum(link) == 1, "this", "these"), " fish ", ifelse(sum(link) == 1, "was", "were")," not detected."))
+    override <- override[!link]
+  }
+
   movements <- lapply(seq_along(movements), function(i) {
     fish <- names(movements)[i]
     appendTo("debug", paste0("debug: Checking movement quality for fish ", fish,"."))
     
     if (is.na(match(fish, override))) {
       release <- as.character(bio$Release.site[na.as.false(bio$Transmitter == fish)])
-      release <- with(spatial, release.sites[release.sites$Standard.name == release, "Array"])
+      release <- unlist(strsplit(with(spatial, release.sites[release.sites$Standard.name == release, "Array"]), "|", fixed = TRUE))
 
       output <- checkMinimumN(movements = movements[[i]], fish = fish, minimum.detections = minimum.detections)
     
-      output <- checkImpassables(movements = output, fish = fish, dotmat = dotmat)
+      output <- checkImpassables(movements = output, fish = fish, dotmat = dotmat, GUI = GUI)
 
       output <- checkJumpDistance(movements = output, release = release, fish = fish, dotmat = dotmat, 
-                                  jump.warning = jump.warning, jump.error = jump.error)
+                                  jump.warning = jump.warning, jump.error = jump.error, GUI = GUI)
 
       if (do.checkSpeeds) {
         temp.valid.movements <- simplifyMovements(movements = output, fish = fish, bio = bio, 
           speed.method = speed.method, dist.mat = dist.mat, invalid.dist = invalid.dist)
         output <- checkSpeeds(movements = output, fish = fish, valid.movements = temp.valid.movements, 
-          speed.warning = speed.warning, speed.error = speed.error)
+          speed.warning = speed.warning, speed.error = speed.error, GUI = GUI)
         rm(temp.valid.movements)
       }
 
       if (do.checkInactiveness) {
         output <- checkInactiveness(movements = output, fish = fish, detections.list = detections.list[[fish]], 
           inactive.warning = inactive.warning, inactive.error = inactive.error, 
-          dist.mat = dist.mat, invalid.dist = invalid.dist)
+          dist.mat = dist.mat, invalid.dist = invalid.dist, GUI = GUI)
       }
     } else {
-      output <- overrideValidityChecks(moves = movements[[i]], fish = names(movements)[i])
+      output <- overrideValidityChecks(moves = movements[[i]], fish = names(movements)[i], GUI = GUI) # nocov
     }
     return(output)
   })
@@ -324,11 +337,13 @@ detections.list <- study.data$detections.list
   
 
 # Compile section movements
+  appendTo(c("Screen", "Report"), "M: Compiling and checking section movements for the valid tags.")
+
   section.movements <- lapply(seq_along(movements), function(i) {
     fish <- names(movements)[i]
     appendTo("debug", paste0("debug: Compiling section movements for fish ", fish,"."))
     aux <- sectionMovements(movements = movements[[i]], sections = sections, invalid.dist = invalid.dist)
-    output <- checkSMovesN(secmoves = aux, fish = fish, section.minimum = section.minimum)
+    output <- checkSMovesN(secmoves = aux, fish = fish, section.minimum = section.minimum, GUI = GUI)
     return(output)
   })
   names(section.movements) <- names(movements)
@@ -337,6 +352,8 @@ detections.list <- study.data$detections.list
   movements <- updateValidity(arrmoves = movements, secmoves = section.movements)
 
   # compile valid movements
+  appendTo(c("Screen", "Report"), "M: Filtering valid array and section movements.")
+
   valid.movements <- lapply(seq_along(movements), function(i){
     output <- simplifyMovements(movements = movements[[i]], fish = names(movements)[i], bio = bio, 
       speed.method = speed.method, dist.mat = dist.mat, invalid.dist = invalid.dist)
@@ -353,7 +370,7 @@ detections.list <- study.data$detections.list
   names(section.movements) <- names(valid.movements)
 
   # Grab summary information
-  res.df <- assembleResidency(secmoves = section.movements, movements = valid.movements, sections = sections)
+  res.df <- assembleResidency(secmoves = section.movements, movements = movements, sections = sections)
   
   appendTo(c("Screen", "Report"), "M: Timetable successfully filled. Fitting in the remaining variables.")
   
@@ -385,7 +402,10 @@ detections.list <- study.data$detections.list
 
   appendTo("Screen", "M: Validating detections...")
 
-  valid.detections <- validateDetections(detections.list = detections.list, movements = valid.movements)
+  recipient <- validateDetections(detections.list = detections.list, movements = valid.movements)
+  detections <- recipient$detections
+  valid.detections <- recipient$valid.detections
+  rm(recipient)
 
 # ---------------
   
@@ -393,7 +413,7 @@ detections.list <- study.data$detections.list
   appendTo(c("Screen", "Report"), "M: Calculating array efficiency.")
   efficiency <- res_efficiency(arrmoves = valid.movements, bio = bio, spatial = spatial, arrays = arrays, paths = paths, dotmat = dotmat)
   if (!is.null(replicates)) {
-    intra.array.matrices <- getDualMatrices(replicates = replicates, CJS = NULL, spatial = spatial, detections.list = detections.list)
+    intra.array.matrices <- getDualMatrices(replicates = replicates, CJS = NULL, spatial = spatial, detections.list = valid.detections)
     recipient <- includeIntraArrayEstimates(m = intra.array.matrices, efficiency = efficiency, CJS = NULL)
     efficiency <- recipient[[1]]
     intra.array.CJS <- recipient[[2]]
@@ -409,7 +429,6 @@ detections.list <- study.data$detections.list
 # ---------------
 
 # wrap up in-R objects
-  detections <- detections.list
   deployments <- do.call(rbind.data.frame, deployments)
 
   if (!debug)
@@ -455,9 +474,9 @@ detections.list <- study.data$detections.list
     biometric.fragment <- printBiometrics(bio = bio)
     printDot(dot = dot, sections = sections, spatial = spatial)
     printSectionTimes(section.times = section.times, bio = bio, detections = valid.detections)
-    printGlobalRatios(global.ratios = global.ratios, daily.ratios = daily.ratios)
-    individual.detection.plots <- printIndividuals(redraw = TRUE, detections.list = detections, bio = bio, 
-        tz = tz, arrays = arrays, spatial = spatial, movements = movements, valid.movements = valid.movements)
+    printGlobalRatios(global.ratios = global.ratios, daily.ratios = daily.ratios, sections = sections)
+    individual.detection.plots <- printIndividuals(detections.list = detections, bio = bio, 
+        tz = tz, spatial = spatial, movements = movements, valid.movements = valid.movements)
     array.circular.plots <- printCircular(times = convertTimesToCircular(array.times), bio = bio, suffix = "_array")
     section.arrival.circular.plots <- printCircular(times = convertTimesToCircular(section.times$arrival), bio = bio, suffix = "_array")
     section.departure.circular.plots <- printCircular(times = convertTimesToCircular(section.times$departure), bio = bio, suffix = "_array")
@@ -465,7 +484,7 @@ detections.list <- study.data$detections.list
     dayrange <- range(as.Date(global.ratios[[1]]$Date))
     dayrange[1] <- dayrange[1] - 1
     dayrange[2] <- dayrange[2] + 1
-    individual.residency.plots <- printIndividualResidency(ratios = daily.ratios, dayrange = dayrange)
+    individual.residency.plots <- printIndividualResidency(ratios = daily.ratios, dayrange = dayrange, sections = sections)
     efficiency.fragment <- printEfficiency(intra.CJS = intra.array.CJS, type = "residency")
     printLastSeen(input = last.seen, sections = sections)
     if (nrow(last.seen) > 3) 
@@ -478,7 +497,7 @@ detections.list <- study.data$detections.list
 # wrap up the txt report
   appendTo("Report", "\n-------------------")
   if (file.exists("temp_UD.txt")) 
-    appendTo("Report", paste0("User interventions:\n-------------------\n", gsub("\r", "", readr::read_file("temp_UD.txt")), "-------------------"))
+    appendTo("Report", paste0("User interventions:\n-------------------\n", gsub("\r", "", readr::read_file("temp_UD.txt")), "-------------------")) # nocov
   
   appendTo("Report", paste0("Function call:\n-------------------\n", the.function.call, "\n-------------------"))
 # ------------------
@@ -504,8 +523,13 @@ detections.list <- study.data$detections.list
       quiet = TRUE)
     appendTo("debug", "debug: Moving report")
     fs::file_move(sub("Rmd", "html", reportname), sub("Report/", "", sub("Rmd", "html", reportname)))
-    appendTo("debug", "debug: Opening report if the pc has internet.")
-    openReport(file.name = sub("Report/", "", sub("Rmd", "html", reportname)))
+    if (interactive()) { # nocov start
+      appendTo("debug", "debug: Opening report.")
+      browseURL(sub("Report/", "", sub("Rmd", "html", reportname)))
+    } # nocov end
+    appendTo("debug", "debug: Removing toc_menu_explore.html")
+    if(file.exists("Report/toc_menu_explore.html"))
+      file.remove("Report/toc_menu_explore.html")
   }
   appendTo("Screen", "M: Process finished successfully.")
 # ------------------
@@ -538,8 +562,10 @@ detections.list <- study.data$detections.list
 #' 
 #' @keywords internal
 #' 
-printResidencyRmd <- function(override.fragment, biometric.fragment, efficiency.fragment, individual.detection.plots, individual.residency.plots, array.circular.plots, 
-  section.arrival.circular.plots, section.departure.circular.plots, spatial, deployments, detections, valid.detections, last.seen, last.seen.graph.size){
+printResidencyRmd <- function(override.fragment, biometric.fragment, efficiency.fragment,
+  individual.detection.plots, individual.residency.plots, array.circular.plots, 
+  section.arrival.circular.plots, section.departure.circular.plots, spatial, 
+  deployments, detections, valid.detections, last.seen, last.seen.graph.size){
   inst.ver <- utils::packageVersion("actel")
   inst.ver.short <- substr(inst.ver, start = 1, stop = nchar(as.character(inst.ver)) - 5) 
   if (file.exists(reportname <- "Report/actel_residency_report.Rmd")) {
@@ -563,6 +589,9 @@ printResidencyRmd <- function(override.fragment, biometric.fragment, efficiency.
     unknown.fragment <- ""
   } 
   report <- readr::read_file("temp_log.txt")
+
+  options(knitr.kable.NA = "-")
+
   sink(reportname)
   cat(paste0(
 '---
@@ -742,7 +771,7 @@ Note:
   : The movement event lines move straight between the first and last station of each event (i.e. in-between detections will not be individually linked by the line).
   : Manually **edited** fish are highlighted with **yellow** graphic borders.
   : The stations have been grouped by array, following the array order provided either in the spatial.csv file or in the spatial.txt file.
-  : The data used in these graphics is stored in the `detections`, `movements` and `valid.movements` objects.
+  : The data used in these graphics is stored in the `detections` and `movements` objects (and respective valid counterparts).
 
 <center>
 ', individual.detection.plots,'
@@ -863,7 +892,7 @@ return(reportname)
 #' Collect summary information for the residency analysis
 #' 
 #' @param secmoves the section-movements
-#' @param movements the array-movements
+#' @param movements the array-movements (Valid and invalid)
 #' @inheritParams migration
 #' 
 #' @return A residency summary table
@@ -889,7 +918,6 @@ assembleResidency <- function(secmoves, movements, sections) {
   rm(recipient)
   rownames(res.df) <- names(secmoves)
 	  
-  # for (fish in names(secmoves)) {
   capture <- lapply(names(secmoves), function(fish) {
     # cat(fish, "\n")
   	aux <- split(secmoves[[fish]], secmoves[[fish]]$Section)
@@ -913,8 +941,9 @@ assembleResidency <- function(secmoves, movements, sections) {
   		return(recipient)
   	})
   	recipient <- as.data.frame(combine(recipient), stringsAsFactors = FALSE)
-    # replace NAs
-    the.cols <- which(grepl("Total.time|Times.entered|Average.time", colnames(recipient)))
+    # convert Total.times to numeric and replace NAs
+    the.cols <- which(grepl("Times.entered", colnames(recipient)))
+    recipient[, the.cols] <- as.numeric(recipient[, the.cols])
     recipient[, the.cols[which(is.na(recipient[, the.cols]))]] <- 0
     # --
   	recipient$Very.last.array <- secmoves[[fish]][.N, Last.array]
@@ -988,7 +1017,7 @@ res_assembleOutput <- function(res.df, bio, spatial, sections, tz) {
   status.df$Release.date <- as.POSIXct(status.df$Release.date, tz = tz)
   status.df$Very.last.time <- as.POSIXct(status.df$Very.last.time, tz = tz)
   
-  if (file.exists("temp_comments.txt")) {
+  if (file.exists("temp_comments.txt")) { # nocov start
     temp <- read.table("temp_comments.txt", header = FALSE, sep = "\t")
     status.df[, "Comments"] <- NA_character_
     for (i in seq_len(nrow(temp))) {
@@ -999,7 +1028,7 @@ res_assembleOutput <- function(res.df, bio, spatial, sections, tz) {
         status.df$Comments[link] <- paste(status.df$Comments[link], temp[i, 2], sep = "// ")
       }
     }
-  }
+  } # nocov end
   appendTo("debug", "Done.")
   return(status.df)
 }
@@ -1020,6 +1049,7 @@ res_assembleOutput <- function(res.df, bio, spatial, sections, tz) {
 #'  
 res_efficiency <- function(arrmoves, bio, spatial, arrays, paths, dotmat) {
   values.per.fish <- lapply(names(arrmoves), function(fish) {
+    # cat(fish, "\n")
       first.array <- firstArrayFailure(fish = fish, bio = bio, spatial = spatial, first.array = arrmoves[[fish]]$Array[1], paths = paths, dotmat = dotmat)
       if (nrow(arrmoves[[fish]]) > 1)
         subsequent <- countArrayFailures(moves = arrmoves[[fish]], paths = paths, dotmat = dotmat)
@@ -1077,61 +1107,42 @@ res_efficiency <- function(arrmoves, bio, spatial, arrays, paths, dotmat) {
 #' 
 firstArrayFailure <- function(fish, bio, spatial, first.array, paths, dotmat) {
   release <- as.character(bio$Release.site[na.as.false(bio$Transmitter == fish)])
-  release.array <- as.character(with(spatial, release.sites[release.sites$Standard.name == release, "Array"]))
-  if (release.array == first.array) {
+  aux <- as.character(with(spatial, release.sites[release.sites$Standard.name == release, "Array"]))
+  release.arrays <- unlist(strsplit(aux, "|", fixed = TRUE))
+  if (any(release.arrays == first.array)) {
     return(NULL)
   } else {
-    if (dotmat[release.array, first.array] == 1) {
-      return(unlist(list(known = release.array)))
+    if (length(release.arrays) == 1)
+      to.blame <- release.arrays
+    else
+      to.blame <- names(dotmat[release.arrays, first.array])[dotmat[release.arrays, first.array] == min(dotmat[release.arrays, first.array])]
+    if (min(dotmat[release.arrays, first.array]) == 1) {
+      if (table(dotmat[release.arrays, first.array])["1"] == 1)
+        return(unlist(list(known = to.blame)))
+      else
+        return(unlist(list(unsure = to.blame)))
     } else {
-      aux <- blameArrays(from = release.array, to = first.array, paths = paths)
-      return(unlist(list(known = c(release.array, aux$known), unsure = aux$unsure)))
+      if (table(dotmat[release.arrays, first.array])[1] == 1) {
+        aux <- blameArrays(from = to.blame, to = first.array, paths = paths)
+        return(unlist(list(known = c(to.blame, aux$known), unsure = aux$unsure)))
+      } else {
+        aux <- lapply(to.blame, function(x) blameArrays(from = x, to = first.array, paths = paths))
+        names(aux) <- to.blame
+        combined.unsure <- unique(unlist(aux))
+        aux.knowns <- unlist(lapply(aux, function(x) x$known))
+        knowns <- table(aux.knowns)
+        if (any(knowns == length(aux))) {
+          combined.knowns <- names(knowns)[knowns == length(aux)]
+          combined.unsure <- combined.unsure[!combined.unsure %in% combined.knowns]
+        } else {
+          combined.knowns <- NULL
+        }
+        return(unlist(list(known = combined.knowns, unsure = c(to.blame, combined.unsure))))
+      }
     }
   }
 }
 
-#' Find and list arrays which failed during the movements of the fish
-#' 
-#' @param moves the simplified array movements
-#' @inheritParams res_efficiency
-#' @inheritParams dotPaths
-#' 
-#' @return NULL if no arrays failed, or a list of arrays which failed
-#' 
-#' @keywords internal
-#' 
-countArrayFailures <- function(moves, paths, dotmat) {
-  x <- lapply(1:(nrow(moves) - 1), function(i) {
-    A <- moves$Array[i]
-    B <- moves$Array[i + 1]
-    if (A != B & dotmat[A, B] != 1)
-      blameArrays(from = A, to = B, paths = paths)
-    else
-      NULL
-  })
-  return(unlist(x))
-}
-
-#' Find which arrays to blame for a jump in movement events
-#' 
-#' @param from The array where the fish started
-#' @param to The array where the fish was next detected
-#' @inheritParams res_efficiency
-#' 
-#' @return A list of arrays which failed
-#' 
-#' @keywords internal
-#' 
-blameArrays <- function(from, to, paths) {
-  the.paths <- paths[[paste0(from, "_to_", to)]]
-  if (is.null(the.paths))
-    stop("Either 'from' is not connected to 'to', or both are neighbours.\n")
-  output <- unique(unlist(strsplit(the.paths, " -> ")))
-  if (length(the.paths) == 1)
-    return(list(known = output))
-  else
-    return(list(unsure = output))
-}
 
 #' Assemble residency tables per fish
 #' 
@@ -1145,6 +1156,7 @@ blameArrays <- function(from, to, paths) {
 getResidency <- function(movements, spatial){
   output <- lapply(movements, function(x) {
       recipient <- as.data.frame(x)[, c("Section", "First.time", "Last.time")]
+      recipient$Index <- (1:nrow(recipient) * 2) - 1
       if (nrow(recipient) > 1) {
         to.add <- data.frame(
           A = match(recipient$Section[-nrow(recipient)], names(spatial$array.order)),
@@ -1158,8 +1170,11 @@ getResidency <- function(movements, spatial){
             return(paste0(names(spatial$array.order)[as.numeric(xi[2])], "-", names(spatial$array.order)[as.numeric(xi[1])]))
         })
         to.add <- to.add[, c("Section", "First.time", "Last.time")]
+        to.add$Index <- 1:nrow(to.add) * 2
         output <- rbind(recipient, to.add)
-        output <- output[order(output$First.time), ]
+        output <- output[order(output$Index), ]
+        output <- output[, -ncol(output)]
+        row.names(output) <- 1:nrow(output)
       } else {
         output <- recipient
       }
@@ -1186,6 +1201,7 @@ dailyRatios <- function(res) {
   pb <- txtProgressBar(min = 0, max = length(res), style = 3, width = 60)
   output <- lapply(res, function(x) {
     counter <<- counter + 1
+    # cat("\n", counter, "\n")
     dayrange <- seq(from = round.POSIXt(x$First.time[1] - 43200, units = "days"), 
       to =  round.POSIXt(x$Last.time[nrow(x)] - 43200, units = "days"), by = 86400)
     days.list <- lapply(dayrange, function(d) {
@@ -1193,7 +1209,7 @@ dailyRatios <- function(res) {
       findSecondsPerSection(res = x, day = d, the.range = range(dayrange))
     })
     setTxtProgressBar(pb, counter)
-    names(days.list) <- dayrange
+    names(days.list) <- round.POSIXt(dayrange, units = "days")
     dailyRatiosIndOut(input = days.list)
   })
   close(pb)
@@ -1225,22 +1241,22 @@ findSecondsPerSection <- function(res, day, the.range) {
     if (e == 1) {
       # Exception for if the fish was only detected one day, calculates difference between event start and stop.
       if (the.range[2] == the.range[1]) {
-        aux[[length(aux) + 1]] <- difftime(res$Last.time[e], res$First.time[e], units = "secs")
+        aux[length(aux) + 1] <- difftime(res$Last.time[e], res$First.time[e], units = "secs")
         names(aux)[length(aux)] <- res$Section[e]        
-        aux[[length(aux) + 1]] <- 0
+        aux[length(aux) + 1] <- 0
         names(aux)[length(aux)] <- "Changes"
       } else {
         # Exception for if the day being analysed is the last day, calculates difference between day start and event stop.
         if (day == the.range[2]) {
-          aux[[length(aux) + 1]] <- difftime(res$Last.time[e], day, units = "secs")
+          aux[length(aux) + 1] <- difftime(res$Last.time[e], day, units = "secs")
           names(aux)[length(aux)] <- res$Section[e]
         # Otherwise calculate difference between event start and day end, and trim at a full day.
         } else {
-          aux[[length(aux) + 1]] <- min(86400, as.numeric(difftime(day + 86400, res$First.time[e], units = "secs")))
+          aux[length(aux) + 1] <- min(86400, as.numeric(difftime(day + 86400, res$First.time[e], units = "secs")))
           names(aux)[length(aux)] <- res$Section[e]
         }
         # Regardless of path, if length(e) == 1 and the event is the first one, the number of changes is 0
-        aux[[length(aux) + 1]] <- 0
+        aux[length(aux) + 1] <- 0
         names(aux)[length(aux)] <- "Changes"
       }
     # If there is only one event but that event is not the very first one
@@ -1249,26 +1265,26 @@ findSecondsPerSection <- function(res, day, the.range) {
       if (res$First.time[e] < day) {
         # Exception for the last day, calculates difference between day start and event stop.
         if (day == the.range[2]) {
-          aux[[length(aux) + 1]] <- difftime(res$Last.time[e], day, units = "secs")
+          aux[length(aux) + 1] <- difftime(res$Last.time[e], day, units = "secs")
           names(aux)[length(aux)] <- res$Section[e]
         # otherwise, since there are no more 'e', the fish has stayed the whole day in the event
         } else {
-          aux[[length(aux) + 1]] <- 86400
+          aux[length(aux) + 1] <- 86400
           names(aux)[length(aux)] <- res$Section[e]        
         }
         # In either case above the fish spends the whole time in the event, so changes = 0
-        aux[[length(aux) + 1]] <- 0
+        aux[length(aux) + 1] <- 0
         names(aux)[length(aux)] <- "Changes"
       # If the start time of the event is already in the day itself
       } else {
         # Start by storing the time spent in previous event (i.e. difference between day start and event start)
-        aux[[length(aux) + 1]] <- difftime(res$First.time[e], day, units = "secs")
+        aux[length(aux) + 1] <- difftime(res$First.time[e], day, units = "secs")
         names(aux)[length(aux)] <- res$Section[e - 1]
         # Then, since there are no more events, calculate difference between event start and day end.
-        aux[[length(aux) + 1]] <- difftime(day + 86400, res$First.time[e], units = "secs")
+        aux[length(aux) + 1] <- difftime(day + 86400, res$First.time[e], units = "secs")
         names(aux)[length(aux)] <- res$Section[e]
         # Since the day is split in two events, there is 1 change
-        aux[[length(aux) + 1]] <- 1
+        aux[length(aux) + 1] <- 1
         names(aux)[length(aux)] <- "Changes"
       }
     }
@@ -1276,7 +1292,7 @@ findSecondsPerSection <- function(res, day, the.range) {
   } else {
     n <- length(e)
     # calculate difference between day start and first time
-    aux[[length(aux) + 1]] <- difftime(res$First.time[e[1]], day, units = "secs")
+    aux[length(aux) + 1] <- difftime(res$First.time[e[1]], day, units = "secs")
     # Exception for if the day being analysed is the first day (in which case this fragment should be excluded at the end)
     if (day == the.range[1])
       names(aux)[length(aux)] <- "TO.EXCLUDE"
@@ -1284,21 +1300,21 @@ findSecondsPerSection <- function(res, day, the.range) {
       names(aux)[length(aux)] <- res$Section[e[1] - 1]
     # For all events except the last, calculate the difference between first and last time of the event.
     for (i in e[-n]) {
-      aux[[length(aux) + 1]] <- difftime(res$Last.time[i], res$First.time[i], units = "secs")
+      aux[length(aux) + 1] <- difftime(res$Last.time[i], res$First.time[i], units = "secs")
       names(aux)[length(aux)] <- res$Section[i]
     }
     # For the very last day
     # exception for if the day being analysed is the last day, where the behaviour should be the same as the above
     if (day == the.range[2]) {
-      aux[[length(aux) + 1]] <- difftime(res$Last.time[e[n]], res$First.time[e[n]], units = "secs")
+      aux[length(aux) + 1] <- difftime(res$Last.time[e[n]], res$First.time[e[n]], units = "secs")
       names(aux)[length(aux)] <- res$Section[e[n]]
     # otherwise, remove the seconds already accounted for to a full day, and store the result
     } else {
-      aux[[length(aux) + 1]] <- 86400 - sum(aux)
+      aux[length(aux) + 1] <- 86400 - sum(as.vector(aux))
       names(aux)[length(aux)] <- res$Section[e[n]]        
     }
     # The number of changes will be the number of events - 1
-    aux[[length(aux) + 1]] <- length(e) - 1
+    aux[length(aux) + 1] <- length(e) - 1
     names(aux)[length(aux)] <- "Changes"
   }
   # Conclude the exception started above, where the first fragment must be excluded

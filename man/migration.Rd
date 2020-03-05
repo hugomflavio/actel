@@ -26,11 +26,8 @@ migration(
   if.last.skip.section = TRUE,
   replicates = NULL,
   disregard.parallels = TRUE,
-  debug = FALSE,
-  maximum.time = 60,
-  tz.study.area = NULL,
-  start.timestamp = NULL,
-  end.timestamp = NULL
+  GUI = c("needed", "always", "never"),
+  debug = FALSE
 )
 }
 \arguments{
@@ -117,16 +114,16 @@ used as a replicate. See the vignettes for more details.}
 \item{disregard.parallels}{Logical:  Should the presence of parallel arrays
 invalidate potential efficiency peers? See the vignettes for more details.}
 
+\item{GUI}{One of "needed", "always" or "never". If "needed", a new window is
+opened to inspect the movements only if the movements table is too big to be
+displayed in R's console. If "always", a graphical interface is always created
+when the possibility to invalidate events emerges. If "never", a graphical
+interface is never invoqued. In this case, if the table to be displayed does
+not fit in R's console, a temporary file will be saved and the user will be
+prompted to open and examine that file. Defaults to "needed".}
+
 \item{debug}{Logical: Should temporary files be kept at the end of the
 analysis?}
-
-\item{maximum.time}{DEPRECATED. See \code{max.interval}.}
-
-\item{tz.study.area}{DEPRECATED. See \code{tz}.}
-
-\item{start.timestamp}{DEPRECATED. See \code{start.time}.}
-
-\item{end.timestamp}{DEPRECATED See argument \code{stop.time}}
 }
 \value{
 A list containing:
@@ -172,8 +169,10 @@ changes to the validity of the events,
 }
 \item \code{section.overview}: Summary table of the number of fish that
 disappeared in each section;
-\item \code{array.overview}: Number of known and estimated fish to have
-passed through each array;
+\item \code{group.overview}: Number of known and estimated fish to have
+passed through each array, divided by group;
+\item \code{release.overview}: Number of known and estimated fish to have
+passed through each array, divided by group and release sites;
 \item \code{matrices}: CJS matrices used for the efficiency calculations;
 \item \code{overall.CJS}: Results of the inter-array CJS calculations;
 \item \code{intra.array.CJS}: Results of the intra-array CJS calculations;

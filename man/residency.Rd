@@ -25,11 +25,8 @@ residency(
   report = TRUE,
   section.minimum = 2,
   replicates = NULL,
-  debug = FALSE,
-  maximum.time = 60,
-  tz.study.area = NULL,
-  start.timestamp = NULL,
-  end.timestamp = NULL
+  GUI = c("needed", "always", "never"),
+  debug = FALSE
 )
 }
 \arguments{
@@ -113,16 +110,16 @@ consecutive detections in a section, a warning is issued. Defaults to 2.}
 efficiency is to be calculated: The standard names of the stations to be
 used as a replicate. See the vignettes for more details.}
 
+\item{GUI}{One of "needed", "always" or "never". If "needed", a new window is
+opened to inspect the movements only if the movements table is too big to be
+displayed in R's console. If "always", a graphical interface is always created
+when the possibility to invalidate events emerges. If "never", a graphical
+interface is never invoqued. In this case, if the table to be displayed does
+not fit in R's console, a temporary file will be saved and the user will be
+prompted to open and examine that file. Defaults to "needed".}
+
 \item{debug}{Logical: Should temporary files be kept at the end of the
 analysis?}
-
-\item{maximum.time}{DEPRECATED. See \code{max.interval}.}
-
-\item{tz.study.area}{DEPRECATED. See \code{tz}.}
-
-\item{start.timestamp}{DEPRECATED. See \code{start.time}.}
-
-\item{end.timestamp}{DEPRECATED See argument \code{stop.time}}
 }
 \value{
 A list containing:

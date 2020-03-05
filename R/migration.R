@@ -65,8 +65,10 @@
 #'    }
 #'  \item \code{section.overview}: Summary table of the number of fish that 
 #'    disappeared in each section;
-#'  \item \code{array.overview}: Number of known and estimated fish to have
-#'    passed through each array;
+#'  \item \code{group.overview}: Number of known and estimated fish to have
+#'    passed through each array, divided by group;
+#'  \item \code{release.overview}: Number of known and estimated fish to have
+#'    passed through each array, divided by group and release sites;
 #'  \item \code{matrices}: CJS matrices used for the efficiency calculations;
 #'  \item \code{overall.CJS}: Results of the inter-array CJS calculations;
 #'  \item \code{intra.array.CJS}: Results of the intra-array CJS calculations;
@@ -84,51 +86,38 @@ migration <- function(path = NULL, tz, sections, success.arrays = NULL, max.inte
   start.time = NULL, stop.time = NULL, speed.method = c("last to first", "first to first"), 
   speed.warning = NULL, speed.error = NULL, jump.warning = 2, jump.error = 3, 
   inactive.warning = NULL, inactive.error = NULL, exclude.tags = NULL, override = NULL, report = TRUE,
-  if.last.skip.section = TRUE, replicates = NULL, disregard.parallels = TRUE, debug = FALSE,
-  maximum.time = 60, tz.study.area = NULL, start.timestamp = NULL, end.timestamp = NULL) {
-
-# Temporary: check deprecated options
-  dep.warning <- "------------------------------------------------------------------\n!!! Deprecated arguments used!\n!!!\n"
-  trigger.dep <- FALSE
-  if (maximum.time != 60) {
-    dep.warning <- paste0(dep.warning, "!!! 'maximum.time' is now 'max.interval'\n")
-    max.interval <- maximum.time
-    trigger.dep <- TRUE
-  }
-  if (!is.null(tz.study.area)) {
-    dep.warning <- paste0(dep.warning, "!!! 'tz.study.area' is now 'tz'\n")
-    tz <- tz.study.area
-    trigger.dep <- TRUE
-  }
-  if (!is.null(start.timestamp)) {
-    dep.warning <- paste0(dep.warning, "!!! 'start.timestamp' is now 'start.time'\n")
-    start.time <- start.timestamp
-    trigger.dep <- TRUE
-  }
-  if (!is.null(end.timestamp)) {
-    dep.warning <- paste0(dep.warning, "!!! 'end.timestamp' is now 'stop.time'\n")
-    stop.time <- end.timestamp
-    trigger.dep <- TRUE
-  }
-  if (trigger.dep)
-    warning(paste0("\n", dep.warning, "!!!\n!!! Please switch to the new arguments as soon as possible.\n!!! The deprecated arguments will stop working in future versions.\n------------------------------------------------------------------"),
-      immediate. = TRUE, call. = FALSE)
-  rm(maximum.time, tz.study.area, start.timestamp, end.timestamp)
+  if.last.skip.section = TRUE, replicates = NULL, disregard.parallels = TRUE, GUI = c("needed", "always", "never"), 
+  debug = FALSE) {
   
 # check argument quality
   my.home <- getwd()
+  if (!is.null(path) && !is.character(path))
+    path <- as.character(path)
   if (is.null(tz) || is.na(match(tz, OlsonNames())))
     stop("'tz' could not be recognized as a timezone. Check available timezones with OlsonNames()\n", call. = FALSE)
   if (!is.numeric(minimum.detections))
     stop("'minimum.detections' must be numeric.\n", call. = FALSE)
+  if (minimum.detections <= 0)
+    stop("'minimum.detections' must be positive.\n", call. = FALSE)
   if (!is.numeric(max.interval))
     stop("'max.interval' must be numeric.\n", call. = FALSE)
+  if (max.interval <= 0)
+    stop("'max.interval' must be positive.\n", call. = FALSE)
 
+  if (!is.character(speed.method))
+    stop("'speed.method' should be one of 'first to first' or 'last to first'.\n", call. = FALSE)
   speed.method <- match.arg(speed.method)
+
   if (!is.null(speed.warning) && !is.numeric(speed.warning))
     stop("'speed.warning' must be numeric.\n", call. = FALSE)    
+  if (!is.null(speed.warning) && speed.warning <= 0)
+    stop("'speed.warning' must be positive.\n", call. = FALSE) 
+
   if (!is.null(speed.error) && !is.numeric(speed.error))
     stop("'speed.error' must be numeric.\n", call. = FALSE)    
+  if (!is.null(speed.error) && speed.error <= 0)
+    stop("'speed.error' must be positive.\n", call. = FALSE)
+
   if (!is.null(speed.error) & is.null(speed.warning))
     speed.warning <- speed.error
   if (!is.null(speed.error) && speed.error < speed.warning)
@@ -150,6 +139,9 @@ migration <- function(path = NULL, tz, sections, success.arrays = NULL, max.inte
   if (!is.null(replicates) && !is.list(replicates))
     stop("'replicates' must be a list.\n", call. = FALSE)
 
+  if (length(names(replicates)) != length(replicates))
+    stop("All list elements within 'replicates' must be named (i.e. list(Array = 'St.1') rather than list('St.1')).\n", call. = FALSE)
+
   if (!is.numeric(jump.warning))
     stop("'jump.warning' must be numeric.\n", call. = FALSE)
   if (jump.warning < 1)
@@ -160,13 +152,17 @@ migration <- function(path = NULL, tz, sections, success.arrays = NULL, max.inte
     stop("'jump.error' must not be lower than 1.\n", call. = FALSE)
   if (jump.error < jump.warning)
     stop("'jump.error' must not be lower than 'jump.warning'.\n", call. = FALSE)
-  if (!is.null(jump.warning) & is.null(jump.error))
-    jump.error <- Inf
   
   if (!is.null(inactive.warning) && !is.numeric(inactive.warning))
     stop("'inactive.warning' must be numeric.\n", call. = FALSE)    
+  if (!is.null(inactive.warning) && inactive.warning <= 0)
+    stop("'inactive.warning' must be positive.\n", call. = FALSE)
+
   if (!is.null(inactive.error) && !is.numeric(inactive.error))
     stop("'inactive.error' must be numeric.\n", call. = FALSE)    
+  if (!is.null(inactive.error) && inactive.error <= 0)
+    stop("'inactive.error' must be positive.\n", call. = FALSE)
+
   if (!is.null(inactive.error) & is.null(inactive.warning))
     inactive.warning <- inactive.error
   if (!is.null(inactive.error) && inactive.error < inactive.warning)
@@ -174,6 +170,13 @@ migration <- function(path = NULL, tz, sections, success.arrays = NULL, max.inte
   if (!is.null(inactive.warning) & is.null(inactive.error))
     inactive.error <- Inf
   
+  if (!is.null(exclude.tags) && any(!grepl("-", exclude.tags, fixed = TRUE)))
+    stop("Not all contents in 'exclude.tags' could be recognized as tags (i.e. 'codespace-signal'). Valid examples: 'R64K-1234', A69-1303-1234'\n", call. = FALSE)
+  if (!is.null(override) && any(!grepl("-", override, fixed = TRUE)))
+    stop("Not all contents in 'override' could be recognized as tags (i.e. 'codespace-signal'). Valid examples: 'R64K-1234', A69-1303-1234'\n", call. = FALSE)
+
+  GUI <- checkGUI(GUI)
+
   if (!is.logical(debug))
     stop("'debug' must be logical.\n", call. = FALSE)
 # ------------------------
@@ -195,7 +198,7 @@ migration <- function(path = NULL, tz, sections, success.arrays = NULL, max.inte
 # Store function call
   the.function.call <- paste0("migration(path = ", ifelse(is.null(path), "NULL", paste0("'", path, "'")), 
       ", sections = ", paste0("c('", paste(sections, collapse = "', '"), "')"), 
-      ", success.arrays = ", paste0("c('", paste(success.arrays, collapse = "', '"), "')"), 
+      ", success.arrays = ", ifelse(is.null(success.arrays), "NULL", paste0("c('", paste(success.arrays, collapse = "', '"), "')")), 
       ", minimum.detections = ", minimum.detections,
       ", max.interval = ", max.interval,
       ", speed.method = ", paste0("c('", speed.method, "')"),
@@ -214,6 +217,7 @@ migration <- function(path = NULL, tz, sections, success.arrays = NULL, max.inte
       ", jump.error = ", jump.error,
       ", inactive.warning = ", ifelse(is.null(inactive.warning), "NULL", inactive.warning), 
       ", inactive.error = ", ifelse(is.null(inactive.error), "NULL", inactive.error), 
+      ", GUI = '", GUI, "'",
       ", debug = ", ifelse(debug, "TRUE", "FALSE"), 
       ")")
 # --------------------
@@ -242,6 +246,7 @@ migration <- function(path = NULL, tz, sections, success.arrays = NULL, max.inte
                               start.time = start.time, stop.time = stop.time,
                               sections = sections, exclude.tags = exclude.tags, disregard.parallels = disregard.parallels)
   bio <- study.data$bio
+  sections <- study.data$sections
   deployments <- study.data$deployments
   spatial <- study.data$spatial
   dot <- study.data$dot
@@ -252,6 +257,9 @@ migration <- function(path = NULL, tz, sections, success.arrays = NULL, max.inte
   dist.mat <- study.data$dist.mat
   invalid.dist <- study.data$invalid.dist
   detections.list <- study.data$detections.list
+
+  if (!is.null(replicates) && any(is.na(match(names(replicates), names(arrays)))))
+    stop("Some of the array names listed in the 'replicates' argument do not match the study's arrays.\n", call. = FALSE)
 
   if (any(!sapply(arrays, function(x) is.null(x$parallel)))) {
     if (disregard.parallels)
@@ -266,6 +274,12 @@ migration <- function(path = NULL, tz, sections, success.arrays = NULL, max.inte
       appendTo(c("Screen", "Warning", "Report"), paste0("'success.arrays' was not defined. Assuming success if fish are last detected at array ", success.arrays, "."))
     else
       appendTo(c("Screen", "Warning", "Report"), paste0("'success.arrays' was not defined. Assuming success if fish are last detected at arrays ", paste(success.arrays[-length(success.arrays)], collapse = ", "), " or ", tail(success.arrays, 1), "."))
+  } else {
+    if (any(link <- is.na(match(success.arrays, unlist(spatial$array.order))))) {
+      stop(ifelse(sum(link) > 1, "Arrays '", "Array '"), paste(success.arrays[link], collapse = "', '"),
+        ifelse(sum(link) > 1, "' are ", "' is "), "listed in the 'success.arrays' argument, but ",
+        ifelse(sum(link) > 1, "these arrays are", "this array is"), " not part of the study arrays.\n", call. = FALSE)
+    }
   }
 # -------------------------------------
   
@@ -278,7 +292,7 @@ migration <- function(path = NULL, tz, sections, success.arrays = NULL, max.inte
   aux <- names(movements)
   movements <- lapply(names(movements), function(fish) {
       speedReleaseToFirst(fish = fish, bio = bio, movements = movements[[fish]],
-                          dist.mat = dist.mat, invalid.dist = invalid.dist, silent = FALSE)
+                          dist.mat = dist.mat, invalid.dist = invalid.dist)
     })
   names(movements) <- aux
   rm(aux)
@@ -306,38 +320,45 @@ migration <- function(path = NULL, tz, sections, success.arrays = NULL, max.inte
   }
 
   movement.names <- names(movements)
+  
+  if (any(link <- !override %in% movement.names)) {
+    appendTo(c("Screen", "Warning", "Report"), paste0("Override has been triggered for fish ", paste(override[link], collapse = ", "), " but ", 
+      ifelse(sum(link) == 1, "this", "these"), " fish ", ifelse(sum(link) == 1, "was", "were")," not detected."))
+    override <- override[!link]
+  }
+
   movements <- lapply(seq_along(movements), function(i) {
     fish <- names(movements)[i]
     appendTo("debug", paste0("debug: Checking movement quality for fish ", fish,"."))
     
     if (is.na(match(fish, override))) {
       release <- as.character(bio$Release.site[na.as.false(bio$Transmitter == fish)])
-      release <- with(spatial, release.sites[release.sites$Standard.name == release, "Array"])
+      release <- unlist(strsplit(with(spatial, release.sites[release.sites$Standard.name == release, "Array"]), "|", fixed = TRUE))
 
       output <- checkMinimumN(movements = movements[[i]], fish = fish, minimum.detections = minimum.detections)
 
-      output <- checkUpstream(movements = output, fish = fish, release = release, arrays = arrays)
+      output <- checkUpstream(movements = output, fish = fish, release = release, arrays = arrays, GUI = GUI)
     
-      output <- checkImpassables(movements = output, fish = fish, dotmat = dotmat)
+      output <- checkImpassables(movements = output, fish = fish, dotmat = dotmat, GUI = GUI)
 
       output <- checkJumpDistance(movements = output, release = release, fish = fish, dotmat = dotmat, 
-                                  jump.warning = jump.warning, jump.error = jump.error)
+                                  jump.warning = jump.warning, jump.error = jump.error, GUI = GUI)
 
       if (do.checkSpeeds) {
         temp.valid.movements <- simplifyMovements(movements = output, fish = fish, bio = bio, 
           speed.method = speed.method, dist.mat = dist.mat, invalid.dist = invalid.dist)
         output <- checkSpeeds(movements = output, fish = fish, valid.movements = temp.valid.movements, 
-          speed.warning = speed.warning, speed.error = speed.error)
+          speed.warning = speed.warning, speed.error = speed.error, GUI = GUI)
         rm(temp.valid.movements)
       }
 
       if (do.checkInactiveness) {
         output <- checkInactiveness(movements = output, fish = fish, detections.list = detections.list[[fish]], 
           inactive.warning = inactive.warning, inactive.error = inactive.error, 
-          dist.mat = dist.mat, invalid.dist = invalid.dist)
+          dist.mat = dist.mat, invalid.dist = invalid.dist, GUI = GUI)
       }
     } else {
-      output <- overrideValidityChecks(moves = movements[[i]], fish = names(movements)[i])
+      output <- overrideValidityChecks(moves = movements[[i]], fish = names(movements)[i], GUI = GUI) # nocov
     }
     return(output)
   })
@@ -346,11 +367,13 @@ migration <- function(path = NULL, tz, sections, success.arrays = NULL, max.inte
 # -------------------------
   
 # Compile section movements
+  appendTo(c("Screen", "Report"), "M: Compiling and checking section movements for the valid tags.")
+
   section.movements <- lapply(seq_along(movements), function(i) {
     fish <- names(movements)[i]
     appendTo("debug", paste0("debug: Compiling section movements for fish ", fish,"."))
     aux <- sectionMovements(movements = movements[[i]], sections = sections, invalid.dist = invalid.dist)
-    output <- checkLinearity(secmoves = aux, fish = fish, sections = sections, arrays = arrays)
+    output <- checkLinearity(secmoves = aux, fish = fish, sections = sections, arrays = arrays, GUI = GUI)
     return(output)
   })
   names(section.movements) <- names(movements)
@@ -359,6 +382,8 @@ migration <- function(path = NULL, tz, sections, success.arrays = NULL, max.inte
   movements <- updateValidity(arrmoves = movements, secmoves = section.movements)
 
   # compile valid movements
+  appendTo(c("Screen", "Report"), "M: Filtering valid array and section movements.")
+
   valid.movements <- lapply(seq_along(movements), function(i){
     output <- simplifyMovements(movements = movements[[i]], fish = names(movements)[i], bio = bio, 
       speed.method = speed.method, dist.mat = dist.mat, invalid.dist = invalid.dist)
@@ -389,11 +414,14 @@ migration <- function(path = NULL, tz, sections, success.arrays = NULL, max.inte
   
   section.overview <- assembleSectionOverview(status.df = status.df, sections = sections)
 
-  times <- getTimes(movements = valid.movements, spatial = spatial, type = "arrival", events = "one")
+  times <- getTimes(movements = valid.movements, spatial = spatial, type = "arrival", events = "first")
 
   appendTo("Screen", "M: Validating detections...")
 
-  valid.detections <- validateDetections(detections.list = detections.list, movements = valid.movements)
+  recipient <- validateDetections(detections.list = detections.list, movements = valid.movements)
+  detections <- recipient$detections
+  valid.detections <- recipient$valid.detections
+  rm(recipient)
 
 # -------------------------------------
 
@@ -418,12 +446,17 @@ migration <- function(path = NULL, tz, sections, success.arrays = NULL, max.inte
         simpleCJS(m[[1]])
       else
         combineCJS(m)
-      })
+    })
 
-    overall.CJS <- assembleArrayCJS(mat = the.matrices, CJS = CJS.list, arrays = arrays)
+    release_nodes <- as.data.frame(table(bio$Group, bio$Release.site))
+    colnames(release_nodes) <- c("Group", "Release.site", "n")
+    release_nodes$Array <- spatial$release.sites$Array[match(release_nodes$Release.site, spatial$release.sites$Standard.name)]
+    release_nodes$Combined <- paste(release_nodes[, 1], release_nodes[, 2], sep = ".")
+
+    overall.CJS <- assembleArrayCJS(mat = the.matrices, CJS = CJS.list, arrays = arrays, releases = release_nodes)
 
     if (!is.null(replicates)) {
-      intra.array.matrices <- getDualMatrices(replicates = replicates, CJS = overall.CJS, spatial = spatial, detections.list = detections.list)
+      intra.array.matrices <- getDualMatrices(replicates = replicates, CJS = overall.CJS, spatial = spatial, detections.list = valid.detections)
       recipient <- includeIntraArrayEstimates(m = intra.array.matrices, CJS = overall.CJS)
       overall.CJS <- recipient[[1]]
       intra.array.CJS <- recipient[[2]]
@@ -432,24 +465,41 @@ migration <- function(path = NULL, tz, sections, success.arrays = NULL, max.inte
       intra.array.CJS <- NULL
     }
 
-    aux <- mbSplitCJS(m = m.by.array, fixed.efficiency = overall.CJS$efficiency)
+    aux <- mbSplitCJS(mat = m.by.array, fixed.efficiency = overall.CJS$efficiency)
     aux <- aux[names(the.matrices)]
-    split.CJS <- assembleSplitCJS(mat = the.matrices, CJS = aux, arrays = arrays)
+    split.CJS <- assembleSplitCJS(mat = the.matrices, CJS = aux, arrays = arrays, releases = release_nodes, intra.CJS = intra.array.CJS)
+    aux <- mbAssembleArrayOverview(input = split.CJS)
+    release.overview <- lapply(names(aux), function(i, releases = spatial$release.sites) {
+      output <- aux[[i]]
+      x <- unlist(stringr::str_split(i, "\\.", 2))
+      output$Release <- c(releases[releases$Station.name == x[2], paste0("n.", x[1])], NA, NA)
+      output <- output[, c(ncol(output), 1:(ncol(output) - 1))]
+      return(output)
+    })
+    names(release.overview) <- names(aux)
     rm(aux)
 
-    aux <- mbGroupCJS(m = m.by.array, status.df = status.df, fixed.efficiency = overall.CJS$efficiency)
-    group.CJS <- assembleGroupCJS(mat = the.matrices, CJS = aux, arrays = arrays)
-    array.overview <- mbAssembleArrayOverview(input = group.CJS)
+    aux <- mbGroupCJS(mat = m.by.array, status.df = status.df, fixed.efficiency = overall.CJS$efficiency)
+    group.CJS <- assembleGroupCJS(mat = the.matrices, CJS = aux, arrays = arrays, releases = release_nodes, intra.CJS = intra.array.CJS)
+    aux <- mbAssembleArrayOverview(input = group.CJS)
+    group.overview <- lapply(names(aux), function(i, releases = spatial$release.sites) {
+      output <- aux[[i]]
+      x <- unlist(stringr::str_split(i, "\\.", 2))[1]
+      output$Release <- c(sum(releases[, paste0("n.", x)]), NA, NA)
+      output <- output[, c(ncol(output), 1:(ncol(output) - 1))]
+      return(output)
+    })
+    names(group.overview) <- names(aux)
     rm(aux)
 } else {
   overall.CJS <- NULL
   intra.array.CJS <- NULL
-  array.overview <- NULL
+  release.overview <- NULL
+  group.overview <- NULL
 }
 # -------------------------------------
 
 # wrap up in-R objects
-  detections <- detections.list
   deployments <- do.call(rbind.data.frame, deployments)
   matrices <- the.matrices
 
@@ -479,10 +529,10 @@ migration <- function(path = NULL, tz, sections, success.arrays = NULL, max.inte
 
   if (invalid.dist)
     save(detections, valid.detections, spatial, deployments, arrays, movements, valid.movements, section.movements, status.df,
-      section.overview, array.overview, matrices, overall.CJS, intra.array.CJS, times, rsp.info, file = resultsname)
+      section.overview, group.overview, release.overview, matrices, overall.CJS, intra.array.CJS, times, rsp.info, file = resultsname)
   else
     save(detections, valid.detections, spatial, deployments, arrays, movements, valid.movements, section.movements, status.df,
-      section.overview, array.overview, matrices, overall.CJS, intra.array.CJS, times, rsp.info, dist.mat, file = resultsname)
+      section.overview, group.overview, release.overview, matrices, overall.CJS, intra.array.CJS, times, rsp.info, dist.mat, file = resultsname)
 # ------------
 
 # Print graphics
@@ -499,13 +549,13 @@ migration <- function(path = NULL, tz, sections, success.arrays = NULL, max.inte
     if (calculate.efficiency) {
       printProgression(dot = dot,  sections = sections, overall.CJS = overall.CJS, spatial = spatial, status.df = status.df)
       display.progression <- TRUE
-      array.overview.fragment <- printArrayOverview(array.overview)
+      array.overview.fragment <- printArrayOverview(group.overview)
     } else {
       display.progression <- FALSE
       array.overview.fragment <- ""
     }
-    individual.plots <- printIndividuals(redraw = TRUE, detections.list = detections, bio = bio, 
-        status.df = status.df, tz = tz, arrays = arrays, spatial = spatial, movements = movements, valid.movements = valid.movements)
+    individual.plots <- printIndividuals(detections.list = detections, bio = bio, 
+        status.df = status.df, tz = tz, spatial = spatial, movements = movements, valid.movements = valid.movements)
     circular.plots <- printCircular(times = convertTimesToCircular(times), bio = bio)
     if (nrow(section.overview) > 3) 
       survival.graph.size <- "width=90%" else survival.graph.size <- "height=4in"
@@ -517,7 +567,7 @@ migration <- function(path = NULL, tz, sections, success.arrays = NULL, max.inte
 # wrap up the txt report
   appendTo("Report", "\n-------------------")
   if (file.exists("temp_UD.txt")) 
-    appendTo("Report", paste0("User interventions:\n-------------------\n", gsub("\r", "", readr::read_file("temp_UD.txt")), "-------------------"))
+    appendTo("Report", paste0("User interventions:\n-------------------\n", gsub("\r", "", readr::read_file("temp_UD.txt")), "-------------------")) # no cov
   
   appendTo("Report", paste0("Function call:\n-------------------\n", the.function.call, "\n-------------------"))
 # ------------------
@@ -542,8 +592,13 @@ migration <- function(path = NULL, tz, sections, success.arrays = NULL, max.inte
       quiet = TRUE)
     appendTo("debug", "debug: Moving report")
     fs::file_move(sub("Rmd", "html", reportname), sub("Report/", "", sub("Rmd", "html", reportname)))
-    appendTo("debug", "debug: Opening report if the pc has internet.")
-    openReport(file.name = sub("Report/", "", sub("Rmd", "html", reportname)))
+    if (interactive()) { # nocov start
+      appendTo("debug", "debug: Opening report.")
+      browseURL(sub("Report/", "", sub("Rmd", "html", reportname)))
+    } # nocov end
+    appendTo("debug", "debug: Removing toc_menu_explore.html")
+    if(file.exists("Report/toc_menu_explore.html"))
+      file.remove("Report/toc_menu_explore.html")
   }
   appendTo("Screen", "M: Process finished successfully.")
 # ------------------
@@ -557,12 +612,12 @@ migration <- function(path = NULL, tz, sections, success.arrays = NULL, max.inte
 
   if (invalid.dist)
     return(list(detections = detections, valid.detections = valid.detections, spatial = spatial, deployments = deployments, arrays = arrays,
-      movements = movements, valid.movements = valid.movements, section.movements = section.movements, status.df = status.df, section.overview = section.overview, array.overview = array.overview,
-      matrices = matrices, overall.CJS = overall.CJS, intra.array.CJS = intra.array.CJS, times = times, rsp.info = rsp.info))
+      movements = movements, valid.movements = valid.movements, section.movements = section.movements, status.df = status.df, section.overview = section.overview, group.overview = group.overview,
+      release.overview = release.overview, matrices = matrices, overall.CJS = overall.CJS, intra.array.CJS = intra.array.CJS, times = times, rsp.info = rsp.info))
   else
     return(list(detections = detections, valid.detections = valid.detections, spatial = spatial, deployments = deployments, arrays = arrays,
-      movements = movements, valid.movements = valid.movements, section.movements = section.movements, status.df = status.df, section.overview = section.overview, array.overview = array.overview,
-      matrices = matrices, overall.CJS = overall.CJS, intra.array.CJS = intra.array.CJS, times = times, rsp.info = rsp.info, dist.mat = dist.mat))
+      movements = movements, valid.movements = valid.movements, section.movements = section.movements, status.df = status.df, section.overview = section.overview, group.overview = group.overview,
+      release.overview = release.overview, matrices = matrices, overall.CJS = overall.CJS, intra.array.CJS = intra.array.CJS, times = times, rsp.info = rsp.info, dist.mat = dist.mat))
 }
 
 #' Print Rmd report
@@ -582,8 +637,9 @@ migration <- function(path = NULL, tz, sections, success.arrays = NULL, max.inte
 #' 
 #' @keywords internal
 #' 
-printMigrationRmd <- function(override.fragment, biometric.fragment, section.overview, efficiency.fragment, display.progression, array.overview.fragment,
-  survival.graph.size, individual.plots, circular.plots, spatial, deployments, valid.detections, detections){
+printMigrationRmd <- function(override.fragment, biometric.fragment, section.overview,
+  efficiency.fragment, display.progression, array.overview.fragment, survival.graph.size, 
+  individual.plots, circular.plots, spatial, deployments, valid.detections, detections){
   inst.ver <- utils::packageVersion("actel")
   inst.ver.short <- substr(inst.ver, start = 1, stop = nchar(as.character(inst.ver)) - 5) 
   if (file.exists(reportname <- "Report/actel_migration_report.Rmd")) {
@@ -607,6 +663,9 @@ printMigrationRmd <- function(override.fragment, biometric.fragment, section.ove
     unknown.fragment <- ""
   } 
   report <- readr::read_file("temp_log.txt")
+
+  options(knitr.kable.NA = "-")
+
   sink(reportname)
   cat(paste0(
 '---
@@ -705,7 +764,7 @@ Note:
 
 Note:
   : The progression calculations **do not account for** intra-section backwards movements. This implies that the total number of fish to have been **last seen** at a given array **may be lower** than the displayed below. Please refer to the [section survival overview](#survival) to find out how many fish were considered to have disappeared per section.
-  : The data used in this graphic is stored in the `overall.CJS` object, and the data used in the tables is stored in the `array.overview` object.
+  : The data used in this graphic is stored in the `overall.CJS` object, and the data used in the tables is stored in the `group.overview` object. You can find detailed progressions per release site in the `release.overview` object.
 
 <img src="mb_efficiency.svg" alt="Missing file" style="padding-top: 15px; padding-bottom: 15px;"/>
 
@@ -744,7 +803,7 @@ Note:
   : Manually **edited** fish are highlighted with **yellow** graphic borders.
   : Manually **overridden** fish are highlighted with **red** graphic borders.
   : The stations have been grouped by array, following the array order provided either in the spatial.csv file or in the spatial.txt file.
-  : The data used in these graphics is stored in the `detections`, `movements` and `valid.movements` objects.
+  : The data used in these graphics is stored in the `detections` and `movements` objects (and respective valid counterparts).
 
 <center>
 ', individual.plots,'
@@ -931,27 +990,27 @@ assembleTimetable <- function(vm, all.moves, sections, arrays,
 
       appendTo("debug", paste0("Deploying values for fish ", fish, "."))
       capture <- lapply(1:length(last.events), function(i) {
-          the.section <- names(last.events)[i]
-          timetable[fish, paste("Arrived", the.section, sep = ".")] <- paste(vm[[fish]][[first.events[i], "First.time"]])
-          timetable[fish, paste("First.station", the.section, sep = ".")] <- vm[[fish]][[first.events[i], "First.station"]]
-          timetable[fish, paste("Left", the.section, sep = ".")] <- paste(vm[[fish]][[last.events[i], "Last.time"]])
-          timetable[fish, paste("Last.station", the.section, sep = ".")] <- vm[[fish]][[last.events[i], "Last.station"]]
-          timetable[fish, paste("Time.in", the.section, sep = ".")] <- 
-            as.vector(
-              difftime(
-                timetable[fish, paste("Left", the.section, sep = ".")], 
-                timetable[fish, paste("Arrived", the.section, sep = ".")], units = "secs"
-                )
-            )
+        the.section <- names(last.events)[i]
+        timetable[fish, paste("Arrived", the.section, sep = ".")] <- paste(vm[[fish]][[first.events[i], "First.time"]])
+        timetable[fish, paste("First.station", the.section, sep = ".")] <- vm[[fish]][[first.events[i], "First.station"]]
+        timetable[fish, paste("Left", the.section, sep = ".")] <- paste(vm[[fish]][[last.events[i], "Last.time"]])
+        timetable[fish, paste("Last.station", the.section, sep = ".")] <- vm[[fish]][[last.events[i], "Last.station"]]
+        timetable[fish, paste("Time.in", the.section, sep = ".")] <- 
+          as.vector(
+            difftime(
+              timetable[fish, paste("Left", the.section, sep = ".")], 
+              timetable[fish, paste("Arrived", the.section, sep = ".")], units = "secs"
+              )
+          )
 
-          # If Time.in is to be calculated
-          if (speed.method == "last to first" && !invalid.dist) {
-            to.col <- paste("Speed.in", the.section, sep = ".")
-            dist.row <- timetable[fish, paste("First.station", the.section, sep = ".")]
-            dist.col <- timetable[fish, paste("Last.station", the.section, sep = ".")]
-            from.col <- paste("Time.in", the.section, sep = ".")
-            timetable[fish, to.col] <- dist.mat[dist.row, dist.col] / timetable[fish, from.col]
-          }
+        # If Time.in is to be calculated
+        if (speed.method == "last to first" && !invalid.dist) {
+          to.col <- paste("Speed.in", the.section, sep = ".")
+          dist.row <- timetable[fish, paste("First.station", the.section, sep = ".")]
+          dist.col <- timetable[fish, paste("Last.station", the.section, sep = ".")]
+          from.col <- paste("Time.in", the.section, sep = ".")
+          timetable[fish, to.col] <- dist.mat[dist.row, dist.col] / timetable[fish, from.col]
+        }
 
         # If this is not the first section
         if (match(the.section, sections) > 1) {
@@ -1131,7 +1190,7 @@ assembleOutput <- function(timetable, bio, spatial, sections, dist.mat, invalid.
     }
   }  
 
-  if (file.exists("temp_comments.txt")) {
+  if (file.exists("temp_comments.txt")) { # nocov start
     temp <- read.table("temp_comments.txt", header = F, sep = "\t")
     status.df[, "Comments"] <- NA
     for (i in seq_len(nrow(temp))) {
@@ -1142,7 +1201,7 @@ assembleOutput <- function(timetable, bio, spatial, sections, dist.mat, invalid.
         status.df$Comments[link] <- paste(status.df$Comments[link], temp[i, 2], sep = "// ")
       }
     }
-  }
+  } # nocov end
   appendTo("debug", "Done.")
   return(status.df)
 }
@@ -1198,13 +1257,14 @@ assembleSectionOverview <- function(status.df, sections) {
 #' 
 mbAssembleArrayOverview <- function(input) {
   appendTo("debug", "Starting mbAssembleArrayOverview.")
-  for (i in 1:length(input)) {
-    input[[i]][1, ] <- apply(input[[i]][c(1,3), ], 2, sum, na.rm = TRUE)
-    input[[i]][2, ] <- input[[i]][4, ]
-    input[[i]][3, ] <- input[[i]][2, ] - input[[i]][1, ]
-    input[[i]] <- input[[i]][1:3, ]
-    rownames(input[[i]]) <- c("Known", "Estimated", "Difference")
-  }
+  output <- lapply(input, function(x) {
+    x[1, ] <- apply(x[c(1, 3), ], 2, function(i) sum(i, na.rm = TRUE))
+    x[2, ] <- x[4, ]
+    x[3, ] <- x[2, ] - x[1, ]
+    output <- x[1:3, ]
+    rownames(output) <- c("Known", "Estimated", "Difference")
+    return(output)
+  })
   appendTo("debug", "Terminating mbAssembleArrayOverview.")  
-  return(input)
+  return(output)
 }

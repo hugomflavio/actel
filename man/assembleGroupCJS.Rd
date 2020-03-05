@@ -4,7 +4,7 @@
 \alias{assembleGroupCJS}
 \title{Assembles CJS tables for all groups}
 \usage{
-assembleGroupCJS(mat, CJS, arrays)
+assembleGroupCJS(mat, CJS, arrays, releases, intra.CJS = NULL)
 }
 \arguments{
 \item{mat}{The presence/absence matrices.}

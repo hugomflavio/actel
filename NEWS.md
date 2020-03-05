@@ -2,6 +2,57 @@
 
 Find out the main highlights of each update.
 
+## actel 0.1.3
+
+Fixes:
+  * Force R to assume detection files are separated by commas (prevents occasional Thelma log crash).
+  * Fix bug where fish whose data started in summer time and extended into winter time would cause one day to be lost in the daily positions during residency analysis.
+  * Prevent arrays from having maximum estimated fish passing through greater than previous arrays (unless new fish are released).
+  * Fix internal bug where efficiency matrices did not have "1" at Release for all fish (did not impact results).
+  * Fix bug where arrays with no detections for a group\*release combination would cause skewed estimates.
+  * Fix estimation of passed fish when using intra-array estimates.
+  * Fix split CJS's not receiving information about intra-array estimates.
+  * Avoid crash if a fish makes a U turn without being detected in all sections.
+  * Avoid crash if group names have '.' characters in them.
+  * Avoid crash if some group names are entirely contained within other groups.
+  * Fix bug where 'disregard.parallels' was ironically disregarded and parallels always blocked peer assignment.
+  * Prevent crash if the spatial.csv file cannot be updated due to being open elsewhere.
+  * Fix bug where the presence of multiple instantaneous shifts in section would mess up the residency lists.
+  * Fix bug preventing distancesMatrix from recognising the transition layer object.
+  * Fix bug where the temporary detections object would be overwritten during inactiveness checks with a distance matrix present.
+  * Fix bug causing speed calculations  to crash in the presence of unknown detections.
+  * Fix bug where the Invalid.detections and Invalid.events columns in the status.df of residency would always return 0.
+  * Prevent invalid detections from being considered during intra-array efficiency estimations.
+  * Fix bug where fish with only one movement event would not count towards efficiency calculations.
+  * Fix very specific bug where 8 shaped study areas would not have the bottleneck array accounted as a "known" failure in case a fish moved from one side of the constriction to the other without being detected.
+
+Changes:
+  * `array.overview` is now called `group.overview`.
+  * Fish that never entered a section now have NA total and average times for that section during residency analysis. This allows to distinguish between fish that never entered a section (NA time) and fish that only had one detection at a section (0 time).
+
+Enhancements:
+  * The object `detections` now contains a "Valid" column, similarly to the `movements` objects.
+  * Invalid detections are now painted in grey in the individual detection plots.
+  * Check for duplicated detections and give the user a chance to clear them out before continuing.
+  * Prevent unhandled crashes if the 'replicates' argument is badly structured.
+  * Show number of released fish per release location in the release sites table.
+  * Detailed progression per group and release site is now exported through a `release.overview` object.
+  * Prevent migration from continuing if some arrays are not associated to a section.
+  * Warn user if override is requested for a fish that is not detected.
+  * Improve mechanics behind suggestions to linearise movements.
+  * Movement tables can now be visualised in a new window with the argument GUI.
+  * Improve handling of partially empty groups and release sites in the biometrics file.
+  * Improve flexibility in handling shape files with dimensions incompatible with the requested pixel size.
+  * Improve the distances matrix so it can cope with unspecified release sites.
+  * transitionLayer can now take into account the station positions and expand the study area as needed.
+  * transitionLayer now has a "buffer" argument, which can be used to expand the study area beyond the limits of the shape file.
+  * distanceMatrix will now warn the user if some stations are completely cut off from the rest (i.e. there is no water path).
+  * Reports are now opened using utils::browseURL, allowing the report to be open even when the computer is not connected to the internet.
+  * Sensor values are now transported through the analysis and returned in the valid detections (for Vemco loggers only for now).
+  * Ensure the legend in the residency graphics follows the order specified in the sections argument.
+  * Improve Thelma .csv file handling for files exported with new column structure.
+  * Allow for multiple expected first arrays (e.g. if fish are released in a lake whose exits are covered with receivers).
+
 ## actel 0.1.2
 
 Fixes:

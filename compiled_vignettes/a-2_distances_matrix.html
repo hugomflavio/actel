@@ -8,11 +8,11 @@
 <meta name="generator" content="pandoc" />
 <meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
 
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1" />
 
 <meta name="author" content="Hugo Flávio" />
 
-<meta name="date" content="2020-01-08" />
+<meta name="date" content="2020-03-04" />
 
 <title>1.2) Creating a distances matrix</title>
 
@@ -117,9 +117,6 @@ padding-right: 2em;
 font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
 font-size: 14px;
 line-height: 1.35;
-}
-#header {
-text-align: center;
 }
 #TOC {
 clear: both;
@@ -288,7 +285,8 @@ code > span.st { color: #d14; }
 code > span.co { color: #888888; font-style: italic; } 
 code > span.ot { color: #007020; } 
 code > span.al { color: #ff0000; font-weight: bold; } 
-code > span.fu { color: #900; font-weight: bold; }  code > span.er { color: #a61717; background-color: #e3d2d2; } 
+code > span.fu { color: #900; font-weight: bold; } 
+code > span.er { color: #a61717; background-color: #e3d2d2; } 
 </style>
 
 
@@ -303,7 +301,7 @@ code > span.fu { color: #900; font-weight: bold; }  code > span.er { color: #a61
 
 <h1 class="title toc-ignore">1.2) Creating a distances matrix</h1>
 <h4 class="author">Hugo Flávio</h4>
-<h4 class="date">2020-01-08</h4>
+<h4 class="date">2020-03-04</h4>
 
 
 
@@ -725,11 +723,9 @@ code > span.fu { color: #900; font-weight: bold; }  code > span.er { color: #a61
 <p>If you are not familiar with shapefiles and GIS, it might be a good idea to ask for a colleague’s help.</p>
 <div id="preparing-the-shapefile" class="section level4">
 <h4>Preparing the shapefile</h4>
-<p>To begin, you need to create a shapefile that extends over all your receivers and release sites. This shapefile is expected to contain polygons of the land masses, which means that your rivers, lakes, fjords and any water bodies must be “empty space”. The width of your water channels is important, as the shapefile will be converted into a raster later on (i.e. a image made of pixels). If your pixels represent squares of 30 by 30 metres, and your channel width originally was of five metres, then the river path will be lost during the conversion process.</p>
+<p>To begin, you need to create a shapefile that extends over all your receivers and release sites. This shapefile is expected to contain polygons of the land masses, which means that your rivers, lakes, fjords and any water bodies must be “empty space”. The width of your water channels is important, as the shapefile will be converted into a raster later on (i.e. a image made of pixels). If your pixels represent squares of 30 by 30 metres, and your channel width originally was of five metres, then the river path will be lost during the conversion process. Try to ensure, as best as possible, that the corners of your shapefile are aligned (i.e. the shape as a rectangular/quadrangular form).</p>
 <dl>
 <dt>Note:</dt>
-<dd>The shapefile extent <strong>must</strong> be rounded (e.g. 20100 by 7500 metres instead of 20089 by 7499 metres). You will find out why later on.
-</dd>
 <dd>You <strong>must</strong> save the shapefile in a metric coordinate system, or otherwise the distance calculation will return wrong measurements.
 </dd>
 </dl>
@@ -749,8 +745,7 @@ code > span.fu { color: #900; font-weight: bold; }  code > span.er { color: #a61
 <li><p>The <code>shape</code> is the name of your shapefile, including the “.shp” extension.</p></li>
 <li><p>The <code>size</code> determines the size of the transition layer’s pixels.</p>
 <p>For example, if <code>size = 20</code>, then each pixel will have 20 by 20 meters.</p>
-<p>Keep in mind that your pixel size must allow R to still capture the presence of your river channels. If the river channels are too slim, you can go back to your shapefile and artificially enlarge them.</p>
-<p>Note that the chosen <code>size</code> <strong>must</strong> allow for an integer number of pixels to cover your shapefile (i.e., <code>size</code> must be a divisor of your shapefile’s resolution). If you pick a wrong number, don’t worry, actel will let you know.</p></li>
+<p>Keep in mind that your pixel size must allow R to still capture the presence of your river channels. If the river channels are too slim, you can go back to your shapefile and artificially enlarge them.</p></li>
 <li><p>The <code>EPSGcode</code> is the code of the coordinate system that the shapefile was saved in.</p></li>
 <li><p>The <code>directions</code> determine the complexity of R’s distance tracking techniques. It can take one of four values: four, eight or sixteen, defaulting to the latter.</p>
 <ul>

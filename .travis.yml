@@ -1,0 +1,41 @@
+# Use R language
+language: r
+
+#Define R-versions
+r:
+  - release
+  - devel
+
+apt_packages:
+  - libv8-dev
+  - librsvg2-dev
+
+r_github_packages: 
+  - r-lib/testthat
+  - r-lib/covr
+
+r_binary_packages:
+  - devtools
+  - roxygen2
+
+script:
+  - Rscript -e "devtools::load_all(); testthat::test_dir('tests/testthat', reporter = c('progress', 'fail'))"
+
+# environment variables set for all builds
+env:
+  global:
+  # don't treat missing suggested packages as error
+  - _R_CHECK_FORCE_SUGGESTS_=false
+
+after_success:
+  - Rscript -e 'covr::codecov()'
+
+addons:
+  apt:
+    sources:
+      - sourceline: 'ppa:ubuntugis/ppa'
+    packages:
+      - libudunits2-dev
+      - libproj-dev
+      - libgeos-dev
+      - libgdal-dev

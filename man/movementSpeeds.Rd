@@ -4,7 +4,7 @@
 \alias{movementSpeeds}
 \title{Calculate time and speed}
 \usage{
-movementSpeeds(movements, speed.method, dist.mat, silent = TRUE)
+movementSpeeds(movements, speed.method, dist.mat)
 }
 \arguments{
 \item{movements}{A list of movements for each target tag, created by groupMovements.}
@@ -16,8 +16,6 @@ If 'first to first', the first detection on a given array is matched to the
 first detection on the next array to perform the calculations.}
 
 \item{dist.mat}{A matrix of the distances between the deployed ALS.}
-
-\item{silent}{logical: If TRUE, debug messages are issued (only works within actel)}
 }
 \value{
 The movement data frame with time and speed calculations

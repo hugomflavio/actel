@@ -4,7 +4,7 @@
 \alias{checkImpassables}
 \title{Find out if a fish moved in an impossible direction}
 \usage{
-checkImpassables(movements, fish, dotmat)
+checkImpassables(movements, fish, dotmat, GUI)
 }
 \arguments{
 \item{movements}{The movements table}
@@ -12,6 +12,14 @@ checkImpassables(movements, fish, dotmat)
 \item{fish}{The fish being analysed}
 
 \item{dotmat}{The matrix of distances between arrays}
+
+\item{GUI}{One of "needed", "always" or "never". If "needed", a new window is
+opened to inspect the movements only if the movements table is too big to be
+displayed in R's console. If "always", a graphical interface is always created
+when the possibility to invalidate events emerges. If "never", a graphical
+interface is never invoqued. In this case, if the table to be displayed does
+not fit in R's console, a temporary file will be saved and the user will be
+prompted to open and examine that file. Defaults to "needed".}
 }
 \value{
 the movements list with valid/invalid rows

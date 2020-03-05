@@ -50,11 +50,10 @@ Opening movements list for inspection.
 
 [...]
 
-Note: You can select event ranges by separating them with a ':' and/or multiple events at once by separating them with a space.
-Events to be rendered invalid: 
+Would you like to render any movement event invalid?(y/N/comment) 
 ```
 
-You must then select which events you would like to be invalidated. Once you have finished your edits, actel will automatically terminate manual mode and proceed with the analysis.
+You must then decide whether or not you want to invalidate any events and which events you would like to be invalidated. Once you have finished your edits, actel will automatically terminate manual mode and proceed with the analysis.
 
 ## actel report with overridden fish
 

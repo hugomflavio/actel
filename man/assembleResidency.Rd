@@ -9,7 +9,7 @@ assembleResidency(secmoves, movements, sections)
 \arguments{
 \item{secmoves}{the section-movements}
 
-\item{movements}{the array-movements}
+\item{movements}{the array-movements (Valid and invalid)}
 
 \item{sections}{The sections in which the study area is divided. Must be
 coincident with the names given to the arrays. See the vignettes for more

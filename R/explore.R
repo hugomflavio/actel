@@ -7,11 +7,17 @@
 #' 
 #' @param debug Logical: Should temporary files be kept at the end of the 
 #'  analysis?
-#' @param end.timestamp DEPRECATED See argument \code{stop.time}
 #' @param exclude.tags A vector of tags that should be excluded from the 
 #'  detection data before any analyses are performed. Intended to be used if 
 #'  stray tags from a different code space but with the same signal as a target
 #'  tag are detected in the study area.
+#' @param GUI One of "needed", "always" or "never". If "needed", a new window is
+#'  opened to inspect the movements only if the movements table is too big to be
+#'  displayed in R's console. If "always", a graphical interface is always created
+#'  when the possibility to invalidate events emerges. If "never", a graphical
+#'  interface is never invoqued. In this case, if the table to be displayed does
+#'  not fit in R's console, a temporary file will be saved and the user will be
+#'  prompted to open and examine that file. Defaults to "needed".
 #' @param inactive.error If a fish spends a number of days equal or greater than 
 #'  \code{inactive.error} in a given array at the tail of the respective 
 #'  detections, user intervention is suggested. If left NULL (default), user 
@@ -28,7 +34,6 @@
 #'  NULL (default), no warnings are issued.
 #' @param max.interval The number of minutes that must pass between detections 
 #'  for a new event to be created. Defaults to 60.
-#' @param maximum.time DEPRECATED. See \code{max.interval}.
 #' @param minimum.detections For tags with only one movement event, defines the
 #'  minimum number of times a tag must have been recorded during the study 
 #'  period for it to be considered true detections and not random noise.
@@ -53,13 +58,11 @@
 #' @param start.time Detection data prior to the timestamp set in 
 #'  \code{start.time} (in YYYY-MM-DD HH:MM:SS format) is not considered during 
 #'  the analysis.
-#' @param start.timestamp DEPRECATED. See \code{start.time}.
 #' @param stop.time Detection data posterior to the timestamp set in 
 #'  \code{stop.time} (in YYYY-MM-DD HH:MM:SS format) is not considered during 
 #'  the analysis.
 #' @param tz The time zone of the study area. Must match one of the values
 #'  present in \code{\link[base]{timezones}}.
-#' @param tz.study.area DEPRECATED. See \code{tz}.
 #' 
 #' @return A list containing:
 #' \itemize{
@@ -83,51 +86,37 @@
 explore <- function(path = NULL, tz, max.interval = 60, minimum.detections = 2, start.time = NULL, stop.time = NULL, 
   speed.method = c("last to first", "first to first"), speed.warning = NULL, speed.error = NULL, 
   jump.warning = 2, jump.error = 3, inactive.warning = NULL, inactive.error = NULL, 
-  exclude.tags = NULL, override = NULL, report = TRUE, debug = FALSE,
-  maximum.time = 60, tz.study.area = NULL, start.timestamp = NULL, end.timestamp = NULL) {
-
-# Temporary: check deprecated options
-  dep.warning <- "------------------------------------------------------------------\n!!! Deprecated arguments used!\n!!!\n"
-  trigger.dep <- FALSE
-  if (maximum.time != 60) {
-    dep.warning <- paste0(dep.warning, "!!! 'maximum.time' is now 'max.interval'\n")
-    max.interval <- maximum.time
-    trigger.dep <- TRUE
-  }
-  if (!is.null(tz.study.area)) {
-    dep.warning <- paste0(dep.warning, "!!! 'tz.study.area' is now 'tz'\n")
-    tz <- tz.study.area
-    trigger.dep <- TRUE
-  }
-  if (!is.null(start.timestamp)) {
-    dep.warning <- paste0(dep.warning, "!!! 'start.timestamp' is now 'start.time'\n")
-    start.time <- start.timestamp
-    trigger.dep <- TRUE
-  }
-  if (!is.null(end.timestamp)) {
-    dep.warning <- paste0(dep.warning, "!!! 'end.timestamp' is now 'stop.time'\n")
-    stop.time <- end.timestamp
-    trigger.dep <- TRUE
-  }
-  if (trigger.dep)
-    warning(paste0("\n", dep.warning, "!!!\n!!! Please switch to the new arguments as soon as possible.\n!!! The deprecated arguments will stop working in future versions.\n------------------------------------------------------------------"),
-      immediate. = TRUE, call. = FALSE)
-  rm(maximum.time, tz.study.area, start.timestamp, end.timestamp)
+  exclude.tags = NULL, override = NULL, report = TRUE, GUI = c("needed", "always", "never"), debug = FALSE) {
 
 # check arguments quality
   my.home <- getwd()
+  if (!is.null(path) && !is.character(path))
+    path <- as.character(path)
   if (is.null(tz) || is.na(match(tz, OlsonNames())))
     stop("'tz' could not be recognized as a timezone. Check available timezones with OlsonNames()\n", call. = FALSE)
   if (!is.numeric(minimum.detections))
     stop("'minimum.detections' must be numeric.\n", call. = FALSE)
+  if (minimum.detections <= 0)
+    stop("'minimum.detections' must be positive.\n", call. = FALSE)
   if (!is.numeric(max.interval))
-    stop("'max.interval' must be numerical.\n", call. = FALSE)
+    stop("'max.interval' must be numeric.\n", call. = FALSE)
+  if (max.interval <= 0)
+    stop("'max.interval' must be positive.\n", call. = FALSE)
 
+  if (!is.character(speed.method))
+    stop("'speed.method' should be one of 'first to first' or 'last to first'.\n", call. = FALSE)
   speed.method <- match.arg(speed.method)
+
   if (!is.null(speed.warning) && !is.numeric(speed.warning))
-    stop("'speed.warning' must be numeric.\n", call. = FALSE)    
+    stop("'speed.warning' must be numeric.\n", call. = FALSE)
+  if (!is.null(speed.warning) && speed.warning <= 0)
+    stop("'speed.warning' must be positive.\n", call. = FALSE) 
+
   if (!is.null(speed.error) && !is.numeric(speed.error))
     stop("'speed.error' must be numeric.\n", call. = FALSE)    
+  if (!is.null(speed.error) && speed.error <= 0)
+    stop("'speed.error' must be positive.\n", call. = FALSE)
+
   if (!is.null(speed.error) & is.null(speed.warning))
     speed.warning <- speed.error
   if (!is.null(speed.error) && speed.error < speed.warning)
@@ -153,13 +142,17 @@ explore <- function(path = NULL, tz, max.interval = 60, minimum.detections = 2, 
     stop("'jump.error' must not be lower than 1.\n", call. = FALSE)
   if (jump.error < jump.warning)
     stop("'jump.error' must not be lower than 'jump.warning'.\n", call. = FALSE)
-  if (!is.null(jump.warning) & is.null(jump.error))
-    jump.error <- Inf
-  
+
   if (!is.null(inactive.warning) && !is.numeric(inactive.warning))
     stop("'inactive.warning' must be numeric.\n", call. = FALSE)    
+  if (!is.null(inactive.warning) && inactive.warning <= 0)
+    stop("'inactive.warning' must be positive.\n", call. = FALSE)
+
   if (!is.null(inactive.error) && !is.numeric(inactive.error))
     stop("'inactive.error' must be numeric.\n", call. = FALSE)    
+  if (!is.null(inactive.error) && inactive.error <= 0)
+    stop("'inactive.error' must be positive.\n", call. = FALSE)
+
   if (!is.null(inactive.error) & is.null(inactive.warning))
     inactive.warning <- inactive.error
   if (!is.null(inactive.error) && inactive.error < inactive.warning)
@@ -167,6 +160,13 @@ explore <- function(path = NULL, tz, max.interval = 60, minimum.detections = 2, 
   if (!is.null(inactive.warning) & is.null(inactive.error))
     inactive.error <- Inf
   
+  if (!is.null(exclude.tags) && any(!grepl("-", exclude.tags, fixed = TRUE)))
+    stop("Not all contents in 'exclude.tags' could be recognized as tags (i.e. 'codespace-signal'). Valid examples: 'R64K-1234', A69-1303-1234'\n", call. = FALSE)
+  if (!is.null(override) && any(!grepl("-", override, fixed = TRUE)))
+    stop("Not all contents in 'override' could be recognized as tags (i.e. 'codespace-signal'). Valid examples: 'R64K-1234', A69-1303-1234'\n", call. = FALSE)
+
+  GUI <- checkGUI(GUI)
+
   if (!is.logical(debug))
     stop("'debug' must be logical.\n", call. = FALSE)
 # ------------------------
@@ -200,8 +200,9 @@ explore <- function(path = NULL, tz, max.interval = 60, minimum.detections = 2, 
       ", override = ", ifelse(is.null(override), "NULL", paste0("c('", paste(override, collapse = "', '"), "')")),
       ", jump.warning = ", jump.warning,
       ", jump.error = ", jump.error,
-      ", inactive.warning = ", ifelse(is.null(inactive.warning), "NULL", inactive.warning), 
+      ", inactive.warning = ", ifelse(is.null(inactive.warning), "NULL", inactive.warning),
       ", inactive.error = ", ifelse(is.null(inactive.error), "NULL", inactive.error), 
+      ", GUI = '", GUI, "'",
       ", debug = ", ifelse(debug, "TRUE", "FALSE"), 
       ")")
 # --------------------
@@ -230,6 +231,7 @@ study.data <- loadStudyData(tz = tz, override = override,
                             start.time = start.time, stop.time = stop.time,
                             sections = NULL, exclude.tags = exclude.tags)
 bio <- study.data$bio
+sections <- study.data$sections
 deployments <- study.data$deployments
 spatial <- study.data$spatial
 dot <- study.data$dot
@@ -250,7 +252,7 @@ detections.list <- study.data$detections.list
   aux <- names(movements)
   movements <- lapply(names(movements), function(fish) {
       speedReleaseToFirst(fish = fish, bio = bio, movements = movements[[fish]],
-                          dist.mat = dist.mat, invalid.dist = invalid.dist, silent = FALSE)
+                          dist.mat = dist.mat, invalid.dist = invalid.dist)
     })
   names(movements) <- aux
   rm(aux)
@@ -278,41 +280,50 @@ detections.list <- study.data$detections.list
   }
 
   movement.names <- names(movements)
+  
+  if (any(link <- !override %in% movement.names)) {
+    appendTo(c("Screen", "Warning", "Report"), paste0("Override has been triggered for fish ", paste(override[link], collapse = ", "), " but ", 
+      ifelse(sum(link) == 1, "this", "these"), " fish ", ifelse(sum(link) == 1, "was", "were")," not detected."))
+    override <- override[!link]
+  }
+
   movements <- lapply(seq_along(movements), function(i) {
     fish <- names(movements)[i]
     appendTo("debug", paste0("debug: Checking movement quality for fish ", fish,"."))
     
     if (is.na(match(fish, override))) {
       release <- as.character(bio$Release.site[na.as.false(bio$Transmitter == fish)])
-      release <- with(spatial, release.sites[release.sites$Standard.name == release, "Array"])
+      release <- unlist(strsplit(with(spatial, release.sites[release.sites$Standard.name == release, "Array"]), "|", fixed = TRUE))
 
       output <- checkMinimumN(movements = movements[[i]], fish = fish, minimum.detections = minimum.detections)
 
-      output <- checkImpassables(movements = output, fish = fish, dotmat = dotmat)
+      output <- checkImpassables(movements = output, fish = fish, dotmat = dotmat, GUI = GUI)
 
       output <- checkJumpDistance(movements = output, release = release, fish = fish, dotmat = dotmat, 
-                                  jump.warning = jump.warning, jump.error = jump.error)
+                                  jump.warning = jump.warning, jump.error = jump.error, GUI = GUI)
 
       if (do.checkSpeeds) {
         temp.valid.movements <- simplifyMovements(movements = output, fish = fish, bio = bio, 
           speed.method = speed.method, dist.mat = dist.mat, invalid.dist = invalid.dist)
         output <- checkSpeeds(movements = output, fish = fish, valid.movements = temp.valid.movements, 
-          speed.warning = speed.warning, speed.error = speed.error)
+          speed.warning = speed.warning, speed.error = speed.error, GUI = GUI)
         rm(temp.valid.movements)
       }
 
       if (do.checkInactiveness) {
         output <- checkInactiveness(movements = output, fish = fish, detections.list = detections.list[[fish]], 
           inactive.warning = inactive.warning, inactive.error = inactive.error, 
-          dist.mat = dist.mat, invalid.dist = invalid.dist)
+          dist.mat = dist.mat, invalid.dist = invalid.dist, GUI = GUI)
       }
     } else {
-      output <- overrideValidityChecks(moves = movements[[i]], fish = names(movements)[i])
+      output <- overrideValidityChecks(moves = movements[[i]], fish = names(movements)[i], GUI = GUI) # nocov
     }
     return(output)
   })
   names(movements) <- movement.names
   rm(movement.names)
+
+  appendTo(c("Screen", "Report"), "M: Filtering valid array movements.")
 
   valid.movements <- lapply(seq_along(movements), function(i){
     output <- simplifyMovements(movements = movements[[i]], fish = names(movements)[i], bio = bio, 
@@ -321,16 +332,17 @@ detections.list <- study.data$detections.list
   names(valid.movements) <- names(movements)
   valid.movements <- valid.movements[!unlist(lapply(valid.movements, is.null))]
 
-  times <- getTimes(movements = valid.movements, spatial = spatial, type = "arrival", events = "all")
+  times <- getTimes(movements = valid.movements, spatial = spatial, type = "arrival", events = "first")
 
   appendTo("Screen", "M: Validating detections...")
 
-  valid.detections <- validateDetections(detections.list = detections.list, movements = valid.movements)
-
+  recipient <- validateDetections(detections.list = detections.list, movements = valid.movements)
+  detections <- recipient$detections
+  valid.detections <- recipient$valid.detections
+  rm(recipient)
 # -------------------------------------
 
 # wrap up in-R objects
-  detections <- detections.list
   deployments <- do.call(rbind.data.frame, deployments)
   
   # extra info for potential RSP analysis
@@ -368,8 +380,8 @@ detections.list <- study.data$detections.list
     appendTo(c("Screen", "Report"), "M: Producing the report.")
     biometric.fragment <- printBiometrics(bio = bio)
     printDot(dot = dot, sections = NULL, spatial = spatial)
-    individual.plots <- printIndividuals(redraw = TRUE, detections.list = detections, spatial = spatial, 
-      tz = tz, movements = movements, valid.movements = valid.movements, arrays = arrays, bio = bio)
+    individual.plots <- printIndividuals(detections.list = detections, spatial = spatial, 
+      tz = tz, movements = movements, valid.movements = valid.movements, bio = bio)
     circular.plots <- printCircular(times = convertTimesToCircular(times), bio = bio)
   }
   
@@ -379,7 +391,7 @@ detections.list <- study.data$detections.list
 # wrap up the txt report
   appendTo("Report", "\n-------------------")
   if (file.exists("temp_UD.txt")) 
-    appendTo("Report", paste0("User interventions:\n-------------------\n", gsub("\r", "", readr::read_file("temp_UD.txt")), "-------------------"))
+    appendTo("Report", paste0("User interventions:\n-------------------\n", gsub("\r", "", readr::read_file("temp_UD.txt")), "-------------------")) # nocov
   
   appendTo("Report", paste0("Function call:\n-------------------\n", the.function.call, "\n-------------------"))
 # ------------------
@@ -399,8 +411,13 @@ detections.list <- study.data$detections.list
       quiet = TRUE)
     appendTo("debug", "debug: Moving report")
     fs::file_move(sub("Rmd", "html", reportname), sub("Report/", "", sub("Rmd", "html", reportname)))
-    appendTo("debug", "debug: Opening report if the pc has internet.")
-    openReport(file.name = sub("Report/", "", sub("Rmd", "html", reportname)))
+    if (interactive()) { # nocov start
+      appendTo("debug", "debug: Opening report.")
+      browseURL(sub("Report/", "", sub("Rmd", "html", reportname)))
+    } # nocov end
+    appendTo("debug", "debug: Removing toc_menu_explore.html")
+    if(file.exists("Report/toc_menu_explore.html"))
+      file.remove("Report/toc_menu_explore.html")
   }
   appendTo("Screen", "M: Process finished successfully.")
 # ------------------
@@ -436,7 +453,8 @@ detections.list <- study.data$detections.list
 #' 
 #' @keywords internal
 #' 
-printExploreRmd <- function(override.fragment, biometric.fragment, individual.plots, circular.plots, spatial, deployments, detections, valid.detections){
+printExploreRmd <- function(override.fragment, biometric.fragment, individual.plots,
+  circular.plots, spatial, deployments, detections, valid.detections){
   inst.ver <- utils::packageVersion("actel")
   inst.ver.short <- substr(inst.ver, start = 1, stop = nchar(as.character(inst.ver)) - 5) 
   if (file.exists(reportname <- "Report/actel_explore_report.Rmd")) {
@@ -460,6 +478,9 @@ printExploreRmd <- function(override.fragment, biometric.fragment, individual.pl
     unknown.fragment <- ""
   } 
   report <- readr::read_file("temp_log.txt")
+
+  options(knitr.kable.NA = "-")
+
   sink(reportname)
   cat(paste0(
 '---
@@ -545,11 +566,11 @@ Note:
 ### Individual plots
 
 Note:
-  : The detections are coloured by array. The vertical black dashed line shows the time of release. The dashed dark-grey line shows the generated movement events.
+  : The detections are coloured by array. The full dark-grey line shows the movement events considered valid, while the dashed dark-grey line shows the movement events considered invalid.
   : The movement event lines move straight between the first and last station of each event (i.e. in-between detections will not be individually linked by the line).
   : Manually **edited** fish are highlighted with **yellow** graphic borders.
   : The stations have been grouped by array, following the array order provided either in the spatial.csv file or in the spatial.txt file.
-  : The data used in these graphics is stored in the `detections` and `valid.movements` objects.
+  : The data used in these graphics is stored in the `detections` and `movements` objects (and respective valid counterparts).
 
 <center>
 ', individual.plots,'
@@ -665,25 +686,38 @@ return(reportname)
 #' @keywords internal
 #' 
 validateDetections <- function(detections.list, movements) {
+  Valid <- NULL
   counter <- 0
   pb <- txtProgressBar(min = 0, max = sum(unlist(lapply(movements, nrow))), style = 3, width = 60)
-  output <- lapply(names(movements), function(i) {
+  output.all <- lapply(names(detections.list), function(i) {
     # cat(i, "\n")
-    counter <<- counter + nrow(movements[[i]])    
     aux <- detections.list[[i]]
-    valid.rows <- unlist(lapply(1:nrow(movements[[i]]), function(j) {
-      start <- min(which(aux$Timestamp == movements[[i]]$First.time[j] & aux$Standard.name == movements[[i]]$First.station[j]))
-      stop <- start + (movements[[i]]$Detections[j] - 1)
-      # cat(j, ":", start, ":", stop, "\n"); flush.console()
-      return(start:stop)
-    }))
-    setTxtProgressBar(pb, counter)    
-    return(data.table::as.data.table(aux[valid.rows, ]))
+    aux$Valid <- FALSE
+    if (!is.null(movements[[i]])) {
+      counter <<- counter + nrow(movements[[i]])
+      valid.rows <- unlist(lapply(1:nrow(movements[[i]]), function(j) {
+        start <- min(which(aux$Timestamp == movements[[i]]$First.time[j] & aux$Standard.name == movements[[i]]$First.station[j]))
+        stop <- start + (movements[[i]]$Detections[j] - 1)
+        # cat(j, ":", start, ":", stop, "\n"); flush.console()
+        return(start:stop)
+      }))
+      aux$Valid[valid.rows] <- TRUE
+    }
+    setTxtProgressBar(pb, counter)
+    return(data.table::as.data.table(aux))
   })
   close(pb)
-  names(output) <- names(movements)
-  attributes(output)$actel <- "valid.detections"
-  return(output)
+  names(output.all) <- names(detections.list)
+  attributes(output.all)$actel <- "all.detections"
+  output.valid <- lapply(output.all, function(x) {
+    if (any(x$Valid))
+      return(x[(Valid)])
+    else
+      return(NULL)
+  })
+  output.valid <- output.valid[!sapply(output.valid, is.null)]
+  attributes(output.valid)$actel <- "valid.detections"
+  return(list(detections = output.all, valid.detections = output.valid))
 }
 
 

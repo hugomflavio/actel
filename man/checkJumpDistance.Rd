@@ -4,7 +4,15 @@
 \alias{checkJumpDistance}
 \title{Check if fish are jumping over arrays}
 \usage{
-checkJumpDistance(movements, fish, release, dotmat, jump.warning, jump.error)
+checkJumpDistance(
+  movements,
+  fish,
+  release,
+  dotmat,
+  jump.warning,
+  jump.error,
+  GUI
+)
 }
 \arguments{
 \item{movements}{The movements table}
@@ -22,6 +30,14 @@ NULL (default), no warnings are issued.}
 \item{jump.error}{If a fish crosses a number of arrays equal or greater than
 \code{jump.error} without being detected, user intervention is suggested.
 If left NULL (default), user intervention is never suggested.}
+
+\item{GUI}{One of "needed", "always" or "never". If "needed", a new window is
+opened to inspect the movements only if the movements table is too big to be
+displayed in R's console. If "always", a graphical interface is always created
+when the possibility to invalidate events emerges. If "never", a graphical
+interface is never invoqued. In this case, if the table to be displayed does
+not fit in R's console, a temporary file will be saved and the user will be
+prompted to open and examine that file. Defaults to "needed".}
 }
 \value{
 a checked movements list

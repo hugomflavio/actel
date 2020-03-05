@@ -4,10 +4,10 @@
 \alias{mbGroupCJS}
 \title{Calculate CJS for each group for each array}
 \usage{
-mbGroupCJS(m, status.df, fixed.efficiency = NULL)
+mbGroupCJS(mat, status.df, fixed.efficiency = NULL)
 }
 \arguments{
-\item{m}{The presence/absence matrices.}
+\item{mat}{The presence/absence matrices.}
 
 \item{status.df}{The main results table.}
 
