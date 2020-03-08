@@ -90,7 +90,9 @@ The `valid.movements` represents a refined version of the `movements` object, wh
 
 The `times` data frame contains the timestamps of first valid detection in each array, for each fish. These are used to draw the circular plots in the report (like the ones below), but you can also use them to test for differences between groups!
 
-<img src="times_River3.svg" alt="drawing" width="330"/> <img src="times_Sea1.svg" alt="drawing" width="330"/>
+<center>
+<img src="times_Sea1.svg" alt="drawing" width="330"/>
+</center>
 
 ### dist.mat
 
