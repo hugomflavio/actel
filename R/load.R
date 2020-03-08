@@ -571,6 +571,7 @@ loadDeployments <- function(file, tz){
   input$Receiver <- sapply(input$Receiver, function(x) tail(unlist(strsplit(x, "-")), 1))
   input$Start <- as.POSIXct(input$Start, tz = tz)
   input$Stop <- as.POSIXct(input$Stop, tz = tz)
+  input <- input[order(input$Start), ]
   return(input)
 }
 

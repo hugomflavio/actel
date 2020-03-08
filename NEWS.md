@@ -2,6 +2,11 @@
 
 Find out the main highlights of each update.
 
+## Development
+
+Fixes:
+  * Sort deployment rows by start time. Avoids false triggering of redeployment-before-retrieval errors.
+
 ## actel 0.1.3
 
 Fixes:
