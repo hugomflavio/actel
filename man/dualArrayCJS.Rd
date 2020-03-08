@@ -7,7 +7,7 @@
 dualArrayCJS(input)
 }
 \arguments{
-\item{input}{A presence/Absence matrix.}
+\item{input}{A presence/absence matrix.}
 }
 \value{
 A summary of the CJS results

@@ -2,7 +2,7 @@
 % Please edit documentation in R/check.R
 \name{tableInteraction}
 \alias{tableInteraction}
-\title{handler for table interaction events}
+\title{Handler for table interaction events}
 \usage{
 tableInteraction(moves, fish, trigger, GUI, force = FALSE)
 }
@@ -17,16 +17,16 @@ tableInteraction(moves, fish, trigger, GUI, force = FALSE)
 opened to inspect the movements only if the movements table is too big to be
 displayed in R's console. If "always", a graphical interface is always created
 when the possibility to invalidate events emerges. If "never", a graphical
-interface is never invoqued. In this case, if the table to be displayed does
+interface is never invoked. In this case, if the table to be displayed does
 not fit in R's console, a temporary file will be saved and the user will be
 prompted to open and examine that file. Defaults to "needed".}
 
 \item{force}{Logical: If TRUE, the user is moved directly to indicating which movements should be invalidated.}
 }
 \value{
-the updated movements table
+The updated movements table
 }
 \description{
-handler for table interaction events
+Handler for table interaction events
 }
 \keyword{internal}

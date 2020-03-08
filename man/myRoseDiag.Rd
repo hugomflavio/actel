@@ -112,6 +112,6 @@ A list with the zero, rotation and next.points values, to be parsed to an overla
 Adapted from the \code{\link[circular]{rose.diag}} function of the circular package.
 }
 \details{
-For more details about the original function, visit the circular package homepage at https://github.com/cran/circular
+For more details about the original function, visit the circular package homepage at \url{https://github.com/cran/circular}.
 }
 \keyword{internal}

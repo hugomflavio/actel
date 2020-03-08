@@ -7,7 +7,7 @@
 simpleCJS(input, estimate = NULL, fixed.efficiency = NULL, silent = TRUE)
 }
 \arguments{
-\item{input}{A presence/Absence matrix.}
+\item{input}{A presence/absence matrix.}
 
 \item{estimate}{an estimate of the last array's efficiency.}
 

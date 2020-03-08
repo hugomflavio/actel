@@ -7,7 +7,7 @@
 checkUnknownReceivers(input)
 }
 \arguments{
-\item{input}{The detections dataframe}
+\item{input}{The detections data frame}
 }
 \description{
 Find detections from unknown receivers

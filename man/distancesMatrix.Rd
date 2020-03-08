@@ -35,8 +35,5 @@ The distances matrix. If actel = TRUE, the distance matrix is also stored in a '
 }
 \description{
 Using a previously created transition layer (see \code{\link{transitionLayer}}), calculates the distances
-between spatial points. Adapted from Grant Adams' script "distance to closest mpa". (grant.adams@eagles.usm.edu)
-}
-\details{
-\url{https://cran.r-project.org/web/packages/gdistance/vignettes/gdistance1.pdf}
+between spatial points. Adapted from Grant Adams' script "distance to closest mpa".
 }

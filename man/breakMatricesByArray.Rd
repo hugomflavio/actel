@@ -13,7 +13,7 @@ breakMatricesByArray(m, arrays, type = c("peers", "all"), verbose = TRUE)
 
 \item{type}{The type of arrays to be matched}
 
-\item{verbose}{Logical: Should appendto be used?}
+\item{verbose}{Logical: Should appendTo be used?}
 }
 \value{
 a list of matrices, split by array

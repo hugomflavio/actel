@@ -14,6 +14,6 @@ analysis?}
 A TRUE/FALSE decision
 }
 \description{
-Creates a "Report" folder if necessary and silently activates ggplot2 and reshape2 to avoid startup messages
+Checks if pandoc is up and running and creates a "Report" folder, if necessary
 }
 \keyword{internal}

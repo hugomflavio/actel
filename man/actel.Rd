@@ -6,18 +6,18 @@
 \alias{actel-package}
 \title{actel: Acoustic Telemetry Data Analysis}
 \description{
-actel is designed for studies where fish tagged with acoustic tags are
-expected to move through a pre-defined set of receiver arrays. actel combines
-the advantages of automatic sorting and checking of fish movements with the
-possibility for user intervention on tags that deviate from expected
-behaviour. actel allows the user to run the analysis in a systematic way, and
-makes it easy to compare results from different studies.
+actel is designed for studies where fish tagged with acoustic tags are expected
+to move through receiver arrays. actel combines the advantages of automatic sorting and checking
+of fish movements with the possibility for user intervention on tags that deviate from expected
+behaviour. The three analysis functions: \code{\link{explore}}, \code{\link{migration}}
+and \code{\link{residency}}, allow the users to analyse their data in a systematic way,
+making it easy to compare results from different studies.
 }
 \seealso{
 \code{\link{explore}}, \code{\link{migration}}, \code{\link{residency}}
 }
 \author{
-\strong{Maintainer}: Hugo Flávio \email{hdmfla@aqua.dtu.dk}
+\strong{Maintainer}: Hugo Flávio \email{hdmfla@aqua.dtu.dk} (\href{https://orcid.org/0000-0002-5174-1197}{ORCID})
 
 }
 \keyword{internal}
@@ -28,12 +28,12 @@ format. To learn more about this, you need to have a look at the package
 vignettes, which can be found by running \code{browseVignettes('actel')}. If
 this function returns "No vignettes found", you can alternatively download
 the vignette pages directly through this link:
-\url{https://github.com/hugomflavio/actel/raw/master/compiled_vignettes.zip}
+\url{https://github.com/hugomflavio/actel/raw/master/actel_vignettes.zip}
 }
 \section{Example dataset}{
 
 If this is the first time you are using actel, you can try running it on an
-example dataset using the \code{exampleWorkspace} function. This function
+example dataset using the \code{\link{exampleWorkspace}} function. This function
 creates a new folder in your working directory (named 'exampleWorkspace'),
 and creates example files following the structure described in the package
 vignettes. Namely:
@@ -41,10 +41,10 @@ vignettes. Namely:
 \item biometrics.csv
 \item deployments.csv
 \item spatial.csv
-\item detections/ (a folder with csv files)
+\item detections/ (a folder with .csv files)
 }
 
-Once the example dataset is created, \code{exampleWorkspace} also provides
+Once the example dataset is created, \code{\link{exampleWorkspace}} also provides
 you with an example code to run a \code{\link{migration}} analysis:\preformatted{results <- migration(path = 'exampleWorkspace', sections = c('River', 'Fjord', 'Sea'),
                      success.arrays = 'Sea1', tz = 'Europe/Copenhagen')
 }

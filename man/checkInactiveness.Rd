@@ -20,7 +20,7 @@ checkInactiveness(
 
 \item{fish}{The fish being analysed}
 
-\item{detections.list}{A list of the detections split by each target tag, created by splitDetections.}
+\item{detections.list}{A list of the detections split by each target tag, created by \code{splitDetections}.}
 
 \item{inactive.warning}{If a fish spends a number of days equal or greater
 than \code{inactive.error} in a given array at the tail of the respective
@@ -36,7 +36,7 @@ intervention is never suggested.}
 opened to inspect the movements only if the movements table is too big to be
 displayed in R's console. If "always", a graphical interface is always created
 when the possibility to invalidate events emerges. If "never", a graphical
-interface is never invoqued. In this case, if the table to be displayed does
+interface is never invoked. In this case, if the table to be displayed does
 not fit in R's console, a temporary file will be saved and the user will be
 prompted to open and examine that file. Defaults to "needed".}
 }

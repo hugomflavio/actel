@@ -507,12 +507,9 @@ convertTimesToCircular <- function(times) {
 
 #' Calculate Transition Layer
 #' 
-#' \code{transitionLayer} imports a shape file into R and prepares it to be used in distance
-#' estimations. Adapted from Grant Adams' script "distance to closest mpa". 
-#' (grant.adams@@eagles.usm.edu)
+#' \code{transitionLayer()} imports a shape file into R and prepares it to be used in distance
+#' estimations. Adapted from Grant Adams' script "distance to closest mpa".
 #' 
-#' \url{https://cran.r-project.org/web/packages/gdistance/vignettes/gdistance1.pdf}
-#'
 #' @param shape A shape file projected in a metric coordinate system.
 #' @param size The pixel size, in metres.
 #' @param EPSGcode The EPSG code of the shape file's coordinate system. DO NOT USE degree-based coordinate systems.
@@ -674,10 +671,8 @@ size, rerun the function with force = TRUE.\n", call. = FALSE)
 #' Calculate Distances Matrix
 #' 
 #' Using a previously created transition layer (see \code{\link{transitionLayer}}), calculates the distances
-#' between spatial points. Adapted from Grant Adams' script "distance to closest mpa". (grant.adams@@eagles.usm.edu)
+#' between spatial points. Adapted from Grant Adams' script "distance to closest mpa".
 #' 
-#' \url{https://cran.r-project.org/web/packages/gdistance/vignettes/gdistance1.pdf}
-#'
 #' @param t.layer An RData file containing a transition layer.
 #' @param starters The points from which to start measuring the distance.
 #' @param targets The points to which a way must be found.
@@ -814,7 +809,7 @@ will artificially add water space around the shape file.", call. = FALSE)
 
 #' Create a Template Distances Matrix
 #' 
-#' Creates a matrix based on the local 'spatial.csv' file and saves it to 'distances.csv' so the
+#' Creates an empty matrix based on the local 'spatial.csv' file and saves it to 'distances.csv' so the
 #' user can manually fill it.
 #' 
 #' @export

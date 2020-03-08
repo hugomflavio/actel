@@ -8,7 +8,7 @@
 
 \item{bio}{A table with the tags and biometrics of the studied fish.}
 
-\item{detections.list}{A list of the detections split by each target tag, created by splitDetections.}
+\item{detections.list}{A list of the detections split by each target tag, created by \code{splitDetections}.}
 
 \item{dotmat}{The matrix of distances between arrays}
 
@@ -18,7 +18,7 @@
 opened to inspect the movements only if the movements table is too big to be
 displayed in R's console. If "always", a graphical interface is always created
 when the possibility to invalidate events emerges. If "never", a graphical
-interface is never invoqued. In this case, if the table to be displayed does
+interface is never invoked. In this case, if the table to be displayed does
 not fit in R's console, a temporary file will be saved and the user will be
 prompted to open and examine that file. Defaults to "needed".}
 

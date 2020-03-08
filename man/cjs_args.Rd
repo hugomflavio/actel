@@ -18,7 +18,7 @@
 
 \item{mat, m}{The presence/absence matrices.}
 
-\item{input}{A presence/Absence matrix.}
+\item{input}{A presence/absence matrix.}
 
 \item{movements, moves}{The movements table.}
 

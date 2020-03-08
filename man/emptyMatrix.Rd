@@ -7,6 +7,6 @@
 emptyMatrix()
 }
 \description{
-Creates a matrix based on the local 'spatial.csv' file and saves it to 'distances.csv' so the
+Creates an empty matrix based on the local 'spatial.csv' file and saves it to 'distances.csv' so the
 user can manually fill it.
 }

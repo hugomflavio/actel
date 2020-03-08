@@ -6,7 +6,7 @@
 #' @param efficiency The efficiency results.
 #' @param arrays A list containing information for each array.
 #' @param mat,m The presence/absence matrices.
-#' @param input A presence/Absence matrix.
+#' @param input A presence/absence matrix.
 #' @param movements,moves The movements table.
 #' @param status.df The main results table.
 #' @param dotmat The matrix of distances between arrays.
@@ -149,7 +149,7 @@ assembleGroupCJS <- function(mat, CJS, arrays, releases, intra.CJS = NULL) {
 #' Break the detection matrices per array
 #' 
 #' @param type The type of arrays to be matched
-#' @param verbose Logical: Should appendto be used?
+#' @param verbose Logical: Should appendTo be used?
 #' @inheritParams cjs_args
 #' 
 #' @return a list of matrices, split by array
@@ -669,7 +669,7 @@ includeMissing <- function(x, status.df){
 #'
 #' @inheritParams cjs_args
 #' 
-#' @return a matrix of detection histories per fish for the last array.
+#' @return A matrix of detection histories per fish for the last array.
 #' 
 #' @keywords internal
 #' 

@@ -46,7 +46,7 @@ createWorkspace <- function(dir = "actel_workspace") {
 #'
 #' Creates a ready-to-run workspace with example data.
 #' 
-#' @param spatial,biometrics,detections,deployments Datasets provided with the package.
+#' @param spatial,biometrics,detections,deployments Example datasets provided with the package.
 #'
 #' @export
 #' 

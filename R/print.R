@@ -1,6 +1,6 @@
 #' Generate default ggplot colours
 #' 
-#' Copied from: https://stackoverflow.com/questions/8197559/emulate-ggplot2-default-color-palette
+#' Copied from: \url{https://stackoverflow.com/questions/8197559/emulate-ggplot2-default-color-palette}.
 #' 
 #' @param n The number of colours to be generated
 #' 
@@ -762,7 +762,7 @@ printCircular <- function(times, bio, suffix = NULL){
 #' 
 #' Adapted from the \code{\link[circular]{rose.diag}} function of the circular package.
 #' 
-#' For more details about the original function, visit the circular package homepage at https://github.com/cran/circular
+#' For more details about the original function, visit the circular package homepage at \url{https://github.com/cran/circular}.
 #' 
 #' @param x a vector, matrix or data.frame. The object is coerced to class circular.
 #' @param pch point character to use. See help on par.
@@ -903,7 +903,7 @@ myRoseDiag <- function (x, pch = 16, cex = 1, axes = TRUE, shrink = 1, bins = 24
 
 #' Draw rings at relative points
 #' 
-#' Adapted from RosediagRad (from the circular package) to draw rings inside the circular plot. Called if rings = TRUE in \code{\link{myRoseDiag}}
+#' Adapted from RosediagRad() (from the circular package) to draw rings inside the circular plot. Called if rings = TRUE in \code{\link{myRoseDiag}}
 #' 
 #' For more details about the circular package, visit its homepage at \url{https://github.com/cran/circular}
 #' 
@@ -989,9 +989,9 @@ roseMean <- function(input, col = c("cornflowerblue", "chartreuse3", "deeppink")
 
 #' circular:::circlePlotRad
 #' 
-#' This function is an EXACT copy of the function circlePlotRad in the circular package. 
+#' This function is an EXACT copy of the function circlePlotRad() in the circular package. 
 #' As the function is not exported by the original package, I have copied it here to resolve
-#' the note thrown by devtools:check()
+#' the note thrown by devtools::check()
 #' 
 #' For more details about the original function, visit the circular package homepage at \url{https://github.com/cran/circular}
 #' 
@@ -1054,9 +1054,9 @@ copyOfCirclePlotRad <- function (xlim = c(-1, 1), ylim = c(-1, 1), uin = NULL, s
 
 #' circular:::RosediagRad
 #' 
-#' This function is an EXACT copy of the function RosediagRad in the circular package. 
+#' This function is an EXACT copy of the function RosediagRad() in the circular package. 
 #' As the function is not exported by the original package, I have copied it here to resolve
-#' the note thrown by devtools:check()
+#' the note thrown by devtools::check()
 #' 
 #' For more details about the original function, visit the circular package homepage at \url{https://github.com/cran/circular}
 #' 

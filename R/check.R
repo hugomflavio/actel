@@ -1,14 +1,15 @@
 #' check.R arguments
+#' 
 #' @param arrays a list containing information for each array
 #' @param bio A table with the tags and biometrics of the studied fish.
-#' @param detections.list A list of the detections split by each target tag, created by splitDetections.
+#' @param detections.list A list of the detections split by each target tag, created by \code{splitDetections}.
 #' @param dotmat The matrix of distances between arrays
 #' @param fish The fish being analysed
 #' @param GUI One of "needed", "always" or "never". If "needed", a new window is
 #'  opened to inspect the movements only if the movements table is too big to be
 #'  displayed in R's console. If "always", a graphical interface is always created
 #'  when the possibility to invalidate events emerges. If "never", a graphical
-#'  interface is never invoqued. In this case, if the table to be displayed does
+#'  interface is never invoked. In this case, if the table to be displayed does
 #'  not fit in R's console, a temporary file will be saved and the user will be
 #'  prompted to open and examine that file. Defaults to "needed".
 #' @param movements,moves The movements table
@@ -16,17 +17,19 @@
 #' @param secmoves the section movements list
 #' @param spatial The spatial data frame, as loaded by loadSpatial
 #' @param valid.movements The valid movements table
+#' 
 #' @name check_args
 #' @keywords internal
+#' 
 NULL
 
-#' handler for table interaction events
+#' Handler for table interaction events
 #' 
 #' @inheritParams check_args
 #' @param trigger The message/warning that triggered the interaction
 #' @param force Logical: If TRUE, the user is moved directly to indicating which movements should be invalidated.
 #' 
-#' @return the updated movements table
+#' @return The updated movements table
 #' 
 #' @keywords internal
 #' 
@@ -100,7 +103,7 @@ tableInteraction <- function(moves, fish, trigger, GUI, force = FALSE) { # nocov
 } # nocov end
 
 #' Check if the dependencies required to open a GUI are installed, and if
-#' opening a GUI does not throw an error. Some ode adapted from RGtk2's 
+#' opening a GUI does not throw an error. Some code adapted from RGtk2's 
 #' .onLoad function.
 #' 
 #' @inheritParams explore
@@ -145,7 +148,7 @@ checkGUI <- function(GUI = c("needed", "always", "never")) {
 
 #' Check if there are duplicated detection in the input data
 #' 
-#' @param input The detections dataframe
+#' @param input The detections data frame
 #' @keywords internal
 #' 
 checkDupDetections <- function(input) {
@@ -473,7 +476,7 @@ checkLinearity <- function(secmoves, fish, sections, arrays, GUI) {
 
 #' Check report compatibility
 #' 
-#' Creates a "Report" folder if necessary and silently activates ggplot2 and reshape2 to avoid startup messages
+#' Checks if pandoc is up and running and creates a "Report" folder, if necessary
 #'
 #' @inheritParams explore
 #' 
@@ -707,7 +710,7 @@ checkDeploymentStations <- function(input, spatial) {
 
 #' Find detections from unknown receivers
 #' 
-#' @param input The detections dataframe
+#' @param input The detections data frame
 #' 
 #' @keywords internal
 #' 
@@ -994,7 +997,7 @@ invalidateEvents <- function(movements, fish) { # nocov start
   return(movements)
 } # nocov end
 
-#' Opens a new winder that allows the user to determine movement event invalidity
+#' Opens a new window that allows the user to determine movement event invalidity
 #' 
 #' @inheritParams check_args
 #' @param trigger The warning/message that triggered the interaction

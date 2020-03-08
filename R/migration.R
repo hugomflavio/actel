@@ -79,7 +79,7 @@
 #' }
 #'
 #' @seealso \code{\link{explore}}, \code{\link{residency}}
-
+#' 
 #' @export
 #' 
 migration <- function(path = NULL, tz, sections, success.arrays = NULL, max.interval = 60, minimum.detections = 2, 

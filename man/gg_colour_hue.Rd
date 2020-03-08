@@ -10,6 +10,6 @@ gg_colour_hue(n)
 \item{n}{The number of colours to be generated}
 }
 \description{
-Copied from: https://stackoverflow.com/questions/8197559/emulate-ggplot2-default-color-palette
+Copied from: \url{https://stackoverflow.com/questions/8197559/emulate-ggplot2-default-color-palette}.
 }
 \keyword{internal}

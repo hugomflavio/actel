@@ -34,10 +34,6 @@ transitionLayer(
 A RData file with the transition layer is stored in the current directory.
 }
 \description{
-\code{transitionLayer} imports a shape file into R and prepares it to be used in distance
+\code{transitionLayer()} imports a shape file into R and prepares it to be used in distance
 estimations. Adapted from Grant Adams' script "distance to closest mpa".
-(grant.adams@eagles.usm.edu)
-}
-\details{
-\url{https://cran.r-project.org/web/packages/gdistance/vignettes/gdistance1.pdf}
 }

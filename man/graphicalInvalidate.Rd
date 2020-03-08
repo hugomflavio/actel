@@ -2,7 +2,7 @@
 % Please edit documentation in R/check.R
 \name{graphicalInvalidate}
 \alias{graphicalInvalidate}
-\title{Opens a new winder that allows the user to determine movement event invalidity}
+\title{Opens a new window that allows the user to determine movement event invalidity}
 \usage{
 graphicalInvalidate(moves, fish, trigger)
 }
@@ -17,6 +17,6 @@ graphicalInvalidate(moves, fish, trigger)
 the movement table with valid/invalid notes
 }
 \description{
-Opens a new winder that allows the user to determine movement event invalidity
+Opens a new window that allows the user to determine movement event invalidity
 }
 \keyword{internal}

@@ -12,7 +12,7 @@ exampleWorkspace(
 )
 }
 \arguments{
-\item{spatial, biometrics, detections, deployments}{Datasets provided with the package.}
+\item{spatial, biometrics, detections, deployments}{Example datasets provided with the package.}
 }
 \description{
 Creates a ready-to-run workspace with example data.
