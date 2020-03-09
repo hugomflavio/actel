@@ -4,7 +4,14 @@
 \alias{printProgression}
 \title{Print progression diagram}
 \usage{
-printProgression(dot, sections, overall.CJS, spatial, status.df)
+printProgression(
+  dot,
+  sections,
+  overall.CJS,
+  spatial,
+  status.df,
+  print.releases
+)
 }
 \arguments{
 \item{dot}{a dot data frame}
@@ -18,6 +25,9 @@ details.}
 \item{spatial}{A list of spatial objects in the study area}
 
 \item{status.df}{A data frame with the final migration results}
+
+\item{print.releases}{Logical: Should the release sites be printed in the
+study area diagrams?}
 }
 \description{
 Print progression diagram

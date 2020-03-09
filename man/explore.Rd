@@ -22,7 +22,8 @@ explore(
   override = NULL,
   report = TRUE,
   GUI = c("needed", "always", "never"),
-  debug = FALSE
+  debug = FALSE,
+  print.releases = TRUE
 )
 }
 \arguments{
@@ -101,6 +102,9 @@ prompted to open that file and examine it. Defaults to "needed".}
 
 \item{debug}{Logical: Should temporary files be kept at the end of the
 analysis?}
+
+\item{print.releases}{Logical: Should the release sites be printed in the
+study area diagrams?}
 }
 \value{
 A list containing:
