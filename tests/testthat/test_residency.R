@@ -159,10 +159,13 @@ test_that("residency stops when any argument does not make sense", {
 		"Some of the array names listed in the 'replicates' argument do not match the study's arrays.", fixed = TRUE)
 	file.remove("detections/actel.detections.RData")
 
-	expect_error(residency(tz = 'Europe/Copenhagen', sections = c("River", "Ri", "Fjord", "Sea")),
+	expect_error(residency(tz = 'Europe/Copenhagen', sections = c("River", "River", "Fjord", "Sea"), GUI = "never"),
+		"Some section names are duplicated. Please include each section only once in the 'sections' argument.", fixed = TRUE)
+
+	expect_error(residency(tz = 'Europe/Copenhagen', sections = c("River", "Ri", "Fjord", "Sea"), GUI = "never"),
 		"Section 'Ri' is contained within other section names. Sections must be unique and independent.\n       Please rename your sections and arrays so that section names are not contained within each other.", fixed = TRUE)
 
-	expect_error(residency(tz = 'Europe/Copenhagen', sections = c("River", "Ri", "Fjord", "ord", "Sea")),
+	expect_error(residency(tz = 'Europe/Copenhagen', sections = c("River", "Ri", "Fjord", "ord", "Sea"), GUI = "never"),
 		"Sections 'Ri', 'ord' are contained within other section names. Sections must be unique and independent.\n       Please rename your sections and arrays so that section names are not contained within each other.", fixed = TRUE)
 
 	expect_error(residency(tz = 'Europe/Copenhagen', sections = c("River", "Fjord", "Sea"), print.releases = "a", GUI = "never"),
@@ -265,8 +268,8 @@ test_that("the debug option works as expected", {
 	expect_true(file.exists("residency_debug.RData"))
 	aux <- dataToList("residency_debug.RData")
 	expect_equal(names(aux), c('study.data', 'jump.error', 'speed.error', 'valid.movements', 'valid.detections', 
-		'success.arrays', 'movements', 'array.times', 'replicates', 'invalid.dist', 'detections.list', 'dotmat', 
-		'dist.mat', 'resultsname', 'my.home', 'status.df', 'efficiency', 'tz', 'the.function.call', 'max.interval', 
+		'success.arrays', 'movements', 'array.times', 'print.releases', 'replicates', 'invalid.dist', 'detections.list', 
+		'dotmat', 'dist.mat', 'resultsname', 'my.home', 'status.df', 'efficiency', 'tz', 'the.function.call', 'max.interval', 
 		'section.minimum', 'last.seen', 'daily.positions', 'detections', 'minimum.detections', 'paths', 'global.ratios', 
 		'deployments', 'arrays', 'override.fragment', 'report', 'residency.list', 'inst.ver.short', 'the.time', 
 		'override', 'jobname', 'inactive.warning', 'speed.warning', 'path', 'GUI', 'spatial', 'inactive.error', 

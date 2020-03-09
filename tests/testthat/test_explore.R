@@ -134,8 +134,8 @@ test_that("explore stops when any argument does not make sense", {
 	expect_error(explore(tz = "Europe/Copenhagen", GUI = "never", debug = "a"),
 		"'debug' must be logical.", fixed = TRUE)
 
-	expect_error(explore(tz = "Europe/Copenhagen", GUI = "never", print.progression = "a"),
-		"'print.progression' must be logical.", fixed = TRUE)
+	expect_error(explore(tz = "Europe/Copenhagen", GUI = "never", print.releases = "a"),
+		"'print.releases' must be logical.", fixed = TRUE)
 })
 
 test_that("explore results contains all the expected elements.", {
@@ -192,11 +192,11 @@ test_that("the debug option works as expected", {
 	aux <- dataToList("explore_debug.RData")
 	expect_equal(names(aux), c('study.data', 'do.checkSpeeds', 'arrays', 'dist.mat', 'dotmat', 'the.time', 
 		'start.time', 'my.home', 'speed.warning', 'GUI', 'jump.error', 'speed.error', 'valid.movements', 
-		'times', 'deployments', 'dot', 'jump.warning', 'tz', 'inactive.error', 'valid.detections', 'max.interval', 
-		'inst.ver.short', 'detections.list', 'stop.time', 'jobname', 'override', 'path', 'minimum.detections', 
-		'movements', 'exclude.tags', 'detections', 'the.function.call', 'report', 'invalid.dist', 'resultsname', 
-		'rsp.info', 'sections', 'link', 'do.checkInactiveness', 'override.fragment', 'spatial', 'speed.method', 
-		'inactive.warning', 'bio', 'debug'))
+		'times', 'deployments', 'print.releases', 'dot', 'jump.warning', 'tz', 'inactive.error', 'valid.detections', 
+		'max.interval', 'inst.ver.short', 'detections.list', 'stop.time', 'jobname', 'override', 'path', 
+		'minimum.detections', 'movements', 'exclude.tags', 'detections', 'the.function.call', 'report', 
+		'invalid.dist', 'resultsname', 'rsp.info', 'sections', 'link', 'do.checkInactiveness', 'override.fragment', 
+		'spatial', 'speed.method', 'inactive.warning', 'bio', 'debug'))
 	expect_true(file.exists("temp_warnings.txt"))
 	expect_true(file.exists("temp_debug.txt"))
 })

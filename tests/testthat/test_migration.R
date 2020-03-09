@@ -179,13 +179,13 @@ test_that("migration stops when any argument does not make sense", {
 		"Some of the array names listed in the 'replicates' argument do not match the study's arrays.", fixed = TRUE)
 	file.remove("detections/actel.detections.RData")
 
-	expect_error(migration(tz = 'Europe/Copenhagen', sections = c("River", "River", "Fjord", "Sea")),
-		"Error: Some section names are duplicated. Please include each section only once in the 'sections' argument.", fixed = TRUE)
+	expect_error(migration(tz = 'Europe/Copenhagen', sections = c("River", "River", "Fjord", "Sea"), GUI = "never"),
+		"Some section names are duplicated. Please include each section only once in the 'sections' argument.", fixed = TRUE)
 
-	expect_error(migration(tz = 'Europe/Copenhagen', sections = c("River", "Ri", "Fjord", "Sea")),
+	expect_error(migration(tz = 'Europe/Copenhagen', sections = c("River", "Ri", "Fjord", "Sea"), GUI = "never"),
 		"Section 'Ri' is contained within other section names. Sections must be unique and independent.\n       Please rename your sections and arrays so that section names are not contained within each other.", fixed = TRUE)
 
-	expect_error(migration(tz = 'Europe/Copenhagen', sections = c("River", "Ri", "Fjord", "ord", "Sea")),
+	expect_error(migration(tz = 'Europe/Copenhagen', sections = c("River", "Ri", "Fjord", "ord", "Sea"), GUI = "never"),
 		"Sections 'Ri', 'ord' are contained within other section names. Sections must be unique and independent.\n       Please rename your sections and arrays so that section names are not contained within each other.", fixed = TRUE)
 
 	expect_error(migration(tz = 'Europe/Copenhagen', sections = c("River", "Fjord", "Sea"), print.releases = "a", GUI = "never"),
@@ -291,7 +291,7 @@ test_that("the debug option works as expected", {
 	expect_true(file.exists("migration_debug.RData"))
 	aux <- dataToList("migration_debug.RData")
 	expect_equal(names(aux), c('study.data', 'jump.error', 'speed.error', 'valid.movements', 'valid.detections', 
-		'times', 'success.arrays', 'split.CJS', 'overall.CJS', 'movements', 'replicates', 'invalid.dist', 'detections.list', 
+		'times', 'success.arrays', 'split.CJS', 'overall.CJS', 'movements', 'print.releases', 'replicates', 'invalid.dist', 'detections.list', 
 		'dotmat', 'dist.mat', 'resultsname', 'my.home', 'status.df', 'group.overview', 'section.overview', 'tz', 
 		'the.function.call', 'max.interval', 'detections', 'minimum.detections', 'paths', 'deployments', 'arrays', 
 		'group.CJS', 'override.fragment', 'report', 'CJS.list', 'inst.ver.short', 'timetable', 'the.time', 'override', 
