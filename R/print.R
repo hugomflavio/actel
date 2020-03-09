@@ -1235,6 +1235,11 @@ printIndividualResidency <- function(ratios, dayrange, sections) {
   link <- unlist(sapply(sections, function(i) which(grepl(paste0("^", i), unordered.unique.values))))
   unique.values <- unordered.unique.values[link]
 
+  if (length(unique.values) <= 8)
+    unique.colours <- as.vector(cbPalette)[1:length(unique.values)]
+  else
+    unique.colours <- gg_colour_hue(length(unique.values))
+
   pb <- txtProgressBar(min = 0, max = length(ratios), style = 3, width = 60)
   capture <- lapply(names(ratios), function(i) {
     counter <<- counter + 1
@@ -1247,18 +1252,23 @@ printIndividualResidency <- function(ratios, dayrange, sections) {
     plotdata <- suppressMessages(reshape2::melt(x))
     colnames(plotdata) <- c("Date", "Location", "n")
     plotdata$Date <- as.Date(plotdata$Date)
-    plotdata$Location <- factor(plotdata$Location, levels = unique.values)
+    
+    level.link <- !is.na(match(unique.values, unique(plotdata$Location)))
+    use.levels <- unique.values[level.link]
+    use.colours <- unique.colours[level.link]
+
+    plotdata$Location <- factor(plotdata$Location, levels = use.levels)
+    
     p <- ggplot2::ggplot(data = plotdata, ggplot2::aes(x = Date, y = n, fill = Location))
     p <- p + ggplot2::geom_bar(width = 1, stat = "identity")
     p <- p + ggplot2::theme_bw()
     p <- p + ggplot2::scale_y_continuous(limits = c(0,  max(apply(ratios[[i]][, aux, drop = FALSE], 1, sum))), expand = c(0, 0))
     p <- p + ggplot2::labs(title = paste0(i, " (", substring(x$Date[1], 1, 10), " to ", substring(x$Date[nrow(x)], 1, 10), ")") , x = "", y = "% time per day")
     p <- p + ggplot2::scale_x_date(limits = dayrange)
-    if (length(unique.values) <= 8)
-      p <- p + ggplot2::scale_fill_manual(values = as.vector(cbPalette)[1:length(unique.values)], drop = FALSE)
-    if (length(unique.values) > 5)
+    p <- p + ggplot2::scale_fill_manual(values = use.colours, drop = TRUE)
+    if (length(use.levels) > 5 & length(use.levels) <= 10)
       p <- p + ggplot2::guides(fill = ggplot2::guide_legend(ncol = 2))
-    if (length(unique.values) > 10)
+    if (length(use.levels) > 10)
       p <- p + ggplot2::guides(fill = ggplot2::guide_legend(ncol = 3))
     ggplot2::ggsave(paste0("Report/", i,"_residency.png"), width = 10, height = 1.5)
     individual.plots <<- paste0(individual.plots, "![](", i, "_residency.png){ width=95% }\n")
