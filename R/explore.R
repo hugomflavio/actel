@@ -88,7 +88,7 @@
 explore <- function(path = NULL, tz, max.interval = 60, minimum.detections = 2, start.time = NULL, stop.time = NULL, 
   speed.method = c("last to first", "first to first"), speed.warning = NULL, speed.error = NULL, 
   jump.warning = 2, jump.error = 3, inactive.warning = NULL, inactive.error = NULL, 
-  exclude.tags = NULL, override = NULL, report = TRUE, GUI = c("needed", "always", "never"), debug = FALSE, print.releases = TRUE) {
+  exclude.tags = NULL, override = NULL, report = TRUE, GUI = c("needed", "always", "never"), print.releases = TRUE, debug = FALSE) {
 
 # check arguments quality
   my.home <- getwd()
@@ -208,6 +208,7 @@ explore <- function(path = NULL, tz, max.interval = 60, minimum.detections = 2, 
       ", inactive.warning = ", ifelse(is.null(inactive.warning), "NULL", inactive.warning),
       ", inactive.error = ", ifelse(is.null(inactive.error), "NULL", inactive.error), 
       ", GUI = '", GUI, "'",
+      ", print.releases = ", ifelse(print.releases, "TRUE", "FALSE"), 
       ", debug = ", ifelse(debug, "TRUE", "FALSE"), 
       ")")
 # --------------------

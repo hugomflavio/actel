@@ -82,7 +82,7 @@ residency <- function(path = NULL, tz, sections, success.arrays = NULL, max.inte
   start.time = NULL, stop.time = NULL, speed.method = c("last to first", "first to first"), 
   speed.warning = NULL, speed.error = NULL, jump.warning = 2, jump.error = 3, 
   inactive.warning = NULL, inactive.error = NULL, exclude.tags = NULL, override = NULL, report = TRUE,
-  section.minimum = 2, replicates = NULL, GUI = c("needed", "always", "never"), debug = FALSE, print.releases = TRUE) {
+  section.minimum = 2, replicates = NULL, GUI = c("needed", "always", "never"), print.releases = TRUE, debug = FALSE) {
 # check argument quality
   my.home <- getwd()
   if (!is.null(path) && !is.character(path))
@@ -214,6 +214,7 @@ residency <- function(path = NULL, tz, sections, success.arrays = NULL, max.inte
       ", inactive.warning = ", ifelse(is.null(inactive.warning), "NULL", inactive.warning), 
       ", inactive.error = ", ifelse(is.null(inactive.error), "NULL", inactive.error), 
       ", GUI = '", GUI, "'",
+      ", print.releases = ", ifelse(print.releases, "TRUE", "FALSE"), 
       ", debug = ", ifelse(debug, "TRUE", "FALSE"), 
       ")")
 # --------------------

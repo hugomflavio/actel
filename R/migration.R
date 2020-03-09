@@ -87,7 +87,7 @@ migration <- function(path = NULL, tz, sections, success.arrays = NULL, max.inte
   speed.warning = NULL, speed.error = NULL, jump.warning = 2, jump.error = 3, 
   inactive.warning = NULL, inactive.error = NULL, exclude.tags = NULL, override = NULL, report = TRUE,
   if.last.skip.section = TRUE, replicates = NULL, disregard.parallels = TRUE, GUI = c("needed", "always", "never"), 
-  debug = FALSE, print.releases = TRUE) {
+  print.releases = TRUE, debug = FALSE) {
   
 # check argument quality
   my.home <- getwd()
@@ -223,6 +223,7 @@ migration <- function(path = NULL, tz, sections, success.arrays = NULL, max.inte
       ", inactive.warning = ", ifelse(is.null(inactive.warning), "NULL", inactive.warning), 
       ", inactive.error = ", ifelse(is.null(inactive.error), "NULL", inactive.error), 
       ", GUI = '", GUI, "'",
+      ", print.releases = ", ifelse(print.releases, "TRUE", "FALSE"), 
       ", debug = ", ifelse(debug, "TRUE", "FALSE"), 
       ")")
 # --------------------

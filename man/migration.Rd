@@ -27,8 +27,8 @@ migration(
   replicates = NULL,
   disregard.parallels = TRUE,
   GUI = c("needed", "always", "never"),
-  debug = FALSE,
-  print.releases = TRUE
+  print.releases = TRUE,
+  debug = FALSE
 )
 }
 \arguments{
@@ -123,11 +123,11 @@ interface is never invoqued. In this case, if the table to be displayed does
 not fit in R's console, a temporary file will be saved and the user will be
 prompted to open that file and examine it. Defaults to "needed".}
 
-\item{debug}{Logical: Should temporary files be kept at the end of the
-analysis?}
-
 \item{print.releases}{Logical: Should the release sites be printed in the
 study area diagrams?}
+
+\item{debug}{Logical: Should temporary files be kept at the end of the
+analysis?}
 }
 \value{
 A list containing:
