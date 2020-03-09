@@ -87,7 +87,7 @@ migration <- function(path = NULL, tz, sections, success.arrays = NULL, max.inte
   speed.warning = NULL, speed.error = NULL, jump.warning = 2, jump.error = 3, 
   inactive.warning = NULL, inactive.error = NULL, exclude.tags = NULL, override = NULL, report = TRUE,
   if.last.skip.section = TRUE, replicates = NULL, disregard.parallels = TRUE, GUI = c("needed", "always", "never"), 
-  debug = FALSE) {
+  debug = FALSE, print.releases = TRUE) {
   
 # check argument quality
   my.home <- getwd()
@@ -181,6 +181,9 @@ migration <- function(path = NULL, tz, sections, success.arrays = NULL, max.inte
     stop("'debug' must be logical.\n", call. = FALSE)
 
   checkSectionsUnique(sections = sections)
+
+  if (!is.logical(print.releases))
+    stop("'print.releases' must be logical.\n", call. = FALSE)
 # ------------------------
 
 # Prepare clean-up before function ends
@@ -547,9 +550,9 @@ migration <- function(path = NULL, tz, sections, success.arrays = NULL, max.inte
       efficiency.fragment <- "Array efficiency could not be calculated. See full log for more details.\n"
     printDotplots(status.df = status.df, invalid.dist = invalid.dist)
     printSurvivalGraphic(section.overview = section.overview)
-    printDot(dot = dot, sections = sections, spatial = spatial)
+    printDot(dot = dot, sections = sections, spatial = spatial, print.releases = print.releases)
     if (calculate.efficiency) {
-      printProgression(dot = dot,  sections = sections, overall.CJS = overall.CJS, spatial = spatial, status.df = status.df)
+      printProgression(dot = dot,  sections = sections, overall.CJS = overall.CJS, spatial = spatial, status.df = status.df, print.releases = print.releases)
       display.progression <- TRUE
       array.overview.fragment <- printArrayOverview(group.overview)
     } else {

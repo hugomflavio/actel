@@ -42,6 +42,8 @@
 #' define which movement events are valid and invalid.
 #' @param path Path to the folder containing the data. If left NULL (default), 
 #'  the analysis runs in the current folder.
+#' @param print.releases Logical: Should the release sites be printed in the
+#'  study area diagrams?
 #' @param report Logical. Should an HTML report be created at the end of the
 #'  analysis?
 #' @param speed.error If a fish moves at a speed equal or greater than 
@@ -86,7 +88,7 @@
 explore <- function(path = NULL, tz, max.interval = 60, minimum.detections = 2, start.time = NULL, stop.time = NULL, 
   speed.method = c("last to first", "first to first"), speed.warning = NULL, speed.error = NULL, 
   jump.warning = 2, jump.error = 3, inactive.warning = NULL, inactive.error = NULL, 
-  exclude.tags = NULL, override = NULL, report = TRUE, GUI = c("needed", "always", "never"), debug = FALSE) {
+  exclude.tags = NULL, override = NULL, report = TRUE, GUI = c("needed", "always", "never"), debug = FALSE, print.releases = TRUE) {
 
 # check arguments quality
   my.home <- getwd()
@@ -169,6 +171,9 @@ explore <- function(path = NULL, tz, max.interval = 60, minimum.detections = 2, 
 
   if (!is.logical(debug))
     stop("'debug' must be logical.\n", call. = FALSE)
+
+  if (!is.logical(print.releases))
+    stop("'print.releases' must be logical.\n", call. = FALSE)
 # ------------------------
 
 # Prepare clean-up before function ends
@@ -379,7 +384,7 @@ detections.list <- study.data$detections.list
   if (report) {
     appendTo(c("Screen", "Report"), "M: Producing the report.")
     biometric.fragment <- printBiometrics(bio = bio)
-    printDot(dot = dot, sections = NULL, spatial = spatial)
+    printDot(dot = dot, sections = NULL, spatial = spatial, print.releases = print.releases)
     individual.plots <- printIndividuals(detections.list = detections, spatial = spatial, 
       tz = tz, movements = movements, valid.movements = valid.movements, bio = bio)
     circular.plots <- printCircular(times = convertTimesToCircular(times), bio = bio)

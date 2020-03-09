@@ -82,7 +82,7 @@ residency <- function(path = NULL, tz, sections, success.arrays = NULL, max.inte
   start.time = NULL, stop.time = NULL, speed.method = c("last to first", "first to first"), 
   speed.warning = NULL, speed.error = NULL, jump.warning = 2, jump.error = 3, 
   inactive.warning = NULL, inactive.error = NULL, exclude.tags = NULL, override = NULL, report = TRUE,
-  section.minimum = 2, replicates = NULL, GUI = c("needed", "always", "never"), debug = FALSE) {
+  section.minimum = 2, replicates = NULL, GUI = c("needed", "always", "never"), debug = FALSE, print.releases = TRUE) {
 # check argument quality
   my.home <- getwd()
   if (!is.null(path) && !is.character(path))
@@ -174,6 +174,9 @@ residency <- function(path = NULL, tz, sections, success.arrays = NULL, max.inte
     stop("'debug' must be logical.\n", call. = FALSE)
 
   checkSectionsUnique(sections = sections)
+
+  if (!is.logical(print.releases))
+    stop("'print.releases' must be logical.\n", call. = FALSE)
 # ------------------------
 
 # Prepare clean-up before function ends
@@ -474,7 +477,7 @@ residency <- function(path = NULL, tz, sections, success.arrays = NULL, max.inte
   if (report) {
     appendTo(c("Screen", "Report"), "M: Producing the report.")
     biometric.fragment <- printBiometrics(bio = bio)
-    printDot(dot = dot, sections = sections, spatial = spatial)
+    printDot(dot = dot, sections = sections, spatial = spatial, print.releases = print.releases)
     printSectionTimes(section.times = section.times, bio = bio, detections = valid.detections)
     printGlobalRatios(global.ratios = global.ratios, daily.ratios = daily.ratios, sections = sections)
     individual.detection.plots <- printIndividuals(detections.list = detections, bio = bio, 

@@ -133,6 +133,9 @@ test_that("explore stops when any argument does not make sense", {
 
 	expect_error(explore(tz = "Europe/Copenhagen", GUI = "never", debug = "a"),
 		"'debug' must be logical.", fixed = TRUE)
+
+	expect_error(explore(tz = "Europe/Copenhagen", GUI = "never", print.progression = "a"),
+		"'print.progression' must be logical.", fixed = TRUE)
 })
 
 test_that("explore results contains all the expected elements.", {

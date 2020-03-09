@@ -13,6 +13,7 @@ gg_colour_hue <- function(n) {
 
 #' Print progression diagram
 #'
+#' @inheritParams explore
 #' @inheritParams migration
 #' @inheritParams createStandards
 #' @param dot a dot data frame
@@ -21,7 +22,7 @@ gg_colour_hue <- function(n) {
 #'  
 #' @keywords internal
 #' 
-printProgression <- function(dot, sections, overall.CJS, spatial, status.df) {
+printProgression <- function(dot, sections, overall.CJS, spatial, status.df, print.releases) {
   cbPalette <- c("#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7", "#999999")
   names(cbPalette) <- c("Orange", "Blue", "Green", "Yellow", "Darkblue", "Darkorange", "Pink", "Grey")
 
@@ -52,28 +53,31 @@ printProgression <- function(dot, sections, overall.CJS, spatial, status.df) {
   }
 
  # Release nodes
-  release_nodes <- spatial$release.sites[, c("Standard.name", "Array")]
-  release_nodes$n <- 0
-  n <- table(status.df$Release.site)
-  link <- match(names(n), release_nodes$Standard.name)
-  release_nodes$n[link] <- n
-  release_nodes$label <- apply(release_nodes, 1, function(s) {
-    paste0(s[1], "\\nn = ", s[3])
-  })
-  if (any(link <- grepl( "|", release_nodes$Array, fixed = TRUE))) {
-    expanded <- NULL
-    for(i in which(link)) {
-      aux <- data.frame(Standard.name = release_nodes$Standard.name[i],
-        Array = unlist(strsplit(release_nodes$Array[i], "|", fixed = TRUE)),
-        n = release_nodes$n[i],
-        label = release_nodes$label[i])
-      expanded <- rbind(expanded, aux)
+  if (print.releases) {
+    release_nodes <- spatial$release.sites[, c("Standard.name", "Array")]
+    release_nodes$n <- 0
+    n <- table(status.df$Release.site)
+    link <- match(names(n), release_nodes$Standard.name)
+    release_nodes$n[link] <- n
+    release_nodes$label <- apply(release_nodes, 1, function(s) {
+      paste0(s[1], "\\nn = ", s[3])
+    })
+    if (any(link <- grepl( "|", release_nodes$Array, fixed = TRUE))) {
+      expanded <- NULL
+      for(i in which(link)) {
+        aux <- data.frame(Standard.name = release_nodes$Standard.name[i],
+          Array = unlist(strsplit(release_nodes$Array[i], "|", fixed = TRUE)),
+          n = release_nodes$n[i],
+          label = release_nodes$label[i])
+        expanded <- rbind(expanded, aux)
+      }
+      release_nodes <- rbind(release_nodes[-which(link), ], expanded)
+      rm(expanded)
     }
-    release_nodes <- rbind(release_nodes[-which(link), ], expanded)
-    rm(expanded)
+    release_nodes$id <- nrow(diagram_nodes) + as.numeric(as.factor(release_nodes$label))
+  } else {
+    release_nodes <- NULL
   }
-  release_nodes$id <- nrow(diagram_nodes) + as.numeric(as.factor(release_nodes$label))
-  # Release nodes
 
   # node string
   node_list <- split(diagram_nodes, diagram_nodes$fillcolor)
@@ -82,9 +86,13 @@ printProgression <- function(dot, sections, overall.CJS, spatial, status.df) {
     s <- paste0(s, paste0(n$id, " [label = '", n$label, "']", collapse = "\n"), "\n")
   })), collapse = "\n")
 
-  node_fragment <- paste0(node_aux, "\n", 
-    paste0("node [fillcolor = '#e0f4ff'\nfontcolor = '#727475'\nstyle = 'rounded, filled'\nshape = box]\n", 
-    paste0(release_nodes$id, " [label = 'R.S.: ", release_nodes$label, "']", collapse = "\n"), "\n"))
+  if (print.releases) {
+    node_fragment <- paste0(node_aux, "\n", 
+      paste0("node [fillcolor = '#e0f4ff'\nfontcolor = '#727475'\nstyle = 'rounded, filled'\nshape = box]\n", 
+      paste0(release_nodes$id, " [label = 'R.S.: ", release_nodes$label, "']", collapse = "\n"), "\n"))
+  } else {
+    node_fragment <- node_aux
+  }
 
   # prepare edge data frame
   if (nrow(dot) == 1)
@@ -98,12 +106,16 @@ printProgression <- function(dot, sections, overall.CJS, spatial, status.df) {
   colnames(diagram_edges) <- c("from", "to", "type")
 
   # Release edges
-  release_edges <- data.frame(from = release_nodes$id,
-    to = diagram_nodes$id[match(release_nodes$Array, diagram_nodes$original.label)],
-    type = rep("[arrowtype='normal']", nrow(release_nodes)))
+  if (print.releases) {
+    release_edges <- data.frame(from = release_nodes$id,
+      to = diagram_nodes$id[match(release_nodes$Array, diagram_nodes$original.label)],
+      type = rep("[arrowtype='normal']", nrow(release_nodes)))
 
-  # edge string
-  combined_edges <- rbind(diagram_edges, release_edges)
+    # edge string
+    combined_edges <- rbind(diagram_edges, release_edges)
+  } else {
+    combined_edges <- diagram_edges
+  }
 
   edge_list <- split(combined_edges, combined_edges$type)
 
@@ -135,12 +147,13 @@ printProgression <- function(dot, sections, overall.CJS, spatial, status.df) {
 #' Print DOT diagram
 #' 
 #' @param dot a dot data frame
+#' @inheritParams explore
 #' @inheritParams migration
 #' @inheritParams setSpatialStandards
 #' 
 #' @keywords internal
 #' 
-printDot <- function(dot, sections = NULL, spatial) {
+printDot <- function(dot, sections = NULL, spatial, print.releases) {
 # requires:
 # DiagrammeR
 # DiagrammeRsvg
@@ -163,19 +176,23 @@ printDot <- function(dot, sections = NULL, spatial) {
   }
 
  # Release nodes
-  release_nodes <- spatial$release.sites[, c("Standard.name", "Array")]
-  if (any(link <- grepl( "|", release_nodes$Array, fixed = TRUE))) {
-    expanded <- NULL
-    for(i in which(link)) {
-      aux <- data.frame(Standard.name = release_nodes$Standard.name[i],
-        Array = unlist(strsplit(release_nodes$Array[i], "|", fixed = TRUE)))
-      expanded <- rbind(expanded, aux)
+  if (print.releases) {
+    release_nodes <- spatial$release.sites[, c("Standard.name", "Array")]
+    if (any(link <- grepl( "|", release_nodes$Array, fixed = TRUE))) {
+      expanded <- NULL
+      for(i in which(link)) {
+        aux <- data.frame(Standard.name = release_nodes$Standard.name[i],
+          Array = unlist(strsplit(release_nodes$Array[i], "|", fixed = TRUE)))
+        expanded <- rbind(expanded, aux)
+      }
+      release_nodes <- rbind(release_nodes[-which(link), ], expanded)
+      rm(expanded)
     }
-    release_nodes <- rbind(release_nodes[-which(link), ], expanded)
-    rm(expanded)
+    colnames(release_nodes)[1] <- "label"
+    release_nodes$id <- nrow(diagram_nodes) + as.numeric(as.factor(release_nodes$label))
+  } else {
+    release_nodes <- NULL
   }
-  colnames(release_nodes)[1] <- "label"
-  release_nodes$id <- nrow(diagram_nodes) + as.numeric(as.factor(release_nodes$label))
 
   # node string
   node_list <- split(diagram_nodes, diagram_nodes$fillcolor)
@@ -184,9 +201,13 @@ printDot <- function(dot, sections = NULL, spatial) {
     s <- paste0(s, paste0(n$id, " [label = '", n$label, "']", collapse = "\n"), "\n")
   })), collapse = "\n")
 
-  node_fragment <- paste0(node_aux, "\n", 
-    paste0("node [fillcolor = '#e0f4ff'\nfontcolor = '#727475'\nstyle = 'rounded, filled'\nshape = box]\n", 
-    paste0(release_nodes$id, " [label = 'R.S.: ", release_nodes$label, "']", collapse = "\n"), "\n"))
+  if (print.releases) {
+    node_fragment <- paste0(node_aux, "\n", 
+      paste0("node [fillcolor = '#e0f4ff'\nfontcolor = '#727475'\nstyle = 'rounded, filled'\nshape = box]\n", 
+      paste0(release_nodes$id, " [label = 'R.S.: ", release_nodes$label, "']", collapse = "\n"), "\n"))
+  } else {
+    node_fragment <- node_aux
+  }
 
   # prepare edge data frame
   if (nrow(dot) == 1)
@@ -200,12 +221,16 @@ printDot <- function(dot, sections = NULL, spatial) {
   colnames(diagram_edges) <- c("from", "to", "type")
 
   # Release edges
-  release_edges <- data.frame(from = release_nodes$id,
-    to = diagram_nodes$id[match(release_nodes$Array, diagram_nodes$label)],
-    type = rep("[arrowtype='normal']", nrow(release_nodes)))
+  if (print.releases) {  
+    release_edges <- data.frame(from = release_nodes$id,
+      to = diagram_nodes$id[match(release_nodes$Array, diagram_nodes$label)],
+      type = rep("[arrowtype='normal']", nrow(release_nodes)))
 
-  # edge string
-  combined_edges <- rbind(diagram_edges, release_edges)
+    # edge string
+    combined_edges <- rbind(diagram_edges, release_edges)
+  } else {
+    combined_edges <- diagram_edges
+  }
 
   edge_list <- split(combined_edges, combined_edges$type)
 

@@ -187,6 +187,9 @@ test_that("migration stops when any argument does not make sense", {
 
 	expect_error(migration(tz = 'Europe/Copenhagen', sections = c("River", "Ri", "Fjord", "ord", "Sea")),
 		"Sections 'Ri', 'ord' are contained within other section names. Sections must be unique and independent.\n       Please rename your sections and arrays so that section names are not contained within each other.", fixed = TRUE)
+
+	expect_error(migration(tz = 'Europe/Copenhagen', sections = c("River", "Fjord", "Sea"), print.releases = "a", GUI = "never"),
+		"'print.releases' must be logical.", fixed = TRUE)
 })
 
 test_that("migration results contains all the expected elements.", {

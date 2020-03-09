@@ -9,6 +9,7 @@ Fixes:
 
 Enhancements:
   * Perform early quality checks on the content of 'sections' before advancing with migration and residency analysis.
+  * Allow user to hide release sites from the study area diagrams.
 
 ## actel 0.1.3
 
