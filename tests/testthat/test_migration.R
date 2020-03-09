@@ -193,7 +193,8 @@ test_that("migration stops when any argument does not make sense", {
 })
 
 test_that("migration results contains all the expected elements.", {
-	output <- suppressWarnings(migration(tz = 'Europe/Copenhagen', sections = c("River", "Fjord", "Sea"), report = TRUE, GUI = "never"))
+	output <- suppressWarnings(migration(tz = 'Europe/Copenhagen', sections = c("River", "Fjord", "Sea"), 
+		report = TRUE, GUI = "never", print.releases = FALSE))
 	
 	file.remove("detections/actel.detections.RData")
 	
