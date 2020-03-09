@@ -179,6 +179,8 @@ migration <- function(path = NULL, tz, sections, success.arrays = NULL, max.inte
 
   if (!is.logical(debug))
     stop("'debug' must be logical.\n", call. = FALSE)
+
+  checkSectionsUnique(sections = sections)
 # ------------------------
 
 # Prepare clean-up before function ends

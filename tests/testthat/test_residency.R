@@ -158,6 +158,12 @@ test_that("residency stops when any argument does not make sense", {
 	expect_error(suppressWarnings(residency(tz = 'Europe/Copenhagen', sections = c("River", "Fjord", "Sea"), report = TRUE, GUI = "never", replicates = list(test = "a"))),
 		"Some of the array names listed in the 'replicates' argument do not match the study's arrays.", fixed = TRUE)
 	file.remove("detections/actel.detections.RData")
+
+	expect_error(residency(tz = 'Europe/Copenhagen', sections = c("River", "Ri", "Fjord", "Sea")),
+		"Section 'Ri' is contained within other section names. Sections must be unique and independent.\n       Please rename your sections and arrays so that section names are not contained within each other.", fixed = TRUE)
+
+	expect_error(residency(tz = 'Europe/Copenhagen', sections = c("River", "Ri", "Fjord", "ord", "Sea")),
+		"Sections 'Ri', 'ord' are contained within other section names. Sections must be unique and independent.\n       Please rename your sections and arrays so that section names are not contained within each other.", fixed = TRUE)
 })
 
 

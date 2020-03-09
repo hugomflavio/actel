@@ -7,6 +7,9 @@ Find out the main highlights of each update.
 Fixes:
   * Sort deployment rows by start time. Avoids false triggering of redeployment-before-retrieval errors.
 
+Enhancements:
+  * Perform early quality checks on the content of 'sections' before advancing with migration and residency analysis.
+
 ## actel 0.1.3
 
 Fixes:

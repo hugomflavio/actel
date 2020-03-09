@@ -23,6 +23,24 @@
 #' 
 NULL
 
+#' Check that section names are not duplicated and that sections are not contained 
+#' within other section names (e.g. section "N" and section "NW").
+#' 
+#' @inheritParams migration
+#' 
+#' @keywords internal
+#' 
+checkSectionsUnique <- function(sections) {
+  if (any(table(sections) > 1))
+    stop("Some section names are duplicated. Please include each section only once in the 'sections' argument.\n", call. = FALSE)
+  if (any(link <- sapply(sections, function(i) length(grep(i, sections))) > 1))
+    stop(paste0(
+      ifelse(sum(link) == 1, "Section '", "Sections '"), 
+      paste(sections[link], collapse = "', '"), 
+      ifelse(sum(link) == 1, "' is", "' are"), 
+      " contained within other section names. Sections must be unique and independent.\n       Please rename your sections and arrays so that section names are not contained within each other.\n"), call. = FALSE)
+}
+
 #' Handler for table interaction events
 #' 
 #' @inheritParams check_args
