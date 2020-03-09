@@ -19,14 +19,14 @@ test_that("loadDot stops if contents of file do not match spatial", {
 	cat("River1--River2--River3--River4--River5--River6\n")
 	sink()
 	expect_error(loadDot(input = "spatial.dot", spatial = example.spatial, disregard.parallels = TRUE),
-		"Not all the arrays listed in the spatial.csv file are present in the spatial.dot.", fixed = TRUE)
+		"Not all the arrays listed in the spatial.csv file are present in the spatial.dot.\nMissing arrays: River0, Fjord1, Fjord2, Sea", fixed = TRUE)
 	file.remove("spatial.dot")
 
 	sink("spatial.txt")
 	cat("River1--River2--River3--River4--River5--River6\n")
 	sink()
 	expect_error(loadDot(input = "spatial.txt", spatial = example.spatial, disregard.parallels = TRUE),
-		"Not all the arrays listed in the spatial.csv file are present in the spatial.txt.", fixed = TRUE)
+		"Not all the arrays listed in the spatial.csv file are present in the spatial.txt.\nMissing arrays: River0, Fjord1, Fjord2, Sea", fixed = TRUE)
 	file.remove("spatial.txt")
 })
 

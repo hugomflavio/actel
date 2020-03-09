@@ -119,12 +119,12 @@ loadDot <- function(string = NULL, input = NULL, spatial, sections = NULL, disre
   }
   mat <- dotMatrix(input = dot)
   unique.arrays <- unique(unlist(sapply(spatial$Array, function(x) unlist(strsplit(x, "|", fixed = TRUE)))))
-  if (any(is.na(match(unique.arrays, colnames(mat))))) {
+  if (any(link <- is.na(match(unique.arrays, colnames(mat))))) {
     emergencyBreak()
     if (file.exists("spatial.txt"))
-      stop("Not all the arrays listed in the spatial.csv file are present in the spatial.txt.\n", call. = FALSE)
+      stop(paste0("Not all the arrays listed in the spatial.csv file are present in the spatial.txt.\nMissing arrays: ", paste(unique.arrays[link], collapse = ", "), "\n"), call. = FALSE)
     if (file.exists("spatial.dot"))
-      stop("Not all the arrays listed in the spatial.csv file are present in the spatial.dot.\n", call. = FALSE)
+      stop(paste0("Not all the arrays listed in the spatial.csv file are present in the spatial.dot.\nMissing arrays: ", paste(unique.arrays[link], collapse = ", "), "\n"), call. = FALSE)
     else
       stop("Something went wrong when compiling the dot file. Try restarting R and trying again. If the problem persists, contact the developer.\n", call. = FALSE)
   }
