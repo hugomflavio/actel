@@ -21,6 +21,7 @@ Imports:
     fasttime,
     fs,
     ggplot2,
+    svglite,
     graphics,
     knitr,
     readr,
