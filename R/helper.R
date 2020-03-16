@@ -734,18 +734,25 @@ distancesMatrix <- function(t.layer = "transition.layer.RData", starters = NULL,
   if (tools::file_ext(starters) != "csv" | tools::file_ext(targets) != "csv")
     stop("One of the point files (starters or targets) does not appear to be written in csv format. Please make sure to include the '.csv' extension in the file name.\n", call. = FALSE)
 
-  starters.df <- read.csv(starters) 
   
   if (actel) {
     message("M: Creating actel-compatible distances matrix."); flush.console()
     id.col <- "Standard.name"
-    starters.df$Standard.name <- as.character(starters.df$Station.name)
-    link <- starters.df$Type == "Hydrophone"
-    starters.df$Standard.name[link] <- paste0("St.", seq_len(sum(starters.df$Type == "Hydrophone")))
+    starters.df <- loadSpatial()
     targets.df <- starters.df
   } else {
+    starters.df <- read.csv(starters) 
     targets.df <- read.csv(targets)
   }
+
+  if (is.na(match(coord.x, colnames(starters.df))))
+    stop(paste0("Could not find a column '", coord.x, "' in the file '", starters,"'."), call. = FALSE)
+  if (is.na(match(coord.y, colnames(starters.df))))
+    stop(paste0("Could not find a column '", coord.y, "' in the file '", starters,"'."), call. = FALSE)
+  if (is.na(match(coord.x, colnames(targets.df))))
+    stop(paste0("Could not find a column '", coord.x, "' in the file '", targets,"'."), call. = FALSE)
+  if (is.na(match(coord.y, colnames(targets.df))))
+    stop(paste0("Could not find a column '", coord.y, "' in the file '", targets,"'."), call. = FALSE)
 
   colnames(starters.df)[colnames(starters.df) == coord.x] <- "longitude"
   colnames(starters.df)[colnames(starters.df) == coord.y] <- "latitude"

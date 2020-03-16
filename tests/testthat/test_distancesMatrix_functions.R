@@ -192,6 +192,25 @@ test_that("distancesMatrix handles bad data correctly", {
 	expect_warning(distancesMatrix(t.layer = "transition.layer.RData", EPSGcode = 32632, 
   		coord.x = "x.32632", coord.y = "y.32632", starters = "spatial.csv", id.col = "Array", actel = FALSE),
 	"The 'Array' column in the 'spatial.csv' file contains duplicated values; skipping column naming.", fixed = TRUE)
+
+	colnames(xspatial)[7] <- "test"
+	write.csv(xspatial, "spatial2.csv", row.names = FALSE)
+
+	expect_error(distancesMatrix(t.layer = "transition.layer.RData", EPSGcode = 32632, 
+  		coord.x = "test", coord.y = "y.32632", starters = "spatial.csv", targets = "spatial2.csv", actel = FALSE),
+	"Could not find a column 'test' in the file 'spatial.csv'.", fixed = TRUE)
+
+	expect_error(distancesMatrix(t.layer = "transition.layer.RData", EPSGcode = 32632, 
+  		coord.x = "x.32632", coord.y = "test", starters = "spatial.csv", targets = "spatial2.csv", actel = FALSE),
+	"Could not find a column 'test' in the file 'spatial.csv'.", fixed = TRUE)
+
+	expect_error(distancesMatrix(t.layer = "transition.layer.RData", EPSGcode = 32632, 
+  		coord.x = "y.32632", coord.y = "x.32632", starters = "spatial.csv", targets = "spatial2.csv", actel = FALSE),
+	"Could not find a column 'y.32632' in the file 'spatial2.csv'.", fixed = TRUE)
+
+	expect_error(distancesMatrix(t.layer = "transition.layer.RData", EPSGcode = 32632, 
+  		coord.x = "x.32632", coord.y = "y.32632", starters = "spatial.csv", targets = "spatial2.csv", actel = FALSE),
+	"Could not find a column 'y.32632' in the file 'spatial2.csv'.", fixed = TRUE)
 })
 
 
@@ -275,4 +294,5 @@ test_that("completeMatrix works as expected", {
 file.remove(list.files(pattern = "*txt$"))
 file.remove("distances.csv")
 file.remove("spatial.csv")
+file.remove("spatial2.csv")
 rm(list = ls())

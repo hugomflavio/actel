@@ -590,7 +590,8 @@ loadSpatial <- function(file = "spatial.csv", report = FALSE){
   if (file.exists(file))
     input <- as.data.frame(data.table::fread(file))
   else {
-    emergencyBreak()
+    if (report)
+      emergencyBreak()
     stop("Could not find a '", file, "' file in the working directory.\n", call. = FALSE)
   }
   if (any(link <- duplicated(colnames(input))))
@@ -598,7 +599,8 @@ loadSpatial <- function(file = "spatial.csv", report = FALSE){
   if (!is.na(link <- match("Station.Name", colnames(input))))
     colnames(input)[link] <- "Station.name"
   if (!any(grepl("Station.name", colnames(input)))) {
-    emergencyBreak()
+    if (report)
+      emergencyBreak()
     stop("The ", file, " file must contain a 'Station.name' column.\n", call. = FALSE)
   } else {
     if (any(link <- table(input$Station.name) > 1)) {
@@ -615,7 +617,10 @@ loadSpatial <- function(file = "spatial.csv", report = FALSE){
   if (any(is.na(input$Array)))
     stop("Some rows do not contain 'Array' information in the ",file, " file. Please double-check the input files.")
   if (any(grepl(" ", input$Array))) {
-    appendTo("Screen", "M: Replacing spaces in array names to prevent function failure.")
+    if (report)
+      appendTo("Screen", "M: Replacing spaces in array names to prevent function failure.")
+    else
+      message("M: Replacing spaces in array names to prevent function failure.")
     input$Array <- gsub(" ", "_", input$Array)
   }
   if (!any(grepl("Type", colnames(input)))) {

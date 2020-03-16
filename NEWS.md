@@ -12,6 +12,7 @@ Enhancements:
   * Allow user to hide release sites from the study area diagrams.
   * Improve spatial.csv vs spatial.txt mismatch error messaging by showing missing arrays.
   * Improve colour and caption handling on individual residency plots for study areas with many sections.
+  * Improve handling of spatial file in distancesMatrix (including new fail-safes).
 
 ## actel 0.1.3
 
