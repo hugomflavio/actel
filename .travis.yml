@@ -25,7 +25,7 @@ script:
 env:
   global:
   # don't treat missing suggested packages as error
-  - _R_CHECK_FORCE_SUGGESTS_=true
+  - _R_CHECK_FORCE_SUGGESTS_=false
 
 after_success:
   - Rscript -e 'covr::codecov()'
