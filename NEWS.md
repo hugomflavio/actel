@@ -7,6 +7,7 @@ Find out the main highlights of each update.
 Fixes:
   * Sort deployment rows by start time. Avoids false triggering of redeployment-before-retrieval errors.
   * Prevent failure to identify receivers if the model-serial combination has two or more "-" characters.
+  * Prevent residence crash if no fish entered a given section.
 
 Enhancements:
   * Perform early quality checks on the content of 'sections' before advancing with migration and residency analysis.

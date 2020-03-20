@@ -376,9 +376,9 @@ residency <- function(path = NULL, tz, sections, success.arrays = NULL, max.inte
   names(section.movements) <- names(valid.movements)
 
   # Grab summary information
-  res.df <- assembleResidency(secmoves = section.movements, movements = movements, sections = sections)
+  appendTo(c("Screen", "Report"), "M: Compiling residency objects.")
   
-  appendTo(c("Screen", "Report"), "M: Timetable successfully filled. Fitting in the remaining variables.")
+  res.df <- assembleResidency(secmoves = section.movements, movements = movements, sections = sections)
   
   status.df <- res_assembleOutput(res.df = res.df, bio = bio, spatial = spatial, 
                                   sections = sections, tz = tz)
@@ -923,69 +923,71 @@ assembleResidency <- function(secmoves, movements, sections) {
   colnames(res.df) <- recipient
   rm(recipient)
   rownames(res.df) <- names(secmoves)
-	  
+    
   capture <- lapply(names(secmoves), function(fish) {
     # cat(fish, "\n")
-  	aux <- split(secmoves[[fish]], secmoves[[fish]]$Section)
-  	recipient <- lapply(seq_along(aux), function(i) {
+    aux <- split(secmoves[[fish]], secmoves[[fish]]$Section)
+    recipient <- lapply(seq_along(aux), function(i) {
       # cat(i, "\n")
-  		recipient <- rep(NA, ncol(res.df))
-  		names(recipient) <- colnames(res.df)
-  		recipient <- t(as.data.frame(recipient))
-  		total.time <- apply(aux[[i]][, c("First.time", "Last.time")], 1, function(x) difftime(x[2], x[1], units = "secs"))
-  		recipient[1, paste0("Total.time.", names(aux)[i])] <- sum(total.time)
-  		recipient[1, paste0("Times.entered.", names(aux)[i])] <- nrow(aux[[i]])
-  		entry.time <- mean(circular::circular(decimalTime(substr(aux[[i]]$First.time, start = 12, stop = 20)), units = "hours", template = "clock24"))
-  		if (entry.time < 0)
-  			entry.time <- 24 + entry.time
-  		recipient[1, paste0("Average.entry.", names(aux)[i])] <- minuteTime(entry.time, format = "h", seconds = FALSE)
-  		leave.time <- mean(circular::circular(decimalTime(substr(aux[[i]]$Last.time, start = 12, stop = 20)), units = "hours", template = "clock24"))
-  		recipient[1, paste0("Average.time.", names(aux)[i])] <- mean(total.time)
-  		if (leave.time < 0)
-  			leave.time <- 24 + leave.time
-  		recipient[1, paste0("Average.departure.", names(aux)[i])] <- minuteTime(leave.time, format = "h", seconds = FALSE)
-  		return(recipient)
-  	})
-  	recipient <- as.data.frame(combine(recipient), stringsAsFactors = FALSE)
+      recipient <- rep(NA, ncol(res.df))
+      names(recipient) <- colnames(res.df)
+      recipient <- t(as.data.frame(recipient))
+      total.time <- apply(aux[[i]][, c("First.time", "Last.time")], 1, function(x) difftime(x[2], x[1], units = "secs"))
+      recipient[1, paste0("Total.time.", names(aux)[i])] <- sum(total.time)
+      recipient[1, paste0("Times.entered.", names(aux)[i])] <- nrow(aux[[i]])
+      entry.time <- mean(circular::circular(decimalTime(substr(aux[[i]]$First.time, start = 12, stop = 20)), units = "hours", template = "clock24"))
+      if (entry.time < 0)
+        entry.time <- 24 + entry.time
+      recipient[1, paste0("Average.entry.", names(aux)[i])] <- minuteTime(entry.time, format = "h", seconds = FALSE)
+      leave.time <- mean(circular::circular(decimalTime(substr(aux[[i]]$Last.time, start = 12, stop = 20)), units = "hours", template = "clock24"))
+      recipient[1, paste0("Average.time.", names(aux)[i])] <- mean(total.time)
+      if (leave.time < 0)
+        leave.time <- 24 + leave.time
+      recipient[1, paste0("Average.departure.", names(aux)[i])] <- minuteTime(leave.time, format = "h", seconds = FALSE)
+      return(recipient)
+    })
+    recipient <- as.data.frame(combine(recipient), stringsAsFactors = FALSE)
     # convert Total.times to numeric and replace NAs
     the.cols <- which(grepl("Times.entered", colnames(recipient)))
     recipient[, the.cols] <- as.numeric(recipient[, the.cols])
     recipient[, the.cols[which(is.na(recipient[, the.cols]))]] <- 0
     # --
-  	recipient$Very.last.array <- secmoves[[fish]][.N, Last.array]
-  	recipient$Very.last.time <- as.character(secmoves[[fish]][.N, Last.time])
-  	recipient$Status <- paste0("Disap. in ", secmoves[[fish]][.N, Section])
-  	recipient$Valid.detections <- sum(secmoves[[fish]]$Detections)
-  	recipient$Valid.events <- sum(movements[[fish]]$Valid)
-  	if (any(!movements[[fish]]$Valid)) { 
-  		recipient$Invalid.detections <- sum(movements[[fish]][!(Valid)]$Detections)
-  		recipient$Invalid.events <- sum(!movements[[fish]]$Valid)
-  	} else {
-  		recipient$Invalid.detections <- 0
-  		recipient$Invalid.events <- 0
-  	}
-  	recipient$P.type <- attributes(secmoves[[fish]])$p.type
-  	res.df[fish, ] <<- recipient
+    recipient$Very.last.array <- secmoves[[fish]][.N, Last.array]
+    recipient$Very.last.time <- as.character(secmoves[[fish]][.N, Last.time])
+    recipient$Status <- paste0("Disap. in ", secmoves[[fish]][.N, Section])
+    recipient$Valid.detections <- sum(secmoves[[fish]]$Detections)
+    recipient$Valid.events <- sum(movements[[fish]]$Valid)
+    if (any(!movements[[fish]]$Valid)) { 
+      recipient$Invalid.detections <- sum(movements[[fish]][!(Valid)]$Detections)
+      recipient$Invalid.events <- sum(!movements[[fish]]$Valid)
+    } else {
+      recipient$Invalid.detections <- 0
+      recipient$Invalid.events <- 0
+    }
+    recipient$P.type <- attributes(secmoves[[fish]])$p.type
+    res.df[fish, ] <<- recipient
   })
-	# Convert time data
-	for (section in sections) {
-		for (the.col in c("Average.time.", "Total.time.")) {
+  # Convert time data
+  for (section in sections) {
+    for (the.col in c("Average.time.", "Total.time.")) {
       # convert to numeric
       res.df[, paste0(the.col, section)] <- as.numeric(res.df[, paste0(the.col, section)])
       # grab the mean for later use
       aux <- mean(res.df[, paste0(the.col, section)], na.rm = TRUE)
-  		# convert to difftime
+      # convert to difftime
       res.df[, paste0(the.col, section)] <- as.difftime(res.df[, paste0(the.col, section)], units = "secs")
-  		units(res.df[, paste0(the.col, section)]) <- "secs"
-  		if (aux > 86400)
-  			units(res.df[, paste0(the.col, section)]) <- "days"
-  		if (aux <= 86400 & aux > 3600)
-  			units(res.df[, paste0(the.col, section)]) <- "hours"
-  		if (aux <= 3600)
-  			units(res.df[, paste0(the.col, section)]) <- "mins"
-  		res.df[, paste0(the.col, section)] <- round(res.df[, paste0(the.col, section)], 3)
-  	}
-	}
+      units(res.df[, paste0(the.col, section)]) <- "secs"
+      if (!is.nan(aux)) {
+        if (aux > 86400)
+          units(res.df[, paste0(the.col, section)]) <- "days"
+        if (aux <= 86400 & aux > 3600)
+          units(res.df[, paste0(the.col, section)]) <- "hours"
+        if (aux <= 3600)
+          units(res.df[, paste0(the.col, section)]) <- "mins"
+      }
+      res.df[, paste0(the.col, section)] <- round(res.df[, paste0(the.col, section)], 3)
+    }
+  }
   res.df$Transmitter <- row.names(res.df)
   return(res.df)
 }
@@ -1014,12 +1016,12 @@ res_assembleOutput <- function(res.df, bio, spatial, sections, tz) {
   status.df$Very.last.array[is.na(status.df$Very.last.array)] <- "Release"
   status.df$Very.last.array <- factor(status.df$Very.last.array, levels = c("Release", levels(spatial$stations$Array)))
   status.df$P.type[is.na(status.df$P.type)] <- "Skipped"
-	status.df$Valid.detections[is.na(status.df$Valid.detections)] <- 0
-	status.df$Invalid.detections[is.na(status.df$Invalid.detections)] <- 0
-	status.df$Valid.events[is.na(status.df$Valid.events)] <- 0
-	status.df$Invalid.events[is.na(status.df$Invalid.events)] <- 0
+  status.df$Valid.detections[is.na(status.df$Valid.detections)] <- 0
+  status.df$Invalid.detections[is.na(status.df$Invalid.detections)] <- 0
+  status.df$Valid.events[is.na(status.df$Valid.events)] <- 0
+  status.df$Invalid.events[is.na(status.df$Invalid.events)] <- 0
 
-	# Convert time stamps
+  # Convert time stamps
   status.df$Release.date <- as.POSIXct(status.df$Release.date, tz = tz)
   status.df$Very.last.time <- as.POSIXct(status.df$Very.last.time, tz = tz)
   
