@@ -948,10 +948,9 @@ processVemcoFile <- function(input) {
   appendTo("Debug", "Running processVemcoFile.")
   appendTo("Debug", "Processing data inside the file...")
   transmitter_aux <- strsplit(input$Transmitter, "-", fixed = TRUE)
-  receiver_aux <- strsplit(input$Receiver, "-", fixed = TRUE) # split model and serial
   input[, "CodeSpace"] <- unlist(lapply(transmitter_aux, function(x) paste(x[1:2], collapse = "-"))) # Rejoin code space
   input[, "Signal"] <- unlist(lapply(transmitter_aux, function(x) x[3])) # extract only signal
-  input[, "Receiver"] <- unlist(lapply(receiver_aux, function(x) x[2])) # extract only the serial
+  input[, "Receiver"] <- sapply(input$Receiver, function(x) tail(unlist(strsplit(x, "-")), 1)) # extract only the serial
   appendTo("Debug", "Done!")
   colnames(input)[1] <- c("Timestamp")
   colnames(input) <- gsub(" ", ".", colnames(input))
