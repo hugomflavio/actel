@@ -1,5 +1,5 @@
 test_that("loadSpatial stops if file is missing", {
-	expect_error(loadSpatial(file = "test", report = TRUE, 
+	expect_error(loadSpatial(file = "test", report = TRUE), 
 		"Could not find a 'test' file in the working directory.", fixed = TRUE)
 })
 
@@ -46,6 +46,8 @@ test_that("loadSpatial responds correctly if data is missing or badly formatted"
 	write.csv(spatial, "spatial.csv", row.names = FALSE)
 	expect_message(loadSpatial(report = TRUE),
 		"M: Replacing spaces in array names to prevent function failure.", fixed = TRUE)
+	
+	write.csv(spatial, "spatial.csv", row.names = FALSE)
 	expect_message(output <- loadSpatial(),
 		"M: Replacing spaces in array names to prevent function failure.", fixed = TRUE)
 	expect_equal(output$Array[1], "River_0_a")
