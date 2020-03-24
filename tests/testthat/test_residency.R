@@ -293,7 +293,9 @@ test_that("residency can handle multi-sensor data", {
 	xbio$Signal <- as.character(xbio$Signal)
 	xbio$Signal[1] <- "4453|4454"
 	write.csv(xbio, "biometrics.csv", row.names = FALSE)
-	output <- suppressWarnings(residency(sections = c("River", "Fjord", "Sea"), tz = 'Europe/Copenhagen', GUI = "never"))
+	sink("temp.txt")
+		output <- suppressWarnings(residency(sections = c("River", "Fjord", "Sea"), tz = 'Europe/Copenhagen', GUI = "never"))
+	sink()
 	file.remove("detections/actel.detections.RData")
 })
 
