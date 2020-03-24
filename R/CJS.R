@@ -270,7 +270,8 @@ assembleMatrices <- function(spatial, movements, status.df, arrays, paths, dotma
   output <- lapply(temp, function(x) {
     # sort the rows by the same order as status.df
     x <- includeMissing(x = x, status.df = status.df)
-    link <- sapply(status.df$Signal, function(i) grep(paste0("^", i, "$"), rownames(x)))
+    lowest_signals <- sapply(as.character(status.df$Signal), function(i) min(as.numeric(unlist(strsplit(i, "|", fixed = TRUE)))))
+    link <- sapply(lowest_signals, function(i) grep(paste0("^", i, "$"), rownames(x)))
     x <- x[link, ]  
     # split by group*release site combinations
     aux <- split(x, paste0(status.df$Group, ".", status.df$Release.site))
@@ -657,7 +658,11 @@ blameArrays <- function(from, to, paths) {
 #' 
 includeMissing <- function(x, status.df){
   appendTo("debug", "Starting includeMissing")
-  include <- as.character(status.df[-match(rownames(x), status.df$Signal),"Signal"])
+  include <- as.character(status.df[
+    -match(rownames(x), 
+      sapply(as.character(status.df$Signal), 
+        function(i) min(as.numeric(unlist(strsplit(i, "|", fixed = TRUE)))))
+      ), "Signal"])
   x[include, ] = 0
   x[include, 1] = 1
   appendTo("debug", "Terminating includeMissing")
