@@ -285,7 +285,7 @@ test_that("migration can handle multiple expected first arrays", {
 })
 
 test_that("the debug option works as expected", {
-	output <- suppressWarnings(migration(sections = c("River", "Fjord", "Sea"), , tz = 'Europe/Copenhagen', report = FALSE, 
+	output <- suppressWarnings(migration(sections = c("River", "Fjord", "Sea"), tz = 'Europe/Copenhagen', report = FALSE, 
 		GUI = "never", debug = TRUE))
 	file.remove("detections/actel.detections.RData")
 
@@ -303,6 +303,23 @@ test_that("the debug option works as expected", {
 		'if.last.skip.section', 'bio', 'rsp.info'))
 	expect_true(file.exists("temp_warnings.txt"))
 	expect_true(file.exists("temp_debug.txt"))
+})
+
+test_that("migration can handle multi-sensor data", {
+	xdet <- example.detections
+	xdet$Sensor.Value <- 1
+	xdet$Sensor.Unit <- "A"
+	xdet$Sensor.Unit[xdet$Transmitter == "A69-1303-4454"] <- "B"
+	my.list <- split(xdet, xdet$Receiver)
+  for (i in names(my.list)) {
+    write.csv(my.list[[i]], paste0("detections/", i, ".csv"), row.names = FALSE)
+  }
+	xbio <- example.biometrics[-(1:4), ]
+	xbio$Signal <- as.character(xbio$Signal)
+	xbio$Signal[1] <- "4453|4454"
+	write.csv(xbio, "biometrics.csv", row.names = FALSE)
+	output <- suppressWarnings(migration(sections = c("River", "Fjord", "Sea"), tz = 'Europe/Copenhagen', GUI = "never"))
+	file.remove("detections/actel.detections.RData")
 })
 
 setwd("..")

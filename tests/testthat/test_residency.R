@@ -280,6 +280,23 @@ test_that("the debug option works as expected", {
 	expect_true(file.exists("temp_debug.txt"))
 })
 
+test_that("residency can handle multi-sensor data", {
+	xdet <- example.detections
+	xdet$Sensor.Value <- 1
+	xdet$Sensor.Unit <- "A"
+	xdet$Sensor.Unit[xdet$Transmitter == "A69-1303-4454"] <- "B"
+	my.list <- split(xdet, xdet$Receiver)
+  for (i in names(my.list)) {
+    write.csv(my.list[[i]], paste0("detections/", i, ".csv"), row.names = FALSE)
+  }
+	xbio <- example.biometrics[-(1:4), ]
+	xbio$Signal <- as.character(xbio$Signal)
+	xbio$Signal[1] <- "4453|4454"
+	write.csv(xbio, "biometrics.csv", row.names = FALSE)
+	output <- suppressWarnings(residency(sections = c("River", "Fjord", "Sea"), tz = 'Europe/Copenhagen', GUI = "never"))
+	file.remove("detections/actel.detections.RData")
+})
+
 setwd("..")
 unlink("exampleWorkspace", recursive = TRUE)
 rm(list = ls())
