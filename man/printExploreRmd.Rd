@@ -9,6 +9,7 @@ printExploreRmd(
   biometric.fragment,
   individual.plots,
   circular.plots,
+  sensor.plots,
   spatial,
   deployments,
   detections,
@@ -23,6 +24,8 @@ printExploreRmd(
 \item{individual.plots}{Rmarkdown string specifying the name of the individual plots.}
 
 \item{circular.plots}{Rmarkdown string specifying the name of the circular plots.}
+
+\item{sensor.plots}{Rmarkdown string specifying the name of the sensor plots.}
 
 \item{detections}{All the detections used in the study}
 

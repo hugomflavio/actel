@@ -4,7 +4,7 @@
 \alias{checkDupSignals}
 \title{Check if there are duplicated signals in the detected tags.}
 \usage{
-checkDupSignals(input, bio, tag.list)
+checkDupSignals(input, bio)
 }
 \arguments{
 \item{input}{list of detections}

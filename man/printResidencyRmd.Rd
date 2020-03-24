@@ -13,6 +13,7 @@ printResidencyRmd(
   array.circular.plots,
   section.arrival.circular.plots,
   section.departure.circular.plots,
+  sensor.plots,
   spatial,
   deployments,
   detections,
@@ -27,6 +28,8 @@ printResidencyRmd(
 \item{biometric.fragment}{Rmarkdown string specifying the biometric graphics drawn.}
 
 \item{efficiency.fragment}{Rmarkdown string specifying the efficiency results.}
+
+\item{sensor.plots}{Rmarkdown string specifying the name of the sensor plots.}
 }
 \description{
 Creates a Rmd report and converts it to hmtl.
