@@ -837,8 +837,7 @@ includeUnknownReceiver <- function(spatial, deployments, unknown.receivers){
 checkDetectionsBeforeRelease <- function(input, bio){
   appendTo("debug", "Running detectionBeforeReleaseCheck.")  
   remove.tag <- NULL
-  tag.list <- stripCodeSpaces(names(input))
-  link <- match(bio$Signal, tag.list)
+  link <- match(bio$Transmitter, names(input))
   for(i in seq_len(length(link))) {
     if (!is.na(link[i])) {
       if (any(to.remove <- !(input[[link[i]]]$Timestamp > bio$Release.date[i]))) {
@@ -891,13 +890,14 @@ checkDetectionsBeforeRelease <- function(input, bio){
 checkNoDetections <- function(input, bio){
   appendTo("debug", "Running noDetectionsCheck.")  
   tag.list <- stripCodeSpaces(names(input))
-  link <- match(bio$Signal, tag.list)
+  signal_check <- suppressWarnings(as.numeric(unlist(strsplit(as.character(bio$Signal), "|", fixed = TRUE))))
+  link <- match(signal_check, tag.list)
   if (all(is.na(link))) {
     appendTo(c("Report"), "Error: No detections were found in the input data which matched the target signals.")
     emergencyBreak()
     stop("No detections were found in the input data which matched the target signals.\n", call. = FALSE)
   }
-  return(list(list = tag.list,link = link))
+  # return(list(list = tag.list, link = link))
 }
 
 #' Check if there are duplicated signals in the detected tags.
@@ -908,12 +908,14 @@ checkNoDetections <- function(input, bio){
 #' 
 #' @keywords internal
 #' 
-checkDupSignals <- function(input, bio, tag.list){
-  appendTo("debug", "Running dupSignalsCheck.")  
-  failsafe <- match(tag.list, bio$Signal)
+checkDupSignals <- function(input, bio){
+  appendTo("debug", "Running dupSignalsCheck.")
+  tag.list <- stripCodeSpaces(names(input))
+  signal_check <- suppressWarnings(as.numeric(unlist(strsplit(as.character(bio$Signal), "|", fixed = TRUE))))  
+  failsafe <- match(tag.list, signal_check)
   if (any(table(failsafe) > 1)) {
     appendTo(c("Report"), "Error: One or more signals match more than one tag in the detections! Showing relevant signals/tags.")
-    t1 <- cbind(names(input), bio$Signal[failsafe])
+    t1 <- cbind(names(input), signal_check[failsafe])
     t2 <- t1[complete.cases(t1), ]
     t3 <- table(t2[, 1], t2[, 2])
     rm(t1, t2)

@@ -14,8 +14,12 @@ loadStudyData <- function(tz, override = NULL, start.time, stop.time,
   appendTo(c("Screen", "Report"), paste0("M: Number of target tags: ", nrow(bio), "."))
   
   # Check that all the overriden fish are part of the study
-  if (!is.null(override) && any(link <- is.na(match(unlist(lapply(strsplit(override, "-"), function(x) tail(x, 1))), bio$Signal))))
-    stop("Some tag signals listed in 'override' ('", paste0(override[link], collapse = "', '"), "') are not listed in the biometrics file.\n", call. = FALSE)
+  if (!is.null(override)) {
+    override_signals <- unlist(lapply(strsplit(override, "-"), function(x) tail(x, 1))) 
+    lowest_signals <- sapply(bio$Signal, function(i) min(as.numeric(unlist(strsplit(as.character(i), "|", fixed = TRUE)))))
+    if (any(link <- is.na(match(override_signals, lowest_signals))))
+      stop("Some tag signals listed in 'override' ('", paste0(override[link], collapse = "', '"), "') are not listed in the biometrics file.\n", call. = FALSE)
+  }
   deployments <- loadDeployments(file = "deployments.csv", tz = tz)
   checkDeploymentTimes(input = deployments) # check that receivers are not deployed before being retrieved
   spatial <- loadSpatial(file = "spatial.csv", report = TRUE)
@@ -688,20 +692,40 @@ loadBio <- function(file, tz){
     stop("The biometrics.csv file must contain an 'Signal' column.\n", call. = FALSE)
   }
 
-  if (!inherits(bio$Signal,"integer")) {
-    emergencyBreak()
-    stop("Could not recognise the data in the 'Signal' column as integers. Please double-check the biometrics.csv file.\n", call. = FALSE)
-  }
-
   if (any(is.na(bio$Signal))) {
     emergencyBreak()
     stop("Some fish have no 'Signal' information. Please double-check the biometrics.csv file.\n", call. = FALSE)
   }
 
-  if (any(link <- table(bio$Signal) > 1)) {
+  if (any(grepl("|", bio$Signal))) {
+    appendTo(c("Screen", "Report"), "M: Multi-sensor tags detected. These tags will be referred to by their lowest signal value.")
+    expect_integer <- FALSE
+  } else {
+    expect_integer <- TRUE
+  }
+
+  if (expect_integer & !inherits(bio$Signal, "integer")) {
+    emergencyBreak()
+    stop("Could not recognise the data in the 'Signal' column as integers. Please double-check the biometrics.csv file.\n", call. = FALSE)
+  } else {
+    signal_check <- suppressWarnings(as.numeric(unlist(strsplit(as.character(bio$Signal), "|", fixed = TRUE))))
+    if (any(is.na(signal_check))) {
+      stop("Could not recognise the data in the 'Signal' column as integers. Please double-check the biometrics.csv file.\n", call. = FALSE)
+    }
+  }
+
+  if (expect_integer & any(link <- table(bio$Signal) > 1)) {
     emergencyBreak()
     stop(ifelse(sum(link) > 1, "Signals ", "Signal "), paste(names(table(bio$Signal))[link], collapse = ", "), ifelse(sum(link) > 1," are ", " is "), "duplicated in the biometrics.csv file.\n", call. = FALSE)
+  } else {
+    if (any(link <- table(signal_check) > 1)) {
+      emergencyBreak()
+      stop(ifelse(sum(link) > 1, "Signals ", "Signal "), paste(names(table(signal_check))[link], collapse = ", "), ifelse(sum(link) > 1," are ", " is "), "duplicated in the biometrics.csv file.\n", call. = FALSE)      
+    }
   }
+
+  if (!expect_integer & !any(grepl("Sensor.unit", colnames(bio))))
+    appendTo(c("Screen", "Warning"), "Tags with multiple sensors are listed in the biometrics.csv file, but a 'Sensor.unit' column could not be found. Skipping sensor unit assignment.")
 
   if (!any(grepl("Release.site", colnames(bio)))) {
     appendTo("Screen", "M: No Release site has been indicated in the biometrics.csv file. Creating a 'Release.site' column to avoid function failure. Filling with 'unspecified'.")
@@ -1078,16 +1102,80 @@ splitDetections <- function(detections, bio, exclude.tags = NULL, silent = FALSE
   my.list <- split(detections, detections$Transmitter)
   my.list <- excludeTags(input = my.list, exclude.tags = exclude.tags)
   
-  tags <- checkNoDetections(input = my.list, bio = bio)
-  checkDupSignals(input = my.list, bio = bio, tag.list = tags$list)
-  
+  checkNoDetections(input = my.list, bio = bio)
+  checkDupSignals(input = my.list, bio = bio)
+
   appendTo("debug", "Debug: Creating 'trimmed.list'.")
-  bio$Transmitter <- names(my.list)[tags[["link"]]]
-  trimmed.list <- my.list[tags[["link"]]]
-  non.empty <- unlist(lapply(trimmed.list, function(x) length(x) != 0))
-  trimmed.list <- trimmed.list[non.empty]
+
+  # Find signal matches, including for double-signal tags
+  tag.list <- stripCodeSpaces(names(my.list))
+  signal_list <- lapply(strsplit(as.character(bio$Signal), "|", fixed = TRUE), as.numeric)
+  aux <- lapply(1:length(signal_list), function(i) {
+    output <- rep(NA_integer_, length(tag.list))
+    output[tag.list %in% signal_list[[i]]] <- i
+    return(output)
+  })
+  signal_match <- combine(aux)
+
+  # Combine tables for multi-signal tags and transfer sensor units
+  if (any(table(signal_match) > 1)) {
+    to.combine <- names(which(table(signal_match) > 1))
+    for (i in to.combine) {
+      unordered_indexes <- which(signal_match %in% i)
+      if (any(grepl("Sensor.unit", colnames(bio)))) {
+        sensor_units <- unlist(strsplit(bio$Sensor.unit[as.numeric(i)], "|", fixed = TRUE))
+        if (length(sensor_units) != length(unordered_indexes)) {
+          appendTo(c("Screen", "Warning", "Report"), 
+            paste0("The number of sensor units provided does not match the number of signals emitted ('",
+              bio$Sensor.unit[as.numeric(i)], "' ",
+              ifelse(length(sensor_units) > length(unordered_indexes), ">", "<"), " '",
+              bio$Signal[as.numeric(i)], "').\n         Aborting sensor unit attribution"))
+        } else {
+          for (j in 1:length(sensor_units)) {
+            my.list[[unordered_indexes[j]]]$Sensor.Unit <- rep(sensor_units[j], nrow(my.list[[unordered_indexes[j]]]))
+          }
+        }
+      }
+      indexes <- unordered_indexes[order(unordered_indexes)]
+      aux <- data.table::rbindlist(my.list[indexes])
+      aux <- aux[order(aux$Timestamp), ]
+      my.list[[indexes[1]]] <- aux
+    }
+  }
+
+  # Transfer transmitter names to bio
+  lowest_signals <- sapply(bio$Signal, function(i) {
+    min(as.numeric(unlist(strsplit(as.character(i), "|", fixed = TRUE))))
+  })
+  link <- match(lowest_signals, tag.list)
+  bio$Transmitter <- names(my.list)[link]
+
+  # extract target detections
+  trimmed.list <- my.list[na.exclude(link)]
+  
+  # include sensor units for single signal tags, if relevant
+  if (any(grepl("Sensor.unit", colnames(bio)))) {
+    link <- match(stripCodeSpaces(names(trimmed.list)), bio$Signal)
+    aux <- names(trimmed.list)
+    trimmed.list <- lapply(1:length(link), function(i) {
+      output <- trimmed.list[[i]]
+      if (!is.na(link[i])) {
+        if (grepl("|", bio$Sensor.unit[link[i]], fixed = TRUE)) {
+          appendTo(c("Screen", "Warning", "Report"), 
+            paste0("The tag with signal ", bio$Signal[link[i]],
+              " appears to have more than one sensor unit ('", bio$Sensor.unit[link[i]],
+              "'). Could there be an error in the input data?"))
+        }
+        output$Sensor.Unit <- rep(bio$Sensor.unit[link[i]], nrow(output))
+      }
+      return(output)
+    })
+    names(trimmed.list) <- aux
+  }
+
+  # Collect stray summary
   if (!silent){
-    collectStrays(input = my.list[-na.exclude(tags[["link"]])])
+    collectStrays(input = my.list[-na.exclude(link)])
     storeStrays()
   }
 

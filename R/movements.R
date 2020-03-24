@@ -228,7 +228,7 @@ movementTimes <- function(movements, type = c("array", "section")){
 #' 
 speedReleaseToFirst <- function(fish, bio, movements, dist.mat, invalid.dist = FALSE){
   appendTo("debug", "Running speedReleaseToFirst.")
-  the.row <- match(fish,bio$Transmitter)
+  the.row <- match(fish, bio$Transmitter)
   origin.time <- bio[the.row, "Release.date"]
   origin.place <- as.character(bio[the.row, "Release.site"])
   if (origin.time <= movements$First.time[1]) {

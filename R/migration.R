@@ -1156,7 +1156,7 @@ assembleOutput <- function(timetable, bio, spatial, sections, dist.mat, invalid.
   
   appendTo("debug", "Calculating time from release to first detection.")
   for (i in 1:nrow(status.df)) {
-    appendTo("debug", paste0("(status.df) Analysing fish ", status.df$Signal[i], " (", i, ")."))
+    appendTo("debug", paste0("(status.df) Analysing fish ", status.df$Transmitter[i], " (", i, ")."))
     arriving.points <- status.df[i, paste("Arrived", sections, sep = ".")]
     if (any(!is.na(arriving.points))) {
       first.section <- sections[head(which(!is.na(arriving.points)), 1)]
