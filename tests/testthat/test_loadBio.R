@@ -147,4 +147,36 @@ test_that("loadBio output matches example.biometrics", {
 	file.remove("biometrics.csv")
 })
 
+test_that("loadBio can handle multi-sensor tags.", {
+	xbio <- example.biometrics[-(1:4), ]
+	xbio$Signal <- as.character(xbio$Signal)
+	xbio$Signal[1] <- "4453|4454"
+	write.csv(xbio, "biometrics.csv", row.names = FALSE)
+	expect_message(
+		expect_warning(bio <- loadBio("biometrics.csv", tz = "Europe/Copenhagen"),
+			"Tags with multiple sensors are listed in the biometrics.csv file, but a 'Sensor.unit' column could not be found. Skipping sensor unit assignment.", fixed = TRUE),
+		"M: Multi-sensor tags detected. These tags will be referred to by their lowest signal value.", fixed = TRUE)
+
+	xbio$Signal[1] <- "test|4454"
+	write.csv(xbio, "biometrics.csv", row.names = FALSE)
+	expect_message(
+		expect_error(bio <- loadBio("biometrics.csv", tz = "Europe/Copenhagen"),
+			"Could not recognise the data in the 'Signal' column as integers. Please double-check the biometrics.csv file.", fixed = TRUE),
+		"M: Multi-sensor tags detected. These tags will be referred to by their lowest signal value.", fixed = TRUE)
+
+	xbio$Signal[1] <- "4455|4456"
+	write.csv(xbio, "biometrics.csv", row.names = FALSE)
+	expect_message(
+		expect_error(bio <- loadBio("biometrics.csv", tz = "Europe/Copenhagen"),
+			"Signal 4456 is duplicated in the biometrics.csv file.", fixed = TRUE),
+		"M: Multi-sensor tags detected. These tags will be referred to by their lowest signal value.", fixed = TRUE)
+	
+	xbio$Signal[1] <- "4453|4454"
+	xbio$Sensor.unit <- NA
+	write.csv(xbio, "biometrics.csv", row.names = FALSE)
+	expect_message(bio <- loadBio("biometrics.csv", tz = "Europe/Copenhagen"),
+		"M: Multi-sensor tags detected. These tags will be referred to by their lowest signal value.", fixed = TRUE)
+	file.remove("biometrics.csv")
+})
+
 file.remove(list.files(pattern = "*txt$"))

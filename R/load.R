@@ -697,7 +697,7 @@ loadBio <- function(file, tz){
     stop("Some fish have no 'Signal' information. Please double-check the biometrics.csv file.\n", call. = FALSE)
   }
 
-  if (any(grepl("|", bio$Signal))) {
+  if (any(grepl("|", bio$Signal, fixed = TRUE))) {
     appendTo(c("Screen", "Report"), "M: Multi-sensor tags detected. These tags will be referred to by their lowest signal value.")
     expect_integer <- FALSE
   } else {
@@ -1129,7 +1129,7 @@ splitDetections <- function(detections, bio, exclude.tags = NULL, silent = FALSE
             paste0("The number of sensor units provided does not match the number of signals emitted ('",
               bio$Sensor.unit[as.numeric(i)], "' ",
               ifelse(length(sensor_units) > length(unordered_indexes), ">", "<"), " '",
-              bio$Signal[as.numeric(i)], "').\n         Aborting sensor unit attribution"))
+              bio$Signal[as.numeric(i)], "').\n         Aborting sensor unit attribution."))
         } else {
           for (j in 1:length(sensor_units)) {
             my.list[[unordered_indexes[j]]]$Sensor.Unit <- rep(sensor_units[j], nrow(my.list[[unordered_indexes[j]]]))
@@ -1166,7 +1166,8 @@ splitDetections <- function(detections, bio, exclude.tags = NULL, silent = FALSE
               " appears to have more than one sensor unit ('", bio$Sensor.unit[link[i]],
               "'). Could there be an error in the input data?"))
         }
-        output$Sensor.Unit <- rep(bio$Sensor.unit[link[i]], nrow(output))
+        if (!is.na(bio$Sensor.unit[link[i]]) & bio$Sensor.unit[link[i]] != "")
+          output$Sensor.Unit <- rep(bio$Sensor.unit[link[i]], nrow(output))
       }
       return(output)
     })
