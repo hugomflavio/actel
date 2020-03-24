@@ -318,9 +318,7 @@ test_that("migration can handle multi-sensor data", {
 	xbio$Signal <- as.character(xbio$Signal)
 	xbio$Signal[1] <- "4453|4454"
 	write.csv(xbio, "biometrics.csv", row.names = FALSE)
-	sink("temp.txt")
-		output <- suppressWarnings(migration(sections = c("River", "Fjord", "Sea"), tz = 'Europe/Copenhagen', GUI = "never"))
-	sink()
+	output <- suppressWarnings(migration(sections = c("River", "Fjord", "Sea"), tz = 'Europe/Copenhagen', GUI = "never"))
 	file.remove("detections/actel.detections.RData")
 })
 

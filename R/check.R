@@ -663,7 +663,7 @@ checkJumpDistance <- function(movements, fish, release, dotmat, jump.warning, ju
       }
     }
     # Trigger user interaction
-    if (trigger.error) { # nocov start
+    if (interactive() && trigger.error) { # nocov start
       aux <- tableInteraction(moves = vm, fish = fish, trigger = the.warning, GUI = GUI)
       movements <- transferValidity(from = aux, to = movements)
     } # nocov end
