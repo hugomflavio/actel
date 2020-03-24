@@ -1174,8 +1174,9 @@ splitDetections <- function(detections, bio, exclude.tags = NULL, silent = FALSE
     names(trimmed.list) <- aux
   }
 
+  link <- match(tag.list, unlist(signal_list))
   # Collect stray summary
-  if (!silent){
+  if (!silent && any(is.na(link))) {
     collectStrays(input = my.list[-na.exclude(link)])
     storeStrays()
   }
