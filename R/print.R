@@ -1303,3 +1303,47 @@ printLastSeen <- function(input, sections) {
   the.width <- max(2, (ncol(input) - 1) * nrow(input) * 0.7)
   ggplot2::ggsave("Report/last_seen.png", width = the.width, height = 4)
 }
+
+#' Print sensor data for each individual tag
+#' 
+#' @param detections A valid detections list
+#' @param extension the format of the generated graphics
+#' 
+#' @keywords internal
+#' 
+#' @return a rmd string to add to the report
+#' 
+printSensorData <- function(detections, extension = "png") {
+  individual.plots <- NULL
+  Timestamp <- NULL
+  Sensor.Value <- NULL
+  Sensor.Unit <- NULL
+  pb <- txtProgressBar(min = 0, max = length(detections), style = 3, width = 60)
+  counter <- 0
+  individual.plots <- ""
+  capture <- lapply(names(detections), function(fish) {
+    counter <<- counter + 1
+    if (any(!is.na(detections[[fish]]$Sensor.Value))) {
+      p <- ggplot2::ggplot(data = detections[[fish]], ggplot2::aes(x = Timestamp, y = Sensor.Value, by = Sensor.Unit))
+      p <- p + ggplot2::geom_line(col = "grey40")
+      p <- p + ggplot2::geom_point(col = "black", size = 0.5)
+      p <- p + ggplot2::labs(title = fish, x = "", y = "Sensor value")
+      p <- p + ggplot2::theme_bw()
+      p <- p + ggplot2::facet_grid(Sensor.Unit ~ ., scales = "free_y")
+      p <- p + ggplot2::theme(legend.position = "none")
+      if (length(unique(detections[[fish]]$Sensor.Unit)) > 2)
+        the.height <- 6
+      else
+        the.height <- 4
+      ggplot2::ggsave(paste0("Report/", fish, "_sensors.", extension), width = 5, height = the.height)  # better to save in png to avoid point overlapping issues
+      if (counter %% 2 == 0) {
+        individual.plots <<- paste0(individual.plots, "![](", fish, "_sensors.", extension, "){ width=50% }\n")
+      } else {
+        individual.plots <<- paste0(individual.plots, "![](", fish, "_sensors.", extension, "){ width=50% }")
+      }
+      setTxtProgressBar(pb, counter)
+    }
+  })
+  close(pb)
+  return(individual.plots)
+}

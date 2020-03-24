@@ -389,6 +389,12 @@ detections.list <- study.data$detections.list
     individual.plots <- printIndividuals(detections.list = detections, spatial = spatial, 
       tz = tz, movements = movements, valid.movements = valid.movements, bio = bio)
     circular.plots <- printCircular(times = convertTimesToCircular(times), bio = bio)
+    if (any(sapply(valid.detections, function(x) any(!is.na(x$Sensor.Value))))) {
+      appendTo(c("Screen", "Report"), "M: Printing sensor values for tags with sensor data.")
+      sensor.plots <- printSensorData(detections = valid.detections)
+    } else {
+      sensor.plots <- NULL
+    } 
   }
   
   appendTo("Report", "M: Process finished successfully.")
@@ -410,6 +416,7 @@ detections.list <- study.data$detections.list
                                     biometric.fragment = biometric.fragment,
                                     individual.plots = individual.plots,
                                     circular.plots = circular.plots,
+                                    sensor.plots = sensor.plots,
                                     spatial = spatial,
                                     deployments = deployments,
                                     detections = detections,
@@ -453,6 +460,7 @@ detections.list <- study.data$detections.list
 #' @param biometric.fragment Rmarkdown string specifying the biometric graphics drawn.
 #' @param individual.plots Rmarkdown string specifying the name of the individual plots.
 #' @param circular.plots Rmarkdown string specifying the name of the circular plots.
+#' @param sensor.plots Rmarkdown string specifying the name of the sensor plots.
 #' @param detections All the detections used in the study
 #' @param valid.detectiosn The valid detections used in the study
 #' @inheritParams loadDetections
@@ -460,7 +468,7 @@ detections.list <- study.data$detections.list
 #' @keywords internal
 #' 
 printExploreRmd <- function(override.fragment, biometric.fragment, individual.plots,
-  circular.plots, spatial, deployments, detections, valid.detections){
+  circular.plots, sensor.plots, spatial, deployments, detections, valid.detections){
   inst.ver <- utils::packageVersion("actel")
   inst.ver.short <- substr(inst.ver, start = 1, stop = nchar(as.character(inst.ver)) - 5) 
   if (file.exists(reportname <- "Report/actel_explore_report.Rmd")) {
@@ -483,6 +491,17 @@ printExploreRmd <- function(override.fragment, biometric.fragment, individual.pl
   } else {
     unknown.fragment <- ""
   } 
+  if (!is.null(sensor.plots)) {
+    sensor.fragment <- paste0("### Sensor plots
+
+Note:
+  : The data used used for these graphics is stored in the `valid.detections` object.
+
+<center>\n", sensor.plots, "\n</center>")
+  } else {
+    sensor.fragment <- NULL
+  }
+
   report <- readr::read_file("temp_log.txt")
 
   options(knitr.kable.NA = "-")
@@ -582,6 +601,8 @@ Note:
 ', individual.plots,'
 </center>
 
+', sensor.fragment,'
+
 ### Full log
 
 ```{r log, echo = FALSE, comment = NA}
@@ -674,7 +695,8 @@ h4 {
   <a href="#user-comments">Comments</a>
   <a href="#biometric-graphics">Biometrics</a>
   <a href="#average-time-of-arrival-at-each-array">Arrival times</a>
-  <a href="#individual-plots">Individuals</a>
+  <a href="#individual-plots">Individuals</a>',
+  ifelse(is.null(sensor.fragment), '', '\n<a href="#sensor-plots">Sensor data</a>'),'
   <a href="#full-log">Full log</a>
 </div>
 ', fill = TRUE)

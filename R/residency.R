@@ -495,6 +495,12 @@ residency <- function(path = NULL, tz, sections, success.arrays = NULL, max.inte
     printLastSeen(input = last.seen, sections = sections)
     if (nrow(last.seen) > 3) 
       last.seen.graph.size <- "width=90%" else last.seen.graph.size <- "height=4in"
+    if (any(sapply(valid.detections, function(x) any(!is.na(x$Sensor.Value))))) {
+      appendTo(c("Screen", "Report"), "M: Printing sensor values for tags with sensor data.")
+      sensor.plots <- printSensorData(detections = valid.detections)
+    } else {
+      sensor.plots <- NULL
+    } 
   }
   
   appendTo("Report", "M: Process finished successfully.")
@@ -520,6 +526,7 @@ residency <- function(path = NULL, tz, sections, success.arrays = NULL, max.inte
                                       array.circular.plots = array.circular.plots, 
                                       section.arrival.circular.plots = section.arrival.circular.plots, 
                                       section.departure.circular.plots = section.departure.circular.plots, 
+                                      sensor.plots = sensor.plots,
                                       spatial = spatial, 
                                       deployments = deployments, 
                                       detections = detections, 
@@ -570,7 +577,7 @@ residency <- function(path = NULL, tz, sections, success.arrays = NULL, max.inte
 #' 
 printResidencyRmd <- function(override.fragment, biometric.fragment, efficiency.fragment,
   individual.detection.plots, individual.residency.plots, array.circular.plots, 
-  section.arrival.circular.plots, section.departure.circular.plots, spatial, 
+  section.arrival.circular.plots, section.departure.circular.plots, sensor.plots, spatial, 
   deployments, detections, valid.detections, last.seen, last.seen.graph.size){
   inst.ver <- utils::packageVersion("actel")
   inst.ver.short <- substr(inst.ver, start = 1, stop = nchar(as.character(inst.ver)) - 5) 
@@ -594,6 +601,17 @@ printResidencyRmd <- function(override.fragment, biometric.fragment, efficiency.
   } else {
     unknown.fragment <- ""
   } 
+  if (!is.null(sensor.plots)) {
+    sensor.fragment <- paste0("### Sensor plots
+
+Note:
+  : The data used used for these graphics is stored in the `valid.detections` object.
+
+<center>\n", sensor.plots, "\n</center>")
+  } else {
+    sensor.fragment <- NULL
+  }
+
   report <- readr::read_file("temp_log.txt")
 
   options(knitr.kable.NA = "-")
@@ -783,6 +801,8 @@ Note:
 ', individual.detection.plots,'
 </center>
 
+', sensor.fragment,'
+
 ### Full log
 
 ```{r log, echo = FALSE, comment = NA}
@@ -886,7 +906,8 @@ img[src*="#diagram"] {
   <a href="#time-details-for-each-section">Section times</a>
   <a href="#section-progression">Section progression</a>
   <a href="#individual-residency-plots">Individual residency</a>
-  <a href="#individual-detection-plots">Individual detections</a>
+  <a href="#individual-detection-plots">Individual detections</a>',
+  ifelse(is.null(sensor.fragment), '', '\n<a href="#sensor-plots">Sensor data</a>'),'
   <a href="#full-log">Full log</a>
 </div>
 ', fill = TRUE)

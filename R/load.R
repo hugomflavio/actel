@@ -1178,8 +1178,8 @@ splitDetections <- function(detections, bio, exclude.tags = NULL, silent = FALSE
   # Collect stray summary
   if (!silent && any(is.na(link))) {
     collectStrays(input = my.list[-na.exclude(link)])
-    storeStrays()
   }
+  storeStrays()
 
   return(list(detections.list = trimmed.list, bio = bio))
 }

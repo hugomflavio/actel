@@ -2,7 +2,7 @@
 
 Find out the main highlights of each update.
 
-## Development
+## Development (0.1.4)
 
 Fixes:
   * Sort deployment rows by start time. Avoids false triggering of redeployment-before-retrieval errors.
@@ -15,6 +15,9 @@ Enhancements:
   * Improve spatial.csv vs spatial.txt mismatch error messaging by showing missing arrays.
   * Improve colour and caption handling on individual residency plots for study areas with many sections.
   * Improve handling of spatial file in distancesMatrix (including new fail-safes).
+  * Added support for tags that emit multiple signals (i.e. multi-sensor tags).
+  * Plot sensor data in the reports.
+  
 
 ## actel 0.1.3
 

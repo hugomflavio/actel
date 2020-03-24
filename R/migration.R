@@ -565,6 +565,12 @@ migration <- function(path = NULL, tz, sections, success.arrays = NULL, max.inte
     circular.plots <- printCircular(times = convertTimesToCircular(times), bio = bio)
     if (nrow(section.overview) > 3) 
       survival.graph.size <- "width=90%" else survival.graph.size <- "height=4in"
+    if (any(sapply(valid.detections, function(x) any(!is.na(x$Sensor.Value))))) {
+      appendTo(c("Screen", "Report"), "M: Printing sensor values for tags with sensor data.")
+      sensor.plots <- printSensorData(detections = valid.detections)
+    } else {
+      sensor.plots <- NULL
+    } 
   }
   
   appendTo("Report", "M: Process finished successfully.")
@@ -591,6 +597,7 @@ migration <- function(path = NULL, tz, sections, success.arrays = NULL, max.inte
                                       survival.graph.size = survival.graph.size,
                                       individual.plots = individual.plots,
                                       circular.plots = circular.plots,
+                                      sensor.plots = sensor.plots,
                                       spatial = spatial,
                                       deployments = deployments,
                                       valid.detections = valid.detections,
@@ -639,13 +646,14 @@ migration <- function(path = NULL, tz, sections, success.arrays = NULL, max.inte
 #' @param survival.graph.size Rmarkdown string specifying the type size of the survival graphics.
 #' @param individual.plots Rmarkdown string specifying the name of the individual plots.
 #' @param circular.plots Rmarkdown string specifying the name of the circular plots.
+#' @param sensor.plots Rmarkdown string specifying the name of the sensor plots.
 #' @inheritParams loadDetections
 #' 
 #' @keywords internal
 #' 
 printMigrationRmd <- function(override.fragment, biometric.fragment, section.overview,
   efficiency.fragment, display.progression, array.overview.fragment, survival.graph.size, 
-  individual.plots, circular.plots, spatial, deployments, valid.detections, detections){
+  individual.plots, circular.plots, sensor.plots, spatial, deployments, valid.detections, detections){
   inst.ver <- utils::packageVersion("actel")
   inst.ver.short <- substr(inst.ver, start = 1, stop = nchar(as.character(inst.ver)) - 5) 
   if (file.exists(reportname <- "Report/actel_migration_report.Rmd")) {
@@ -668,6 +676,17 @@ printMigrationRmd <- function(override.fragment, biometric.fragment, section.ove
   } else {
     unknown.fragment <- ""
   } 
+  if (!is.null(sensor.plots)) {
+    sensor.fragment <- paste0("### Sensor plots
+
+Note:
+  : The data used used for these graphics is stored in the `valid.detections` object.
+
+<center>\n", sensor.plots, "\n</center>")
+  } else {
+    sensor.fragment <- NULL
+  }
+
   report <- readr::read_file("temp_log.txt")
 
   options(knitr.kable.NA = "-")
@@ -815,6 +834,8 @@ Note:
 ', individual.plots,'
 </center>
 
+', sensor.fragment,'
+
 ### Full log
 
 ```{r log, echo = FALSE, comment = NA}
@@ -917,7 +938,8 @@ img[src*="#diagram"] {
   <a href="#progression">Progression</a>
   <a href="#time-of-arrival-at-each-array">Arrival times</a>
   <a href="#dotplots">Dotplots</a>
-  <a href="#individual-plots">Individuals</a>
+  <a href="#individual-plots">Individuals</a>',
+  ifelse(is.null(sensor.fragment), '', '\n<a href="#sensor-plots">Sensor data</a>'),'
   <a href="#full-log">Full log</a>
 </div>
 ', fill = TRUE)
