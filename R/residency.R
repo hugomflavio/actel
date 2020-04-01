@@ -1111,7 +1111,7 @@ res_efficiency <- function(arrmoves, bio, spatial, arrays, paths, dotmat) {
   absolutes[3, match(names(unsureMissEvents), colnames(absolutes))] <- unsureMissEvents
 
   # do not calculate efficiency for arrays without before or after neighbours
-  aux <- unlist(lapply(arrays, function(x) (!is.null(x$after) | is.null(x$before)) | (is.null(x$after) | !is.null(x$before))))
+  aux <- unlist(lapply(arrays, function(x) (!is.null(x$after) & is.null(x$before)) | (is.null(x$after) & !is.null(x$before))))
   one.side.neighbours <- names(aux)[aux]
   # exclude arrays which are connected to a release site from the list above
   one.side.neighbours <- one.side.neighbours[!one.side.neighbours %in% spatial$release.sites$Array]
