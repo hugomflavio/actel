@@ -18,6 +18,7 @@ Enhancements:
   * Improve handling of spatial file in distancesMatrix (including new fail-safes).
   * Added support for tags that emit multiple signals (i.e. multi-sensor tags).
   * Plot sensor data in the reports.
+  * Allow the GUI to pop up if the number of lines to display goes over getOptions("max.print").
   
 
 ## actel 0.1.3
