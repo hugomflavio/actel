@@ -468,6 +468,7 @@ migration <- function(path = NULL, tz, sections, success.arrays = NULL, max.inte
       intra.array.CJS <- recipient$intra.CJS
       rm(recipient)
     } else {
+      intra.array.matrices <- NULL
       intra.array.CJS <- NULL
     }
 
