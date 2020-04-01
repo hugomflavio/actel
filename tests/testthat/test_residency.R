@@ -177,7 +177,7 @@ test_that("residency results contains all the expected elements.", {
 	output <- suppressWarnings(residency(tz = 'Europe/Copenhagen', sections = c("River", "Fjord", "Sea"), report = TRUE, GUI = "never"))
 	file.remove("detections/actel.detections.RData")
 
-	expect_false(any(is.na(match(names(aux), c('array.times', 'arrays', 'daily.positions', 'daily.ratios', 'deployments', 
+	expect_false(any(is.na(match(names(output), c('array.times', 'arrays', 'daily.positions', 'daily.ratios', 'deployments', 
 		'detections', 'dist.mat', 'efficiency', 'global.ratios', 'intra.array.CJS', 'intra.array.matrices',
 		'last.seen', 'movements', 'residency.list', 'rsp.info', 'section.movements', 'section.times', 
 		'spatial', 'status.df', 'valid.detections', 'valid.movements')))))
