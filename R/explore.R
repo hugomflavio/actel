@@ -495,7 +495,7 @@ printExploreRmd <- function(override.fragment, biometric.fragment, individual.pl
     sensor.fragment <- paste0("### Sensor plots
 
 Note:
-  : The data used used for these graphics is stored in the `valid.detections` object.
+  : The data used for these graphics is stored in the `valid.detections` object.
 
 <center>\n", sensor.plots, "\n</center>")
   } else {
@@ -696,7 +696,7 @@ h4 {
   ifelse(biometric.fragment == '', '', '\n  <a href="#biometric-graphics">Biometrics</a>'),'
   <a href="#average-time-of-arrival-at-each-array">Arrival times</a>
   <a href="#individual-plots">Individuals</a>',
-  ifelse(is.null(sensor.fragment), '', '\n<a href="#sensor-plots">Sensor data</a>'),'
+  ifelse(is.null(sensor.fragment), '', '\n  <a href="#sensor-plots">Sensor data</a>'),'
   <a href="#full-log">Full log</a>
 </div>
 ', fill = TRUE)

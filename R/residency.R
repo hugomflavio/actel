@@ -612,7 +612,7 @@ printResidencyRmd <- function(override.fragment, biometric.fragment, efficiency.
     sensor.fragment <- paste0("### Sensor plots
 
 Note:
-  : The data used used for these graphics is stored in the `valid.detections` object.
+  : The data used for these graphics is stored in the `valid.detections` object.
 
 <center>\n", sensor.plots, "\n</center>")
   } else {
@@ -914,7 +914,7 @@ img[src*="#diagram"] {
   <a href="#section-progression">Section progression</a>
   <a href="#individual-residency-plots">Individual residency</a>
   <a href="#individual-detection-plots">Individual detections</a>',
-  ifelse(is.null(sensor.fragment), '', '\n<a href="#sensor-plots">Sensor data</a>'),'
+  ifelse(is.null(sensor.fragment), '', '\n  <a href="#sensor-plots">Sensor data</a>'),'
   <a href="#full-log">Full log</a>
 </div>
 ', fill = TRUE)
