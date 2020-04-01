@@ -473,11 +473,11 @@ residency <- function(path = NULL, tz, sections, success.arrays = NULL, max.inte
 
   if (invalid.dist)
     save(detections, valid.detections, spatial, deployments, arrays, movements, valid.movements, 
-      section.movements, status.df, last.seen, array.times, section.times,
+      section.movements, status.df, last.seen, array.times, section.times, intra.array.matrices,
       residency.list, daily.ratios, daily.positions, global.ratios, efficiency, intra.array.CJS, rsp.info, file = resultsname)
   else
     save(detections, valid.detections, spatial, deployments, arrays, movements, valid.movements, 
-      section.movements, status.df, last.seen, array.times, section.times,
+      section.movements, status.df, last.seen, array.times, section.times, intra.array.matrices,
       residency.list, daily.ratios, daily.positions, global.ratios, efficiency, intra.array.CJS, rsp.info, dist.mat, file = resultsname)
 # ------------
 

@@ -544,10 +544,10 @@ migration <- function(path = NULL, tz, sections, success.arrays = NULL, max.inte
 
   if (invalid.dist)
     save(detections, valid.detections, spatial, deployments, arrays, movements, valid.movements, section.movements, status.df,
-      section.overview, group.overview, release.overview, matrices, overall.CJS, intra.array.CJS, times, rsp.info, file = resultsname)
+      section.overview, group.overview, release.overview, matrices, overall.CJS, intra.array.matrices, intra.array.CJS, times, rsp.info, file = resultsname)
   else
     save(detections, valid.detections, spatial, deployments, arrays, movements, valid.movements, section.movements, status.df,
-      section.overview, group.overview, release.overview, matrices, overall.CJS, intra.array.CJS, times, rsp.info, dist.mat, file = resultsname)
+      section.overview, group.overview, release.overview, matrices, overall.CJS, intra.array.matrices, intra.array.CJS, times, rsp.info, dist.mat, file = resultsname)
 # ------------
 
 # Print graphics
