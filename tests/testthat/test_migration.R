@@ -255,7 +255,10 @@ test_that("migration is able to run speed and inactiveness checks.", {
 	
 	file.remove("detections/actel.detections.RData")
 	
-	expect_equal(sort(names(output)), c('arrays', 'deployments', 'detections', 'dist.mat', 'group.overview', 'intra.array.CJS', 'intra.array.matrices','matrices', 'movements', 'overall.CJS', 'release.overview', 'rsp.info', 'section.movements', 'section.overview', 'spatial', 'status.df', 'times', 'valid.detections', 'valid.movements'))
+	expect_false(any(is.na(names(output), c('arrays', 'deployments', 'detections', 'dist.mat', 'group.overview', 
+		'intra.array.CJS', 'intra.array.matrices','matrices', 'movements', 'overall.CJS', 'release.overview', 
+		'rsp.info', 'section.movements', 'section.overview', 'spatial', 'status.df', 'times', 'valid.detections', 
+		'valid.movements'))))
 	
 	file.remove("distances.csv")
 	
@@ -265,7 +268,9 @@ test_that("migration is able to run speed and inactiveness checks.", {
 	
 	file.remove("detections/actel.detections.RData")
 	
-	expect_equal(sort(names(output)), c('arrays', 'deployments', 'detections', 'group.overview', 'intra.array.CJS', 'intra.array.matrices','matrices', 'movements', 'overall.CJS', 'release.overview', 'rsp.info', 'section.movements', 'section.overview', 'spatial', 'status.df', 'times', 'valid.detections', 'valid.movements'))
+	expect_false(any(is.na(names(output), c('arrays', 'deployments', 'detections', 'group.overview', 'intra.array.CJS',
+	 'intra.array.matrices','matrices', 'movements', 'overall.CJS', 'release.overview', 'rsp.info', 'section.movements',
+	  'section.overview', 'spatial', 'status.df', 'times', 'valid.detections', 'valid.movements'))))
 })
 
 test_that("migration can handle multiple expected first arrays", {
@@ -285,7 +290,19 @@ test_that("the debug option works as expected", {
 
 	expect_true(file.exists("migration_debug.RData"))
 	aux <- dataToList("migration_debug.RData")
-	expect_equal(sort(names(aux)), c('arrays', 'bio', 'calculate.efficiency', 'CJS.list', 'debug', 'deployments', 'detections', 'detections.list', 'disregard.parallels', 'dist.mat', 'do.checkInactiveness', 'do.checkSpeeds', 'dot', 'dotmat', 'exclude.tags', 'group.CJS', 'group.overview', 'GUI', 'if.last.skip.section', 'inactive.error', 'inactive.warning', 'inst.ver.short', 'intra.array.CJS', 'intra.array.matrices', 'invalid.dist', 'jobname', 'jump.error', 'jump.warning', 'link', 'm.by.array', 'matrices', 'max.interval', 'minimum.detections', 'movements', 'my.home', 'overall.CJS', 'override', 'override.fragment', 'path', 'paths', 'print.releases', 'release.overview', 'release_nodes', 'replicates', 'report', 'resultsname', 'rsp.info', 'section.movements', 'section.overview', 'sections', 'spatial', 'speed.error', 'speed.method', 'speed.warning', 'split.CJS', 'start.time', 'status.df', 'stop.time', 'study.data', 'success.arrays', 'the.function.call', 'the.matrices', 'the.time', 'times', 'timetable', 'tz', 'valid.detections', 'valid.movements'))
+	expect_false(any(is.na(match(names(aux), c('arrays', 'bio', 'calculate.efficiency', 'CJS.list', 'debug', 
+		'deployments', 'detections', 'detections.list', 'disregard.parallels', 'dist.mat', 
+		'do.checkInactiveness', 'do.checkSpeeds', 'dot', 'dotmat', 'exclude.tags', 'group.CJS', 
+		'group.overview', 'GUI', 'if.last.skip.section', 'inactive.error', 'inactive.warning', 
+		'inst.ver.short', 'intra.array.CJS', 'intra.array.matrices', 'invalid.dist', 'jobname', 
+		'jump.error', 'jump.warning', 'link', 'm.by.array', 'matrices', 'max.interval', 
+		'minimum.detections', 'movements', 'my.home', 'overall.CJS', 'override', 'override.fragment', 
+		'path', 'paths', 'print.releases', 'release.overview', 'release_nodes', 'replicates', 'report', 'resultsname', 
+		'rsp.info', 'section.movements', 'section.overview', 'sections', 'spatial', 'speed.error', 
+		'speed.method', 'speed.warning', 'split.CJS', 'start.time', 'status.df', 'stop.time', 'study.data', 
+		'success.arrays', 'the.function.call', 'the.matrices', 'the.time', 'times', 'timetable', 'tz', 
+		'valid.detections', 'valid.movements')))))
+
 	expect_true(file.exists("temp_warnings.txt"))
 	expect_true(file.exists("temp_debug.txt"))
 })
