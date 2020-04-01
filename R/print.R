@@ -126,7 +126,7 @@ printProgression <- function(dot, sections, overall.CJS, spatial, status.df, pri
     combined_edges <- diagram_edges
   }
 
-  if (!is.null(combined.edges)) {
+  if (!is.null(combined_edges)) {
     edge_list <- split(combined_edges, combined_edges$type)
 
     edge_fragment <- paste0(unlist(lapply(edge_list, function(n) {
@@ -482,9 +482,9 @@ printEfficiency <- function(CJS = NULL, efficiency = NULL, intra.CJS, type = c("
     if (is.null(CJS)) {
       efficiency.fragment <- "Inter-array efficiency could not be calculated. See full log for more details.\n"
     } else {
-      to.print <- t(paste0(round(overall.CJS$efficiency * 100, 1), "%"))
+      to.print <- t(paste0(round(CJS$efficiency * 100, 1), "%"))
       to.print[grepl("NA", to.print)] <- "-"
-      colnames(to.print) <- names(overall.CJS$efficiency)
+      colnames(to.print) <- names(CJS$efficiency)
       rownames(to.print) <- "efficiency"
 
       efficiency.fragment <- paste0('
@@ -494,7 +494,7 @@ Note:
 
 **Individuals detected and estimated**
 
-', paste(knitr::kable(overall.CJS$absolutes), collapse = "\n"), '
+', paste(knitr::kable(CJS$absolutes), collapse = "\n"), '
 
 **Array efficiency**
 
