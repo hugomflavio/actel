@@ -177,10 +177,10 @@ test_that("residency results contains all the expected elements.", {
 	output <- suppressWarnings(residency(tz = 'Europe/Copenhagen', sections = c("River", "Fjord", "Sea"), report = TRUE, GUI = "never"))
 	file.remove("detections/actel.detections.RData")
 
-	expect_false(any(is.na(names(aux), c('array.times', 'arrays', 'daily.positions', 'daily.ratios', 'deployments', 
+	expect_false(any(is.na(match(names(aux), c('array.times', 'arrays', 'daily.positions', 'daily.ratios', 'deployments', 
 		'detections', 'dist.mat', 'efficiency', 'global.ratios', 'intra.array.CJS', 'intra.array.matrices',
 		'last.seen', 'movements', 'residency.list', 'rsp.info', 'section.movements', 'section.times', 
-		'spatial', 'status.df', 'valid.detections', 'valid.movements'))))
+		'spatial', 'status.df', 'valid.detections', 'valid.movements')))))
 
 	# all the contents of each object have been tested in their respective function tests, appart from rsp.info and last.seen
 	expect_equal(names(output$rsp.info), c('analysis.type', 'analysis.time', 'bio', 'tz', 'actel.version'))
@@ -212,19 +212,19 @@ test_that("residency is able to run speed and inactiveness checks.", {
 	output <- suppressWarnings(residency(sections = c("River", "Fjord", "Sea"), tz = 'Europe/Copenhagen', 
 		report = FALSE, GUI = "never", speed.warning = 1000000, inactive.warning = 1000000, replicates = list(Sea1 = c("St.16", "St.17"))))
 	file.remove("detections/actel.detections.RData")
-	expect_false(any(is.na(names(output), c('array.times', 'arrays', 'daily.positions', 'daily.ratios', 
+	expect_false(any(is.na(match(names(output), c('array.times', 'arrays', 'daily.positions', 'daily.ratios', 
 		'deployments', 'detections', 'dist.mat', 'efficiency', 'global.ratios', 'intra.array.CJS', 
 		'intra.array.matrices','last.seen', 'movements', 'residency.list', 'rsp.info', 'section.movements', 
-		'section.times', 'spatial', 'status.df', 'valid.detections', 'valid.movements'))))
+		'section.times', 'spatial', 'status.df', 'valid.detections', 'valid.movements')))))
 	file.remove("distances.csv")
 	expect_warning(output <- residency(sections = c("River", "Fjord", "Sea"), tz = 'Europe/Copenhagen', report = TRUE, 
 			GUI = "never", speed.error = 1000000, inactive.error = 1000000),
 		"Running inactiveness checks without a distance matrix. Performance may be limited.", fixed = TRUE)
 	file.remove("detections/actel.detections.RData")
-	expect_false(any(is.na(names(output), c('array.times', 'arrays', 'daily.positions', 'daily.ratios', 
+	expect_false(any(is.na(match(names(output), c('array.times', 'arrays', 'daily.positions', 'daily.ratios', 
 		'deployments', 'detections', 'efficiency', 'global.ratios', 'intra.array.CJS', 'intra.array.matrices',
 		'last.seen', 'movements', 'residency.list', 'rsp.info', 'section.movements', 'section.times', 
-		'spatial', 'status.df', 'valid.detections', 'valid.movements'))))
+		'spatial', 'status.df', 'valid.detections', 'valid.movements')))))
 })
 
 test_that("residency can handle multiple release sites.", {
@@ -267,7 +267,7 @@ test_that("the debug option works as expected", {
 	file.remove("detections/actel.detections.RData")
 	expect_true(file.exists("residency_debug.RData"))
 	aux <- dataToList("residency_debug.RData")
-	expect_false(any(is.na(names(aux), c('array.times', 'arrays', 'bio', 'daily.positions', 'daily.ratios', 
+	expect_false(any(is.na(match(names(aux), c('array.times', 'arrays', 'bio', 'daily.positions', 'daily.ratios', 
 		'debug', 'deployments', 'detections', 'detections.list', 'dist.mat', 'do.checkInactiveness', 'do.checkSpeeds', 
 		'dot', 'dotmat', 'efficiency', 'exclude.tags', 'global.ratios', 'GUI', 'inactive.error', 'inactive.warning',
 		'inst.ver.short', 'intra.array.CJS', 'intra.array.matrices', 'invalid.dist', 'jobname', 'jump.error', 
@@ -276,7 +276,7 @@ test_that("the debug option works as expected", {
 		'residency.list', 'resultsname', 'rsp.info', 'section.minimum', 'section.movements', 'section.times', 
 		'sections', 'spatial', 'speed.error', 'speed.method', 'speed.warning', 'start.time', 'status.df', 
 		'stop.time', 'study.data', 'success.arrays', 'the.function.call', 'the.time', 'tz', 'valid.detections', 
-		'valid.movements'))))
+		'valid.movements')))))
 	expect_true(file.exists("temp_warnings.txt"))
 	expect_true(file.exists("temp_debug.txt"))
 })
