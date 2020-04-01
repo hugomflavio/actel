@@ -44,8 +44,15 @@ loadStudyData <- function(tz, override = NULL, start.time, stop.time,
     use.fakedot <- FALSE
   }
   if (use.fakedot) {
-    fakedot <- paste(unique(spatial$Array[spatial$Type == "Hydrophone"]), collapse = "--")
-    recipient <- loadDot(string = fakedot, spatial = spatial, sections = sections, disregard.parallels = disregard.parallels)
+    n <- length(unique(spatial$Array[spatial$Type == "Hydrophone"]))
+    if (n > 1) {
+      fakedot <- paste(unique(spatial$Array[spatial$Type == "Hydrophone"]), collapse = "--")
+      recipient <- loadDot(string = fakedot, spatial = spatial, sections = sections, disregard.parallels = disregard.parallels)
+    } else {
+      aux <- unique(spatial$Array[spatial$Type == "Hydrophone"])
+      fakedot <- paste(aux, "--", aux)
+      recipient <- loadDot(string = fakedot, spatial = spatial, sections = sections, disregard.parallels = disregard.parallels)
+    }
   }
   dot <- recipient$dot
   arrays <- recipient$arrays

@@ -95,16 +95,25 @@ printProgression <- function(dot, sections, overall.CJS, spatial, status.df, pri
   }
 
   # prepare edge data frame
-  if (nrow(dot) == 1)
-    diagram_edges <- as.data.frame(t(apply(dot[, c(1, 3), drop = FALSE], 2, function(x) match(x, diagram_nodes$original.label))))
-  else 
+  if (nrow(dot) == 1) {
+    if (dot[1, 1] == dot[1, 3]) {
+      diagram_edges <- NULL
+      complete <- FALSE
+    } else {
+      diagram_edges <- as.data.frame(t(apply(dot[, c(1, 3), drop = FALSE], 2, function(x) match(x, diagram_nodes$original.label))))
+      complete <- TRUE
+    }
+  } else  {
     diagram_edges <- as.data.frame(apply(dot[, c(1, 3), drop = FALSE], 2, function(x) match(x, diagram_nodes$original.label)))
-  diagram_edges$type <- NA_character_
-  diagram_edges$type[dot$to == "--"] <- "[dir = none]"
-  diagram_edges$type[dot$to == "->"] <- "[arrowtail = tee, arrowhead = normal, dir = both]"
-  diagram_edges$type[dot$to == "<-"] <- "[arrowtail = normal, arrowhead = tee, dir = both]"
-  colnames(diagram_edges) <- c("from", "to", "type")
-
+    complete <- TRUE
+  }
+  if (complete) {
+    diagram_edges$type <- NA_character_
+    diagram_edges$type[dot$to == "--"] <- "[dir = none]"
+    diagram_edges$type[dot$to == "->"] <- "[arrowtail = tee, arrowhead = normal, dir = both]"
+    diagram_edges$type[dot$to == "<-"] <- "[arrowtail = normal, arrowhead = tee, dir = both]"
+    colnames(diagram_edges) <- c("from", "to", "type")
+  }
   # Release edges
   if (print.releases) {
     release_edges <- data.frame(from = release_nodes$id,
@@ -117,12 +126,16 @@ printProgression <- function(dot, sections, overall.CJS, spatial, status.df, pri
     combined_edges <- diagram_edges
   }
 
-  edge_list <- split(combined_edges, combined_edges$type)
+  if (!is.null(combined.edges)) {
+    edge_list <- split(combined_edges, combined_edges$type)
 
-  edge_fragment <- paste0(unlist(lapply(edge_list, function(n) {
-    s <- paste0("edge ", n$type[1], "\n")
-    s <- paste0(s, paste0(apply(n, 1, function(x) paste0(x[1:2], collapse = "->")), collapse = "\n"), "\n")
-  })), collapse = "\n")
+    edge_fragment <- paste0(unlist(lapply(edge_list, function(n) {
+      s <- paste0("edge ", n$type[1], "\n")
+      s <- paste0(s, paste0(apply(n, 1, function(x) paste0(x[1:2], collapse = "->")), collapse = "\n"), "\n")
+    })), collapse = "\n")
+  } else {
+    edge_fragment <- ""
+  }
 
   x <- paste0("digraph {
   rankdir = LR
@@ -210,15 +223,25 @@ printDot <- function(dot, sections = NULL, spatial, print.releases) {
   }
 
   # prepare edge data frame
-  if (nrow(dot) == 1)
-    diagram_edges <- as.data.frame(t(apply(dot[, c(1, 3), drop = FALSE], 2, function(x) match(x, diagram_nodes$label))))
-  else 
+  if (nrow(dot) == 1) {
+    if (dot[1, 1] == dot[1, 3]) {
+      diagram_edges <- NULL
+      complete <- FALSE
+    } else {
+      diagram_edges <- as.data.frame(t(apply(dot[, c(1, 3), drop = FALSE], 2, function(x) match(x, diagram_nodes$label))))
+      complete <- TRUE
+    }
+  } else {
     diagram_edges <- as.data.frame(apply(dot[, c(1, 3), drop = FALSE], 2, function(x) match(x, diagram_nodes$label)))
-  diagram_edges$type <- NA_character_
-  diagram_edges$type[dot$to == "--"] <- "[dir = none]"
-  diagram_edges$type[dot$to == "->"] <- "[arrowtail = tee, arrowhead = normal, dir = both]"
-  diagram_edges$type[dot$to == "<-"] <- "[arrowtail = normal, arrowhead = tee, dir = both]"
-  colnames(diagram_edges) <- c("from", "to", "type")
+    complete <- TRUE
+  }
+  if (complete) {
+    diagram_edges$type <- NA_character_
+    diagram_edges$type[dot$to == "--"] <- "[dir = none]"
+    diagram_edges$type[dot$to == "->"] <- "[arrowtail = tee, arrowhead = normal, dir = both]"
+    diagram_edges$type[dot$to == "<-"] <- "[arrowtail = normal, arrowhead = tee, dir = both]"
+    colnames(diagram_edges) <- c("from", "to", "type")
+  }
 
   # Release edges
   if (print.releases) {  
@@ -232,12 +255,16 @@ printDot <- function(dot, sections = NULL, spatial, print.releases) {
     combined_edges <- diagram_edges
   }
 
-  edge_list <- split(combined_edges, combined_edges$type)
+  if (!is.null(combined_edges)) {
+    edge_list <- split(combined_edges, combined_edges$type)
 
-  edge_fragment <- paste0(unlist(lapply(edge_list, function(n) {
-    s <- paste0("edge ", n$type[1], "\n")
-    s <- paste0(s, paste0(apply(n, 1, function(x) paste0(x[1:2], collapse = "->")), collapse = "\n"), "\n")
-  })), collapse = "\n")
+    edge_fragment <- paste0(unlist(lapply(edge_list, function(n) {
+      s <- paste0("edge ", n$type[1], "\n")
+      s <- paste0(s, paste0(apply(n, 1, function(x) paste0(x[1:2], collapse = "->")), collapse = "\n"), "\n")
+    })), collapse = "\n")
+  } else {
+    edge_fragment <- ""
+  }
 
   x <- paste0("digraph {
   rankdir = LR
@@ -300,7 +327,6 @@ printBiometrics <- function(bio) {
         biometric.fragment <- paste0(biometric.fragment, "![](", gsub("[.]", "_", i), "_boxplot.png){ width=", graphic.width, " }")
     }
   }
-  rm(C, graphic.width)
   appendTo("debug", "Terminating printBiometrics.")
   return(biometric.fragment)
 }

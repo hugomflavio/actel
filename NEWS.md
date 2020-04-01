@@ -8,6 +8,7 @@ Fixes:
   * Sort deployment rows by start time. Avoids false triggering of redeployment-before-retrieval errors.
   * Prevent failure to identify receivers if the model-serial combination has two or more "-" characters.
   * Prevent residence crash if no fish entered a given section.
+  * Prevent crash if study area only has one array.
 
 Enhancements:
   * Perform early quality checks on the content of 'sections' before advancing with migration and residency analysis.
