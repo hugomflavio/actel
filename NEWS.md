@@ -10,6 +10,9 @@ Fixes:
   * Prevent residence crash if no fish entered a given section.
   * Prevent crash if study area only has one array.
 
+Changes:
+  * maximum efficiency estimates in residency now only take into account known missed events and recorded events in the denominator (previously, potentially missed events were being included as well).
+
 Enhancements:
   * Perform early quality checks on the content of 'sections' before advancing with migration and residency analysis.
   * Allow user to hide release sites from the study area diagrams.

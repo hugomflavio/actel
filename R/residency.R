@@ -1116,7 +1116,7 @@ res_efficiency <- function(arrmoves, bio, spatial, arrays, paths, dotmat) {
   absolutes[2, match(no.neighbours, colnames(absolutes))] <- NA
   absolutes[3, match(no.neighbours, colnames(absolutes))] <- NA
 
-  max.efficiency <- apply(absolutes, 2, function(x) 1 - (x[2] / sum(x)))
+  max.efficiency <- apply(absolutes, 2, function(x) 1 - (x[2] / (x[1] + x[2])))
   min.efficiency <- apply(absolutes, 2, function(x) 1 - ((x[2] + x[3]) / sum(x)))
   return(list(absolutes = absolutes, max.efficiency = max.efficiency, min.efficiency = min.efficiency, values.per.fish = values.per.fish))
 }
