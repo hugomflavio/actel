@@ -296,10 +296,8 @@ test_that("dualMatrix stops if stations that do not belong to the array are used
 })
 
 test_that("includeIntraArrayEstimates throws errors if expected conditions are not met", {
-  expect_error(includeIntraArrayEstimates(m = intra.array.matrices, CJS = overall.CJS, efficiency  = "test"),
+  expect_error(includeIntraArrayEstimates(m = NULL, CJS = overall.CJS, efficiency  = "test"),
   	"Use only one of 'efficiency' or 'CJS' at a time.", fixed = TRUE)
-  expect_error(includeIntraArrayEstimates(m = intra.array.matrices),
-  	"Include a 'efficiency' or 'CJS' argument.", fixed = TRUE)
 })
 
 test_that("replicate functions work as expected.", {

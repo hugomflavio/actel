@@ -198,9 +198,7 @@ test_that("migration results contains all the expected elements.", {
 	
 	file.remove("detections/actel.detections.RData")
 	
-	expect_equal(names(output), c('detections', 'valid.detections', 'spatial', 'deployments', 'arrays', 'movements', 
-		'valid.movements', 'section.movements', 'status.df', 'section.overview', 'group.overview', 'release.overview', 
-		'matrices', 'overall.CJS', 'intra.array.CJS', 'times', 'rsp.info', 'dist.mat'))
+	expect_equal(sort(names(output)), c('arrays', 'deployments', 'detections', 'dist.mat','group.overview', 'intra.array.CJS', 'intra.array.matrices','matrices', 'movements', 'overall.CJS', 'release.overview', 'rsp.info', 'section.movements', 'section.overview', 'spatial', 'status.df', 'times', 'valid.detections', 'valid.movements'))
 
 	# all the contents of each object have been tested in their respective function tests, appart from rsp.info, release.overview and group.overview
 	expect_equal(names(output$rsp.info), c('analysis.type', 'analysis.time', 'bio', 'tz', 'actel.version'))
@@ -257,9 +255,7 @@ test_that("migration is able to run speed and inactiveness checks.", {
 	
 	file.remove("detections/actel.detections.RData")
 	
-	expect_equal(names(output), c('detections', 'valid.detections', 'spatial', 'deployments', 'arrays', 'movements', 
-		'valid.movements', 'section.movements', 'status.df', 'section.overview', 'group.overview', 'release.overview', 
-		'matrices', 'overall.CJS', 'intra.array.CJS', 'times', 'rsp.info', 'dist.mat'))
+	expect_equal(sort(names(output)), c('arrays', 'deployments', 'detections', 'dist.mat', 'group.overview', 'intra.array.CJS', 'intra.array.matrices','matrices', 'movements', 'overall.CJS', 'release.overview', 'rsp.info', 'section.movements', 'section.overview', 'spatial', 'status.df', 'times', 'valid.detections', 'valid.movements'))
 	
 	file.remove("distances.csv")
 	
@@ -269,9 +265,7 @@ test_that("migration is able to run speed and inactiveness checks.", {
 	
 	file.remove("detections/actel.detections.RData")
 	
-	expect_equal(names(output), c('detections', 'valid.detections', 'spatial', 'deployments', 'arrays', 'movements', 
-		'valid.movements', 'section.movements', 'status.df', 'section.overview', 'group.overview', 'release.overview', 
-		'matrices', 'overall.CJS', 'intra.array.CJS', 'times', 'rsp.info'))
+	expect_equal(sort(names(output)), c('arrays', 'deployments', 'detections', 'group.overview', 'intra.array.CJS', 'intra.array.matrices','matrices', 'movements', 'overall.CJS', 'release.overview', 'rsp.info', 'section.movements', 'section.overview', 'spatial', 'status.df', 'times', 'valid.detections', 'valid.movements'))
 })
 
 test_that("migration can handle multiple expected first arrays", {
