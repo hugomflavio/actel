@@ -567,7 +567,7 @@ if(file.exists("../temp_warnings.txt")) cat(gsub("\\r", "", readr::read_file("..
  if(file.exists("../temp_comments.txt")) cat(gsub("\\r", "", readr::read_file("../temp_comments.txt"))) else cat("No comments were included during the analysis.")
 ```
 
-### Biometric graphics
+', ifelse(biometric.fragment == '', '', paste0('### Biometric graphics
 
 Note:
   : The data used in this graphic is the data present in the biometrics.csv file.
@@ -575,7 +575,7 @@ Note:
 <center>
 ', biometric.fragment,'
 </center>
-
+')), '
 
 ### Average time of arrival at each Array
 
@@ -692,8 +692,8 @@ h4 {
   <a href="#deployments">Deployments</a>
   <a href="#release-sites">Release sites</a>
   <a href="#warning-messages">Warnings</a>
-  <a href="#user-comments">Comments</a>
-  <a href="#biometric-graphics">Biometrics</a>
+  <a href="#user-comments">Comments</a>',
+  ifelse(biometric.fragment == '', '', '\n  <a href="#biometric-graphics">Biometrics</a>'),'
   <a href="#average-time-of-arrival-at-each-array">Arrival times</a>
   <a href="#individual-plots">Individuals</a>',
   ifelse(is.null(sensor.fragment), '', '\n<a href="#sensor-plots">Sensor data</a>'),'

@@ -767,7 +767,7 @@ Note:
 ```
 
 
-### Biometric graphics
+', ifelse(biometric.fragment == '', '', paste0('### Biometric graphics
 
 Note:
   : The data used in this graphic is the data present in the biometrics.csv file.
@@ -775,7 +775,7 @@ Note:
 <center>
 ', biometric.fragment,'
 </center>
-
+')), '
 
 ### Survival
 
@@ -938,8 +938,8 @@ img[src*="#diagram"] {
   <a href="#release-sites">Release sites</a>
   <a href="#array-forward-efficiency">Efficiency</a>
   <a href="#warning-messages">Warnings</a>
-  <a href="#user-comments">Comments</a>
-  <a href="#biometric-graphics">Biometrics</a>
+  <a href="#user-comments">Comments</a>',
+  ifelse(biometric.fragment == '', '', '\n  <a href="#biometric-graphics">Biometrics</a>'),'
   <a href="#survival">Survival</a>
   <a href="#progression">Progression</a>
   <a href="#time-of-arrival-at-each-array">Arrival times</a>
