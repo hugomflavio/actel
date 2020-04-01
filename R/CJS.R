@@ -72,8 +72,6 @@ output <- list()
 includeIntraArrayEstimates <- function(m, efficiency = NULL, CJS = NULL) {
   if (!is.null(efficiency) & !is.null(CJS))
     stop("Use only one of 'efficiency' or 'CJS' at a time.\n")
-  if (is.null(efficiency) & is.null(CJS))
-    stop("Include a 'efficiency' or 'CJS' argument.\n")
   if (length(m) > 0) {
     intra.CJS <- lapply(m, dualArrayCJS)
     if (!is.null(CJS)) {
@@ -81,7 +79,8 @@ includeIntraArrayEstimates <- function(m, efficiency = NULL, CJS = NULL) {
         CJS$absolutes[4, i] <- round(CJS$absolutes[1, i] / intra.CJS[[i]]$combined.efficiency, 0)
         CJS$efficiency[i] <- intra.CJS[[i]]$combined.efficiency
       }
-    } else {
+    } 
+    if (!is.null(efficiency)) {
       for (i in names(intra.CJS)) {
         efficiency$max.efficiency[i] <- intra.CJS[[i]]$combined.efficiency
         efficiency$min.efficiency[i] <- intra.CJS[[i]]$combined.efficiency
@@ -92,8 +91,9 @@ includeIntraArrayEstimates <- function(m, efficiency = NULL, CJS = NULL) {
   }
   if (!is.null(CJS))
     return(list(CJS = CJS, intra.CJS = intra.CJS))
-  else
+  if (!is.null(efficiency))
     return(list(efficiency = efficiency, intra.CJS = intra.CJS))
+  return(list(intra.CJS = intra.CJS))
 }
 
 

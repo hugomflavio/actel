@@ -439,7 +439,7 @@ migration <- function(path = NULL, tz, sections, success.arrays = NULL, max.inte
 
   if (is.null(m.by.array[[1]])) {
     calculate.efficiency <- FALSE
-    appendTo(c("Screen", "Report", "Warning"), "Aborting efficiency calculations (will limit the report's output).")
+    appendTo(c("Screen", "Report", "Warning"), "Aborting inter-array efficiency calculations (will limit the report's output).")
   } else {
     calculate.efficiency <- TRUE
   }
@@ -464,8 +464,8 @@ migration <- function(path = NULL, tz, sections, success.arrays = NULL, max.inte
     if (!is.null(replicates)) {
       intra.array.matrices <- getDualMatrices(replicates = replicates, CJS = overall.CJS, spatial = spatial, detections.list = valid.detections)
       recipient <- includeIntraArrayEstimates(m = intra.array.matrices, CJS = overall.CJS)
-      overall.CJS <- recipient[[1]]
-      intra.array.CJS <- recipient[[2]]
+      overall.CJS <- recipient$CJS
+      intra.array.CJS <- recipient$intra.CJS
       rm(recipient)
     } else {
       intra.array.CJS <- NULL
@@ -497,12 +497,21 @@ migration <- function(path = NULL, tz, sections, success.arrays = NULL, max.inte
     })
     names(group.overview) <- names(aux)
     rm(aux)
-} else {
-  overall.CJS <- NULL
-  intra.array.CJS <- NULL
-  release.overview <- NULL
-  group.overview <- NULL
-}
+  } else {
+    overall.CJS <- NULL
+
+    if (!is.null(replicates)) {
+      appendTo(c("Screen", "Report"), "M: Calculating intra-array efficiency.")
+      intra.array.matrices <- getDualMatrices(replicates = replicates, CJS = overall.CJS, spatial = spatial, detections.list = valid.detections)
+      intra.array.CJS <- includeIntraArrayEstimates(m = intra.array.matrices, CJS = overall.CJS)$intra.CJS
+    } else {
+      intra.array.matrices <- NULL
+      intra.array.CJS <- NULL
+    }
+
+    release.overview <- NULL
+    group.overview <- NULL
+  }
 # -------------------------------------
 
 # wrap up in-R objects
@@ -545,10 +554,7 @@ migration <- function(path = NULL, tz, sections, success.arrays = NULL, max.inte
   if (report) {
     appendTo(c("Screen", "Report"), "M: Producing the report.")
     biometric.fragment <- printBiometrics(bio = bio)
-    if (calculate.efficiency)
-      efficiency.fragment <- printEfficiency(intra.CJS = intra.array.CJS, type = "migration")
-    else
-      efficiency.fragment <- "Array efficiency could not be calculated. See full log for more details.\n"
+    efficiency.fragment <- printEfficiency(CJS = overall.CJS, intra.CJS = intra.array.CJS, type = "migration")
     printDotplots(status.df = status.df, invalid.dist = invalid.dist)
     printSurvivalGraphic(section.overview = section.overview)
     printDot(dot = dot, sections = sections, spatial = spatial, print.releases = print.releases)
@@ -626,11 +632,11 @@ migration <- function(path = NULL, tz, sections, success.arrays = NULL, max.inte
   if (invalid.dist)
     return(list(detections = detections, valid.detections = valid.detections, spatial = spatial, deployments = deployments, arrays = arrays,
       movements = movements, valid.movements = valid.movements, section.movements = section.movements, status.df = status.df, section.overview = section.overview, group.overview = group.overview,
-      release.overview = release.overview, matrices = matrices, overall.CJS = overall.CJS, intra.array.CJS = intra.array.CJS, times = times, rsp.info = rsp.info))
+      release.overview = release.overview, matrices = matrices, overall.CJS = overall.CJS, intra.array.matrices = intra.array.matrices, intra.array.CJS = intra.array.CJS, times = times, rsp.info = rsp.info))
   else
     return(list(detections = detections, valid.detections = valid.detections, spatial = spatial, deployments = deployments, arrays = arrays,
       movements = movements, valid.movements = valid.movements, section.movements = section.movements, status.df = status.df, section.overview = section.overview, group.overview = group.overview,
-      release.overview = release.overview, matrices = matrices, overall.CJS = overall.CJS, intra.array.CJS = intra.array.CJS, times = times, rsp.info = rsp.info, dist.mat = dist.mat))
+      release.overview = release.overview, matrices = matrices, overall.CJS = overall.CJS, intra.array.matrices = intra.array.matrices, intra.array.CJS = intra.array.CJS, times = times, rsp.info = rsp.info, dist.mat = dist.mat))
 }
 
 #' Print Rmd report

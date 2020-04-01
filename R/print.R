@@ -469,72 +469,86 @@ printArrayOverview <- function(array.overview) {
 #'
 #' Prints the ALS inter-array efficiency for inclusion in printRmd.
 #' 
+#' @param CJS the overall CJS result from a migration analysis. Used to assess if efficiency should be printed.
+#' @param efficiency the overall efficiency result from a residency analysis. Used to assess if efficiency should be printed.
 #' @param intra.CJS The output of the getEstimate calculations.
+#' @param type The type of analysis being run (migration or residency)
 #' 
 #' @keywords internal
 #' 
-printEfficiency <- function(intra.CJS, type = c("migration", "residency")){
+printEfficiency <- function(CJS = NULL, efficiency = NULL, intra.CJS, type = c("migration", "residency")){
   type <- match.arg(type)
   if (type == "migration") {
-    efficiency.fragment <- paste('
+    if (is.null(CJS)) {
+      efficiency.fragment <- "Inter-array efficiency could not be calculated. See full log for more details.\n"
+    } else {
+      to.print <- t(paste0(round(overall.CJS$efficiency * 100, 1), "%"))
+      to.print[grepl("NA", to.print)] <- "-"
+      colnames(to.print) <- names(overall.CJS$efficiency)
+      rownames(to.print) <- "efficiency"
+
+      efficiency.fragment <- paste0('
 Note:
-  : The data used in the tables below is stored in the `overall.CJS` object. Auxiliary information can also be found in the `matrixes` and `arrays` objects.
+  : The data used in the tables below is stored in the `overall.CJS` object. Auxiliary information can also be found in the `matrices` and `arrays` objects.
+  : These efficiency values are estimated using the equations provided in the paper "Using mark-recapture models to estimate survival from telemetry data" by Perry et al. (2012). In some situations, more advanced efficiency estimation methods may be required.
 
 **Individuals detected and estimated**
 
-```{r efficiency1, echo = FALSE}
-knitr::kable(overall.CJS$absolutes)
-```
+', paste(knitr::kable(overall.CJS$absolutes), collapse = "\n"), '
 
 **Array efficiency**
 
-```{r efficiency2, echo = FALSE}
-to.print <- t(paste0(round(overall.CJS$efficiency * 100, 1), "%"))
-to.print[grepl("NA", to.print)] <- "-"
-colnames(to.print) <- names(overall.CJS$efficiency)
-rownames(to.print) <- "efficiency"
-knitr::kable(to.print)
-```
+Note:
+  : These values already include any intra-array efficiency estimates that have been requested.
 
-#### Intra array efficiency estimates
+', paste(knitr::kable(to.print), collapse = "\n"), '
+
 ')
+    }
   } else {
-    efficiency.fragment <- paste('
+    if (is.null(efficiency)) {
+      efficiency.fragment <- "Inter-array efficiency could not be calculated. See full log for more details.\n"
+    } else {
+      absolutes <- as.data.frame(apply(efficiency$absolutes, c(1, 2), function(x) ifelse(is.na(x), "-", x)))
+
+      minmax <- t(paste0(round(efficiency$max.efficiency * 100, 1), "%"))
+      minmax[grepl("NA", minmax)] <- "-"
+      minmax <- as.data.frame(minmax, stringsAsFactors = FALSE)
+      colnames(minmax) <- names(efficiency$max.efficiency)
+
+      aux <- t(paste0(round(efficiency$min.efficiency * 100, 1), "%"))
+      aux[grepl("NA", aux)] <- "-"
+      minmax[2, ] <- aux
+
+      rownames(minmax) <- c("Maximum efficiency", "Minimum efficiency")
+
+      efficiency.fragment <- paste0('
 Note:
   : More information on the differences between "Known missed events" and "Potentially missed events" can be found in the package vignettes.
   : The data used in this table is stored in the `efficiency` object.
+  : These efficiency values are estimated using a simple step-by-step method (described in the package vignettes). In some situations, more advanced efficiency estimation methods may be required.
 
 **Events recorded and missed**
 
-```{r efficiency1, echo = FALSE}
-to.print <- as.data.frame(apply(efficiency$absolutes, c(1, 2), function(x) ifelse(is.na(x), "-", x)))
-knitr::kable(to.print)
-```
+', paste(knitr::kable(absolutes), collapse = "\n"), '
 
 **Array efficiency**
 
-```{r efficiency2, echo = FALSE}
-to.print <- t(paste0(round(efficiency$max.efficiency * 100, 1), "%"))
-to.print[grepl("NA", to.print)] <- "-"
-to.print <- as.data.frame(to.print, stringsAsFactors = FALSE)
-colnames(to.print) <- names(efficiency$max.efficiency)
+Note:
+  : These values already include any intra-array efficiency estimates that have been requested.
 
-aux <- t(paste0(round(efficiency$min.efficiency * 100, 1), "%"))
-aux[grepl("NA", aux)] <- "-"
-to.print[2, ] <- aux
+', paste(knitr::kable(minmax), collapse = "\n"), '
 
-rownames(to.print) <- c("Maximum efficiency", "Minimum efficiency")
-
-knitr::kable(to.print)
-```
-
-#### Intra array efficiency estimates
-')    
+')
+    }
   }
   if (!is.null(intra.CJS)){
     efficiency.fragment <- paste0(efficiency.fragment, '
+#### Intra array efficiency estimates
+
 Note:
-  : The data used in the table(s) below is stored in the `intra.array.CJS` object.
+  : The data used in the table(s) below is stored in the `intra.array.CJS` object. Auxiliary information can also be found in the `intra.array.matrices` object.
+  : These efficiency values are estimated using the equations provided in the paper "Using mark-recapture models to estimate survival from telemetry data" by Perry et al. (2012). In some situations, more advanced efficiency estimation methods may be required.
 ')
     for (i in 1:length(intra.CJS)) {
     efficiency.fragment <- paste0(efficiency.fragment, '
@@ -546,12 +560,7 @@ knitr::kable(intra.array.CJS[[',i ,']]$absolutes)
 
 *Estimated efficiency:* ', round(intra.CJS[[i]]$combined.efficiency * 100, 2), "%\n")
     }
-  } else {
-    efficiency.fragment <- paste0(efficiency.fragment, '
-```{r efficiency3, echo = FALSE,  comment = NA}
-cat("No intra-array replicates were indicated.")
-```')
-  }
+  } 
   return(efficiency.fragment)
 }
 

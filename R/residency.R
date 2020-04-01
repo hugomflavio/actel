@@ -416,15 +416,22 @@ residency <- function(path = NULL, tz, sections, success.arrays = NULL, max.inte
 # ---------------
   
 # Efficiency
-  appendTo(c("Screen", "Report"), "M: Calculating array efficiency.")
-  efficiency <- res_efficiency(arrmoves = valid.movements, bio = bio, spatial = spatial, arrays = arrays, paths = paths, dotmat = dotmat)
+  if (length(arrays) == 0) {
+    appendTo(c("Screen", "Warning", "Report"), "Cannot calculate inter-array efficiency when there is only one array (will limit the report's output).")
+    efficiency <- NULL
+  } else {
+    appendTo(c("Screen", "Report"), "M: Calculating inter-array efficiency.")
+    efficiency <- res_efficiency(arrmoves = valid.movements, bio = bio, spatial = spatial, arrays = arrays, paths = paths, dotmat = dotmat)
+  }
   if (!is.null(replicates)) {
+    appendTo(c("Screen", "Report"), "M: Calculating intra-array efficiency.")
     intra.array.matrices <- getDualMatrices(replicates = replicates, CJS = NULL, spatial = spatial, detections.list = valid.detections)
     recipient <- includeIntraArrayEstimates(m = intra.array.matrices, efficiency = efficiency, CJS = NULL)
-    efficiency <- recipient[[1]]
-    intra.array.CJS <- recipient[[2]]
+    efficiency <- recipient$efficiency
+    intra.array.CJS <- recipient$intra.CJS
     rm(recipient)
   } else {
+    intra.array.matrices <- NULL
     intra.array.CJS <- NULL
   }
 
@@ -491,7 +498,7 @@ residency <- function(path = NULL, tz, sections, success.arrays = NULL, max.inte
     dayrange[1] <- dayrange[1] - 1
     dayrange[2] <- dayrange[2] + 1
     individual.residency.plots <- printIndividualResidency(ratios = daily.ratios, dayrange = dayrange, sections = sections)
-    efficiency.fragment <- printEfficiency(intra.CJS = intra.array.CJS, type = "residency")
+    efficiency.fragment <- printEfficiency(efficiency = efficiency, intra.CJS = intra.array.CJS, type = "residency")
     printLastSeen(input = last.seen, sections = sections)
     if (nrow(last.seen) > 3) 
       last.seen.graph.size <- "width=90%" else last.seen.graph.size <- "height=4in"
@@ -557,12 +564,12 @@ residency <- function(path = NULL, tz, sections, success.arrays = NULL, max.inte
   if (invalid.dist)
     return(list(detections = detections, valid.detections = valid.detections, spatial = spatial, deployments = deployments, arrays = arrays,
       movements = movements, valid.movements = valid.movements, section.movements = section.movements,
-      status.df = status.df, efficiency = efficiency, intra.array.CJS = intra.array.CJS, array.times = array.times, section.times = section.times, 
+      status.df = status.df, efficiency = efficiency, intra.array.matrices = intra.array.matrices, intra.array.CJS = intra.array.CJS, array.times = array.times, section.times = section.times, 
       residency.list = residency.list, daily.ratios = daily.ratios, daily.positions = daily.positions, global.ratios = global.ratios, last.seen = last.seen, rsp.info = rsp.info))
   else
     return(list(detections = detections, valid.detections = valid.detections, spatial = spatial, deployments = deployments, arrays = arrays,
       movements = movements, valid.movements = valid.movements, section.movements = section.movements,
-      status.df = status.df, efficiency = efficiency, intra.array.CJS = intra.array.CJS, array.times = array.times, section.times = section.times, 
+      status.df = status.df, efficiency = efficiency, intra.array.matrices = intra.array.matrices, intra.array.CJS = intra.array.CJS, array.times = array.times, section.times = section.times, 
       residency.list = residency.list, daily.ratios = daily.ratios, daily.positions = daily.positions, global.ratios = global.ratios, last.seen = last.seen, rsp.info = rsp.info, dist.mat = dist.mat))
 }
 
@@ -1103,16 +1110,17 @@ res_efficiency <- function(arrmoves, bio, spatial, arrays, paths, dotmat) {
   absolutes[2, match(names(knownMissEvents), colnames(absolutes))] <- knownMissEvents
   absolutes[3, match(names(unsureMissEvents), colnames(absolutes))] <- unsureMissEvents
 
-  # # do not calculate efficiency for arrays without peers
-  # aux <- unlist(lapply(arrays, function(x) is.null(x$after.peers) & is.null(x$before.peers)))
-  # no.peers <- names(aux)[aux]
-  # absolutes[2, match(no.peers, colnames(absolutes))] <- NA
-
   # do not calculate efficiency for arrays without before or after neighbours
-  aux <- unlist(lapply(arrays, function(x) is.null(x$after) | is.null(x$before)))
-  no.neighbours <- names(aux)[aux]
+  aux <- unlist(lapply(arrays, function(x) (!is.null(x$after) | is.null(x$before)) | (is.null(x$after) | !is.null(x$before))))
+  one.side.neighbours <- names(aux)[aux]
   # exclude arrays which are connected to a release site from the list above
-  no.neighbours <- no.neighbours[!no.neighbours %in% spatial$release.sites$Array]
+  one.side.neighbours <- one.side.neighbours[!one.side.neighbours %in% spatial$release.sites$Array]
+  # do not calculate efficiency for arrays without any neighbour at all
+  aux <- unlist(lapply(arrays, function(x) is.null(x$after) & is.null(x$before)))
+  two.side.neighbours <- names(aux)[aux]
+  # combine both types
+  no.neighbours <- unique(c(one.side.neighbours, two.side.neighbours))
+  # erase efficiency for them
   absolutes[2, match(no.neighbours, colnames(absolutes))] <- NA
   absolutes[3, match(no.neighbours, colnames(absolutes))] <- NA
 

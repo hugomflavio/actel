@@ -21,6 +21,7 @@ Enhancements:
   * Improve handling of spatial file in distancesMatrix (including new fail-safes).
   * Added support for tags that emit multiple signals (i.e. multi-sensor tags).
   * Plot sensor data in the reports.
+  * Allow intra-array efficiency to be calculated even if no inter-array efficiency could be calculated.
   * Allow the GUI to pop up if the number of lines to display goes over getOptions("max.print").
   
 
