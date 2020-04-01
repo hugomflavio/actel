@@ -1359,15 +1359,18 @@ printSensorData <- function(detections, extension = "png") {
   capture <- lapply(names(detections), function(fish) {
     counter <<- counter + 1
     if (any(!is.na(detections[[fish]]$Sensor.Value))) {
-      p <- ggplot2::ggplot(data = detections[[fish]], ggplot2::aes(x = Timestamp, y = Sensor.Value, by = Sensor.Unit))
+      plotdata <- detections[[fish]]
+      if (any(link <- is.na(plotdata$Sensor.Unit) | plotdata$Sensor.Unit == ""))
+        plotdata$Sensor.Unit[link] <- paste0("? (", plotdata$Signal[link], ")")
+      p <- ggplot2::ggplot(data = plotdata, ggplot2::aes(x = Timestamp, y = Sensor.Value, by = Sensor.Unit))
       p <- p + ggplot2::geom_line(col = "grey40")
       p <- p + ggplot2::geom_point(col = "black", size = 0.5)
       p <- p + ggplot2::labs(title = fish, x = "", y = "Sensor value")
       p <- p + ggplot2::theme_bw()
       p <- p + ggplot2::facet_grid(Sensor.Unit ~ ., scales = "free_y")
       p <- p + ggplot2::theme(legend.position = "none")
-      if (length(unique(detections[[fish]]$Sensor.Unit)) > 2)
-        the.height <- 6
+      if (length(unique(plotdata$Sensor.Unit)) > 2)
+        the.height <- 4 + ((length(unique(plotdata$Sensor.Unit)) - 2) * 2)
       else
         the.height <- 4
       ggplot2::ggsave(paste0("Report/", fish, "_sensors.", extension), width = 5, height = the.height)  # better to save in png to avoid point overlapping issues
