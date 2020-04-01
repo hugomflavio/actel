@@ -285,16 +285,7 @@ test_that("the debug option works as expected", {
 
 	expect_true(file.exists("migration_debug.RData"))
 	aux <- dataToList("migration_debug.RData")
-	expect_equal(names(aux), c('study.data', 'jump.error', 'speed.error', 'valid.movements', 'valid.detections', 
-		'times', 'success.arrays', 'split.CJS', 'overall.CJS', 'movements', 'print.releases', 'replicates', 'invalid.dist', 'detections.list', 
-		'dotmat', 'dist.mat', 'resultsname', 'my.home', 'status.df', 'group.overview', 'section.overview', 'tz', 
-		'the.function.call', 'max.interval', 'detections', 'minimum.detections', 'paths', 'deployments', 'arrays', 
-		'group.CJS', 'override.fragment', 'report', 'CJS.list', 'inst.ver.short', 'timetable', 'the.time', 'override', 
-		'jobname', 'speed.warning', 'inactive.warning', 'release.overview', 'path', 'calculate.efficiency', 'GUI', 
-		'spatial', 'inactive.error', 'the.matrices', 'do.checkInactiveness', 'section.movements', 'sections', 
-		'exclude.tags', 'matrices', 'intra.array.CJS', 'release_nodes', 'disregard.parallels', 'do.checkSpeeds', 
-		'speed.method', 'dot', 'stop.time', 'start.time', 'debug', 'jump.warning', 'm.by.array', 'link', 
-		'if.last.skip.section', 'bio', 'rsp.info'))
+	expect_equal(sort(names(aux)), c('arrays', 'bio', 'calculate.efficiency', 'CJS.list', 'debug', 'deployments', 'detections', 'detections.list', 'disregard.parallels', 'dist.mat', 'do.checkInactiveness', 'do.checkSpeeds', 'dot', 'dotmat', 'exclude.tags', 'group.CJS', 'group.overview', 'GUI', 'if.last.skip.section', 'inactive.error', 'inactive.warning', 'inst.ver.short', 'intra.array.CJS', 'intra.array.matrices', 'invalid.dist', 'jobname', 'jump.error', 'jump.warning', 'link', 'm.by.array', 'matrices', 'max.interval', 'minimum.detections', 'movements', 'my.home', 'overall.CJS', 'override', 'override.fragment', 'path', 'paths', 'print.releases', 'release.overview', 'release_nodes', 'replicates', 'report', 'resultsname', 'rsp.info', 'section.movements', 'section.overview', 'sections', 'spatial', 'speed.error', 'speed.method', 'speed.warning', 'split.CJS', 'start.time', 'status.df', 'stop.time', 'study.data', 'success.arrays', 'the.function.call', 'the.matrices', 'the.time', 'times', 'timetable', 'tz', 'valid.detections', 'valid.movements'))
 	expect_true(file.exists("temp_warnings.txt"))
 	expect_true(file.exists("temp_debug.txt"))
 })

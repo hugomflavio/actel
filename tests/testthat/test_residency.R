@@ -258,15 +258,7 @@ test_that("the debug option works as expected", {
 	file.remove("detections/actel.detections.RData")
 	expect_true(file.exists("residency_debug.RData"))
 	aux <- dataToList("residency_debug.RData")
-	expect_equal(names(aux), c('study.data', 'jump.error', 'speed.error', 'valid.movements', 'valid.detections', 
-		'success.arrays', 'movements', 'array.times', 'print.releases', 'replicates', 'invalid.dist', 'detections.list', 
-		'dotmat', 'dist.mat', 'resultsname', 'my.home', 'status.df', 'efficiency', 'tz', 'the.function.call', 'max.interval', 
-		'section.minimum', 'last.seen', 'daily.positions', 'detections', 'minimum.detections', 'paths', 'global.ratios', 
-		'deployments', 'arrays', 'override.fragment', 'report', 'residency.list', 'inst.ver.short', 'the.time', 
-		'override', 'jobname', 'inactive.warning', 'speed.warning', 'path', 'GUI', 'spatial', 'inactive.error', 
-		'do.checkInactiveness', 'section.movements', 'section.times', 'sections', 'exclude.tags', 'daily.ratios', 
-		'intra.array.CJS', 'do.checkSpeeds', 'speed.method', 'dot', 'stop.time', 'start.time', 'res.df', 'debug', 
-		'jump.warning', 'link', 'bio', 'rsp.info'))
+	expect_equal(sort(names(aux)), c('array.times', 'arrays', 'bio', 'daily.positions', 'daily.ratios', 'debug', 'deployments', 'detections', 'detections.list', 'dist.mat', 'do.checkInactiveness', 'do.checkSpeeds', 'dot', 'dotmat', 'efficiency', 'exclude.tags', 'global.ratios', 'GUI', 'inactive.error', 'inactive.warning', 'inst.ver.short', 'intra.array.CJS', 'intra.array.matrices', 'invalid.dist', 'jobname', 'jump.error', 'jump.warning', 'last.seen', 'link', 'max.interval', 'minimum.detections', 'movements', 'my.home', 'override', 'override.fragment', 'path', 'paths', 'print.releases', 'replicates', 'report', 'res.df', 'residency.list', 'resultsname', 'rsp.info', 'section.minimum', 'section.movements', 'section.times', 'sections', 'spatial', 'speed.error', 'speed.method', 'speed.warning', 'start.time', 'status.df', 'stop.time', 'study.data', 'success.arrays', 'the.function.call', 'the.time', 'tz', 'valid.detections', 'valid.movements'))
 	expect_true(file.exists("temp_warnings.txt"))
 	expect_true(file.exists("temp_debug.txt"))
 })
