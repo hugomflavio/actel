@@ -24,6 +24,7 @@ Enhancements:
   * Allow intra-array efficiency to be calculated even if no inter-array efficiency could be calculated.
   * Allow the GUI to pop up if the number of lines to display goes over getOptions("max.print").
   * Hide biometrics' section from the report if no biometric data was found.
+  * New `advEfficiency` function allows user to get more robust efficiency estimates.
   
 
 ## actel 0.1.3

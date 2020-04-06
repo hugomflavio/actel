@@ -283,6 +283,22 @@ test_that("assembleArrayCJS works as expected.",{
 	overall.CJS <<- output
 })
 
+test_that("advEfficiency can plot overall.CJS results", {
+	output <- round(advEfficiency(x = overall.CJS, n = 10000), 1)
+	check <- read.csv(text = '"","2.5%","50%","97.5%"
+"River1",1.0,1,1
+"River2",1.0,1,1
+"River3",0.9,1,1
+"River4",1.0,1,1
+"River5",1.0,1,1
+"River6",1.0,1,1
+"Fjord1",0.9,1,1
+"Fjord2",1.0,1,1
+', row.names = 1)
+	colnames(check) <- c("2.5%","50%","97.5%")
+	expect_equal(output, check)
+})
+
 test_that("getDualMatrices throws a warning if efficiency has already been calculated", {
 	expect_warning(getDualMatrices(replicates = list(Fjord1 = c("St.10", "St.11")), CJS = overall.CJS, spatial = spatial, detections.list = detections.list),
 		"An inter-array efficiency has already been calculated for array Fjord1", fixed = TRUE)
@@ -391,9 +407,33 @@ test_that("replicate functions work as expected.", {
 
 	overall.CJS <<- recipient[[1]]
 	intra.array.CJS <<- recipient[[2]]
-
 })
 
+test_that("advEfficiency can plot intra.array.CJS results", {
+	expect_message(output <- round(advEfficiency(intra.array.CJS[[1]], n = 10000), 1),
+		"M: For each quantile, 'Combined' estimates are calculated as 1-((1-R1)*(1-R2)).", fixed = TRUE)
+	check <- read.csv(text = '"","2.5%","50%","97.5%"
+"Replica.1",0.6,0.8,0.9
+"Replica.2",0.7,0.9,1.0
+"Combined",0.9,1.0,1.0
+', row.names = 1)
+	colnames(check) <- c("2.5%","50%","97.5%")
+	expect_equal(output, check)
+
+	output <- advEfficiency(intra.array.CJS[[1]], labels = c(1, 2))
+	expect_equal(row.names(output), c("1", "2", "Combined"))
+
+	expect_error(advEfficiency(intra.array.CJS[[1]], labels = 1:3),
+		"Wrong number of panel names", fixed = TRUE)
+
+	expect_warning(advEfficiency(intra.array.CJS[[1]], n = 10),
+		"Low n values may produce unreliable estimates.", fixed = TRUE)
+
+	output <- advEfficiency(intra.array.CJS[[1]], force.grid = c(2, 1), title = "Top/Bottom")
+
+	expect_error(advEfficiency(x = 1),
+		"Could not recognise the input as an efficiency object from actel", fixed = TRUE)
+})
 
 test_that("split CJS functions work as expected.", {
   aux <- mbSplitCJS(mat = m.by.array, fixed.efficiency = overall.CJS$efficiency)

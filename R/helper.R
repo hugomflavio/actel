@@ -1,3 +1,35 @@
+#' nearsq helper
+#' 
+#' Obtained here: https://stackoverflow.com/questions/32017327/calculate-the-optimal-grid-layout-dimensions-for-a-given-amount-of-plots-in-r
+#' 
+#' @keywords internal
+#' 
+fact <- function(n) {
+  k <- floor(sqrt(n))
+  for (i in k:1) {
+    if (n %% i == 0) 
+      return(i)
+  }
+}
+
+#' find optimum plotting grid
+#' 
+#' obtained here: https://stackoverflow.com/questions/32017327/calculate-the-optimal-grid-layout-dimensions-for-a-given-amount-of-plots-in-r
+#' 
+#' @param n number of plots to fit.
+#' 
+#' @keywords internal
+#' 
+nearsq <- function(n, tol = 5/3+0.001) {
+  m <- ceiling(sqrt(n))^2
+  for (i in n:m) {
+    a <- fact(i)
+    b <- i / a
+    if(b / a < tol) 
+      return(c(a, b))
+  }
+}
+
 #' Import actel Results to a List
 #' 
 #' @param source A RData file containing actel results from a previous run

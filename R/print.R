@@ -1,3 +1,113 @@
+#' Calculate beta estimations for efficiency
+#' 
+#' @param x An efficiency object from actel (\code{overall.CJS}, \code{intra.array.CJS[[array]]} or \code{efficiency} objects)
+#' @param labels a vector of strings to substitute default plot labels
+#' @param n Number of draws for each array.
+#' @param q The quantile values to be calculated. Defaults to code{c(0.025, 0.5, 0.975)} (i.e. median and 95% CI)
+#' @param force.grid A vector of format c(nrow, ncol) that allows the user to define the number of rows and columns to distribute the plots in.
+#' @param paired Logical: For efficiency derived from residency analyses, should min and max estimates for an array be paired together?
+#' @param title A title for the plot (feeds into ggplot's labs title parameter).
+#' 
+#' @return A dataframe with the requred quantile values and a plot of the efficiency distributions.
+#' 
+#' @export
+#' 
+advEfficiency <- function(x, labels = NULL, n = 10000, q = c(0.025, 0.5, 0.975), force.grid = NULL, paired = TRUE, title = "") {
+  prob <- NULL
+  y <- NULL
+  ..density.. <- NULL
+
+  if (!is.list(x) || is.null(x$absolutes))
+    stop("Could not recognise the input as an efficiency object from actel\n", call. = FALSE)
+
+  input <- x$absolutes
+
+  if (inherits(input, "matrix")) {
+    aux <- as.data.frame(input)
+    input <- data.frame(Replica.1 = c(input[3], input[2] - input[3]), Replica.2 = c(input[3], input[1] - input[3]))
+    calc.combined <- TRUE
+  } else {
+    calc.combined <- FALSE
+    if (nrow(input) == 4) {
+      input <- input[2:3, apply(input[2:3, ], 2, function(i) all(!is.na(i)))]
+    } else {
+      aux <- input[, apply(input[2:3, ], 2, function(i) all(!is.na(i)))]
+      auxA <- aux[1:2, ]
+      colnames(auxA) <- paste0(colnames(aux), ".max")
+      auxB <- aux[1:2, ]
+      auxB[2, ] <- apply(aux[2:3, ], 2, sum)
+      colnames(auxB) <- paste0(colnames(aux), ".min")
+      if (paired)
+        input <- cbind(auxA, auxB)[, c(t(replicate(2, 1:ncol(aux)))) + c(ncol(aux), 0)]
+      else
+        input <- cbind(auxA, auxB)
+    }
+  }
+
+  if (!is.null(labels)) {
+    if (ncol(input) != length(labels))
+      stop("Wrong number of panel names")
+    colnames(input) <- labels
+  } 
+
+  message("M: Drawing ", n, " beta samples for each array.")
+
+  if (n < 5000)
+    warning("Low n values may produce unreliable estimates.", immediate. = TRUE, call. = FALSE)
+
+  x <- lapply(1:ncol(input), function(i) rbeta(n, input[1, i], input[2, i]))
+  names(x) <- colnames(input)
+
+  ranges <- as.data.frame(data.table::rbindlist(lapply(x, function(i) as.data.frame(t(quantile(i, q))))))
+  rownames(ranges) <- names(x)
+
+  if (calc.combined) {
+    message("M: For each quantile, 'Combined' estimates are calculated as 1-((1-R1)*(1-R2)).")
+    ranges <- rbind(ranges, Combined = apply(ranges, 2, function(i) (1 - prod(1 - i))))
+  }
+
+  aux <- lapply(x, function(i) {
+    out <- as.data.frame(i)
+    colnames(out) <- "prob"
+    return(out)
+  })
+
+  xx <- data.table::rbindlist(aux, idcol = "label")
+  xx$label <- factor(xx$label, levels = colnames(input))
+  head(xx)  
+
+  intervals <- as.data.frame(as.matrix(
+    aggregate(xx$prob, list(xx$label), function(i) quantile(i, c(min(q), max(q))))
+    ), stringsAsFactors = FALSE)
+  colnames(intervals) <- c("label", "x1", "x2")
+  intervals$x1 <- as.numeric(intervals$x1)
+  intervals$x2 <- as.numeric(intervals$x2)
+  int.data <- suppressWarnings(reshape2::melt(intervals, id.vars = "label"))
+  int.data$label <- factor(int.data$label, levels = colnames(input))
+  colnames(int.data)[ncol(int.data)] <- "x"
+  int.data$y <- 0
+
+  medians <- aggregate(xx$prob, list(xx$label), median)
+  colnames(medians) <- c("label", "x")
+
+  if (is.null(force.grid))
+    grid.dim <- nearsq(length(x))
+  else
+    grid.dim <- force.grid
+
+  p <- ggplot2::ggplot(data = xx, ggplot2::aes(x = prob))
+  p <- p + ggplot2::geom_histogram(bins = 100, ggplot2::aes(y = ..density../100))
+  p <- p + ggplot2::geom_point(data = medians, ggplot2::aes(x = x, y = 0), size = 8, shape = "|", col = "red")
+  p <- p + ggplot2::geom_line(data = int.data, ggplot2::aes(x = x, y = y), size = 2, col = "red")
+  p <- p + ggplot2::scale_y_continuous(expand = ggplot2::expand_scale(mult = c(0, 0.05)))
+  p <- p + ggplot2::labs(title = title, y = "prop.", x = "")
+  p <- p + ggplot2::theme_bw()
+  p <- p + ggplot2::facet_wrap(~ label, nrow = grid.dim[1], ncol = grid.dim[2], scales = "free", labeller = ggplot2::label_parsed)
+  print(p)
+
+  return(ranges)
+}
+
 #' Generate default ggplot colours
 #' 
 #' Copied from: \url{https://stackoverflow.com/questions/8197559/emulate-ggplot2-default-color-palette}.
@@ -491,6 +601,7 @@ printEfficiency <- function(CJS = NULL, efficiency = NULL, intra.CJS, type = c("
 Note:
   : The data used in the tables below is stored in the `overall.CJS` object. Auxiliary information can also be found in the `matrices` and `arrays` objects.
   : These efficiency values are estimated using the equations provided in the paper "Using mark-recapture models to estimate survival from telemetry data" by Perry et al. (2012). In some situations, more advanced efficiency estimation methods may be required.
+  : You can try running `advEfficiency([results]$overall.CJS)` to obtain beta-drawn efficiency distributions (replace `[results]` with the name of the object where you saved the analysis).
 
 **Individuals detected and estimated**
 
@@ -498,8 +609,7 @@ Note:
 
 **Array efficiency**
 
-Note:
-  : These values already include any intra-array efficiency estimates that have been requested.
+**Note:** These values already include any intra-array efficiency estimates that have been requested.
 
 ', paste(knitr::kable(to.print), collapse = "\n"), '
 
@@ -527,6 +637,7 @@ Note:
   : More information on the differences between "Known missed events" and "Potentially missed events" can be found in the package vignettes.
   : The data used in this table is stored in the `efficiency` object.
   : These efficiency values are estimated using a simple step-by-step method (described in the package vignettes). In some situations, more advanced efficiency estimation methods may be required.
+  : You can try running `advEfficiency([results]$efficiency)` to obtain beta-drawn efficiency distributions (replace `[results]` with the name of the object where you saved the analysis).
 
 **Events recorded and missed**
 
@@ -534,8 +645,7 @@ Note:
 
 **Array efficiency**
 
-Note:
-  : These values already include any intra-array efficiency estimates that have been requested.
+**Note:** These values already include any intra-array efficiency estimates that have been requested.
 
 ', paste(knitr::kable(minmax), collapse = "\n"), '
 
@@ -549,6 +659,7 @@ Note:
 Note:
   : The data used in the table(s) below is stored in the `intra.array.CJS` object. Auxiliary information can also be found in the `intra.array.matrices` object.
   : These efficiency values are estimated using the equations provided in the paper "Using mark-recapture models to estimate survival from telemetry data" by Perry et al. (2012). In some situations, more advanced efficiency estimation methods may be required.
+  : You can try running `advEfficiency([results]$intra.array.CJS$', names(intra.CJS)[1], ')` to obtain beta-drawn efficiency distributions (replace `[results]` with the name of the object where you saved the analysis).
 ')
     for (i in 1:length(intra.CJS)) {
     efficiency.fragment <- paste0(efficiency.fragment, '

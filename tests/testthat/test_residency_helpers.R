@@ -155,7 +155,7 @@ test_that("globalRatios works as expected.", {
 })
 
 test_that("res_efficiency works as expected, and can include intra array estimates", {
-  efficiency <- res_efficiency(arrmoves = moves, bio = bio, spatial = spatial, arrays = arrays, paths = paths, dotmat = dotmat)
+  efficiency <<- res_efficiency(arrmoves = moves, bio = bio, spatial = spatial, arrays = arrays, paths = paths, dotmat = dotmat)
   expect_equal(names(efficiency), c("absolutes", "max.efficiency", "min.efficiency",  "values.per.fish"))
   ### ONLY RUN THIS TO RESET REFERENCE
   # aux_res_efficiency <- efficiency
@@ -178,6 +178,52 @@ test_that("res_efficiency works as expected, and can include intra array estimat
 
   output <- includeIntraArrayEstimates(m = list(), efficiency = efficiency, CJS = NULL)
   expect_equal(output$intra.CJS, NULL)
+})
+
+test_that("advEfficiency can plot efficiency results", {
+  output <- round(advEfficiency(efficiency, n = 10000), 1)
+  check <- read.csv(text = '"","2.5%","50%","97.5%"
+"River1.min",1,1,1
+"River1.max",1,1,1
+"River2.min",0.1,0.5,0.9
+"River2.max",0.1,0.5,0.9
+"River3.min",0.1,0.5,0.9
+"River3.max",0.1,0.5,0.9
+"River4.min",0.1,0.5,0.9
+"River4.max",0.1,0.5,0.9
+"River5.min",0.1,0.5,0.9
+"River5.max",0.1,0.5,0.9
+"River6.min",0.1,0.5,0.9
+"River6.max",0.1,0.5,0.9
+"Fjord1.min",1,1,1
+"Fjord1.max",1,1,1
+"Fjord2.min",1,1,1
+"Fjord2.max",1,1,1
+', row.names = 1)
+  colnames(check) <- c("2.5%","50%","97.5%")
+  expect_equal(output, check)
+
+  output <- round(advEfficiency(efficiency, n = 10000, paired = FALSE), 1)
+  check <- read.csv(text = '"","2.5%","50%","97.5%"
+"River1.max",1,1,1
+"River2.max",0.1,0.5,0.9
+"River3.max",0.1,0.5,0.9
+"River4.max",0.1,0.5,0.9
+"River5.max",0.1,0.5,0.9
+"River6.max",0.1,0.5,0.9
+"Fjord1.max",1,1,1
+"Fjord2.max",1,1,1
+"River1.min",1,1,1
+"River2.min",0.1,0.5,0.9
+"River3.min",0.1,0.5,0.9
+"River4.min",0.1,0.5,0.9
+"River5.min",0.1,0.5,0.9
+"River6.min",0.1,0.5,0.9
+"Fjord1.min",1,1,1
+"Fjord2.min",1,1,1
+', row.names = 1)
+  colnames(check) <- c("2.5%","50%","97.5%")
+  expect_equal(output, check)
 })
 
 test_that("firstArrayFailure is able to deal with multile first expected arrays", {
