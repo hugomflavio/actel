@@ -208,7 +208,7 @@ residency <- function(path = NULL, tz, sections, success.arrays = NULL, max.inte
       ", report = ", ifelse(report, "TRUE", "FALSE"), 
       ", exclude.tags = ", ifelse(is.null(exclude.tags), "NULL", paste0("c('", paste(exclude.tags, collapse = "', '"), "')")), 
       ", override = ", ifelse(is.null(override), "NULL", paste0("c('", paste(override, collapse = "', '"), "')")),
-      ", replicates = ", ifelse(is.null(replicates),"NULL", paste0("c('", paste(replicates, collapse = "', '"), "')")),
+      ", replicates = ", ifelse(is.null(replicates),"NULL", paste0("list(", paste(sapply(1:length(replicates), function(i) paste0("'", names(replicates)[i], "' = c('", paste(replicates[[i]], collapse = "', '"), "')")), collapse = ", "), ")")),
       ", jump.warning = ", jump.warning,
       ", jump.error = ", jump.error,
       ", inactive.warning = ", ifelse(is.null(inactive.warning), "NULL", inactive.warning), 

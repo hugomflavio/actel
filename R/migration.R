@@ -216,7 +216,7 @@ migration <- function(path = NULL, tz, sections, success.arrays = NULL, max.inte
       ", report = ", ifelse(report, "TRUE", "FALSE"), 
       ", override = ", ifelse(is.null(override), "NULL", paste0("c('", paste(override, collapse = "', '"), "')")),
       ", exclude.tags = ", ifelse(is.null(exclude.tags), "NULL", paste0("c('", paste(exclude.tags, collapse = "', '"), "')")), 
-      ", replicates = ", ifelse(is.null(replicates),"NULL", paste0("c('", paste(replicates, collapse = "', '"), "')")),
+      ", replicates = ", ifelse(is.null(replicates),"NULL", paste0("list(", paste(sapply(1:length(replicates), function(i) paste0("'", names(replicates)[i], "' = c('", paste(replicates[[i]], collapse = "', '"), "')")), collapse = ", "), ")")),
       ", disregard.parallels = ", ifelse(disregard.parallels, "TRUE", "FALSE"), 
       ", jump.warning = ", jump.warning,
       ", jump.error = ", jump.error,

@@ -9,6 +9,7 @@ Fixes:
   * Prevent failure to identify receivers if the model-serial combination has two or more "-" characters.
   * Prevent residence crash if no fish entered a given section.
   * Prevent crash if study area only has one array.
+  * Fix replicates argument formulation in the log's function call carbon copy.
 
 Changes:
   * maximum efficiency estimates in residency now only take into account known missed events and recorded events in the denominator (previously, potentially missed events were being included as well).
