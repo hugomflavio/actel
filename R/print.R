@@ -600,7 +600,7 @@ printEfficiency <- function(CJS = NULL, efficiency = NULL, intra.CJS, type = c("
       efficiency.fragment <- paste0('
 Note:
   : The data used in the tables below is stored in the `overall.CJS` object. Auxiliary information can also be found in the `matrices` and `arrays` objects.
-  : These efficiency values are estimated using the equations provided in the paper "Using mark-recapture models to estimate survival from telemetry data" by Perry et al. (2012). In some situations, more advanced efficiency estimation methods may be required.
+  : These efficiency values are estimated using the analytical equations provided in the paper "Using mark-recapture models to estimate survival from telemetry data" by Perry et al. (2012). In some situations, more advanced efficiency estimation methods may be required.
   : You can try running `advEfficiency([results]$overall.CJS)` to obtain beta-drawn efficiency distributions (replace `[results]` with the name of the object where you saved the analysis).
 
 **Individuals detected and estimated**
@@ -658,7 +658,7 @@ Note:
 
 Note:
   : The data used in the table(s) below is stored in the `intra.array.CJS` object. Auxiliary information can also be found in the `intra.array.matrices` object.
-  : These efficiency values are estimated using the equations provided in the paper "Using mark-recapture models to estimate survival from telemetry data" by Perry et al. (2012). In some situations, more advanced efficiency estimation methods may be required.
+  : These efficiency values are estimated using the analytical equations provided in the paper "Using mark-recapture models to estimate survival from telemetry data" by Perry et al. (2012). In some situations, more advanced efficiency estimation methods may be required.
   : You can try running `advEfficiency([results]$intra.array.CJS$', names(intra.CJS)[1], ')` to obtain beta-drawn efficiency distributions (replace `[results]` with the name of the object where you saved the analysis).
 ')
     for (i in 1:length(intra.CJS)) {
