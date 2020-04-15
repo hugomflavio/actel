@@ -1344,7 +1344,8 @@ transformSpatial <- function(spatial, bio, arrays, dotmat, sections = NULL, firs
                                   Latitude = NA_real_, 
                                   Array = first.array,
                                   Standard.name = "unspecified",
-                                  n = nrow(bio))
+                                  n = nrow(bio),
+                                  stringsAsFactors = FALSE)
     } else {
       A <- spatial$Standard.name[spatial$Type == "Release"]
       B <- unique(bio$Release.site)
@@ -1405,7 +1406,8 @@ transformSpatial <- function(spatial, bio, arrays, dotmat, sections = NULL, firs
                                 Longitude = NA_real_,
                                 Latitude = NA_real_, 
                                 Array = rep(first.array, length(unique(bio$Release.site))),
-                                Standard.name = unique(bio$Release.site))
+                                Standard.name = unique(bio$Release.site),
+                                stringsAsFactors = FALSE)
     for (i in unique(bio$Group)) {
       aux <- bio[bio$Group == i, ]
       release.sites[, paste0("n.", i)] <- 0
