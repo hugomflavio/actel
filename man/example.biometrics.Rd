@@ -4,7 +4,8 @@
 \name{example.biometrics}
 \alias{example.biometrics}
 \title{Example biometric data}
-\format{A data frame with 60 rows and 7 variables:
+\format{
+A data frame with 60 rows and 7 variables:
 \describe{
 \item{Release.date}{The date and time of release}
 \item{Release.site}{The release site}
@@ -13,7 +14,8 @@
 \item{Group}{The group of the tagged fish}
 \item{Total.Length.mm}{The length of the tagged fish}
 \item{Mass.g}{The mass of the tagged fish}
-}}
+}
+}
 \source{
 Data collected by the authors.
 }

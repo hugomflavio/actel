@@ -4,14 +4,16 @@
 \name{example.spatial}
 \alias{example.spatial}
 \title{Example spatial data}
-\format{A data frame with 18 rows and 6 variables:
+\format{
+A data frame with 18 rows and 6 variables:
 \describe{
 \item{Station.name}{The name of the ALS or release site}
 \item{Latitude}{The latitude of the ALS or release site}
 \item{Longitude}{The longitude of the ALS or release site}
 \item{Array}{The Array to which the ALS belongs, or the first ALS array downstream of the release site.}
 \item{Type}{The type of spatial object (must be either Hydrophone or Release)}
-}}
+}
+}
 \source{
 Data collected by the authors.
 }

@@ -13,16 +13,7 @@ behaviour. The three analysis functions: \code{\link{explore}}, \code{\link{migr
 and \code{\link{residency}}, allow the users to analyse their data in a systematic way,
 making it easy to compare results from different studies.
 }
-\seealso{
-\code{\link{explore}}, \code{\link{migration}}, \code{\link{residency}}
-}
-\author{
-\strong{Maintainer}: Hugo Flávio \email{hdmfla@aqua.dtu.dk} (\href{https://orcid.org/0000-0002-5174-1197}{ORCID})
-
-}
-\keyword{internal}
 \section{Input structure}{
-
 To be able to work with actel, you must prepare your data in a specific
 format. To learn more about this, you need to have a look at the package
 vignettes, which can be found by running \code{browseVignettes('actel')}. If
@@ -30,8 +21,8 @@ this function returns "No vignettes found", you can alternatively download
 the vignette pages directly through this link:
 \url{https://github.com/hugomflavio/actel/raw/master/actel_vignettes.zip}
 }
-\section{Example dataset}{
 
+\section{Example dataset}{
 If this is the first time you are using actel, you can try running it on an
 example dataset using the \code{\link{exampleWorkspace}} function. This function
 creates a new folder in your working directory (named 'exampleWorkspace'),
@@ -53,8 +44,8 @@ In this example dataset, you will have to intervene twice. In both cases,
 actel will give you a suggestion, which you can easily follow by answering
 'a' to both questions.
 }
-\section{Main functions}{
 
+\section{Main functions}{
 The actel package provides three main analyses:
 \code{\link{explore}}, \code{\link{migration}} and \code{\link{residency}}
 \subsection{explore}{
@@ -85,5 +76,13 @@ were in each day of the study, how many fish were in each section each day,
 and other residency-focused variables, this is the analysis you are looking
 for!
 }
+}
+
+\seealso{
+\code{\link{explore}}, \code{\link{migration}}, \code{\link{residency}}
+}
+\author{
+\strong{Maintainer}: Hugo Flávio \email{hdmfla@aqua.dtu.dk} (\href{https://orcid.org/0000-0002-5174-1197}{ORCID})
 
 }
+\keyword{internal}
