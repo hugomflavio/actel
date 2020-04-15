@@ -99,7 +99,7 @@ advEfficiency <- function(x, labels = NULL, n = 10000, q = c(0.025, 0.5, 0.975),
   p <- p + ggplot2::geom_histogram(bins = 100, ggplot2::aes(y = ..density../100))
   p <- p + ggplot2::geom_point(data = medians, ggplot2::aes(x = x, y = 0), size = 8, shape = "|", col = "red")
   p <- p + ggplot2::geom_line(data = int.data, ggplot2::aes(x = x, y = y), size = 2, col = "red")
-  p <- p + ggplot2::scale_y_continuous(expand = ggplot2::expand_scale(mult = c(0, 0.05)))
+  p <- p + ggplot2::scale_y_continuous(expand = ggplot2::expansion(mult = c(0, 0.05)))
   p <- p + ggplot2::labs(title = title, y = "prop.", x = "")
   p <- p + ggplot2::theme_bw()
   p <- p + ggplot2::facet_wrap(~ label, nrow = grid.dim[1], ncol = grid.dim[2], scales = "free", labeller = ggplot2::label_parsed)
