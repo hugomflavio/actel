@@ -614,7 +614,7 @@ transitionLayer <- function(shape, size, EPSGcode, coord.x = NULL, coord.y = NUL
     stop("'shape' must be a .shp file.\n", call. = FALSE)
   }
   data.crs <- raster::crs(paste0("+init=epsg:", EPSGcode))
-  raster::crs(shape) <- raster::crs(data.crs) # Set CRS 
+  shape <- sp::spTransform(x = shape, CRSobj = data.crs) # Set CRS 
 
   if (!is.null(buffer)) {
     if (length(buffer) == 1){
