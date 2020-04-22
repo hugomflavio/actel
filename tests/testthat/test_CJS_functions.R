@@ -438,6 +438,9 @@ test_that("advEfficiency can plot intra.array.CJS results", {
 
 	expect_error(advEfficiency(x = 1),
 		"Could not recognise the input as an efficiency object from actel", fixed = TRUE)
+
+	expect_error(advEfficiency(x = list(a = 1)),
+		"Could not recognise the input as an efficiency object from actel", fixed = TRUE)
 })
 
 test_that("split CJS functions work as expected.", {

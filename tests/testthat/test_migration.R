@@ -193,7 +193,7 @@ test_that("migration stops when any argument does not make sense", {
 })
 
 test_that("migration results contains all the expected elements.", {
-	output <- suppressWarnings(migration(tz = 'Europe/Copenhagen', sections = c("River", "Fjord", "Sea"), 
+	output <<- suppressWarnings(migration(tz = 'Europe/Copenhagen', sections = c("River", "Fjord", "Sea"), 
 		report = TRUE, GUI = "never", print.releases = FALSE))
 	
 	file.remove("detections/actel.detections.RData")
@@ -250,6 +250,24 @@ test_that("migration results contains all the expected elements.", {
 ', row.names = 1)
   expect_equal(output$group.overview[[2]], check) 
 })
+
+test_that("advEfficiency can calculate efficiency from release and group overviews", {
+	expect_message(output <- advEfficiency(output$group.overview$A[, -5], q = c(0.5, 0.9)),
+		"M: All arrays were estimated to have either 0% or 100% efficiency, skipping plotting for all arrays.", fixed = TRUE)
+		check <- read.csv(text = '"","50%","90%"
+"River1",1,1
+"River2",1,1
+"River4",1,1
+"River5",1,1
+"River6",1,1
+"Fjord1",1,1
+"Fjord2",1,1
+', row.names = 1)
+	colnames(check) <- c("50%","90%")
+	expect_equal(output, check)
+})
+
+rm(output)
 
 test_that("migration results are stored in target directory", {
 	expect_true(file.exists("actel_migration_results.RData"))

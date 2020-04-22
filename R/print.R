@@ -61,8 +61,12 @@ advEfficiency <- function(x, labels = NULL, n = 10000, q = c(0.025, 0.5, 0.975),
   y <- NULL
   ..density.. <- NULL
 
+  if (!inherits(x, "list") & !inherits(x, "data.frame") & !inherits(x, "matrix"))
+    stop("Could not recognise the input as an efficiency object from actel.\n", call. = FALSE)
+
   if (inherits(x, "list") & is.null(x$absolutes))
-    stop("Could not recognise the input as an efficiency object from actel\n", call. = FALSE)
+    stop("Could not recognise the input as an efficiency object from actel.\n", call. = FALSE)
+
 
   if (inherits(x, "list"))
     input <- x$absolutes
