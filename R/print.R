@@ -112,7 +112,17 @@ advEfficiency <- function(x, labels = NULL, n = 10000, q = c(0.025, 0.5, 0.975),
     ranges <- rbind(ranges, Combined = apply(ranges, 2, function(i) (1 - prod(1 - i))))
   }
 
-  aux <- lapply(x, function(i) {
+  link <- sapply(x, function(i) length(unique(i))) != 1
+
+  if (all(!link)) {
+    message("M: All arrays were estimated to have either 0% or 100% efficiency, skipping plotting for all arrays.")
+    return(ranges)
+  }
+
+  if (any(!link))
+    message("M: Some arrays were estimated to have either 0% or 100% efficiency, skipping plotting for those arrays.")
+
+  aux <- lapply(x[link], function(i) {
     out <- as.data.frame(i)
     colnames(out) <- "prob"
     return(out)
@@ -137,7 +147,7 @@ advEfficiency <- function(x, labels = NULL, n = 10000, q = c(0.025, 0.5, 0.975),
   colnames(medians) <- c("label", "x")
 
   if (is.null(force.grid))
-    grid.dim <- nearsq(length(x))
+    grid.dim <- nearsq(length(aux))
   else
     grid.dim <- force.grid
 
