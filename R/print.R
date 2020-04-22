@@ -645,6 +645,7 @@ printArrayOverview <- function(array.overview) {
 #' @keywords internal
 #' 
 printEfficiency <- function(CJS = NULL, efficiency = NULL, intra.CJS, type = c("migration", "residency")){
+  options(knitr.kable.NA = "-")
   type <- match.arg(type)
   if (type == "migration") {
     if (is.null(CJS)) {
