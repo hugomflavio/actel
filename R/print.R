@@ -1,14 +1,58 @@
 #' Calculate beta estimations for efficiency
 #' 
-#' @param x An efficiency object from actel (\code{overall.CJS}, \code{intra.array.CJS[[array]]} or \code{efficiency} objects)
+#' advEfficiency estimates efficiency ranges by drawing n samples from a beta distribution 
+#' with parameters \eqn{\alpha} = number of detected tags and \eqn{\beta} = number of missed 
+#' tags. The desired quantiles (argument `q`) are then calculated from the drawn values.
+#' Plots are also drawn showing the sample distribution, the median point (red dash) and
+#' the range between the lowest and largest quantile requested (bottom red band).
+#' 
+#' Examples for inclusion in a paper:
+#' 
+#' \enumerate{
+#' \item If advEfficiency was run on an \code{overall.CJS} object (i.e. migration analysis):
+#' 
+#'   "Array efficiency was estimated by drawing 10000 samples from a beta distribution 
+#'   (\eqn{\alpha} = number of tags detected subsequently and at the array, 
+#'   \eqn{\beta} = number of tags detected subsequently but not at the array) 
+#'   and calculating the median estimated efficiency value using the R package actel (https://github.com/hugomflavio/actel)."
+#' 
+#' \item If advEfficiency was run on an \code{efficiency} object (i.e. residency analysis):
+#' 
+#' - If you are using maximum efficiency estimates:
+#' 
+#'     "Array efficiency was estimated by drawing 10000 samples from a beta distribution 
+#'     (\eqn{\alpha} = number of events recorded by the array,
+#'     \eqn{\beta} = number of events known to have been missed by the array).
+#'     and calculating the median estimated efficiency value using the R package actel (https://github.com/hugomflavio/actel)."
+#' 
+#' - If you are using minimum efficiency estimates:
+#' 
+#'     "Array efficiency was estimated by drawing 10000 samples from a beta distribution 
+#'     (\eqn{\alpha} = number of events recorded by the array, 
+#'     \eqn{\beta} = number of events both known to have been missed and potentially missed by the array).
+#'     and calculating the median estimated efficiency value using the R package actel (https://github.com/hugomflavio/actel)."
+#' 
+#' \item If advEfficiency was run on an \code{intra.array.CJS} object:
+#' 
+#'   "Intra-array efficiency was estimated by comparing the tags detected at each of the 
+#'   two replicates. For each replicate, 10000 samples were drawn from a beta distribution 
+#'   (\eqn{\alpha} = number of tags detected at both replicates, \eqn{\beta} = number 
+#'   of tags detected at the opposite replicate but not at the one for which efficiency 
+#'   is being calculated) and calculating the median estimated efficiency value. The overall 
+#'   efficiency of the array was then estimated as 1-((1-R1)*(1-R2)), where R1 and R2 are
+#'   the median efficiency estimates for each replicate. These calculations were performed 
+#'   using the R package actel (https://github.com/hugomflavio/actel)."
+#' }
+#' 
+#' @param x An efficiency object from actel (\code{overall.CJS}, \code{intra.array.CJS[[...]]} or \code{efficiency} objects)
 #' @param labels a vector of strings to substitute default plot labels
 #' @param n Number of draws for each array.
 #' @param q The quantile values to be calculated. Defaults to code{c(0.025, 0.5, 0.975)} (i.e. median and 95% CI)
 #' @param force.grid A vector of format c(nrow, ncol) that allows the user to define the number of rows and columns to distribute the plots in.
-#' @param paired Logical: For efficiency derived from residency analyses, should min and max estimates for an array be paired together?
+#' @param paired Logical: For efficiency derived from residency analyses, should min. and max. estimates for an array be displayed next to each other?
 #' @param title A title for the plot (feeds into ggplot's labs title parameter).
 #' 
-#' @return A dataframe with the requred quantile values and a plot of the efficiency distributions.
+#' @return A data frame with the required quantile values and a plot of the efficiency distributions.
 #' 
 #' @export
 #' 
