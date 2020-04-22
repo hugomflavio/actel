@@ -571,6 +571,8 @@ printDotplots <- function(status.df, invalid.dist) {
 #' 
 printSurvivalGraphic <- function(section.overview) {
   appendTo("debug", "Starting printSurvivalGraphic.")
+  section <- NULL
+  value <- NULL
   cbPalette <- c("#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7", "#999999")
   names(cbPalette) <- c("Orange", "Blue", "Green", "Yellow", "Darkblue", "Darkorange", "Pink", "Grey")
   survival <- data.frame(group = character(), section = character(), value = vector(), stringsAsFactors = FALSE)
@@ -598,7 +600,7 @@ printSurvivalGraphic <- function(section.overview) {
     survival$value[active.row] <- section.overview[j, ncol(section.overview)]/section.overview[j, 1]
   }
   survival$section <- factor(survival$section, levels = unique(survival$section))
-  p <- ggplot2::ggplot(survival, ggplot2::aes(x = survival$section, y = survival$value))
+  p <- ggplot2::ggplot(survival, ggplot2::aes(x = section, y = value))
   p <- p + ggplot2::geom_bar(stat = "identity", fill = cbPalette[[2]], colour = cbPalette[[2]])
   p <- p + ggplot2::facet_grid(. ~ group)
   p <- p + ggplot2::theme_bw()
