@@ -475,11 +475,10 @@ migration <- function(path = NULL, tz, sections, success.arrays = NULL, max.inte
     aux <- mbSplitCJS(mat = m.by.array, fixed.efficiency = overall.CJS$efficiency)
     aux <- aux[names(the.matrices)]
     split.CJS <- assembleSplitCJS(mat = the.matrices, CJS = aux, arrays = arrays, releases = release_nodes, intra.CJS = intra.array.CJS)
-    aux <- mbAssembleArrayOverview(input = split.CJS)
-    release.overview <- lapply(names(aux), function(i, releases = spatial$release.sites) {
-      output <- aux[[i]]
+    release.overview <- lapply(names(split.CJS), function(i, releases = spatial$release.sites) {
+      output <- split.CJS[[i]]
       x <- unlist(stringr::str_split(i, "\\.", 2))
-      output$Release <- c(releases[releases$Station.name == x[2], paste0("n.", x[1])], NA, NA)
+      output$Release <- rep(c(releases[releases$Station.name == x[2], paste0("n.", x[1])], NA, NA), 2)
       output <- output[, c(ncol(output), 1:(ncol(output) - 1))]
       return(output)
     })
@@ -488,11 +487,10 @@ migration <- function(path = NULL, tz, sections, success.arrays = NULL, max.inte
 
     aux <- mbGroupCJS(mat = m.by.array, status.df = status.df, fixed.efficiency = overall.CJS$efficiency)
     group.CJS <- assembleGroupCJS(mat = the.matrices, CJS = aux, arrays = arrays, releases = release_nodes, intra.CJS = intra.array.CJS)
-    aux <- mbAssembleArrayOverview(input = group.CJS)
-    group.overview <- lapply(names(aux), function(i, releases = spatial$release.sites) {
-      output <- aux[[i]]
+    group.overview <- lapply(names(group.CJS), function(i, releases = spatial$release.sites) {
+      output <- group.CJS[[i]]
       x <- unlist(stringr::str_split(i, "\\.", 2))[1]
-      output$Release <- c(sum(releases[, paste0("n.", x)]), NA, NA)
+      output$Release <- rep(c(sum(releases[, paste0("n.", x)]), NA, NA), 2)
       output <- output[, c(ncol(output), 1:(ncol(output) - 1))]
       return(output)
     })
@@ -1284,22 +1282,22 @@ assembleSectionOverview <- function(status.df, sections) {
 
 
 
-#' Create array.overview
-#'
-#' @return A data frame containing the progression per group of fish present in the biometrics.
-#' 
-#' @keywords internal
-#' 
-mbAssembleArrayOverview <- function(input) {
-  appendTo("debug", "Starting mbAssembleArrayOverview.")
-  output <- lapply(input, function(x) {
-    x[1, ] <- apply(x[c(1, 3), ], 2, function(i) sum(i, na.rm = TRUE))
-    x[2, ] <- x[4, ]
-    x[3, ] <- x[2, ] - x[1, ]
-    output <- x[1:3, ]
-    rownames(output) <- c("Known", "Estimated", "Difference")
-    return(output)
-  })
-  appendTo("debug", "Terminating mbAssembleArrayOverview.")  
-  return(output)
-}
+# #' Create array.overview
+# #'
+# #' @return A data frame containing the progression per group of fish present in the biometrics.
+# #' 
+# #' @keywords internal
+# #' 
+# mbAssembleArrayOverview <- function(input) {
+#   appendTo("debug", "Starting mbAssembleArrayOverview.")
+#   output <- lapply(input, function(x) {
+#     x[1, ] <- apply(x[c(1, 3), ], 2, function(i) sum(i, na.rm = TRUE))
+#     x[2, ] <- x[4, ]
+#     x[3, ] <- x[2, ] - x[1, ]
+#     output <- x[1:3, ]
+#     rownames(output) <- c("Known", "Estimated", "Difference")
+#     return(output)
+#   })
+#   appendTo("debug", "Terminating mbAssembleArrayOverview.")  
+#   return(output)
+# }

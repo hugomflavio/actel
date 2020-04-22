@@ -76,7 +76,7 @@ includeIntraArrayEstimates <- function(m, efficiency = NULL, CJS = NULL) {
     intra.CJS <- lapply(m, dualArrayCJS)
     if (!is.null(CJS)) {
       for (i in names(intra.CJS)) {
-        CJS$absolutes[4, i] <- round(CJS$absolutes[1, i] / intra.CJS[[i]]$combined.efficiency, 0)
+        CJS$absolutes["estimated", i] <- round(CJS$absolutes["detected", i] / intra.CJS[[i]]$combined.efficiency, 0)
         CJS$efficiency[i] <- intra.CJS[[i]]$combined.efficiency
       }
     } 
@@ -112,9 +112,10 @@ assembleSplitCJS <- function(mat, CJS, arrays, releases, intra.CJS = NULL) {
     output <- assembleArrayCJS(mat = mat[i], CJS = CJS[[i]], arrays = arrays, releases = aux)[[1]]
     if (!is.null(intra.CJS)) {
       for (i in names(intra.CJS)) {
-        output[4, i] <- round(output[1, i] / intra.CJS[[i]]$combined.efficiency, 0)
+        output["estimated", i] <- round(output["detected", i] / intra.CJS[[i]]$combined.efficiency, 0)
       }
     }
+    output["difference", ] <- output["estimated", ] - output["known", ]
     return(output)
   })
   names(recipient) <- names(CJS)
@@ -137,9 +138,10 @@ assembleGroupCJS <- function(mat, CJS, arrays, releases, intra.CJS = NULL) {
     output <- assembleArrayCJS(mat = mat[link], CJS = CJS[[i]], arrays = arrays, releases = aux)[[1]]
     if (!is.null(intra.CJS)) {
       for (i in names(intra.CJS)) {
-        output[4, i] <- round(output[1, i] / intra.CJS[[i]]$combined.efficiency, 0)
+        output["estimated", i] <- round(output["detected", i] / intra.CJS[[i]]$combined.efficiency, 0)
       }
     }
+    output["difference", ] <- output["estimated", ] - output["known", ]
     return(output)
   })
   names(recipient) <- names(CJS)
@@ -218,9 +220,9 @@ breakMatricesByArray <- function(m, arrays, type = c("peers", "all"), verbose = 
 #' 
 assembleArrayCJS <- function(mat, CJS, arrays, releases) { 
   # Compile final objects
-  absolutes <- matrix(nrow = 4, ncol = length(arrays))
+  absolutes <- matrix(nrow = 5, ncol = length(arrays))
   colnames(absolutes) <- names(arrays)
-  rownames(absolutes) <- c("detected", "here plus on peers", "not here but on peers", "estimated")
+  rownames(absolutes) <- c("detected", "here plus on peers", "not here but on peers", "known", "estimated")
   absolutes <- as.data.frame(absolutes)
   efficiency <- rep(NA, length(arrays))
   names(efficiency) <- names(arrays)
@@ -230,28 +232,39 @@ assembleArrayCJS <- function(mat, CJS, arrays, releases) {
   }
   # Fix max estimated based on arrays before, if needed
   for (i in names(arrays)) {
-    if (!is.na(absolutes[4, i]) && !is.null(arrays[[i]]$before)) {
-      if (all(!is.na(absolutes[4, arrays[[i]]$before]))) {
+    # if an estimation is made and previous arrays exist
+    if (!is.na(absolutes["estimated", i]) && !is.null(arrays[[i]]$before)) {
+      # if estimations were made for all the previous arrays
+      if (all(!is.na(absolutes["estimated", arrays[[i]]$before]))) {
+        # if fish were included in the system in the target array
         if (any(releases$Array == i))
-          the.max <- sum(absolutes[4, arrays[[i]]$before]) + sum(releases$n[releases$Array == i])
+          # the max is the sum of the estimated for the previous arrays plus the released fish.
+          the.max <- sum(absolutes["estimated", arrays[[i]]$before]) + sum(releases$n[releases$Array == i])
         else
-          the.max <- sum(absolutes[4, arrays[[i]]$before])
-        if (absolutes[4, i] > the.max)
-          absolutes[4, i] <- the.max
+          # the max is the sum of the estimated for the previous arrays.
+          the.max <- sum(absolutes["estimated", arrays[[i]]$before])
+        #if the estimated is too high, correct it.
+        if (absolutes["estimated", i] > the.max)
+          absolutes["estimated", i] <- the.max
       }
     }
   }
-  # Fix estimated for arrays with 0% efficiency and Fix absolutes for arrays with no peers
+  # Final fixes
   fix.zero <- na.as.false(efficiency == 0)
   fix.peers <- is.na(efficiency)
   for (i in 1:length(arrays)) {
-    if (fix.zero[i])
-      absolutes[4, i] <- sum(absolutes[4, arrays[[i]]$before])
+    if (fix.zero[i]) {
+      # fix estimated for arrays with 0 efficiency.
+      absolutes["estimated", i] <- sum(absolutes["estimated", arrays[[i]]$before])
+    }
     if (fix.peers[i]) {
-      absolutes[1, i] <- sum(unlist(lapply(mat, function(m) {
+      # fix absolutes for arrays with no peers
+      absolutes["detected", i] <- sum(unlist(lapply(mat, function(m) {
         if (any(colnames(m) == names(arrays)[i]))
           return(sum(m[, names(arrays)[i]]))
       })))
+      # Fix knowns for arrays with no peers
+      absolutes["known", i] <- absolutes["detected", i]
     }
   }
   return(list(absolutes = absolutes, efficiency = efficiency))
@@ -433,8 +446,9 @@ simpleCJS <- function(input, estimate = NULL, fixed.efficiency = NULL, silent = 
   }
 
   # prepare printings
-  absolutes <- matrix(c(m, r, z, M), ncol = ncol(input), byrow = TRUE)
-  rownames(absolutes) <- c("detected", "here plus downstream", "not here but downstream", "estimated")
+  k <- sapply(1:length(m), function(i) sum(c(m[i], z[i]), na.rm = TRUE))
+  absolutes <- matrix(c(m, r, z, k, M), ncol = ncol(input), byrow = TRUE)
+  rownames(absolutes) <- c("detected", "here plus downstream", "not here but downstream", "known", "estimated")
   colnames(absolutes) <- colnames(input)
   names(p) <- colnames(input)
   link <- is.na(S) | S >= 0

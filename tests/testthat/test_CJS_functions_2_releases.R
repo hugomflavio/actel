@@ -94,7 +94,7 @@ test_that("assembleArrayCJS can cope with 0% efficiency", {
   })
 
   overall.CJS <- assembleArrayCJS(mat = xmatrices, CJS = CJS.list, arrays = arrays, releases = release_nodes)
-  expect_equal(overall.CJS$absolutes$River5, c(3, 0, 25, 28))
+  expect_equal(overall.CJS$absolutes$River5, c(3, 0, 25, 28, 28))
 })
 
 overall.CJS <- assembleArrayCJS(mat = the.matrices, CJS = CJS.list, arrays = arrays, releases = release_nodes)

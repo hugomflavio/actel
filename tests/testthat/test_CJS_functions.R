@@ -170,15 +170,15 @@ test_that("simpleCJS works as expected.", {
 
 	xm <- m.by.array[[1]][[1]]
 	output <- simpleCJS(xm, fixed.efficiency = c(1, 0.2, 1), silent = FALSE)
-	expect_equal(output$absolutes[4, "River1"], 30)
+	expect_equal(output$absolutes["estimated", "River1"], 30)
 	expect_equal(output$efficiency, c(FakeStart = 1.0, River1 = 0.2, AnyPeer = 1.0))
 
 	output <- simpleCJS(xm, estimate = 0, silent = FALSE)
-	expect_equal(output$absolutes[4, "AnyPeer"], 26)
+	expect_equal(output$absolutes["estimated", "AnyPeer"], 26)
 	expect_equal(output$efficiency, c(FakeStart = 1, River1 = 1, AnyPeer = 0))
 
 	output <- simpleCJS(xm, estimate = 0.2, silent = FALSE)
-	expect_equal(output$absolutes[4, "AnyPeer"], 26)
+	expect_equal(output$absolutes["estimated", "AnyPeer"], 26)
 	expect_equal(output$efficiency, c(FakeStart = 1.0, River1 = 1.0, AnyPeer = 0.2))
 	expect_equal(output$survival[2], 1)
 
@@ -187,7 +187,8 @@ test_that("simpleCJS works as expected.", {
 	check <- read.csv(text = ',FakeStart,River1,AnyPeer
 "detected",30,26,26
 "here plus downstream",26,26,NA
-"not here but downstream",0, 0,NA
+"not here but downstream",0,0,NA
+"known",30,26,26
 "estimated",30,26,NA', row.names = 1)
 	expect_equal(output$absolutes, as.matrix(check))
 	expect_equal(output$efficiency, c(FakeStart = 1, River1 = 1, AnyPeer = NA))
@@ -240,7 +241,8 @@ test_that("combineCJS works as expected.", {
 	check <- read.csv(text = ',FakeStart,River1,AnyPeer
 "detected",60,54,54
 "here plus downstream",54,54,NA
-"not here but downstream",0, 0,NA
+"not here but downstream",0,0,NA
+"known",60,54,54
 "estimated",60,54,NA', row.names = 1)
 	expect_equal(output$absolutes, as.matrix(check))
 	expect_equal(output$efficiency, c(FakeStart = 1, River1 = 1, AnyPeer = NA))
@@ -273,6 +275,7 @@ test_that("assembleArrayCJS works as expected.",{
 "detected",0,54,54,52,52,52,52,49,44,34
 "here plus on peers",NA,54,54,50,52,52,50,43,34,NA
 "not here but on peers",NA,0,0,2,0,0,0,1,0,NA
+"known",0,54,54,54,52,52,52,50,44,34
 "estimated",NA,54,54,54,52,52,52,50,44,NA', row.names = 1)	
 
 	expect_equal(output$absolutes, check)
@@ -284,7 +287,8 @@ test_that("assembleArrayCJS works as expected.",{
 })
 
 test_that("advEfficiency can plot overall.CJS results", {
-	output <- round(advEfficiency(x = overall.CJS, n = 10000), 1)
+	expect_message(output <- round(advEfficiency(x = overall.CJS, n = 10000), 1),
+		"M: Some arrays were estimated to have either 0% or 100% efficiency, skipping plotting for those arrays.", fixed = TRUE)
 	check <- read.csv(text = '"","2.5%","50%","97.5%"
 "River1",1.0,1,1
 "River2",1.0,1,1
@@ -385,6 +389,7 @@ test_that("replicate functions work as expected.", {
 "detected",0,54,54,52,52,52,52,49,44,34
 "here plus on peers",NA,54,54,50,52,52,50,43,34,NA
 "not here but on peers",NA,0,0,2,0,0,0,1,0,NA
+"known",0,54,54,54,52,52,52,50,44,34
 "estimated",NA,54,54,54,52,52,52,50,44,35', row.names = 1)	
 	expect_equal(recipient$CJS$absolutes, check)
 
@@ -457,7 +462,9 @@ test_that("split CJS functions work as expected.", {
 "detected",0,26,26,25,26,26,26,26,25,19
 "here plus on peers",NA,26,26,25,26,26,26,25,19,NA
 "not here but on peers",NA,0,0,1,0,0,0,0,0,NA
+"known",0,26,26,26,26,26,26,26,25,19
 "estimated",NA,26,26,26,26,26,26,26,25,20
+"difference",NA,0,0,0,0,0,0,0,0,1
 ', row.names = 1)
   expect_equal(split.CJS[[1]], check)
 
@@ -465,25 +472,11 @@ test_that("split CJS functions work as expected.", {
 "detected",0,28,28,27,26,26,26,23,19,15
 "here plus on peers",NA,28,28,25,26,26,24,18,15,NA
 "not here but on peers",NA,0,0,1,0,0,0,1,0,NA
+"known",0,28,28,28,26,26,26,24,19,15
 "estimated",NA,28,28,28,26,26,26,24,19,16
+"difference",NA,0,0,0,0,0,0,0,0,1
 ', row.names = 1)
   expect_equal(split.CJS[[2]], check)
-
-  aux <- mbAssembleArrayOverview(input = split.CJS)
-
-  check <- read.csv(text = '"","River0","River1","River2","River3","River4","River5","River6","Fjord1","Fjord2","Sea1"
-"Known",0,26,26,26,26,26,26,26,25,19
-"Estimated",NA,26,26,26,26,26,26,26,25,20
-"Difference",NA,0,0,0,0,0,0,0,0,1
-', row.names = 1)
-  expect_equal(aux[[1]], check)
-
-  check <- read.csv(text = '"","River0","River1","River2","River3","River4","River5","River6","Fjord1","Fjord2","Sea1"
-"Known",0,28,28,28,26,26,26,24,19,15
-"Estimated",NA,28,28,28,26,26,26,24,19,16
-"Difference",NA,0,0,0,0,0,0,0,0,1
-', row.names = 1)
-  expect_equal(aux[[2]], check) 
 })
 
 test_that("group CJS functions work as expected.", {
@@ -507,7 +500,9 @@ test_that("group CJS functions work as expected.", {
 "detected",0,26,26,25,26,26,26,26,25,19
 "here plus on peers",NA,26,26,25,26,26,26,25,19,NA
 "not here but on peers",NA,0,0,1,0,0,0,0,0,NA
+"known",0,26,26,26,26,26,26,26,25,19
 "estimated",NA,26,26,26,26,26,26,26,25,20
+"difference",NA,0,0,0,0,0,0,0,0,1
 ', row.names = 1)
   expect_equal(group.CJS[[1]], check)
 
@@ -515,24 +510,11 @@ test_that("group CJS functions work as expected.", {
 "detected",0,28,28,27,26,26,26,23,19,15
 "here plus on peers",NA,28,28,25,26,26,24,18,15,NA
 "not here but on peers",NA,0,0,1,0,0,0,1,0,NA
+"known",0,28,28,28,26,26,26,24,19,15
 "estimated",NA,28,28,28,26,26,26,24,19,16
+"difference",NA,0,0,0,0,0,0,0,0,1
 ', row.names = 1)
   expect_equal(group.CJS[[2]], check)
-
-  aux <- mbAssembleArrayOverview(input = group.CJS)
- check <- read.csv(text = '"","River0","River1","River2","River3","River4","River5","River6","Fjord1","Fjord2","Sea1"
-"Known",0,26,26,26,26,26,26,26,25,19
-"Estimated",NA,26,26,26,26,26,26,26,25,20
-"Difference",NA,0,0,0,0,0,0,0,0,1
-', row.names = 1)
-  expect_equal(aux[[1]], check)
-
-  check <- read.csv(text = '"","River0","River1","River2","River3","River4","River5","River6","Fjord1","Fjord2","Sea1"
-"Known",0,28,28,28,26,26,26,24,19,15
-"Estimated",NA,28,28,28,26,26,26,24,19,16
-"Difference",NA,0,0,0,0,0,0,0,0,1
-', row.names = 1)
-  expect_equal(aux[[2]], check) 
 })
 
 

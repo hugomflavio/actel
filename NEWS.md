@@ -26,6 +26,7 @@ Enhancements:
   * Allow the GUI to pop up if the number of lines to display goes over getOptions("max.print").
   * Hide biometrics' section from the report if no biometric data was found.
   * New `advEfficiency` function allows user to get more robust efficiency estimates.
+  * Improved release.overview and group.overview objects so they can be used as an input to advEfficiency().
   
 
 ## actel 0.1.3

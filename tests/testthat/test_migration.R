@@ -210,31 +210,43 @@ test_that("migration results contains all the expected elements.", {
 
 	expect_equal(names(output$release.overview), c("A.RS1", "B.RS1"))
   check <- read.csv(text = '"","Release","River0","River1","River2","River3","River4","River5","River6","Fjord1","Fjord2","Sea1"
-"Known",30,0,26,26,26,26,26,26,26,25,20
-"Estimated",NA,NA,26,26,26,26,26,26,26,25,NA
-"Difference",NA,NA,0,0,0,0,0,0,0,0,NA
+"detected",30,0,26,26,25,26,26,26,26,25,20
+"here plus on peers",NA,NA,26,26,25,26,26,26,25,20,NA
+"not here but on peers",NA,NA,0,0,1,0,0,0,0,0,NA
+"known",30,0,26,26,26,26,26,26,26,25,20
+"estimated",NA,NA,26,26,26,26,26,26,26,25,NA
+"difference",NA,NA,0,0,0,0,0,0,0,0,NA
 ', row.names = 1)
   expect_equal(output$release.overview[[1]], check)
 
   check <- read.csv(text = '"","Release","River0","River1","River2","River3","River4","River5","River6","Fjord1","Fjord2","Sea1"
-"Known",30,0,28,28,28,26,26,26,24,19,15
-"Estimated",NA,NA,28,28,28,26,26,26,24,19,NA
-"Difference",NA,NA,0,0,0,0,0,0,0,0,NA
+"detected",30,0,28,28,27,26,26,26,23,19,15
+"here plus on peers",NA,NA,28,28,25,26,26,24,18,15,NA
+"not here but on peers",NA,NA,0,0,1,0,0,0,1,0,NA
+"known",30,0,28,28,28,26,26,26,24,19,15
+"estimated",NA,NA,28,28,28,26,26,26,24,19,NA
+"difference",NA,NA,0,0,0,0,0,0,0,0,NA
 ', row.names = 1)
   expect_equal(output$release.overview[[2]], check) 
 
 	expect_equal(names(output$group.overview), c("A", "B"))
   check <- read.csv(text = '"","Release","River0","River1","River2","River3","River4","River5","River6","Fjord1","Fjord2","Sea1"
-"Known",30,0,26,26,26,26,26,26,26,25,20
-"Estimated",NA,NA,26,26,26,26,26,26,26,25,NA
-"Difference",NA,NA,0,0,0,0,0,0,0,0,NA
+"detected",30,0,26,26,25,26,26,26,26,25,20
+"here plus on peers",NA,NA,26,26,25,26,26,26,25,20,NA
+"not here but on peers",NA,NA,0,0,1,0,0,0,0,0,NA
+"known",30,0,26,26,26,26,26,26,26,25,20
+"estimated",NA,NA,26,26,26,26,26,26,26,25,NA
+"difference",NA,NA,0,0,0,0,0,0,0,0,NA
 ', row.names = 1)
   expect_equal(output$group.overview[[1]], check)
 
   check <- read.csv(text = '"","Release","River0","River1","River2","River3","River4","River5","River6","Fjord1","Fjord2","Sea1"
-"Known",30,0,28,28,28,26,26,26,24,19,15
-"Estimated",NA,NA,28,28,28,26,26,26,24,19,NA
-"Difference",NA,NA,0,0,0,0,0,0,0,0,NA
+"detected",30,0,28,28,27,26,26,26,23,19,15
+"here plus on peers",NA,NA,28,28,25,26,26,24,18,15,NA
+"not here but on peers",NA,NA,0,0,1,0,0,0,1,0,NA
+"known",30,0,28,28,28,26,26,26,24,19,15
+"estimated",NA,NA,28,28,28,26,26,26,24,19,NA
+"difference",NA,NA,0,0,0,0,0,0,0,0,NA
 ', row.names = 1)
   expect_equal(output$group.overview[[2]], check) 
 })

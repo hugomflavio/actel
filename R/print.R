@@ -17,18 +17,20 @@ advEfficiency <- function(x, labels = NULL, n = 10000, q = c(0.025, 0.5, 0.975),
   y <- NULL
   ..density.. <- NULL
 
-  if (!is.list(x) || is.null(x$absolutes))
+  if (inherits(x, "list") & is.null(x$absolutes))
     stop("Could not recognise the input as an efficiency object from actel\n", call. = FALSE)
 
-  input <- x$absolutes
+  if (inherits(x, "list"))
+    input <- x$absolutes
+  else
+    input <- x
 
   if (inherits(input, "matrix")) {
-    aux <- as.data.frame(input)
     input <- data.frame(Replica.1 = c(input[3], input[2] - input[3]), Replica.2 = c(input[3], input[1] - input[3]))
     calc.combined <- TRUE
   } else {
     calc.combined <- FALSE
-    if (nrow(input) == 4) {
+    if (nrow(input) > 4) {
       input <- input[2:3, apply(input[2:3, ], 2, function(i) all(!is.na(i)))]
     } else {
       aux <- input[, apply(input[2:3, ], 2, function(i) all(!is.na(i)))]
@@ -158,8 +160,8 @@ printProgression <- function(dot, sections, overall.CJS, spatial, status.df, pri
     link <- grep(diagram_nodes$label[i], names(overall.CJS$absolutes))
     diagram_nodes$label[i] <- paste0(diagram_nodes$label[i], 
       "\\nEfficiency: ", ifelse(is.na(overall.CJS$efficiency[link]), "--", round(overall.CJS$efficiency[link] * 100, 0)),
-      "%\\nDetected: ", overall.CJS$absolutes[1, link], 
-      "\\nMax.Est.: ", ifelse(is.na(overall.CJS$absolutes[4, link]), "--",overall.CJS$absolutes[4, link]))
+      "%\\nDetected: ", overall.CJS$absolutes["detected", link], 
+      "\\nMax.Est.: ", ifelse(is.na(overall.CJS$absolutes["estimated", link]), "--",overall.CJS$absolutes["estimated", link]))
   }
 
  # Release nodes
