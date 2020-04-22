@@ -27,7 +27,7 @@ Enhancements:
   * Hide biometrics' section from the report if no biometric data was found.
   * New `advEfficiency` function allows user to get more robust efficiency estimates.
   * Improved release.overview and group.overview objects so they can be used as an input to advEfficiency().
-  
+  * New `plotTimes` function allows the user to create circular plots of specific subsets of the time data, with the ability to include night shades too.
 
 ## actel 0.1.3
 

@@ -936,9 +936,6 @@ printCircular <- function(times, bio, suffix = NULL){
     {grDevices::svg(paste0("Report/times_", names(times)[i], suffix, ".svg"), height = 5, width = 5, bg = "transparent")
     par(mar = c(1, 2, 2, 1))
     copyOfCirclePlotRad(main = names(times)[i], shrink = 1.05)
-    # circularSection(from = sunset, 
-    #   to = sunrize, units = "hours", template = "clock24", 
-    #   limits = c(1, 0), fill = scales::alpha("grey", 0.3), border = "transparent")
     params <- myRoseDiag(trim.times, bins = 24, radii.scale = "linear",
       prop = prop, tcl.text = -0.1, tol = 0.05, col = colours, border = "black")
     roseMean(trim.times, col = params$col, mean.length = c(0.07, -0.07), mean.lwd = 6,
@@ -959,6 +956,129 @@ printCircular <- function(times, bio, suffix = NULL){
   return(circular.plots)
 }
 
+#' Print circular graphics for time series.
+#' 
+#' Wraps functions adapted from the circular R package.
+#' 
+#' For more details about the original functions, visit the circular package homepage at \url{https://github.com/cran/circular}
+#' 
+#' @param times A list of of time vectors (each vector will be plotted as a series).
+#' @param night A vector of two times defining the start and stop of the night period (in HH:MM format).
+#' @param col A vector of colour names to paint each time series (colours will be added transparency).
+#' @param opacity A value between 1 and 100 for the opacity of each layer (defaults to 80% opacity).
+#' @param title A title for the plot.
+#' @param mean.dash Logical: Should the mean value be displayed on the plot's edge?
+#' @param mean.range Logical: Should the SEM be displayed? (only relevant if mean.dash = TRUE)
+#' @param rings Logical: Should inner plot rings be displayed?
+#' @param file A file name to save the plot as an SVG. Leave NULL to plot on active graphics device.
+#' 
+#' @return A circular plot
+#' 
+#' @export
+#' 
+plotTimes <- function(times, night = NULL, col = NULL, opacity = 80, title = "", mean.dash = TRUE, 
+  mean.range = TRUE, rings = TRUE, file = NULL){
+  
+  if (!inherits(times, "list"))
+    stop("'times' must be a list.", call. = FALSE)
+
+  if (!is.null(night) && length(night) != 2)
+    stop("'night' must have two values.", call. = FALSE)
+
+  if (!is.null(night) && is.character(night) && any(!grepl("[0-2][0-9]:[0-5][0-9]", night)))
+    stop("'night' values must be either numeric (between 0 and 24) or in a HH:MM format.", call. = FALSE)
+
+  if (!is.null(night) && is.numeric(night) && (any(night > 24) | any(night < 0)))
+    stop("'night' values must be either numeric (between 0 and 24) or in a HH:MM format.", call. = FALSE)
+
+  if (length(title) > 1)
+    stop("Please provide only one 'title'.", call. = FALSE)
+
+  if (!is.logical(mean.dash))
+    stop("'mean.dash' must be either TRUE or FALSE.", call. = FALSE)
+
+  if (!is.logical(mean.range))
+    stop("'mean.range' must be either TRUE or FALSE.", call. = FALSE)
+
+  if (!is.logical(rings))
+    stop("'rings' must be either TRUE or FALSE.", call. = FALSE)
+
+  if (!is.null(file) && length(file) > 1)
+    stop("Please provide only one 'file' name.", call. = FALSE)
+
+  if (length(opacity) > 1)
+    stop("Please provide only one 'opacity' value.", call. = FALSE)
+
+  if (!is.numeric(opacity) || (opacity < 1 | opacity > 100))
+    stop("'opacity' must be numeric (between 1 and 100).", call. = FALSE)
+
+  if (is.null(col)) {
+    if (length(times) > 8)
+      stop("To plot this many time series simultaneously, colours must be specified using 'col'.", call. = FALSE)
+    cbPalette <- c("#56B4E9", "#c0ff3e", "#E69F00", "#F0E442", "#0072B2", "#D55E00", "#CC79A7", "#999999")
+    colours <- paste0(cbPalette[c(1:length(times))], 80)
+  } else {
+    if (length(col) != length(times))
+      stop("'col' must be of the same length as 'times'.", call. = FALSE)
+    colours <- paste0(gplots::col2hex(col), opacity)
+  }
+
+  times <- lapply(times, as.character)
+  times <- lapply(times, function(i) {
+    recipient <- decimalTime(sapply(i, function(i_j) {
+      aux <- unlist(strsplit(i_j, " ", fixed = TRUE))
+      return(aux[length(aux)])
+    }))
+    return(circular::circular(recipient, units = "hours", template = "clock24"))
+  })
+
+  if (length(times) > 2)
+    ylegend <- -0.97 + (0.1 * (length(times) - 2))
+  else
+    ylegend <- -0.97
+  
+  prop <- roundDown(1 / max(unlist(lapply(times, function(x) table(roundUp(x, to = 1)) / sum(!is.na(x))))), to = 1)
+  
+  if (!is.null(file)) {
+    if (!grepl(".svg$", file))
+      file <- paste0(file, ".svg")
+    grDevices::svg(file, height = 5, width = 5, bg = "transparent")
+  }
+  
+  par(mar = c(1, 2, 2, 1))
+  copyOfCirclePlotRad(main = title, shrink = 1.05)
+  
+  if (!is.null(night)) {
+    circularSection(from = night[1], 
+      to = night[2], units = "hours", template = "clock24", 
+      limits = c(1, 0), fill = scales::alpha("grey", 0.3), border = "transparent")
+  }
+
+  params <- myRoseDiag(times, bins = 24, radii.scale = "linear",
+    prop = prop, tcl.text = -0.1, tol = 0.05, col = colours, border = "black")
+  
+  if (mean.dash) {
+    roseMean(times, col = params$col, mean.length = c(0.07, -0.07), mean.lwd = 6,
+      box.range = ifelse(mean.range, "std.error", "none"), fill = "white", border = "black",
+      box.size = c(1.015, 0.985), edge.length = c(0.025, -0.025),
+      edge.lwd = 2)
+  }
+
+  if (rings) {
+    ringsRel(plot.params = params, border = "black", ring.text = TRUE, 
+      ring.text.pos = 0.07, rings.lty = "f5", ring.text.cex = 0.8)
+  }
+
+  legend(x = -1.2, y = ylegend,
+    legend = paste(names(times), " (", unlist(lapply(times, function(x) sum(!is.na(x)))), ")", sep =""),
+    fill = params$col, bty = "n", x.intersp = 0.3, cex = 0.8)
+
+  if(!is.null(file)) {
+    grDevices::dev.off()
+    message("M: Plot saved to ", file)
+  }
+}
+
 # #' Draw a section on the outside of the circle
 # #' 
 # #' @param from value where the section should start
@@ -971,22 +1091,22 @@ printCircular <- function(times, bio, suffix = NULL){
 # #' 
 # #' @keywords internal
 # #' 
-# circularSection <- function(from, to, units = "hours", template = "clock24", limits = c(1, 0), fill = "white", border = "black"){
-#   if( inherits(from,"character") ){
-#     hour.from <- circular::circular(decimalTime(from), units = units, template = template)
-#     hour.to <- circular::circular(decimalTime(to), units = units, template = template)
-#   } else {
-#     hour.from <- circular::circular(from, units = units, template = template)
-#     hour.to <- circular::circular(to, units = units, template = template)
-#   }
-#   if(hour.to < hour.from) hour.to <- hour.to + 24
-#   zero <- attr(hour.from,"circularp")$zero # extracted from the circular data
-#   xmin <- as.numeric(circular::conversion.circular(hour.from, units = "radians")) * -1
-#   xmax <- as.numeric(circular::conversion.circular(hour.to, units = "radians")) * -1
-#   xx <- c(limits[1] * cos(seq(xmin, xmax, length = 1000) + zero), rev(limits[2] * cos(seq(xmin, xmax, length = 1000) + zero)))
-#   yy <- c(limits[1] * sin(seq(xmin, xmax, length = 1000) + zero), rev(limits[2] * sin(seq(xmin, xmax, length = 1000) + zero)))
-#   polygon(xx, yy, col = fill, border = border)
-# }
+circularSection <- function(from, to, units = "hours", template = "clock24", limits = c(1, 0), fill = "white", border = "black"){
+  if( inherits(from,"character") ){
+    hour.from <- circular::circular(decimalTime(from), units = units, template = template)
+    hour.to <- circular::circular(decimalTime(to), units = units, template = template)
+  } else {
+    hour.from <- circular::circular(from, units = units, template = template)
+    hour.to <- circular::circular(to, units = units, template = template)
+  }
+  if(hour.to < hour.from) hour.to <- hour.to + 24
+  zero <- attr(hour.from,"circularp")$zero # extracted from the circular data
+  xmin <- as.numeric(circular::conversion.circular(hour.from, units = "radians")) * -1
+  xmax <- as.numeric(circular::conversion.circular(hour.to, units = "radians")) * -1
+  xx <- c(limits[1] * cos(seq(xmin, xmax, length = 1000) + zero), rev(limits[2] * cos(seq(xmin, xmax, length = 1000) + zero)))
+  yy <- c(limits[1] * sin(seq(xmin, xmax, length = 1000) + zero), rev(limits[2] * sin(seq(xmin, xmax, length = 1000) + zero)))
+  polygon(xx, yy, col = fill, border = border)
+}
 
 #' Edited rose diagram function
 #' 
