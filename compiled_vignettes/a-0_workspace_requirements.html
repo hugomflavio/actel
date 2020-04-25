@@ -12,7 +12,7 @@
 
 <meta name="author" content="Hugo Flávio" />
 
-<meta name="date" content="2020-03-08" />
+<meta name="date" content="2020-04-25" />
 
 <title>1) Preparing your data</title>
 
@@ -215,7 +215,7 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 
 <h1 class="title toc-ignore">1) Preparing your data</h1>
 <h4 class="author">Hugo Flávio</h4>
-<h4 class="date">2020-03-08</h4>
+<h4 class="date">2020-04-25</h4>
 
 
 
@@ -245,7 +245,8 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 <li><a href="d-3_residency_efficiency.html">Multi-way efficiency estimations</a></li>
 </ol></li>
 <li><a href="e-0_manual_mode.html">Manual mode</a></li>
-<li><a href="f-0_messages.html">Errors and messages</a></li>
+<li><a href="f-0_post_functions.html">Beyond the three main analyses</a></li>
+<li><a href="g-0_messages.html">Errors and messages</a></li>
 </ol>
 </div>
 <div id="preparing-your-data" class="section level2">
@@ -319,6 +320,63 @@ M: No &#39;Group&#39; column found in the biometrics file. Assigning all fish to
 <dd>You can append as many columns as you want to <strong>biometrics.csv</strong>. Importantly, if the biometrics have columns with keywords such as <em>length</em>, <em>weight</em> or <em>mass</em>, graphics showing the distribution of these parameters per fish group will be drawn for you in the report.
 </dd>
 </dl>
+<div id="tags-with-sensors" class="section level3">
+<h3>Tags with sensors</h3>
+<p>Tags with single or multiple sensors (and multiple signals) can be listed in the biometrics file. If you have a tag that emits more than one signal, simply list both signals separated with “|” in the “Signal” column. Additionally, you can specify the respective sensor units by creating a new “Sensor.unit” column (only the first letter is capitalised), and including the units being recorded by each signal separated with a “|”. You can name your sensor units in whichever way you prefer, as long as you separate them with a single “|”. If your tag has three or more sensors, simply add the signals and respective sensor units separated with additional “|”’s.</p>
+<p>If your tag only has one sensor, list it as usual in the signal column and, if you want to personalise the sensor unit name, include it also in the “Sensor.unit” column.</p>
+<p>For example:</p>
+<table>
+<thead>
+<tr class="header">
+<th align="left">Release.date</th>
+<th align="left">Signal</th>
+<th align="left">Sensor.unit</th>
+<th align="right">Length.mm</th>
+<th align="right">Weight.g</th>
+<th align="left">Group</th>
+<th align="left">Release.site</th>
+<th align="left">…</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">2018-02-01 10:05:00</td>
+<td align="left">501</td>
+<td align="left">T</td>
+<td align="right">150</td>
+<td align="right">40</td>
+<td align="left">Wild</td>
+<td align="left">Site A</td>
+<td align="left">…</td>
+</tr>
+<tr class="even">
+<td align="left">2018-02-01 10:15:00</td>
+<td align="left">502|503</td>
+<td align="left">T|D</td>
+<td align="right">160</td>
+<td align="right">60</td>
+<td align="left">Hatchery</td>
+<td align="left">Site A</td>
+<td align="left">…</td>
+</tr>
+<tr class="odd">
+<td align="left">2018-02-01 10:15:00</td>
+<td align="left">504|505|506</td>
+<td align="left">T|D|A</td>
+<td align="right">170</td>
+<td align="right">50</td>
+<td align="left">Wild</td>
+<td align="left">Site B</td>
+<td align="left">…</td>
+</tr>
+</tbody>
+</table>
+<dl>
+<dt>Note:</dt>
+<dd>If you do not include a “Sensor.unit” column, actel will simply use whatever sensor unit it can find in the raw detections file. To ensure that no issues arrise from different manufacturers handling unit names differently, I recommend that you write the sensor unit even for single sensor tags.
+</dd>
+</dl>
+</div>
 </div>
 <div id="spatial-file" class="section level2">
 <h2>Spatial file</h2>

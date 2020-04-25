@@ -12,7 +12,7 @@
 
 <meta name="author" content="Hugo Flávio" />
 
-<meta name="date" content="2020-03-08" />
+<meta name="date" content="2020-04-25" />
 
 <title>2.2) Inspecting the explore() results</title>
 
@@ -215,7 +215,7 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 
 <h1 class="title toc-ignore">2.2) Inspecting the explore() results</h1>
 <h4 class="author">Hugo Flávio</h4>
-<h4 class="date">2020-03-08</h4>
+<h4 class="date">2020-04-25</h4>
 
 
 
@@ -245,7 +245,8 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 <li><a href="d-3_residency_efficiency.html">Multi-way efficiency estimations</a></li>
 </ol></li>
 <li><a href="e-0_manual_mode.html">Manual mode</a></li>
-<li><a href="f-0_messages.html">Errors and messages</a></li>
+<li><a href="f-0_post_functions.html">Beyond the three main analyses</a></li>
+<li><a href="g-0_messages.html">Errors and messages</a></li>
 </ol>
 </div>
 <div id="results-within-r" class="section level2">
@@ -497,6 +498,10 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 <p>Note that fish where you had to manually intervene during the analysis will be highlighted with a yellow border, and fish that were manually overridden through the <a href="b-0_explore.html#override"><code>override</code> argument</a> will be highlighted with a red border.</p>
 <p>Lastly, the total number of detections for the fish is displayed in the header, between brackets.</p>
 <ol start="8" style="list-style-type: decimal">
+<li><strong>Sensor data</strong></li>
+</ol>
+<p>If actel finds valid sensor data in the detections, that data will be plotted here per tag. For tags with more than one sensor, two or more panels will be drawn, one for each sensor unit.</p>
+<ol start="9" style="list-style-type: decimal">
 <li><strong>Actel log</strong></li>
 </ol>
 <p>This section contains the same information as the actel log saved in your target folder. It is useful to have a look at a few things. For example, the number of target tags, the detection data range or the number of ALS (i.e. receivers) can help you spot any missing data (i.e. if you tagged 100 fish and had only 80 target tags, some tags are missing from your input files!).</p>
