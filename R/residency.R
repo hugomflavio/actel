@@ -385,11 +385,14 @@ residency <- function(path = NULL, tz, sections, success.arrays = NULL, max.inte
 
   last.seen <- as.data.frame.matrix(with(status.df, table(Group, Status)))
 
-  array.times <- getTimes(movements = valid.movements, spatial = spatial, type = "arrival", events = "all")
+  aux <- list(valid.movements = valid.movements, section.movements = section.movements, 
+    spatial = spatial, rsp.info = list(bio = bio, analysis.type = "residency"))
+  array.times <- getTimes(input = aux, move.type = "array", event.type = "arrival", n.events = "all")
 
   section.times <- list(
-    arrival = getTimes(movements = section.movements, spatial = spatial, type = "arrival", events = "all"),
-    departure = getTimes(movements = section.movements, spatial = spatial, type = "departure", events = "all"))
+    arrival = getTimes(input = aux, move.type = "section", event.type = "arrival", n.events = "all"),
+    departure = getTimes(input = aux, move.type = "section", event.type = "departure", n.events = "all"))
+  rm(aux)
 
   residency.list <- getResidency(movements = section.movements, spatial = spatial)
 
@@ -490,9 +493,9 @@ residency <- function(path = NULL, tz, sections, success.arrays = NULL, max.inte
     printGlobalRatios(global.ratios = global.ratios, daily.ratios = daily.ratios, sections = sections)
     individual.detection.plots <- printIndividuals(detections.list = detections, bio = bio, 
         tz = tz, spatial = spatial, movements = movements, valid.movements = valid.movements)
-    array.circular.plots <- printCircular(times = convertTimesToCircular(array.times), bio = bio, suffix = "_array")
-    section.arrival.circular.plots <- printCircular(times = convertTimesToCircular(section.times$arrival), bio = bio, suffix = "_array")
-    section.departure.circular.plots <- printCircular(times = convertTimesToCircular(section.times$departure), bio = bio, suffix = "_array")
+    array.circular.plots <- printCircular(times = timesToCircular(array.times), bio = bio, suffix = "_array")
+    section.arrival.circular.plots <- printCircular(times = timesToCircular(section.times$arrival), bio = bio, suffix = "_array")
+    section.departure.circular.plots <- printCircular(times = timesToCircular(section.times$departure), bio = bio, suffix = "_array")
     appendTo(c("Screen", "Report"), "M: Drawing individual residency graphics.")
     dayrange <- range(as.Date(global.ratios[[1]]$Date))
     dayrange[1] <- dayrange[1] - 1

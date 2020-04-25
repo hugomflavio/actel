@@ -426,31 +426,58 @@ updateActel <- function() { # nocov start
 } # nocov end
 
 
-#' Extract time stamp of valid entry or exit in each array
+#' Extract timestamps from the analysis results.
 #' 
-#' @param spatial The list of spatial objects.
-#' @param movements The list of valid movements.
-#' @param type The point to be recorded: one of "arrival" or "departure".
-#' @param events The number of events to record. if "one" and type is "arrival", the very first arrival is returned;
+#' @param input An actel results object.
+#' @param locations The names of the arrays or sections to be included. If left NULL, information for all arrays/sections is extracted.
+#' @param move.type The type of events to record: one of "array" or "section".
+#' @param event.type The point to be recorded: one of "arrival" or "departure".
+#' @param n.events The number of events to record. if "one" and type is "arrival", the very first arrival is returned;
 #' if "one" and type is "departure", the very last departure is returned.
 #' 
-#' @keywords internal
+#' @export
 #' 
 #' @return A data frame with the timestamps for each fish (rows) and array (columns)
 #' 
-getTimes <- function(movements, spatial, type = c("arrival", "departure"), events = c("first", "all", "last")){
-  # appendTo("Debug", "Running getTimes.")
-  type <- match.arg(type)
-  events <- match.arg(events)
+getTimes <- function(input, locations = NULL, move.type = c("array", "section"), event.type = c("arrival", "departure"), n.events = c("first", "all", "last")){
+  if (!inherits(input, "list"))
+    stop("Could not recognise the input as an actel results object.", call. = FALSE)
 
-  if (type == "arrival")
+  if (is.null(input$valid.movements) | is.null(input$spatial) | is.null(input$rsp.info))
+    stop("Could not recognise the input as an actel results object.", call. = FALSE)
+
+  move.type <- match.arg(move.type)
+  event.type <- match.arg(event.type)
+  n.events <- match.arg(n.events)
+  
+  if (input$rsp.info$analysis.type == "explore" & move.type == "section")
+    stop("Section times are not calculated for analyses of type 'explore'.", call. = FALSE)
+
+  if (move.type == "array")
+    movements <- input$valid.movements
+  else
+    movements <- input$section.movements
+  spatial <- input$spatial
+  bio <- input$rsp.info$bio
+
+  if (move.type == "array" & any(link <- is.na(match(locations, unique(spatial$stations$Array)))))
+    stop(ifelse(sum(link) > 1, "Arrays '", "Array '"),
+      paste0(locations[link], collapse = "', '"), 
+      ifelse(sum(link) > 1, "' are", "' is"), " not part of this study's arrays.", call. = FALSE)
+
+  if (move.type == "section" & any(link <- is.na(match(locations, names(spatial$array.order)))))
+    stop(ifelse(sum(link) > 1, "Sections '", "Section '"),
+      paste0(locations[link], collapse = "', '"), 
+      ifelse(sum(link) > 1, "' are", "' is"), " not part of this study's sections.", call. = FALSE)
+
+  if (event.type == "arrival")
     the.column <- "First.time"
   else
     the.column <- "Last.time"
 
   the.times <- list()
 
-  # extrat arrivals or departures
+  # extract arrivals or departures
   capture.output <- lapply(movements, function(x) {
     # cat(".\n")
     aux <- x[[the.column]] # data.table syntax
@@ -461,7 +488,7 @@ getTimes <- function(movements, spatial, type = c("arrival", "departure"), event
   names(the.times) <- names(movements)
 
   # allow array/section movement flexibility
-  if (colnames(movements[[1]])[1] == "Array")
+  if (move.type == "array")
     col.order <- unlist(spatial$array.order)
   else
     col.order <- names(spatial$array.order)
@@ -479,17 +506,17 @@ getTimes <- function(movements, spatial, type = c("arrival", "departure"), event
           V1 = the.times[[j]][link]
         )
         colnames(output)[2] <- i
-        if (events == "first") {
+        if (n.events == "first") {
           first.row <- output[1, , drop = FALSE]
           first.row$Event <- j
           return(first.row)
         }
-        if (events == "last") {
+        if (n.events == "last") {
           last.row <- output[nrow(output), , drop = FALSE]
           last.row$Event <- j
           return(last.row)
         }
-        if (events == "all")
+        if (n.events == "all")
           return(output)
       } else {
         return(NULL)
@@ -510,30 +537,54 @@ getTimes <- function(movements, spatial, type = c("arrival", "departure"), event
     return(x)
   })
   output <- do.call(cbind, aux)
+
+  if (!is.null(locations)) {
+    output <- output[, locations, drop = FALSE]
+    completely.empty <- apply(output, 1, function(r) all(is.na(r)))
+    output <- output[!completely.empty, ,drop = FALSE]
+  }
+
   output$Transmitter <- gsub("_[0-9]*$", "", rownames(output))
-  output <- output[, c(ncol(output), 1:(ncol(output) - 1))]
+  output$Group <- bio$Group[match(output$Transmitter, bio$Transmitter)]
+  output <- output[, c(ncol(output)-1, ncol(output), 1:(ncol(output) - 2))]
+  rownames(output) <- 1:nrow(output)
   return(output)
 }
 
 
-#' Convert times data frame into a list of circular objects
+#' Convert a data frame with timestamps into a list of circular objects
 #' 
-#' @param times A data frame with the time stamps for reach fish and array.
+#' @param x A data frame where the first column is an identifier, the second column is a grouping structure, and columns three and onwards are timestamps at different locations.
+#' @param by.group Logical: Should the times at each location be divided by the group column (second column of x)?
 #' 
-#' @keywords internal
+#' @export
 #' 
 #' @return A list of circular objects
 #' 
-convertTimesToCircular <- function(times) {
-  appendTo("Debug", "Running convertTimesToCircular.")
+timesToCircular <- function(x, by.group = FALSE) {
+  if (!all(sapply(x[, 3:ncol(x)], function(i) any(class(i) == "POSIXt"))))
+    stop("timesToCircular only works on data frames where the second column is a grouping structure and columns three and onwards are timestamps.", call. = FALSE)
+
   output <- list()
-  cols.with.data <- apply(times, 2, function(x) !all(is.na(x)))
-  times <- times[, cols.with.data]
-  for (i in 2:ncol(times)) {
-    output[[i - 1]] <- circular::circular(decimalTime(substrRight(as.character(times[, i]), 8)), units = "hours", template = "clock24")
-    names(output[[i - 1]]) <- times$Transmitter
+  cols.with.data <- apply(x, 2, function(x) !all(is.na(x)))
+  x <- x[, cols.with.data]
+
+  if (by.group) {
+    aux <- split(x, x[, 2])
+    capture <- lapply(1:length(aux), function(i) {
+      for (j in 3:ncol(x)) {
+        output[[length(output) + 1]] <<- circular::circular(decimalTime(substrRight(as.character(aux[[i]][, j]), 8)), units = "hours", template = "clock24")
+        names(output[[length(output)]]) <<- aux[[i]]$Transmitter
+        names(output)[length(output)] <<- paste0(names(aux)[i], ".", colnames(aux[[i]])[j])
+      }
+    })
+  } else {
+    for (i in 3:ncol(x)) {
+      output[[length(output) + 1]] <- circular::circular(decimalTime(substrRight(as.character(x[, i]), 8)), units = "hours", template = "clock24")
+      names(output[[length(output)]]) <- x$Transmitter
+    }
+    names(output) <- colnames(x)[3:ncol(x)]
   }
-  names(output) <- colnames(times)[2:ncol(times)]
   return(output)
 }
 

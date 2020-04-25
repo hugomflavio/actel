@@ -420,7 +420,9 @@ migration <- function(path = NULL, tz, sections, success.arrays = NULL, max.inte
   
   section.overview <- assembleSectionOverview(status.df = status.df, sections = sections)
 
-  times <- getTimes(movements = valid.movements, spatial = spatial, type = "arrival", events = "first")
+  aux <- list(valid.movements = valid.movements, spatial = spatial, rsp.info = list(bio = bio, analysis.type = "migration"))
+  times <- getTimes(input = aux, move.type = "array", event.type = "arrival", n.events = "first")
+  rm(aux)
 
   appendTo("Screen", "M: Validating detections...")
 
@@ -567,7 +569,7 @@ migration <- function(path = NULL, tz, sections, success.arrays = NULL, max.inte
     }
     individual.plots <- printIndividuals(detections.list = detections, bio = bio, 
         status.df = status.df, tz = tz, spatial = spatial, movements = movements, valid.movements = valid.movements)
-    circular.plots <- printCircular(times = convertTimesToCircular(times), bio = bio)
+    circular.plots <- printCircular(times = timesToCircular(times), bio = bio)
     if (nrow(section.overview) > 3) 
       survival.graph.size <- "width=90%" else survival.graph.size <- "height=4in"
     if (any(sapply(valid.detections, function(x) any(!is.na(x$Sensor.Value))))) {

@@ -338,7 +338,9 @@ detections.list <- study.data$detections.list
   names(valid.movements) <- names(movements)
   valid.movements <- valid.movements[!unlist(lapply(valid.movements, is.null))]
 
-  times <- getTimes(movements = valid.movements, spatial = spatial, type = "arrival", events = "first")
+  aux <- list(valid.movements = valid.movements, spatial = spatial, rsp.info = list(bio = bio, analysis.type = "explore"))
+  times <- getTimes(input = aux, move.type = "array", event.type = "arrival", n.events = "first")
+  rm(aux)
 
   appendTo("Screen", "M: Validating detections...")
 
@@ -388,7 +390,7 @@ detections.list <- study.data$detections.list
     printDot(dot = dot, sections = NULL, spatial = spatial, print.releases = print.releases)
     individual.plots <- printIndividuals(detections.list = detections, spatial = spatial, 
       tz = tz, movements = movements, valid.movements = valid.movements, bio = bio)
-    circular.plots <- printCircular(times = convertTimesToCircular(times), bio = bio)
+    circular.plots <- printCircular(times = timesToCircular(times), bio = bio)
     if (any(sapply(valid.detections, function(x) any(!is.na(x$Sensor.Value))))) {
       appendTo(c("Screen", "Report"), "M: Printing sensor values for tags with sensor data.")
       sensor.plots <- printSensorData(detections = valid.detections)

@@ -47,10 +47,10 @@
 #' @param x An efficiency object from actel (\code{overall.CJS}, \code{intra.array.CJS[[...]]} or \code{efficiency} objects)
 #' @param labels a vector of strings to substitute default plot labels
 #' @param n Number of draws for each array.
-#' @param q The quantile values to be calculated. Defaults to code{c(0.025, 0.5, 0.975)} (i.e. median and 95% CI)
+#' @param q The quantile values to be calculated. Defaults to \code{c(0.025, 0.5, 0.975)} (i.e. median and 95% CI)
 #' @param force.grid A vector of format c(nrow, ncol) that allows the user to define the number of rows and columns to distribute the plots in.
 #' @param paired Logical: For efficiency derived from residency analyses, should min. and max. estimates for an array be displayed next to each other?
-#' @param title A title for the plot (feeds into ggplot's labs title parameter).
+#' @param title A title for the plot (feeds into title parameter of ggplot's labs function).
 #' 
 #' @return A data frame with the required quantile values and a plot of the efficiency distributions.
 #' 
@@ -1026,15 +1026,6 @@ plotTimes <- function(times, night = NULL, col = NULL, opacity = 80, title = "",
       stop("'col' must be of the same length as 'times'.", call. = FALSE)
     colours <- paste0(gplots::col2hex(col), opacity)
   }
-
-  times <- lapply(times, as.character)
-  times <- lapply(times, function(i) {
-    recipient <- decimalTime(sapply(i, function(i_j) {
-      aux <- unlist(strsplit(i_j, " ", fixed = TRUE))
-      return(aux[length(aux)])
-    }))
-    return(circular::circular(recipient, units = "hours", template = "clock24"))
-  })
 
   if (length(times) > 2)
     ylegend <- -0.97 + (0.1 * (length(times) - 2))
