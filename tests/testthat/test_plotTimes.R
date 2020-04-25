@@ -1,4 +1,5 @@
 load("aux_plotTimes.RData")
+times <- timesToCircular(times)
 
 test_that("plotTimes fail-safes kick in when needed", {
 	expect_error(plotTimes(times = 1),

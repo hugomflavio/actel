@@ -33,7 +33,8 @@ knitr::opts_chunk$set(
     1. [Inspecting the residency() results](d-2_residency_results.html)
     1. [Multi-way efficiency estimations](d-3_residency_efficiency.html)
 1. [Manual mode](e-0_manual_mode.html)
-1. [Errors and messages](f-0_messages.html)
+1. [Beyond the three main analyses](f-0_post_functions.html)
+1. [Errors and messages](g-0_messages.html)
 
 ## Preparing your data
 
@@ -46,15 +47,16 @@ To create a blank workspace ready to be used, run `createWorkspace()`, and a tem
 Your biometrics file should look similar to this:
 
 ```{r, echo=FALSE, results='asis'}
-biometrics <- data.frame(Release.date=c("2018-02-01 10:05:00","2018-02-01 10:10:00","2018-02-01 10:15:00")
-    ,Serial.nr=c("12340001","A12-3456-1001","19340301")
-    ,Signal=c(1,1001,301)
-    ,Length.mm=c(150,160,170)
-    ,Weight.g=c(40,60,50)
-    ,Group=c("Wild","Hatchery","Wild")
-    ,Release.site=c("Site A","Site A","Site B")
-    ,...=c("...","...","...")
-    )
+biometrics <- data.frame(
+  Release.date = c("2018-02-01 10:05:00", "2018-02-01 10:10:00", "2018-02-01 10:15:00"),
+  Serial.nr = c("12340001", "A12-3456-1001", "19340301"),
+  Signal = c(1, 1001, 301),
+  Length.mm = c(150, 160, 170),
+  Weight.g = c(40, 60, 50),
+  Group = c("Wild", "Hatchery", "Wild"),
+  Release.site = c("Site A", "Site A", "Site B"),
+  ... = c("...", "...", "..."))
+
 knitr::kable(biometrics)
 ```
 
@@ -76,17 +78,43 @@ M: No 'Group' column found in the biometrics file. Assigning all fish to group '
 Note:
   : You can append as many columns as you want to **biometrics.csv**. Importantly, if the biometrics have columns with keywords such as *length*, *weight* or *mass*, graphics showing the distribution of these parameters per fish group will be drawn for you in the report.
 
+### Tags with sensors
+
+Tags with single or multiple sensors (and multiple signals) can be listed in the biometrics file. If you have a tag that emits more than one signal, simply list both signals separated with "|" in the "Signal" column. Additionally, you can specify the respective sensor units by creating a new "Sensor.unit" column (only the first letter is capitalised), and including the units being recorded by each signal separated with a "|". You can name your sensor units in whichever way you prefer, as long as you separate them with a single "|". If your tag has three or more sensors, simply add the signals and respective sensor units separated with additional "|"'s.
+
+If your tag only has one sensor, list it as usual in the signal column and, if you want to personalise the sensor unit name, include it also in the "Sensor.unit" column.
+
+For example:
+
+```{r, echo=FALSE, results='asis'}
+biometrics <- data.frame(
+  Release.date=c("2018-02-01 10:05:00", "2018-02-01 10:15:00", "2018-02-01 10:15:00"),
+  Signal = c("501", "502|503", "504|505|506"),
+  Sensor.unit = c("T", "T|D", "T|D|A"),
+  Length.mm = c(150, 160, 170),
+  Weight.g = c(40, 60, 50),
+  Group = c("Wild", "Hatchery", "Wild"),
+  Release.site = c("Site A", "Site A", "Site B"),
+  ...=c("...", "...", "..."))
+
+knitr::kable(biometrics)
+```
+
+Note:
+  : If you do not include a "Sensor.unit" column, actel will simply use whatever sensor unit it can find in the raw detections file. To ensure that no issues arrise from different manufacturers handling unit names differently, I recommend that you write the sensor unit even for single sensor tags.
+
 ## Spatial file
 
 Your spatial file should look similar to this:
 
 ```{r, echo=FALSE, results='asis'}
-  spatial <- data.frame(Station.name=c("River East","River West","Estuary","Site A","Site B")
-    ,Latitude=c(8.411,8.521,8.402,8.442,8.442)
-    ,Longitude=c(40.411,40.521,40.402,40.442,40.442)
-    ,Array=c("River1","River1","River2","River1","River2")
-    ,Type=c("Hydrophone","Hydrophone","Hydrophone","Release","Release")
-    )
+spatial <- data.frame(
+  Station.name = c("River East", "River West", "Estuary", "Site A", "Site B"),
+  Latitude = c(8.411, 8.521, 8.402, 8.442, 8.442),
+  Longitude = c(40.411, 40.521, 40.402, 40.442, 40.442),
+  Array = c("River1", "River1", "River2", "River1", "River2"),
+  Type = c("Hydrophone", "Hydrophone", "Hydrophone", "Release", "Release"))
+
 knitr::kable(spatial)
 ```
 
@@ -125,11 +153,12 @@ W: At least one release site has been indicated in the spatial file, but no rele
 The deployments file is where you will list the receivers you used in the study. here is an example:
 
 ```{r, echo=FALSE, results='asis'}
-  deployments <- data.frame(Receiver = c(11111, 22222, 33333),
-    Station.name = c("River East","River West","Estuary")
-    ,Start = c("2018-01-01 11:30:00", "2018-01-01 11:33:00", "2018-01-01 11:34:00")
-    ,Stop = c("2018-05-03 09:30:00", "2018-05-04 08:33:00", "2018-05-05 12:00:00")
-    )
+deployments <- data.frame(
+  Receiver = c(11111, 22222, 33333),
+  Station.name = c("River East", "River West", "Estuary"),
+  Start = c("2018-01-01 11:30:00", "2018-01-01 11:33:00", "2018-01-01 11:34:00"),
+  Stop = c("2018-05-03 09:30:00", "2018-05-04 08:33:00", "2018-05-05 12:00:00"))
+
 knitr::kable(deployments)
 ```
 

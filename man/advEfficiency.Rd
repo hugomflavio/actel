@@ -21,13 +21,13 @@ advEfficiency(
 
 \item{n}{Number of draws for each array.}
 
-\item{q}{The quantile values to be calculated. Defaults to code{c(0.025, 0.5, 0.975)} (i.e. median and 95\% CI)}
+\item{q}{The quantile values to be calculated. Defaults to \code{c(0.025, 0.5, 0.975)} (i.e. median and 95\% CI)}
 
 \item{force.grid}{A vector of format c(nrow, ncol) that allows the user to define the number of rows and columns to distribute the plots in.}
 
 \item{paired}{Logical: For efficiency derived from residency analyses, should min. and max. estimates for an array be displayed next to each other?}
 
-\item{title}{A title for the plot (feeds into ggplot's labs title parameter).}
+\item{title}{A title for the plot (feeds into title parameter of ggplot's labs function).}
 }
 \value{
 A data frame with the required quantile values and a plot of the efficiency distributions.

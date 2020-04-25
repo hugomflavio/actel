@@ -126,6 +126,8 @@ tableInteraction <- function(moves, fish, trigger, GUI, force = FALSE) { # nocov
 #' 
 #' @inheritParams explore
 #' 
+#' @keywords internal
+#' 
 #' @return An updated GUI argument
 #'
 #' 

@@ -25,3 +25,4 @@ Check if the dependencies required to open a GUI are installed, and if
 opening a GUI does not throw an error. Some code adapted from RGtk2's
 .onLoad function.
 }
+\keyword{internal}
