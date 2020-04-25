@@ -28,6 +28,8 @@ Enhancements:
   * New `advEfficiency` function allows user to get more robust efficiency estimates.
   * Improved release.overview and group.overview objects so they can be used as an input to advEfficiency().
   * New `plotTimes` function allows the user to create circular plots of specific subsets of the time data, with the ability to include night shades too.
+  * `getTimes` and `timesToCircular` are now exported, allowing the user to quickly format the input for `plotTimes`.
+  * A new page has been included in the vignettes aiming to explore what can be done with the results of actel's analyses.
 
 ## actel 0.1.3
 
