@@ -119,7 +119,7 @@ advEfficiency(x)
 
 ## Drawing personalized circular plots
 
-Circular plots can do a great job at passing a point across in a publication, be it differences between groups or between arrival points at different places, or both. Although actel provides circular plots with its analyses, these default plots may not be exactly what you are looking for. As such, I created the function `plotTimes`, to help you get your plot just right.
+Circular plots are a great way to display your results in a publication. Examples include differences between groups or between arrival points at different places. Although actel provides circular plots with its analyses, these default plots may not be exactly what you are looking for. As such, I created the function `plotTimes`, to help you get your plot just right.
 
 You can prepare the input for plotTimes by using two other functions (which may also be useful on their own): `getTimes` and `timesToCircular`.
 
