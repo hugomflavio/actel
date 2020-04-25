@@ -148,7 +148,7 @@ x <- getTimes(results, locations = "A")
 x <- timesToCircular(x, by.group = TRUE)
 plotTimes(x)
 
-# You can change the names on the captions by changing the
+# You can change the names on the legend by changing the
 # names of object 'x' (run 'names(x)' to see them).
 ```
 
