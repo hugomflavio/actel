@@ -20,14 +20,14 @@ test_that("plotTimes fail-safes kick in when needed", {
 		"'rings' must be either TRUE or FALSE.", fixed = TRUE)
 	expect_error(plotTimes(times = times, file = c(25, 1)),
 		"Please provide only one 'file' name.", fixed = TRUE)
-	expect_error(plotTimes(times = times, opacity = c(25, 1)),
-		"Please provide only one 'opacity' value.", fixed = TRUE)
-	expect_error(plotTimes(times = times, opacity = -1),
-		"'opacity' must be numeric (between 1 and 100).", fixed = TRUE)
-	expect_error(plotTimes(times = times, opacity = 101),
-		"'opacity' must be numeric (between 1 and 100).", fixed = TRUE)
-	expect_error(plotTimes(times = times, opacity = "a"),
-		"'opacity' must be numeric (between 1 and 100).", fixed = TRUE)
+	expect_error(plotTimes(times = times, alpha = c(25, 1)),
+		"Please provide only one 'alpha' value.", fixed = TRUE)
+	expect_error(plotTimes(times = times, alpha = -1),
+		"'alpha' must be numeric (between 0 and 1).", fixed = TRUE)
+	expect_error(plotTimes(times = times, alpha = 101),
+		"'alpha' must be numeric (between 0 and 1).", fixed = TRUE)
+	expect_error(plotTimes(times = times, alpha = "a"),
+		"'alpha' must be numeric (between 0 and 1).", fixed = TRUE)
 	xtimes <- list(a = times[[1]], b = times[[1]], c = times[[1]], d = times[[1]], e = times[[1]], 
 		f = times[[1]], g = times[[1]], h = times[[1]], i = times[[1]])
 	expect_error(plotTimes(times = xtimes),

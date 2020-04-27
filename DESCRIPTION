@@ -32,7 +32,6 @@ Imports:
     stats,
     stringr,
     grDevices,
-    gplots,
     utils
 Suggests: 
     raster,

@@ -8,7 +8,7 @@ plotTimes(
   times,
   night = NULL,
   col = NULL,
-  opacity = 80,
+  alpha = 0.8,
   title = "",
   mean.dash = TRUE,
   mean.range = TRUE,
@@ -23,7 +23,7 @@ plotTimes(
 
 \item{col}{A vector of colour names to paint each time series (colours will be added transparency).}
 
-\item{opacity}{A value between 1 and 100 for the opacity of each layer (defaults to 80\% opacity).}
+\item{alpha}{A value between 0 and 1 for the opacity of each layer (defaults to 0.8).}
 
 \item{title}{A title for the plot.}
 

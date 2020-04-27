@@ -969,7 +969,7 @@ printCircular <- function(times, bio, suffix = NULL){
 #' @param times A list of of time vectors (each vector will be plotted as a series).
 #' @param night A vector of two times defining the start and stop of the night period (in HH:MM format).
 #' @param col A vector of colour names to paint each time series (colours will be added transparency).
-#' @param opacity A value between 1 and 100 for the opacity of each layer (defaults to 80% opacity).
+#' @param alpha A value between 0 and 1 for the opacity of each layer (defaults to 0.8).
 #' @param title A title for the plot.
 #' @param mean.dash Logical: Should the mean value be displayed on the plot's edge?
 #' @param mean.range Logical: Should the SEM be displayed? (only relevant if mean.dash = TRUE)
@@ -980,7 +980,7 @@ printCircular <- function(times, bio, suffix = NULL){
 #' 
 #' @export
 #' 
-plotTimes <- function(times, night = NULL, col = NULL, opacity = 80, title = "", mean.dash = TRUE, 
+plotTimes <- function(times, night = NULL, col = NULL, alpha = 0.8, title = "", mean.dash = TRUE, 
   mean.range = TRUE, rings = TRUE, file = NULL){
   
   if (!inherits(times, "list"))
@@ -1010,21 +1010,21 @@ plotTimes <- function(times, night = NULL, col = NULL, opacity = 80, title = "",
   if (!is.null(file) && length(file) > 1)
     stop("Please provide only one 'file' name.", call. = FALSE)
 
-  if (length(opacity) > 1)
-    stop("Please provide only one 'opacity' value.", call. = FALSE)
+  if (length(alpha) > 1)
+    stop("Please provide only one 'alpha' value.", call. = FALSE)
 
-  if (!is.numeric(opacity) || (opacity < 1 | opacity > 100))
-    stop("'opacity' must be numeric (between 1 and 100).", call. = FALSE)
+  if (!is.numeric(alpha) || (alpha < 0 | alpha > 1))
+    stop("'alpha' must be numeric (between 0 and 1).", call. = FALSE)
 
   if (is.null(col)) {
     if (length(times) > 8)
       stop("To plot this many time series simultaneously, colours must be specified using 'col'.", call. = FALSE)
     cbPalette <- c("#56B4E9", "#c0ff3e", "#E69F00", "#F0E442", "#0072B2", "#D55E00", "#CC79A7", "#999999")
-    colours <- paste0(cbPalette[c(1:length(times))], 80)
+    colours <- scales::alpha(colour = cbPalette[c(1:length(times))], alpha = alpha)
   } else {
     if (length(col) != length(times))
       stop("'col' must be of the same length as 'times'.", call. = FALSE)
-    colours <- paste0(gplots::col2hex(col), opacity)
+      colours <- scales::alpha(colour = col, alpha = alpha)
   }
 
   if (length(times) > 2)
