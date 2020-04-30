@@ -42,14 +42,14 @@ First of all, congratulations! If you are reading this page, you must have succe
 
 Here you will find some additional examples of things you can do using the output of your analysis. As actel connects to other packages and expands its capacities, so will this page.
 
-## Calculating utilization distribution areas and space-use overlaps
+<!-- ## Calculating utilization distribution areas and space-use overlaps
 
 The R package RSP ([github](https://github.com/YuriNiella/RSP)) allows you to run spatial analyses on the habitat use of your fish using the output of your actel analysis. With the RSP toolkit you can analyse the fine scale movements of aquatic animals while accounting for the surrounding land masses. The animal movements between detections are recreated to have occurred exclusively in water and the utilization distribution areas are limited by the land contours, providing realistic estimations of space use. 
 
 Depending on the research questions being addressed the utilization distribution areas can be calculated for the entire monitoring periods, or in fine-scale according to fixed temporal intervals in hours (timeframes). This approach allows spatial ecologists to use the outputs from such fine scale space use models (areas of use, or between-group overlap frequencies) as input for further statistical analysis.
 
 This is a great R package, so make sure to go check it out!
-
+ -->
 ## Calculating efficiency ranges
 
 Both the `migration` and the `residency` analyses include efficiency calculations. However, these calculations are analytical (i.e. derived from resolving an equation), and can sometimes be somewhat limited. To get a better idea of your array efficiencies, you can run the function `advEfficiency` on the efficiency outputs of your actel analysis.
