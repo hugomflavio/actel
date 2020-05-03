@@ -1,3 +1,5 @@
+cache: false
+
 # Use R language
 language: r
 
