@@ -3,3 +3,4 @@
 ^compiled_vignettes$
 ^actel_vignettes.zip
 ^.travis.yml$
+^.github$
