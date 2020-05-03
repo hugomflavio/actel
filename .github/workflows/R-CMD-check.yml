@@ -71,10 +71,15 @@ jobs:
         run: |
           # Use cran:libgit2 PPA to avoid conflicts of libcurl4-gnutls-dev
           # Remove this after https://github.com/r-lib/actions/pull/97 gets merged
+          sudo apt-get install libudunits2-dev
+          sudo apt-get install libproj-dev
+          sudo apt-get install libgeos-dev
+          sudo apt-get install libgdal-dev
           sudo add-apt-repository ppa:cran/libgit2
           Rscript -e "remotes::install_github('r-hub/sysreqs')"
           sysreqs=$(Rscript -e "cat(sysreqs::sysreq_commands('DESCRIPTION'))")
           sudo -s eval "$sysreqs"
+
       - name: Install system dependencies on macOS
         if: runner.os == 'macOS'
         run: |
