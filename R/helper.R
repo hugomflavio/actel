@@ -609,8 +609,8 @@ transitionLayer <- function(shape, size, EPSGcode, coord.x = NULL, coord.y = NUL
   list.of.packages <- c("raster", "gdistance", "sp", "tools", "rgdal")
   new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[, "Package"])]
   if (length(new.packages) > 0) {
-    stop(paste0("This function requires packages '", paste(new.packages,collapse="', '"), 
-      "' to operate. Please install them before proceeding.\n"), call. = FALSE)
+    stop(paste0("This function requires packages '", paste(new.packages, collapse = "', '"), 
+      "' to operate. Please install ", ifelse(length(new.packages) > 1, "them", "it"), " before proceeding.\n"), call. = FALSE)
   }
   directions <- as.character(directions)
   directions <- match.arg(directions)
@@ -773,8 +773,8 @@ distancesMatrix <- function(t.layer = "transition.layer.RData", starters = NULL,
   list.of.packages <- c("raster", "gdistance", "sp", "tools", "rgdal")
   new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[, "Package"])]
   if (length(new.packages) > 0) {
-    stop(paste0("This function requires packages '", paste(new.packages,collapse="', '"), 
-      "' to operate. Please install them before proceeding.\n"), call. = FALSE)
+    stop(paste0("This function requires packages '", paste(new.packages, collapse = "', '"), 
+      "' to operate. Please install ", ifelse(length(new.packages) > 1, "them", "it"), " before proceeding.\n"), call. = FALSE)
   }
 
   if (!is.numeric(EPSGcode))
