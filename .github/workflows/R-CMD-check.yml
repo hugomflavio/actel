@@ -26,20 +26,17 @@ jobs:
       fail-fast: false
       matrix:
         config:
-          # - {os: windows-latest, r: '4.0',   vdiffr: true}
-          # - {os: windows-latest, r: 'devel', vdiffr: false}
-          # - {os: macOS-latest,   r: '4.0',   vdiffr: true}
-          - {os: ubuntu-16.04,   r: '4.0',   vdiffr: true,  cran: "https://demo.rstudiopm.com/all/__linux__/xenial/latest"}
-          - {os: ubuntu-16.04,   r: '3.6',   vdiffr: false, cran: "https://demo.rstudiopm.com/all/__linux__/xenial/latest"}
+          - {os: windows-latest, r: '4.0'}
+          - {os: windows-latest, r: 'devel'}
+          - {os: macOS-latest,   r: '4.0'}
+          - {os: ubuntu-16.04,   r: '4.0', cran: "https://demo.rstudiopm.com/all/__linux__/xenial/latest"}
+          # - {os: ubuntu-16.04,   r: '3.6', cran: "https://demo.rstudiopm.com/all/__linux__/xenial/latest"}
 
     env:
       R_REMOTES_NO_ERRORS_FROM_WARNINGS: true
       CRAN: ${{ matrix.config.cran }}
       # don't treat missing suggested packages as error
       _R_CHECK_FORCE_SUGGESTS_: false
-      # Runs vdiffr test only on the latest version of R
-      VDIFFR_RUN_TESTS: ${{ matrix.config.vdiffr }}
-      VDIFFR_LOG_PATH: "../vdiffr.Rout.fail"
 
     steps:
       - uses: actions/checkout@v2
@@ -70,7 +67,6 @@ jobs:
           RHUB_PLATFORM: linux-x86_64-ubuntu-gcc
         run: |
           sudo apt-get install libudunits2-dev libproj-dev libgeos-dev libgdal-dev
-          sudo cp /usr/local/lib/libgdal.so.20* /usr/lib64/
           Rscript -e "remotes::install_github('r-hub/sysreqs')"
           sysreqs=$(Rscript -e "cat(sysreqs::sysreq_commands('DESCRIPTION'))")
           sudo -s eval "$sysreqs"
@@ -78,18 +74,12 @@ jobs:
       - name: Install system dependencies on macOS
         if: runner.os == 'macOS'
         run: |
-          # XQuartz is needed by vdiffr
-          brew cask install xquartz
-          # To install vdiffr, these three libraries/tools are needed in addition to XQuartz
-          # - freetype (already installed, needed by systemfonts)
-          # - cairo (not installed, needed by gdtools)
-          # - pkg-config (not installed, needed to set proper build settings)
-          brew install pkg-config cairo
           # Since sf dependencies are a bit heavy, install them only when they are needed
           SF_NEEDS_UPDATED=$(Rscript -e 'if (!"sf" %in% installed.packages()[,"Package"] || "sf" %in% old.packages()[,"Package"]) cat("yes")')
           if [ "${SF_NEEDS_UPDATED}" == "yes" ]; then
             brew install udunits gdal
           fi
+
       - name: Install dependencies
         run: |
           remotes::install_deps(dependencies = TRUE)
@@ -97,7 +87,7 @@ jobs:
         shell: Rscript {0}
 
       - name: Check
-        run: rcmdcheck::rcmdcheck(args = "--no-manual", error_on = "warning", check_dir = "check")
+        run: rcmdcheck::rcmdcheck(args = c("--no-manual", "--as-cran"), error_on = "warning", check_dir = "check")
         shell: Rscript {0}
 
       - name: Upload check results
