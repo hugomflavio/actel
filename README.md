@@ -2,6 +2,7 @@ Jump to [**installation instructions**](#installing-actel)
 
 # actel<img src="vignettes/actel_logo.png" align="right" width="120" />
 
+![R-CMD-check](https://github.com/hugomflavio/actel/workflows/R-CMD-check/badge.svg)
 [![Travis Build Status](https://travis-ci.com/hugomflavio/actel.svg?branch=dev)](https://travis-ci.org/hugomflavio/actel)
 [![codecov](https://codecov.io/github/hugomflavio/actel/branch/dev/graphs/badge.svg)](https://codecov.io/github/hugomflavio/actel)<sup> of non-interactive code*</sup>
 
