@@ -36,13 +36,14 @@ is a sensible topic, and the user must be informed about it. The
 startup message of actel asks the users to run startNote(). This
 is a message-only function that contains the following text:
 
-"Writing/editing files:
+```
+Writing/editing files:
   To operate, actel must write/change files present in the target 
   directory and create subdirectories. This includes the functions 
-  createWorkspace, exampleWorkspace, clearWorkspace, explore, migration 
-  and residency. These actions are always related to the analysis 
-  processes being carried on (e.g. deploy example files, write 
-  reports, print graphics). 
+  transitionLayer, distancesMatrix, emptyMatrix, createWorkspace, 
+  exampleWorkspace, clearWorkspace, explore, migration and residency. 
+  These actions are always related to the analysis processes being 
+  carried on (e.g. deploy examples, write reports, print graphics). 
 
 Opening the web browser:
   actel has an auto-open feature for generated reports, which will 
@@ -53,8 +54,10 @@ Opening the web browser:
 Please only use actel if you agree with this.
 
 To get aquainted with how actel works, read the package vignettes.
-You can find them by running browseVignettes('actel')"
+You can find them by running browseVignettes('actel')
+```
 
-I have also deployed fail-safes to createWorkspace, exampleWorkspace
-and clearWorkspace to require user confirmation when there is a risk
-of file overwriting or deletion.
+I have also deployed checkpoints to transitionLayer, distancesMatrix,
+emptyMatrix, createWorkspace, exampleWorkspace, and clearWorkspace 
+that require user confirmation when there is a risk of file overwriting
+or deletion.

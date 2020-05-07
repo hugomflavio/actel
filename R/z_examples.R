@@ -7,10 +7,16 @@
 #' @export
 #' 
 createWorkspace <- function(dir = "actel_workspace") {
-  if (dir.exists(dir))
-    stop("Directory '", dir, "' already exists. Stopping to prevent file overwrite. Please choose a new target directory.\n", call. = FALSE)
-  else
+  if (interactive() & dir.exists(dir)) {
+    warning("The folder ", dir, " already exists. Continuing may overwrite some of its contents.", call. = FALSE, immediate. = TRUE)
+    decision <- readline("Proceed? (y/N) ")
+    if (decision != "y" & decision != "Y")
+      stop("Function stopped by user command.\n", call. = FALSE)
+  }
+
+  if (!dir.exists(dir))
     dir.create(dir)
+
   spatial <- data.frame(
     Station.name = c("Example station1", "Example station2", "Example station3", "Example release1", "Example release2"),
     Latitude = c(8.411, 8.521, 8.402, 8.442, 8.442),
@@ -52,28 +58,27 @@ createWorkspace <- function(dir = "actel_workspace") {
 #' 
 exampleWorkspace <- function(spatial = example.spatial, biometrics = example.biometrics, detections = example.detections, deployments = example.deployments) {
   if (interactive() & dir.exists("exampleWorkspace")) {
-    cat("Careful! a folder named 'exampleWorkspace' already exists! Would you like to overwrite\nthe contents of its spatial, biometrics, deployments and detections files?")
-    decision <- readline("(y/N) ")
-  } else {
-    decision <- "y"
+    warning("The folder exampleWorkspace already exists. Continuing may overwrite some of its contents.", call. = FALSE, immediate. = TRUE)
+    decision <- readline("Proceed? (y/N) ")
+    if (decision != "y" & decision != "Y")
+      stop("Function stopped by user command.\n", call. = FALSE)
   }
-  if (decision == "y" | decision == "Y") {
-      if (!dir.exists("exampleWorkspace"))
-        dir.create("exampleWorkspace")
-    write.csv(spatial, "exampleWorkspace/spatial.csv", row.names = FALSE)
-    write.csv(biometrics, "exampleWorkspace/biometrics.csv", row.names = FALSE)
-    write.csv(deployments, "exampleWorkspace/deployments.csv", row.names = FALSE)
-    if (!dir.exists("exampleWorkspace/detections")) 
-      dir.create("exampleWorkspace/detections")
-    my.list <- split(detections, detections$Receiver)
-    for (i in names(my.list)) {
-      write.csv(my.list[[i]], paste0("exampleWorkspace/detections/", i, ".csv"), row.names = FALSE)
-    }
-    message("M: The example workspace is now ready. To run the analysis on the example data, run:\n
+
+  if (!dir.exists("exampleWorkspace"))
+      dir.create("exampleWorkspace")
+  write.csv(spatial, "exampleWorkspace/spatial.csv", row.names = FALSE)
+  write.csv(biometrics, "exampleWorkspace/biometrics.csv", row.names = FALSE)
+  write.csv(deployments, "exampleWorkspace/deployments.csv", row.names = FALSE)
+  if (!dir.exists("exampleWorkspace/detections")) 
+    dir.create("exampleWorkspace/detections")
+  my.list <- split(detections, detections$Receiver)
+  for (i in names(my.list)) {
+    write.csv(my.list[[i]], paste0("exampleWorkspace/detections/", i, ".csv"), row.names = FALSE)
+  }
+  message("M: The example workspace is now ready. To run the analysis on the example data, run:\n
   results <- migration(path = 'exampleWorkspace', sections = c('River', 'Fjord', 'Sea'), 
   \t\t     success.arrays = 'Sea1', tz = 'Europe/Copenhagen')\n
 And follow the instructions as they come. Once finished, explore the object 'results' for the output.")
-  }
 }
 
 #' Example spatial data

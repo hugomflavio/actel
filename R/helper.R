@@ -7,10 +7,10 @@ startNote <- function() {
 "Writing/editing files:
   To operate, actel must write/change files present in the target 
   directory and create subdirectories. This includes the functions 
-  createWorkspace, exampleWorkspace, clearWorkspace, explore, migration 
-  and residency. These actions are always related to the analysis 
-  processes being carried on (e.g. deploy example files, write 
-  reports, print graphics). 
+  transitionLayer, distancesMatrix, emptyMatrix, createWorkspace, 
+  exampleWorkspace, clearWorkspace, explore, migration and residency. 
+  These actions are always related to the analysis processes being 
+  carried on (e.g. deploy examples, write reports, print graphics). 
 
 Opening the web browser:
   actel has an auto-open feature for generated reports, which will 
@@ -420,7 +420,7 @@ clearWorkspace <- function(skip = NA){
   files <- files[!files == "actel.detections.RData"]
   files <- files[!matchl(files, skip)]
   if (length(files) > 0) {
-    message("Proceeding will eliminate the following files/folders:")
+    message("Proceeding will delete the following files/folders:")
     print(files)
     if (interactive()) {
       decision <- readline("Proceed?(y/N) ") # nocov
@@ -632,6 +632,13 @@ transitionLayer <- function(shape, size, EPSGcode, coord.x = NULL, coord.y = NUL
   if (length(EPSGcode) != 1)
     stop("Please provide only one EPSG code.\n", call. = FALSE)
 
+  if (interactive() & file.exists("transition.layer.RData")) {
+    warning("A file 'transition.layer.RData' already exists. Continuing will overwrite its contents.", call. = FALSE, immediate. = TRUE)
+    decision <- readline("Proceed? (y/N) ")
+    if (decision != "y" & decision != "Y")
+      stop("Function stopped by user command.\n", call. = FALSE)
+  }
+
   aux <- rgdal::make_EPSG()$code
   to.check <- aux[!is.na(aux)]
   if (is.na(match(EPSGcode, to.check)))
@@ -788,6 +795,13 @@ distancesMatrix <- function(t.layer = "transition.layer.RData", starters = NULL,
       "' to operate. Please install ", ifelse(length(new.packages) > 1, "them", "it"), " before proceeding.\n"), call. = FALSE)
   }
 
+  if (interactive() & actel & file.exists("distances.csv")) {
+    warning("A file 'distances.csv' already exists. Continuing will overwrite its contents.", call. = FALSE, immediate. = TRUE)
+    decision <- readline("Proceed? (y/N) ")
+    if (decision != "y" & decision != "Y")
+      stop("Function stopped by user command.\n", call. = FALSE)
+  }
+
   if (!is.numeric(EPSGcode))
     stop("'EPSGcode' must be numeric.\n", call. = FALSE)
   if (length(EPSGcode) != 1)
@@ -925,17 +939,16 @@ emptyMatrix <- function(){
   colnames(output) <- rownames(output) <- input$Standard.name
 
   for(i in 1:nrow(output))
-    output[i,i] = 0
+    output[i, i] = 0
 
-  if (file.exists("distances.csv"))
-    decision <- readline("A file named 'distances.csv' is already present in the working directory. Do you want to overwrite it?(y/N) ") # nocov
-  else 
-    decision <- "Y"
+  if (interactive() & file.exists("distances.csv")) {
+    warning("A file 'distances.csv' already exists. Continuing will overwrite its contents.", call. = FALSE, immediate. = TRUE)
+    decision <- readline("Proceed? (y/N) ")
+    if (decision != "y" & decision != "Y")
+      stop("Function stopped by user command.\n", call. = FALSE)
+  }
 
-  if(decision == "Y" | decision == "y")
-    write.csv(output, file = "distances.csv", na = "", row.names = TRUE)
-  else
-    message("Aborting.") # nocov
+  write.csv(output, file = "distances.csv", na = "", row.names = TRUE)
 }
 
 #' Complete a Distances Matrix
