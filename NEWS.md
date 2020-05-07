@@ -13,6 +13,7 @@ Fixes:
 
 Changes:
   * maximum efficiency estimates in residency now only take into account known missed events and recorded events in the denominator (previously, potentially missed events were being included as well).
+  * GUI interaction mechanisms were changed as a consequence of updating from package gWidgets to gWidgets2.
 
 Enhancements:
   * Perform early quality checks on the content of 'sections' before advancing with migration and residency analysis.

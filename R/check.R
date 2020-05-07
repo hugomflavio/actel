@@ -68,7 +68,7 @@ tableInteraction <- function(moves, fish, trigger, GUI, force = FALSE) { # nocov
     decision <- readline(paste0("Would you like to leave a comment for fish ", fish, "?(y/N) "))
     appendTo(c("UD"), "Comment")
     if (decision == "y" | decision == "Y") {
-      appendTo(c("UD", "Comment"), readline(paste0("New comment on fish ", fish, ":" )), fish)
+      appendTo(c("UD", "Comment"), readline(paste0("New comment on fish ", fish, ": " )), fish)
       appendTo("Screen", "M: Comment successfully stored, returning to the previous interaction.")
     }
   } else {
@@ -136,11 +136,11 @@ checkGUI <- function(GUI = c("needed", "always", "never")) {
     stop("'GUI' should be one of 'needed', 'always' or 'never'.\n", call. = FALSE)
   GUI <- match.arg(GUI)
   if (GUI != "never") {
-    if (any(link <- !(c("gWidgetsRGtk2", "gWidgets", "RGtk2") %in% installed.packages()))) {
+    if (any(link <- !(c("gWidgets2RGtk2", "gWidgets2", "RGtk2") %in% installed.packages()))) {
       appendTo(c("Screen", "Warning", "Report"), 
         paste0("GUI is set to '", GUI, "' but ", 
           ifelse(sum(link) == 1, "package '", "packages '"),
-          paste(c("gWidgetsRGtk2", "gWidgets", "RGtk2")[link], collapse = "', '"),
+          paste(c("gWidgets2RGtk2", "gWidgets2", "RGtk2")[link], collapse = "', '"),
           ifelse(sum(link) == 1, "' is", "' are"),
           " not available. Please install ",
           ifelse(sum(link) == 1, "it", "them"),
@@ -158,7 +158,7 @@ checkGUI <- function(GUI = c("needed", "always", "never")) {
       if (is.character(dll)) {
        appendTo(c("Screen", "Warning", "Report"), 
         paste0("GUI is set to '", GUI,
-        "' but loading of RGtk2 dll failed. Please run e.g. gWidgets::gtext() to trigger the installation of RGtk2's dll and then restart R.\n         Disabling GUI (i.e. GUI = 'never') for the current run."))
+        "' but loading of RGtk2 dll failed. Please run e.g. gWidgets2::gtext() to trigger the installation of RGtk2's dll and then restart R.\n         Disabling GUI (i.e. GUI = 'never') for the current run."))
        GUI <- "never"
       }
     }
@@ -1029,36 +1029,50 @@ invalidateEvents <- function(movements, fish) { # nocov start
 #' @keywords internal
 #' 
 graphicalInvalidate <- function(moves, fish, trigger) { # nocov start
+  on.exit({if(gWidgets2::isExtant(w)) gWidgets2::dispose(w)}, add = TRUE)
+  
   graphical_valid <- NULL
+  
   to.print <- cbind(data.frame(Event = 1:nrow(moves)), moves)
   to.print$First.time <- as.character(to.print$First.time)
   to.print$Last.time <- as.character(to.print$Last.time)
-  w <- gWidgets::gwindow(paste("Events for fish", fish), width = 500)
-  g <- gWidgets::ggroup(horizontal = FALSE, container = w)
-  lbl <- gWidgets::glabel("<b>Warning message:</b>", markup = TRUE, container = g)
-  lbl <- gWidgets::gtext(trigger, container = g)
-  lbl <- gWidgets::glabel("<b>Usage notes:\n1)</b> Click on events to set 'Valid' to FALSE, <b>2)</b> Hold shift to invalidate sequential events, <b>3)</b> Reset 'Valid' to TRUE by double clicking an event.", markup = TRUE, container = g)
-  tbl <- gWidgets::gtable(to.print, container = g, multiple = TRUE, expand = TRUE)
+  
+  w <- gWidgets2::gwindow(paste("Events for fish", fish), width = 800, height = 300)
+  g <- gWidgets2::ggroup(horizontal = FALSE, container = w)
+  hdr <- gWidgets2::glayout(container = g)
+  hdr[1, 1] <- gWidgets2::glabel("<b>Warning message:</b>", markup = TRUE)
+  hdr[1, 2, expand = TRUE] <- ""
+  hdr[2, 1:2, expand = TRUE] <- gWidgets2::gtext(trigger, handler = NULL)
+  hdr[3, 1:2, expand = TRUE] <- gWidgets2::glabel("<b>Usage note:</b> Edit event validity by selecting event and choosing the desired action below.", markup = TRUE)
+  
+  tbl <- gWidgets2::gtable(to.print, multiple = TRUE, expand = TRUE, container = g)
+  
+  btns <- gWidgets2::glayout(container = g)
+
+  invalid_function <- function(h, ...) {
+    tbl[tbl$get_value(), "Valid"] <- FALSE
+  }
+  btns[1, 1] <- gWidgets2::gbutton(text = "Invalidate selected", handler = invalid_function, action = NULL)
+
+  reset_function <- function(h, ...) {
+    tbl[tbl$get_value(), "Valid"] <- TRUE
+  }
+  btns[1, 2] <- gWidgets2::gbutton(text = "Revalidate selected", handler = reset_function, action = NULL)
+
+  btns[1, 3, expand = TRUE] <- ""
+
   btn_function <- function(h, ...) {
     x <- as.data.frame(tbl[, c("Event", "Valid")])
     graphical_valid <<- x$Valid[order(x$Event)]
-    gWidgets::dispose(w)
+    gWidgets2::dispose(w)
   }
-  btn <- gWidgets::gbutton(text = "Submit and close", border = TRUE, handler = btn_function, action = NULL, container = g)
+  btns[1, 4] <- gWidgets2::gbutton(text = "Submit and close", handler = btn_function, action = NULL)
 
-  ## add handlers
-  gWidgets::addHandlerClicked(tbl, handler = function(h,...) {
-    tbl[gWidgets::svalue(h$obj)]$Valid <- FALSE
-  })
-  gWidgets::addHandlerDoubleclick(tbl, handler = function(h,...) {
-    tbl[gWidgets::svalue(h$obj)]$Valid <- TRUE
-  })
-  
-  message("M: Make any necessary edits in the external visualization window and submit the result to continue the analysis."); flush.console()
-  while (gWidgets::isExtant(w)) {}
+  message("M: Make any necessary edits in the external visualization window and submit the result to continue the analysis.\nNote: You can use Ctrl and Shift to select multiple events, and Ctrl+A to select all events at once."); flush.console()
+  while (gWidgets2::isExtant(w)) {}
 
   if (is.null(graphical_valid)) {
-    appendTo(c("Screen", "Report"), "External visualization window was closed before result submission. Assuming all movement events are valid.")
+    appendTo(c("Screen", "Warning", "Report"), "External visualization window was closed before result submission. Assuming all movement events are valid.")
     graphical_valid <- rep(TRUE, nrow(moves))
   }
 

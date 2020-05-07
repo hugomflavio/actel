@@ -41,8 +41,8 @@ Suggests:
     rgdal,
     testthat,
     RGtk2,
-    gWidgetsRGtk2,
-    gWidgets    
+    gWidgets2RGtk2,
+    gWidgets2    
 VignetteBuilder: knitr
 URL: https://github.com/hugomflavio/actel
 BugReports: https://github.com/hugomflavio/actel/issues
