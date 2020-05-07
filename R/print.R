@@ -773,7 +773,8 @@ printIndividuals <- function(detections.list, bio, status.df = NULL, tz,
   link <- as.numeric(names(link))
   y.order <- spatial$stations$Standard.name[link]
 
-  pb <- txtProgressBar(min = 0, max = length(detections.list), style = 3, width = 60)
+  if (interactive())
+    pb <- txtProgressBar(min = 0, max = length(detections.list), style = 3, width = 60)
   counter <- 0
   individual.plots <- ""
   
@@ -901,9 +902,11 @@ printIndividuals <- function(detections.list, bio, status.df = NULL, tz,
     } else {
       individual.plots <<- paste0(individual.plots, "![](", fish, ".", extension, "){ width=50% }")
     }
-    setTxtProgressBar(pb, counter)
+    if (interactive())
+      setTxtProgressBar(pb, counter)
   })
-  close(pb)
+  if (interactive())
+    close(pb)
   return(individual.plots)
 }
 
@@ -1560,7 +1563,8 @@ printIndividualResidency <- function(ratios, dayrange, sections) {
   else
     unique.colours <- gg_colour_hue(length(unique.values))
 
-  pb <- txtProgressBar(min = 0, max = length(ratios), style = 3, width = 60)
+  if (interactive())
+    pb <- txtProgressBar(min = 0, max = length(ratios), style = 3, width = 60)
   capture <- lapply(names(ratios), function(i) {
     counter <<- counter + 1
     x <- ratios[[i]]
@@ -1592,9 +1596,11 @@ printIndividualResidency <- function(ratios, dayrange, sections) {
       p <- p + ggplot2::guides(fill = ggplot2::guide_legend(ncol = 3))
     ggplot2::ggsave(paste0("Report/", i,"_residency.png"), width = 10, height = 1.5)
     individual.plots <<- paste0(individual.plots, "![](", i, "_residency.png){ width=95% }\n")
-    setTxtProgressBar(pb, counter)
+    if (interactive())
+      setTxtProgressBar(pb, counter)
   })
-  close(pb)
+  if (interactive())
+    close(pb)
   return(individual.plots)
 }
 
@@ -1638,7 +1644,8 @@ printSensorData <- function(detections, extension = "png") {
   Timestamp <- NULL
   Sensor.Value <- NULL
   Sensor.Unit <- NULL
-  pb <- txtProgressBar(min = 0, max = length(detections), style = 3, width = 60)
+  if (interactive())
+    pb <- txtProgressBar(min = 0, max = length(detections), style = 3, width = 60)
   counter <- 0
   individual.plots <- ""
   capture <- lapply(names(detections), function(fish) {
@@ -1664,9 +1671,11 @@ printSensorData <- function(detections, extension = "png") {
       } else {
         individual.plots <<- paste0(individual.plots, "![](", fish, "_sensors.", extension, "){ width=50% }")
       }
-      setTxtProgressBar(pb, counter)
+      if (interactive())
+        setTxtProgressBar(pb, counter)
     }
   })
-  close(pb)
+  if (interactive())
+    close(pb)
   return(individual.plots)
 }

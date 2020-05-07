@@ -20,7 +20,8 @@ groupMovements <- function(detections.list, bio, spatial, speed.method, max.inte
   round.points <- roundDown(seq(from = length(detections.list)/10, to = length(detections.list), length.out = 10), to = 1)
   counter <- 1
   {
-    pb <- txtProgressBar(min = 0, max = sum(unlist(lapply(detections.list, nrow))), style = 3, width = 60)
+    if (interactive())
+      pb <- txtProgressBar(min = 0, max = sum(unlist(lapply(detections.list, nrow))), style = 3, width = 60)
     movements <- lapply(names(detections.list), function(i) {
       appendTo("debug", paste0("Debug: (Movements) Analysing fish ", i, "."))
       if (invalid.dist) {
@@ -71,7 +72,8 @@ groupMovements <- function(detections.list, bio, spatial, speed.method, max.inte
         counter <<- counter + stop - start + 1
         if (i == tail(names(detections.list), 1)) 
           counter <<- sum(unlist(lapply(detections.list, nrow)))
-        setTxtProgressBar(pb, counter)
+        if (interactive())
+          setTxtProgressBar(pb, counter)
         flush.console()
       })
       counter <<- counter
@@ -92,7 +94,8 @@ groupMovements <- function(detections.list, bio, spatial, speed.method, max.inte
       return(recipient)
     })
     names(movements) <- names(detections.list)
-    close(pb)
+    if (interactive())
+      close(pb)
   }
 
   if (trigger.unknown)

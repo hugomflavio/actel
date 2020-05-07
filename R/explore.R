@@ -5,6 +5,8 @@
 #' input files are behaving as expected. It is also a good candidate if you just
 #' want to validate your detections for later use in other analyses.
 #' 
+#' @param auto.open Logical: Should the report be automatically opened once the
+#'  analysis is over? Defaults to TRUE.
 #' @param debug Logical: Should temporary files be kept at the end of the 
 #'  analysis?
 #' @param exclude.tags A vector of tags that should be excluded from the 
@@ -714,7 +716,8 @@ return(reportname)
 validateDetections <- function(detections.list, movements) {
   Valid <- NULL
   counter <- 0
-  pb <- txtProgressBar(min = 0, max = sum(unlist(lapply(movements, nrow))), style = 3, width = 60)
+  if (interactive())
+    pb <- txtProgressBar(min = 0, max = sum(unlist(lapply(movements, nrow))), style = 3, width = 60)
   output.all <- lapply(names(detections.list), function(i) {
     # cat(i, "\n")
     aux <- detections.list[[i]]
@@ -729,10 +732,12 @@ validateDetections <- function(detections.list, movements) {
       }))
       aux$Valid[valid.rows] <- TRUE
     }
-    setTxtProgressBar(pb, counter)
+    if (interactive())
+      setTxtProgressBar(pb, counter)
     return(data.table::as.data.table(aux))
   })
-  close(pb)
+  if(interactive())
+    close(pb)
   names(output.all) <- names(detections.list)
   attributes(output.all)$actel <- "all.detections"
   output.valid <- lapply(output.all, function(x) {

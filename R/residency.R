@@ -1233,7 +1233,8 @@ getResidency <- function(movements, spatial){
 #' 
 dailyRatios <- function(res) {
   counter <- 0
-  pb <- txtProgressBar(min = 0, max = length(res), style = 3, width = 60)
+  if (interactive())
+    pb <- txtProgressBar(min = 0, max = length(res), style = 3, width = 60)
   output <- lapply(res, function(x) {
     counter <<- counter + 1
     # cat("\n", counter, "\n")
@@ -1243,11 +1244,13 @@ dailyRatios <- function(res) {
       # cat(as.character(d), "\n")
       findSecondsPerSection(res = x, day = d, the.range = range(dayrange))
     })
-    setTxtProgressBar(pb, counter)
+    if (interactive())
+      setTxtProgressBar(pb, counter)
     names(days.list) <- round.POSIXt(dayrange, units = "days")
     dailyRatiosIndOut(input = days.list)
   })
-  close(pb)
+  if (interactive())
+    close(pb)
   return(output)
 }
 
