@@ -68,7 +68,7 @@ The `deployments` data frame is similar to t deployments.csv file, with the exce
 
 ### arrays
 
-The `arrays` list contains detailed information for each array: Which arrays are directly before, which arrays are direcly after, which arrays are valid efficiency peers, which arrays are directly OR indirectly after, and more.
+The `arrays` list contains detailed information for each array: Which arrays are directly before, which arrays are directly after, which arrays are valid efficiency peers, which arrays are directly OR indirectly after, and more.
 
 ### movements
 
@@ -112,7 +112,7 @@ To make sure that you don't accidentally lose your results, actel stores them ri
 
 This log acts as a carbon copy of the analysis. It contains everything: summary information, errors, warnings and messages and the options you have taken while the analysis was running. It is worth keeping it in case you need to find out the reasoning behind some result. To avoid overwriting when conducting multiple analysis, the actel.log.txt file is preceded by the timestamp of when it was created (e.g. '2019-05-14.10.51.40.actel.log.txt').
 
-If something goes wrong during the analysis, the report will be saved with the sufix "STOP".
+If something goes wrong during the analysis, the report will be saved with the suffix "STOP".
 
 ### stray_tags.csv
 

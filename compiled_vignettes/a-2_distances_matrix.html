@@ -426,7 +426,7 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 </table>
 <dl>
 <dt>Note:</dt>
-<dd>The matrix is simetric (i.e. the entries of the matrix are symmetric with respect to the main diagonal).
+<dd>The matrix is symmetric (i.e. the entries of the matrix are symmetric with respect to the main diagonal).
 </dd>
 <dd>The diagonal line is composed of 0’s as it represents the distance between an element and itself.
 </dd>
@@ -439,7 +439,7 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 <p>There are two ways to create a distance matrix for actel: manually, or automatically. While the manual way is more prone to errors and can be tedious, the automatic way can take some time and requires some GIS knowledge. It is up to you to decide which way to use:</p>
 <div id="the-manual-way" class="section level3">
 <h3>The manual way</h3>
-<p>The manual way is simple. In your R session, move to the folder where you have your spatial file, and run the command <code>emptyMatrix()</code>. This will read your spatial data and create a matrix that is in acoordance with it. It is important that you create your template this way, as the column and row names of the distance matrix are essential for actel to recognise the data. Below is an example of a distances matrix created by <code>emptyMatrix()</code>.</p>
+<p>The manual way is simple. In your R session, move to the folder where you have your spatial file, and run the command <code>emptyMatrix()</code>. This will read your spatial data and create a matrix that is in accordance with it. It is important that you create your template this way, as the column and row names of the distance matrix are essential for actel to recognise the data. Below is an example of a distances matrix created by <code>emptyMatrix()</code>.</p>
 <table>
 <thead>
 <tr class="header">
@@ -526,7 +526,7 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 </tr>
 </tbody>
 </table>
-<p>The correspondence between the standard names (e.g. “St.1”, “St.2”) and your receivers can be found in your ‘spatials.csv’ file, under the column “Standard.Name”.</p>
+<p>The correspondence between the standard names (e.g. “St.1”, “St.2”) and your receivers can be found in your ‘spatial.csv’ file, under the column “Standard.Name”.</p>
 <p>Now, you can fill in the matrix directly by opening it with a spreadsheet editor. To simplify the task, you can fill in the upper diagonal-half of the matrix, save the file, and then run <code>completeMatrix()</code>.</p>
 <p>Here is how it works:</p>
 <ol style="list-style-type: decimal">

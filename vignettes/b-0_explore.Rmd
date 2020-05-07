@@ -166,7 +166,7 @@ These two variables control the speed checks. By default, they are NULL, and no 
 M: 'speed.warning'/'speed.error' were not set, skipping speed checks.
 ````
 
-However, if you include a distances matrix in the analysis, you can specify the maximum espected speed for your fish, in metres per second. If a fish goes over these values, [warnings and user interaction will be activated, as necessary.](b-1_explore_processes.html#average-speed)
+However, if you include a distances matrix in the analysis, you can specify the maximum expected speed for your fish, in metres per second. If a fish goes over these values, [warnings and user interaction will be activated, as necessary.](b-1_explore_processes.html#average-speed)
 
 Speed checks cannot be performed without a distance matrix. If you attempt to do this, actel will complain:
 
@@ -189,7 +189,7 @@ These two variables control the inactiveness checks. `inactive.warning` and `ina
 M: 'inactive.warning'/'inactive.error' were not set, skipping inactivity checks.
 ````
 
-Altough it is not a requirement, inactiveness checks work best if a distances matrix is present. If you choose to run inactiveness checks without a distances matrix, actel will remind you of this with the following message:
+Although it is not a requirement, inactiveness checks work best if a distances matrix is present. If you choose to run inactiveness checks without a distances matrix, actel will remind you of this with the following message:
 
 ````
 M: Running inactiveness checks without a distance matrix. Performance may be limited.

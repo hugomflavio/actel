@@ -100,7 +100,7 @@ analysis is over? Defaults to TRUE.}
 opened to inspect the movements only when the movements table is too big to be
 displayed in R's console. If "always", a graphical interface is always created
 when the possibility to invalidate events emerges. If "never", a graphical
-interface is never invoqued. In this case, if the table to be displayed does
+interface is never invoked. In this case, if the table to be displayed does
 not fit in R's console, a temporary file will be saved and the user will be
 prompted to open that file and examine it. Defaults to "needed".}
 
@@ -119,7 +119,7 @@ A list containing:
 \item \code{deployments}: The deployments of each receiver;
 \item \code{arrays}: The array details used during the analysis;
 \item \code{movements}: All movement events for each target fish;
-\item \code{valid.movements}: Valid movemenet events for each target fish;
+\item \code{valid.movements}: Valid movement events for each target fish;
 \item \code{times}: All arrival times (per fish) at each array;
 \item \code{rsp.info}: Appendix information for the RSP package;
 \item \code{dist.mat}: The distance matrix used in the analysis (if a valid

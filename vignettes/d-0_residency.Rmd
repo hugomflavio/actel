@@ -73,7 +73,7 @@ You can find more about the [creation and validation of section movements here](
 
 ### replicates
 
-Estimating inter-array efficiency can be tricky in study areas with multiple channels and pathsways. However, if these "isolated" arrays are composed by two lines of receivers, one line can be used as a replicate of the other, which in turn allows for the estimation of intra-array efficiency. If this is your case, then you should make use of the `replicates` argument.
+Estimating inter-array efficiency can be tricky in study areas with multiple channels and pathways. However, if these "isolated" arrays are composed by two lines of receivers, one line can be used as a replicate of the other, which in turn allows for the estimation of intra-array efficiency. If this is your case, then you should make use of the `replicates` argument.
 
 Note:
   : Array replication should only be performed if the replicate stations cover the same extent of the migration route section as the opposite stations, and only if the two lines of receivers are close to each other (i.e. one can assume 0% mortality between them). Have a look at the figures below for some examples.

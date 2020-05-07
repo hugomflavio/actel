@@ -596,7 +596,7 @@ Decision:(a/b/comment) </code></pre>
 <h3>speed.warning and speed.error</h3>
 <p>These two variables control the speed checks. By default, they are NULL, and no speed checks are performed. actel will let you know this happened with the following message:</p>
 <pre><code>M: &#39;speed.warning&#39;/&#39;speed.error&#39; were not set, skipping speed checks.</code></pre>
-<p>However, if you include a distances matrix in the analysis, you can specify the maximum espected speed for your fish, in metres per second. If a fish goes over these values, <a href="b-1_explore_processes.html#average-speed">warnings and user interaction will be activated, as necessary.</a></p>
+<p>However, if you include a distances matrix in the analysis, you can specify the maximum expected speed for your fish, in metres per second. If a fish goes over these values, <a href="b-1_explore_processes.html#average-speed">warnings and user interaction will be activated, as necessary.</a></p>
 <p>Speed checks cannot be performed without a distance matrix. If you attempt to do this, actel will complain:</p>
 <pre><code>W: &#39;speed.warning&#39;/&#39;speed.error&#39; were set, but a valid distance matrix is not present. Aborting speed checks.</code></pre>
 </div>
@@ -609,7 +609,7 @@ Decision:(a/b/comment) </code></pre>
 <h3>inactive.warning and inactive.error</h3>
 <p>These two variables control the inactiveness checks. <code>inactive.warning</code> and <code>inactive.error</code> must be set in days. That is, if <code>inactive.warning = 2</code>, any fish that is deemed inactive for two days or more will trigger a warning. By default, they are NULL, and no inactiveness checks are performed. Actel will let you know this happened with the following message:</p>
 <pre><code>M: &#39;inactive.warning&#39;/&#39;inactive.error&#39; were not set, skipping inactivity checks.</code></pre>
-<p>Altough it is not a requirement, inactiveness checks work best if a distances matrix is present. If you choose to run inactiveness checks without a distances matrix, actel will remind you of this with the following message:</p>
+<p>Although it is not a requirement, inactiveness checks work best if a distances matrix is present. If you choose to run inactiveness checks without a distances matrix, actel will remind you of this with the following message:</p>
 <pre><code>M: Running inactiveness checks without a distance matrix. Performance may be limited.</code></pre>
 <p>You can learn more about <a href="b-1_explore_processes.html#inactiveness">how the inactiveness checks operate here.</a></p>
 </div>

@@ -1127,7 +1127,7 @@ circularSection <- function(from, to, units = "hours", template = "clock24", lim
 #' @param col the colour for filling the rose diagram. The default, NULL, is to leave rose diagram unfilled. The values are recycled if needed.
 #' @param tol proportion of white space at the margins of plot.
 #' @param uin desired values for the units per inch parameter. If of length 1, the desired units per inch on the x axis.
-#' @param xlim,ylim the ranges to be encompassed by the x and y axes. Useful for centering the plot
+#' @param xlim,ylim the ranges to be encompassed by the x and y axes. Useful for centring the plot
 #' @param prop numerical constant determining the radii of the sectors. By default, prop = 1. 
 #' @param digits number of digits used to print axis values.
 #' @param plot.info an object from plot.circular that contains information on the zero, the rotation and next.points.
@@ -1343,7 +1343,7 @@ roseMean <- function(input, col = c("cornflowerblue", "chartreuse3", "deeppink")
 #' 
 #' For more details about the original function, visit the circular package homepage at \url{https://github.com/cran/circular}
 #' 
-#' @param xlim,ylim the ranges to be encompassed by the x and y axes. Useful for centering the plot.
+#' @param xlim,ylim the ranges to be encompassed by the x and y axes. Useful for centring the plot.
 #' @param uin desired values for the units per inch parameter. If of length 1, the desired units per inch on the x axis.
 #' @param shrink parameter that controls the size of the plotted circle. Default is 1. Larger values shrink the circle, while smaller values enlarge the circle.
 #' @param tol proportion of white space at the margins of plot.

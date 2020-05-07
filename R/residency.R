@@ -1424,7 +1424,7 @@ dailyPositions <- function(ratios) {
   return(output)
 }
 
-#' Transform vectors into data frams with specific columns
+#' Transform vectors into data frames with specific columns
 #' 
 #' Used to prepare lists of vectors with partially matching names for combination with do.call(rbind.data.frame, x)
 #' 

@@ -18,7 +18,7 @@ copyOfCirclePlotRad(
 )
 }
 \arguments{
-\item{xlim, ylim}{the ranges to be encompassed by the x and y axes. Useful for centering the plot.}
+\item{xlim, ylim}{the ranges to be encompassed by the x and y axes. Useful for centring the plot.}
 
 \item{uin}{desired values for the units per inch parameter. If of length 1, the desired units per inch on the x axis.}
 

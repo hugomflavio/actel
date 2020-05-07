@@ -45,7 +45,7 @@
 #'      \item \emph{Time.in.\[section\]}: Total time spent within a given section
 #'      \item \emph{Last.station.\[section\]}: Standard name of the last station
 #'        where the fish was detected in a given section
-#'      \item \emph{Left.\[section\]}: Departure time from a givem section
+#'      \item \emph{Left.\[section\]}: Departure time from a given section
 #'      \item \emph{Very.last.array}: Last array where the fish was detected
 #'      \item \emph{Status}: Fate assigned to the fish
 #'      \item \emph{Valid.detections}: Number of valid detections

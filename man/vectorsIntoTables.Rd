@@ -2,7 +2,7 @@
 % Please edit documentation in R/residency.R
 \name{vectorsIntoTables}
 \alias{vectorsIntoTables}
-\title{Transform vectors into data frams with specific columns}
+\title{Transform vectors into data frames with specific columns}
 \usage{
 vectorsIntoTables(input, columns)
 }

@@ -101,7 +101,7 @@ knitr::kable(biometrics)
 ```
 
 Note:
-  : If you do not include a "Sensor.unit" column, actel will simply use whatever sensor unit it can find in the raw detections file. To ensure that no issues arrise from different manufacturers handling unit names differently, I recommend that you write the sensor unit even for single sensor tags.
+  : If you do not include a "Sensor.unit" column, actel will simply use whatever sensor unit it can find in the raw detections file. To ensure that no issues arise from different manufacturers handling unit names differently, I recommend that you write the sensor unit even for single sensor tags.
 
 ## Spatial file
 
@@ -202,7 +202,7 @@ A distances matrix is a table that contains information on the distance (in metr
 
 ## Optional: spatial.txt file
 
-If your study area has multiple branches, then you need to tell actel how your arrays connect with each other. This file is optional because, if ommitted, actel will assume that your study area is composed by a single branch and that the array order is the one listed in the spatial.csv file.
+If your study area has multiple branches, then you need to tell actel how your arrays connect with each other. This file is optional because, if omitted, actel will assume that your study area is composed by a single branch and that the array order is the one listed in the spatial.csv file.
 
 The spatial.txt file is very simple; all you need to do is connect your arrays with either dashes or arrows (find out the difference below). You can connect your arrays in pairs or make longer strings. To decide whether or not two arrays should be connected, ask yourself the following: "Can fish move from A to B without having to pass through any other array?" If the answer is yes, then the arrays should be connected. Let's have a look at some examples:
 

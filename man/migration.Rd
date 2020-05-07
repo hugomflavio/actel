@@ -123,7 +123,7 @@ invalidate potential efficiency peers? See the vignettes for more details.}
 opened to inspect the movements only when the movements table is too big to be
 displayed in R's console. If "always", a graphical interface is always created
 when the possibility to invalidate events emerges. If "never", a graphical
-interface is never invoqued. In this case, if the table to be displayed does
+interface is never invoked. In this case, if the table to be displayed does
 not fit in R's console, a temporary file will be saved and the user will be
 prompted to open that file and examine it. Defaults to "needed".}
 
@@ -157,7 +157,7 @@ where the fish was detected in a given section
 \item \emph{Time.in.[section]}: Total time spent within a given section
 \item \emph{Last.station.[section]}: Standard name of the last station
 where the fish was detected in a given section
-\item \emph{Left.[section]}: Departure time from a givem section
+\item \emph{Left.[section]}: Departure time from a given section
 \item \emph{Very.last.array}: Last array where the fish was detected
 \item \emph{Status}: Fate assigned to the fish
 \item \emph{Valid.detections}: Number of valid detections

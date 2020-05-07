@@ -73,7 +73,7 @@ myRoseDiag(
 
 \item{uin}{desired values for the units per inch parameter. If of length 1, the desired units per inch on the x axis.}
 
-\item{xlim, ylim}{the ranges to be encompassed by the x and y axes. Useful for centering the plot}
+\item{xlim, ylim}{the ranges to be encompassed by the x and y axes. Useful for centring the plot}
 
 \item{prop}{numerical constant determining the radii of the sectors. By default, prop = 1.}
 
