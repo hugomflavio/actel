@@ -134,9 +134,9 @@ test_that("residency stops when any argument does not make sense", {
 
 	file.remove("detections/actel.detections.RData")
 
-	if (!"gWidgetsRGtk2" %in% installed.packages()) {
+	if (!"gWidgets2RGtk2" %in% installed.packages()) {
 		expect_warning(residency(sections = c("River", "Fjord", "Sea"), tz = "Europe/Copenhagen", report = FALSE), 
-			"GUI is set to 'needed' but packages 'gWidgetsRGtk2', 'RGtk2' are not available. Please install them if you intend to run GUI.\n         Disabling GUI (i.e. GUI = 'never') for the current run.", fixed = TRUE)
+			"GUI is set to 'needed' but packages 'gWidgets2RGtk2', 'RGtk2' are not available. Please install them if you intend to run GUI.\n         Disabling GUI (i.e. GUI = 'never') for the current run.", fixed = TRUE)
 		file.remove("detections/actel.detections.RData")
 	}
 
