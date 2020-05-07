@@ -23,6 +23,7 @@ residency(
   exclude.tags = NULL,
   override = NULL,
   report = TRUE,
+  auto.open = TRUE,
   section.minimum = 2,
   replicates = NULL,
   GUI = c("needed", "always", "never"),
@@ -103,6 +104,9 @@ define which movement events are valid and invalid.}
 
 \item{report}{Logical. Should an HTML report be created at the end of the
 analysis?}
+
+\item{auto.open}{Logical: Should the report be automatically opened once the
+analysis is over? Defaults to TRUE.}
 
 \item{section.minimum}{If a fish has less than \code{section.minimum}
 consecutive detections in a section, a warning is issued. Defaults to 2.}

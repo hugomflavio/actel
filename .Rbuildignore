@@ -1,6 +1,7 @@
 ^doc$
 ^Meta$
 ^compiled_vignettes$
-^actel_vignettes.zip
+^actel_vignettes.zip$
 ^.travis.yml$
 ^.github$
+^cran-comments.md$

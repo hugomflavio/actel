@@ -1,3 +1,29 @@
+#' Start note for actel
+#' 
+#' @export
+#' 
+startNote <- function() {
+  message(
+"Writing/editing files:
+  To operate, actel must write/change files present in the target 
+  directory and create subdirectories. This includes the functions 
+  createWorkspace, exampleWorkspace, clearWorkspace, explore, migration 
+  and residency. These actions are always related to the analysis 
+  processes being carried on (e.g. deploy example files, write 
+  reports, print graphics). 
+
+Opening the web browser:
+  actel has an auto-open feature for generated reports, which will 
+  trigger your browser to open at the end of the explore, migration 
+  and residency functions. If you would like to disable this, please 
+  run these functions with auto.open = FALSE. 
+
+Please only use actel if you agree with this.
+
+To get aquainted with how actel works, read the package vignettes.
+You can find them by running browseVignettes('actel')")
+}
+
 #' nearsq helper
 #' 
 #' Obtained here: https://stackoverflow.com/questions/32017327/calculate-the-optimal-grid-layout-dimensions-for-a-given-amount-of-plots-in-r
@@ -46,7 +72,7 @@ dataToList <- function(source){
 #' 
 #' @param input A vector of transmitter names
 #' 
-#' @keywords internal
+#' @export
 #' 
 stripCodeSpaces <- function(input) {
   unlist(lapply(input, function(x) tail(unlist(strsplit(x, "-")), 1)))
@@ -410,21 +436,6 @@ clearWorkspace <- function(skip = NA){
     message("Workspace already clean.")
   }
 }
-
-#' Display Update Help
-#' 
-#' @export
-#' 
-updateActel <- function() { # nocov start
-  rep.ver <- tryCatch(unlist(strsplit(readLines('https://raw.githubusercontent.com/hugomflavio/actel/master/DESCRIPTION')[3], " "))[2], error = function(e) NULL, warning = function(w) NULL)
-  if (!is.null(rep.ver)) {
-    message("M: Opening actel's installation instructions.")
-    browseURL("https://github.com/hugomflavio/actel#installing-actel")
-  } else {
-    message("M: Could not detect an internet connection. Find installation instructions in this webpage:\n   https://github.com/hugomflavio/actel#installing-actel")
-  }
-} # nocov end
-
 
 #' Extract timestamps from the analysis results.
 #' 

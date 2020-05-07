@@ -270,7 +270,7 @@ test_that("the debug option works as expected", {
 	expect_false(any(is.na(match(names(aux), c('array.times', 'arrays', 'bio', 'daily.positions', 'daily.ratios', 
 		'debug', 'deployments', 'detections', 'detections.list', 'dist.mat', 'do.checkInactiveness', 'do.checkSpeeds', 
 		'dot', 'dotmat', 'efficiency', 'exclude.tags', 'global.ratios', 'GUI', 'inactive.error', 'inactive.warning',
-		'inst.ver.short', 'intra.array.CJS', 'intra.array.matrices', 'invalid.dist', 'jobname', 'jump.error', 
+		'auto.open', 'intra.array.CJS', 'intra.array.matrices', 'invalid.dist', 'jobname', 'jump.error', 
 		'jump.warning', 'last.seen', 'link', 'max.interval', 'minimum.detections', 'movements', 'my.home', 
 		'override', 'override.fragment', 'path', 'paths', 'print.releases', 'replicates', 'report', 'res.df', 
 		'residency.list', 'resultsname', 'rsp.info', 'section.minimum', 'section.movements', 'section.times', 

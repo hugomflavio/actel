@@ -88,7 +88,8 @@
 explore <- function(path = NULL, tz, max.interval = 60, minimum.detections = 2, start.time = NULL, stop.time = NULL, 
   speed.method = c("last to first", "first to first"), speed.warning = NULL, speed.error = NULL, 
   jump.warning = 2, jump.error = 3, inactive.warning = NULL, inactive.error = NULL, 
-  exclude.tags = NULL, override = NULL, report = TRUE, GUI = c("needed", "always", "never"), print.releases = TRUE, debug = FALSE) {
+  exclude.tags = NULL, override = NULL, report = TRUE, auto.open = TRUE,
+  GUI = c("needed", "always", "never"), print.releases = TRUE, debug = FALSE) {
 
 # check arguments quality
   my.home <- getwd()
@@ -214,10 +215,7 @@ explore <- function(path = NULL, tz, max.interval = 60, minimum.detections = 2, 
 # --------------------
 
 # Final arrangements before beginning
-  inst.ver <- utils::packageVersion("actel")
-  inst.ver.short <- substr(inst.ver, start = 1, stop = nchar(as.character(inst.ver)) - 5) 
-  appendTo("Report", paste0("Actel R package report.\nVersion: ", inst.ver.short, "\n"))
-  rm(inst.ver)
+  appendTo("Report", paste0("Actel R package report.\nVersion: ", utils::packageVersion("actel"), "\n"))
 
   path <- checkPath(my.home = my.home, path = path)  
 
@@ -354,7 +352,7 @@ detections.list <- study.data$detections.list
   deployments <- do.call(rbind.data.frame, deployments)
   
   # extra info for potential RSP analysis
-  rsp.info <- list(analysis.type = "explore", analysis.time = the.time, bio = bio, tz = tz, actel.version = inst.ver.short)
+  rsp.info <- list(analysis.type = "explore", analysis.time = the.time, bio = bio, tz = tz, actel.version = utils::packageVersion("actel"))
 
   if (!is.null(override))
     override.fragment <- paste0('<span style="color:red">Manual mode has been triggered for **', length(override),'** fish.</span>\n')
@@ -426,7 +424,7 @@ detections.list <- study.data$detections.list
       quiet = TRUE)
     appendTo("debug", "debug: Moving report")
     fs::file_move(sub("Rmd", "html", reportname), sub("Report/", "", sub("Rmd", "html", reportname)))
-    if (interactive()) { # nocov start
+    if (interactive() & auto.open) { # nocov start
       appendTo("debug", "debug: Opening report.")
       browseURL(sub("Report/", "", sub("Rmd", "html", reportname)))
     } # nocov end
@@ -471,8 +469,6 @@ detections.list <- study.data$detections.list
 #' 
 printExploreRmd <- function(override.fragment, biometric.fragment, individual.plots,
   circular.plots, sensor.plots, spatial, deployments, detections, valid.detections){
-  inst.ver <- utils::packageVersion("actel")
-  inst.ver.short <- substr(inst.ver, start = 1, stop = nchar(as.character(inst.ver)) - 5) 
   if (file.exists(reportname <- "Report/actel_explore_report.Rmd")) {
     continue <- TRUE
     index <- 1
@@ -512,7 +508,7 @@ Note:
   cat(paste0(
 '---
 title: "Acoustic telemetry exploratory analysis"
-author: "Actel R package (', inst.ver.short, ')"
+author: "Actel R package (', utils::packageVersion("actel"), ')"
 output: 
   html_document:
     includes:

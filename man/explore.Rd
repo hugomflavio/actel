@@ -21,6 +21,7 @@ explore(
   exclude.tags = NULL,
   override = NULL,
   report = TRUE,
+  auto.open = TRUE,
   GUI = c("needed", "always", "never"),
   print.releases = TRUE,
   debug = FALSE
@@ -91,6 +92,9 @@ define which movement events are valid and invalid.}
 
 \item{report}{Logical. Should an HTML report be created at the end of the
 analysis?}
+
+\item{auto.open}{Logical: Should the report be automatically opened once the
+analysis is over? Defaults to TRUE.}
 
 \item{GUI}{One of "needed", "always" or "never". If "needed", a new window is
 opened to inspect the movements only when the movements table is too big to be

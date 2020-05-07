@@ -85,7 +85,7 @@
 migration <- function(path = NULL, tz, sections, success.arrays = NULL, max.interval = 60, minimum.detections = 2, 
   start.time = NULL, stop.time = NULL, speed.method = c("last to first", "first to first"), 
   speed.warning = NULL, speed.error = NULL, jump.warning = 2, jump.error = 3, 
-  inactive.warning = NULL, inactive.error = NULL, exclude.tags = NULL, override = NULL, report = TRUE,
+  inactive.warning = NULL, inactive.error = NULL, exclude.tags = NULL, override = NULL, report = TRUE, auto.open = TRUE,
   if.last.skip.section = TRUE, replicates = NULL, disregard.parallels = TRUE, GUI = c("needed", "always", "never"), 
   print.releases = TRUE, debug = FALSE) {
   
@@ -229,10 +229,7 @@ migration <- function(path = NULL, tz, sections, success.arrays = NULL, max.inte
 # --------------------
 
 # Final arrangements before beginning
-  inst.ver <- utils::packageVersion("actel")
-  inst.ver.short <- substr(inst.ver, start = 1, stop = nchar(as.character(inst.ver)) - 5) 
-  appendTo("Report", paste0("Actel R package report.\nVersion: ", inst.ver.short, "\n"))
-  rm(inst.ver)
+  appendTo("Report", paste0("Actel R package report.\nVersion: ", utils::packageVersion("actel"), "\n"))
 
   path <- checkPath(my.home = my.home, path = path)  
 
@@ -520,7 +517,7 @@ migration <- function(path = NULL, tz, sections, success.arrays = NULL, max.inte
   matrices <- the.matrices
 
   # extra info for potential RSP analysis
-  rsp.info <- list(analysis.type = "migration", analysis.time = the.time, bio = bio, tz = tz, actel.version = inst.ver.short)
+  rsp.info <- list(analysis.type = "migration", analysis.time = the.time, bio = bio, tz = tz, actel.version = utils::packageVersion("actel"))
 
   if (!is.null(override))
     override.fragment <- paste0('<span style="color:red">Manual mode has been triggered for **', length(override),'** fish.</span>\n')
@@ -612,7 +609,7 @@ migration <- function(path = NULL, tz, sections, success.arrays = NULL, max.inte
       quiet = TRUE)
     appendTo("debug", "debug: Moving report")
     fs::file_move(sub("Rmd", "html", reportname), sub("Report/", "", sub("Rmd", "html", reportname)))
-    if (interactive()) { # nocov start
+    if (interactive() & auto.open) { # nocov start
       appendTo("debug", "debug: Opening report.")
       browseURL(sub("Report/", "", sub("Rmd", "html", reportname)))
     } # nocov end
@@ -661,8 +658,6 @@ migration <- function(path = NULL, tz, sections, success.arrays = NULL, max.inte
 printMigrationRmd <- function(override.fragment, biometric.fragment, section.overview,
   efficiency.fragment, display.progression, array.overview.fragment, survival.graph.size, 
   individual.plots, circular.plots, sensor.plots, spatial, deployments, valid.detections, detections){
-  inst.ver <- utils::packageVersion("actel")
-  inst.ver.short <- substr(inst.ver, start = 1, stop = nchar(as.character(inst.ver)) - 5) 
   if (file.exists(reportname <- "Report/actel_migration_report.Rmd")) {
     continue <- TRUE
     index <- 1
@@ -702,7 +697,7 @@ Note:
   cat(paste0(
 '---
 title: "Acoustic telemetry migration analysis"
-author: "Actel R package (', inst.ver.short, ')"
+author: "Actel R package (', utils::packageVersion("actel"), ')"
 output: 
   html_document:
     includes:
@@ -1281,25 +1276,3 @@ assembleSectionOverview <- function(status.df, sections) {
   appendTo("debug", "Terminating assembleSectionOverview.")
   return(section.overview[, recipient])
 }
-
-
-
-# #' Create array.overview
-# #'
-# #' @return A data frame containing the progression per group of fish present in the biometrics.
-# #' 
-# #' @keywords internal
-# #' 
-# mbAssembleArrayOverview <- function(input) {
-#   appendTo("debug", "Starting mbAssembleArrayOverview.")
-#   output <- lapply(input, function(x) {
-#     x[1, ] <- apply(x[c(1, 3), ], 2, function(i) sum(i, na.rm = TRUE))
-#     x[2, ] <- x[4, ]
-#     x[3, ] <- x[2, ] - x[1, ]
-#     output <- x[1:3, ]
-#     rownames(output) <- c("Known", "Estimated", "Difference")
-#     return(output)
-#   })
-#   appendTo("debug", "Terminating mbAssembleArrayOverview.")  
-#   return(output)
-# }

@@ -23,6 +23,7 @@ migration(
   exclude.tags = NULL,
   override = NULL,
   report = TRUE,
+  auto.open = TRUE,
   if.last.skip.section = TRUE,
   replicates = NULL,
   disregard.parallels = TRUE,
@@ -104,6 +105,9 @@ define which movement events are valid and invalid.}
 
 \item{report}{Logical. Should an HTML report be created at the end of the
 analysis?}
+
+\item{auto.open}{Logical: Should the report be automatically opened once the
+analysis is over? Defaults to TRUE.}
 
 \item{if.last.skip.section}{Logical: Should a fish detected at the last array
 of a given section be considered to have disappeared in the next section?}

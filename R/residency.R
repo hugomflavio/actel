@@ -81,7 +81,7 @@
 residency <- function(path = NULL, tz, sections, success.arrays = NULL, max.interval = 60, minimum.detections = 2, 
   start.time = NULL, stop.time = NULL, speed.method = c("last to first", "first to first"), 
   speed.warning = NULL, speed.error = NULL, jump.warning = 2, jump.error = 3, 
-  inactive.warning = NULL, inactive.error = NULL, exclude.tags = NULL, override = NULL, report = TRUE,
+  inactive.warning = NULL, inactive.error = NULL, exclude.tags = NULL, override = NULL, report = TRUE, auto.open = TRUE,
   section.minimum = 2, replicates = NULL, GUI = c("needed", "always", "never"), print.releases = TRUE, debug = FALSE) {
 # check argument quality
   my.home <- getwd()
@@ -220,10 +220,7 @@ residency <- function(path = NULL, tz, sections, success.arrays = NULL, max.inte
 # --------------------
 
 # Final arrangements before beginning
-  inst.ver <- utils::packageVersion("actel")
-  inst.ver.short <- substr(inst.ver, start = 1, stop = nchar(as.character(inst.ver)) - 5) 
-  appendTo("Report", paste0("Actel R package report.\nVersion: ", inst.ver.short, "\n"))
-  rm(inst.ver)
+  appendTo("Report", paste0("Actel R package report.\nVersion: ", utils::packageVersion("actel"), "\n"))
 
   path <- checkPath(my.home = my.home, path = path)  
 
@@ -451,7 +448,7 @@ residency <- function(path = NULL, tz, sections, success.arrays = NULL, max.inte
     efficiency <- efficiency[1:3]
 
   # extra info for potential RSP analysis
-  rsp.info <- list(analysis.type = "residency", analysis.time = the.time, bio = bio, tz = tz, actel.version = inst.ver.short)
+  rsp.info <- list(analysis.type = "residency", analysis.time = the.time, bio = bio, tz = tz, actel.version = utils::packageVersion("actel"))
 
   if (!is.null(override))
     override.fragment <- paste0('<span style="color:red">Manual mode has been triggered for **', length(override),'** fish.</span>\n')
@@ -589,8 +586,6 @@ printResidencyRmd <- function(override.fragment, biometric.fragment, efficiency.
   individual.detection.plots, individual.residency.plots, array.circular.plots, 
   section.arrival.circular.plots, section.departure.circular.plots, sensor.plots, spatial, 
   deployments, detections, valid.detections, last.seen, last.seen.graph.size){
-  inst.ver <- utils::packageVersion("actel")
-  inst.ver.short <- substr(inst.ver, start = 1, stop = nchar(as.character(inst.ver)) - 5) 
   if (file.exists(reportname <- "Report/actel_residency_report.Rmd")) {
     continue <- TRUE
     index <- 1
@@ -630,7 +625,7 @@ Note:
   cat(paste0(
 '---
 title: "Acoustic telemetry residency analysis"
-author: "Actel R package (', inst.ver.short, ')"
+author: "Actel R package (', utils::packageVersion("actel"), ')"
 output: 
   html_document:
     includes:

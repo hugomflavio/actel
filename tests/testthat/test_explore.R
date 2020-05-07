@@ -193,7 +193,7 @@ test_that("the debug option works as expected", {
 	expect_false(any(is.na(match(names(aux), c('study.data', 'do.checkSpeeds', 'arrays', 'dist.mat', 'dotmat', 'the.time', 
 		'start.time', 'my.home', 'speed.warning', 'GUI', 'jump.error', 'speed.error', 'valid.movements', 
 		'times', 'deployments', 'print.releases', 'dot', 'jump.warning', 'tz', 'inactive.error', 'valid.detections', 
-		'max.interval', 'inst.ver.short', 'detections.list', 'stop.time', 'jobname', 'override', 'path', 
+		'max.interval', 'detections.list', 'stop.time', 'jobname', 'override', 'path', 'auto.open',
 		'minimum.detections', 'movements', 'exclude.tags', 'detections', 'the.function.call', 'report', 
 		'invalid.dist', 'resultsname', 'rsp.info', 'sections', 'link', 'do.checkInactiveness', 'override.fragment', 
 		'spatial', 'speed.method', 'inactive.warning', 'bio', 'debug')))))

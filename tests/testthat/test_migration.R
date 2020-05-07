@@ -327,7 +327,7 @@ test_that("the debug option works as expected", {
 		'deployments', 'detections', 'detections.list', 'disregard.parallels', 'dist.mat', 
 		'do.checkInactiveness', 'do.checkSpeeds', 'dot', 'dotmat', 'exclude.tags', 'group.CJS', 
 		'group.overview', 'GUI', 'if.last.skip.section', 'inactive.error', 'inactive.warning', 
-		'inst.ver.short', 'intra.array.CJS', 'intra.array.matrices', 'invalid.dist', 'jobname', 
+		'auto.open', 'intra.array.CJS', 'intra.array.matrices', 'invalid.dist', 'jobname', 
 		'jump.error', 'jump.warning', 'link', 'm.by.array', 'matrices', 'max.interval', 
 		'minimum.detections', 'movements', 'my.home', 'overall.CJS', 'override', 'override.fragment', 
 		'path', 'paths', 'print.releases', 'release.overview', 'release_nodes', 'replicates', 'report', 'resultsname', 
