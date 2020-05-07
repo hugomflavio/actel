@@ -51,21 +51,29 @@ createWorkspace <- function(dir = "actel_workspace") {
 #' @export
 #' 
 exampleWorkspace <- function(spatial = example.spatial, biometrics = example.biometrics, detections = example.detections, deployments = example.deployments) {
-  if (!dir.exists("exampleWorkspace")) 
-    dir.create("exampleWorkspace")
-  write.csv(spatial, "exampleWorkspace/spatial.csv", row.names = FALSE)
-  write.csv(biometrics, "exampleWorkspace/biometrics.csv", row.names = FALSE)
-  write.csv(deployments, "exampleWorkspace/deployments.csv", row.names = FALSE)
-  if (!dir.exists("exampleWorkspace/detections")) 
-    dir.create("exampleWorkspace/detections")
-  my.list <- split(detections, detections$Receiver)
-  for (i in names(my.list)) {
-    write.csv(my.list[[i]], paste0("exampleWorkspace/detections/", i, ".csv"), row.names = FALSE)
+  if (interactive() & dir.exists("exampleWorkspace")) {
+    cat("Careful! a folder named 'exampleWorkspace' already exists! Would you like to overwrite\nthe contents of its spatial, biometrics, deployments and detections files?")
+    decision <- readline("(y/N) ")
+  } else {
+    decision <- "y"
   }
-  message("M: The example workspace is now ready. To run the analysis on the example data, run:\n
+  if (decision == "y" | decision == "Y") {
+      if (!dir.exists("exampleWorkspace"))
+        dir.create("exampleWorkspace")
+    write.csv(spatial, "exampleWorkspace/spatial.csv", row.names = FALSE)
+    write.csv(biometrics, "exampleWorkspace/biometrics.csv", row.names = FALSE)
+    write.csv(deployments, "exampleWorkspace/deployments.csv", row.names = FALSE)
+    if (!dir.exists("exampleWorkspace/detections")) 
+      dir.create("exampleWorkspace/detections")
+    my.list <- split(detections, detections$Receiver)
+    for (i in names(my.list)) {
+      write.csv(my.list[[i]], paste0("exampleWorkspace/detections/", i, ".csv"), row.names = FALSE)
+    }
+    message("M: The example workspace is now ready. To run the analysis on the example data, run:\n
   results <- migration(path = 'exampleWorkspace', sections = c('River', 'Fjord', 'Sea'), 
   \t\t     success.arrays = 'Sea1', tz = 'Europe/Copenhagen')\n
 And follow the instructions as they come. Once finished, explore the object 'results' for the output.")
+  }
 }
 
 #' Example spatial data

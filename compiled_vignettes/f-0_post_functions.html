@@ -12,7 +12,7 @@
 
 <meta name="author" content="Hugo Flávio" />
 
-<meta name="date" content="2020-04-30" />
+<meta name="date" content="2020-05-07" />
 
 <title>6) Beyond the three main analyses</title>
 
@@ -301,7 +301,7 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 
 <h1 class="title toc-ignore">6) Beyond the three main analyses</h1>
 <h4 class="author">Hugo Flávio</h4>
-<h4 class="date">2020-04-30</h4>
+<h4 class="date">2020-05-07</h4>
 
 
 
@@ -390,13 +390,13 @@ This is a great R package, so make sure to go check it out!
 <a class="sourceLine" id="cb4-7" title="7">tags &lt;-<span class="st"> </span>results<span class="op">$</span>status.df<span class="op">$</span>Signal[results<span class="op">$</span>status.df<span class="op">$</span>Group <span class="op">==</span><span class="st"> &quot;group_name&quot;</span>]</a>
 <a class="sourceLine" id="cb4-8" title="8"></a>
 <a class="sourceLine" id="cb4-9" title="9"><span class="co"># Extract only the matrix rows that match the target group</span></a>
-<a class="sourceLine" id="cb4-10" title="10">m &lt;-<span class="st"> </span>x[<span class="kw">match</span>(tags, actel<span class="op">:::</span><span class="kw">stripCodeSpaces</span>(<span class="kw">rownames</span>(m))), ]</a>
+<a class="sourceLine" id="cb4-10" title="10">m &lt;-<span class="st"> </span>x[<span class="kw">match</span>(tags, <span class="kw">stripCodeSpaces</span>(<span class="kw">rownames</span>(m))), ]</a>
 <a class="sourceLine" id="cb4-11" title="11"></a>
 <a class="sourceLine" id="cb4-12" title="12"><span class="co"># Remove any NA leftovers</span></a>
 <a class="sourceLine" id="cb4-13" title="13">m &lt;-<span class="st"> </span>m[<span class="kw">complete.cases</span>(m), ]</a>
 <a class="sourceLine" id="cb4-14" title="14"></a>
 <a class="sourceLine" id="cb4-15" title="15"><span class="co"># Re-calculate the intra-array CJS</span></a>
-<a class="sourceLine" id="cb4-16" title="16">x &lt;-<span class="st"> </span>actel<span class="op">:::</span><span class="kw">dualArrayCJS</span>(m)</a>
+<a class="sourceLine" id="cb4-16" title="16">x &lt;-<span class="st"> </span><span class="kw">dualArrayCJS</span>(m)</a>
 <a class="sourceLine" id="cb4-17" title="17"></a>
 <a class="sourceLine" id="cb4-18" title="18"><span class="co"># Run advEfficiency on the new results</span></a>
 <a class="sourceLine" id="cb4-19" title="19"><span class="kw">advEfficiency</span>(x)</a></code></pre></div>

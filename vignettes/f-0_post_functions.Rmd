@@ -103,13 +103,13 @@ m <- results$intra.array.matrices$name
 tags <- results$status.df$Signal[results$status.df$Group == "group_name"]
 
 # Extract only the matrix rows that match the target group
-m <- x[match(tags, actel:::stripCodeSpaces(rownames(m))), ]
+m <- x[match(tags, stripCodeSpaces(rownames(m))), ]
 
 # Remove any NA leftovers
 m <- m[complete.cases(m), ]
 
 # Re-calculate the intra-array CJS
-x <- actel:::dualArrayCJS(m)
+x <- dualArrayCJS(m)
 
 # Run advEfficiency on the new results
 advEfficiency(x)

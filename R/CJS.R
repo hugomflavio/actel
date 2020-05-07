@@ -12,7 +12,7 @@
 #' @param dotmat The matrix of distances between arrays.
 #' @param paths A list containing the shortest paths between arrays with distance > 1.
 #' @param estimate an estimate of the last array's efficiency.
-#' @param fixed.efficiency A vector of fixed efficiency estimates from a more complete CJS model.
+#' @param fixed.efficiency A vector of fixed efficiency estimates from a more strict CJS model.
 #' @param silent Logical: Should messages be printed?
 #' @name cjs_args
 #' @keywords internal
@@ -318,7 +318,7 @@ assembleMatrices <- function(spatial, movements, status.df, arrays, paths, dotma
 #' 
 #' @return A summary of the CJS results
 #' 
-#' @keywords internal
+#' @export
 #' 
 simpleCJS <- function(input, estimate = NULL, fixed.efficiency = NULL, silent = TRUE){
   if (!is.matrix(input) & !is.data.frame(input))
@@ -721,10 +721,12 @@ dualMatrix <- function(array, replicates, spatial, detections.list){
 #' 
 #' @return A summary of the CJS results
 #' 
-#' @keywords internal
+#' @export
 #' 
 dualArrayCJS <- function(input){
-  appendTo("debug", "Running dualArrayCJS.")
+  if ((!inherits(input, "matrix") & !inherits(input, "data.frame")) || ncol(input) != 2 | any(!apply(input, 2, is.logical)))
+    stop("Please provide a data.frame or matrix of TRUE/FALSE's with two columns", call. = FALSE)
+
   # r: tags detected at i and on other pair
   # z: tags NOT detected at i but detected on other pair
   # p: probability of detection (efficiency)

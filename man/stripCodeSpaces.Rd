@@ -12,4 +12,3 @@ stripCodeSpaces(input)
 \description{
 Remove Code Spaces from transmitter names
 }
-\keyword{internal}

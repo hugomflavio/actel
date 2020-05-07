@@ -11,7 +11,7 @@ simpleCJS(input, estimate = NULL, fixed.efficiency = NULL, silent = TRUE)
 
 \item{estimate}{an estimate of the last array's efficiency.}
 
-\item{fixed.efficiency}{A vector of fixed efficiency estimates from a more complete CJS model.}
+\item{fixed.efficiency}{A vector of fixed efficiency estimates from a more strict CJS model.}
 
 \item{silent}{Logical: Should messages be printed?}
 }
@@ -21,4 +21,3 @@ A summary of the CJS results
 \description{
 The calculations are based on 'Using mark-recapture models to estimate survival from telemetry data' by Perry et al. 2012
 }
-\keyword{internal}

@@ -11,7 +11,7 @@ mbGroupCJS(mat, status.df, fixed.efficiency = NULL)
 
 \item{status.df}{The main results table.}
 
-\item{fixed.efficiency}{A vector of fixed efficiency estimates from a more complete CJS model.}
+\item{fixed.efficiency}{A vector of fixed efficiency estimates from a more strict CJS model.}
 }
 \value{
 A list of CJS results

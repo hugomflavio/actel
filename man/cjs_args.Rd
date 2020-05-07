@@ -30,7 +30,7 @@
 
 \item{estimate}{an estimate of the last array's efficiency.}
 
-\item{fixed.efficiency}{A vector of fixed efficiency estimates from a more complete CJS model.}
+\item{fixed.efficiency}{A vector of fixed efficiency estimates from a more strict CJS model.}
 
 \item{silent}{Logical: Should messages be printed?}
 }
