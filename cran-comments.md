@@ -32,12 +32,16 @@ On Windows server, MacOS and local Windows 10:
 * checking CRAN incoming feasibility ... NOTE
 Maintainer: ‘Hugo Flávio <hdmfla@aqua.dtu.dk>’
 
+New submission
+
 On Ubuntu 16.04:
 
 0 errors | 0 warnings | 2 notes
 
 * checking CRAN incoming feasibility ... NOTE
 Maintainer: ‘Hugo Flávio <hdmfla@aqua.dtu.dk>’
+
+New submission
 
 * checking package dependencies ... NOTE
 Package suggested but not available for checking: ‘rgdal’
