@@ -39,7 +39,7 @@ knitr::opts_chunk$set(
 
 ## Making sure everything checks out
 
-The first thing actel does is import your data. This also includes all of your detection files, which can take a bit of time. Then, actel performs many verifications to make sure everything is all right. As the list of checks is long, I won't explore each one of them in detail here. Should something be out of the ordinary, actel will let you know with a warning or an error message, depending on the severity of the issue. You can find more about the possible exceptions in this [list of errors and messages](e-0_messages.html).
+The first thing actel does is import your data. This also includes all of your detection files, which can take a bit of time. Then, actel performs many verifications to make sure everything is all right. As the list of checks is long, I won't explore each one of them in detail here. Should something be out of the ordinary, actel will let you know with a warning or an error message, depending on the severity of the issue. You can find more about the possible exceptions in this [list of errors and messages](g-0_messages.html).
 
 ## Organising the detections
 

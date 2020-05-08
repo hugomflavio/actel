@@ -7,9 +7,9 @@ This is a resubmission. As requested, in this version I have:
 * Removed the LICENSE file
 
 * Corrected an invalid URL in the vignettes
-('e-0_messages.html' to 'f-0_messages.html')
+('e-0_messages.html' to 'g-0_messages.html')
 
-* Replaced "actel" with "This package" in the description.
+* Removed "This package" from the description start.
 
 * Considerably lowered Overall checktime by disabling
 most of the testing suites during CRAN checks only. 
