@@ -152,10 +152,7 @@ test_that("explore results contains all the expected elements.", {
 })
 
 test_that("explore results are stored in target directory", {
-	skip_on_cran()
 	expect_true(file.exists("actel_explore_results.RData"))
-	expect_true(file.exists("actel_explore_report.html"))
-	expect_true(dir.exists("Report"))
 })
 
 test_that("explore temp files are removed at the end of the analysis", {
