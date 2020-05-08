@@ -174,7 +174,7 @@ test_that("residency stops when any argument does not make sense", {
 
 
 test_that("residency results contains all the expected elements.", {
-	output <- suppressWarnings(residency(tz = 'Europe/Copenhagen', sections = c("River", "Fjord", "Sea"), report = TRUE, GUI = "never"))
+	output <- suppressWarnings(residency(tz = 'Europe/Copenhagen', sections = c("River", "Fjord", "Sea"), report = FALSE, GUI = "never"))
 	file.remove("detections/actel.detections.RData")
 
 	expect_false(any(is.na(match(names(output), c('array.times', 'arrays', 'daily.positions', 'daily.ratios', 'deployments', 
@@ -197,8 +197,6 @@ test_that("residency results contains all the expected elements.", {
 
 test_that("residency results are stored in target directory", {
 	expect_true(file.exists("actel_residency_results.RData"))
-	expect_true(file.exists("actel_residency_report.html"))
-	expect_true(dir.exists("Report"))
 })
 
 test_that("residency temp files are removed at the end of the analysis", {

@@ -195,7 +195,7 @@ test_that("migration stops when any argument does not make sense", {
 
 test_that("migration results contains all the expected elements.", {
 	output <<- suppressWarnings(migration(tz = 'Europe/Copenhagen', sections = c("River", "Fjord", "Sea"), 
-		report = TRUE, GUI = "never", print.releases = FALSE))
+		report = FALSE, GUI = "never", print.releases = FALSE))
 	
 	file.remove("detections/actel.detections.RData")
 	
@@ -273,8 +273,6 @@ rm(output)
 
 test_that("migration results are stored in target directory", {
 	expect_true(file.exists("actel_migration_results.RData"))
-	expect_true(file.exists("actel_migration_report.html"))
-	expect_true(dir.exists("Report"))
 })
 
 test_that("migration temp files are removed at the end of the analysis", {
