@@ -196,7 +196,6 @@ test_that("residency results contains all the expected elements.", {
 })
 
 test_that("residency results are stored in target directory", {
-	skip_on_cran()
 	expect_true(file.exists("actel_residency_results.RData"))
 	expect_true(file.exists("actel_residency_report.html"))
 	expect_true(dir.exists("Report"))

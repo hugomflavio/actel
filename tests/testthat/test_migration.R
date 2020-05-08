@@ -272,7 +272,6 @@ test_that("advEfficiency can calculate efficiency from release and group overvie
 rm(output)
 
 test_that("migration results are stored in target directory", {
-	skip_on_cran()
 	expect_true(file.exists("actel_migration_results.RData"))
 	expect_true(file.exists("actel_migration_report.html"))
 	expect_true(dir.exists("Report"))
