@@ -32,6 +32,6 @@ printExploreRmd(
 \item{valid.detectiosn}{The valid detections used in the study}
 }
 \description{
-Creates a Rmd report and converts it to hmtl.
+Creates a Rmd report and converts it to html.
 }
 \keyword{internal}

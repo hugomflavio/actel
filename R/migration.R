@@ -639,7 +639,7 @@ migration <- function(path = NULL, tz, sections, success.arrays = NULL, max.inte
 
 #' Print Rmd report
 #'
-#' Creates a Rmd report and converts it to hmtl.
+#' Creates a Rmd report and converts it to html.
 #' 
 #' @param override.fragment Rmarkdown string specifying the type of report for the header.
 #' @param biometric.fragment Rmarkdown string specifying the biometric graphics drawn.

@@ -32,6 +32,6 @@ printResidencyRmd(
 \item{sensor.plots}{Rmarkdown string specifying the name of the sensor plots.}
 }
 \description{
-Creates a Rmd report and converts it to hmtl.
+Creates a Rmd report and converts it to html.
 }
 \keyword{internal}
