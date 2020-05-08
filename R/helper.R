@@ -20,7 +20,7 @@ Opening the web browser:
 
 Please only use actel if you agree with this.
 
-To get aquainted with how actel works, read the package vignettes.
+To get acquainted with how actel works, read the package vignettes.
 You can find them by running browseVignettes('actel')")
 }
 

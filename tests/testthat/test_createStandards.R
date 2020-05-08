@@ -1,3 +1,5 @@
+skip_on_cran()
+
 dir.create("detections")
 aux <- split(example.detections, example.detections$Receiver)
 for (i in names(aux)[1:3]) {

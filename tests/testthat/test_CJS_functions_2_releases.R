@@ -1,3 +1,5 @@
+skip_on_cran()
+
 # ---- FORCE TWO RELEASE SITES
 
 exampleWorkspace()

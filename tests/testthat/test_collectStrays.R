@@ -1,3 +1,5 @@
+skip_on_cran()
+
 test_that("collectStrays work as expected", {
 	xdet <- list(Test = example.detections[1:5, ])
 	colnames(xdet[[1]])[1] <- "Timestamp"

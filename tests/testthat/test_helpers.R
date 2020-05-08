@@ -1,3 +1,5 @@
+skip_on_cran()
+
 test_that("dataToList is working", {
 	a <- matrix(c(1,2,3,4), 2, 2)
 	b <- data.frame(A = 1:2, B = 3:4)

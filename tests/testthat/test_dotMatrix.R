@@ -1,3 +1,5 @@
+skip_on_cran()
+
 test_that("dotMatrix stops if any connector is not one of '--', '<-' or '->'", {
 	dot <- readDot(string = "A--B--C--D--E--F<>G")
 	expect_error(dotMatrix(input = dot),

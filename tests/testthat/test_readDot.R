@@ -1,3 +1,5 @@
+skip_on_cran()
+
 test_that("readDot stops if argument or file is missing", {
 	expect_error(readDot(), 
 		"No dot file or data were specified.", fixed = TRUE)

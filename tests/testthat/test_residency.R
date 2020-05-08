@@ -3,7 +3,7 @@ setwd("exampleWorkspace")
 write.csv(example.distances, "distances.csv")
 
 test_that("residency stops when any argument does not make sense", {
-	
+	skip_on_cran()
 	expect_error(residency(tz = 1), 
 		"'tz' could not be recognized as a timezone. Check available timezones with OlsonNames()", fixed = TRUE)
 	
@@ -196,12 +196,14 @@ test_that("residency results contains all the expected elements.", {
 })
 
 test_that("residency results are stored in target directory", {
+	skip_on_cran()
 	expect_true(file.exists("actel_residency_results.RData"))
 	expect_true(file.exists("actel_residency_report.html"))
 	expect_true(dir.exists("Report"))
 })
 
 test_that("residency temp files are removed at the end of the analysis", {
+	skip_on_cran()
 	expect_false(file.exists("temp_log.txt"))
 	expect_false(file.exists("temp_warnings.txt"))
 	expect_false(file.exists("temp_UD.txt"))
@@ -209,6 +211,7 @@ test_that("residency temp files are removed at the end of the analysis", {
 })
 
 test_that("residency is able to run speed and inactiveness checks.", {
+	skip_on_cran()
 	output <- suppressWarnings(residency(sections = c("River", "Fjord", "Sea"), tz = 'Europe/Copenhagen', 
 		report = FALSE, GUI = "never", speed.warning = 1000000, inactive.warning = 1000000, replicates = list(Sea1 = c("St.16", "St.17"))))
 	file.remove("detections/actel.detections.RData")
@@ -228,6 +231,7 @@ test_that("residency is able to run speed and inactiveness checks.", {
 })
 
 test_that("residency can handle multiple release sites.", {
+	skip_on_cran()
 	xbio <- example.biometrics
 	xbio$Release.site <- as.character(xbio$Release.site)
 	xbio$Release.site[c(1:15)] <- "RS2"
@@ -251,6 +255,7 @@ test_that("residency can handle multiple release sites.", {
 })
 
 test_that("residency can handle multiple expected first arrays", {
+	skip_on_cran()
 	xspatial <- example.spatial
 	xspatial$Array[18] <- "River1|River2"
 	write.csv(xspatial, "spatial.csv", row.names = FALSE)
@@ -262,6 +267,7 @@ test_that("residency can handle multiple expected first arrays", {
 })
 
 test_that("the debug option works as expected", {
+	skip_on_cran()
 	output <- suppressWarnings(residency(sections = c("River", "Fjord", "Sea"), tz = 'Europe/Copenhagen', report = FALSE, 
 		GUI = "never", debug = TRUE))
 	file.remove("detections/actel.detections.RData")
@@ -282,6 +288,7 @@ test_that("the debug option works as expected", {
 })
 
 test_that("residency can handle multi-sensor data", {
+	skip_on_cran()
 	xdet <- example.detections
 	xdet$Sensor.Value <- 1
 	xdet$Sensor.Unit <- "A"

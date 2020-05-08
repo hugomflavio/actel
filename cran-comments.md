@@ -1,6 +1,23 @@
-## Original package submission
+## Package resubmission
+
+This is a resubmission. As requested, in this version I have:
+
+* Removed markup from the package description
+
+* Removed the LICENSE file
+
+* Corrected an invalid URL in the vignettes
+('e-0_messages.html' to 'f-0_messages.html')
+
+* Replaced "actel" with "This package" in the description.
+
+* Considerably lowered Overall checktime by disabling
+most of the testing suites during CRAN checks only. 
+All components are still being checked on GitHub to ensure
+the functions are behaving as expected.
 
 ## Test environments
+
 * Windows Server 2019 (on GitHub), R 4.0.0 and devel
 * Mac OS (on GitHub), R 4.0.0
 * Ubuntu 16.04 (on GitHub), R 4.0.0
@@ -53,7 +70,7 @@ Opening the web browser:
 
 Please only use actel if you agree with this.
 
-To get aquainted with how actel works, read the package vignettes.
+To get acquainted with how actel works, read the package vignettes.
 You can find them by running browseVignettes('actel')
 ```
 

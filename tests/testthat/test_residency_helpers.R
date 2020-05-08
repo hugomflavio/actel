@@ -1,3 +1,5 @@
+skip_on_cran()
+
 exampleWorkspace()
 setwd("exampleWorkspace")
 write.csv(example.distances, "distances.csv")

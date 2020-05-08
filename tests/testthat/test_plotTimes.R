@@ -1,3 +1,5 @@
+skip_on_cran()
+
 load("aux_plotTimes.RData")
 times <- timesToCircular(times)
 

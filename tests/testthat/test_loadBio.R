@@ -1,3 +1,5 @@
+skip_on_cran()
+
 test_that("loadBio stops if arguments or file are missing", {
 	# Missing arguments
 	expect_error(loadBio(), "'file' is missing.", fixed = TRUE)

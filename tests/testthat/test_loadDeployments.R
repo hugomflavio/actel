@@ -1,3 +1,5 @@
+skip_on_cran()
+
 test_that("loadDeployments stops if file is missing", {
 	expect_error(loadDeployments(file = "test"), 
 		"Could not find a 'test' file in the working directory.", fixed = TRUE)

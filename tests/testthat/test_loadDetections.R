@@ -1,3 +1,5 @@
+skip_on_cran()
+
 test_that("loadDetections fails with expected message if no detections are present.", {
 	expect_error(loadDetections(tz = "Europe/Copenhagen"),
 		"Could not find a 'detections' folder nor a 'detections.csv' file.", fixed = TRUE)

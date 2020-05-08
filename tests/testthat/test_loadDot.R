@@ -1,3 +1,5 @@
+skip_on_cran()
+
 test_that("loadDot stops if arguments or file are missing", {
 	expect_error(loadDot(), "No dot file or dot string were specified.", fixed = TRUE)
 })

@@ -4,6 +4,8 @@ write.csv(example.distances, "distances.csv")
 
 test_that("explore stops when any argument does not make sense", {
 
+	skip_on_cran()
+	
 	expect_error(explore(tz = 1), 
 		"'tz' could not be recognized as a timezone. Check available timezones with OlsonNames()", fixed = TRUE)
 	
@@ -139,7 +141,7 @@ test_that("explore stops when any argument does not make sense", {
 })
 
 test_that("explore results contains all the expected elements.", {
-	output <- suppressWarnings(explore(tz = 'Europe/Copenhagen', report = TRUE, GUI = "never"))
+	output <- suppressWarnings(explore(tz = 'Europe/Copenhagen', report = FALSE, GUI = "never"))
 	file.remove("detections/actel.detections.RData")
 	expect_equal(names(output), c('detections', 'valid.detections', 'spatial', 'deployments', 'arrays',
     'movements', 'valid.movements', 'times', 'rsp.info', 'dist.mat'))
@@ -150,12 +152,14 @@ test_that("explore results contains all the expected elements.", {
 })
 
 test_that("explore results are stored in target directory", {
+	skip_on_cran()
 	expect_true(file.exists("actel_explore_results.RData"))
 	expect_true(file.exists("actel_explore_report.html"))
 	expect_true(dir.exists("Report"))
 })
 
 test_that("explore temp files are removed at the end of the analysis", {
+	skip_on_cran()
 	expect_false(file.exists("temp_log.txt"))
 	expect_false(file.exists("temp_warnings.txt"))
 	expect_false(file.exists("temp_UD.txt"))
@@ -163,6 +167,7 @@ test_that("explore temp files are removed at the end of the analysis", {
 })
 
 test_that("explore is able to run speed and inactiveness checks.", {
+	skip_on_cran()
 	output <- suppressWarnings(explore(tz = 'Europe/Copenhagen', report = FALSE, GUI = "never", speed.error = 1000000, inactive.error = 1000000))
 	file.remove("detections/actel.detections.RData")
 	expect_false(any(is.na(match(names(output), c('detections', 'valid.detections', 'spatial', 'deployments', 'arrays',
@@ -175,6 +180,7 @@ test_that("explore is able to run speed and inactiveness checks.", {
 })
 
 test_that("checkPath moves the session to the right environment.", {
+	skip_on_cran()
 	setwd("..")
 	output <- suppressWarnings(explore(path = "exampleWorkspace", tz = 'Europe/Copenhagen', report = FALSE, GUI = "never"))
 	file.remove("exampleWorkspace/detections/actel.detections.RData")
@@ -186,6 +192,7 @@ test_that("checkPath moves the session to the right environment.", {
 })
 
 test_that("the debug option works as expected", {
+	skip_on_cran()
 	output <- suppressWarnings(explore(tz = 'Europe/Copenhagen', report = FALSE, GUI = "never", debug = TRUE))
 	file.remove("detections/actel.detections.RData")
 	expect_true(file.exists("explore_debug.RData"))
@@ -202,6 +209,7 @@ test_that("the debug option works as expected", {
 })
 
 test_that("explore can handle multi-sensor data", {
+	skip_on_cran()
 	xdet <- example.detections
 	xdet$Sensor.Value <- 1
 	xdet$Sensor.Unit <- "A"

@@ -1,3 +1,4 @@
+skip_on_cran()
 
 write.csv(example.spatial, "spatial.csv", row.names = FALSE)
 spatial <- loadSpatial()

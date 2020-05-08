@@ -1,3 +1,5 @@
+skip_on_cran()
+
 list.of.packages <- c("raster", "gdistance", "sp", "tools", "rgdal")
 new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[, "Package"])]
 
