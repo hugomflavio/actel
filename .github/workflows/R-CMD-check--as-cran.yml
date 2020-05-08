@@ -10,7 +10,7 @@ on:
       - master
       - dev
 
-name: R-CMD-check
+name: R-CMD-check--as-cran
 
 # Increment this version when we want to clear cache
 env:
