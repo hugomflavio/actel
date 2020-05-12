@@ -146,7 +146,7 @@ The process for this fish is then finished.
 
 Actel repeats the processes above for all fish, and compiles a table of successful, surely missed and potentially missed events. Then, we have what we need to calculate efficiency:
 
-`max_efficiency = 1 - (s / (r + s + p))`
+`max_efficiency = 1 - (s / (r + s))`
 
 `min_efficiency = 1 - ((s + p) / (r + s + p))`
 

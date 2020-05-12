@@ -115,7 +115,7 @@ x <- dualArrayCJS(m)
 advEfficiency(x)
 ```
 
-`advEfficiency` comes with some additional parameters that will help you get the results exactly as you need them. Find more by running `?advEfficiency`. The advEfficiency manual page also includes additional information on how the calculations are made, and how you could explain them in a paper, if you need to!
+`advEfficiency` comes with some additional parameters that will help you get the results exactly as you need them. Find more by running `?advEfficiency`. The advEfficiency manual page (accessible by running ?advEfficiency) also includes additional information on how the calculations are made, and how you could explain them in a paper, if you need to!
 
 ## Drawing personalized circular plots
 

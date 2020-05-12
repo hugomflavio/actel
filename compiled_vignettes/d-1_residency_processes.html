@@ -12,7 +12,7 @@
 
 <meta name="author" content="Hugo Flávio" />
 
-<meta name="date" content="2020-05-08" />
+<meta name="date" content="2020-05-12" />
 
 <title>4.1) Processes behind residency()</title>
 
@@ -215,7 +215,7 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 
 <h1 class="title toc-ignore">4.1) Processes behind residency()</h1>
 <h4 class="author">Hugo Flávio</h4>
-<h4 class="date">2020-05-08</h4>
+<h4 class="date">2020-05-12</h4>
 
 
 
@@ -259,7 +259,7 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 <p>The initial processes of residency() are the same as those from <a href="b-1_explore_processes.html">the explore() function</a>.</p>
 <p>Upon validating the movement events, the residency analysis proceeds to compressing these array-level events into section-level events. <a href="d-2_residency_results.html#section.movements">You can find an example here</a>. This shows how many times a fish entered and left each section. It is here that <a href="d-0_residency.html#section.minimum">the argument <code>section.minimum</code></a> comes in. If the number of consecutive detections at a given section are lower than the value stipulated, a warning will be issued, and user interaction is suggested:</p>
 <pre><code>M: Section movements with less than 2 detections are present for fish R64K-3.
-Would you like to inspect the section movements from fish R64K-3 ?(y/N/comment)</code></pre>
+Would you like to inspect the section movements from fish R64K-3?(y/N/comment)</code></pre>
 <p>You can then decide whether or not something should be considered invalid. Once all fish have been validated, if any section movement has been deemed invalid, the respective array movements will also be invalidated. Actel will let you know this happened by issuing a message:</p>
 <pre><code>M: Rendering 1 array movement(s) invalid for fish R64K-3 as the respective section movements were discarded by the user.</code></pre>
 </div>

@@ -12,7 +12,7 @@
 
 <meta name="author" content="Hugo Flávio" />
 
-<meta name="date" content="2020-05-08" />
+<meta name="date" content="2020-05-12" />
 
 <title>1.2) Creating a distances matrix</title>
 
@@ -301,7 +301,7 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 
 <h1 class="title toc-ignore">1.2) Creating a distances matrix</h1>
 <h4 class="author">Hugo Flávio</h4>
-<h4 class="date">2020-05-08</h4>
+<h4 class="date">2020-05-12</h4>
 
 
 
@@ -439,7 +439,7 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 <p>There are two ways to create a distance matrix for actel: manually, or automatically. While the manual way is more prone to errors and can be tedious, the automatic way can take some time and requires some GIS knowledge. It is up to you to decide which way to use:</p>
 <div id="the-manual-way" class="section level3">
 <h3>The manual way</h3>
-<p>The manual way is simple. In your R session, move to the folder where you have your spatial file, and run the command <code>emptyMatrix()</code>. This will read your spatial data and create a matrix that is in accordance with it. It is important that you create your template this way, as the column and row names of the distance matrix are essential for actel to recognise the data. Below is an example of a distances matrix created by <code>emptyMatrix()</code>.</p>
+<p>The manual way is simple. In your R session, move to the folder where you have your spatial file, and run the command <code>emptyMatrix</code>. This will read your spatial data and create a matrix that is in accordance with it. It is important that you create your template this way, as the column and row names of the distance matrix are essential for actel to recognise the data. Below is an example of a distances matrix created by <code>emptyMatrix</code>.</p>
 <table>
 <thead>
 <tr class="header">
@@ -526,8 +526,8 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 </tr>
 </tbody>
 </table>
-<p>The correspondence between the standard names (e.g. “St.1”, “St.2”) and your receivers can be found in your ‘spatial.csv’ file, under the column “Standard.Name”.</p>
-<p>Now, you can fill in the matrix directly by opening it with a spreadsheet editor. To simplify the task, you can fill in the upper diagonal-half of the matrix, save the file, and then run <code>completeMatrix()</code>.</p>
+<p>You can find the correspondence between the standard names (e.g. “St.1”, “St.2”) and your receivers by running <code>loadSpatial()</code> (see the ‘Standard.name’ column).</p>
+<p>Now, you can either fill in the matrix directly in R or save it and edit it a spreadsheet editor (make sure to save the row names too!). To simplify the task, you can fill in the upper diagonal-half of the matrix, reload into R if you used an external editor, and then run <code>completeMatrix</code> on the edited object.</p>
 <p>Here is how it works:</p>
 <ol style="list-style-type: decimal">
 <li>Fill in the top part of the matrix:</li>
@@ -619,8 +619,7 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 </tbody>
 </table>
 <ol style="list-style-type: decimal">
-<li><p>Save the file as ‘distances.csv’</p></li>
-<li><p>Run <code>completeMatrix()</code> in the same working directory and the matrix will be completed for you:</p></li>
+<li>Run <code>completeMatrix()</code> on the half-filled matrix:</li>
 </ol>
 <table>
 <thead>
@@ -708,6 +707,9 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 </tr>
 </tbody>
 </table>
+<ol style="list-style-type: decimal">
+<li>Save the complete matrix as ‘distances.csv’ in the folder that has the remaining actel data.</li>
+</ol>
 <dl>
 <dt>Note:</dt>
 <dd>The distance values <strong>must</strong> be in metres!
@@ -758,21 +760,37 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 </ul>
 <p>Increasing the <code>directions</code> improves the distance estimation fidelity, but also increases computation time.</p></li>
 </ol>
-<p>Transition layers can take a long time to compute. To avoid waiting a long time and finding out something went wrong, we recommend that you start with a larger pixel <code>size</code>. For example, if your shapefile has 20000 by 7000 metres, you can start with <code>size = 20</code> (i.e. 1000 by 350 pixels), and then move on to <code>size = 10</code> if you feel you could gain more detail from it.</p>
-<p>This function will save the generated transition layer to ‘transition.layer.RData’ in your working directory.</p>
+<p>Transition layers can take a long time to compute. To avoid waiting a long time and finding out something went wrong, we recommend that you start with a larger pixel <code>size</code>. For example, if your shapefile has 20000 by 7000 metres, you can start with <code>size = 20</code> (i.e. 1000 by 350 pixels), and then move on to <code>size = 10</code> if you feel you could gain more detail from it. Also, do not forget to allocate the output of the function to an R object!</p>
 <p>The hard part is done!</p>
 </div>
 <div id="creating-the-distances-matrix" class="section level4">
 <h4>Creating the distances matrix</h4>
 <p>Once you have your transition layer, you can use it to calculate multiple distances matrixes, as long as the target objects fall within the extent of the original shapefile. To create your distances matrix, you must run this function in the same working directory as your transition layer and your ‘spatial.csv’ file:</p>
-<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb2-1" title="1"><span class="kw">distancesMatrix</span>(coord.x, coord.y, EPSGcode)</a></code></pre></div>
-<p>Fill in the column names of the X and Y coordinates of your ‘spatial.csv’ file in <code>coord.x</code> and <code>coord.y</code>. Like before, the EPSGcode is the code of the coordinate system of the points (the same as the shapefile’s). When you run this command, a ‘distances.csv’ file will be created in your working directory.</p>
-<p>Actel will automatically recognise this file and activate speed calculations in your next analysis!</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb2-1" title="1"><span class="kw">distancesMatrix</span>(t.layer, coord.x, coord.y, EPSGcode)</a></code></pre></div>
+<p>The <code>t.layer</code> is the transition layer you just calculated. Fill in the column names of the X and Y coordinates of your ‘spatial.csv’ file in <code>coord.x</code> and <code>coord.y</code>. Like before, the <code>EPSGcode</code> is the code of the coordinate system of the points (the same as the shapefile’s). When you run this command, actel will ask you if you want to save the output to a ‘distances.csv’ file. Alternatively, you can check the output within R and then save the matrix yourself!</p>
+<p>Actel will automatically recognise the ‘distances.csv’ file and activate speed calculations in your next analysis!</p>
 <dl>
 <dt>Note:</dt>
 <dd>It is important that you check the results of this process by inspecting your distances matrix. If the distances do not look correct, you may have accidentally done something wrong in the steps above.
 </dd>
 </dl>
+<p>Here is a minimum example:</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb3-1" title="1"><span class="co"># Start by creating a transition layer:</span></a>
+<a class="sourceLine" id="cb3-2" title="2">x &lt;-<span class="st"> </span><span class="kw">transitionLayer</span>(<span class="dt">shape =</span> <span class="st">&quot;my_shapefile.shp&quot;</span>, <span class="dt">size =</span> <span class="dv">20</span>, <span class="dt">EPSGcode =</span> <span class="dv">32632</span>)</a>
+<a class="sourceLine" id="cb3-3" title="3"></a>
+<a class="sourceLine" id="cb3-4" title="4"><span class="co"># You can opt to save the transition layer for later use by running</span></a>
+<a class="sourceLine" id="cb3-5" title="5"><span class="co"># save(x, file = &quot;transition.layer.RData&quot;)</span></a>
+<a class="sourceLine" id="cb3-6" title="6"><span class="co"># You can then load it by running</span></a>
+<a class="sourceLine" id="cb3-7" title="7"><span class="co"># load(&quot;transition.layer.RData&quot;)</span></a>
+<a class="sourceLine" id="cb3-8" title="8"><span class="co"># This will restore the object &quot;x&quot; to your R session</span></a>
+<a class="sourceLine" id="cb3-9" title="9"></a>
+<a class="sourceLine" id="cb3-10" title="10">dist.mat &lt;-<span class="st"> </span><span class="kw">distancesMatrix</span>(<span class="dt">t.layer =</span> x, <span class="dt">coord.x =</span> <span class="st">&quot;x&quot;</span>, <span class="dt">coord.y =</span> <span class="st">&quot;y&quot;</span>, <span class="dt">EPSGcode =</span> <span class="dv">32632</span>)</a>
+<a class="sourceLine" id="cb3-11" title="11"><span class="co"># Reply &quot;y&quot; when prompted to save the distances matrix directly to a &#39;distances.csv&#39; file</span></a>
+<a class="sourceLine" id="cb3-12" title="12"><span class="co"># or, alternatively, inspect the output and save it manually.</span></a>
+<a class="sourceLine" id="cb3-13" title="13"></a>
+<a class="sourceLine" id="cb3-14" title="14">dist.mat</a>
+<a class="sourceLine" id="cb3-15" title="15"></a>
+<a class="sourceLine" id="cb3-16" title="16"><span class="kw">write.csv</span>(dist.mat, <span class="st">&quot;distances.csv&quot;</span>, <span class="dt">row.names =</span> <span class="ot">TRUE</span>)</a></code></pre></div>
 <p><strong><a href="javascript:history.back()">Return to previous page</a></strong></p>
 <p><a href="#">Back to top.</a></p>
 </div>

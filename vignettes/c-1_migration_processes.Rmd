@@ -45,7 +45,7 @@ Note:
 The initial processes of migration() are the same as those from [the explore() function](b-1_explore_processes.html). However, when it comes to movement validity, actel will now also check if the fish was detected at an array that is not directly or indirectly below its release site. Should this happen, the following warning will be issued:
 
 ````
-W: Fish R64K-1234 was detected in an array that is not after its release site! Opening relevant data for inspection.
+Warning: Fish R64K-1234 was detected in an array that is not after its release site! Opening relevant data for inspection.
    Release site: Trap
    Expected first array: River3
 
@@ -83,7 +83,7 @@ In this example, the fish starts by moving towards the Fjord, as expected, but t
 These backwards movements imply going to an anterior section, which has an impact in the definition of entry and exit times. As such, a warning will be issued:
 
 ````
-W: Inter-section backwards movements were detected for Fish R64K-4456.
+Warning: Inter-section backwards movements were detected for Fish R64K-4456.
 ````
 
 #### B) Both Movement events and last events are unordered
@@ -93,7 +93,7 @@ In this example, contrary to the above, the fish moves back into the river and t
 This has both an impact on the assignment of section entry and exit times and also on the assignment of the fish's fate. As such, a warning will be issued:
 
 ````
-W: Inter-section backwards movements were detected for Fish R64K-4526 and the last events are not ordered!
+Warning: Inter-section backwards movements were detected for Fish R64K-4526 and the last events are not ordered!
 ````
 
 #### Making movements linear
@@ -103,18 +103,14 @@ W: Inter-section backwards movements were detected for Fish R64K-4526 and the la
 If a fish has moved back and forth between sections, actel will open the section movements and provide you with a suggestion to linearise the movements:
 
 ````
-M: Opening section movements for fish [...] for inspection:
+Warning: Inter-section backwards movements were detected for fish R64K-4508.
+To linearise the movements, actel suggests invalidating the following events: ...
+Opening movements list for inspection:
 
 [...]
 
-M: migration() expects the movements to be linear, from release to success arrays.
-   To linearise the movements, actel suggests invalidating the following events: [...]
-
-Would you like to:
-a) Accept the suggestion
-b) Manually choose other events to be invalidated
-
-Decision:(a/b/comment) 
+Note: You can select event ranges by separating them with a ':' and/or multiple events at once by separating them with a space or a comma.
+Events to be rendered invalid: 
 ````
 
 By default, actel will suggest removing all the backwards movement events. This is graphically shown in the two panels above, where the dashed movement events would not be considered. However, for any number of reasons, you may find that that is not the best solution, and as such you can manually decide which events to invalidate. There is no universal answer to this, you must analyse your scenario and decide the best course of action.
@@ -123,7 +119,7 @@ By default, actel will suggest removing all the backwards movement events. This 
 Once all fish have been validated, if any section movement has been deemed invalid, the respective array movements will also be invalidated. Actel will let you know this happened by issuing a message:
 
 ````
-M: Rendering 1 array movement(s) invalid for fish R64K-3 as the respective section movements were discarded by the user.
+M: Rendering 1 array movement(s) invalid for fish R64K-4508 as the respective section movements were discarded by the user.
 ````
 
 <span style="color:red">Note:</span>

@@ -61,7 +61,7 @@ There are two ways to create a distance matrix for actel: manually, or automatic
 
 ### The manual way
 
-The manual way is simple. In your R session, move to the folder where you have your spatial file, and run the command `emptyMatrix()`. This will read your spatial data and create a matrix that is in accordance with it. It is important that you create your template this way, as the column and row names of the distance matrix are essential for actel to recognise the data. Below is an example of a distances matrix created by `emptyMatrix()`.
+The manual way is simple. In your R session, move to the folder where you have your spatial file, and run the command `emptyMatrix`. This will read your spatial data and create a matrix that is in accordance with it. It is important that you create your template this way, as the column and row names of the distance matrix are essential for actel to recognise the data. Below is an example of a distances matrix created by `emptyMatrix`.
 
 |        | St.1| St.2| St.3| St.4| St.5| St.6| Release|
 |:-------|----:|----:|----:|----:|----:|----:|-------:|
@@ -73,9 +73,9 @@ The manual way is simple. In your R session, move to the folder where you have y
 |St.6    |     |     |     |     |     |    0|        |
 |Release |     |     |     |     |     |     |       0|
 
-The correspondence between the standard names (e.g. "St.1", "St.2") and your receivers can be found in your 'spatial.csv' file, under the column "Standard.Name".
+You can find the correspondence between the standard names (e.g. "St.1", "St.2") and your receivers by running `loadSpatial()` (see the 'Standard.name' column).
 
-Now, you can fill in the matrix directly by opening it with a spreadsheet editor. To simplify the task, you can fill in the upper diagonal-half of the matrix, save the file, and then run `completeMatrix()`.
+Now, you can either fill in the matrix directly in R or save it and edit it a spreadsheet editor (make sure to save the row names too!). To simplify the task, you can fill in the upper diagonal-half of the matrix, reload into R if you used an external editor, and then run `completeMatrix` on the edited object.
 
 Here is how it works:
 
@@ -91,10 +91,7 @@ Here is how it works:
 |St.6    |     |     |     |     |      |    0|   11476|
 |Release |     |     |     |     |      |     |       0|
 
-
-1. Save the file as 'distances.csv'
-
-1. Run `completeMatrix()` in the same working directory and the matrix will be completed for you:
+1. Run `completeMatrix()` on the half-filled matrix:
 
 |        | St.1| St.2| St.3| St.4|  St.5|  St.6| Release|
 |:-------|----:|----:|----:|----:|-----:|-----:|-------:|
@@ -105,6 +102,8 @@ Here is how it works:
 |St.5    | 8864| 7498| 5480| 1963|     0|   409|   11068|
 |St.6    | 9273| 7906| 5889| 2372|   409|     0|   11476|
 |Release | 2230| 3570| 5621| 9116| 11068| 11476|       0|
+
+1. Save the complete matrix as 'distances.csv' in the folder that has the remaining actel data.
 
 Note:
   : The distance values **must** be in metres!
@@ -162,9 +161,7 @@ transitionLayer(shape, size, EPSGcode, coord.x, coord.y, buffer, directions)
 
     Increasing the `directions` improves the distance estimation fidelity, but also increases computation time.
 
-Transition layers can take a long time to compute. To avoid waiting a long time and finding out something went wrong, we recommend that you start with a larger pixel `size`. For example, if your shapefile has 20000 by 7000 metres, you can start with `size = 20` (i.e. 1000 by 350 pixels), and then move on to `size = 10` if you feel you could gain more detail from it.
-
-This function will save the generated transition layer to 'transition.layer.RData' in your working directory. 
+Transition layers can take a long time to compute. To avoid waiting a long time and finding out something went wrong, we recommend that you start with a larger pixel `size`. For example, if your shapefile has 20000 by 7000 metres, you can start with `size = 20` (i.e. 1000 by 350 pixels), and then move on to `size = 10` if you feel you could gain more detail from it. Also, do not forget to allocate the output of the function to an R object!
 
 The hard part is done!
 
@@ -173,15 +170,37 @@ The hard part is done!
 Once you have your transition layer, you can use it to calculate multiple distances matrixes, as long as the target objects fall within the extent of the original shapefile. To create your distances matrix, you must run this function in the same working directory as your transition layer and your 'spatial.csv' file:
 
 ```r
-distancesMatrix(coord.x, coord.y, EPSGcode)
+distancesMatrix(t.layer, coord.x, coord.y, EPSGcode)
 ```
 
-Fill in the column names of the X and Y coordinates of your 'spatial.csv' file in `coord.x` and `coord.y`. Like before, the EPSGcode is the code of the coordinate system of the points (the same as the shapefile's). When you run this command, a 'distances.csv' file will be created in your working directory. 
+The `t.layer` is the transition layer you just calculated. Fill in the column names of the X and Y coordinates of your 'spatial.csv' file in `coord.x` and `coord.y`. Like before, the `EPSGcode` is the code of the coordinate system of the points (the same as the shapefile's). When you run this command, actel will ask you if you want to save the output to a 'distances.csv' file. Alternatively, you can check the output within R and then save the matrix yourself!
 
-Actel will automatically recognise this file and activate speed calculations in your next analysis!
+Actel will automatically recognise the 'distances.csv' file and activate speed calculations in your next analysis!
 
 Note:
   : It is important that you check the results of this process by inspecting your distances matrix. If the distances do not look correct, you may have accidentally done something wrong in the steps above.
+
+
+Here is a minimum example:
+
+```r
+# Start by creating a transition layer:
+x <- transitionLayer(shape = "my_shapefile.shp", size = 20, EPSGcode = 32632)
+
+# You can opt to save the transition layer for later use by running
+# save(x, file = "transition.layer.RData")
+# You can then load it by running
+# load("transition.layer.RData")
+# This will restore the object "x" to your R session
+
+dist.mat <- distancesMatrix(t.layer = x, coord.x = "x", coord.y = "y", EPSGcode = 32632)
+# Reply "y" when prompted to save the distances matrix directly to a 'distances.csv' file
+# or, alternatively, inspect the output and save it manually.
+
+dist.mat
+
+write.csv(dist.mat, "distances.csv", row.names = TRUE)
+```
 
 **<a href="javascript:history.back()">Return to previous page</a>**
 

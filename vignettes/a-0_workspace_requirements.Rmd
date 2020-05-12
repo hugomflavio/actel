@@ -142,7 +142,7 @@ Type
   1. If the spatial table contains release site information, but the biometrics table does not, release site information will be discarded and the following warning is issued:
     
 ```
-W: At least one release site has been indicated in the spatial file, but no release sites were specified in the biometrics file.
+Warning: At least one release site has been indicated in the spatial file, but no release sites were specified in the biometrics file.
    Discarding release site information to avoid script failure. Please doublecheck your data.
 ```
 
@@ -178,7 +178,7 @@ Start and Stop
 Including your detections is the easiest part. Copy the *.csv* files offloaded from your receivers to the *detections* folder that was created by the *createWorkspace()* function and actel will know they are to be imported. Right now actel can upload files generated from VEMCO and THELMA manufactured receivers. If you have an receiver from a different manufacturer, or if you are using one of the supported manufacturers and get the warning displayed below, please to contact me so we can solve the issue.
 
 ```
-W: File 'filename' does not match to any of the supported hydrophone file formats! If your file corresponds to a hydrophone log and actel did not recognize it, please get in contact through www.github.com/hugomflavio/actel/issues/new
+Warning: File 'filename' does not match to any of the supported hydrophone file formats! If your file corresponds to a hydrophone log and actel did not recognize it, please get in contact through www.github.com/hugomflavio/actel/issues/new
 ```
 
 Note:

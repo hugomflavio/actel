@@ -104,19 +104,33 @@ If a valid [distance matrix](a-2_distances_matrix.html) was supplied for the ana
 
 On top of the results stored in your R session, actel saves some additional information in your working directory:
 
-### actel_explore_results.RData
+### If you said "y" during the relevant analysis questions:
 
-To make sure that you don't accidentally lose your results, actel stores them right away in the target folder. The results present in this file are the same as the ones you obtain directly in your R console (see above).
+#### actel_explore_results.RData
 
-### actel.log.txt
+``
+Would you like to save a copy of the results to actel_explore_results.RData?(y/N) 
+``
+
+To make sure that you don't accidentally lose your results, you can save them right away in the current directory. The results present in this file are the same as the ones you obtain directly in your R console (see above).
+
+#### actel.log.txt (if report = FALSE)
+
+```
+Would you like to save a copy of the analysis log to [timestamp].actel.log.txt?(y/N)
+```
 
 This log acts as a carbon copy of the analysis. It contains everything: summary information, errors, warnings and messages and the options you have taken while the analysis was running. It is worth keeping it in case you need to find out the reasoning behind some result. To avoid overwriting when conducting multiple analysis, the actel.log.txt file is preceded by the timestamp of when it was created (e.g. '2019-05-14.10.51.40.actel.log.txt').
 
-If something goes wrong during the analysis, the report will be saved with the suffix "STOP".
+If you are running the analysis with report = TRUE, the log is automatically saved as part of the report.
 
-### stray_tags.csv
+#### stray_tags.csv
 
-Deployed receivers may pick up stray tags that came in range during the study period. Actel stores a brief summary of these tags in the stray_tags.csv file, in case you are interested in knowing more about these tags, or perhaps share the codes with your colleagues.
+```
+Stray tags were detected in your study area. Would you like to save a summary to stray_tags.csv?(y/N) 
+```
+
+Deployed receivers may pick up stray tags that came in range during the study period. This file contains a brief summary of these tags in the stray_tags.csv file, in case you are interested in knowing more about these tags, or perhaps share the codes with your colleagues.
 
 ### actel_explore_report.html (if report = TRUE)
 
@@ -163,10 +177,6 @@ This is the main non-R output. If you activated the `report` option, actel will 
 9. **Actel log**
 
   This section contains the same information as the actel log saved in your target folder. It is useful to have a look at a few things. For example, the number of target tags, the detection data range or the number of ALS (i.e. receivers) can help you spot any missing data (i.e. if you tagged 100 fish and had only 80 target tags, some tags are missing from your input files!).
-
-### 'Report' folder (if report = TRUE)
-
-Activating the `report` option will trigger the creation of this folder. This folder contains all the pieces used to build the actel report described above. This allows you to have a look at the raw graphics used in the report.
 
 
 ## What if actel has miss-assigned something?

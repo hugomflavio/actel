@@ -12,7 +12,7 @@
 
 <meta name="author" content="Hugo Flávio" />
 
-<meta name="date" content="2020-05-08" />
+<meta name="date" content="2020-05-12" />
 
 <title>1) Preparing your data</title>
 
@@ -215,7 +215,7 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 
 <h1 class="title toc-ignore">1) Preparing your data</h1>
 <h4 class="author">Hugo Flávio</h4>
-<h4 class="date">2020-05-08</h4>
+<h4 class="date">2020-05-12</h4>
 
 
 
@@ -450,7 +450,7 @@ M: No &#39;Group&#39; column found in the biometrics file. Assigning all fish to
 <li><p>The release sites must have <strong>exactly</strong> the same names in the biometrics table and in the spatial table. If there is a mismatch, actel will stop so you may correct this.</p></li>
 <li><p>If the spatial table contains release site information, but the biometrics table does not, release site information will be discarded and the following warning is issued:</p></li>
 </ol>
-<pre><code>W: At least one release site has been indicated in the spatial file, but no release sites were specified in the biometrics file.
+<pre><code>Warning: At least one release site has been indicated in the spatial file, but no release sites were specified in the biometrics file.
    Discarding release site information to avoid script failure. Please doublecheck your data.</code></pre>
 <p><strong><a href="a-1_study_area.html">Click here to learn more about how to fit your study area into a spatial.csv file.</a></strong></p>
 </div>
@@ -503,7 +503,7 @@ M: No &#39;Group&#39; column found in the biometrics file. Assigning all fish to
 <div id="detections" class="section level2">
 <h2>Detections</h2>
 <p>Including your detections is the easiest part. Copy the <em>.csv</em> files offloaded from your receivers to the <em>detections</em> folder that was created by the <em>createWorkspace()</em> function and actel will know they are to be imported. Right now actel can upload files generated from VEMCO and THELMA manufactured receivers. If you have an receiver from a different manufacturer, or if you are using one of the supported manufacturers and get the warning displayed below, please to contact me so we can solve the issue.</p>
-<pre><code>W: File &#39;filename&#39; does not match to any of the supported hydrophone file formats! If your file corresponds to a hydrophone log and actel did not recognize it, please get in contact through www.github.com/hugomflavio/actel/issues/new</code></pre>
+<pre><code>Warning: File &#39;filename&#39; does not match to any of the supported hydrophone file formats! If your file corresponds to a hydrophone log and actel did not recognize it, please get in contact through www.github.com/hugomflavio/actel/issues/new</code></pre>
 <dl>
 <dt>Note:</dt>
 <dd><strong>The detection timestamps must be in UTC</strong>. This is the default time zone used by the receivers, so as long as you did not edit the raw files, all should be ready to go.

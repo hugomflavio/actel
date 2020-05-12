@@ -12,7 +12,7 @@
 
 <meta name="author" content="Hugo Flávio" />
 
-<meta name="date" content="2020-05-08" />
+<meta name="date" content="2020-05-12" />
 
 <title>3.2) Inspecting the migration() results</title>
 
@@ -215,7 +215,7 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 
 <h1 class="title toc-ignore">3.2) Inspecting the migration() results</h1>
 <h4 class="author">Hugo Flávio</h4>
-<h4 class="date">2020-05-08</h4>
+<h4 class="date">2020-05-12</h4>
 
 
 
@@ -383,12 +383,15 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 <div id="results-in-your-working-directory" class="section level2">
 <h2>Results in your working directory</h2>
 <p>The migration function saves <a href="b-2_explore_results.html#results-in-your-working-directory">outputs similar to those saved by explore</a>. The main differences are in the two elements listed below.</p>
-<div id="actel_migration_results.rdata" class="section level3">
-<h3>actel_migration_results.RData</h3>
-<p>To make sure that you don’t accidentally loose your results, actel stores them right away in the target folder. The results present in this file are the same as the ones you obtain directly in your R console (see above). It differs from the explore() output both in name and content.</p>
+<div id="if-you-said-y-during-the-relevant-analysis-questions" class="section level3">
+<h3>If you said “y” during the relevant analysis questions:</h3>
+<div id="actel_migration_results.rdata" class="section level4">
+<h4>actel_migration_results.RData</h4>
+<p><code>Would you like to save a copy of the results to actel_migration_results.RData?(y/N)</code></p>
+<p>To make sure that you don’t accidentally lose your results, you can save them right away in the current directory. The results present in this file are the same as the ones you obtain directly in your R console (see above). It differs from the explore() output both in name and content.</p>
 </div>
-<div id="actel_migration_report.html-if-report-true" class="section level3">
-<h3>actel_migration_report.html (if report = TRUE)</h3>
+<div id="actel_migration_report.html-if-report-true" class="section level4">
+<h4>actel_migration_report.html (if report = TRUE)</h4>
 <p>This is the main non-R output. If you activated the <code>report</code> option, actel will compile an html report for you. The migration report contains the same sections as the explore report, plus the following:</p>
 <ol style="list-style-type: decimal">
 <li><strong>Array forward efficiency</strong></li>
@@ -412,6 +415,7 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 </ol>
 <p>These graphics contain more information than those created by the explore function: the vertical grey dashed lines show the assigned moments of entry and exit for each study area section, and the assigned fate of the fish is shown in the header.</p>
 <p>It is a good idea to have a good look at all of these graphics and verify that everything is looking correct (i.e. actel has assigned fates and entry/exit points correctly). This is also a good chance to have a closer look at the tags you flagged as suspicious during the analysis.</p>
+</div>
 </div>
 </div>
 <div id="what-if-actel-has-miss-assigned-something" class="section level2">

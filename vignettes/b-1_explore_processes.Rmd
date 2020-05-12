@@ -39,7 +39,7 @@ knitr::opts_chunk$set(
 
 ## Making sure everything checks out
 
-The first thing actel does is import your data. This also includes all of your detection files, which can take a bit of time. Then, actel performs many verifications to make sure everything is all right. As the list of checks is long, I won't explore each one of them in detail here. Should something be out of the ordinary, actel will let you know with a warning or an error message, depending on the severity of the issue. You can find more about the possible exceptions in this [list of errors and messages](g-0_messages.html).
+The first thing actel does is import your data. This also includes all of your detection files, which can take a bit of time. Then, actel performs many verifications to make sure everything is all right. As the list of checks is long, I will not explore each one of them in detail here. Should something be out of the ordinary, actel will let you know with a warning or an error message, depending on the severity of the issue. You can find more help with the possible exceptions in this [list of errors and messages](g-0_messages.html).
 
 ## Organising the detections
 
@@ -56,7 +56,7 @@ Actel uses the tag's signal to find your fish. However, if two tags with the sam
 Once the detections are sorted and validated, actel is ready to start compiling movement events.
 
 Note:
-  : If your detections contain data from stray tags (i.e. tags that do not belong to your study), a summary of this will be stored in a "stray_tags.csv" file.
+  : If your detections contain data from stray tags (i.e. tags that do not belong to your study), actel will ask you if you would like to save a summary of this to a "stray_tags.csv" file.
 
 ## From detections to movements
 
@@ -90,19 +90,15 @@ On the other hand, in example 2, the way from C to A is also blocked by a weir. 
 This is the respective warning:
 
 ```
-W: Fish R64K-1234 made an impassable jump: It is not possible to go from array C to A.
+Warning: Fish R64K-1234 made an impassable jump: It is not possible to go from array C to A.
+         Please resolve this either by invalidating events or by adjusting your 'spatial.txt' file and restarting.
 
 Opening valid movement table for inspection:
 
 [...]
 
-You may either:
-
-a) Render movement events invalid to resolve the impassable exception.
-b) Stop the analysis and modify the spatial.txt file.
-
-Decision:(a/b/comment) 
-
+Note: You can select event ranges by separating them with a ':' and/or multiple events at once by separating them with a space or a comma.
+Events to be rendered invalid: 
 ```
 
 As the warning says, you then have two options: Invalidate events until the impassable exception is resolved, or re-structure your spatial.txt file.
@@ -123,13 +119,13 @@ Assuming `jump.warning = 2` and `jump.error = 3`, examples **1** and **2** would
 However, in example **3**, the jump size is equal to `jump.warning`, but lower than `jump.error`. When this happens, actel will display a warning:
 
 ````
-W: Fish R64K-1234 jumped through 2 arrays in events 1 -> 2 (A -> D).
+Warning: Fish R64K-1234 jumped through 2 arrays in events 1 -> 2 (A -> D).
 ````
 
 Then, actel would continue the analysis. This warning is issued whenever the jump size equals or is greater than `jump.warning`. Lastly, in example **4**, the jump size is equal to the `jump.error`. When this happens, actel issues a warning like the one above, and on top of that allows the user to intervene:
 
 ````
-W: Fish R64K-1234 jumped through 3 arrays in events 1 -> 2 (A -> E).
+Warning: Fish R64K-1234 jumped through 3 arrays in events 1 -> 2 (A -> E).
 M: Opening movement table of fish R64K-2791 for inspection:
 [...]
 Would you like to render any movement event invalid?(y/N/comment)
@@ -145,13 +141,13 @@ If you include a [distance matrix](a-0_workspace_requirements.html#optional-dist
 If the average speed is higher than `speed.warning`, a warning is triggered:
 
 ````
-W: Fish R64K-1234 had an average speed of 1.3 m/s from valid event 3 to 4 (Array1 -> Array2).
+Warning: Fish R64K-1234 had an average speed of 1.3 m/s from valid event 3 to 4 (Array1 -> Array2).
 ````
 
 If, on top of this, any of the average speeds is higher than `speed.error`, user interaction is suggested:
 
 ````
-W: Fish R64K-1234 had an average speed of 1.3 m/s from valid event 5 to 6 (Array4 -> Array5).
+Warning: Fish R64K-1234 had an average speed of 1.3 m/s from valid event 5 to 6 (Array4 -> Array5).
 M: Opening valid movements table of fish R64K-1234 for inspection:
 
 [...]
@@ -183,7 +179,7 @@ In this case, the last three events are valid candidates for inactiveness. Actel
 Actel will gather all the stations where these last detections occurred and check if they are less than 1500 metres a part. If this is true, then there is a valid case for inactivity, and a warning will be issued:
 
 ````
-W: Fish R64K-1234 was detected 7 times at stations less than 1.5 km apart in array 'C' (St.5, St.6), over 3.07 days and then disappeared. Could it be inactive?
+Warning: Fish R64K-1234 was detected 7 times at stations less than 1.5 km apart in array 'C' (St.5, St.6), over 3.07 days and then disappeared. Could it be inactive?
 ````
 
 #### If a distances matrix is NOT present
@@ -191,7 +187,7 @@ W: Fish R64K-1234 was detected 7 times at stations less than 1.5 km apart in arr
 Actel will count the number of individual stations in which the fish was detected. If there are three or less individual stations, there is a valid case for inactivity, and a similar warning will be issued:
 
 ````
-W: Fish R64K-1234 was detected 7 times at three or less stations of array 'C' (St.5, St.6) over 3.07 days and then disappeared. Could it be inactive?
+Warning: Fish R64K-1234 was detected 7 times at three or less stations of array 'C' (St.5, St.6) over 3.07 days and then disappeared. Could it be inactive?
 ````
 
 Since `inactive.error` was also set to three, this situation would trigger the possibility for user interaction:

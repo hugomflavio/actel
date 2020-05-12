@@ -12,7 +12,7 @@
 
 <meta name="author" content="Hugo Flávio" />
 
-<meta name="date" content="2020-05-08" />
+<meta name="date" content="2020-05-12" />
 
 <title>2.2) Inspecting the explore() results</title>
 
@@ -215,7 +215,7 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 
 <h1 class="title toc-ignore">2.2) Inspecting the explore() results</h1>
 <h4 class="author">Hugo Flávio</h4>
-<h4 class="date">2020-05-08</h4>
+<h4 class="date">2020-05-12</h4>
 
 
 
@@ -450,18 +450,24 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 <div id="results-in-your-working-directory" class="section level2">
 <h2>Results in your working directory</h2>
 <p>On top of the results stored in your R session, actel saves some additional information in your working directory:</p>
-<div id="actel_explore_results.rdata" class="section level3">
-<h3>actel_explore_results.RData</h3>
-<p>To make sure that you don’t accidentally lose your results, actel stores them right away in the target folder. The results present in this file are the same as the ones you obtain directly in your R console (see above).</p>
+<div id="if-you-said-y-during-the-relevant-analysis-questions" class="section level3">
+<h3>If you said “y” during the relevant analysis questions:</h3>
+<div id="actel_explore_results.rdata" class="section level4">
+<h4>actel_explore_results.RData</h4>
+<p><code>Would you like to save a copy of the results to actel_explore_results.RData?(y/N)</code></p>
+<p>To make sure that you don’t accidentally lose your results, you can save them right away in the current directory. The results present in this file are the same as the ones you obtain directly in your R console (see above).</p>
 </div>
-<div id="actel.log.txt" class="section level3">
-<h3>actel.log.txt</h3>
+<div id="actel.log.txt-if-report-false" class="section level4">
+<h4>actel.log.txt (if report = FALSE)</h4>
+<pre><code>Would you like to save a copy of the analysis log to [timestamp].actel.log.txt?(y/N)</code></pre>
 <p>This log acts as a carbon copy of the analysis. It contains everything: summary information, errors, warnings and messages and the options you have taken while the analysis was running. It is worth keeping it in case you need to find out the reasoning behind some result. To avoid overwriting when conducting multiple analysis, the actel.log.txt file is preceded by the timestamp of when it was created (e.g. ‘2019-05-14.10.51.40.actel.log.txt’).</p>
-<p>If something goes wrong during the analysis, the report will be saved with the suffix “STOP”.</p>
+<p>If you are running the analysis with report = TRUE, the log is automatically saved as part of the report.</p>
 </div>
-<div id="stray_tags.csv" class="section level3">
-<h3>stray_tags.csv</h3>
-<p>Deployed receivers may pick up stray tags that came in range during the study period. Actel stores a brief summary of these tags in the stray_tags.csv file, in case you are interested in knowing more about these tags, or perhaps share the codes with your colleagues.</p>
+<div id="stray_tags.csv" class="section level4">
+<h4>stray_tags.csv</h4>
+<pre><code>Stray tags were detected in your study area. Would you like to save a summary to stray_tags.csv?(y/N) </code></pre>
+<p>Deployed receivers may pick up stray tags that came in range during the study period. This file contains a brief summary of these tags in the stray_tags.csv file, in case you are interested in knowing more about these tags, or perhaps share the codes with your colleagues.</p>
+</div>
 </div>
 <div id="actel_explore_report.html-if-report-true" class="section level3">
 <h3>actel_explore_report.html (if report = TRUE)</h3>
@@ -505,10 +511,6 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 <li><strong>Actel log</strong></li>
 </ol>
 <p>This section contains the same information as the actel log saved in your target folder. It is useful to have a look at a few things. For example, the number of target tags, the detection data range or the number of ALS (i.e. receivers) can help you spot any missing data (i.e. if you tagged 100 fish and had only 80 target tags, some tags are missing from your input files!).</p>
-</div>
-<div id="report-folder-if-report-true" class="section level3">
-<h3>‘Report’ folder (if report = TRUE)</h3>
-<p>Activating the <code>report</code> option will trigger the creation of this folder. This folder contains all the pieces used to build the actel report described above. This allows you to have a look at the raw graphics used in the report.</p>
 </div>
 </div>
 <div id="what-if-actel-has-miss-assigned-something" class="section level2">

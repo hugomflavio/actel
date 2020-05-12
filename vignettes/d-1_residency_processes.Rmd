@@ -48,7 +48,7 @@ Upon validating the movement events, the residency analysis proceeds to compress
 
 ````
 M: Section movements with less than 2 detections are present for fish R64K-3.
-Would you like to inspect the section movements from fish R64K-3 ?(y/N/comment)
+Would you like to inspect the section movements from fish R64K-3?(y/N/comment)
 ````
 
 You can then decide whether or not something should be considered invalid. Once all fish have been validated, if any section movement has been deemed invalid, the respective array movements will also be invalidated. Actel will let you know this happened by issuing a message:
