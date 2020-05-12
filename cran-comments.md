@@ -19,6 +19,10 @@ explicit user request (i.e. if the user sets 'report' to TRUE).
 
 * The function appendTo() now writes to R's temporary folder.
 
+* The user is now asked for confirmation before the results
+are saved as an .RData file and the analysis log is saved as a
+.txt file.
+
 
 * Removed markup from the package description
 

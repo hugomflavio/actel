@@ -457,20 +457,28 @@ residency <- function(tz, sections, max.interval = 60, minimum.detections = 2,
         continue <- FALSE
       }
     }
-    appendTo("Screen", paste0("M: An actel residency results file is already present in the current directory.\n   Saving new results as '", resultsname,"'."))
     rm(continue, index)
-  } else {
-    appendTo(c("Screen", "Report"), paste0("M: Saving results to '", resultsname, "'."))
-  }
+  } 
 
-  if (invalid.dist)
-    save(detections, valid.detections, spatial, deployments, arrays, movements, valid.movements, 
-      section.movements, status.df, last.seen, array.times, section.times, intra.array.matrices,
-      residency.list, daily.ratios, daily.positions, global.ratios, efficiency, intra.array.CJS, rsp.info, file = resultsname)
-  else
-    save(detections, valid.detections, spatial, deployments, arrays, movements, valid.movements, 
-      section.movements, status.df, last.seen, array.times, section.times, intra.array.matrices,
-      residency.list, daily.ratios, daily.positions, global.ratios, efficiency, intra.array.CJS, rsp.info, dist.mat, file = resultsname)
+
+  decision <- readline(paste0("Would you like to save a copy of the results to ", resultsname, "?(y/N) "))
+  appendTo("UD", decision)
+
+  if (decision == "y" | decision == "Y") {
+    appendTo(c("Screen", "Report"), paste0("M: Saving results as '", resultsname, "'."))
+    if (invalid.dist)
+      save(detections, valid.detections, spatial, deployments, arrays, movements, valid.movements, 
+        section.movements, status.df, last.seen, array.times, section.times, intra.array.matrices,
+        residency.list, daily.ratios, daily.positions, global.ratios, efficiency, intra.array.CJS, rsp.info, file = resultsname)
+    else
+      save(detections, valid.detections, spatial, deployments, arrays, movements, valid.movements, 
+        section.movements, status.df, last.seen, array.times, section.times, intra.array.matrices,
+        residency.list, daily.ratios, daily.positions, global.ratios, efficiency, intra.array.CJS, rsp.info, dist.mat, file = resultsname)
+  } else {
+    appendTo(c("Screen", "Report"), paste0("M: Skipping saving of the results."))
+  }
+  rm(decision)
+
 # ------------
 
 # Print graphics
@@ -547,11 +555,18 @@ residency <- function(tz, sections, max.interval = 60, minimum.detections = 2,
 # ------------------
 
   jobname <- paste0(gsub(" |:", ".", as.character(Sys.time())), ".actel.log.txt")
-  appendTo("Screen", paste0("M: Saving job log as '",jobname, "'."))
-  file.rename("temp_log.txt", jobname)
-  
-  if (!debug)
-    deleteHelpers()
+
+  if (!report) {
+    decision <- readline(paste0("Would you like to save a copy of the analysis log to ", jobname, "?(y/N) "))
+    appendTo("UD", decision)
+
+    if (decision == "y" | decision == "Y") {
+      appendTo("Screen", paste0("M: Saving job log as '",jobname, "'."))
+      file.copy(paste(tempdir(), "temp_log.txt", sep = "/"), jobname)
+    }
+  }
+
+  appendTo("Screen", "M: Process finished successfully.")
 
   if (invalid.dist)
     return(list(detections = detections, valid.detections = valid.detections, spatial = spatial, deployments = deployments, arrays = arrays,
