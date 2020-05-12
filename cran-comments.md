@@ -17,6 +17,8 @@ residency() to remove the need to rely on work directory changes.
 migration() and residency() only write to the file system by
 explicit user request (i.e. if the user sets 'report' to TRUE).
 
+* The function appendTo() now writes to R's temporary folder.
+
 
 * Removed markup from the package description
 

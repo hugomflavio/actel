@@ -295,7 +295,7 @@ roundDown <- function(input, to = 10) {
 
 #' Append to ...
 #'
-#' Appends a note/comment to the specified recipient, which in turn corresponds to a helper file (later on deleted by deleteHelpers).
+#' Appends a note/comment to the specified recipient, which in turn corresponds to a temporary helper file.
 #' 
 #' @param recipient 'Screen' displays the message on screen, 'Report' appends the message to 'temp_log.txt', 'Warning' appends the message to 'temp_warnings.txt', 'UD' appends the message to 'temp_UD.txt', 'Comment' appends the message to 'temp_comments.txt'. The same message may be appended to multiple recipients at once.
 #' @param line The text to be appended.
@@ -313,68 +313,64 @@ appendTo <- function(recipient, line, fish) {
       flush.console()
     } 
     if (i == "Report") {
-      if (any(recipient == "Warning"))
-        write(paste("Warning:", line), file = "temp_log.txt", append = file.exists("temp_log.txt"))
-      else
-        write(line, file = "temp_log.txt", append = file.exists("temp_log.txt"))
+      if (any(recipient == "Warning")) {
+        write(paste("Warning:", line), 
+          file = paste(tempdir(), "temp_log.txt", sep = "/"), 
+          append = file.exists(paste(tempdir(), "temp_log.txt", sep = "/")))
+      } else {
+        write(line, 
+          file = paste(tempdir(), "temp_log.txt", sep = "/"), 
+          append = file.exists(paste(tempdir(), "temp_log.txt", sep = "/")))
+      }
     }
-    if (i == "Warning") 
-      write(paste("Warning:", line), file = "temp_warnings.txt", append = file.exists("temp_warnings.txt"))
-    if (i == "UD") 
-      write(line, file = "temp_UD.txt", append = file.exists("temp_UD.txt"))
-    if (i == "Comment") 
-      write(paste(fish, line, sep = "\t"), file = "temp_comments.txt", append = file.exists("temp_comments.txt"))
+    if (i == "Warning") {
+      write(paste("Warning:", line), 
+        file = paste(tempdir(), "temp_warnings.txt", sep = "/"), 
+        append = file.exists(paste(tempdir(), "temp_warnings.txt", sep = "/")))
+    }
+    if (i == "UD") {
+      write(line, 
+        file = paste(tempdir(), "temp_UD.txt", sep = "/"), 
+        append = file.exists(paste(tempdir(), "temp_UD.txt", sep = "/")))
+    }
+    if (i == "Comment") {
+      write(paste(fish, line, sep = "\t"), 
+        file = paste(tempdir(), "temp_comments.txt", sep = "/"), 
+        append = file.exists(paste(tempdir(), "temp_comments.txt", sep = "/")))
+    }
   }
-  write(line, file = "temp_debug.txt", append = file.exists("temp_debug.txt"))
+  write(line, 
+    file = paste(tempdir(), "actel_debug_file.txt", sep = "/"), 
+    append = file.exists(paste(tempdir(), "actel_debug_file.txt", sep = "/")))
 }
 
 #' Delete temporary files
 #' 
 #' At the end of the function actel or emergencyBreak, removes temporary files.
 #' 
-#' @param emergency Logical: Should temp_debug.txt be kept?
-#' 
 #' @keywords internal
 #' 
-deleteHelpers <- function(emergency = FALSE) {
-  helper.list <- paste0("temp_", c("log", "warnings", "UD", "comments", "debug"), ".txt")
-  if (emergency) 
-    helper.list <- helper.list[helper.list != "temp_debug.txt"]
+deleteHelpers <- function() {
+  helper.list <- paste0(tempdir(), paste0("/temp_", c("log", "warnings", "UD", "comments"), ".txt"))
   link <- unlist(lapply(helper.list, file.exists))
-  for (file in helper.list[link]) file.remove(file)
+  for (file in helper.list[link]) {
+    file.remove(file)
+  }
 }
 
 #' Standard procedure when aborting
 #' 
-#' Saves a copy of the report in a permanent file, where the user decisions taken up to the abort are recorded.
+#' Wraps up the report in R's temporary folder before the function end.
 #' 
 #' @keywords internal
 #' 
 emergencyBreak <- function() {
   appendTo("Report", "\nA fatal exception occurred, stopping the process!\n\n-------------------")
   logname <- paste(gsub(":", ".", sub(" ", ".", as.character(Sys.time()))), "actel.log-STOP.txt", sep = ".")
-  appendTo("Screen", paste("M: A fatal exception occurred, saving emergency log as", logname))
-  if (file.exists("temp_UD.txt")) 
-    appendTo("Report", paste0("User interventions:\n-------------------\n", gsub("\r", "", readr::read_file("temp_UD.txt")), "-------------------"))
-  file.rename("temp_log.txt", logname)
-  deleteHelpers(TRUE)
-}
-
-#' Move helper files to new directory
-#' 
-#' @param my.home The working directory where the main function was triggered.
-#' 
-#' @keywords internal
-#' 
-moveHelpers <- function(my.home) {
-  if (getwd() != my.home) {
-    if (file.exists(paste(my.home, "temp_log.txt", sep = "/")))
-      fs::file_move(paste(my.home, "temp_log.txt", sep = "/"), paste(getwd(), "temp_log.txt", sep = "/"))
-    if (file.exists(paste(my.home, "temp_warnings.txt", sep = "/"))) 
-      fs::file_move(paste(my.home, "temp_warnings.txt", sep = "/"), paste(getwd(), "temp_warnings.txt", sep = "/"))
-    if (file.exists(paste(my.home, "temp_debug.txt", sep = "/"))) 
-      fs::file_move(paste(my.home, "temp_debug.txt", sep = "/"), paste(getwd(), "temp_debug.txt", sep = "/"))
-  }
+  if (file.exists(paste(tempdir(), "temp_UD.txt", sep = "/"))) 
+    appendTo("Report", paste0("User interventions:\n-------------------\n", gsub("\r", "", readr::read_file(paste(tempdir(), "temp_UD.txt", sep = "/"))), "-------------------"))
+  file.rename(paste(tempdir(), "temp_log.txt", sep = "/"), paste(tempdir(), logname, sep = "/"))
+  deleteHelpers()
 }
 
 #' Write in comments
@@ -412,7 +408,6 @@ commentCheck <- function(line, tag) { # nocov start
 #' @export
 #' 
 clearWorkspace <- function(skip = NA){
-  deleteHelpers()
   files <- c(list.files(pattern = "*actel*"), list.files(pattern = "stray"))
   if (file_test("-d", "Report"))
     files <- c(files, "Report")
