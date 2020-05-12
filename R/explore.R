@@ -7,8 +7,6 @@
 #' 
 #' @param auto.open Logical: Should the report be automatically opened once the
 #'  analysis is over? Defaults to TRUE.
-#' @param debug Logical: Should temporary files be kept at the end of the 
-#'  analysis?
 #' @param exclude.tags A vector of tags that should be excluded from the 
 #'  detection data before any analyses are performed. Intended to be used if 
 #'  stray tags from a different code space but with the same signal as a target
@@ -90,8 +88,8 @@
 explore <- function(tz, max.interval = 60, minimum.detections = 2, start.time = NULL, stop.time = NULL, 
   speed.method = c("last to first", "first to first"), speed.warning = NULL, speed.error = NULL, 
   jump.warning = 2, jump.error = 3, inactive.warning = NULL, inactive.error = NULL, 
-  GUI = c("needed", "always", "never"), print.releases = TRUE, debug = FALSE) {
   exclude.tags = NULL, override = NULL, report = FALSE, auto.open = TRUE, save.detections = FALSE, 
+  GUI = c("needed", "always", "never"), print.releases = TRUE) {
 
 # check arguments quality
   if (is.null(tz) || is.na(match(tz, OlsonNames())))
@@ -169,25 +167,15 @@ explore <- function(tz, max.interval = 60, minimum.detections = 2, start.time = 
 
   GUI <- checkGUI(GUI)
 
-  if (!is.logical(debug))
-    stop("'debug' must be logical.\n", call. = FALSE)
-
   if (!is.logical(print.releases))
     stop("'print.releases' must be logical.\n", call. = FALSE)
 # ------------------------
 
 # Prepare clean-up before function ends
-  if (debug) {
-    on.exit(save(list = ls(), file = "explore_debug.RData"), add = TRUE)
-    appendTo("Screen", "!!!--- Debug mode has been activated ---!!!")
-  } else {
-    on.exit(deleteHelpers(), add = TRUE)
-  }
-  on.exit(setwd(my.home), add = TRUE)
+  if (file.exists(paste0(tempdir(), "/actel_debug_file.txt")))
+    file.remove(paste0(tempdir(), "/actel_debug_file.txt"))
+  on.exit(deleteHelpers(), add = TRUE)
   on.exit(tryCatch(sink(), warning = function(w) {hide <- NA}), add = TRUE)
-  if (!debug)
-    on.exit(deleteHelpers(), add = TRUE)
-  deleteHelpers()
 # --------------------------------------
 
 # Store function call
@@ -210,15 +198,11 @@ explore <- function(tz, max.interval = 60, minimum.detections = 2, start.time = 
       ", save.detections = ", ifelse(save.detections, "TRUE", "FALSE"),       
       ", GUI = '", GUI, "'",
       ", print.releases = ", ifelse(print.releases, "TRUE", "FALSE"), 
-      ", debug = ", ifelse(debug, "TRUE", "FALSE"), 
       ")")
 # --------------------
 
 # Final arrangements before beginning
   appendTo("Report", paste0("Actel R package report.\nVersion: ", utils::packageVersion("actel"), "\n"))
-
-  if (debug)
-    appendTo("Report", "!!!--- Debug mode has been activated ---!!!\n")
 
   appendTo(c("Report"), paste0("Target folder: ", getwd(), "\nTimestamp: ", the.time <- Sys.time(), "\nFunction: explore()\n"))
 

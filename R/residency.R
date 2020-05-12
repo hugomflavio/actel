@@ -81,8 +81,9 @@
 residency <- function(tz, sections, max.interval = 60, minimum.detections = 2, 
   start.time = NULL, stop.time = NULL, speed.method = c("last to first", "first to first"), 
   speed.warning = NULL, speed.error = NULL, jump.warning = 2, jump.error = 3, 
-  section.minimum = 2, replicates = NULL, GUI = c("needed", "always", "never"), print.releases = TRUE, debug = FALSE) {
+  inactive.warning = NULL, inactive.error = NULL, exclude.tags = NULL, override = NULL, 
   report = FALSE, auto.open = TRUE, save.detections = FALSE, section.minimum = 2, 
+  replicates = NULL, GUI = c("needed", "always", "never"), print.releases = TRUE) {
 # check argument quality
   if (is.null(tz) || is.na(match(tz, OlsonNames())))
     stop("'tz' could not be recognized as a timezone. Check available timezones with OlsonNames()\n", call. = FALSE)
@@ -167,9 +168,6 @@ residency <- function(tz, sections, max.interval = 60, minimum.detections = 2,
 
   GUI <- checkGUI(GUI)
 
-  if (!is.logical(debug))
-    stop("'debug' must be logical.\n", call. = FALSE)
-
   checkSectionsUnique(sections = sections)
 
   if (!is.logical(print.releases))
@@ -177,17 +175,10 @@ residency <- function(tz, sections, max.interval = 60, minimum.detections = 2,
 # ------------------------
 
 # Prepare clean-up before function ends
-  if (debug) {
-    on.exit(save(list = ls(), file = "residency_debug.RData"), add = TRUE)
-    appendTo("Screen", "!!!--- Debug mode has been activated ---!!!")
-  } else {
-    on.exit(deleteHelpers(), add = TRUE)
-  }
-  on.exit(setwd(my.home), add = TRUE)
+  if (file.exists(paste0(tempdir(), "/actel_debug_file.txt")))
+    file.remove(paste0(tempdir(), "/actel_debug_file.txt"))
+  on.exit(deleteHelpers(), add = TRUE)
   on.exit(tryCatch(sink(), warning = function(w) {hide <- NA}), add = TRUE)
-  if (!debug)
-    on.exit(deleteHelpers(), add = TRUE)
-  deleteHelpers()
 # --------------------------------------
 
 # Store function call
@@ -213,15 +204,11 @@ residency <- function(tz, sections, max.interval = 60, minimum.detections = 2,
       ", inactive.error = ", ifelse(is.null(inactive.error), "NULL", inactive.error), 
       ", GUI = '", GUI, "'",
       ", print.releases = ", ifelse(print.releases, "TRUE", "FALSE"), 
-      ", debug = ", ifelse(debug, "TRUE", "FALSE"), 
       ")")
 # --------------------
 
 # Final arrangements before beginning
   appendTo("Report", paste0("Actel R package report.\nVersion: ", utils::packageVersion("actel"), "\n"))
-
-  if (debug)
-    appendTo("Report", "!!!--- Debug mode has been activated ---!!!\n")
 
   appendTo(c("Report"), paste0("Target folder: ", getwd(), "\nTimestamp: ", the.time <- Sys.time(), "\nFunction: residency()\n"))
 
@@ -437,8 +424,7 @@ residency <- function(tz, sections, max.interval = 60, minimum.detections = 2,
 # wrap up in-R objects
   deployments <- do.call(rbind.data.frame, deployments)
 
-  if (!debug)
-    efficiency <- efficiency[1:3]
+  efficiency <- efficiency[1:3]
 
   # extra info for potential RSP analysis
   rsp.info <- list(analysis.type = "residency", analysis.time = the.time, bio = bio, tz = tz, actel.version = utils::packageVersion("actel"))
