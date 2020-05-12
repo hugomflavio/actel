@@ -6,7 +6,9 @@
 #' want to validate your detections for later use in other analyses.
 #' 
 #' @param auto.open Logical: Should the report be automatically opened once the
-#'  analysis is over? Defaults to TRUE.
+#'  analysis is over? Defaults to TRUE. NOTE: If report = TRUE and auto.open = TRUE,
+#'  the web browser will automatically be launched to open the report once the 
+#'  function terminates.
 #' @param exclude.tags A vector of tags that should be excluded from the 
 #'  detection data before any analyses are performed. Intended to be used if 
 #'  stray tags from a different code space but with the same signal as a target
@@ -43,7 +45,9 @@
 #' @param print.releases Logical: Should the release sites be printed in the
 #'  study area diagrams?
 #' @param report Logical. Should an HTML report be created at the end of the
-#'  analysis?
+#'  analysis? NOTE: Setting report to TRUE will generate an HTML file in the current 
+#'  directory. Additionally, if auto.open = TRUE (default), the web browser will 
+#'  automatically be launched to open the report once the function terminates.
 #' @param speed.error If a fish moves at a speed equal or greater than 
 #'  \code{speed.error} (in metres per second), user intervention is suggested. 
 #'  If left NULL (default), user intervention is never suggested. 
