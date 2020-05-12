@@ -1528,10 +1528,11 @@ printGlobalRatios <- function(global.ratios, daily.ratios, sections) {
       p <- p + ggplot2::scale_y_continuous(limits = c(0,  max.y), expand = c(0, 0))
       p <- p + ggplot2::labs(x = "", y = "% fish")
     }
-    if (length(unique(plotdata$Location)) <= 8)
+    if (length(unique(plotdata$Location)) <= 8) {
       p <- p + ggplot2::scale_fill_manual(values = as.vector(cbPalette)[1:length(unique.values)], drop = FALSE)
-    ggplot2::ggsave(paste0("Report/global_ratios_", i,".png"), width = 10, height = 4)
-    ggplot2::ggsave(paste0("Report/global_ratios_", i,".svg"), width = 10, height = 4)
+      p <- p + ggplot2::scale_colour_manual(values = as.vector(cbPalette)[1:length(unique.values)], drop = FALSE)
+    }
+    ggplot2::ggsave(paste0(tempdir(), "/global_ratios_", i,".svg"), width = 10, height = 4)
   })
 }
 
