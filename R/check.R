@@ -544,35 +544,6 @@ checkReport <- function(report){
   return(report)
 }
 
-#' Check path validity
-#' 
-#' Confirms that the target directory exists.
-#' 
-#' @inheritParams check_args
-#' @inheritParams explore
-#' 
-#' @keywords internal
-#' 
-checkPath <- function(my.home, path) {
-  appendTo("debug", "Running pathCheck.")
-  if (!is.null(path)) {
-    if (dir.exists(path)) {
-      setwd(path)
-    } else {
-      emergencyBreak()
-      stop("The selected path does not exist.\n", call. = FALSE)
-    }
-  } else {
-    path <- my.home
-  }
-  if (my.home != getwd() )
-    deleteHelpers()
-  moveHelpers(my.home)
-  appendTo("debug", "Done.")
-  return(path)
-}
-
-
 #' Check for movements upstream of the release site.
 #'
 #' @inheritParams check_args

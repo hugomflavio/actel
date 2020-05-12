@@ -10,6 +10,9 @@ description
 imposed on the options() or par(), to ensure these changes are
 reverted when the function ends.
 
+* removed the argument 'path' from explore(), migration() and
+residency() to remove the need to rely on work directory changes.
+
 
 * Removed markup from the package description
 

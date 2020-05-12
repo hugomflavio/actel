@@ -42,8 +42,6 @@
 #'  Defaults to 2.
 #' @param override A vector of tags for which the user intends to manually 
 #' define which movement events are valid and invalid.
-#' @param path Path to the folder containing the data. If left NULL (default), 
-#'  the analysis runs in the current folder.
 #' @param print.releases Logical: Should the release sites be printed in the
 #'  study area diagrams?
 #' @param report Logical. Should an HTML report be created at the end of the
@@ -87,16 +85,13 @@
 
 #' @export
 #' 
-explore <- function(path = NULL, tz, max.interval = 60, minimum.detections = 2, start.time = NULL, stop.time = NULL, 
+explore <- function(tz, max.interval = 60, minimum.detections = 2, start.time = NULL, stop.time = NULL, 
   speed.method = c("last to first", "first to first"), speed.warning = NULL, speed.error = NULL, 
   jump.warning = 2, jump.error = 3, inactive.warning = NULL, inactive.error = NULL, 
   exclude.tags = NULL, override = NULL, report = TRUE, auto.open = TRUE,
   GUI = c("needed", "always", "never"), print.releases = TRUE, debug = FALSE) {
 
 # check arguments quality
-  my.home <- getwd()
-  if (!is.null(path) && !is.character(path))
-    path <- as.character(path)
   if (is.null(tz) || is.na(match(tz, OlsonNames())))
     stop("'tz' could not be recognized as a timezone. Check available timezones with OlsonNames()\n", call. = FALSE)
   if (!is.numeric(minimum.detections))
@@ -194,7 +189,7 @@ explore <- function(path = NULL, tz, max.interval = 60, minimum.detections = 2, 
 # --------------------------------------
 
 # Store function call
-  the.function.call <- paste0("explore(path = ", ifelse(is.null(path), "NULL", paste0("'", path, "'")), 
+  the.function.call <- paste0("explore(tz = ", ifelse(is.null(tz), "NULL", paste0("'", tz, "'")), 
       ", max.interval = ", max.interval,
       ", minimum.detections = ", minimum.detections,
       ", speed.method = ", paste0("c('", speed.method, "')"),
@@ -219,16 +214,11 @@ explore <- function(path = NULL, tz, max.interval = 60, minimum.detections = 2, 
 # Final arrangements before beginning
   appendTo("Report", paste0("Actel R package report.\nVersion: ", utils::packageVersion("actel"), "\n"))
 
-  path <- checkPath(my.home = my.home, path = path)  
-
   if (debug)
     appendTo("Report", "!!!--- Debug mode has been activated ---!!!\n")
 
   appendTo(c("Report"), paste0("Target folder: ", getwd(), "\nTimestamp: ", the.time <- Sys.time(), "\nFunction: explore()\n"))
 
-  if (!is.null(path))
-    appendTo(c("Screen"), "M: Moving to selected work directory")
-  
   report <- checkReport(report = report)
 # -----------------------------------
 

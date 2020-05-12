@@ -78,15 +78,12 @@
 #' 
 #' @export
 #' 
-residency <- function(path = NULL, tz, sections, success.arrays = NULL, max.interval = 60, minimum.detections = 2, 
+residency <- function(tz, sections, max.interval = 60, minimum.detections = 2, 
   start.time = NULL, stop.time = NULL, speed.method = c("last to first", "first to first"), 
   speed.warning = NULL, speed.error = NULL, jump.warning = 2, jump.error = 3, 
   inactive.warning = NULL, inactive.error = NULL, exclude.tags = NULL, override = NULL, report = TRUE, auto.open = TRUE,
   section.minimum = 2, replicates = NULL, GUI = c("needed", "always", "never"), print.releases = TRUE, debug = FALSE) {
 # check argument quality
-  my.home <- getwd()
-  if (!is.null(path) && !is.character(path))
-    path <- as.character(path)
   if (is.null(tz) || is.na(match(tz, OlsonNames())))
     stop("'tz' could not be recognized as a timezone. Check available timezones with OlsonNames()\n", call. = FALSE)
   if (!is.numeric(section.minimum))
@@ -194,7 +191,7 @@ residency <- function(path = NULL, tz, sections, success.arrays = NULL, max.inte
 # --------------------------------------
 
 # Store function call
-  the.function.call <- paste0("residency(path = ", ifelse(is.null(path), "NULL", paste0("'", path, "'")), 
+  the.function.call <- paste0("residency(tz = ", ifelse(is.null(tz), "NULL", paste0("'", tz, "'")), 
       ", sections = ", paste0("c('", paste(sections, collapse = "', '"), "')"), 
       ", section.minimum = ", section.minimum,
       ", minimum.detections = ", minimum.detections,
@@ -222,16 +219,11 @@ residency <- function(path = NULL, tz, sections, success.arrays = NULL, max.inte
 # Final arrangements before beginning
   appendTo("Report", paste0("Actel R package report.\nVersion: ", utils::packageVersion("actel"), "\n"))
 
-  path <- checkPath(my.home = my.home, path = path)  
-
   if (debug)
     appendTo("Report", "!!!--- Debug mode has been activated ---!!!\n")
 
   appendTo(c("Report"), paste0("Target folder: ", getwd(), "\nTimestamp: ", the.time <- Sys.time(), "\nFunction: residency()\n"))
 
-  if (!is.null(path))
-    appendTo(c("Screen"), "M: Moving to selected work directory")
-  
   report <- checkReport(report = report)
 # -----------------------------------
 
