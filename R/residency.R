@@ -81,8 +81,8 @@
 residency <- function(tz, sections, max.interval = 60, minimum.detections = 2, 
   start.time = NULL, stop.time = NULL, speed.method = c("last to first", "first to first"), 
   speed.warning = NULL, speed.error = NULL, jump.warning = 2, jump.error = 3, 
-  inactive.warning = NULL, inactive.error = NULL, exclude.tags = NULL, override = NULL, report = TRUE, auto.open = TRUE,
   section.minimum = 2, replicates = NULL, GUI = c("needed", "always", "never"), print.releases = TRUE, debug = FALSE) {
+  report = FALSE, auto.open = TRUE, save.detections = FALSE, section.minimum = 2, 
 # check argument quality
   if (is.null(tz) || is.na(match(tz, OlsonNames())))
     stop("'tz' could not be recognized as a timezone. Check available timezones with OlsonNames()\n", call. = FALSE)

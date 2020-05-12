@@ -88,8 +88,8 @@
 explore <- function(tz, max.interval = 60, minimum.detections = 2, start.time = NULL, stop.time = NULL, 
   speed.method = c("last to first", "first to first"), speed.warning = NULL, speed.error = NULL, 
   jump.warning = 2, jump.error = 3, inactive.warning = NULL, inactive.error = NULL, 
-  exclude.tags = NULL, override = NULL, report = TRUE, auto.open = TRUE,
   GUI = c("needed", "always", "never"), print.releases = TRUE, debug = FALSE) {
+  exclude.tags = NULL, override = NULL, report = FALSE, auto.open = TRUE, save.detections = FALSE, 
 
 # check arguments quality
   if (is.null(tz) || is.na(match(tz, OlsonNames())))

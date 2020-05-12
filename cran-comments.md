@@ -13,6 +13,10 @@ reverted when the function ends.
 * removed the argument 'path' from explore(), migration() and
 residency() to remove the need to rely on work directory changes.
 
+* set the 'report' argument default to FALSE, so that explore()
+migration() and residency() only write to the file system by
+explicit user request (i.e. if the user sets 'report' to TRUE).
+
 
 * Removed markup from the package description
 
