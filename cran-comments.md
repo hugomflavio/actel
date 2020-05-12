@@ -18,10 +18,13 @@ migration() and residency() only write to the file system by
 explicit user request (i.e. if the user sets 'report' to TRUE).
 
 * The function appendTo() now writes to R's temporary folder.
+All auxiliary files required for the report are now saved in
+R's temporary folder. Thank you very much for mentioning the
+tempdir() function, it is really great!
 
 * The user is now asked for confirmation before the results
 are saved as an .RData file and the analysis log is saved as a
-.txt file.
+.txt file (the latter only applies if report = FALSE).
 
 * A new argument 'save.detections' (defaults to FALSE) ensures
 that compiled detections are only saved for reuse by explicit
@@ -60,7 +63,7 @@ now performed inside R's temporary directory. This change as also
 been applied for tests that do not run on CRAN.
 
 * All installed.packages() calls were removed and the respective
-functions were addapted to work with packageDescription()
+functions were adapted to work with packageDescription()
 
 * Examples were included in the documentation of all exported
 functions. Some of these examples were wrapped with \dontrun{}
@@ -69,6 +72,8 @@ files outside R's temporary directory without explicit permission.
 
 * \value fields detailing the nature and content of the output
 were included for all functions.
+
+* Removed the startNote function as it is no longer relevant.
 
 ## Package resubmission (1st revision)
 
@@ -125,6 +130,14 @@ Package suggested but not available for checking: ‘rgdal’
 were put in place to ensure that actel's functions stop orderly
 if the 'rgdal' is missing.
 
+
+## Obsolete comments
+
+NOTE: The text below was part of the original submission, but is
+no longer relevant! I am just keeping it here for continuity sake 
+(only visible in the source file).
+
+<!-- 
 actel must read/write files to operate. I understand that this
 is a sensible topic, and the user must be informed about it. The
 startup message of actel asks the users to run startNote(). This
@@ -155,3 +168,4 @@ I have also deployed checkpoints to transitionLayer, distancesMatrix,
 emptyMatrix, createWorkspace, exampleWorkspace, and clearWorkspace 
 that require user confirmation when there is a risk of file overwriting
 or deletion.
+-->
