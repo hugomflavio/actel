@@ -27,6 +27,12 @@ are saved as an .RData file and the analysis log is saved as a
 that compiled detections are only saved for reuse by explicit
 command of the user.
 
+* the functions transitionLayer and distancesMatrix were adapted
+so that they do not write into the file system by default, but rather
+return the created objects into the R session. distancesMatrix still
+offers the possibility to write the output to 'distances.csv', but only
+through explicit user consent.
+
 
 * Removed markup from the package description
 
