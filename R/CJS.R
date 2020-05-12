@@ -376,13 +376,13 @@ simpleCJS <- function(input, estimate = NULL, fixed.efficiency = NULL, silent = 
   for(i in 1:(ncol(input) - 1)){
     # number of tags detected at i and downstream (r)
     tr <- input[input[, i] == 1, (i + 1):ncol(input)]
-    if (is.data.frame(tr))
+    if (is.data.frame(tr) | is.matrix(tr))
       r[i] = sum(apply(tr, 1, function(f) any(f == 1)))
     if (is.vector(tr))
       r[i] = sum(tr)
     # number of tags NOT detected at i but detected downstream (z)
     tz <- input[input[, i] == 0, (i + 1):ncol(input)]
-    if (is.data.frame(tz))
+    if (is.data.frame(tz) | is.matrix(tz))
       z[i] = sum(apply(tz, 1, function(f) any(f == 1)))
     if (is.vector(tz))
       z[i] = sum(tz)
