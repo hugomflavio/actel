@@ -43,6 +43,17 @@ documentation to make it clear that files will be written and
 included a request for additional confirmation from the user when 
 files/folders with the same name already exist.
 
+* print(x) calls were wrapped to:
+
+message(paste0(capture.output(print(x)), collapse = "\n"))
+
+To allow the display of tables without preventing message
+suppression if requested. An exception was made in 1) the function
+clearWorkspace, as this function always requires user intervention,
+and using print allows for the multiple file names to flow
+orderly into the console dimensions, and 2) the function 
+advEfficiency, where the print call is intended to trigger the
+plotting of a graphic.
 
 * Removed markup from the package description
 

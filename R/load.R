@@ -1278,7 +1278,7 @@ createStandards <- function(detections, spatial, deployments) {
       if (any(the.error <- is.na(detections$Standard.name[receiver.link]))) {
         appendTo(c("Screen", "Report"), paste0("Error: ", sum(the.error), " detections for receiver ", names(deployments)[i], " do not fall within deployment periods."))
         message("")
-        print(detections[receiver.link][the.error, -c(6, 7)])
+        message(paste0(capture.output(print(detections[receiver.link][the.error, -c(6, 7)])), collapse = "\n"))
         message("")
         message("Possible options:\n   a) Stop and double-check the data (recommended)\n   b) Discard orphan detections.")
         check <- TRUE

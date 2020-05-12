@@ -728,12 +728,12 @@ transitionLayer <- function(shape, size, EPSGcode, coord.x = NULL, coord.y = NUL
 
   if (fix.y != 0 | fix.y != 0) {
     message("M: New shape extent:\n")
-    print(shape@bbox)
+    message(paste0(capture.output(print(shape@bbox)), collapse = "\n"))
   }
   
   pixel.res <- (shape@bbox[,2] - shape@bbox[,1]) / size
   message(paste("\nChosen pixel size:", size, "\n\nNumber of resulting pixels:\n"))
-  print(pixel.res)
+  message(paste0(capture.output(print(pixel.res)), collapse = "\n"), "\n")
   message("")
 
   # start working
