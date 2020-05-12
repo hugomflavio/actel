@@ -915,33 +915,25 @@ emptyMatrix <- function(){
   for(i in 1:nrow(output))
     output[i, i] = 0
 
-  if (interactive() & file.exists("distances.csv")) {
-    warning("A file 'distances.csv' already exists. Continuing will overwrite its contents.", call. = FALSE, immediate. = TRUE)
-    decision <- readline("Proceed? (y/N) ")
-    if (decision != "y" & decision != "Y")
-      stop("Function stopped by user command.\n", call. = FALSE)
-  }
-
-  write.csv(output, file = "distances.csv", na = "", row.names = TRUE)
+  return(output)
 }
 
 #' Complete a Distances Matrix
 #' 
-#' Completes a matrix that has the upper diagonal half filled.
+#' Completes the bottom diagonal of a matrix with the same number of rows and columns.
+#' 
+#' @param x A distances matrix to be completed.
 #' 
 #' @export
 #' 
-completeMatrix <- function(){
-  if (!file.exists("distances.csv"))
-    stop("Could not find a 'distances.csv' file in the current working directory.\n", call. = FALSE)
+completeMatrix <- function(x){
+  if (!inherits(x, "matrix"))
+    stop("The input must be a matrix", call. = FALSE)
+  if (nrow(x) != ncol(x))
+    stop("The matrix does not contain the same number of columns and rows. Aborting.", call. = FALSE)
 
-  input <- read.csv("distances.csv", row.names = 1)
-
-  for (i in 1:ncol(input)) {
-    input[i:ncol(input), i] <- t(input[i, i:ncol(input)])
+  for (i in 1:ncol(x)) {
+    x[i:ncol(x), i] <- t(x[i, i:ncol(x)])
   }
-
-  write.csv(input, file = "distances.csv", row.names = TRUE)
-  message("M: Distances matrix successfully completed and stored in 'distances.csv'.")
-  return(input)
+  return(x)
 }

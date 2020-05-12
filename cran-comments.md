@@ -33,6 +33,10 @@ return the created objects into the R session. distancesMatrix still
 offers the possibility to write the output to 'distances.csv', but only
 through explicit user consent.
 
+* the functions createMatrix and completeMatrix were adapted so that
+they do not write into the file system. It is now up to the user to
+save the output with the correct name (this is explained in the vignettes).
+
 
 * Removed markup from the package description
 
