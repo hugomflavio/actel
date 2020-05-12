@@ -7,7 +7,7 @@
 #' 
 #' @keywords internal
 #' 
-loadStudyData <- function(tz, override = NULL, start.time, stop.time, 
+loadStudyData <- function(tz, override = NULL, start.time, stop.time, save.detections,
   sections = NULL, exclude.tags, disregard.parallels = TRUE) {
   appendTo(c("Screen", "Report"), "M: Importing data. This process may take a while.")
   bio <- loadBio(file = "biometrics.csv", tz = tz)
@@ -26,7 +26,7 @@ loadStudyData <- function(tz, override = NULL, start.time, stop.time,
   deployments <- checkDeploymentStations(input = deployments, spatial = spatial) # match Station.name in the deployments to Station.name in spatial, and vice-versa
   deployments <- createUniqueSerials(input = deployments) # Prepare serial numbers to overwrite the serials in detections
 
-  detections <- loadDetections(start.time = start.time, stop.time = stop.time, tz = tz)
+  detections <- loadDetections(start.time = start.time, stop.time = stop.time, tz = tz, save.detections = save.detections)
   detections <- checkDupDetections(input = detections)
   detections <- createStandards(detections = detections, spatial = spatial, deployments = deployments) # get standardized station and receiver names, check for receivers with no detections
   appendTo(c("Screen","Report"), paste0("M: Data time range: ", as.character(head(detections$Timestamp, 1)), " to ", as.character(tail(detections$Timestamp, 1)), " (", tz, ")."))
@@ -786,7 +786,7 @@ loadBio <- function(file, tz){
 #' 
 #' @keywords internal
 #' 
-loadDetections <- function(start.time = NULL, stop.time = NULL, tz, force = FALSE) {
+loadDetections <- function(start.time = NULL, stop.time = NULL, tz, force = FALSE, save.detections = FALSE) {
   # NOTE: The variable actel.detections is loaded from a RData file, if present. To avoid package check
   #   notes, the variable name is created before any use.
   actel.detections <- NULL
@@ -822,7 +822,7 @@ loadDetections <- function(start.time = NULL, stop.time = NULL, tz, force = FALS
 
   if (recompile)
     detections <- compileDetections(path = "detections", start.time = start.time, 
-      stop.time = stop.time, tz = tz)
+      stop.time = stop.time, tz = tz, save.detections = save.detections)
   return(detections)
 }
 
@@ -841,7 +841,7 @@ loadDetections <- function(start.time = NULL, stop.time = NULL, tz, force = FALS
 #' 
 #' @keywords internal
 #' 
-compileDetections <- function(path = "detections", start.time = NULL, stop.time = NULL, tz) {
+compileDetections <- function(path = "detections", start.time = NULL, stop.time = NULL, tz, save.detections = FALSE) {
   appendTo("Screen", "M: Compiling detections...")
   # Find the detection files
   if (file_test("-d", path)) {
@@ -910,7 +910,10 @@ compileDetections <- function(path = "detections", start.time = NULL, stop.time 
 
   # save detections in UTC
   actel.detections <- list(detections = output, timestamp = Sys.time())
-  save(actel.detections, file = ifelse(file_test("-d", path), paste0(path, "/actel.detections.RData"), "actel.detections.RData"))
+  if (save.detections) {
+    save(actel.detections, file = ifelse(file_test("-d", path), 
+      paste0(path, "/actel.detections.RData"), "actel.detections.RData"))
+  }
   
   # Convert time-zones
   output <- convertTimes(input = output, start.time = start.time, 

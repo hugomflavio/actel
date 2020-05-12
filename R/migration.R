@@ -85,9 +85,9 @@
 migration <- function(tz, sections, success.arrays = NULL, max.interval = 60, minimum.detections = 2, 
   start.time = NULL, stop.time = NULL, speed.method = c("last to first", "first to first"), 
   speed.warning = NULL, speed.error = NULL, jump.warning = 2, jump.error = 3, 
-  if.last.skip.section = TRUE, replicates = NULL, disregard.parallels = TRUE, GUI = c("needed", "always", "never"), 
   print.releases = TRUE, debug = FALSE) {
   inactive.warning = NULL, inactive.error = NULL, exclude.tags = NULL, override = NULL, report = FALSE, auto.open = TRUE, 
+  save.detections = FALSE, if.last.skip.section = TRUE, replicates = NULL, disregard.parallels = TRUE, 
   
 # check argument quality
   if (is.null(tz) || is.na(match(tz, OlsonNames())))
@@ -219,6 +219,7 @@ migration <- function(tz, sections, success.arrays = NULL, max.interval = 60, mi
       ", jump.error = ", jump.error,
       ", inactive.warning = ", ifelse(is.null(inactive.warning), "NULL", inactive.warning), 
       ", inactive.error = ", ifelse(is.null(inactive.error), "NULL", inactive.error), 
+      ", save.detections = ", ifelse(save.detections, "TRUE", "FALSE"), 
       ", GUI = '", GUI, "'",
       ", print.releases = ", ifelse(print.releases, "TRUE", "FALSE"), 
       ", debug = ", ifelse(debug, "TRUE", "FALSE"), 
@@ -237,7 +238,7 @@ migration <- function(tz, sections, success.arrays = NULL, max.interval = 60, mi
 # -----------------------------------
 
 # Load, structure and check the inputs
-  study.data <- loadStudyData(tz = tz, override = override, 
+  study.data <- loadStudyData(tz = tz, override = override, save.detections = save.detections,
                               start.time = start.time, stop.time = stop.time,
                               sections = sections, exclude.tags = exclude.tags, disregard.parallels = disregard.parallels)
   bio <- study.data$bio

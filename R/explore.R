@@ -60,6 +60,8 @@
 #' @param start.time Detection data prior to the timestamp set in 
 #'  \code{start.time} (in YYYY-MM-DD HH:MM:SS format) is not considered during 
 #'  the analysis.
+#' @param save.detections Logical: Should the processed detections be saved for
+#'  future runs?
 #' @param stop.time Detection data posterior to the timestamp set in 
 #'  \code{stop.time} (in YYYY-MM-DD HH:MM:SS format) is not considered during 
 #'  the analysis.
@@ -205,6 +207,7 @@ explore <- function(tz, max.interval = 60, minimum.detections = 2, start.time = 
       ", jump.error = ", jump.error,
       ", inactive.warning = ", ifelse(is.null(inactive.warning), "NULL", inactive.warning),
       ", inactive.error = ", ifelse(is.null(inactive.error), "NULL", inactive.error), 
+      ", save.detections = ", ifelse(save.detections, "TRUE", "FALSE"),       
       ", GUI = '", GUI, "'",
       ", print.releases = ", ifelse(print.releases, "TRUE", "FALSE"), 
       ", debug = ", ifelse(debug, "TRUE", "FALSE"), 
@@ -223,7 +226,7 @@ explore <- function(tz, max.interval = 60, minimum.detections = 2, start.time = 
 # -----------------------------------
 
 # Load, structure and check the inputs
-study.data <- loadStudyData(tz = tz, override = override, 
+study.data <- loadStudyData(tz = tz, override = override, save.detections = save.detections,
                             start.time = start.time, stop.time = stop.time,
                             sections = NULL, exclude.tags = exclude.tags)
 bio <- study.data$bio

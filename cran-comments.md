@@ -23,6 +23,10 @@ explicit user request (i.e. if the user sets 'report' to TRUE).
 are saved as an .RData file and the analysis log is saved as a
 .txt file.
 
+* A new argument 'save.detections' (defaults to FALSE) ensures
+that compiled detections are only saved for reuse by explicit
+command of the user.
+
 
 * Removed markup from the package description
 

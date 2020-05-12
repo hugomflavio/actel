@@ -209,6 +209,7 @@ residency <- function(tz, sections, max.interval = 60, minimum.detections = 2,
       ", jump.warning = ", jump.warning,
       ", jump.error = ", jump.error,
       ", inactive.warning = ", ifelse(is.null(inactive.warning), "NULL", inactive.warning), 
+      ", save.detections = ", ifelse(save.detections, "TRUE", "FALSE"), 
       ", inactive.error = ", ifelse(is.null(inactive.error), "NULL", inactive.error), 
       ", GUI = '", GUI, "'",
       ", print.releases = ", ifelse(print.releases, "TRUE", "FALSE"), 
@@ -228,7 +229,7 @@ residency <- function(tz, sections, max.interval = 60, minimum.detections = 2,
 # -----------------------------------
 
 # Load, structure and check the inputs
-  study.data <- loadStudyData(tz = tz, override = override,
+  study.data <- loadStudyData(tz = tz, override = override, save.detections = save.detections,
                               start.time = start.time, stop.time = stop.time,
                               sections = sections, exclude.tags = exclude.tags)
   bio <- study.data$bio
