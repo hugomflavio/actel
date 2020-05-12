@@ -462,7 +462,6 @@ setSpatialStandards <- function(input){
   input$Standard.name <- gsub(" ", "", input$Standard.name)
   link <- input$Type == "Hydrophone"
   input$Standard.name[link] <- paste0("St.", seq_len(sum(input$Type == "Hydrophone")))
-  try(suppressWarnings(write.csv(input, "spatial.csv", row.names = FALSE)), silent = TRUE)
   return(input)
 }
 
@@ -1203,8 +1202,8 @@ splitDetections <- function(detections, bio, exclude.tags = NULL, silent = FALSE
 #' 
 collectStrays <- function(input, restart = FALSE){
   appendTo("debug", "Running collectStrays.")
-  if (restart && file.exists("temp_strays.csv")) {
-    file.remove("temp_strays.csv")
+  if (restart && file.exists(paste0(tempdir(), "/temp_strays.csv"))) {
+    file.remove(paste0(tempdir(), "/temp_strays.csv"))
   }
   if (length(input) > 0) {
     recipient <- data.frame(Transmitter = names(input), 
@@ -1213,7 +1212,9 @@ collectStrays <- function(input, restart = FALSE){
       Last.detection = unlist(lapply(input, function(x) as.character(tail(x$Timestamp,1)))),
       Receivers = unlist(lapply(input, function(x) paste(unique(x$Receiver), collapse = ", ")))
       )
-    write.table(recipient, file = "temp_strays.csv", sep = ",", append = file.exists("temp_strays.csv"), row.names = FALSE, col.names = !file.exists("temp_strays.csv"))
+    write.table(recipient, file = paste0(tempdir(), "/temp_strays.csv"), sep = ",", 
+      append = file.exists(paste0(tempdir(), "/temp_strays.csv")), row.names = FALSE, 
+      col.names = !file.exists(paste0(tempdir(), "/temp_strays.csv")))
   }
 }
 
@@ -1223,7 +1224,7 @@ collectStrays <- function(input, restart = FALSE){
 #'
 storeStrays <- function(){
   appendTo("debug", "Running storeStrays.")
-  if (file.exists("temp_strays.csv")) {
+  if (file.exists(paste0(tempdir(), "/temp_strays.csv"))) {
     if (file.exists(newname <- "stray_tags.csv")) {
       continue <- TRUE
       index <- 1
@@ -1235,7 +1236,10 @@ storeStrays <- function(){
         }
       }
     }
-    file.rename("temp_strays.csv", newname)
+    decision <- readline(paste0("Stray tags were detected in your study area. Would you like to save a summary to ", newname, "?(y/N) "))
+    appendTo("UD", decision)
+    if (decision == "y" | decision == "Y")
+      file.copy(paste0(tempdir(), "/temp_strays.csv"), newname)
   }
 }
 
