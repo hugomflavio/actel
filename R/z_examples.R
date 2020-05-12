@@ -1,6 +1,7 @@
 #' Create a Default Workspace
 #'
 #' Produces the files and folders required to run the package, which the user can use as a template.
+#' Note: This function will create a new sub-directory in the current directory and write files into it.
 #' 
 #' @param dir The name of the target directory. Will be created if not present
 #'
@@ -51,6 +52,8 @@ createWorkspace <- function(dir = "actel_workspace") {
 #' Deploy Example Data
 #'
 #' Creates a ready-to-run workspace with example data.
+#' Note: This function will create a new sub-directory called 'exampleWorkspace' 
+#' in the current directory and write files into it.
 #' 
 #' @param spatial,biometrics,detections,deployments Example datasets provided with the package.
 #'

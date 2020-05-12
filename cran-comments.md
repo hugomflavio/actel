@@ -37,6 +37,12 @@ through explicit user consent.
 they do not write into the file system. It is now up to the user to
 save the output with the correct name (this is explained in the vignettes).
 
+* The functions exampleWorkspace, createWorkspace are explicitly 
+intended to write supporting files. I have expanded the functions' 
+documentation to make it clear that files will be written and
+included a request for additional confirmation from the user when 
+files/folders with the same name already exist.
+
 
 * Removed markup from the package description
 
