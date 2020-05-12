@@ -21,7 +21,11 @@ transformSpatial(
 \item{file}{an input file with spatial data.}
 }
 \value{
-A list of 1) stations, 2) release sites, 3) ALS columns in the spatial file, 4) the Number of ASL, 5) The ALS serial numbers and 6) the array order.
+A list containing:
+\itemize{
+\item \code{spatial}: The stations, release sites and array order.
+\item \code{sections}: A vector of the section names.
+}
 }
 \description{
 Creates a list containing multiple spatial elements required throughout the analyses

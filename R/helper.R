@@ -1,6 +1,12 @@
 #' nearsq helper
 #' 
+#' Finds the largest x for which n %% x == 0
+#' 
 #' Obtained here: https://stackoverflow.com/questions/32017327/calculate-the-optimal-grid-layout-dimensions-for-a-given-amount-of-plots-in-r
+#' 
+#' @param n number of plots to fit.
+#' 
+#' @return An integer
 #' 
 #' @keywords internal
 #' 
@@ -12,11 +18,15 @@ fact <- function(n) {
   }
 }
 
-#' find optimum plotting grid
+#' Find optimum plotting grid
 #' 
-#' obtained here: https://stackoverflow.com/questions/32017327/calculate-the-optimal-grid-layout-dimensions-for-a-given-amount-of-plots-in-r
+#' Calculates the optimal distribution of plots in a square grid.
+#' 
+#' Obtained here: https://stackoverflow.com/questions/32017327/calculate-the-optimal-grid-layout-dimensions-for-a-given-amount-of-plots-in-r
 #' 
 #' @param n number of plots to fit.
+#' 
+#' @return a vector of the number of rows and number of columns needed to distribute the desired number of plots.
 #' 
 #' @keywords internal
 #' 
@@ -30,9 +40,16 @@ nearsq <- function(n, tol = 5/3+0.001) {
   }
 }
 
-#' Import actel Results to a List
+#' Import RData in a list format
 #' 
-#' @param source A RData file containing actel results from a previous run
+#' @param source A RData file.
+#' 
+#' @examples
+#' \dontrun{
+#' dataTolist("Path/to/file.RData")
+#' }
+#' 
+#' @return A list containing the objects present in the source RData file.
 #' 
 #' @export
 #' 
@@ -46,6 +63,15 @@ dataToList <- function(source){
 #' 
 #' @param input A vector of transmitter names
 #' 
+#' @examples
+#' # create dummy string
+#' x <- c("R64K-1234", "A69-1303-12")
+#' 
+#' # run stripCodeSpaces
+#' stripCodeSpaces(x)
+#' 
+#' @return A vector of transmitter signals
+#' 
 #' @export
 #' 
 stripCodeSpaces <- function(input) {
@@ -53,13 +79,13 @@ stripCodeSpaces <- function(input) {
 }
 
 
-#' Calculate the standard error of the mean
+#' Calculate the standard error of the mean for circular data
 #' 
 #' @param x input data
 #' @param na.rm Logical: Should missing values be removed?
 #' @param silent Logical: Should the number of NA's removed be displayed?
 #' 
-#' @return Standard Error of the Mean
+#' @return The standard error of the mean (numeric value).
 #' 
 #' @keywords internal
 #' 
@@ -79,7 +105,7 @@ std.error.circular <- function(x, na.rm = TRUE, silent = FALSE){
 #' @param input Single string or a vector of strings containing hours:minutes or hours:minutes:seconds.
 #' @param unit the desired units of the output, one of "h" (hours), "m", (minutes) or "s" (seconds).
 #' 
-#' @return Decimal hour equivalent (single value or vector)
+#' @return A number or vector of numbers corresponding to the decimal hour equivalent of the character input.
 #' 
 #' @keywords internal
 #' 
@@ -116,7 +142,7 @@ decimalTime <- function(input, unit = c("h", "m", "s")) {
 #' @param format the format of x, one of "h" (hours), "m", (minutes) or "s" (seconds).
 #' @param seconds Logical; If TRUE, output is returned in HH:MM:SS format.
 #' 
-#' @return Decimal hour equivalent (single value or vector)
+#' @return a string or vector of strings corresponding to the character hour equivalent of the numeric input.
 #' 
 #' @keywords internal
 #' 
@@ -166,7 +192,7 @@ minuteTime <- function(x, format = c("h", "m", "s"), seconds = TRUE) {
 #' @param input Character string to be trimmed.
 #' @param n Number of characters to be removed.
 #' 
-#' @return Trimmed character string
+#' @return A trimmed string or vector of trimmed strings.
 #' 
 #' @keywords internal
 #' 
@@ -181,7 +207,7 @@ substrRight <- function(input, n) {
 #' @param input vector of elements to be matched.
 #' @param match vector of elements where to look for the input.
 #' 
-#' @return TRUE/FALSE vector for the input values.
+#' @return A logical vector.
 #' 
 #' @keywords internal
 #' 
@@ -195,7 +221,7 @@ matchl <- function(input, match) {
 #' 
 #' @param input vector containing NA's.
 #' 
-#' @return TRUE/FALSE vector
+#' @return A logical vector.
 #' 
 #' @keywords internal
 #' 
@@ -210,7 +236,7 @@ na.as.false <- function(input) {
 #' 
 #' @param input a list of vectors with non-overlapping data.
 #' 
-#' @return A single vector where all data has been combined.
+#' @return A vectorized combination of the data in the different list vectors.
 #' 
 #' @keywords internal
 #' 
@@ -240,7 +266,7 @@ combine <- function(input) {
 #' @param input The value to be rounded.
 #' @param to The level of rounding to be applied (i.e. to=10 will round 14.2 to 20; to=1 will round i to 15).
 #' 
-#' @return The rounded value
+#' @return A numeric value or string.
 #' 
 #' @keywords internal
 #' 
@@ -258,7 +284,7 @@ roundUp <- function(input, to = 10) {
 #' @param input The value to be rounded.
 #' @param to The level of rounding to be applied (i.e. to=10 will round 14.8 to 10; to=1 will round i to 14).
 #' 
-#' @return The rounded value
+#' @return A numeric value or string.
 #' 
 #' @keywords internal
 #' 
@@ -274,6 +300,8 @@ roundDown <- function(input, to = 10) {
 #' @param recipient 'Screen' displays the message on screen, 'Report' appends the message to 'temp_log.txt', 'Warning' appends the message to 'temp_warnings.txt', 'UD' appends the message to 'temp_UD.txt', 'Comment' appends the message to 'temp_comments.txt'. The same message may be appended to multiple recipients at once.
 #' @param line The text to be appended.
 #' @param fish the tag number to which the comment belongs. Only used when recipient = 'Comment'.
+#' 
+#' @return No return value, called for side effects.
 #' 
 #' @keywords internal
 #' 
@@ -322,6 +350,8 @@ appendTo <- function(recipient, line, fish) {
 #' 
 #' At the end of the function actel or emergencyBreak, removes temporary files.
 #' 
+#' @return No return value, called for side effects.
+#' 
 #' @keywords internal
 #' 
 deleteHelpers <- function() {
@@ -335,6 +365,8 @@ deleteHelpers <- function() {
 #' Standard procedure when aborting
 #' 
 #' Wraps up the report in R's temporary folder before the function end.
+#' 
+#' @return No return value, called for side effects.
 #' 
 #' @keywords internal
 #' 
@@ -353,6 +385,8 @@ emergencyBreak <- function() {
 #' 
 #' @param line The text of the interaction in which the user may or may not request a comment.
 #' @param tag The tag number currently being analysed.
+#' 
+#' @return No return value, called for side effects.
 #' 
 #' @keywords internal
 #' 
@@ -378,6 +412,19 @@ commentCheck <- function(line, tag) { # nocov start
 #' Deletes previous analysis files from the current workspace. Input files are not deleted.
 #' 
 #' @param skip A vector of files to be ignored.
+#' 
+#' @examples
+#' \dontrun{
+#' # In a directory where you have saved actel results, run:
+#' clearWorkspace()
+#' # This will show you the files than can be removed and ask for confirmation.
+#' 
+#' # If you want to keep a specific file, you can exclude it with the
+#' # skip argument. E.g., if I wanted to keep the file "file_to.keep":
+#' clearWokspace(skip = "file_to.keep")
+#' }
+#' 
+#' @return No return value, called for side effects.
 #' 
 #' @export
 #' 
@@ -408,16 +455,35 @@ clearWorkspace <- function(skip = NA){
 
 #' Extract timestamps from the analysis results.
 #' 
-#' @param input An actel results object.
+#' @param input An actel results object generated by \code{\link{explore}}, \code{\link{migration}} or \code{\link{residency}}.
 #' @param locations The names of the arrays or sections to be included. If left NULL, information for all arrays/sections is extracted.
 #' @param move.type The type of events to record: one of "array" or "section".
 #' @param event.type The point to be recorded: one of "arrival" or "departure".
 #' @param n.events The number of events to record. if "one" and type is "arrival", the very first arrival is returned;
 #' if "one" and type is "departure", the very last departure is returned.
 #' 
-#' @export
+#' @examples
+#' \dontrun{
+#' # Assuming x is the output of explore, migration or 
+#' # residency, run:
+#' getTimes(x)
+#' 
+#' # You can specifcy which events to extract with 'event.type'
+#' getTimes(x, event.type = "arrival")
+#' # or
+#' getTimes(x, event.type = "departure")
+#' 
+#' # and also how many events per fish.
+#' getTimes(x, n.events = "first")
+#' # or
+#' getTimes(x, n.events = "all")
+#' # or
+#' getTimes(x, n.events = "last")
+#' }
 #' 
 #' @return A data frame with the timestamps for each fish (rows) and array (columns)
+#' 
+#' @export
 #' 
 getTimes <- function(input, locations = NULL, move.type = c("array", "section"), event.type = c("arrival", "departure"), n.events = c("first", "all", "last")){
   if (!inherits(input, "list"))
@@ -534,12 +600,39 @@ getTimes <- function(input, locations = NULL, move.type = c("array", "section"),
 
 #' Convert a data frame with timestamps into a list of circular objects
 #' 
-#' @param x A data frame where the first column is an identifier, the second column is a grouping structure, and columns three and onwards are timestamps at different locations.
+#' @param x A data frame where the first column is an identifier, the second column 
+#'   is a grouping structure, and columns three and onwards are timestamps at different 
+#'   locations. Can be generated automatically by \code{\link{getTimes}}.
 #' @param by.group Logical: Should the times at each location be divided by the group column (second column of x)?
 #' 
-#' @export
+#' @examples
+#' # create dummy input data frame.
+#' # Note: the names of the columns are irrelevant.
+#' x <- data.frame(ID = c(1:5), 
+#'  Group = c("A", "A", "B", "B", "B"), 
+#'  A1 = as.POSIXct(
+#'    c("2019-01-03 11:21:12",
+#'      "2019-01-04 12:22:21",
+#'      "2019-01-05 13:31:34",
+#'      "2019-01-06 14:32:43",
+#'      "2019-01-07 15:23:52")),
+#'  A2 = as.POSIXct(
+#'    c("2019-01-08 16:51:55",
+#'      "2019-01-09 17:42:42",
+#'      "2019-01-10 18:33:33",
+#'      "2019-01-11 19:24:32",
+#'      "2019-01-12 20:15:22")),
+#'  stringsAsFactors = TRUE)
 #' 
-#' @return A list of circular objects
+#' # run timesToCircular
+#' timesToCircular(x)
+#' 
+#' # optionally, split results by group:
+#' timesToCircular(x, by.group = TRUE)
+#' 
+#' @return A list of circular objects for each data column and, optionally, for each group.
+#' 
+#' @export
 #' 
 timesToCircular <- function(x, by.group = FALSE) {
   if (!all(sapply(x[, 3:ncol(x)], function(i) any(class(i) == "POSIXt"))))
@@ -554,14 +647,14 @@ timesToCircular <- function(x, by.group = FALSE) {
     capture <- lapply(1:length(aux), function(i) {
       for (j in 3:ncol(x)) {
         output[[length(output) + 1]] <<- circular::circular(decimalTime(substrRight(as.character(aux[[i]][, j]), 8)), units = "hours", template = "clock24")
-        names(output[[length(output)]]) <<- aux[[i]]$Transmitter
+        names(output[[length(output)]]) <<- aux[[i]][, 1]
         names(output)[length(output)] <<- paste0(names(aux)[i], ".", colnames(aux[[i]])[j])
       }
     })
   } else {
     for (i in 3:ncol(x)) {
       output[[length(output) + 1]] <- circular::circular(decimalTime(substrRight(as.character(x[, i]), 8)), units = "hours", template = "clock24")
-      names(output[[length(output)]]) <- x$Transmitter
+      names(output[[length(output)]]) <- x[, 1]
     }
     names(output) <- colnames(x)[3:ncol(x)]
   }
@@ -572,19 +665,34 @@ timesToCircular <- function(x, by.group = FALSE) {
 #' 
 #' \code{transitionLayer()} imports a shape file into R and prepares it to be used in distance
 #' estimations. Adapted from Grant Adams' script "distance to closest mpa". This function creates
-#' a 'transition.layer.RData' file in the current directory, which is then used by distancesMatrix
+#' a 'transition.layer.RData' file in the current directory, which is then used by \code{\link{distancesMatrix}}.
+#' 
+#' It is highly recommended to read the vignette regarding distances matrix before running this function.
+#' You can find it by running \code{vignette('a-2_distances_matrix', 'actel')} or \code{browseVignettes('actel')}
 #' 
 #' @param shape A shape file projected in a metric coordinate system.
 #' @param size The pixel size, in metres.
-#' @param EPSGcode The EPSG code of the shape file's coordinate system. DO NOT USE degree-based coordinate systems.
-#' @param coord.x,coord.y The names of the columns containing the x and y positions of the stations in the spatial.csv file. Must be in the same coordinate system as the shape file.
-#' @param buffer Artificially expand the shape file edges. Can be a single value (applied to all edges) or four values (xmin, xmax, ymin, ymax).
-#' @param directions The number of directions considered for every movement situation during cost calculation. See the vignettes for more details.
-#' @param force Logical: Should the process continue even if the transition layer has 2000 pixels on one or both axes?
+#' @param EPSGcode The EPSG code of the shape file's coordinate system. DO NOT USE degree-based 
+#'  coordinate systems.
+#' @param coord.x,coord.y The names of the columns containing the x and y positions of the stations 
+#'  in the spatial.csv file. Must be in the same coordinate system as the shape file.
+#' @param buffer Artificially expand the shape file edges. Can be a single value (applied to all edges) 
+#'  or four values (xmin, xmax, ymin, ymax).
+#' @param directions The number of directions considered for every movement situation during cost 
+#'  calculation. See the vignettes for more details.
+#' @param force Logical: Should the process continue even if the transition layer has 2000 pixels 
+#'  on one or both axes?
+#' 
+#' @examples
+#' \dontrun{
+#' # Assuming a shapefile was saved to 'shapefile.shp' in the current
+#' # working directory
+#' x <- transitionLayer("shapefile.shp", size = 20, EPSGcode = 32362)
+#' }
+#' 
+#' @return A TransitionLayer object.
 #' 
 #' @export
-#' 
-#' @return A RData file with the transition layer is stored in the current directory.
 #' 
 transitionLayer <- function(shape, size, EPSGcode, coord.x = NULL, coord.y = NULL, buffer = NULL, directions = c(16, 8, 4), force = FALSE){
   aux <- c(
@@ -643,7 +751,7 @@ transitionLayer <- function(shape, size, EPSGcode, coord.x = NULL, coord.y = NUL
     }
   }
   if (!file.exists(shape))
-    stop(paste0("Could not find file '", shape, "' in the working directory.\n"), call. = FALSE)
+    stop(paste0("Could not find file '", shape, "'.\n"), call. = FALSE)
   if (tools::file_ext(shape) == "shp") {
     shape <- sub(".shp", "", shape)
     shape <- rgdal::readOGR(dsn = ".", layer = shape, verbose = FALSE) #study area shapefile
@@ -743,15 +851,34 @@ size, rerun the function with force = TRUE.\n", call. = FALSE)
 #' is set to TRUE (default), an actel-compatible matrix is generated, and the user will be asked if they would
 #' like to save the matrix as 'distances.csv' in the current directory.
 #' 
+#' It is highly recommended to read the vignette regarding distances matrix before running this function.
+#' You can find it by running \code{vignette('a-2_distances_matrix', 'actel')} or \code{browseVignettes('actel')}
+#' 
 #' @param t.layer A TransitionLayer object, generated by \code{transitionLayer}.
-#' @param starters The points from which to start measuring the distance.
-#' @param targets The points to which a way must be found.
+#' @param starters A data frame with the points from which to start measuring the distance. Ignored if actel = TRUE (default), as the 'spatial.csv' is loaded as starters.
+#' @param targets A data frame with the points to which a way must be found. Ignored if actel = TRUE (default), as the 'spatial.csv' is loaded as targets.
 #' @param EPSGcode The EPSG code corresponding to the coordinate system of the input data. All inputs must be in the same metric system. DO NOT use degree-based coordinates.
-#' @param coord.x,coord.y The names of the columns containing the x and y information. Must be identical in the starters and targets.
-#' @param id.col The name of the column containing the IDs of the points to be used as starters and targets. Must be identical in both files.
-#' @param actel Logical: Should the distance matrix be optimized for actel and saved in the working directory?
+#' @param coord.x,coord.y The names of the columns containing the x and y coordinates. Must be identical in the starters and targets.
+#' @param id.col The name of the column containing the IDs of the points to be used as starters and targets. Must be identical in both files.  Ignored if actel = TRUE (default), as the stations' standard names are used.
+#' @param actel Logical: Should the distance matrix be optimized for actel? Defaults to TRUE.
 #'
-#' @return The distances matrix. If actel = TRUE, the distance matrix is also stored in a 'distances.csv' file.
+#' @examples
+#' \dontrun{
+#' # Assuming a shapefile was saved to 'shapefile.shp' in the current
+#' # working directory
+#' x <- transitionLayer("shapefile.shp", size = 20, EPSGcode = 32362)
+#' 
+#' # Assuming there is a 'spatial.txt' file in the current directory,
+#' # with a 'x' and 'y' column specifying coordinates in the same system
+#' # coordinate system as the original shapefile.
+#' distancesMatrix(x, coord.x = 'x', coord.y = 'y', EPSGcode = 32632)
+#' 
+#' # Alternatively, if you want to calculate a distances matrix that is not
+#' # optimised for future actel analyses, you can set 'actel' to FALSE and 
+#' # determine the 'starters', 'targets' and 'id.col' manually.
+#' }
+#' 
+#' @return A matrix with the distances between each pair of points.
 #' 
 #' @export
 #' 
@@ -885,6 +1012,20 @@ will artificially add water space around the shape file.", call. = FALSE)
 #' Creates an empty matrix based on the local 'spatial.csv' file and saves it to 'distances.csv' so the
 #' user can manually fill it.
 #' 
+#' It is highly recommended to read the vignette regarding distances matrix before running this function.
+#' You can find it by running \code{vignette('a-2_distances_matrix', 'actel')} or \code{browseVignettes('actel')}
+#' 
+#' @examples
+#' \dontrun{
+#' # This function requires the presence of a 'spatial.csv' file
+#' # in the current working directory. 
+#' emptyMatrix()
+#' }
+#' 
+#' @return An empty matrix with the rows and columns required to
+#'  operate with the 'spatial.csv' file present in the current
+#'  work directory.
+#' 
 #' @export
 #' 
 emptyMatrix <- function(){
@@ -906,7 +1047,29 @@ emptyMatrix <- function(){
 #' 
 #' Completes the bottom diagonal of a matrix with the same number of rows and columns.
 #' 
+#' It is highly recommended to read the vignette regarding distances matrix before running this function.
+#' You can find it by running \code{vignette('a-2_distances_matrix', 'actel')} or \code{browseVignettes('actel')}
+#' 
 #' @param x A distances matrix to be completed.
+#' 
+#' @examples
+#' # Create dummy matrix with upper diagonal filled.
+#' x <- matrix(
+#'  c( 0,  1,  2,  3,  4, 5,
+#'    NA,  0,  1,  2,  3, 4,
+#'    NA, NA,  0,  1,  2, 3,
+#'    NA, NA, NA,  0,  1, 2,
+#'    NA, NA, NA, NA,  0, 1,
+#'    NA, NA, NA, NA, NA, 0), 
+#'  ncol = 6, byrow = TRUE)
+#' 
+#' # inspect x
+#' x
+#' 
+#' # run completeMatrix
+#' completeMatrix(x)
+#' 
+#' @return A matrix of distances between pairs of points.
 #' 
 #' @export
 #' 

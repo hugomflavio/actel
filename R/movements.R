@@ -9,7 +9,7 @@
 #' @inheritParams splitDetections
 #' @inheritParams loadDetections
 #' 
-#' @return A list of movement events for each fish.
+#' @return A list containing the movement events for each fish.
 #' 
 #' @keywords internal
 #' 
@@ -113,9 +113,9 @@ groupMovements <- function(detections.list, bio, spatial, speed.method, max.inte
 #' @inheritParams groupMovements
 #' @param movements A list of movements for each target tag, created by groupMovements.
 #' 
-#' @keywords internal
+#' @return The movement data frame containing only valid events for the target fish.
 #' 
-#' @return The movement data frame containing only valid events
+#' @keywords internal
 #' 
 simplifyMovements <- function(movements, fish, bio, speed.method, dist.mat, invalid.dist) {
   # NOTE: The NULL variables below are actually column names used by data.table.
@@ -144,7 +144,7 @@ simplifyMovements <- function(movements, fish, bio, speed.method, dist.mat, inva
 #' @inheritParams simplifyMovements
 #' @inheritParams groupMovements
 #' 
-#' @return The movement data frame with time and speed calculations
+#' @return The movement data frame with speed calculations for the target fish.
 #' 
 #' @keywords internal
 #' 
@@ -178,7 +178,7 @@ movementSpeeds <- function(movements, speed.method, dist.mat) {
 #' @inheritParams movementSpeeds
 #' @param type The type of movements being analysed. One of "array" or "section".
 #' 
-#' @return The movement data frame with time and speed calculations
+#' @return The movement data frame with time calculations for the target fish.
 #' 
 #' @keywords internal
 #' 
@@ -225,7 +225,7 @@ movementTimes <- function(movements, type = c("array", "section")){
 #' @inheritParams movementSpeeds
 #' @param fish The tag ID of the fish currently being analysed
 #' 
-#' @return The movement data frame containing the missing information.
+#' @return The movement data frame containing time and speed from release to first event.
 #' 
 #' @keywords internal
 #' 
@@ -258,7 +258,7 @@ speedReleaseToFirst <- function(fish, bio, movements, dist.mat, invalid.dist = F
 #' @inheritParams simplifyMovements
 #' @inheritParams migration
 #' 
-#' @return the section movements
+#' @return A data frame containing the section movements for the target fish.
 #' 
 #' @keywords internal
 #' 
@@ -321,7 +321,7 @@ sectionMovements <- function(movements, sections, invalid.dist) {
 #' @param arrmoves the array movements
 #' @param secmoves the section movements
 #' 
-#' @return the updated array movements
+#' @return A data frame with the array movements for the target fish, with an updated 'Valid' column.
 #' 
 #' @keywords internal
 #' 

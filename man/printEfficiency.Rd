@@ -20,6 +20,9 @@ printEfficiency(
 
 \item{type}{The type of analysis being run (migration or residency)}
 }
+\value{
+A rmd string to be included in the report.
+}
 \description{
 Prints the ALS inter-array efficiency for inclusion in printRmd.
 }

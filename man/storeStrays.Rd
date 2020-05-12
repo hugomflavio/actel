@@ -6,6 +6,9 @@
 \usage{
 storeStrays()
 }
+\value{
+No return value, called for side effects.
+}
 \description{
 Store summary information on the stray tags detected in a permanent file.
 }

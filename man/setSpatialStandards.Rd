@@ -10,7 +10,7 @@ setSpatialStandards(input)
 \item{input}{A data frame with spatial information.}
 }
 \value{
-A data frame with the same information as the input plus the Standard names.
+A data frame with the same information as the input plus a Standard.name column.
 }
 \description{
 Includes standard names and also reprints 'spatial.csv'

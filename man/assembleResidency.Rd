@@ -16,7 +16,7 @@ coincident with the names given to the arrays. See the vignettes for more
 details.}
 }
 \value{
-A residency summary table
+A data frame with the compiled residency values
 }
 \description{
 Collect summary information for the residency analysis

@@ -10,7 +10,7 @@ dotMatrix(input)
 \item{input}{a dot data frame}
 }
 \value{
-a matrix of distances between arrays
+A matrix of the distance (in number of arrays) between pairs of arrays
 }
 \description{
 Create numerical distances between dot elements

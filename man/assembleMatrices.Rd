@@ -20,7 +20,7 @@ assembleMatrices(spatial, movements, status.df, arrays, paths, dotmat)
 \item{dotmat}{The matrix of distances between arrays.}
 }
 \value{
-A list of detection matrices split by groups and release sites
+A list containing the detection matrices split by groups and release sites
 }
 \description{
 Assemble detection matrices

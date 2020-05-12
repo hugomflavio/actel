@@ -8,10 +8,12 @@ checkReport(report)
 }
 \arguments{
 \item{report}{Logical. Should an HTML report be created at the end of the
-analysis?}
+analysis? NOTE: Setting report to TRUE will generate an HTML file in the current
+directory. Additionally, if auto.open = TRUE (default), the web browser will
+automatically be launched to open the report once the function terminates.}
 }
 \value{
-A TRUE/FALSE decision
+An updated report argument (logical)
 }
 \description{
 Checks if pandoc is up and running and creates a "Report" folder, if necessary

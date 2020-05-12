@@ -13,7 +13,7 @@ loadBio(file, tz)
 present in \code{\link[base]{timezones}}.}
 }
 \value{
-The biometrics table
+A data frame with the biometrics information
 }
 \description{
 Load Biometrics file

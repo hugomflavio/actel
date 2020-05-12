@@ -31,6 +31,9 @@ printExploreRmd(
 
 \item{valid.detectiosn}{The valid detections used in the study}
 }
+\value{
+No return value, called for side effects.
+}
 \description{
 Creates a Rmd report and converts it to html.
 }

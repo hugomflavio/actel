@@ -13,6 +13,9 @@ checkDupSignals(input, bio)
 
 \item{tag.list}{list of the target signals}
 }
+\value{
+No return value, called for side effects.
+}
 \description{
 Check if there are duplicated signals in the detected tags.
 }

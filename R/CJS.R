@@ -11,9 +11,9 @@
 #' @param status.df The main results table.
 #' @param dotmat The matrix of distances between arrays.
 #' @param paths A list containing the shortest paths between arrays with distance > 1.
-#' @param estimate an estimate of the last array's efficiency.
-#' @param fixed.efficiency A vector of fixed efficiency estimates from a more strict CJS model.
-#' @param silent Logical: Should messages be printed?
+#' @param estimate An estimate of the last array's efficiency, between 0 and 1.
+#' @param fixed.efficiency A vector of fixed efficiency estimates \[0, 1\]. `length(fixed.efficiency)` must match `ncol(input)`.
+#' @param silent Logical: Should messages be printed? This argument is mainly intended for function calls running within actel's analyses.
 #' @name cjs_args
 #' @keywords internal
 NULL
@@ -22,7 +22,7 @@ NULL
 #' 
 #' @inheritParams cjs_args
 #' 
-#' @return A list of dual matrices
+#' @return A list of dual matrices for each relevant array.
 #' 
 #' @keywords internal
 #' 
@@ -102,7 +102,7 @@ includeIntraArrayEstimates <- function(m, efficiency = NULL, CJS = NULL) {
 #' @param CJS A list of CJS calculated for each group x release site x array combinations
 #' @param arrays a list of arrays
 #' 
-#' @return A CJS results table for each group x release site combination
+#' @return A list containing the CJS results for each group x release site combination.
 #' 
 #' @keywords internal
 #' 
@@ -127,7 +127,7 @@ assembleSplitCJS <- function(mat, CJS, arrays, releases, intra.CJS = NULL) {
 #' @param CJS A list of CJS calculated for each group x array combinations
 #' @inheritParams cjs_args
 #' 
-#' @return A CJS results table for each group 
+#' @return A data frame containing the CJS results for each group 
 #' 
 #' @keywords internal
 #' 
@@ -154,7 +154,7 @@ assembleGroupCJS <- function(mat, CJS, arrays, releases, intra.CJS = NULL) {
 #' @param verbose Logical: Should appendTo be used?
 #' @inheritParams cjs_args
 #' 
-#' @return a list of matrices, split by array
+#' @return A list containing the split matrices for each array
 #' 
 #' @keywords internal
 #' 
@@ -214,7 +214,7 @@ breakMatricesByArray <- function(m, arrays, type = c("peers", "all"), verbose = 
 #' @param CJS A list of CJS calculated for each array
 #' @inheritParams cjs_args
 #' 
-#' @return A list with the CJS absolute numbers and efficiency estimates
+#' @return A list containing the CJS absolute numbers and efficiency estimates
 #' 
 #' @keywords internal
 #' 
@@ -274,7 +274,7 @@ assembleArrayCJS <- function(mat, CJS, arrays, releases) {
 #' 
 #' @inheritParams cjs_args
 #'
-#' @return A list of detection matrices split by groups and release sites
+#' @return A list containing the detection matrices split by groups and release sites
 #' 
 #' @keywords internal 
 #'
@@ -310,13 +310,29 @@ assembleMatrices <- function(spatial, movements, status.df, arrays, paths, dotma
   return(output)
 }
 
-#' Compute simple CJS model
+#' Analytical CJS model
 #'
-#' The calculations are based on 'Using mark-recapture models to estimate survival from telemetry data' by Perry et al. 2012
+#' Computes an analytical CJS model for a presence/absence matrix.
+#' 
+#' The internal calculations are based on 'Using mark-recapture models to estimate survival from telemetry data' by Perry et al. 2012
 #'
 #' @inheritParams cjs_args
 #' 
-#' @return A summary of the CJS results
+#' @examples
+#' # prepare a dummy presence/absence matrix
+#' x <- matrix(c(T, T, T, T, F, T, T, T, F), ncol = 3)
+#' colnames(x) <- c("Release", "Array1", "Array2")
+#' 
+#' # run CJS
+#' simpleCJS(x)
+#' 
+#' @return A list containing:
+#' \itemize{
+#'   \item \code{absolutes} A data frame with the absolute number of tags detected and missed,
+#'   \item \code{efficiency} A vector of calculated array detection efficiencies,
+#'   \item \code{survival} A matrix of calculated survivals,
+#'   \item \code{lambda} A combined detection efficiency * survival estimate for the last array.
+#' }
 #' 
 #' @export
 #' 
@@ -366,21 +382,21 @@ simpleCJS <- function(input, estimate = NULL, fixed.efficiency = NULL, silent = 
 
   # S: Survival probability between arrays
   # m: tags detected at i
-  # r: tags detected at i and downstream
-  # z: tags NOT detected at i but detected downstream
+  # r: tags detected at i and on peers
+  # z: tags NOT detected at i but detected on peers
   # p: probability of detection (efficiency)
   # M: fish estimated to be alive at i
 
   S <- rep(NA, ncol(input) - 1)
   r <- z <- p <- m <- M <- rep(NA, ncol(input))
   for(i in 1:(ncol(input) - 1)){
-    # number of tags detected at i and downstream (r)
+    # number of tags detected at i and on peers (r)
     tr <- input[input[, i] == 1, (i + 1):ncol(input)]
     if (is.data.frame(tr) | is.matrix(tr))
       r[i] = sum(apply(tr, 1, function(f) any(f == 1)))
     if (is.vector(tr))
       r[i] = sum(tr)
-    # number of tags NOT detected at i but detected downstream (z)
+    # number of tags NOT detected at i but detected on peers (z)
     tz <- input[input[, i] == 0, (i + 1):ncol(input)]
     if (is.data.frame(tz) | is.matrix(tz))
       z[i] = sum(apply(tz, 1, function(f) any(f == 1)))
@@ -448,7 +464,7 @@ simpleCJS <- function(input, estimate = NULL, fixed.efficiency = NULL, silent = 
   # prepare printings
   k <- sapply(1:length(m), function(i) sum(c(m[i], z[i]), na.rm = TRUE))
   absolutes <- matrix(c(m, r, z, k, M), ncol = ncol(input), byrow = TRUE)
-  rownames(absolutes) <- c("detected", "here plus downstream", "not here but downstream", "known", "estimated")
+  rownames(absolutes) <- c("detected", "here plus on peers", "not here but on peers", "known", "estimated")
   colnames(absolutes) <- colnames(input)
   names(p) <- colnames(input)
   link <- is.na(S) | S >= 0
@@ -481,7 +497,7 @@ simpleCJS <- function(input, estimate = NULL, fixed.efficiency = NULL, silent = 
 #' 
 #' @inheritParams cjs_args
 #' 
-#' @return A list of CJS results
+#' @return A list containing CJS results split by group and release site
 #' 
 #' @keywords internal
 #' 
@@ -515,7 +531,7 @@ mbSplitCJS <- function(mat, fixed.efficiency = NULL) {
 #' 
 #' @inheritParams cjs_args
 #' 
-#' @return A list of CJS results
+#' @return A list containing CJS results split by group.
 #' 
 #' @keywords internal
 #' 
@@ -548,7 +564,7 @@ mbGroupCJS <- function(mat, status.df, fixed.efficiency = NULL) {
 #'
 #' @inheritParams cjs_args
 #' 
-#' @return a matrix of detection histories per fish.
+#' @return A matrix of detection histories per fish.
 #' 
 #' @keywords internal
 #' 
@@ -585,7 +601,7 @@ efficiencyMatrix <- function(movements, arrays, paths, dotmat) {
 #' 
 #' @inheritParams cjs_args
 #' 
-#' @return the uni-directional movement table
+#' @return A data frame with the uni-directional movements for the target fish.
 #' 
 #' @keywords internal
 #' 
@@ -614,7 +630,7 @@ oneWayMoves <- function(movements, arrays) {
 #' @inheritParams res_efficiency
 #' @inheritParams dotPaths
 #' 
-#' @return NULL if no arrays failed, or a list of arrays which failed
+#' @return NULL if no arrays failed, or a list containing informatio on the arrays that failed
 #' 
 #' @keywords internal
 #' 
@@ -636,7 +652,7 @@ countArrayFailures <- function(moves, paths, dotmat) {
 #' @param to The array where the fish was next detected
 #' @inheritParams res_efficiency
 #' 
-#' @return A list of arrays which failed
+#' @return A list containing information on the arrays that failed
 #' 
 #' @keywords internal
 #' 
@@ -666,7 +682,7 @@ blameArrays <- function(from, to, paths) {
 #' @param x an efficiency matrix
 #' @inheritParams cjs_args
 #' 
-#' @return a matrix of detection histories per fish, including fish that were never detected.
+#' @return A matrix of detection histories per fish, including fish that were never detected.
 #' 
 #' @keywords internal
 #' 
@@ -719,7 +735,20 @@ dualMatrix <- function(array, replicates, spatial, detections.list){
 #' 
 #' @inheritParams cjs_args
 #' 
-#' @return A summary of the CJS results
+#' @examples
+#' # prepare a dummy presence/absence matrix
+#' x <- matrix(c(T, T, T, T, F, T), ncol = 2)
+#' colnames(x) <- c("R1", "R2")
+#' 
+#' # run CJS
+#' dualArrayCJS(x)
+#' 
+#' @return A list containing:
+#' \itemize{
+#'   \item \code{absolutes} A matrix with the absolute number of tags detected at each replicate and at both,
+#'   \item \code{single.efficiency} A vector of calculated array detection efficiencies for each of the replicates,
+#'   \item \code{combined.efficiency} The value of the combined detection efficiency for the array.
+#' }
 #' 
 #' @export
 #' 
@@ -727,6 +756,8 @@ dualArrayCJS <- function(input){
   if ((!inherits(input, "matrix") & !inherits(input, "data.frame")) || ncol(input) != 2 | any(!apply(input, 2, is.logical)))
     stop("Please provide a data.frame or matrix of TRUE/FALSE's with two columns", call. = FALSE)
 
+  if (is.null(colnames(input)))
+    colnames(input) <- c("R1", "R2")
   # r: tags detected at i and on other pair
   # z: tags NOT detected at i but detected on other pair
   # p: probability of detection (efficiency)
@@ -746,8 +777,8 @@ dualArrayCJS <- function(input){
   combined.p <- 1 - prod(1 - p)
   absolutes <- matrix(c(apply(input, 2, sum), r[1]), nrow = 3)
   colnames(absolutes) <- ""
-  rownames(absolutes) <- c("detected at original:", "detected at replicates: ", "detected at both:")
-  names(p) <- c("original", "replicates")
+  rownames(absolutes) <- c(paste0("detected at ", colnames(input)[1], ": "), paste0("detected at ", colnames(input)[2], ": "), "detected at both: ")
+  names(p) <- colnames(input)
   return(list(absolutes = absolutes, single.efficiency = p, combined.efficiency = combined.p))
 }
 
@@ -756,7 +787,13 @@ dualArrayCJS <- function(input){
 #' @param ... The detection matrices to be joined, or a list containing detection matrices
 #' @inheritParams cjs_args
 #' 
-#' @return The combined CJS
+#' @return A list containing:
+#' \itemize{
+#'   \item \code{absolutes} A data frame with the absolute number of tags detected and missed,
+#'   \item \code{efficiency} A vector of calculated array detection efficiencies,
+#'   \item \code{survival} A matrix of calculated survivals,
+#'   \item \code{lambda} A combined detection efficiency * survival estimate for the last array.
+#' }
 #' 
 #' @keywords internal
 #' 

@@ -18,7 +18,7 @@ first detection on the next array to perform the calculations.}
 \item{dist.mat}{A matrix of the distances between the deployed ALS.}
 }
 \value{
-The movement data frame with time and speed calculations
+The movement data frame with speed calculations for the target fish.
 }
 \description{
 Triggers movementTimes and also calculates the speed between events.

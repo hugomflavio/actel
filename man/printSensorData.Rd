@@ -12,7 +12,7 @@ printSensorData(detections, extension = "png")
 \item{extension}{the format of the generated graphics}
 }
 \value{
-a rmd string to add to the report
+A string of file locations in rmd syntax, to be included in printRmd
 }
 \description{
 Print sensor data for each individual tag

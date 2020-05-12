@@ -9,6 +9,17 @@ stripCodeSpaces(input)
 \arguments{
 \item{input}{A vector of transmitter names}
 }
+\value{
+A vector of transmitter signals
+}
 \description{
 Remove Code Spaces from transmitter names
+}
+\examples{
+# create dummy string
+x <- c("R64K-1234", "A69-1303-12")
+
+# run stripCodeSpaces
+stripCodeSpaces(x)
+
 }

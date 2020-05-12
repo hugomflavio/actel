@@ -2,7 +2,7 @@
 % Please edit documentation in R/helper.R
 \name{std.error.circular}
 \alias{std.error.circular}
-\title{Calculate the standard error of the mean}
+\title{Calculate the standard error of the mean for circular data}
 \usage{
 std.error.circular(x, na.rm = TRUE, silent = FALSE)
 }
@@ -14,9 +14,9 @@ std.error.circular(x, na.rm = TRUE, silent = FALSE)
 \item{silent}{Logical: Should the number of NA's removed be displayed?}
 }
 \value{
-Standard Error of the Mean
+The standard error of the mean (numeric value).
 }
 \description{
-Calculate the standard error of the mean
+Calculate the standard error of the mean for circular data
 }
 \keyword{internal}

@@ -13,6 +13,9 @@ printSectionTimes(section.times, bio, detections)
 
 \item{detections}{A valid detections list}
 }
+\value{
+No return value, called to plot and save graphic.
+}
 \description{
 Print arrival and departure times per section
 }

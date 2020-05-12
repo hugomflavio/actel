@@ -28,6 +28,8 @@ NULL
 #' 
 #' @inheritParams migration
 #' 
+#' @return No return value, called for side effects.
+#' 
 #' @keywords internal
 #' 
 checkSectionsUnique <- function(sections) {
@@ -47,7 +49,7 @@ checkSectionsUnique <- function(sections) {
 #' @param trigger The message/warning that triggered the interaction
 #' @param force Logical: If TRUE, the user is moved directly to indicating which movements should be invalidated.
 #' 
-#' @return The updated movements table
+#' @return A data frame with the updated movements table
 #' 
 #' @keywords internal
 #' 
@@ -128,7 +130,7 @@ tableInteraction <- function(moves, fish, trigger, GUI, force = FALSE) { # nocov
 #' 
 #' @keywords internal
 #' 
-#' @return An updated GUI argument
+#' @return An updated GUI argument (character string)
 #'
 #' 
 checkGUI <- function(GUI = c("needed", "always", "never")) {
@@ -174,6 +176,9 @@ checkGUI <- function(GUI = c("needed", "always", "never")) {
 #' Check if there are duplicated detection in the input data
 #' 
 #' @param input The detections data frame
+#' 
+#' @return The detections data frame, without duplicated detections.
+#' 
 #' @keywords internal
 #' 
 checkDupDetections <- function(input) {
@@ -232,6 +237,9 @@ checkDupDetections <- function(input) {
 #' Skips all validity checks for a fish and allows the user to freely invalidate events
 #' 
 #' @inheritParams check_args
+#' 
+#' @return A data frame containig the movements for the target fish
+#' 
 #' @keywords internal
 #' 
 overrideValidityChecks <- function(moves, fish, GUI) { # nocov start
@@ -249,7 +257,7 @@ overrideValidityChecks <- function(moves, fish, GUI) { # nocov start
 #' @inheritParams check_args
 #' @inheritParams explore
 #' 
-#' @return The movements with valid/invalid notes
+#' @return A data frame containing the movements with valid/invalid notes
 #' 
 #' @keywords internal
 #' 
@@ -266,7 +274,7 @@ checkMinimumN <- function(movements, minimum.detections, fish) {
 #' @inheritParams check_args
 #' @inheritParams explore
 #' 
-#' @return The valid movements list with valid/invalid rows
+#' @return A list of movements with updated 'Valid' columns
 #' 
 #' @keywords internal
 #' 
@@ -306,7 +314,7 @@ checkSpeeds <- function(movements, fish, valid.movements, speed.warning, speed.e
 #' @inheritParams check_args
 #' @inheritParams explore
 #' 
-#' @return The valid movements list with valid/invalid rows
+#' @return A list of movements with updated 'Valid' columns
 #' 
 #' @keywords internal
 #' 
@@ -394,7 +402,7 @@ checkInactiveness <- function(movements, fish, detections.list,
 #' 
 #' @inheritParams check_args
 #' 
-#' @return the movements list with valid/invalid rows
+#' @return A list of movements with updated 'Valid' columns
 #' 
 #' @keywords internal
 #' 
@@ -435,7 +443,7 @@ checkImpassables <- function(movements, fish, dotmat, GUI){
 #' @inheritParams check_args
 #' @inheritParams residency
 #' 
-#' @return the section movements with valid/invalid notes
+#' @return A list of section movements with updated 'Valid' columns
 #' 
 #' @keywords internal
 #' 
@@ -454,7 +462,7 @@ checkSMovesN <- function(secmoves, fish, section.minimum, GUI) {
 #' @inheritParams check_args
 #' @inheritParams migration
 #' 
-#' @return the section movements with valid/invalid notes
+#' @return A list of section movements with updated 'Valid' columns
 #' 
 #' @keywords internal
 #' 
@@ -505,7 +513,7 @@ checkLinearity <- function(secmoves, fish, sections, arrays, GUI) {
 #'
 #' @inheritParams explore
 #' 
-#' @return A TRUE/FALSE decision
+#' @return An updated report argument (logical)
 #' 
 #' @keywords internal
 #' 
@@ -545,7 +553,7 @@ checkReport <- function(report){
 #'
 #' @inheritParams check_args
 #' 
-#' @return The updated movements
+#' @return A data frame with the movements for the target fish with updated 'Valid' column.
 #' 
 #' @keywords internal
 #' 
@@ -580,7 +588,7 @@ checkUpstream <- function(movements, fish, release, arrays, GUI) {
 #' @inheritParams check_args
 #' @inheritParams explore
 #' 
-#' @return a checked movements list
+#' @return A list of movements with updated 'Valid' columns
 #' 
 #' @keywords internal
 #' 
@@ -645,6 +653,8 @@ checkJumpDistance <- function(movements, fish, release, dotmat, jump.warning, ju
 #' 
 #' @param input The table of deployments
 #' 
+#' @return No return value, called for side effects.
+#' 
 #' @keywords internal
 #' 
 checkDeploymentTimes <- function(input) {
@@ -674,6 +684,8 @@ checkDeploymentTimes <- function(input) {
 #' @param input The table of deployments
 #' @inheritParams check_args
 #' 
+#' @return A data frame with the deployment locations
+#' 
 #' @keywords internal
 #' 
 checkDeploymentStations <- function(input, spatial) {
@@ -700,6 +712,8 @@ checkDeploymentStations <- function(input, spatial) {
 #' 
 #' @param input The detections data frame
 #' 
+#' @return No return value, called for side effects.
+#' 
 #' @keywords internal
 #' 
 checkUnknownReceivers <- function(input) {
@@ -715,6 +729,13 @@ checkUnknownReceivers <- function(input) {
 #' @inheritParams check_args
 #' 
 #' @return A list containing an updated spatial list and a TRUE/FALSE object indicating whether or not Standard station names must be reprocessed.
+#' 
+#' @return A list containing:
+#' \itemize{
+#'  \item \code{spatial}: A list containing the spatial elements of the study, with data for the uknown receivers, if relevant.
+#'  \item \code{deployments}: A list containing the receiver deployments, with data for the uknown receivers, if relevant.
+#'  \item \code{detections.list}: A list containing the detections for each fish, with updated station names.
+#' }
 #' 
 #' @keywords internal
 #' 
@@ -770,6 +791,12 @@ checkTagsInUnknownReceivers <- function(detections.list, deployments, spatial) {
 #' @param unknown.receivers serial number of the receivers to be included
 #' @inheritParams check_args
 #' 
+#' @return A list containing:
+#' \itemize{
+#'  \item \code{spatial}: A list containing the spatial elements of the study, with data for the uknown receivers, if relevant.
+#'  \item \code{deployments}: A list containing the receiver deployments, with data for the uknown receivers, if relevant.
+#' }
+#' 
 #' @keywords internal
 #' 
 includeUnknownReceiver <- function(spatial, deployments, unknown.receivers){
@@ -801,8 +828,8 @@ includeUnknownReceiver <- function(spatial, deployments, unknown.receivers){
 #' @inheritParams check_args
 #' 
 #' @keywords internal
-#' 
-#' @return The detections list without invalid detections.
+#'
+#' @return A list containing the detections without invalid data.
 #' 
 checkDetectionsBeforeRelease <- function(input, bio){
   appendTo("debug", "Running detectionBeforeReleaseCheck.")  
@@ -855,6 +882,8 @@ checkDetectionsBeforeRelease <- function(input, bio){
 #' @param input The list of detections
 #' @inheritParams check_args
 #' 
+#' @return No return value, called for side effects.
+#' 
 #' @keywords internal
 #' 
 checkNoDetections <- function(input, bio){
@@ -867,7 +896,6 @@ checkNoDetections <- function(input, bio){
     emergencyBreak()
     stop("No detections were found in the input data which matched the target signals.\n", call. = FALSE)
   }
-  # return(list(list = tag.list, link = link))
 }
 
 #' Check if there are duplicated signals in the detected tags.
@@ -875,6 +903,8 @@ checkNoDetections <- function(input, bio){
 #' @param input list of detections
 #' @param tag.list list of the target signals
 #' @inheritParams check_args
+#' 
+#' @return No return value, called for side effects.
 #' 
 #' @keywords internal
 #' 
@@ -908,7 +938,7 @@ checkDupSignals <- function(input, bio){
 #' 
 #' @inheritParams check_args
 #' 
-#' @return the movement table with valid/invalid notes
+#' @return A data frame with the movement events for the target fish and an updated 'Valid' column.
 #' 
 #' @keywords internal
 #' 
@@ -992,7 +1022,7 @@ invalidateEvents <- function(movements, fish) { # nocov start
 #' @inheritParams check_args
 #' @param trigger The warning/message that triggered the interaction
 #' 
-#' @return the movement table with valid/invalid notes
+#' @return A data frame with the movement events for the target fish and an updated 'Valid' column.
 #' 
 #' @keywords internal
 #' 
@@ -1063,7 +1093,7 @@ graphicalInvalidate <- function(moves, fish, trigger) { # nocov start
 #' @param from The valid movements table with newly invalidated moves
 #' @param to The target movements table
 #' 
-#' @return the all movements table with valid/invalid updated
+#' @return A data frame with the movement events for the target fish and an updated 'Valid' column.
 #' 
 #' @keywords internal
 #' 

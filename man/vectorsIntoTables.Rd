@@ -12,7 +12,7 @@ vectorsIntoTables(input, columns)
 \item{columns}{the columns that should be present in every element}
 }
 \value{
-a list of tables with matching columns
+A list of tables with matching columns
 }
 \description{
 Used to prepare lists of vectors with partially matching names for combination with do.call(rbind.data.frame, x)

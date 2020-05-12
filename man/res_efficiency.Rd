@@ -20,8 +20,13 @@ res_efficiency(arrmoves, bio, spatial, arrays, paths, dotmat)
 \item{dotmat}{A dot distance matrix}
 }
 \value{
-An efficiency list, containing a table of absolutes, min and max efficiency
-and detailed information of where the arrays failed.
+A list containing:
+\itemize{
+\item \code{absolutes}: A data frame with the number of fish detected and missed at each array.
+\item \code{max.efficiency}: A vector of efficiency values calculated disregarding potentially missed fish.
+\item \code{min.efficiency}: A vector of efficiency values calculated taking into account potentially missed fish.
+\item \code{values.per.fish}: A list containing details on the arrays that have failed for each fish.
+}
 }
 \description{
 Calculate array efficiency for residency analysis

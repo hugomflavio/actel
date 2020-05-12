@@ -12,7 +12,7 @@ decimalTime(input, unit = c("h", "m", "s"))
 \item{unit}{the desired units of the output, one of "h" (hours), "m", (minutes) or "s" (seconds).}
 }
 \value{
-Decimal hour equivalent (single value or vector)
+A number or vector of numbers corresponding to the decimal hour equivalent of the character input.
 }
 \description{
 Convert hh:mm:ss time to hh.hhh

@@ -9,6 +9,9 @@ checkUnknownReceivers(input)
 \arguments{
 \item{input}{The detections data frame}
 }
+\value{
+No return value, called for side effects.
+}
 \description{
 Find detections from unknown receivers
 }

@@ -4,7 +4,13 @@
 \alias{compileDetections}
 \title{Combine ALS detections}
 \usage{
-compileDetections(path = "detections", start.time = NULL, stop.time = NULL, tz)
+compileDetections(
+  path = "detections",
+  start.time = NULL,
+  stop.time = NULL,
+  tz,
+  save.detections = FALSE
+)
 }
 \arguments{
 \item{path}{the path(s) to the detection files}
@@ -19,9 +25,12 @@ the analysis.}
 
 \item{tz}{The time zone of the study area. Must match one of the values
 present in \code{\link[base]{timezones}}.}
+
+\item{save.detections}{Logical: Should the processed detections be saved for
+future runs?}
 }
 \value{
-A dataframe with all the detections
+A data frame with all the detections
 }
 \description{
 Finds the detections' files and processes them.

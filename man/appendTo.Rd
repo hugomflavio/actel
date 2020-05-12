@@ -13,7 +13,10 @@ appendTo(recipient, line, fish)
 
 \item{fish}{the tag number to which the comment belongs. Only used when recipient = 'Comment'.}
 }
+\value{
+No return value, called for side effects.
+}
 \description{
-Appends a note/comment to the specified recipient, which in turn corresponds to a helper file (later on deleted by deleteHelpers).
+Appends a note/comment to the specified recipient, which in turn corresponds to a temporary helper file.
 }
 \keyword{internal}

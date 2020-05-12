@@ -12,7 +12,7 @@ checkDetectionsBeforeRelease(input, bio)
 \item{bio}{A table with the tags and biometrics of the studied fish.}
 }
 \value{
-The detections list without invalid detections.
+A list containing the detections without invalid data.
 }
 \description{
 Check if there are detections for the target tags before release.

@@ -70,23 +70,40 @@
 #' @param tz The time zone of the study area. Must match one of the values
 #'  present in \code{\link[base]{timezones}}.
 #' 
+#' @examples
+#' \dontrun{
+#' # If needed, create an example workspace
+#' exampleWorkspace()
+#' 
+#' # Move your R session into your target folder (e.g. "exampleWokspace")
+#' setwd("exampleWorkspace")
+#' 
+#' # run the explore analysis. Ensure the tz argument 
+#' # matches the time zone of the study area
+#' results <- explore(tz = "Europe/Copenhagen")
+#' 
+#' # to obtain an HTML report, run the analysis 
+#' # with report = TRUE
+#' results <- explore(tz = "Europe/Copenhagen", report = TRUE)
+#' }
+#' 
 #' @return A list containing:
 #' \itemize{
-#'  \item \code{detections}: All detections for each target fish;
-#'  \item \code{valid.detections}: Valid detections for each target fish;
-#'  \item \code{spatial}: The spatial information used during the analysis;
-#'  \item \code{deployments}: The deployments of each receiver;
-#'  \item \code{arrays}: The array details used during the analysis;
-#'  \item \code{movements}: All movement events for each target fish;
-#'  \item \code{valid.movements}: Valid movement events for each target fish;
-#'  \item \code{times}: All arrival times (per fish) at each array;
-#'  \item \code{rsp.info}: Appendix information for the RSP package;
-#'  \item \code{dist.mat}: The distance matrix used in the analysis (if a valid
+#'  \item \code{detections}: A list containing all detections for each target fish;
+#'  \item \code{valid.detections}: A list containing the valid detections for each target fish;
+#'  \item \code{spatial}: A list containing the spatial information used during the analysis;
+#'  \item \code{deployments}: A data frame containing the deployments of each receiver;
+#'  \item \code{arrays}: A list containing the array details used during the analysis;
+#'  \item \code{movements}: A list containing all movement events for each target fish;
+#'  \item \code{valid.movements}: A list containing the valid movement events for each target fish;
+#'  \item \code{times}: A data frame containing all arrival times (per fish) at each array;
+#'  \item \code{rsp.info}: A list containing containing appendix information for the RSP package;
+#'  \item \code{dist.mat}: A matrix containing the distance matrix used in the analysis (if a valid
 #'   distance matrix was supplied)
 #' }
 #' 
 #' @seealso \code{\link{migration}}, \code{\link{residency}}
-
+#' 
 #' @export
 #' 
 explore <- function(tz, max.interval = 60, minimum.detections = 2, start.time = NULL, stop.time = NULL, 
@@ -224,7 +241,6 @@ spatial <- study.data$spatial
 dot <- study.data$dot
 arrays <- study.data$arrays
 dotmat <- study.data$dotmat
-detections <- study.data$detections
 dist.mat <- study.data$dist.mat
 invalid.dist <- study.data$invalid.dist
 detections.list <- study.data$detections.list
@@ -477,6 +493,8 @@ detections.list <- study.data$detections.list
 #' @param valid.detectiosn The valid detections used in the study
 #' @inheritParams loadDetections
 #' 
+#' @return No return value, called for side effects.
+#' 
 #' @keywords internal
 #' 
 printExploreRmd <- function(override.fragment, biometric.fragment, individual.plots,
@@ -706,7 +724,7 @@ sink()
 #' @param detections.list The list of detections per fish
 #' @param movements The list of movements to be matched
 #' 
-#' @return A list of valid detections per fish
+#' @return A list containing the valid detections per fish-
 #' 
 #' @keywords internal
 #' 

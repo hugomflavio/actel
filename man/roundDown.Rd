@@ -12,7 +12,7 @@ roundDown(input, to = 10)
 \item{to}{The level of rounding to be applied (i.e. to=10 will round 14.8 to 10; to=1 will round i to 14).}
 }
 \value{
-The rounded value
+A numeric value or string.
 }
 \description{
 Forces the rounding of the input to the next lower rounded value.

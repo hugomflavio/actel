@@ -11,10 +11,10 @@ mbGroupCJS(mat, status.df, fixed.efficiency = NULL)
 
 \item{status.df}{The main results table.}
 
-\item{fixed.efficiency}{A vector of fixed efficiency estimates from a more strict CJS model.}
+\item{fixed.efficiency}{A vector of fixed efficiency estimates [0, 1]. \code{length(fixed.efficiency)} must match \code{ncol(input)}.}
 }
 \value{
-A list of CJS results
+A list containing CJS results split by group.
 }
 \description{
 Calculate CJS for each group for each array

@@ -22,7 +22,7 @@ first detection on the next array to perform the calculations.}
 \item{invalid.dist}{Whether or not the distance matrix supplied is valid for the study area.}
 }
 \value{
-The movement data frame containing only valid events
+The movement data frame containing only valid events for the target fish.
 }
 \description{
 Remove invalid movement events and recalculate times/speeds.

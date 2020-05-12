@@ -18,7 +18,7 @@ speedReleaseToFirst(fish, bio, movements, dist.mat, invalid.dist = FALSE)
 \item{invalid.dist}{Whether or not the distance matrix supplied is valid for the study area.}
 }
 \value{
-The movement data frame containing the missing information.
+The movement data frame containing time and speed from release to first event.
 }
 \description{
 Calculate time and speed since release.

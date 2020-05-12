@@ -62,6 +62,13 @@ been applied for tests that do not run on CRAN.
 * All installed.packages() calls were removed and the respective
 functions were addapted to work with packageDescription()
 
+* Examples were included in the documentation of all exported
+functions. Some of these examples were wrapped with \dontrun{}
+to avoid errors due to missing files and/or the need to deploy
+files outside R's temporary directory without explicit permission.
+
+* \value fields detailing the nature and content of the output
+were included for all functions.
 
 ## Package resubmission (1st revision)
 

@@ -10,7 +10,7 @@ dailyRatios(res)
 \item{res}{a residency list}
 }
 \value{
-the daily ratios
+A list containing the daily ratios for each fish.
 }
 \description{
 calculate daily ratios per fish

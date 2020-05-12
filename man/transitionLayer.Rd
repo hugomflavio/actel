@@ -20,20 +20,38 @@ transitionLayer(
 
 \item{size}{The pixel size, in metres.}
 
-\item{EPSGcode}{The EPSG code of the shape file's coordinate system. DO NOT USE degree-based coordinate systems.}
+\item{EPSGcode}{The EPSG code of the shape file's coordinate system. DO NOT USE degree-based
+coordinate systems.}
 
-\item{coord.x, coord.y}{The names of the columns containing the x and y positions of the stations in the spatial.csv file. Must be in the same coordinate system as the shape file.}
+\item{coord.x, coord.y}{The names of the columns containing the x and y positions of the stations
+in the spatial.csv file. Must be in the same coordinate system as the shape file.}
 
-\item{buffer}{Artificially expand the shape file edges. Can be a single value (applied to all edges) or four values (xmin, xmax, ymin, ymax).}
+\item{buffer}{Artificially expand the shape file edges. Can be a single value (applied to all edges)
+or four values (xmin, xmax, ymin, ymax).}
 
-\item{directions}{The number of directions considered for every movement situation during cost calculation. See the vignettes for more details.}
+\item{directions}{The number of directions considered for every movement situation during cost
+calculation. See the vignettes for more details.}
 
-\item{force}{Logical: Should the process continue even if the transition layer has 2000 pixels on one or both axes?}
+\item{force}{Logical: Should the process continue even if the transition layer has 2000 pixels
+on one or both axes?}
 }
 \value{
-A RData file with the transition layer is stored in the current directory.
+A TransitionLayer object.
 }
 \description{
 \code{transitionLayer()} imports a shape file into R and prepares it to be used in distance
-estimations. Adapted from Grant Adams' script "distance to closest mpa".
+estimations. Adapted from Grant Adams' script "distance to closest mpa". This function creates
+a 'transition.layer.RData' file in the current directory, which is then used by \code{\link{distancesMatrix}}.
+}
+\details{
+It is highly recommended to read the vignette regarding distances matrix before running this function.
+You can find it by running \code{vignette('a-2_distances_matrix', 'actel')} or \code{browseVignettes('actel')}
+}
+\examples{
+\dontrun{
+# Assuming a shapefile was saved to 'shapefile.shp' in the current
+# working directory
+x <- transitionLayer("shapefile.shp", size = 20, EPSGcode = 32362)
+}
+
 }

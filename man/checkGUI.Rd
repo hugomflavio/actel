@@ -18,7 +18,7 @@ not fit in R's console, a temporary file will be saved and the user will be
 prompted to open that file and examine it. Defaults to "needed".}
 }
 \value{
-An updated GUI argument
+An updated GUI argument (character string)
 }
 \description{
 Check if the dependencies required to open a GUI are installed, and if

@@ -11,6 +11,13 @@ includeUnknownReceiver(spatial, deployments, unknown.receivers)
 
 \item{unknown.receivers}{serial number of the receivers to be included}
 }
+\value{
+A list containing:
+\itemize{
+\item \code{spatial}: A list containing the spatial elements of the study, with data for the uknown receivers, if relevant.
+\item \code{deployments}: A list containing the receiver deployments, with data for the uknown receivers, if relevant.
+}
+}
 \description{
 Temporarily include missing receivers in the spatial object
 }

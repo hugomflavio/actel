@@ -10,8 +10,22 @@ dualArrayCJS(input)
 \item{input}{A presence/absence matrix.}
 }
 \value{
-A summary of the CJS results
+A list containing:
+\itemize{
+\item \code{absolutes} A matrix with the absolute number of tags detected at each replicate and at both,
+\item \code{single.efficiency} A vector of calculated array detection efficiencies for each of the replicates,
+\item \code{combined.efficiency} The value of the combined detection efficiency for the array.
+}
 }
 \description{
 The calculations are based on 'Using mark-recapture models to estimate survival from telemetry data' by Perry et al. 2012
+}
+\examples{
+# prepare a dummy presence/absence matrix
+x <- matrix(c(T, T, T, T, F, T), ncol = 2)
+colnames(x) <- c("R1", "R2")
+
+# run CJS
+dualArrayCJS(x)
+
 }

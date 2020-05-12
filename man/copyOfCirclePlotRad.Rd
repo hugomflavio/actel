@@ -30,6 +30,9 @@ copyOfCirclePlotRad(
 
 \item{control.circle}{parameters passed to plot.default in order to draw the circle. The function circle.control is used to set the parameters.}
 }
+\value{
+No return value, adds to an existing plot.
+}
 \description{
 This function is an EXACT copy of the function circlePlotRad() in the circular package.
 As the function is not exported by the original package, I have copied it here to resolve

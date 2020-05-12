@@ -24,6 +24,9 @@ ringsRel(
 
 \item{ring.text.cex}{The size of the ring's text. Ignored if ring.text is set to FALSE.}
 }
+\value{
+No return value, adds to an existing plot.
+}
 \description{
 Adapted from RosediagRad() (from the circular package) to draw rings inside the circular plot. Called if rings = TRUE in \code{\link{myRoseDiag}}
 }

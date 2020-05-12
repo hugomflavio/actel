@@ -32,7 +32,7 @@ present in \code{\link[base]{timezones}}.}
 \item{spatial}{The spatial data frame.}
 }
 \value{
-String to be included in printRmd
+A string of file locations in rmd syntax, to be included in printRmd
 }
 \description{
 Prints the individual detections for each fish, overlaying the points in time considered crucial during the analysis.

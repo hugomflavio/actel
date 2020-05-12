@@ -9,6 +9,9 @@ checkDupDetections(input)
 \arguments{
 \item{input}{The detections data frame}
 }
+\value{
+The detections data frame, without duplicated detections.
+}
 \description{
 Check if there are duplicated detection in the input data
 }

@@ -12,6 +12,9 @@ checkSectionsUnique(sections)
 coincident with the names given to the arrays. See the vignettes for more
 details.}
 }
+\value{
+No return value, called for side effects.
+}
 \description{
 Check that section names are not duplicated and that sections are not contained
 within other section names (e.g. section "N" and section "NW").

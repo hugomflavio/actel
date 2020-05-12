@@ -22,17 +22,36 @@
 #'  used as a replicate. See the vignettes for more details.
 #' @inheritParams explore
 #' 
+#' @examples
+#' \dontrun{
+#' # If needed, create an example workspace
+#' exampleWorkspace()
+#' 
+#' # Move your R session into your target folder (e.g. "exampleWokspace")
+#' setwd("exampleWorkspace")
+#' 
+#' # run the migration analysis. Ensure the tz argument 
+#' # matches the time zone of the study area and that the
+#' # sections match your array names. The line below works 
+#' for the example data.
+#' results <- migration(tz = "Europe/Copenhagen", sections = c("River", "Fjord", "Sea"))
+#' 
+#' # to obtain an HTML report, run the analysis 
+#' # with report = TRUE
+#' results <- migration(tz = "Europe/Copenhagen", sections = c("River", "Fjord", "Sea"), report = TRUE)
+#' }
+#' 
 #' @return A list containing:
 #' \itemize{
-#'  \item \code{detections}: All detections for each target fish;
-#'  \item \code{valid.detections}: Valid detections for each target fish;
-#'  \item \code{spatial}: The spatial information used during the analysis;
-#'  \item \code{deployments}: The deployments of each receiver;
-#'  \item \code{arrays}: The array details used during the analysis;
-#'  \item \code{movements}: All movement events for each target fish;
-#'  \item \code{valid.movements}: Valid movemenet events for each target fish;
-#'  \item \code{section.movements}: Valid section shifts for each target fish;
-#'  \item \code{status.df}: Summary information for each fish, including the
+#'  \item \code{detections}: A list containing all detections for each target fish;
+#'  \item \code{valid.detections}: A list containing the valid detections for each target fish;
+#'  \item \code{spatial}: A list containing the spatial information used during the analysis;
+#'  \item \code{deployments}: A data frame containing the deployments of each receiver;
+#'  \item \code{arrays}: A list containing the array details used during the analysis;
+#'  \item \code{movements}: A list containing all movement events for each target fish;
+#'  \item \code{valid.movements}: A list containing the valid movemenet events for each target fish;
+#'  \item \code{section.movements}: A list containing the valid section shifts for each target fish;
+#'  \item \code{status.df}: A data.frame containing summary information for each fish, including the
 #'   following columns:
 #'    \itemize{
 #'      \item \emph{Time.until.\[section\]}: Time spent between leaving one
@@ -63,17 +82,17 @@
 #'        }
 #'      \item \emph{Comments}: Comments left by the user during the analysis
 #'    }
-#'  \item \code{section.overview}: Summary table of the number of fish that 
+#'  \item \code{section.overview}: A data frame containing the number of fish that 
 #'    disappeared in each section;
-#'  \item \code{group.overview}: Number of known and estimated fish to have
-#'    passed through each array, divided by group;
-#'  \item \code{release.overview}: Number of known and estimated fish to have
-#'    passed through each array, divided by group and release sites;
-#'  \item \code{matrices}: CJS matrices used for the efficiency calculations;
-#'  \item \code{overall.CJS}: Results of the inter-array CJS calculations;
-#'  \item \code{intra.array.CJS}: Results of the intra-array CJS calculations;
-#'  \item \code{times}: All arrival times (per fish) at each array;
-#'  \item \code{rsp.info}: Appendix information for the RSP package;
+#'  \item \code{group.overview}: A list containing the number of known and 
+#'    estimated fish to have passed through each array, divided by group;
+#'  \item \code{release.overview}: A list containing the number of known and 
+#'    estimated fish to have passed through each array, divided by group and release sites;
+#'  \item \code{matrices}: A list of CJS matrices used for the efficiency calculations;
+#'  \item \code{overall.CJS}: A list of CJS results of the inter-array CJS calculations;
+#'  \item \code{intra.array.CJS}: A list of CJS results of the intra-array CJS calculations;
+#'  \item \code{times}: A data frame containing all arrival times (per fish) at each array;
+#'  \item \code{rsp.info}: A list containing appendix information for the RSP package;
 #'  \item \code{dist.mat}: The distance matrix used in the analysis (if a valid
 #'   distance matrix was supplied)
 #' }
@@ -235,7 +254,6 @@ migration <- function(tz, sections, success.arrays = NULL, max.interval = 60, mi
   arrays <- study.data$arrays
   dotmat <- study.data$dotmat
   paths <- study.data$paths
-  detections <- study.data$detections
   dist.mat <- study.data$dist.mat
   invalid.dist <- study.data$invalid.dist
   detections.list <- study.data$detections.list
@@ -662,6 +680,8 @@ migration <- function(tz, sections, success.arrays = NULL, max.interval = 60, mi
 #' @param sensor.plots Rmarkdown string specifying the name of the sensor plots.
 #' @inheritParams loadDetections
 #' 
+#' @return No return value, called for side effects.
+#' 
 #' @keywords internal
 #' 
 printMigrationRmd <- function(override.fragment, biometric.fragment, section.overview,
@@ -952,7 +972,7 @@ sink()
 #' @inheritParams assembleArrayCJS
 #' @param movements A list of movements for each target tag, created by groupMovements.
 #' 
-#' @return A table of the entering and leaving points for each section per target tag
+#' @return A data frame containing the entering and leaving timestamps for each section per target tag
 #' 
 #' @keywords internal
 #' 
@@ -1105,9 +1125,13 @@ assembleTimetable <- function(vm, all.moves, sections, arrays,
 #' @inheritParams simplifyMovements
 #' @inheritParams assembleArrayCJS
 #' 
-#' @keywords internal
+#' @return A list containing:
+#' \itemize{
+#'  \item \code{sum.back.moves} The number of backwards movements for the target tag
+#'  \item \code{max.back.moves} The maximum number of consecutive backwards movements for the target tag
+#' }
 #' 
-#' @return The number of backwards movements and the maximum consecutive backwards movements
+#' @keywords internal
 #' 
 countBackMoves <- function(movements, arrays){
   appendTo("debug", "Starting countBackMoves.")

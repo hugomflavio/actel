@@ -12,7 +12,7 @@ invalidateEvents(movements, fish)
 \item{fish}{The fish being analysed}
 }
 \value{
-the movement table with valid/invalid notes
+A data frame with the movement events for the target fish and an updated 'Valid' column.
 }
 \description{
 Allow the user to determine a given movement event invalid

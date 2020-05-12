@@ -2,13 +2,22 @@
 % Please edit documentation in R/helper.R
 \name{dataToList}
 \alias{dataToList}
-\title{Import actel Results to a List}
+\title{Import RData in a list format}
 \usage{
 dataToList(source)
 }
 \arguments{
-\item{source}{A RData file containing actel results from a previous run}
+\item{source}{A RData file.}
+}
+\value{
+A list containing the objects present in the source RData file.
 }
 \description{
-Import actel Results to a List
+Import RData in a list format
+}
+\examples{
+\dontrun{
+dataTolist("Path/to/file.RData")
+}
+
 }

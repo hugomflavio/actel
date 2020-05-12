@@ -9,14 +9,20 @@ combineCJS(..., estimate = NULL, fixed.efficiency = NULL, silent = FALSE)
 \arguments{
 \item{...}{The detection matrices to be joined, or a list containing detection matrices}
 
-\item{estimate}{an estimate of the last array's efficiency.}
+\item{estimate}{An estimate of the last array's efficiency, between 0 and 1.}
 
-\item{fixed.efficiency}{A vector of fixed efficiency estimates from a more strict CJS model.}
+\item{fixed.efficiency}{A vector of fixed efficiency estimates [0, 1]. \code{length(fixed.efficiency)} must match \code{ncol(input)}.}
 
-\item{silent}{Logical: Should messages be printed?}
+\item{silent}{Logical: Should messages be printed? This argument is mainly intended for function calls running within actel's analyses.}
 }
 \value{
-The combined CJS
+A list containing:
+\itemize{
+\item \code{absolutes} A data frame with the absolute number of tags detected and missed,
+\item \code{efficiency} A vector of calculated array detection efficiencies,
+\item \code{survival} A matrix of calculated survivals,
+\item \code{lambda} A combined detection efficiency * survival estimate for the last array.
+}
 }
 \description{
 Combine multiple CJS models

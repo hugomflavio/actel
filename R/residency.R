@@ -12,17 +12,36 @@
 #' @inheritParams migration
 #' @inheritParams explore
 #' 
+#' @examples
+#' \dontrun{
+#' # If needed, create an example workspace
+#' exampleWorkspace()
+#' 
+#' # Move your R session into your target folder (e.g. "exampleWokspace")
+#' setwd("exampleWorkspace")
+#' 
+#' # Run the residency analysis. Ensure the tz argument 
+#' # matches the time zone of the study area and that the
+#' # sections match your array names. The line below works 
+#' for the example data.
+#' results <- residency(tz = "Europe/Copenhagen", sections = c("River", "Fjord", "Sea"))
+#' 
+#' # to obtain an HTML report, run the analysis 
+#' # with report = TRUE
+#' results <- residency(tz = "Europe/Copenhagen", sections = c("River", "Fjord", "Sea"), report = TRUE)
+#' }
+#' 
 #' @return A list containing:
 #' \itemize{
-#'  \item \code{detections}: All detections for each target fish;
-#'  \item \code{valid.detections}: Valid detections for each target fish;
-#'  \item \code{spatial}: The spatial information used during the analysis;
-#'  \item \code{deployments}: The deployments of each receiver;
-#'  \item \code{arrays}: The array details used during the analysis;
-#'  \item \code{movements}: All movement events for each target fish;
-#'  \item \code{valid.movements}: Valid movemenet events for each target fish;
-#'  \item \code{section.movements}: Valid section shifts for each target fish;
-#'  \item \code{status.df}: Summary information for each fish, including the
+#'  \item \code{detections}: A list containing all detections for each target fish;
+#'  \item \code{valid.detections}: A list containing the valid detections for each target fish;
+#'  \item \code{spatial}: A list containing the spatial information used during the analysis;
+#'  \item \code{deployments}: A data frame containing the deployments of each receiver;
+#'  \item \code{arrays}: A list containing the array details used during the analysis;
+#'  \item \code{movements}: A list containing all movement events for each target fish;
+#'  \item \code{valid.movements}: A list containing the valid movemenet events for each target fish;
+#'  \item \code{section.movements}: A list containing the valid section shifts for each target fish;
+#'  \item \code{status.df}: A data frame containing summary information for each fish, including the
 #'   following columns:
 #'    \itemize{
 #'      \item \emph{Times.entered.\[section\]}: Total number of times the fish
@@ -52,24 +71,24 @@
 #'        }
 #'      \item \emph{Comments}: Comments left by the user during the analysis
 #'    }
-#'  \item \code{last.seen}: Summary table of the number of fish last seen in
+#'  \item \code{last.seen}: A data frame containing the number of fish last seen in
 #'    each study area section;
-#'  \item \code{array.times}: Table containing ALL the entry times of each fish
+#'  \item \code{array.times}: A data frame containing ALL the entry times of each fish
 #'    in each array;
-#'  \item \code{section.times}: Table containing all the entry times of each 
+#'  \item \code{section.times}: A data frame containing all the entry times of each 
 #'    fish in each section;
-#'  \item \code{residency.list}: Places of residency between first and last
+#'  \item \code{residency.list}: A list containing the places of residency between first and last
 #'    valid detection for each fish;
-#'  \item \code{daily.ratios}: Daily location per section (both in seconds spent
+#'  \item \code{daily.ratios}: A list containing the daily location per section (both in seconds spent
 #'    and in percentage of day) for each fish;
-#'  \item \code{daily.positions}: Summary table showing the location where each
+#'  \item \code{daily.positions}: A data frame showing the location where each
 #'    fish spent the most time per day;
-#'  \item \code{global.ratios}: Summary tables showing the number of active fish
+#'  \item \code{global.ratios}: A list containing summary tables showing the number of active fish
 #'    (and respective percentages) present at each location per day;
-#'  \item \code{efficiency}: Results of the inter-array Multi-way efficiency
+#'  \item \code{efficiency}: A list containing the results of the inter-array Multi-way efficiency
 #'    calculations (see vignettes for more details);
-#'  \item \code{intra.array.CJS}: Results of the intra-array CJS calculations;
-#'  \item \code{rsp.info}: Appendix information for the RSP package;
+#'  \item \code{intra.array.CJS}: A list containing the results of the intra-array CJS calculations;
+#'  \item \code{rsp.info}: A list containing appendix information for the RSP package;
 #'  \item \code{dist.mat}: The distance matrix used in the analysis (if a valid
 #'   distance matrix was supplied)
 #' }
@@ -227,7 +246,6 @@ residency <- function(tz, sections, max.interval = 60, minimum.detections = 2,
   arrays <- study.data$arrays
   dotmat <- study.data$dotmat
   paths <- study.data$paths
-  detections <- study.data$detections
   dist.mat <- study.data$dist.mat
   invalid.dist <- study.data$invalid.dist
   detections.list <- study.data$detections.list
@@ -588,6 +606,8 @@ residency <- function(tz, sections, max.interval = 60, minimum.detections = 2,
 #' @inheritParams printMigrationRmd
 #' @inheritParams loadDetections
 #' 
+#' @return No return value, called for side effects.
+#' 
 #' @keywords internal
 #' 
 printResidencyRmd <- function(override.fragment, biometric.fragment, efficiency.fragment,
@@ -919,7 +939,7 @@ sink()
 #' @param movements the array-movements (Valid and invalid)
 #' @inheritParams migration
 #' 
-#' @return A residency summary table
+#' @return A data frame with the compiled residency values
 #' 
 #' @keywords internal
 #' 
@@ -1068,8 +1088,13 @@ res_assembleOutput <- function(res.df, bio, spatial, sections, tz) {
 #' @param paths a list containing the shortest paths between arrays with distance > 1
 #' @inheritParams dotPaths
 #' 
-#' @return An efficiency list, containing a table of absolutes, min and max efficiency 
-#' and detailed information of where the arrays failed.
+#' @return A list containing:
+#' \itemize{
+#'  \item \code{absolutes}: A data frame with the number of fish detected and missed at each array.
+#'  \item \code{max.efficiency}: A vector of efficiency values calculated disregarding potentially missed fish.
+#'  \item \code{min.efficiency}: A vector of efficiency values calculated taking into account potentially missed fish.
+#'  \item \code{values.per.fish}: A list containing details on the arrays that have failed for each fish.
+#' }
 #' 
 #' @keywords internal
 #'  
@@ -1128,7 +1153,7 @@ res_efficiency <- function(arrmoves, bio, spatial, arrays, paths, dotmat) {
 #' @inheritParams res_efficiency
 #' @inheritParams dotPaths
 #' 
-#' @return NULL if no arrays failed, or a list of arrays which failed.
+#' @return NULL if no arrays failed, or a list of arrays that failed.
 #' 
 #' @keywords internal
 #' 
@@ -1176,7 +1201,7 @@ firstArrayFailure <- function(fish, bio, spatial, first.array, paths, dotmat) {
 #' @param movements the movements list
 #' @inheritParams loadDistances
 #' 
-#' @return a list of residency tables
+#' @return a list containing residency tables for each fish.
 #' 
 #' @keywords internal
 #' 
@@ -1219,7 +1244,7 @@ getResidency <- function(movements, spatial){
 #' 
 #' @param res a residency list
 #' 
-#' @return the daily ratios
+#' @return A list containing the daily ratios for each fish.
 #' 
 #' @keywords internal
 #' 
@@ -1252,7 +1277,7 @@ dailyRatios <- function(res) {
 #' @param day the day being analysed (a Date object)
 #' @param the.range the first and last day for the specific fish
 #' 
-#' @return the number of seconds spent at each location
+#' @return A data frame containing the number of seconds spent at each location for a specific day
 #' 
 #' @keywords internal
 #' 
@@ -1359,7 +1384,7 @@ findSecondsPerSection <- function(res, day, the.range) {
 #' 
 #' @param input a list containing the output of findSecondsPerSection for each day
 #' 
-#' @return the daily ratios table for the fish
+#' @return A data frame with the daily ratios table for the target fish
 #' 
 #' @keywords internal
 #' 
@@ -1397,7 +1422,7 @@ dailyRatiosIndOut <- function(input) {
 #' 
 #' @param ratios the daily ratios
 #' 
-#' @return a data frame with the transmitters as columns and the days as rows
+#' @return A data frame containing the section in which each fish spent more time per day.
 #' 
 #' @keywords internal
 #' 
@@ -1423,7 +1448,7 @@ dailyPositions <- function(ratios) {
 #' @param input the list of vectors
 #' @param columns the columns that should be present in every element
 #' 
-#' @return a list of tables with matching columns
+#' @return A list of tables with matching columns
 #' 
 #' @keywords internal
 #' 
@@ -1450,8 +1475,12 @@ vectorsIntoTables <- function(input, columns) {
 #' 
 #' @param positions a positions table, supplied by dailyPositions
 #'
-#' @return A list with 1) a table containing the absolute number of fish at each location per day,
-#'  and 2) the respective percentage table.
+#' @return A list containing:
+#' \itemize{
+#'  \item \code{absolutes}: A data frame containing the absolute number of fish at each location per day,
+#'  \item \code{percentages}: A data frame containing the percentage of fish relative to the total
+#'    number of active fish at each location per day.
+#' }
 #' 
 #' @keywords internal
 #' 

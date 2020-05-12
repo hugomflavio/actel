@@ -2,14 +2,20 @@
 % Please edit documentation in R/helper.R
 \name{nearsq}
 \alias{nearsq}
-\title{find optimum plotting grid}
+\title{Find optimum plotting grid}
 \usage{
 nearsq(n, tol = 5/3 + 0.001)
 }
 \arguments{
 \item{n}{number of plots to fit.}
 }
+\value{
+a vector of the number of rows and number of columns needed to distribute the desired number of plots.
+}
 \description{
-obtained here: https://stackoverflow.com/questions/32017327/calculate-the-optimal-grid-layout-dimensions-for-a-given-amount-of-plots-in-r
+Calculates the optimal distribution of plots in a square grid.
+}
+\details{
+Obtained here: https://stackoverflow.com/questions/32017327/calculate-the-optimal-grid-layout-dimensions-for-a-given-amount-of-plots-in-r
 }
 \keyword{internal}

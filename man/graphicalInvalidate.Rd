@@ -14,7 +14,7 @@ graphicalInvalidate(moves, fish, trigger)
 \item{trigger}{The warning/message that triggered the interaction}
 }
 \value{
-the movement table with valid/invalid notes
+A data frame with the movement events for the target fish and an updated 'Valid' column.
 }
 \description{
 Opens a new window that allows the user to determine movement event invalidity

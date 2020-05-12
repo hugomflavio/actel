@@ -16,6 +16,9 @@ details.}
 \item{print.releases}{Logical: Should the release sites be printed in the
 study area diagrams?}
 }
+\value{
+No return value, called to plot and save graphic.
+}
 \description{
 Print DOT diagram
 }

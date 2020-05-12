@@ -3,7 +3,20 @@
 #' @inheritParams explore
 #' @inheritParams migration
 #' 
-#' @return a list of objects to be used for data analysis
+#' @return A list containing:
+#' \itemize{
+#'  \item \code{bio}: A data frame corresponding to 'biometrics.csv'
+#'  \item \code{sections}: A vector of the study area sections (or NULL in the case of the `explore` function)
+#'  \item \code{deployments}: A list corresponding to 'deployments.csv'
+#'  \item \code{spatial}: A list corresponding to 'spatial.csv'
+#'  \item \code{dot}: A data frame containing the connections between arrays
+#'  \item \code{arrays}: A list containing detailed information on the arrays
+#'  \item \code{dotmat}: A matrix of the distance (in number of arrays) between pairs of arrays
+#'  \item \code{dist.mat}: A matrix of the distances (in metres) between stations (if a 'distances.csv' is present)
+#'  \item \code{invalid.dist}: Logical: Is the distances matrix valid?
+#'  \item \code{detections.list}: A list containing the detection data for each fish
+#'  \item \code{paths}: A list of the all array paths between each pair of arrays.
+#' }
 #' 
 #' @keywords internal
 #' 
@@ -101,18 +114,24 @@ loadStudyData <- function(tz, override = NULL, start.time, stop.time, save.detec
   detections.list <- checkDetectionsBeforeRelease(input = detections.list, bio = bio)
   appendTo(c("Screen", "Report"), "M: Data successfully imported!")
   return(list(bio = bio, sections = sections, deployments = deployments, spatial = spatial, dot = dot,
-   arrays = arrays, dotmat = dotmat, detections = detections, dist.mat = dist.mat, invalid.dist = invalid.dist, 
+   arrays = arrays, dotmat = dotmat, dist.mat = dist.mat, invalid.dist = invalid.dist, 
    detections.list = detections.list, paths = paths))
 }
 
 #' Load spatial.dot
 #' 
-#' @param input The name of the dot file
-#' @param spatial A spatial data frame
-#' @param string A dot string
+#' @param input The name of a file containing dot connections.
+#' @param spatial A spatial data frame.
+#' @param string A string of dot connections.
 #' @inheritParams migration
 #' 
-#' @return The dot list
+#' @return A list containing:
+#' \itemize{
+#'  \item \code{dot}: A data frame containing the connections between arrays
+#'  \item \code{arrays}: A list containing detailed information on the arrays
+#'  \item \code{dotmat}: A matrix of the distance (in number of arrays) between pairs of arrays
+#'  \item \code{paths}: A list of the all array paths between each pair of arrays.
+#' }
 #' 
 #' @keywords internal
 #' 
@@ -145,11 +164,31 @@ loadDot <- function(string = NULL, input = NULL, spatial, sections = NULL, disre
   return(list(dot = dot, arrays = arrays, dotmat = mat, paths = shortest.paths))
 }
 
-#' Read dot file
+#' Read dot file or string
 #' 
 #' @inheritParams loadDot
 #' 
-#' @return A table with A to B rows
+#' @examples
+#' # create dummy dot string
+#' x <- c("A--B--C--D--E--F")
+#' 
+#' # run readDot
+#' readDot(string = x)
+#' 
+#' # more complex strings are acceptable:
+#' y <- x(
+#' "A--B--C--D--E--F
+#' A--G--H--I--E
+#' H--C")
+#' 
+#' readDot(string = y)
+#' 
+#' \dontrun{
+#' # Alternatively, connections can be read from a file
+#' readDot(input = "file.txt")
+#' }
+#' 
+#' @return A data frame with the connections present in the input.
 #' 
 #' @export
 #' 
@@ -191,7 +230,7 @@ readDot <- function (input = NULL, string = NULL) {
 #' 
 #' @param input a dot data frame
 #' 
-#' @return a matrix of distances between arrays
+#' @return A matrix of the distance (in number of arrays) between pairs of arrays
 #' 
 #' @keywords internal
 #' 
@@ -240,7 +279,7 @@ dotMatrix <- function(input) {
 #' @param input a dot data frame
 #' @inheritParams migration
 #' 
-#' @return A list containing, for each array, the arrays that connect to it and to which it connects.
+#' @return  A list containing detailed information on the arrays
 #' 
 #' @keywords internal
 #' 
@@ -288,7 +327,7 @@ dotList <- function(input, sections = NULL) {
 #' @param dotmat A dot distance matrix
 #' @inheritParams migration
 #' 
-#' @return The input list, with an extra element for each array with valid efficiency peers
+#' @return A list of the all array paths between each pair of arrays.
 #' 
 #' @keywords internal
 #' 
@@ -305,7 +344,7 @@ dotPaths <- function(input, dotmat, disregard.parallels) {
 #' @param input An array list
 #' @param type The type of peers to be found ("before" or "after")
 #' 
-#' @return The array list with efficiency peers
+#' @return The array list with efficiency peers.
 #' 
 #' @keywords internal
 #' 
@@ -372,7 +411,7 @@ findPeers <- function(input, dotmat, type = c("before", "after"), disregard.para
 #' @param input An array list
 #' @param type The direction in which to expand the chain ("before" or "after")
 #' 
-#' @return The array list with all linked arrays
+#' @return The array list with all linked arrays.
 #' 
 #' @keywords internal
 #' 
@@ -403,7 +442,7 @@ findDirectChains <- function(input, dotmat, type = c("before", "after")) {
 #' 
 #' @param input An array list
 #' 
-#' @return The array list with all paths between arrays with distance > 1
+#' @return The array list with all paths between arrays with distance > 1.
 #' 
 #' @keywords internal
 #' 
@@ -452,7 +491,7 @@ findShortestChains <- function(input) {
 #' 
 #' @param input A data frame with spatial information.
 #'  
-#' @return A data frame with the same information as the input plus the Standard names.
+#' @return A data frame with the same information as the input plus a Standard.name column.
 #' 
 #' @keywords internal
 #' 
@@ -467,11 +506,15 @@ setSpatialStandards <- function(input){
 
 #' Load distances matrix
 #' 
-#' @param spatial A list of spatial objects in the study area
+#' @param spatial A list of spatial objects in the study area.
+#' 
+#' @return a list containing:
+#' \itemize{
+#'  \item \code{dist.mat}: A matrix of the distances (in metres) between stations (if a 'distances.csv' is present)
+#'  \item \code{invalid.dist}: Logical: Is the distances matrix valid?
+#' }
 #' 
 #' @keywords internal 
-#' 
-#' @return a list containing the distances matrix and a TRUE/FALSE value indicating whether or not that distances matrix is valid for the target study area.
 #' 
 loadDistances <- function(spatial) {
   # Check for distances
@@ -530,7 +573,7 @@ loadDistances <- function(spatial) {
 #' 
 #' @param file an input file with spatial data.
 #' 
-#' @return The deployments dataframe
+#' @return A data frame with the deployments information
 #' 
 #' @keywords internal
 #' 
@@ -587,10 +630,20 @@ loadDeployments <- function(file, tz){
 
 #' Load Spatial File
 #' 
-#' @param file an input file with spatial data.
-#' @param report Logical: If TRUE, the appendTo function is enabled.
+#' Loads a spatial file prepared for actel and appends the Standard.name column. Additionally,
+#' performs a series of quality checks on the contents of the target file.
 #' 
-#' @return The spatial dataframe
+#' @param file an input file with spatial data in the actel format.
+#' @param report Logical: Is the function being run inside an actel analysis? Defaults to FALSE, to deactivate
+#' unnecessary elements when the function is being run manually by the user.
+#' 
+#' @examples
+#' \dontrun{
+#' # Assuming there is a 'spatial.csv' file in the current directory
+#' loadSpatial('spatial.csv')
+#' }
+#' 
+#' @return A data frame with the spatial information present in 'spatial.csv' and the Standard.name column.
 #' 
 #' @export
 #' 
@@ -650,8 +703,6 @@ loadSpatial <- function(file = "spatial.csv", report = FALSE){
   return(input)
 }
 
-
-
 #' Load Biometrics file
 #' 
 #' @param file an input file with biometric data.
@@ -659,9 +710,7 @@ loadSpatial <- function(file = "spatial.csv", report = FALSE){
 #' 
 #' @keywords internal
 #' 
-#' @return The biometrics table
-#' 
-#' @export
+#' @return A data frame with the biometrics information
 #' 
 loadBio <- function(file, tz){
   appendTo("debug", "Running loadBio.")
@@ -781,7 +830,7 @@ loadBio <- function(file, tz){
 #' 
 #' @inheritParams explore
 #' 
-#' @return A dataframe with all the detections
+#' @return A data frame with all the detections
 #' 
 #' @keywords internal
 #' 
@@ -836,7 +885,7 @@ loadDetections <- function(start.time = NULL, stop.time = NULL, tz, force = FALS
 #' 
 #' @import data.table
 #' 
-#' @return A dataframe with all the detections
+#' @return A data frame with all the detections
 #' 
 #' @keywords internal
 #' 
@@ -1078,7 +1127,7 @@ convertTimes <- function(input, start.time, stop.time, tz) {
 #' 
 #' @param input A data frame with the deployments
 #' 
-#' @return A list of deployments, with unique serial numbers per deployment
+#' @return A list of deployments, with unique serial numbers per deployment.
 #' 
 #' @keywords internal
 #' 
@@ -1198,6 +1247,8 @@ splitDetections <- function(detections, bio, exclude.tags = NULL, silent = FALSE
 #' @param input list of detections for the tags to be excluded.
 #' @param restart logical: if TRUE, remove file 'temp_strays.csv' from the working directory.
 #' 
+#' @return No return value, called for side effects.
+#' 
 #' @keywords internal
 #' 
 collectStrays <- function(input, restart = FALSE){
@@ -1220,6 +1271,8 @@ collectStrays <- function(input, restart = FALSE){
 
 #' Store summary information on the stray tags detected in a permanent file.
 #'
+#' @return No return value, called for side effects.
+#' 
 #' @keywords internal
 #'
 storeStrays <- function(){
@@ -1327,7 +1380,11 @@ createStandards <- function(detections, spatial, deployments) {
 #' @inheritParams splitDetections
 #' @inheritParams explore
 #' 
-#' @return A list of 1) stations, 2) release sites, 3) ALS columns in the spatial file, 4) the Number of ASL, 5) The ALS serial numbers and 6) the array order.
+#' @return A list containing:
+#' \itemize{
+#'  \item \code{spatial}: The stations, release sites and array order.
+#'  \item \code{sections}: A vector of the section names.
+#' }
 #' 
 #' @keywords internal
 #' 
@@ -1472,6 +1529,8 @@ transformSpatial <- function(spatial, bio, arrays, dotmat, sections = NULL, firs
 #' @inheritParams explore
 #' @inheritParams splitDetections
 #'
+#' @return A list of detections for each tag that does not contain the excluded tags.
+#' 
 #' @keywords internal
 #' 
 excludeTags <- function(input, exclude.tags, silent){

@@ -5,6 +5,16 @@
 #' 
 #' @param dir The name of the target directory. Will be created if not present
 #'
+#' @examples
+#' \dontrun{
+#' # running createWorkspace deploys template files for an analysis
+#' # by default, createWorkspace creates a directory called 'actel_workspace'
+#' # but this can be changed with the argument 'dir'.
+#' createWorkspace(dir = "my_new_folder")
+#' }
+#' 
+#' @return No return value, called for side effects
+#' 
 #' @export
 #' 
 createWorkspace <- function(dir = "actel_workspace") {
@@ -57,6 +67,28 @@ createWorkspace <- function(dir = "actel_workspace") {
 #' 
 #' @param spatial,biometrics,detections,deployments Example datasets provided with the package.
 #'
+#' @examples
+#' \dontrun{
+#' # deploy a minimal dataset to try actel!
+#' exampleWorkspace()
+#' 
+#' # you can then move into the newly created folder
+#' setwd("exampleWorkspace")
+#' 
+#' # and run the example analysis
+#' results <- explore(tz = 'Europe/Copenhagen', report = TRUE)
+#' 
+#' # Have a look at the results and the html report.
+#' names(results)
+#' 
+#' # you can also try running the migration and residency analyses
+#' m.results <- migration(tz = 'Europe/Copenhagen', sections = c('River', 'Fjord', 'Sea'), report = TRUE)
+#' 
+#' r.results <- migration(tz = 'Europe/Copenhagen', sections = c('River', 'Fjord', 'Sea'), report = TRUE)
+#' }
+#' 
+#' @return No return value, called for side effects.
+#' 
 #' @export
 #' 
 exampleWorkspace <- function(spatial = example.spatial, biometrics = example.biometrics, detections = example.detections, deployments = example.deployments) {

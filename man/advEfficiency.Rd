@@ -48,7 +48,7 @@ Examples for inclusion in a paper:
 "Array efficiency was estimated by drawing 10000 samples from a beta distribution
 (\eqn{\alpha} = number of tags detected subsequently and at the array,
 \eqn{\beta} = number of tags detected subsequently but not at the array)
-and calculating the median estimated efficiency value using the R package actel (https://github.com/hugomflavio/actel)."
+and calculating the median estimated efficiency value using the R package actel \link{citation}."
 
 \item If advEfficiency was run on an \code{efficiency} object (i.e. residency analysis):
 \itemize{
@@ -57,13 +57,13 @@ and calculating the median estimated efficiency value using the R package actel 
 "Array efficiency was estimated by drawing 10000 samples from a beta distribution
 (\eqn{\alpha} = number of events recorded by the array,
 \eqn{\beta} = number of events known to have been missed by the array).
-and calculating the median estimated efficiency value using the R package actel (https://github.com/hugomflavio/actel)."
+and calculating the median estimated efficiency value using the R package actel \link{citation}."
 \item If you are using minimum efficiency estimates:
 
 "Array efficiency was estimated by drawing 10000 samples from a beta distribution
 (\eqn{\alpha} = number of events recorded by the array,
 \eqn{\beta} = number of events both known to have been missed and potentially missed by the array).
-and calculating the median estimated efficiency value using the R package actel (https://github.com/hugomflavio/actel)."
+and calculating the median estimated efficiency value using the R package actel \link{citation}."
 }
 
 \item If advEfficiency was run on an \code{intra.array.CJS} object:
@@ -75,6 +75,50 @@ of tags detected at the opposite replicate but not at the one for which efficien
 is being calculated) and calculating the median estimated efficiency value. The overall
 efficiency of the array was then estimated as 1-((1-R1)*(1-R2)), where R1 and R2 are
 the median efficiency estimates for each replicate. These calculations were performed
-using the R package actel (https://github.com/hugomflavio/actel)."
+using the R package actel \link{citation}."
 }
+Replace \link{citation} with the output of \code{citation('actel')}
+}
+\examples{
+# Example using the output of simpleCJS.
+x <- matrix(
+c(T, T, T, T, T, 
+  T, F, T, T, F, 
+  T, T, F, F, F,
+  T, T, F, T, T,
+  T, T, T, F, F), 
+ncol = 5, byrow = TRUE)
+colnames(x) <- c("Release", "A1", "A2", "A3", "A4")
+cjs.results <- simpleCJS(x)
+
+# These cjs results can be used in advEfficiency
+advEfficiency(cjs.results)
+
+# Example using the output of dualArrayCJS.
+x <- matrix(
+c(T, T, 
+  T, F, 
+  T, T,
+  F, T,
+  F, T), 
+ncol = 2, byrow = TRUE)
+colnames(x) <- c("A1.1", "A1.2")
+cjs.results <- dualArrayCJS(x)
+
+# These cjs results can be used in advEfficiency
+advEfficiency(cjs.results)
+
+\dontrun{
+# Examples to run on the output of actel:
+
+# Assuming 'results' is the output of a migration analysis.
+advEfficiency(results$overall.CJS)
+
+# Assuming 'results' is the output of a residency analysis.
+advEfficiency(results$efficiency)
+
+# Assuming intra-array estimates were calculated for array A1.
+advEfficiency(results$intra.array.CJS$A1)
+}
+
 }

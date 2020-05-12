@@ -37,7 +37,7 @@ present in \code{\link[base]{timezones}}.}
 \item{invalid.dist}{Whether or not the distance matrix supplied is valid for the study area.}
 }
 \value{
-A list of movement events for each fish.
+A list containing the movement events for each fish.
 }
 \description{
 Crawls trough the detections of each fish and groups them based on ALS arrays and time requirements.

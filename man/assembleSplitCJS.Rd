@@ -12,7 +12,7 @@ assembleSplitCJS(mat, CJS, arrays, releases, intra.CJS = NULL)
 \item{arrays}{a list of arrays}
 }
 \value{
-A CJS results table for each group x release site combination
+A list containing the CJS results for each group x release site combination.
 }
 \description{
 Assembles CJS tables for all group x release site combinations

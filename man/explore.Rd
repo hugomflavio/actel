@@ -5,7 +5,6 @@
 \title{Explorative Analysis}
 \usage{
 explore(
-  path = NULL,
   tz,
   max.interval = 60,
   minimum.detections = 2,
@@ -20,17 +19,14 @@ explore(
   inactive.error = NULL,
   exclude.tags = NULL,
   override = NULL,
-  report = TRUE,
+  report = FALSE,
   auto.open = TRUE,
+  save.detections = FALSE,
   GUI = c("needed", "always", "never"),
-  print.releases = TRUE,
-  debug = FALSE
+  print.releases = TRUE
 )
 }
 \arguments{
-\item{path}{Path to the folder containing the data. If left NULL (default),
-the analysis runs in the current folder.}
-
 \item{tz}{The time zone of the study area. Must match one of the values
 present in \code{\link[base]{timezones}}.}
 
@@ -91,10 +87,17 @@ tag are detected in the study area.}
 define which movement events are valid and invalid.}
 
 \item{report}{Logical. Should an HTML report be created at the end of the
-analysis?}
+analysis? NOTE: Setting report to TRUE will generate an HTML file in the current
+directory. Additionally, if auto.open = TRUE (default), the web browser will
+automatically be launched to open the report once the function terminates.}
 
 \item{auto.open}{Logical: Should the report be automatically opened once the
-analysis is over? Defaults to TRUE.}
+analysis is over? Defaults to TRUE. NOTE: If report = TRUE and auto.open = TRUE,
+the web browser will automatically be launched to open the report once the
+function terminates.}
+
+\item{save.detections}{Logical: Should the processed detections be saved for
+future runs?}
 
 \item{GUI}{One of "needed", "always" or "never". If "needed", a new window is
 opened to inspect the movements only when the movements table is too big to be
@@ -106,23 +109,20 @@ prompted to open that file and examine it. Defaults to "needed".}
 
 \item{print.releases}{Logical: Should the release sites be printed in the
 study area diagrams?}
-
-\item{debug}{Logical: Should temporary files be kept at the end of the
-analysis?}
 }
 \value{
 A list containing:
 \itemize{
-\item \code{detections}: All detections for each target fish;
-\item \code{valid.detections}: Valid detections for each target fish;
-\item \code{spatial}: The spatial information used during the analysis;
-\item \code{deployments}: The deployments of each receiver;
-\item \code{arrays}: The array details used during the analysis;
-\item \code{movements}: All movement events for each target fish;
-\item \code{valid.movements}: Valid movement events for each target fish;
-\item \code{times}: All arrival times (per fish) at each array;
-\item \code{rsp.info}: Appendix information for the RSP package;
-\item \code{dist.mat}: The distance matrix used in the analysis (if a valid
+\item \code{detections}: A list containing all detections for each target fish;
+\item \code{valid.detections}: A list containing the valid detections for each target fish;
+\item \code{spatial}: A list containing the spatial information used during the analysis;
+\item \code{deployments}: A data frame containing the deployments of each receiver;
+\item \code{arrays}: A list containing the array details used during the analysis;
+\item \code{movements}: A list containing all movement events for each target fish;
+\item \code{valid.movements}: A list containing the valid movement events for each target fish;
+\item \code{times}: A data frame containing all arrival times (per fish) at each array;
+\item \code{rsp.info}: A list containing containing appendix information for the RSP package;
+\item \code{dist.mat}: A matrix containing the distance matrix used in the analysis (if a valid
 distance matrix was supplied)
 }
 }
@@ -131,6 +131,24 @@ distance matrix was supplied)
 \code{explore} to get a general feel for the study results, and check if the
 input files are behaving as expected. It is also a good candidate if you just
 want to validate your detections for later use in other analyses.
+}
+\examples{
+\dontrun{
+# If needed, create an example workspace
+exampleWorkspace()
+
+# Move your R session into your target folder (e.g. "exampleWokspace")
+setwd("exampleWorkspace")
+
+# run the explore analysis. Ensure the tz argument 
+# matches the time zone of the study area
+results <- explore(tz = "Europe/Copenhagen")
+
+# to obtain an HTML report, run the analysis 
+# with report = TRUE
+results <- explore(tz = "Europe/Copenhagen", report = TRUE)
+}
+
 }
 \seealso{
 \code{\link{migration}}, \code{\link{residency}}

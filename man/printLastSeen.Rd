@@ -11,6 +11,9 @@ printLastSeen(input, sections)
 
 \item{sections}{the order of the sections}
 }
+\value{
+No return value, called to plot and save graphic.
+}
 \description{
 Print a simple barplot with the number of fish last seen at each section
 }

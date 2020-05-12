@@ -12,7 +12,7 @@ updateValidity(arrmoves, secmoves)
 \item{secmoves}{the section movements}
 }
 \value{
-the updated array movements
+A data frame with the array movements for the target fish, with an updated 'Valid' column.
 }
 \description{
 update array-movement validity based on the section-movements

@@ -26,7 +26,7 @@ not fit in R's console, a temporary file will be saved and the user will be
 prompted to open and examine that file. Defaults to "needed".}
 }
 \value{
-the section movements with valid/invalid notes
+A list of section movements with updated 'Valid' columns
 }
 \description{
 Check that the fish linearly moved along the sections

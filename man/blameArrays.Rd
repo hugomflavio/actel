@@ -14,7 +14,7 @@ blameArrays(from, to, paths)
 \item{paths}{a list containing the shortest paths between arrays with distance > 1}
 }
 \value{
-A list of arrays which failed
+A list containing information on the arrays that failed
 }
 \description{
 Find which arrays to blame for a jump in movement events

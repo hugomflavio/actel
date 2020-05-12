@@ -10,7 +10,7 @@ findShortestChains(input)
 \item{input}{An array list}
 }
 \value{
-The array list with all paths between arrays with distance > 1
+The array list with all paths between arrays with distance > 1.
 }
 \description{
 Find the shortest paths between arrays

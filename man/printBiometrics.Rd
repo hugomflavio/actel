@@ -10,7 +10,7 @@ printBiometrics(bio)
 \item{bio}{A table with the tags and biometrics of the studied fish.}
 }
 \value{
-string to be included in printRmd
+A string of file locations in rmd syntax, to be included in printRmd
 }
 \description{
 Searches for columns containing biometric data and prints graphics per fish group

@@ -43,7 +43,7 @@ migrated through the study area.}
 \item{movements}{A list of movements for each target tag, created by groupMovements.}
 }
 \value{
-A table of the entering and leaving points for each section per target tag
+A data frame containing the entering and leaving timestamps for each section per target tag
 }
 \description{
 Crawls trough the movement events of each fish to find when it entered and left each section of the study area.

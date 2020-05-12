@@ -17,7 +17,7 @@ Defaults to 2.}
 \item{fish}{The fish being analysed}
 }
 \value{
-The movements with valid/invalid notes
+A data frame containing the movements with valid/invalid notes
 }
 \description{
 Check that the fish have enough detections to be valid

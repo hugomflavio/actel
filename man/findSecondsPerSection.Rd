@@ -14,7 +14,7 @@ findSecondsPerSection(res, day, the.range)
 \item{the.range}{the first and last day for the specific fish}
 }
 \value{
-the number of seconds spent at each location
+A data frame containing the number of seconds spent at each location for a specific day
 }
 \description{
 Calculate number of seconds at each location per day

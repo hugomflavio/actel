@@ -16,7 +16,7 @@ getDualMatrices(replicates, CJS = NULL, spatial, detections.list)
 \item{detections.list}{A list of the detections split by each target tag.}
 }
 \value{
-A list of dual matrices
+A list of dual matrices for each relevant array.
 }
 \description{
 Prepare intra-array matrices for selected arrays

@@ -6,7 +6,24 @@
 \usage{
 emptyMatrix()
 }
+\value{
+An empty matrix with the rows and columns required to
+operate with the 'spatial.csv' file present in the current
+work directory.
+}
 \description{
 Creates an empty matrix based on the local 'spatial.csv' file and saves it to 'distances.csv' so the
 user can manually fill it.
+}
+\details{
+It is highly recommended to read the vignette regarding distances matrix before running this function.
+You can find it by running \code{vignette('a-2_distances_matrix', 'actel')} or \code{browseVignettes('actel')}
+}
+\examples{
+\dontrun{
+# This function requires the presence of a 'spatial.csv' file
+# in the current working directory. 
+emptyMatrix()
+}
+
 }

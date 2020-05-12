@@ -9,6 +9,21 @@ clearWorkspace(skip = NA)
 \arguments{
 \item{skip}{A vector of files to be ignored.}
 }
+\value{
+No return value, called for side effects.
+}
 \description{
 Deletes previous analysis files from the current workspace. Input files are not deleted.
+}
+\examples{
+\dontrun{
+# In a directory where you have saved actel results, run:
+clearWorkspace()
+# This will show you the files than can be removed and ask for confirmation.
+
+# If you want to keep a specific file, you can exclude it with the
+# skip argument. E.g., if I wanted to keep the file "file_to.keep":
+clearWokspace(skip = "file_to.keep")
+}
+
 }

@@ -14,6 +14,32 @@ exampleWorkspace(
 \arguments{
 \item{spatial, biometrics, detections, deployments}{Example datasets provided with the package.}
 }
+\value{
+No return value, called for side effects.
+}
 \description{
 Creates a ready-to-run workspace with example data.
+Note: This function will create a new sub-directory called 'exampleWorkspace'
+in the current directory and write files into it.
+}
+\examples{
+\dontrun{
+# deploy a minimal dataset to try actel!
+exampleWorkspace()
+
+# you can then move into the newly created folder
+setwd("exampleWorkspace")
+
+# and run the example analysis
+results <- explore(tz = 'Europe/Copenhagen', report = TRUE)
+
+# Have a look at the results and the html report.
+names(results)
+
+# you can also try running the migration and residency analyses
+m.results <- migration(tz = 'Europe/Copenhagen', sections = c('River', 'Fjord', 'Sea'), report = TRUE)
+
+r.results <- migration(tz = 'Europe/Copenhagen', sections = c('River', 'Fjord', 'Sea'), report = TRUE)
+}
+
 }

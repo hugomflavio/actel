@@ -14,7 +14,7 @@
 #'   "Array efficiency was estimated by drawing 10000 samples from a beta distribution 
 #'   (\eqn{\alpha} = number of tags detected subsequently and at the array, 
 #'   \eqn{\beta} = number of tags detected subsequently but not at the array) 
-#'   and calculating the median estimated efficiency value using the R package actel (https://github.com/hugomflavio/actel)."
+#'   and calculating the median estimated efficiency value using the R package actel [citation]."
 #' 
 #' \item If advEfficiency was run on an \code{efficiency} object (i.e. residency analysis):
 #' 
@@ -23,14 +23,14 @@
 #'     "Array efficiency was estimated by drawing 10000 samples from a beta distribution 
 #'     (\eqn{\alpha} = number of events recorded by the array,
 #'     \eqn{\beta} = number of events known to have been missed by the array).
-#'     and calculating the median estimated efficiency value using the R package actel (https://github.com/hugomflavio/actel)."
+#'     and calculating the median estimated efficiency value using the R package actel [citation]."
 #' 
 #' - If you are using minimum efficiency estimates:
 #' 
 #'     "Array efficiency was estimated by drawing 10000 samples from a beta distribution 
 #'     (\eqn{\alpha} = number of events recorded by the array, 
 #'     \eqn{\beta} = number of events both known to have been missed and potentially missed by the array).
-#'     and calculating the median estimated efficiency value using the R package actel (https://github.com/hugomflavio/actel)."
+#'     and calculating the median estimated efficiency value using the R package actel [citation]."
 #' 
 #' \item If advEfficiency was run on an \code{intra.array.CJS} object:
 #' 
@@ -41,8 +41,10 @@
 #'   is being calculated) and calculating the median estimated efficiency value. The overall 
 #'   efficiency of the array was then estimated as 1-((1-R1)*(1-R2)), where R1 and R2 are
 #'   the median efficiency estimates for each replicate. These calculations were performed 
-#'   using the R package actel (https://github.com/hugomflavio/actel)."
+#'   using the R package actel [citation]."
 #' }
+
+#' Replace [citation] with the output of `citation('actel')`
 #' 
 #' @param x An efficiency object from actel (\code{overall.CJS}, \code{intra.array.CJS[[...]]} or \code{efficiency} objects)
 #' @param labels a vector of strings to substitute default plot labels
@@ -51,6 +53,48 @@
 #' @param force.grid A vector of format c(nrow, ncol) that allows the user to define the number of rows and columns to distribute the plots in.
 #' @param paired Logical: For efficiency derived from residency analyses, should min. and max. estimates for an array be displayed next to each other?
 #' @param title A title for the plot (feeds into title parameter of ggplot's labs function).
+#' 
+#' @examples
+#' # Example using the output of simpleCJS.
+#' x <- matrix(
+#' c(T, T, T, T, T, 
+#'   T, F, T, T, F, 
+#'   T, T, F, F, F,
+#'   T, T, F, T, T,
+#'   T, T, T, F, F), 
+#' ncol = 5, byrow = TRUE)
+#' colnames(x) <- c("Release", "A1", "A2", "A3", "A4")
+#' cjs.results <- simpleCJS(x)
+#' 
+#' # These cjs results can be used in advEfficiency
+#' advEfficiency(cjs.results)
+#' 
+#' # Example using the output of dualArrayCJS.
+#' x <- matrix(
+#' c(T, T, 
+#'   T, F, 
+#'   T, T,
+#'   F, T,
+#'   F, T), 
+#' ncol = 2, byrow = TRUE)
+#' colnames(x) <- c("A1.1", "A1.2")
+#' cjs.results <- dualArrayCJS(x)
+#' 
+#' # These cjs results can be used in advEfficiency
+#' advEfficiency(cjs.results)
+#' 
+#' \dontrun{
+#' # Examples to run on the output of actel:
+#' 
+#' # Assuming 'results' is the output of a migration analysis.
+#' advEfficiency(results$overall.CJS)
+#' 
+#' # Assuming 'results' is the output of a residency analysis.
+#' advEfficiency(results$efficiency)
+#' 
+#' # Assuming intra-array estimates were calculated for array A1.
+#' advEfficiency(results$intra.array.CJS$A1)
+#' }
 #' 
 #' @return A data frame with the required quantile values and a plot of the efficiency distributions.
 #' 
@@ -73,8 +117,9 @@ advEfficiency <- function(x, labels = NULL, n = 10000, q = c(0.025, 0.5, 0.975),
   else
     input <- x
 
-  if (inherits(input, "matrix")) {
+  if (ncol(input) == 1) {
     input <- data.frame(Replica.1 = c(input[3], input[2] - input[3]), Replica.2 = c(input[3], input[1] - input[3]))
+    colnames(input)[1:2] <- names(x$single.efficiency)
     calc.combined <- TRUE
   } else {
     calc.combined <- FALSE
@@ -174,6 +219,8 @@ advEfficiency <- function(x, labels = NULL, n = 10000, q = c(0.025, 0.5, 0.975),
 #' 
 #' @param n The number of colours to be generated
 #' 
+#' @return a vector of colours with the same length as n
+#' 
 #' @keywords internal
 #' 
 gg_colour_hue <- function(n) {
@@ -190,6 +237,8 @@ gg_colour_hue <- function(n) {
 #' @param overall.CJS a single CJS with all the groups and release sites merged
 #' @param status.df A data frame with the final migration results
 #'  
+#' @return No return value, called to plot and save graphic.
+#' 
 #' @keywords internal
 #' 
 printProgression <- function(dot, sections, overall.CJS, spatial, status.df, print.releases) {
@@ -334,6 +383,8 @@ printProgression <- function(dot, sections, overall.CJS, spatial, status.df, pri
 #' @inheritParams migration
 #' @inheritParams setSpatialStandards
 #' 
+#' @return No return value, called to plot and save graphic.
+#' 
 #' @keywords internal
 #' 
 printDot <- function(dot, sections = NULL, spatial, print.releases) {
@@ -462,7 +513,7 @@ printDot <- function(dot, sections = NULL, spatial, print.releases) {
 #' 
 #' @inheritParams splitDetections
 #' 
-#' @return string to be included in printRmd
+#' @return A string of file locations in rmd syntax, to be included in printRmd
 #'  
 #' @keywords internal
 #' 
@@ -507,6 +558,8 @@ printBiometrics <- function(bio) {
 #' 
 #' @inheritParams simplifyMovements
 #' @inheritParams groupMovements
+#' 
+#' @return No return value, called to plot and save graphic.
 #' 
 #' @keywords internal
 #' 
@@ -571,6 +624,8 @@ printDotplots <- function(status.df, invalid.dist) {
 #' 
 #' @param section.overview A data frame containing the survival per group of fish present in the biometrics. Supplied by assembleOverview.
 #' 
+#' @return No return value, called to plot and save graphic.
+#' 
 #' @keywords internal
 #' 
 printSurvivalGraphic <- function(section.overview) {
@@ -620,7 +675,7 @@ printSurvivalGraphic <- function(section.overview) {
 #' 
 #' @param array.overview a list of absolute detection numbers for each group
 #' 
-#' @return Rmd fragment
+#' @return An rmd string to be included in the report.
 #' 
 #' @keywords internal
 #' 
@@ -646,6 +701,8 @@ printArrayOverview <- function(array.overview) {
 #' @param efficiency the overall efficiency result from a residency analysis. Used to assess if efficiency should be printed.
 #' @param intra.CJS The output of the getEstimate calculations.
 #' @param type The type of analysis being run (migration or residency)
+#' 
+#' @return A rmd string to be included in the report.
 #' 
 #' @keywords internal
 #' 
@@ -750,7 +807,7 @@ knitr::kable(intra.array.CJS[[',i ,']]$absolutes)
 #' @inheritParams assembleMatrices
 #' @param extension the format of the generated graphics
 #' 
-#' @return String to be included in printRmd
+#' @return A string of file locations in rmd syntax, to be included in printRmd
 #' 
 #' @keywords internal
 #' 
@@ -923,7 +980,7 @@ printIndividuals <- function(detections.list, bio, status.df = NULL, tz,
 #' 
 #' @keywords internal
 #' 
-#' @return A rmd string to be attached to the report.
+#' @return A string of file locations in rmd syntax, to be included in printRmd
 #' 
 printCircular <- function(times, bio, suffix = NULL){
   cbPalette <- c("#56B4E9", "#c0ff3e", "#E69F00", "#F0E442", "#0072B2", "#D55E00", "#CC79A7", "#999999")
@@ -980,6 +1037,32 @@ printCircular <- function(times, bio, suffix = NULL){
 #' @param mean.range Logical: Should the SEM be displayed? (only relevant if mean.dash = TRUE)
 #' @param rings Logical: Should inner plot rings be displayed?
 #' @param file A file name to save the plot as an SVG. Leave NULL to plot on active graphics device.
+#' 
+#' @examples
+#' # The output of timesToCircular can be used as an input to plotTimes.
+#' x <- data.frame(ID = c(1:5), 
+#'  Group = c("A", "A", "B", "B", "B"), 
+#'  A1 = as.POSIXct(
+#'    c("2019-01-03 11:21:12",
+#'      "2019-01-04 12:22:21",
+#'      "2019-01-05 13:31:34",
+#'      "2019-01-06 14:32:43",
+#'      "2019-01-07 15:23:52")),
+#'  A2 = as.POSIXct(
+#'    c("2019-01-08 16:51:55",
+#'      "2019-01-09 17:42:42",
+#'      "2019-01-10 18:33:33",
+#'      "2019-01-11 19:24:32",
+#'      "2019-01-12 20:15:22")),
+#'  stringsAsFactors = TRUE)
+#' 
+#' times <- timesToCircular(x)
+#' 
+#' # plot times
+#' plotTimes(times)
+#' 
+#' # A night period can be added with 'night'
+#' plotTimes(times, night = c("20:00", "06:00"))
 #' 
 #' @return A circular plot
 #' 
@@ -1080,18 +1163,20 @@ plotTimes <- function(times, night = NULL, col = NULL, alpha = 0.8, title = "", 
   }
 }
 
-# #' Draw a section on the outside of the circle
-# #' 
-# #' @param from value where the section should start
-# #' @param to value where the section should end
-# #' @param units units of the from and to variables, defaults to "hours"
-# #' @param template variable to feed into the circular package base functions
-# #' @param limits two values controlling the vertical start and end points of the section
-# #' @param fill The colour of the section
-# #' @param border The colour of the section's border
-# #' 
-# #' @keywords internal
-# #' 
+#' Draw a section on the outside of the circle
+#' 
+#' @param from value where the section should start
+#' @param to value where the section should end
+#' @param units units of the from and to variables, defaults to "hours"
+#' @param template variable to feed into the circular package base functions
+#' @param limits two values controlling the vertical start and end points of the section
+#' @param fill The colour of the section
+#' @param border The colour of the section's border
+#' 
+#' @return No return value, adds to an existing plot.
+#' 
+#' @keywords internal
+#' 
 circularSection <- function(from, to, units = "hours", template = "clock24", limits = c(1, 0), fill = "white", border = "black"){
   if( inherits(from,"character") ){
     hour.from <- circular::circular(decimalTime(from), units = units, template = template)
@@ -1260,6 +1345,8 @@ myRoseDiag <- function (x, pch = 16, cex = 1, axes = TRUE, shrink = 1, bins = 24
 #' 
 #' @inheritParams myRoseDiag
 #' 
+#' @return No return value, adds to an existing plot.
+#' 
 #' @keywords internal
 #'  
 ringsRel <- function(plot.params, border, rings.lty, 
@@ -1294,6 +1381,8 @@ ringsRel <- function(plot.params, border, rings.lty,
 #' @param box.size Vertical size of the range box.
 #' @param edge.length Vertical size of the edge whiskers in the range box.
 #' @param edge.lwd Width of the edge whiskers in the range box.
+#' 
+#' @return No return value, adds to an existing plot.
 #' 
 #' @keywords internal
 #' 
@@ -1352,6 +1441,8 @@ roseMean <- function(input, col = c("cornflowerblue", "chartreuse3", "deeppink")
 #' @param tol proportion of white space at the margins of plot.
 #' @param main,sub,xlab,ylab title, subtitle, x label and y label of the plot.
 #' @param control.circle parameters passed to plot.default in order to draw the circle. The function circle.control is used to set the parameters.
+#' 
+#' @return No return value, adds to an existing plot.
 #' 
 #' @keywords internal
 #' 
@@ -1412,6 +1503,9 @@ copyOfCirclePlotRad <- function (xlim = c(-1, 1), ylim = c(-1, 1), uin = NULL, s
 #' For more details about the original function, visit the circular package homepage at \url{https://github.com/cran/circular}
 #' 
 #' @inheritParams myRoseDiag
+#' 
+#' @return No return value, adds to an existing plot.
+#' 
 #' @keywords internal
 #' 
 copyOfRosediagRad <- function (x, zero, rotation, bins, upper, radii.scale, prop, 
@@ -1455,6 +1549,8 @@ copyOfRosediagRad <- function (x, zero, rotation, bins, upper, radii.scale, prop
 #' @inheritParams splitDetections
 #' @param detections A valid detections list
 #' 
+#' @return No return value, called to plot and save graphic.
+#' 
 #' @keywords internal
 #' 
 printSectionTimes <- function(section.times, bio, detections) {
@@ -1491,6 +1587,8 @@ printSectionTimes <- function(section.times, bio, detections) {
 #' @param global.ratios the global ratios
 #' @param daily.ratios the daily ratios
 #' @inheritParams migration
+#' 
+#' @return No return value, called to plot and save graphic.
 #' 
 #' @keywords internal
 #' 
@@ -1541,7 +1639,7 @@ printGlobalRatios <- function(global.ratios, daily.ratios, sections) {
 #' @param ratios the daily ratios
 #' @param dayrange the overall first and last detection dates
 #' 
-#' @return a Rmarkdown string to be included in the report
+#' @return A string of file locations in rmd syntax, to be included in printRmd
 #' 
 #' @keywords internal
 #' 
@@ -1613,6 +1711,8 @@ printIndividualResidency <- function(ratios, dayrange, sections) {
 #' @param input a table with the last seen data
 #' @param sections the order of the sections
 #' 
+#' @return No return value, called to plot and save graphic.
+#' 
 #' @keywords internal
 #' 
 printLastSeen <- function(input, sections) {
@@ -1641,7 +1741,7 @@ printLastSeen <- function(input, sections) {
 #' 
 #' @keywords internal
 #' 
-#' @return a rmd string to add to the report
+#' @return A string of file locations in rmd syntax, to be included in printRmd
 #' 
 printSensorData <- function(detections, extension = "png") {
   individual.plots <- NULL

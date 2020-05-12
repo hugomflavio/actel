@@ -42,6 +42,9 @@ printMigrationRmd(
 
 \item{sensor.plots}{Rmarkdown string specifying the name of the sensor plots.}
 }
+\value{
+No return value, called for side effects.
+}
 \description{
 Creates a Rmd report and converts it to html.
 }

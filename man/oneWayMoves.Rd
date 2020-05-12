@@ -12,7 +12,7 @@ oneWayMoves(movements, arrays)
 \item{arrays}{A list containing information for each array.}
 }
 \value{
-the uni-directional movement table
+A data frame with the uni-directional movements for the target fish.
 }
 \description{
 Trim movements table to contain only uni-directional movements

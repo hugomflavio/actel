@@ -5,10 +5,8 @@
 \title{Residency Analysis}
 \usage{
 residency(
-  path = NULL,
   tz,
   sections,
-  success.arrays = NULL,
   max.interval = 60,
   minimum.detections = 2,
   start.time = NULL,
@@ -22,29 +20,22 @@ residency(
   inactive.error = NULL,
   exclude.tags = NULL,
   override = NULL,
-  report = TRUE,
+  report = FALSE,
   auto.open = TRUE,
+  save.detections = FALSE,
   section.minimum = 2,
   replicates = NULL,
   GUI = c("needed", "always", "never"),
-  print.releases = TRUE,
-  debug = FALSE
+  print.releases = TRUE
 )
 }
 \arguments{
-\item{path}{Path to the folder containing the data. If left NULL (default),
-the analysis runs in the current folder.}
-
 \item{tz}{The time zone of the study area. Must match one of the values
 present in \code{\link[base]{timezones}}.}
 
 \item{sections}{The sections in which the study area is divided. Must be
 coincident with the names given to the arrays. See the vignettes for more
 details.}
-
-\item{success.arrays}{The arrays that mark the end of the study area. If a
-fish crosses one of these arrays, it is considered to have successfully
-migrated through the study area.}
 
 \item{max.interval}{The number of minutes that must pass between detections
 for a new event to be created. Defaults to 60.}
@@ -103,10 +94,17 @@ tag are detected in the study area.}
 define which movement events are valid and invalid.}
 
 \item{report}{Logical. Should an HTML report be created at the end of the
-analysis?}
+analysis? NOTE: Setting report to TRUE will generate an HTML file in the current
+directory. Additionally, if auto.open = TRUE (default), the web browser will
+automatically be launched to open the report once the function terminates.}
 
 \item{auto.open}{Logical: Should the report be automatically opened once the
-analysis is over? Defaults to TRUE.}
+analysis is over? Defaults to TRUE. NOTE: If report = TRUE and auto.open = TRUE,
+the web browser will automatically be launched to open the report once the
+function terminates.}
+
+\item{save.detections}{Logical: Should the processed detections be saved for
+future runs?}
 
 \item{section.minimum}{If a fish has less than \code{section.minimum}
 consecutive detections in a section, a warning is issued. Defaults to 2.}
@@ -125,22 +123,19 @@ prompted to open that file and examine it. Defaults to "needed".}
 
 \item{print.releases}{Logical: Should the release sites be printed in the
 study area diagrams?}
-
-\item{debug}{Logical: Should temporary files be kept at the end of the
-analysis?}
 }
 \value{
 A list containing:
 \itemize{
-\item \code{detections}: All detections for each target fish;
-\item \code{valid.detections}: Valid detections for each target fish;
-\item \code{spatial}: The spatial information used during the analysis;
-\item \code{deployments}: The deployments of each receiver;
-\item \code{arrays}: The array details used during the analysis;
-\item \code{movements}: All movement events for each target fish;
-\item \code{valid.movements}: Valid movemenet events for each target fish;
-\item \code{section.movements}: Valid section shifts for each target fish;
-\item \code{status.df}: Summary information for each fish, including the
+\item \code{detections}: A list containing all detections for each target fish;
+\item \code{valid.detections}: A list containing the valid detections for each target fish;
+\item \code{spatial}: A list containing the spatial information used during the analysis;
+\item \code{deployments}: A data frame containing the deployments of each receiver;
+\item \code{arrays}: A list containing the array details used during the analysis;
+\item \code{movements}: A list containing all movement events for each target fish;
+\item \code{valid.movements}: A list containing the valid movemenet events for each target fish;
+\item \code{section.movements}: A list containing the valid section shifts for each target fish;
+\item \code{status.df}: A data frame containing summary information for each fish, including the
 following columns:
 \itemize{
 \item \emph{Times.entered.[section]}: Total number of times the fish
@@ -170,24 +165,24 @@ changes to the validity of the events,
 }
 \item \emph{Comments}: Comments left by the user during the analysis
 }
-\item \code{last.seen}: Summary table of the number of fish last seen in
+\item \code{last.seen}: A data frame containing the number of fish last seen in
 each study area section;
-\item \code{array.times}: Table containing ALL the entry times of each fish
+\item \code{array.times}: A data frame containing ALL the entry times of each fish
 in each array;
-\item \code{section.times}: Table containing all the entry times of each
+\item \code{section.times}: A data frame containing all the entry times of each
 fish in each section;
-\item \code{residency.list}: Places of residency between first and last
+\item \code{residency.list}: A list containing the places of residency between first and last
 valid detection for each fish;
-\item \code{daily.ratios}: Daily location per section (both in seconds spent
+\item \code{daily.ratios}: A list containing the daily location per section (both in seconds spent
 and in percentage of day) for each fish;
-\item \code{daily.positions}: Summary table showing the location where each
+\item \code{daily.positions}: A data frame showing the location where each
 fish spent the most time per day;
-\item \code{global.ratios}: Summary tables showing the number of active fish
+\item \code{global.ratios}: A list containing summary tables showing the number of active fish
 (and respective percentages) present at each location per day;
-\item \code{efficiency}: Results of the inter-array Multi-way efficiency
+\item \code{efficiency}: A list containing the results of the inter-array Multi-way efficiency
 calculations (see vignettes for more details);
-\item \code{intra.array.CJS}: Results of the intra-array CJS calculations;
-\item \code{rsp.info}: Appendix information for the RSP package;
+\item \code{intra.array.CJS}: A list containing the results of the intra-array CJS calculations;
+\item \code{rsp.info}: A list containing appendix information for the RSP package;
 \item \code{dist.mat}: The distance matrix used in the analysis (if a valid
 distance matrix was supplied)
 }
@@ -199,6 +194,26 @@ particular points of the fish behaviour. If you want to know where your fish
 were in each day of the study, how many fish were in each section each day,
 and other residency-focused variables, this is the analysis you are looking
 for!
+}
+\examples{
+\dontrun{
+# If needed, create an example workspace
+exampleWorkspace()
+
+# Move your R session into your target folder (e.g. "exampleWokspace")
+setwd("exampleWorkspace")
+
+# Run the residency analysis. Ensure the tz argument 
+# matches the time zone of the study area and that the
+# sections match your array names. The line below works 
+for the example data.
+results <- residency(tz = "Europe/Copenhagen", sections = c("River", "Fjord", "Sea"))
+
+# to obtain an HTML report, run the analysis 
+# with report = TRUE
+results <- residency(tz = "Europe/Copenhagen", sections = c("River", "Fjord", "Sea"), report = TRUE)
+}
+
 }
 \seealso{
 \code{\link{explore}}, \code{\link{migration}}

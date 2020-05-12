@@ -12,7 +12,7 @@ includeMissing(x, status.df)
 \item{status.df}{The main results table.}
 }
 \value{
-a matrix of detection histories per fish, including fish that were never detected.
+A matrix of detection histories per fish, including fish that were never detected.
 }
 \description{
 Include fish that were never detected

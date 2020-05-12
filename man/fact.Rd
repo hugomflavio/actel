@@ -6,7 +6,16 @@
 \usage{
 fact(n)
 }
+\arguments{
+\item{n}{number of plots to fit.}
+}
+\value{
+An integer
+}
 \description{
+Finds the largest x for which n \%\% x == 0
+}
+\details{
 Obtained here: https://stackoverflow.com/questions/32017327/calculate-the-optimal-grid-layout-dimensions-for-a-given-amount-of-plots-in-r
 }
 \keyword{internal}

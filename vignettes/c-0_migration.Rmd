@@ -102,7 +102,7 @@ Note:
 
 #### Setting up the replicates argument
 
-You **must use the stations standard names** (i.e. St.10, St.12) when referring to replicates. If you are not sure what the Standard names are, you can run `loadSpatial()` in the same folder as your spatial.csv file or `loadSpatial(file = "path/to/spatial.csv")` to check them out (look at the last column).
+You **must use the stations standard names** (i.e. St.10, St.12) when referring to replicates. If you are not sure what the Standard names are, you can run `loadSpatial()` in the same folder as your spatial.csv file or `loadSpatial(file = "path/to/spatial.csv")` to check them out (see the "Standard.name" column).
 
 Once you know which replicates you want to list for your array(s), you can include them in the analysis. Lets imagine you want to use stations St.1 and St.2 as replicates for the array River1, and St.3 as a replicate for array River3. This is how they should be listed:
 

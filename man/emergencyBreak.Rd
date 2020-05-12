@@ -6,7 +6,10 @@
 \usage{
 emergencyBreak()
 }
+\value{
+No return value, called for side effects.
+}
 \description{
-Saves a copy of the report in a permanent file, where the user decisions taken up to the abort are recorded.
+Wraps up the report in R's temporary folder before the function end.
 }
 \keyword{internal}

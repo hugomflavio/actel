@@ -2,18 +2,39 @@
 % Please edit documentation in R/load.R
 \name{readDot}
 \alias{readDot}
-\title{Read dot file}
+\title{Read dot file or string}
 \usage{
 readDot(input = NULL, string = NULL)
 }
 \arguments{
-\item{input}{The name of the dot file}
+\item{input}{The name of a file containing dot connections.}
 
-\item{string}{A dot string}
+\item{string}{A string of dot connections.}
 }
 \value{
-A table with A to B rows
+A data frame with the connections present in the input.
 }
 \description{
-Read dot file
+Read dot file or string
+}
+\examples{
+# create dummy dot string
+x <- c("A--B--C--D--E--F")
+
+# run readDot
+readDot(string = x)
+
+# more complex strings are acceptable:
+y <- x(
+"A--B--C--D--E--F
+A--G--H--I--E
+H--C")
+
+readDot(string = y)
+
+\dontrun{
+# Alternatively, connections can be read from a file
+readDot(input = "file.txt")
+}
+
 }

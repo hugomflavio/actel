@@ -24,7 +24,7 @@ not fit in R's console, a temporary file will be saved and the user will be
 prompted to open and examine that file. Defaults to "needed".}
 }
 \value{
-The updated movements
+A data frame with the movements for the target fish with updated 'Valid' column.
 }
 \description{
 Check for movements upstream of the release site.
