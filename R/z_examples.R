@@ -79,9 +79,11 @@ exampleWorkspace <- function(spatial = example.spatial, biometrics = example.bio
     write.csv(my.list[[i]], paste0("exampleWorkspace/detections/", i, ".csv"), row.names = FALSE)
   }
   message("M: The example workspace is now ready. To run the analysis on the example data, run:\n
-  results <- migration(path = 'exampleWorkspace', sections = c('River', 'Fjord', 'Sea'), 
-  \t\t     success.arrays = 'Sea1', tz = 'Europe/Copenhagen')\n
-And follow the instructions as they come. Once finished, explore the object 'results' for the output.")
+  # move into the newly created folder
+  setwd('exampleWorkspace')\n
+  # Run analysis. Note: This will open an analysis report on your web browser.
+  results <- explore(tz = 'Europe/Copenhagen', report = TRUE)\n
+Once finished, explore the html report and the object 'results' for the output.")
 }
 
 #' Example spatial data
