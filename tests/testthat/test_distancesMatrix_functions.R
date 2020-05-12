@@ -18,19 +18,19 @@ if (any(missing.packages)) {
       	"' to operate. Please install ", ifelse(sum(missing.packages) > 1, "them", "it"), " before proceeding.\n"), fixed = TRUE)
   })
 } else {
-my.home <- getwd()
+tests.home <- getwd()
 setwd(tempdir())
 
 test_that("transitionLayer complains if coord.y or coord.x are given and spatial.csv is not present", {
-	expect_warning(transitionLayer(path = paste0(find.package("actel"), "/tests/testthat"), shape = "aux_transitionLayer.shp", size = 10, EPSGcode = 32632, 
+	expect_warning(transitionLayer(path = tests.home, shape = "aux_transitionLayer.shp", size = 10, EPSGcode = 32632, 
 			coord.x = "x.32632", coord.y = "y.32632", directions = 4, force = FALSE),
 	"'coord.x' and 'coord.y' were set but could not find a spatial.csv file in the current working directory. Skipping spatial.csv check.", fixed = TRUE)
 
-	expect_warning(transitionLayer(path = paste0(find.package("actel"), "/tests/testthat"), shape = "aux_transitionLayer.shp", size = 10, EPSGcode = 32632, 
+	expect_warning(transitionLayer(path = tests.home, shape = "aux_transitionLayer.shp", size = 10, EPSGcode = 32632, 
 			coord.x = "x.32632", directions = 4, force = FALSE),
 	"'coord.x' was set but 'coord.y' was not. Skipping spatial.csv check.", fixed = TRUE)
 
-	expect_warning(transitionLayer(path = paste0(find.package("actel"), "/tests/testthat"), shape = "aux_transitionLayer.shp", size = 10, EPSGcode = 32632, 
+	expect_warning(transitionLayer(path = tests.home, shape = "aux_transitionLayer.shp", size = 10, EPSGcode = 32632, 
 			coord.y = "x.32632", directions = 4, force = FALSE),
 	"'coord.y' was set but 'coord.x' was not. Skipping spatial.csv check.", fixed = TRUE)
 })
@@ -41,37 +41,37 @@ xspatial$y.32632 <- c(6242912, 6242630, 6242387, 6242169)
 write.csv(xspatial, "spatial.csv", row.names = FALSE)
 
 test_that("transitionLayer complains if coord.y or coord.x are not valid column names", {
-	expect_warning(transitionLayer(path = paste0(find.package("actel"), "/tests/testthat"), shape = "aux_transitionLayer.shp", size = 10, EPSGcode = 32632, 
+	expect_warning(transitionLayer(path = tests.home, shape = "aux_transitionLayer.shp", size = 10, EPSGcode = 32632, 
 			coord.x = "test", coord.y = "y.32632", directions = 4, force = FALSE),
 	"Could not find column 'test' in the spatial.csv file. Skipping spatial.csv check.", fixed = TRUE)	
 
-	expect_warning(transitionLayer(path = paste0(find.package("actel"), "/tests/testthat"), shape = "aux_transitionLayer.shp", size = 10, EPSGcode = 32632, 
+	expect_warning(transitionLayer(path = tests.home, shape = "aux_transitionLayer.shp", size = 10, EPSGcode = 32632, 
 			coord.x = "x.32632", coord.y = "test", directions = 4, force = FALSE),
 	"Could not find column 'test' in the spatial.csv file. Skipping spatial.csv check.", fixed = TRUE)
 
-	expect_warning(transitionLayer(path = paste0(find.package("actel"), "/tests/testthat"), shape = "aux_transitionLayer.shp", size = 10, EPSGcode = 32632, 
+	expect_warning(transitionLayer(path = tests.home, shape = "aux_transitionLayer.shp", size = 10, EPSGcode = 32632, 
 			coord.x = "test2", coord.y = "test", directions = 4, force = FALSE),
 	"Could not find columns 'test2' and 'test' in the spatial.csv file. Skipping spatial.csv check.", fixed = TRUE)
 })
 
 test_that("transitionLayer only allows valid buffers", {
-	expect_error(transitionLayer(path = paste0(find.package("actel"), "/tests/testthat"), shape = "aux_transitionLayer.shp", size = 10, EPSGcode = 32632, 
+	expect_error(transitionLayer(path = tests.home, shape = "aux_transitionLayer.shp", size = 10, EPSGcode = 32632, 
 			buffer = "a", directions = 4, force = FALSE),
 	"'buffer' must be numeric (in metres).", fixed = TRUE)
 
-	expect_error(transitionLayer(path = paste0(find.package("actel"), "/tests/testthat"), shape = "aux_transitionLayer.shp", size = 10, EPSGcode = 32632, 
+	expect_error(transitionLayer(path = tests.home, shape = "aux_transitionLayer.shp", size = 10, EPSGcode = 32632, 
 			buffer = 1:2, directions = 4, force = FALSE),
 	"'buffer' must either contain one value (applied to all four corners), or four values (applied to xmin, xmax, ymin and ymax, respectively)", fixed = TRUE)
 	
-	expect_error(transitionLayer(path = paste0(find.package("actel"), "/tests/testthat"), shape = "aux_transitionLayer.shp", size = 10, EPSGcode = 32632, 
+	expect_error(transitionLayer(path = tests.home, shape = "aux_transitionLayer.shp", size = 10, EPSGcode = 32632, 
 			buffer = -1, directions = 4, force = FALSE),
 	"'buffer' values cannot be negative.", fixed = TRUE)
 	
-	tryCatch(transitionLayer(path = paste0(find.package("actel"), "/tests/testthat"), shape = "aux_transitionLayer.shp", size = 10, EPSGcode = 32632, 
+	tryCatch(transitionLayer(path = tests.home, shape = "aux_transitionLayer.shp", size = 10, EPSGcode = 32632, 
 			buffer = 100, directions = 4, force = FALSE), 
 		warning = function(w) stop("A warning was issued where it should not have been."))
 	
-	tryCatch(t.layer <<- transitionLayer(path = paste0(find.package("actel"), "/tests/testthat"), shape = "aux_transitionLayer.shp", size = 10, EPSGcode = 32632, 
+	tryCatch(t.layer <<- transitionLayer(path = tests.home, shape = "aux_transitionLayer.shp", size = 10, EPSGcode = 32632, 
 			buffer = c(50, 100, 200, 250), directions = 4, force = FALSE),
 		warning = function(w) stop("A warning was issued where it should not have been."))
 })
@@ -89,7 +89,7 @@ test_that("transitionLayer stops if shape is not present or is not .shp", {
 })
 
 test_that("transitionLayer stops if requested resolution is very high.", {
-	expect_error(transitionLayer(path = paste0(find.package("actel"), "/tests/testthat"), shape = "aux_transitionLayer.shp", size = 0.1, EPSGcode = 32632, 
+	expect_error(transitionLayer(path = tests.home, shape = "aux_transitionLayer.shp", size = 0.1, EPSGcode = 32632, 
 		directions = 4, force = FALSE),
 	"The chosen pixel size creates a transition layer with one or two axes greater than
 2000 pixels. This can lead to very long computing times and ultimately the function  may
@@ -98,15 +98,15 @@ size, rerun the function with force = TRUE.", fixed = TRUE)
 })
 
 test_that("transitionLayer and distancesMatrix stop if more than one value included in 'EPSGcode'", {
-	expect_error(transitionLayer(path = paste0(find.package("actel"), "/tests/testthat"), shape = "aux_transitionLayer.shp", size = 5, EPSGcode = 1:2, 
+	expect_error(transitionLayer(path = tests.home, shape = "aux_transitionLayer.shp", size = 5, EPSGcode = 1:2, 
 			coord.x = "x.32632", coord.y = "y.32632", directions = 16, force = FALSE),
 	"Please provide only one EPSG code.", fixed = TRUE)
 
-	expect_error(transitionLayer(path = paste0(find.package("actel"), "/tests/testthat"), shape = "aux_transitionLayer.shp", size = 5, EPSGcode = "a", 
+	expect_error(transitionLayer(path = tests.home, shape = "aux_transitionLayer.shp", size = 5, EPSGcode = "a", 
 			coord.x = "x.32632", coord.y = "y.32632", directions = 16, force = FALSE),
 	"'EPSGcode' must be numeric.", fixed = TRUE)
 
-	expect_error(transitionLayer(path = paste0(find.package("actel"), "/tests/testthat"), shape = "aux_transitionLayer.shp", size = 5, EPSGcode = 11234122, 
+	expect_error(transitionLayer(path = tests.home, shape = "aux_transitionLayer.shp", size = 5, EPSGcode = 11234122, 
 			coord.x = "x.32632", coord.y = "y.32632", directions = 16, force = FALSE),
 	"Could not recognize the selected EPSG code. You can find a list of available EPSG codes by running rgdal::make_EPSG()", fixed = TRUE)
 
@@ -124,7 +124,7 @@ test_that("transitionLayer and distancesMatrix stop if more than one value inclu
 })
 
 test_that("distancesMatrix produces a warning when there are viable passages between stations", {
-	t.layer <- transitionLayer(path = paste0(find.package("actel"), "/tests/testthat"), shape = "aux_transitionLayer.shp", size = 5, EPSGcode = 32632, 
+	t.layer <- transitionLayer(path = tests.home, shape = "aux_transitionLayer.shp", size = 5, EPSGcode = 32632, 
 		coord.x = "x.32632", coord.y = "y.32632", directions = 16, force = FALSE)
 	expect_warning(dist.mat <- distancesMatrix(t.layer = t.layer, EPSGcode = 32632, 
   		coord.x = "x.32632", coord.y = "y.32632", actel = TRUE),
@@ -156,7 +156,7 @@ test_that("distancesMatrix handles bad data correctly", {
   		coord.x = "x.32632", coord.y = "y.32632", starters = "test", id.col = "test", actel = TRUE),
 	"id.col' was set but will be ignored because 'actel' is set to TRUE. Set 'actel' to FALSE to use the 'id.col' argument.", fixed = TRUE)
 
-	t.layer <<- transitionLayer(path = paste0(find.package("actel"), "/tests/testthat"), shape = "aux_transitionLayer.shp", size = 5, EPSGcode = 32632, 
+	t.layer <<- transitionLayer(path = tests.home, shape = "aux_transitionLayer.shp", size = 5, EPSGcode = 32632, 
 		coord.x = "x.32632", coord.y = "y.32632", directions = 16, force = FALSE, buffer = 100)
 
 	expect_warning(distancesMatrix(t.layer =  t.layer, EPSGcode = 32632, 
@@ -198,32 +198,32 @@ xspatial$x.32632 <- c(454568, 453400, 452047, 452975)
 xspatial$y.32632 <- c(6243912, 6242630, 6242387, 6241169)
 write.csv(xspatial, "spatial.csv", row.names = FALSE)
 test_that("transitionLayer expands the grid range if the spatial objects are outside the shape range.", {
-	expect_message(transitionLayer(path = paste0(find.package("actel"), "/tests/testthat"), shape = "aux_transitionLayer.shp", size = 10, EPSGcode = 32632, 
+	expect_message(transitionLayer(path = tests.home, shape = "aux_transitionLayer.shp", size = 10, EPSGcode = 32632, 
 			coord.x = "x.32632", coord.y = "y.32632", directions = 4, force = FALSE),
 	"Extending shape's minimum X range to ensure the stations fit in the range.", fixed = TRUE)
 
-	expect_message(transitionLayer(path = paste0(find.package("actel"), "/tests/testthat"), shape = "aux_transitionLayer.shp", size = 10, EPSGcode = 32632, 
+	expect_message(transitionLayer(path = tests.home, shape = "aux_transitionLayer.shp", size = 10, EPSGcode = 32632, 
 			coord.x = "x.32632", coord.y = "y.32632", directions = 4, force = FALSE),
 	"Extending shape's maximum X range to ensure the stations fit in the range.", fixed = TRUE)
 
-	expect_message(transitionLayer(path = paste0(find.package("actel"), "/tests/testthat"), shape = "aux_transitionLayer.shp", size = 10, EPSGcode = 32632, 
+	expect_message(transitionLayer(path = tests.home, shape = "aux_transitionLayer.shp", size = 10, EPSGcode = 32632, 
 			coord.x = "x.32632", coord.y = "y.32632", directions = 4, force = FALSE),
 	"Extending shape's minimum Y range to ensure the stations fit in the range.", fixed = TRUE)
 
-	expect_message(transitionLayer(path = paste0(find.package("actel"), "/tests/testthat"), shape = "aux_transitionLayer.shp", size = 10, EPSGcode = 32632, 
+	expect_message(transitionLayer(path = tests.home, shape = "aux_transitionLayer.shp", size = 10, EPSGcode = 32632, 
 			coord.x = "x.32632", coord.y = "y.32632", directions = 4, force = FALSE),
 	"Extending shape's maximum Y range to ensure the stations fit in the range.", fixed = TRUE)
 })
 
 file.remove("spatial.csv")
-setwd(my.home)
+setwd(tests.home)
 rm(list = ls())
 }
 
 # ------------------------
 # Manual functions
 
-my.home <- getwd()
+tests.home <- getwd()
 setwd(tempdir())
 
 test_that("emptyMatrix stops if the required file are not present.", {
@@ -253,5 +253,5 @@ test_that("completeMatrix works as expected", {
 })
 
 file.remove("spatial.csv")
-setwd(my.home)
+setwd(tests.home)
 rm(list = ls())

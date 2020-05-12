@@ -1,6 +1,6 @@
 skip_on_cran()
 
-my.home <- getwd()
+tests.home <- getwd()
 setwd(tempdir())
 
 test_that("collectStrays work as expected", {
@@ -28,4 +28,4 @@ test_that("collectStrays work as expected", {
 # y
 # y
 
-setwd(my.home)
+setwd(tests.home)

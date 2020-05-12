@@ -1,6 +1,6 @@
 skip_on_cran()
 
-my.home <- getwd()
+tests.home <- getwd()
 setwd(tempdir())
 
 test_that("loadDeployments stops if file is missing", {
@@ -92,4 +92,4 @@ test_that("loadDeployments output is exactly as expected", {
 	file.remove("deployments.csv")
 })
 
-setwd(my.home)
+setwd(tests.home)

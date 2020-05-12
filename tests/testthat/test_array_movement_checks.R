@@ -1,6 +1,6 @@
 skip_on_cran()
 
-my.home <- getwd()
+tests.home <- getwd()
 setwd(tempdir())
 exampleWorkspace()
 setwd("exampleWorkspace")
@@ -202,5 +202,5 @@ test_that("validateDetections works as expected.", {
 
 setwd("..")
 unlink("exampleWorkspace", recursive = TRUE)
-setwd(my.home)
+setwd(tests.home)
 rm(list = ls())

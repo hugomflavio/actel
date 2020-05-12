@@ -1,6 +1,6 @@
 skip_on_cran()
 
-my.home <- getwd()
+tests.home <- getwd()
 setwd(tempdir())
 
 exampleWorkspace()
@@ -132,9 +132,9 @@ test_that("dailyRatios works as expected", {
 
   ### ONLY RUN THIS TO RESET REFERENCE
   # aux_dailyRatios <- daily.ratios
-  # save(aux_dailyRatios, file = paste0(find.package("actel"), "/tests/testthat/aux_dailyRatios.RData"))
+  # save(aux_dailyRatios, file = paste0(tests.home, "/aux_dailyRatios.RData"))
 
-  load(paste0(find.package("actel"), "/tests/testthat/aux_dailyRatios.RData"))
+  load(paste0(tests.home, "/aux_dailyRatios.RData"))
   expect_equal(daily.ratios, aux_dailyRatios)
 })
 
@@ -154,9 +154,9 @@ test_that("globalRatios works as expected.", {
 
   ### ONLY RUN THIS TO RESET REFERENCE
   # aux_globalRatios <- global.ratios
-  # save(aux_globalRatios, file = paste0(find.package("actel"), "/tests/testthat/aux_globalRatios.RData"))
+  # save(aux_globalRatios, file = paste0(tests.home, "/aux_globalRatios.RData"))
 
-  load(paste0(find.package("actel"), "/tests/testthat/aux_globalRatios.RData"))
+  load(paste0(tests.home, "/aux_globalRatios.RData"))
   expect_equal(global.ratios, aux_globalRatios)
 })
 
@@ -165,8 +165,8 @@ test_that("res_efficiency works as expected, and can include intra array estimat
   expect_equal(names(efficiency), c("absolutes", "max.efficiency", "min.efficiency",  "values.per.fish"))
   ### ONLY RUN THIS TO RESET REFERENCE
   # aux_res_efficiency <- efficiency
-  # save(aux_res_efficiency, file = paste0(find.package("actel"), "/tests/testthat/aux_res_efficiency.RData"))
-  load(paste0(find.package("actel"), "/tests/testthat/aux_res_efficiency.RData"))
+  # save(aux_res_efficiency, file = paste0(tests.home, "/aux_res_efficiency.RData"))
+  load(paste0(tests.home, "/aux_res_efficiency.RData"))
   expect_equal(efficiency, aux_res_efficiency)
 
   tryCatch(x <- getDualMatrices(replicates = list(Sea1 = c("St.16")), CJS = efficiency, spatial = spatial, detections.list = detections.list), 
@@ -178,8 +178,8 @@ test_that("res_efficiency works as expected, and can include intra array estimat
   output <- includeIntraArrayEstimates(m = intra.array.matrices, efficiency = efficiency, CJS = NULL)
   ### ONLY RUN THIS TO RESET REFERENCE
   # aux_includeIntraArrayEstimates <- output
-  # save(aux_includeIntraArrayEstimates, file = paste0(find.package("actel"), "/tests/testthat/aux_includeIntraArrayEstimates.RData"))
-  load(paste0(find.package("actel"), "/tests/testthat/aux_includeIntraArrayEstimates.RData"))
+  # save(aux_includeIntraArrayEstimates, file = paste0(tests.home, "/aux_includeIntraArrayEstimates.RData"))
+  load(paste0(tests.home, "/aux_includeIntraArrayEstimates.RData"))
   expect_equal(output, aux_includeIntraArrayEstimates)
 
   output <- includeIntraArrayEstimates(m = list(), efficiency = efficiency, CJS = NULL)
@@ -260,5 +260,5 @@ Fjord1 -- Fjord2 -- Fjord1
 
 setwd("..")
 unlink("exampleWorkspace", recursive = TRUE)
-setwd(my.home)
+setwd(tests.home)
 rm(list = ls())

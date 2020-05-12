@@ -1,6 +1,6 @@
 skip_on_cran()
 
-my.home <- getwd()
+tests.home <- getwd()
 setwd(tempdir())
 
 test_that("loadDot stops if arguments or file are missing", {
@@ -358,18 +358,18 @@ River3 -- River6")
 	arrays <- dotPaths(input = arrays, dotmat = mat, disregard.parallels = TRUE)
 	# ONLY RUN THIS TO RESET REFERENCE
 	# aux_dotPaths_complex_text_disregard_parallels_true <- arrays
-	# save(aux_dotPaths_complex_text_disregard_parallels_true, file = paste0(find.package("actel"), "/tests/testthat/aux_dotPaths_complex_text_disregard_parallels_true.RData"))
-	load(paste0(find.package("actel"), "/tests/testthat/aux_dotPaths_complex_text_disregard_parallels_true.RData"))
+	# save(aux_dotPaths_complex_text_disregard_parallels_true, file = paste0(tests.home, "/aux_dotPaths_complex_text_disregard_parallels_true.RData"))
+	load(paste0(tests.home, "/aux_dotPaths_complex_text_disregard_parallels_true.RData"))
 	expect_equal(arrays, aux_dotPaths_complex_text_disregard_parallels_true)
 
 	arrays <- dotList(input = dot, sections = c("River", "Fjord", "Sea"))
 	arrays <- dotPaths(input = arrays, dotmat = mat, disregard.parallels = FALSE)
 	# ONLY RUN THIS TO RESET REFERENCE
 	# aux_dotPaths_complex_text_disregard_parallels_false <- arrays
-	# save(aux_dotPaths_complex_text_disregard_parallels_false, file = paste0(find.package("actel"), "/tests/testthat/aux_dotPaths_complex_text_disregard_parallels_false.RData"))
-	load(paste0(find.package("actel"), "/tests/testthat/aux_dotPaths_complex_text_disregard_parallels_false.RData"))
+	# save(aux_dotPaths_complex_text_disregard_parallels_false, file = paste0(tests.home, "/aux_dotPaths_complex_text_disregard_parallels_false.RData"))
+	load(paste0(tests.home, "/aux_dotPaths_complex_text_disregard_parallels_false.RData"))
 	expect_equal(arrays, aux_dotPaths_complex_text_disregard_parallels_false)
 })
 
-setwd(my.home)
+setwd(tests.home)
 

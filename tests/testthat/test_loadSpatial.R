@@ -1,6 +1,6 @@
 skip_on_cran()
 
-my.home <- getwd()
+tests.home <- getwd()
 setwd(tempdir())
 
 test_that("loadSpatial stops if file is missing", {
@@ -82,4 +82,4 @@ test_that("loadSpatial output is exactly as expected", {
 	file.remove("spatial.csv")
 })
 
-setwd(my.home)
+setwd(tests.home)

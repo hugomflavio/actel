@@ -1,6 +1,6 @@
 skip_on_cran()
 
-my.home <- getwd()
+tests.home <- getwd()
 setwd(tempdir())
 
 test_that("dataToList is working", {
@@ -93,4 +93,4 @@ test_that("clearWorkspace removes target files.", {
 })
 # y
 
-setwd(my.home)
+setwd(tests.home)

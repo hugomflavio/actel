@@ -1,6 +1,6 @@
 skip_on_cran()
 
-my.home <- getwd()
+tests.home <- getwd()
 setwd(tempdir())
 
 exampleWorkspace()
@@ -167,5 +167,5 @@ test_that("assembleGroupOverview is working as expected", {
 
 setwd("..")
 unlink("exampleWorkspace", recursive = TRUE)
-setwd(my.home)
+setwd(tests.home)
 rm(list = ls())

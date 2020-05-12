@@ -1,6 +1,6 @@
 skip_on_cran()
 
-my.home <- getwd()
+tests.home <- getwd()
 setwd(tempdir())
 
 test_that("loadBio stops if arguments or file are missing", {
@@ -184,4 +184,4 @@ test_that("loadBio can handle multi-sensor tags.", {
 	file.remove("biometrics.csv")
 })
 
-setwd(my.home)
+setwd(tests.home)

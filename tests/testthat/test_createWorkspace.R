@@ -1,4 +1,4 @@
-my.home <- getwd()
+tests.home <- getwd()
 setwd(tempdir())
 test_that("createWorkspace deploys necessary files", {
 	createWorkspace()
@@ -13,4 +13,4 @@ test_that("createWorkspace deploys necessary files", {
 	unlink("actel_workspace", recursive = TRUE)
 	unlink("test_name", recursive = TRUE)
 })
-setwd(my.home)
+setwd(tests.home)

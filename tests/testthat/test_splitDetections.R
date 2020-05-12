@@ -1,6 +1,6 @@
 skip_on_cran()
 
-my.home <- getwd()
+tests.home <- getwd()
 setwd(tempdir())
 
 dir.create("detections")
@@ -95,5 +95,5 @@ test_that("splitDetections can handle multi-sensor tags", {
 # n
 # n
 
-setwd(my.home)
+setwd(tests.home)
 rm(list = ls())

@@ -37,9 +37,11 @@ results <- explore(tz = 'Europe/Copenhagen', report = TRUE)
 names(results)
 
 # you can also try running the migration and residency analyses
-m.results <- migration(tz = 'Europe/Copenhagen', sections = c('River', 'Fjord', 'Sea'), report = TRUE)
+m.results <- migration(tz = 'Europe/Copenhagen', 
+ sections = c('River', 'Fjord', 'Sea'), report = TRUE)
 
-r.results <- migration(tz = 'Europe/Copenhagen', sections = c('River', 'Fjord', 'Sea'), report = TRUE)
+r.results <- migration(tz = 'Europe/Copenhagen', 
+ sections = c('River', 'Fjord', 'Sea'), report = TRUE)
 }
 
 }

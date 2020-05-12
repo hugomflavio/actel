@@ -320,7 +320,7 @@ assembleMatrices <- function(spatial, movements, status.df, arrays, paths, dotma
 #' 
 #' @examples
 #' # prepare a dummy presence/absence matrix
-#' x <- matrix(c(T, T, T, T, F, T, T, T, F), ncol = 3)
+#' x <- matrix(c(TRUE, TRUE, TRUE, TRUE, FALSE, TRUE, TRUE, TRUE, FALSE), ncol = 3)
 #' colnames(x) <- c("Release", "Array1", "Array2")
 #' 
 #' # run CJS
@@ -738,7 +738,7 @@ dualMatrix <- function(array, replicates, spatial, detections.list){
 #' 
 #' @examples
 #' # prepare a dummy presence/absence matrix
-#' x <- matrix(c(T, T, T, T, F, T), ncol = 2)
+#' x <- matrix(c(TRUE, TRUE, TRUE, TRUE, FALSE, TRUE), ncol = 2)
 #' colnames(x) <- c("R1", "R2")
 #' 
 #' # run CJS

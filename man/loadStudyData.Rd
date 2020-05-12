@@ -9,7 +9,7 @@ loadStudyData(
   override = NULL,
   start.time,
   stop.time,
-  save.detections,
+  save.detections = FALSE,
   sections = NULL,
   exclude.tags,
   disregard.parallels = TRUE

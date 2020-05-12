@@ -82,11 +82,11 @@ Replace \link{citation} with the output of \code{citation('actel')}
 \examples{
 # Example using the output of simpleCJS.
 x <- matrix(
-c(T, T, T, T, T, 
-  T, F, T, T, F, 
-  T, T, F, F, F,
-  T, T, F, T, T,
-  T, T, T, F, F), 
+c(TRUE,  TRUE,  TRUE,  TRUE,  TRUE, 
+  TRUE, FALSE,  TRUE,  TRUE, FALSE, 
+  TRUE,  TRUE, FALSE, FALSE, FALSE,
+  TRUE,  TRUE, FALSE,  TRUE,  TRUE,
+  TRUE,  TRUE,  TRUE, FALSE, FALSE), 
 ncol = 5, byrow = TRUE)
 colnames(x) <- c("Release", "A1", "A2", "A3", "A4")
 cjs.results <- simpleCJS(x)
@@ -96,11 +96,11 @@ advEfficiency(cjs.results)
 
 # Example using the output of dualArrayCJS.
 x <- matrix(
-c(T, T, 
-  T, F, 
-  T, T,
-  F, T,
-  F, T), 
+c( TRUE,  TRUE, 
+   TRUE, FALSE, 
+   TRUE,  TRUE,
+  FALSE,  TRUE,
+  FALSE,  TRUE), 
 ncol = 2, byrow = TRUE)
 colnames(x) <- c("A1.1", "A1.2")
 cjs.results <- dualArrayCJS(x)

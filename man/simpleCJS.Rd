@@ -32,7 +32,7 @@ The internal calculations are based on 'Using mark-recapture models to estimate 
 }
 \examples{
 # prepare a dummy presence/absence matrix
-x <- matrix(c(T, T, T, T, F, T, T, T, F), ncol = 3)
+x <- matrix(c(TRUE, TRUE, TRUE, TRUE, FALSE, TRUE, TRUE, TRUE, FALSE), ncol = 3)
 colnames(x) <- c("Release", "Array1", "Array2")
 
 # run CJS

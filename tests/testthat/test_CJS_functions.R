@@ -1,6 +1,6 @@
 skip_on_cran()
 
-my.home <- getwd()
+tests.home <- getwd()
 setwd(tempdir())
 exampleWorkspace()
 setwd("exampleWorkspace")
@@ -54,7 +54,7 @@ test_that("assembleMatrices works as expected", {
 
 
 	#### ONLY RUN THIS PART TO RESET REFERENCE TABLES
-		# sink(paste0(find.package("actel"), "/tests/testthat/aux_assembleMatrices.R"))
+		# sink(paste0(tests.home, "/aux_assembleMatrices.R"))
 		# cat("aux_assembleMatrixes <- list()\n")
 		# capture <- lapply(1:2, function(i) {
 		# 	lapply(1:2, function(j) {
@@ -66,7 +66,7 @@ test_that("assembleMatrices works as expected", {
 		# })
 		# sink()
 	
-	source(paste0(find.package("actel"), "/tests/testthat/aux_assembleMatrices.R"))
+	source(paste0(tests.home, "/aux_assembleMatrices.R"))
 
 	capture <- lapply(1:2, function(i) {
 		lapply(1:2, function(j) {
@@ -85,7 +85,7 @@ test_that("breakMatricesByArray works as expected.", {
   m.by.array <<- output
 
 	#### ONLY RUN THIS PART TO RESET REFERENCE TABLES
-		# sink(paste0(find.package("actel"), "/tests/testthat/aux_breakMatricesByArray.R"))
+		# sink(paste0(tests.home, "/aux_breakMatricesByArray.R"))
 		# cat("aux_breakMatricesByArray <- list()\n")
 		# capture <- lapply(1:2, function(i) {
 		# 	lapply(1:2, function(j) {
@@ -97,7 +97,7 @@ test_that("breakMatricesByArray works as expected.", {
 		# })
 		# sink()
 	
-	source(paste0(find.package("actel"), "/tests/testthat/aux_breakMatricesByArray.R"))
+	source(paste0(tests.home, "/aux_breakMatricesByArray.R"))
 
 	capture <- lapply(1:2, function(i) {
 		lapply(1:2, function(j) {
@@ -453,8 +453,8 @@ test_that("split CJS functions work as expected.", {
   aux <- mbSplitCJS(mat = m.by.array, fixed.efficiency = overall.CJS$efficiency)
   ### ONLY RUN TO REPLACE REFERENCE
   # aux_mbSplitCJS <- aux
-  # save(aux_mbSplitCJS, file = paste0(find.package("actel"), "/tests/testthat/aux_mbSplitCJS.RData"))
-  load(paste0(find.package("actel"), "/tests/testthat/aux_mbSplitCJS.RData"))
+  # save(aux_mbSplitCJS, file = paste0(tests.home, "/aux_mbSplitCJS.RData"))
+  load(paste0(tests.home, "/aux_mbSplitCJS.RData"))
   expect_equal(aux, aux_mbSplitCJS)
 
   xefficiency <- overall.CJS$efficiency
@@ -492,8 +492,8 @@ test_that("group CJS functions work as expected.", {
   aux <- mbGroupCJS(mat = m.by.array, status.df = status.df, fixed.efficiency = overall.CJS$efficiency)
   ### ONLY RUN TO REPLACE REFERENCE
   # aux_mbGroupCJS <- aux
-  # save(aux_mbGroupCJS, file = paste0(find.package("actel"), "/tests/testthat/aux_mbGroupCJS.RData"))
-  load(paste0(find.package("actel"), "/tests/testthat/aux_mbGroupCJS.RData"))
+  # save(aux_mbGroupCJS, file = paste0(tests.home, "/aux_mbGroupCJS.RData"))
+  load(paste0(tests.home, "/aux_mbGroupCJS.RData"))
   expect_equal(aux, aux_mbGroupCJS)
 
   xefficiency <- overall.CJS$efficiency
@@ -534,5 +534,5 @@ test_that("special cases in oneWayMoves are working as expected", {
 
 setwd("..")
 unlink("exampleWorkspace", recursive = TRUE)
-setwd(my.home)
+setwd(tests.home)
 rm(list = ls())

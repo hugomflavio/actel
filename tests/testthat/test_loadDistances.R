@@ -1,6 +1,6 @@
 skip_on_cran()
 
-my.home <- getwd()
+tests.home <- getwd()
 setwd(tempdir())
 
 write.csv(example.spatial, "spatial.csv", row.names = FALSE)
@@ -61,5 +61,5 @@ test_that("loadDistances output imports data correctly", {
 	expect_true(all(is.na(output$dist.mat[, 18])))
 })
 
-setwd(my.home)
+setwd(tests.home)
 rm(list = ls())

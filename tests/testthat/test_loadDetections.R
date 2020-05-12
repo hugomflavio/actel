@@ -1,6 +1,6 @@
 skip_on_cran()
 
-my.home <- getwd()
+tests.home <- getwd()
 setwd(tempdir())
 
 test_that("loadDetections fails with expected message if no detections are present.", {
@@ -182,5 +182,5 @@ test_that("checkDetectionsBeforeRelease kicks in if needed.", {
 # b
 # b
 
-setwd(my.home)
+setwd(tests.home)
 rm(list = ls())

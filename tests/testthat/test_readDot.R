@@ -1,6 +1,6 @@
 skip_on_cran()
 
-my.home <- getwd()
+tests.home <- getwd()
 setwd(tempdir())
 
 test_that("readDot stops if argument or file is missing", {
@@ -30,4 +30,4 @@ test_that("readDot stops if the data inside the file/string does not meet expect
 	file.remove("test.txt")
 })
 
-setwd(my.home)
+setwd(tests.home)

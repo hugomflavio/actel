@@ -176,7 +176,7 @@ loadDot <- function(string = NULL, input = NULL, spatial, sections = NULL, disre
 #' readDot(string = x)
 #' 
 #' # more complex strings are acceptable:
-#' y <- x(
+#' y <- c(
 #' "A--B--C--D--E--F
 #' A--G--H--I--E
 #' H--C")

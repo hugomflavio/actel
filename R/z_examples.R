@@ -82,9 +82,11 @@ createWorkspace <- function(dir = "actel_workspace") {
 #' names(results)
 #' 
 #' # you can also try running the migration and residency analyses
-#' m.results <- migration(tz = 'Europe/Copenhagen', sections = c('River', 'Fjord', 'Sea'), report = TRUE)
+#' m.results <- migration(tz = 'Europe/Copenhagen', 
+#'  sections = c('River', 'Fjord', 'Sea'), report = TRUE)
 #' 
-#' r.results <- migration(tz = 'Europe/Copenhagen', sections = c('River', 'Fjord', 'Sea'), report = TRUE)
+#' r.results <- migration(tz = 'Europe/Copenhagen', 
+#'  sections = c('River', 'Fjord', 'Sea'), report = TRUE)
 #' }
 #' 
 #' @return No return value, called for side effects.

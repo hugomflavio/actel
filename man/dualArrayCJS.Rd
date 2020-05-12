@@ -22,7 +22,7 @@ The calculations are based on 'Using mark-recapture models to estimate survival 
 }
 \examples{
 # prepare a dummy presence/absence matrix
-x <- matrix(c(T, T, T, T, F, T), ncol = 2)
+x <- matrix(c(TRUE, TRUE, TRUE, TRUE, FALSE, TRUE), ncol = 2)
 colnames(x) <- c("R1", "R2")
 
 # run CJS

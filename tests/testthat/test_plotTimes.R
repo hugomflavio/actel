@@ -1,9 +1,9 @@
 skip_on_cran()
 
-my.home <- getwd()
+tests.home <- getwd()
 setwd(tempdir())
 
-load(paste0(find.package("actel"), "/tests/testthat/aux_plotTimes.RData"))
+load(paste0(tests.home, "/aux_plotTimes.RData"))
 times <- timesToCircular(times)
 
 test_that("plotTimes fail-safes kick in when needed", {
@@ -50,5 +50,5 @@ test_that("plotTimes returns no errors on actual data, plus saves files", {
 	file.remove("test_plotTimes_output.svg")
 })
 
-setwd(my.home)
+setwd(tests.home)
 rm(list = ls())

@@ -1,6 +1,6 @@
 skip_on_cran()
 
-my.home <- getwd()
+tests.home <- getwd()
 setwd(tempdir())
 dir.create("detections")
 aux <- split(example.detections, example.detections$Receiver)
@@ -43,5 +43,5 @@ test_that("createStandards removes detections outside deployments", {
 })
 # b
 
-setwd(my.home)
+setwd(tests.home)
 rm(list = ls())

@@ -1,4 +1,4 @@
-my.home <- getwd()
+tests.home <- getwd()
 setwd(tempdir())
 
 exampleWorkspace()
@@ -267,5 +267,5 @@ test_that("residency can handle multi-sensor data", {
 
 setwd("..")
 unlink("exampleWorkspace", recursive = TRUE)
-setwd(my.home)
+setwd(tests.home)
 rm(list = ls())

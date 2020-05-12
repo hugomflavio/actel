@@ -5,6 +5,7 @@
 \title{Calculate Transition Layer}
 \usage{
 transitionLayer(
+  path = ".",
   shape,
   size,
   EPSGcode,
@@ -16,6 +17,8 @@ transitionLayer(
 )
 }
 \arguments{
+\item{path}{The system path to the 'shape' file. Defaults to the current directory.}
+
 \item{shape}{A shape file projected in a metric coordinate system.}
 
 \item{size}{The pixel size, in metres.}

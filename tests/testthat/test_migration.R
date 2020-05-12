@@ -1,4 +1,4 @@
-my.home <- getwd()
+tests.home <- getwd()
 setwd(tempdir())
 
 exampleWorkspace()
@@ -164,7 +164,7 @@ test_that("migration stops when any argument does not make sense", {
 		"'auto.open' must be logical.", fixed = TRUE)
 
 	expect_error(migration(tz = 'Europe/Copenhagen', sections = c("River", "Fjord", "Sea"), save.detections = "a", GUI = "never"),
-		"'auto.open' must be logical.", fixed = TRUE)
+		"'save.detections' must be logical.", fixed = TRUE)
 
 	expect_error(migration(tz = 'Europe/Copenhagen', sections = c("River", "Fjord", "Sea"), report = TRUE, GUI = "never", replicates = "a"),
 		"'replicates' must be a list.", fixed = TRUE)
@@ -315,6 +315,6 @@ test_that("migration can handle multi-sensor data", {
 
 setwd("..")
 unlink("exampleWorkspace", recursive = TRUE)
-setwd(my.home)
+setwd(tests.home)
 rm(list = ls())
 
