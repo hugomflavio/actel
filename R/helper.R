@@ -613,11 +613,16 @@ timesToCircular <- function(x, by.group = FALSE) {
 #' @return A RData file with the transition layer is stored in the current directory.
 #' 
 transitionLayer <- function(shape, size, EPSGcode, coord.x = NULL, coord.y = NULL, buffer = NULL, directions = c(16, 8, 4), force = FALSE){
-  list.of.packages <- c("raster", "gdistance", "sp", "tools", "rgdal")
-  new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[, "Package"])]
-  if (length(new.packages) > 0) {
-    stop(paste0("This function requires packages '", paste(new.packages, collapse = "', '"), 
-      "' to operate. Please install ", ifelse(length(new.packages) > 1, "them", "it"), " before proceeding.\n"), call. = FALSE)
+  aux <- c(
+    length(suppressWarnings(packageDescription("raster"))),
+    length(suppressWarnings(packageDescription("gdistance"))),
+    length(suppressWarnings(packageDescription("sp"))),
+    length(suppressWarnings(packageDescription("tools"))),
+    length(suppressWarnings(packageDescription("rgdal"))))
+  missing.packages <- sapply(aux, function(x) x == 1 && is.na(x))
+  if (any(missing.packages)) {
+    stop(paste0("This function requires packages '", paste(c("raster", "gdistance", "sp", "tools", "rgdal")[missing.packages], collapse = "', '"), 
+      "' to operate. Please install ", ifelse(sum(missing.packages) > 1, "them", "it"), " before proceeding.\n"), call. = FALSE)
   }
   directions <- as.character(directions)
   directions <- match.arg(directions)
@@ -778,11 +783,16 @@ size, rerun the function with force = TRUE.\n", call. = FALSE)
 #' 
 distancesMatrix <- function(t.layer, starters = NULL, targets = starters, EPSGcode, 
   coord.x = "x", coord.y = "y", id.col = NULL, actel = TRUE){
-  list.of.packages <- c("raster", "gdistance", "sp", "tools", "rgdal")
-  new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[, "Package"])]
-  if (length(new.packages) > 0) {
-    stop(paste0("This function requires packages '", paste(new.packages, collapse = "', '"), 
-      "' to operate. Please install ", ifelse(length(new.packages) > 1, "them", "it"), " before proceeding.\n"), call. = FALSE)
+  aux <- c(
+    length(suppressWarnings(packageDescription("raster"))),
+    length(suppressWarnings(packageDescription("gdistance"))),
+    length(suppressWarnings(packageDescription("sp"))),
+    length(suppressWarnings(packageDescription("tools"))),
+    length(suppressWarnings(packageDescription("rgdal"))))
+  missing.packages <- sapply(aux, function(x) x == 1 && is.na(x))
+  if (any(missing.packages)) {
+    stop(paste0("This function requires packages '", paste(c("raster", "gdistance", "sp", "tools", "rgdal")[missing.packages], collapse = "', '"), 
+      "' to operate. Please install ", ifelse(sum(missing.packages) > 1, "them", "it"), " before proceeding.\n"), call. = FALSE)
   }
 
   if (class(transition.layer) == "TransitionLayer") 

@@ -59,6 +59,8 @@ plotting of a graphic.
 now performed inside R's temporary directory. This change as also
 been applied for tests that do not run on CRAN.
 
+* All installed.packages() calls were removed and the respective
+functions were addapted to work with packageDescription()
 * Removed markup from the package description
 
 * Removed the LICENSE file

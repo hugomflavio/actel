@@ -136,11 +136,16 @@ checkGUI <- function(GUI = c("needed", "always", "never")) {
     stop("'GUI' should be one of 'needed', 'always' or 'never'.\n", call. = FALSE)
   GUI <- match.arg(GUI)
   if (GUI != "never") {
-    if (any(link <- !(c("gWidgets2RGtk2", "gWidgets2", "RGtk2") %in% installed.packages()))) {
+    aux <- c(
+      length(suppressWarnings(packageDescription("gWidgets2"))),
+      length(suppressWarnings(packageDescription("gWidgets2RGtk2"))),
+      length(suppressWarnings(packageDescription("RGtk2"))))
+    missing.packages <- sapply(aux, function(x) x == 1 && is.na(x))
+    if (any(missing.packages)) {
       appendTo(c("Screen", "Warning", "Report"), 
         paste0("GUI is set to '", GUI, "' but ", 
           ifelse(sum(link) == 1, "package '", "packages '"),
-          paste(c("gWidgets2RGtk2", "gWidgets2", "RGtk2")[link], collapse = "', '"),
+          paste(c("gWidgets2", "gWidgets2RGtk2", "RGtk2")[missing.packages], collapse = "', '"),
           ifelse(sum(link) == 1, "' is", "' are"),
           " not available. Please install ",
           ifelse(sum(link) == 1, "it", "them"),
