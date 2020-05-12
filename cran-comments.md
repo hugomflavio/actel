@@ -1,6 +1,11 @@
-## Package resubmission
+## Package resubmission (2nd revision)
 
-This is a resubmission. As requested, in this version I have:
+This is a resubmission. As requested by Jelena Saf,
+In this version I have:
+
+* Included a reference to a supporting paper in the package
+description
+
 
 * Removed markup from the package description
 
