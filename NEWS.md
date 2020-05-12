@@ -22,7 +22,7 @@ Changes:
   * actel no longer saves the stray tags summary to the user's working directory by default. If there are stray tags in the data, the users will be asked if they would like to save a copy of the summary.
   * transitionLayer no longer saves the output automatically into the working directory.
   * distancesMatrix now receives the transition layer as an R object rather than a file name.
-  * distancesMatrix now requires user confirmation before writting a 'distances.csv' file into the working directory.
+  * distancesMatrix now requires user confirmation before writing a 'distances.csv' file into the working directory.
   * createMatrix and completeMatrix now work with R objects rather than files. The user must manually save the function output to a 'distances.csv' file to include it in the next analysis.
 
 Enhancements:

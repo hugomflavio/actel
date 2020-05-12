@@ -14,8 +14,8 @@ includeUnknownReceiver(spatial, deployments, unknown.receivers)
 \value{
 A list containing:
 \itemize{
-\item \code{spatial}: A list containing the spatial elements of the study, with data for the uknown receivers, if relevant.
-\item \code{deployments}: A list containing the receiver deployments, with data for the uknown receivers, if relevant.
+\item \code{spatial}: A list containing the spatial elements of the study, with data for the unknown receivers, if relevant.
+\item \code{deployments}: A list containing the receiver deployments, with data for the unknown receivers, if relevant.
 }
 }
 \description{

@@ -16,6 +16,6 @@ a vector of the number of rows and number of columns needed to distribute the de
 Calculates the optimal distribution of plots in a square grid.
 }
 \details{
-Obtained here: https://stackoverflow.com/questions/32017327/calculate-the-optimal-grid-layout-dimensions-for-a-given-amount-of-plots-in-r
+Obtained here: \url{https://stackoverflow.com/questions/32017327/calculate-the-optimal-grid-layout-dimensions-for-a-given-amount-of-plots-in-r}
 }
 \keyword{internal}

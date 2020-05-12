@@ -238,7 +238,7 @@ checkDupDetections <- function(input) {
 #' 
 #' @inheritParams check_args
 #' 
-#' @return A data frame containig the movements for the target fish
+#' @return A data frame containing the movements for the target fish
 #' 
 #' @keywords internal
 #' 
@@ -732,8 +732,8 @@ checkUnknownReceivers <- function(input) {
 #' 
 #' @return A list containing:
 #' \itemize{
-#'  \item \code{spatial}: A list containing the spatial elements of the study, with data for the uknown receivers, if relevant.
-#'  \item \code{deployments}: A list containing the receiver deployments, with data for the uknown receivers, if relevant.
+#'  \item \code{spatial}: A list containing the spatial elements of the study, with data for the unknown receivers, if relevant.
+#'  \item \code{deployments}: A list containing the receiver deployments, with data for the unknown receivers, if relevant.
 #'  \item \code{detections.list}: A list containing the detections for each fish, with updated station names.
 #' }
 #' 
@@ -793,8 +793,8 @@ checkTagsInUnknownReceivers <- function(detections.list, deployments, spatial) {
 #' 
 #' @return A list containing:
 #' \itemize{
-#'  \item \code{spatial}: A list containing the spatial elements of the study, with data for the uknown receivers, if relevant.
-#'  \item \code{deployments}: A list containing the receiver deployments, with data for the uknown receivers, if relevant.
+#'  \item \code{spatial}: A list containing the spatial elements of the study, with data for the unknown receivers, if relevant.
+#'  \item \code{deployments}: A list containing the receiver deployments, with data for the unknown receivers, if relevant.
 #' }
 #' 
 #' @keywords internal

@@ -20,7 +20,7 @@ not fit in R's console, a temporary file will be saved and the user will be
 prompted to open and examine that file. Defaults to "needed".}
 }
 \value{
-A data frame containig the movements for the target fish
+A data frame containing the movements for the target fish
 }
 \description{
 Skips all validity checks for a fish and allows the user to freely invalidate events

@@ -2,7 +2,7 @@
 #' 
 #' Finds the largest x for which n %% x == 0
 #' 
-#' Obtained here: https://stackoverflow.com/questions/32017327/calculate-the-optimal-grid-layout-dimensions-for-a-given-amount-of-plots-in-r
+#' Obtained here: <https://stackoverflow.com/questions/32017327/calculate-the-optimal-grid-layout-dimensions-for-a-given-amount-of-plots-in-r>
 #' 
 #' @param n number of plots to fit.
 #' 
@@ -22,7 +22,7 @@ fact <- function(n) {
 #' 
 #' Calculates the optimal distribution of plots in a square grid.
 #' 
-#' Obtained here: https://stackoverflow.com/questions/32017327/calculate-the-optimal-grid-layout-dimensions-for-a-given-amount-of-plots-in-r
+#' Obtained here: <https://stackoverflow.com/questions/32017327/calculate-the-optimal-grid-layout-dimensions-for-a-given-amount-of-plots-in-r>
 #' 
 #' @param n number of plots to fit.
 #' 

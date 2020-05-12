@@ -630,7 +630,7 @@ oneWayMoves <- function(movements, arrays) {
 #' @inheritParams res_efficiency
 #' @inheritParams dotPaths
 #' 
-#' @return NULL if no arrays failed, or a list containing informatio on the arrays that failed
+#' @return NULL if no arrays failed, or a list containing information on the arrays that failed
 #' 
 #' @keywords internal
 #' 

@@ -133,7 +133,7 @@ A list containing:
 \item \code{deployments}: A data frame containing the deployments of each receiver;
 \item \code{arrays}: A list containing the array details used during the analysis;
 \item \code{movements}: A list containing all movement events for each target fish;
-\item \code{valid.movements}: A list containing the valid movemenet events for each target fish;
+\item \code{valid.movements}: A list containing the valid movement events for each target fish;
 \item \code{section.movements}: A list containing the valid section shifts for each target fish;
 \item \code{status.df}: A data frame containing summary information for each fish, including the
 following columns:

@@ -16,6 +16,6 @@ An integer
 Finds the largest x for which n \%\% x == 0
 }
 \details{
-Obtained here: https://stackoverflow.com/questions/32017327/calculate-the-optimal-grid-layout-dimensions-for-a-given-amount-of-plots-in-r
+Obtained here: \url{https://stackoverflow.com/questions/32017327/calculate-the-optimal-grid-layout-dimensions-for-a-given-amount-of-plots-in-r}
 }
 \keyword{internal}

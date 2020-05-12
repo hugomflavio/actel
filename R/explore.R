@@ -551,6 +551,8 @@ Percentage of post-release valid detections: ', round(sum(unlist(lapply(valid.de
 
 Found a bug? [**Report it here.**](https://github.com/hugomflavio/actel/issues)
 
+Want to cite actel in a publication? Run citation("actel")
+
 ### Study area
 
 Release sites are marked with "R.S.". Arrays connected with an arrow indicate that the fish can only pass in one direction.

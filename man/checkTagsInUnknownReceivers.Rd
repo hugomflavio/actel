@@ -16,8 +16,8 @@ A list containing an updated spatial list and a TRUE/FALSE object indicating whe
 
 A list containing:
 \itemize{
-\item \code{spatial}: A list containing the spatial elements of the study, with data for the uknown receivers, if relevant.
-\item \code{deployments}: A list containing the receiver deployments, with data for the uknown receivers, if relevant.
+\item \code{spatial}: A list containing the spatial elements of the study, with data for the unknown receivers, if relevant.
+\item \code{deployments}: A list containing the receiver deployments, with data for the unknown receivers, if relevant.
 \item \code{detections.list}: A list containing the detections for each fish, with updated station names.
 }
 }
