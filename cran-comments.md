@@ -55,6 +55,10 @@ orderly into the console dimensions, and 2) the function
 advEfficiency, where the print call is intended to trigger the
 plotting of a graphic.
 
+* All automated tests that involve writing/reading files are
+now performed inside R's temporary directory. This change as also
+been applied for tests that do not run on CRAN.
+
 * Removed markup from the package description
 
 * Removed the LICENSE file

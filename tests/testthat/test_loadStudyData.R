@@ -1,5 +1,8 @@
 skip_on_cran()
 
+my.home <- getwd()
+setwd(tempdir())
+
 exampleWorkspace()
 setwd("exampleWorkspace")
 
@@ -60,3 +63,4 @@ test_that("loadStudyData can handle detections in unknown receivers", {
 
 setwd("..")
 unlink("exampleWorkspace", recursive = TRUE)
+setwd(my.home)

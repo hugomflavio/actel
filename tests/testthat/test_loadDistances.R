@@ -1,5 +1,8 @@
 skip_on_cran()
 
+my.home <- getwd()
+setwd(tempdir())
+
 write.csv(example.spatial, "spatial.csv", row.names = FALSE)
 spatial <- loadSpatial()
 file.remove("spatial.csv")
@@ -58,5 +61,5 @@ test_that("loadDistances output imports data correctly", {
 	expect_true(all(is.na(output$dist.mat[, 18])))
 })
 
-file.remove(list.files(pattern = "*txt$"))
+setwd(my.home)
 rm(list = ls())

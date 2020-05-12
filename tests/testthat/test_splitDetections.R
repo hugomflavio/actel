@@ -1,5 +1,8 @@
 skip_on_cran()
 
+my.home <- getwd()
+setwd(tempdir())
+
 dir.create("detections")
 aux <- split(example.detections, example.detections$Receiver)
 for (i in names(aux)[1:3]) {
@@ -91,6 +94,5 @@ test_that("splitDetections can handle multi-sensor tags", {
 	expect_true(all(is.na(output$detections.list[[3]]$Sensor.Unit)))
 })
 
-file.remove(list.files(pattern = "*txt$"))
-file.remove(list.files(pattern = "*csv$"))
+setwd(my.home)
 rm(list = ls())

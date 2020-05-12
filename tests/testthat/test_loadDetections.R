@@ -1,5 +1,8 @@
 skip_on_cran()
 
+my.home <- getwd()
+setwd(tempdir())
+
 test_that("loadDetections fails with expected message if no detections are present.", {
 	expect_error(loadDetections(tz = "Europe/Copenhagen"),
 		"Could not find a 'detections' folder nor a 'detections.csv' file.", fixed = TRUE)
@@ -185,5 +188,5 @@ test_that("checkDetectionsBeforeRelease kicks in if needed.", {
   expect_equal(length(output), length(detections.list) - 1)
 })
 
-file.remove(list.files(pattern = "*txt$"))
+setwd(my.home)
 rm(list = ls())

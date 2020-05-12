@@ -1,5 +1,8 @@
 skip_on_cran()
 
+my.home <- getwd()
+setwd(tempdir())
+
 test_that("loadSpatial stops if file is missing", {
 	expect_error(loadSpatial(file = "test", report = TRUE), 
 		"Could not find a 'test' file in the working directory.", fixed = TRUE)
@@ -79,4 +82,4 @@ test_that("loadSpatial output is exactly as expected", {
 	file.remove("spatial.csv")
 })
 
-file.remove(list.files(pattern = "*txt$"))
+setwd(my.home)

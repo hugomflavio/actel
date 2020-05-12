@@ -1,5 +1,8 @@
 skip_on_cran()
 
+my.home <- getwd()
+setwd(tempdir())
+
 test_that("dataToList is working", {
 	a <- matrix(c(1,2,3,4), 2, 2)
 	b <- data.frame(A = 1:2, B = 3:4)
@@ -112,3 +115,5 @@ test_that("clearWorkspace removes target files.", {
 	sink()
 	expect_message(clearWorkspace(), "Workspace already clean.")
 })
+
+setwd(my.home)

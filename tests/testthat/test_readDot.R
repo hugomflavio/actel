@@ -1,5 +1,8 @@
 skip_on_cran()
 
+my.home <- getwd()
+setwd(tempdir())
+
 test_that("readDot stops if argument or file is missing", {
 	expect_error(readDot(), 
 		"No dot file or data were specified.", fixed = TRUE)
@@ -26,3 +29,5 @@ test_that("readDot stops if the data inside the file/string does not meet expect
 		"Could not recognise the input contents as DOT formatted connections.", fixed = TRUE)
 	file.remove("test.txt")
 })
+
+setwd(my.home)

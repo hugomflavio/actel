@@ -1,5 +1,8 @@
 skip_on_cran()
 
+my.home <- getwd()
+setwd(tempdir())
+
 write.csv(example.spatial, "spatial.csv", row.names = FALSE)
 spatial <- loadSpatial()
 file.remove("spatial.csv")
@@ -109,5 +112,5 @@ test_that("transformSpatial handles multiple expected first arrays correctly", {
 		"Multiple possible first arrays detected for more than five release sites.", fixed = TRUE)
 })
 
-file.remove(list.files(pattern = "*txt$"))
+setwd(my.home)
 rm(list = ls())

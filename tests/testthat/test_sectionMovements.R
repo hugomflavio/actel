@@ -1,5 +1,8 @@
 skip_on_cran()
 
+my.home <- getwd()
+setwd(tempdir())
+
 exampleWorkspace()
 setwd("exampleWorkspace")
 write.csv(example.distances, "distances.csv")
@@ -96,5 +99,6 @@ test_that("checkSMovesN throws warning only if movements are not ordered", {
 
 setwd("..")
 unlink("exampleWorkspace", recursive = TRUE)
+setwd(my.home)
 rm(list = ls())
 

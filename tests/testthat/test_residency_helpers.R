@@ -1,5 +1,8 @@
 skip_on_cran()
 
+my.home <- getwd()
+setwd(tempdir())
+
 exampleWorkspace()
 setwd("exampleWorkspace")
 write.csv(example.distances, "distances.csv")
@@ -255,4 +258,5 @@ Fjord1 -- Fjord2 -- Fjord1
 
 setwd("..")
 unlink("exampleWorkspace", recursive = TRUE)
+setwd(my.home)
 rm(list = ls())

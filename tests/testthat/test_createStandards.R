@@ -1,5 +1,7 @@
 skip_on_cran()
 
+my.home <- getwd()
+setwd(tempdir())
 dir.create("detections")
 aux <- split(example.detections, example.detections$Receiver)
 for (i in names(aux)[1:3]) {
@@ -41,4 +43,5 @@ test_that("createStandards removes detections outside deployments", {
 })
 
 file.remove(list.files(pattern = "*txt$"))
+setwd(my.home)
 rm(list = ls())

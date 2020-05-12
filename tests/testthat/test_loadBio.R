@@ -1,5 +1,8 @@
 skip_on_cran()
 
+my.home <- getwd()
+setwd(tempdir())
+
 test_that("loadBio stops if arguments or file are missing", {
 	# Missing arguments
 	expect_error(loadBio(), "'file' is missing.", fixed = TRUE)
@@ -181,4 +184,4 @@ test_that("loadBio can handle multi-sensor tags.", {
 	file.remove("biometrics.csv")
 })
 
-file.remove(list.files(pattern = "*txt$"))
+setwd(my.home)

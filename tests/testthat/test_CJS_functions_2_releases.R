@@ -2,6 +2,8 @@ skip_on_cran()
 
 # ---- FORCE TWO RELEASE SITES
 
+my.home <- getwd()
+setwd(tempdir())
 exampleWorkspace()
 setwd("exampleWorkspace")
 
@@ -224,6 +226,7 @@ test_that("mbGroupCJS can deal with multiple release sites (two sites, single gr
 
 setwd("..")
 unlink("exampleWorkspace", recursive = TRUE)
+setwd(my.home)
 rm(list = ls())
 
 

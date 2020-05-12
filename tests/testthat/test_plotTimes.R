@@ -1,5 +1,8 @@
 skip_on_cran()
 
+my.home <- getwd()
+setwd(tempdir())
+
 load("aux_plotTimes.RData")
 times <- timesToCircular(times)
 
@@ -47,4 +50,5 @@ test_that("plotTimes returns no errors on actual data, plus saves files", {
 	file.remove("test_plotTimes_output.svg")
 })
 
+setwd(my.home)
 rm(list = ls())

@@ -1,5 +1,8 @@
 skip_on_cran()
 
+my.home <- getwd()
+setwd(tempdir())
+
 test_that("loadDot stops if arguments or file are missing", {
 	expect_error(loadDot(), "No dot file or dot string were specified.", fixed = TRUE)
 })
@@ -368,4 +371,5 @@ River3 -- River6")
 	expect_equal(arrays, aux_dotPaths_complex_text_disregard_parallels_false)
 })
 
-file.remove(list.files(pattern = "*txt$"))
+setwd(my.home)
+

@@ -1,5 +1,8 @@
 skip_on_cran()
 
+my.home <- getwd()
+setwd(tempdir())
+
 list.of.packages <- c("raster", "gdistance", "sp", "tools", "rgdal")
 new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[, "Package"])]
 
@@ -311,4 +314,5 @@ file.remove(list.files(pattern = "*txt$"))
 file.remove("distances.csv")
 file.remove("spatial.csv")
 file.remove("spatial2.csv")
+setwd(my.home)
 rm(list = ls())

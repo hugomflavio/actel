@@ -1,5 +1,8 @@
 skip_on_cran()
 
+my.home <- getwd()
+setwd(tempdir())
+
 test_that("collectStrays work as expected", {
 	xdet <- list(Test = example.detections[1:5, ])
 	colnames(xdet[[1]])[1] <- "Timestamp"
@@ -23,4 +26,4 @@ test_that("collectStrays work as expected", {
 	file.remove(list.files(pattern = "stray_tags"))
 })
 
-file.remove(list.files(pattern = "*txt$"))
+setwd(my.home)

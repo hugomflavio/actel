@@ -1,5 +1,8 @@
 skip_on_cran()
 
+my.home <- getwd()
+setwd(tempdir())
+
 test_that("loadDeployments stops if file is missing", {
 	expect_error(loadDeployments(file = "test"), 
 		"Could not find a 'test' file in the working directory.", fixed = TRUE)
@@ -89,4 +92,4 @@ test_that("loadDeployments output is exactly as expected", {
 	file.remove("deployments.csv")
 })
 
-file.remove(list.files(pattern = "*txt$"))
+setwd(my.home)
