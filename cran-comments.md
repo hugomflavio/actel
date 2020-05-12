@@ -59,7 +59,7 @@ advEfficiency, where the print call is intended to trigger the
 plotting of a graphic.
 
 * All automated tests that involve writing/reading files are
-now performed inside R's temporary directory. This change as also
+now performed inside R's temporary directory. This change has also
 been applied for tests that do not run on CRAN.
 
 * All installed.packages() calls were removed and the respective
@@ -74,6 +74,8 @@ files outside R's temporary directory without explicit permission.
 were included for all functions.
 
 * Removed the startNote function as it is no longer relevant.
+
+* Updated the package vignettes accordingly.
 
 ## Package resubmission (1st revision)
 
