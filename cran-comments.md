@@ -61,6 +61,13 @@ been applied for tests that do not run on CRAN.
 
 * All installed.packages() calls were removed and the respective
 functions were addapted to work with packageDescription()
+
+
+## Package resubmission (1st revision)
+
+This is a resubmission. As requested by Uwe Ligges, 
+in this version I have:
+
 * Removed markup from the package description
 
 * Removed the LICENSE file
