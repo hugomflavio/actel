@@ -1,29 +1,3 @@
-#' Start note for actel
-#' 
-#' @export
-#' 
-startNote <- function() {
-  message(
-"Writing/editing files:
-  To operate, actel must write/change files present in the target 
-  directory and create subdirectories. This includes the functions 
-  transitionLayer, distancesMatrix, emptyMatrix, createWorkspace, 
-  exampleWorkspace, clearWorkspace, explore, migration and residency. 
-  These actions are always related to the analysis processes being 
-  carried on (e.g. deploy examples, write reports, print graphics). 
-
-Opening the web browser:
-  actel has an auto-open feature for generated reports, which will 
-  trigger your browser to open at the end of the explore, migration 
-  and residency functions. If you would like to disable this, please 
-  run these functions with auto.open = FALSE. 
-
-Please only use actel if you agree with this.
-
-To get acquainted with how actel works, read the package vignettes.
-You can find them by running browseVignettes('actel')")
-}
-
 #' nearsq helper
 #' 
 #' Obtained here: https://stackoverflow.com/questions/32017327/calculate-the-optimal-grid-layout-dimensions-for-a-given-amount-of-plots-in-r
