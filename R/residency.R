@@ -418,7 +418,6 @@ residency <- function(tz, sections, max.interval = 60, minimum.detections = 2,
 # ----------
 
   
-  appendTo("Report", "M: Process finished successfully.")
 # ---------------
 
 # wrap up in-R objects
@@ -502,43 +501,58 @@ residency <- function(tz, sections, max.interval = 60, minimum.detections = 2,
 
 # wrap up the txt report
   appendTo("Report", "\n-------------------")
-  if (file.exists("temp_UD.txt")) 
-    appendTo("Report", paste0("User interventions:\n-------------------\n", gsub("\r", "", readr::read_file("temp_UD.txt")), "-------------------")) # nocov
+  if (file.exists(paste(tempdir(), "temp_UD.txt", sep = "/")))
+    appendTo("Report", paste0("User interventions:\n-------------------\n", gsub("\r", "", readr::read_file(paste(tempdir(), "temp_UD.txt", sep = "/"))), "-------------------")) # nocov
   
   appendTo("Report", paste0("Function call:\n-------------------\n", the.function.call, "\n-------------------"))
 # ------------------
 
 # print html report
   if (report) {
-    appendTo("debug", "debug: Printing report")
-    rmarkdown::render(
-      reportname <- printResidencyRmd(override.fragment = override.fragment, 
-                                      biometric.fragment = biometric.fragment, 
-                                      efficiency.fragment = efficiency.fragment, 
-                                      individual.detection.plots = individual.detection.plots, 
-                                      individual.residency.plots = individual.residency.plots, 
-                                      array.circular.plots = array.circular.plots, 
-                                      section.arrival.circular.plots = section.arrival.circular.plots, 
-                                      section.departure.circular.plots = section.departure.circular.plots, 
-                                      sensor.plots = sensor.plots,
-                                      spatial = spatial, 
-                                      deployments = deployments, 
-                                      detections = detections, 
-                                      valid.detections = valid.detections, 
-                                      last.seen = last.seen, 
-                                      last.seen.graph.size = last.seen.graph.size), 
-      quiet = TRUE)
+    if (file.exists(reportname <- "actel_residency_report.html")) {
+      continue <- TRUE
+      index <- 1
+      while (continue) {
+        if(file.exists(reportname <- paste0("actel_residency_report.", index, ".html"))) {
+          index <- index + 1
+        } else {
+          continue <- FALSE
+        }
+      }
+      appendTo("Screen", paste0("M: An actel report is already present in the current directory.\n   Saving new report as ", reportname, "."))
+      rm(continue, index)
+    } else {
+      appendTo("Screen", "M: Saving actel report as 'actel_residency_report.html'.")
+    }
+
+    appendTo("debug", "debug: Printing report md")
+    printResidencyRmd(override.fragment = override.fragment, 
+                      biometric.fragment = biometric.fragment, 
+                      efficiency.fragment = efficiency.fragment, 
+                      individual.detection.plots = individual.detection.plots, 
+                      individual.residency.plots = individual.residency.plots, 
+                      array.circular.plots = array.circular.plots, 
+                      section.arrival.circular.plots = section.arrival.circular.plots, 
+                      section.departure.circular.plots = section.departure.circular.plots, 
+                      sensor.plots = sensor.plots,
+                      spatial = spatial, 
+                      deployments = deployments, 
+                      detections = detections, 
+                      valid.detections = valid.detections, 
+                      last.seen = last.seen, 
+                      last.seen.graph.size = last.seen.graph.size)
+
+    appendTo("debug", "debug: Converting report to html")
+    rmarkdown::render(input = paste0(tempdir(), "/actel_residency_report.Rmd"), 
+      output_dir = tempdir(), quiet = TRUE)
+
     appendTo("debug", "debug: Moving report")
-    fs::file_move(sub("Rmd", "html", reportname), sub("Report/", "", sub("Rmd", "html", reportname)))
-    if (interactive()) { # nocov start
+    file.copy(paste0(tempdir(), "/actel_residency_report.html"), reportname)
+    if (interactive() & auto.open) { # nocov start
       appendTo("debug", "debug: Opening report.")
-      browseURL(sub("Report/", "", sub("Rmd", "html", reportname)))
+      browseURL(reportname)
     } # nocov end
-    appendTo("debug", "debug: Removing toc_menu_explore.html")
-    if(file.exists("Report/toc_menu_explore.html"))
-      file.remove("Report/toc_menu_explore.html")
   }
-  appendTo("Screen", "M: Process finished successfully.")
 # ------------------
 
   jobname <- paste0(gsub(" |:", ".", as.character(Sys.time())), ".actel.log.txt")
@@ -580,21 +594,6 @@ printResidencyRmd <- function(override.fragment, biometric.fragment, efficiency.
   individual.detection.plots, individual.residency.plots, array.circular.plots, 
   section.arrival.circular.plots, section.departure.circular.plots, sensor.plots, spatial, 
   deployments, detections, valid.detections, last.seen, last.seen.graph.size){
-  if (file.exists(reportname <- "Report/actel_residency_report.Rmd")) {
-    continue <- TRUE
-    index <- 1
-    while (continue) {
-      if(file.exists(reportname <- paste0("Report/actel_residency_report.", index, ".Rmd"))) {
-        index <- index + 1
-      } else {
-        continue <- FALSE
-      }
-    }
-    appendTo("Screen", paste0("M: An actel report is already present in the current directory\n   Saving new report as 'actel_residency_report.", index, ".html'."))
-    rm(continue,index)
-  } else {
-    appendTo("Screen", "M: Saving actel report as 'actel_residency_report.html'.")
-  }
   if (any(grepl("Unknown", spatial$stations$Standard.name))) {
     unknown.fragment <- paste0('<span style="color:red"> Number of relevant unknown receivers: **', sum(grepl("Unknown", spatial$stations$Standard.name)), '**</span>\n')
   } else {
@@ -611,12 +610,12 @@ Note:
     sensor.fragment <- NULL
   }
 
-  report <- readr::read_file("temp_log.txt")
+  report <- readr::read_file(paste0(tempdir(), "/temp_log.txt"))
 
   oldoptions <- options(knitr.kable.NA = "-")
   on.exit(options(oldoptions), add = TRUE)
 
-  sink(reportname)
+  sink(paste0(tempdir(), "/actel_residency_report.rmd"))
   cat(paste0(
 '---
 title: "Acoustic telemetry residency analysis"
@@ -624,7 +623,7 @@ author: "Actel R package (', utils::packageVersion("actel"), ')"
 output: 
   html_document:
     includes:
-      after_body: toc_menu_residency.html
+      after_body: ', tempdir(), '/toc_menu_residency.html
 ---
 
 ### Summary
@@ -651,7 +650,7 @@ Found a bug? [**Report it here.**](https://github.com/hugomflavio/actel/issues)
 
 Arrays with the same background belong to the same section. Release sites are marked with "R.S.". Arrays connected with an arrow indicate that the fish can only pass in one direction.
 
-<img src="mb_arrays.svg" alt="Missing file" style="padding-top: 15px;"/>
+<img src="', tempdir(), '/mb_arrays.svg" alt="Missing file" style="padding-top: 15px;"/>
 
 ### Receiver stations
 
@@ -672,16 +671,17 @@ Arrays with the same background belong to the same section. Release sites are ma
 ### Warning messages
 
 ```{r warnings, echo = FALSE, comment = NA}
-if(file.exists("../temp_warnings.txt")) cat(gsub("\\r", "", readr::read_file("../temp_warnings.txt"))) else cat("No warnings were raised during the analysis.")
+cat("', ifelse(file.exists(paste0(tempdir(), '/temp_warnings.txt')),
+  gsub("\\r", "", readr::read_file(paste0(tempdir(), '/temp_warnings.txt'))),
+  'No warnings were raised during the analysis.'), '")
 ```
 
 ### User comments
 
-Note:
-  : Comments are also stored in the `status.df` object.
-
 ```{r comments, echo = FALSE, comment = NA}
- if(file.exists("../temp_comments.txt")) cat(gsub("\\r", "", readr::read_file("../temp_comments.txt"))) else cat("No comments were included during the analysis.")
+cat("', ifelse(file.exists(paste0(tempdir(), '/temp_comments.txt')),
+  gsub("\\r", "", readr::read_file(paste0(tempdir(), '/temp_comments.txt'))),
+  'No comments were included during the analysis.'), '")
 ```
 
 ', ifelse(biometric.fragment == '', '', paste0('### Biometric graphics
@@ -702,7 +702,7 @@ Note:
 ', paste(knitr::kable(last.seen), collapse = "\n"), '
 
 <center>
-![](last_seen.png){ ',last.seen.graph.size ,' }
+![](', tempdir(), '/last_seen.png){ ',last.seen.graph.size ,' }
 </center>
 
 
@@ -725,7 +725,7 @@ Note:
   : The data used in these graphics is stored in the `section.times$arrival` object.
 
 <center>
-![](arrival_days.png){ width=95% }
+![](', tempdir(), '/arrival_days.png){ width=95% }
 </center>
 
 #### Arrival times at each section
@@ -745,7 +745,7 @@ Note:
   : The data used in these graphics is stored in the `section.times$departure` object.
 
 <center>
-![](departure_days.png){ width=95% }
+![](', tempdir(), '/departure_days.png){ width=95% }
 </center>
 
 #### Departure times at each section
@@ -768,14 +768,14 @@ Note:
 #### Absolutes
 
 <center>
-![](global_ratios_absolutes.png){ width=95% }
+![](', tempdir(), '/global_ratios_absolutes.svg){ width=95% }
 </center>
 
 
 #### Percentages
 
 <center>
-![](global_ratios_percentages.png){ width=95% }
+![](', tempdir(), '/global_ratios_percentages.svg){ width=95% }
 </center>
 
 
@@ -806,15 +806,13 @@ Note:
 ### Full log
 
 ```{r log, echo = FALSE, comment = NA}
-cat(gsub("\\r", "", readr::read_file("../temp_log.txt")))
+cat("', gsub("\\r", "", readr::read_file(paste0(tempdir(), '/temp_log.txt'))), '")
 ```
 
 '), fill = TRUE)
 sink()
 
-if(file.exists("Report/toc_menu_residency.html"))
-  file.remove("Report/toc_menu_residency.html")
-sink("Report/toc_menu_residency.html")
+sink(paste0(tempdir(), "/toc_menu_residency.html"))
 cat(
 '<style>
 h3 {
@@ -912,7 +910,6 @@ img[src*="#diagram"] {
 </div>
 ', fill = TRUE)
 sink()
-return(reportname)
 }
 
 

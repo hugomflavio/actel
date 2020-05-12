@@ -537,14 +537,6 @@ checkReport <- function(report){
         report <- FALSE
       }
     }
-    if (report) {
-      if (!dir.exists("Report")) {
-        appendTo("Screen", "M: Creating 'Report' subdirectory to store report files.")
-        dir.create("Report")
-      } else {
-        appendTo("Screen", "'Report' directory already present. Overwriting files already present.")
-      }
-    }
   }
   return(report)
 }

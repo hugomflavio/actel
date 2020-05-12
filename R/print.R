@@ -324,7 +324,7 @@ printProgression <- function(dot, sections, overall.CJS, spatial, status.df, pri
   plot <- DiagrammeR::grViz(x)
   plot_string <- DiagrammeRsvg::export_svg(plot)
   plot_raw <- charToRaw(plot_string)
-  rsvg::rsvg_svg(svg = plot_raw, file = "Report/mb_efficiency.svg")
+  rsvg::rsvg_svg(svg = plot_raw, file = paste0(tempdir(), "/mb_efficiency.svg"))
 }
 
 #' Print DOT diagram
@@ -453,7 +453,7 @@ printDot <- function(dot, sections = NULL, spatial, print.releases) {
   plot <- DiagrammeR::grViz(x)
   plot_string <- DiagrammeRsvg::export_svg(plot)
   plot_raw <- charToRaw(plot_string)
-  rsvg::rsvg_svg(svg = plot_raw, file = "Report/mb_arrays.svg")
+  rsvg::rsvg_svg(svg = plot_raw, file = paste0(tempdir(), "/mb_arrays.svg"))
 }
 
 #' Print biometric graphics 
@@ -489,12 +489,12 @@ printBiometrics <- function(bio) {
       p <- p + ggplot2::theme_bw()
       p <- p + ggplot2::theme(panel.grid.minor.x = ggplot2::element_blank(), panel.grid.major.x = ggplot2::element_blank())
       p <- p + ggplot2::labs(x = "", y = i)
-      ggplot2::ggsave(paste0("Report/", gsub("[.]", "_", i), "_boxplot.png"), width = 3, height = 4)
+      ggplot2::ggsave(paste0(tempdir(), "/", gsub("[.]", "_", i), "_boxplot.png"), width = 3, height = 4)
       rm(p)
       if (counter %% 2 == 0)
-        biometric.fragment <- paste0(biometric.fragment, "![](", gsub("[.]", "_", i), "_boxplot.png){ width=", graphic.width, " }\n")
+        biometric.fragment <- paste0(biometric.fragment, "![](", tempdir(), "/", gsub("[.]", "_", i), "_boxplot.png){ width=", graphic.width, " }\n")
       else
-        biometric.fragment <- paste0(biometric.fragment, "![](", gsub("[.]", "_", i), "_boxplot.png){ width=", graphic.width, " }")
+        biometric.fragment <- paste0(biometric.fragment, "![](", tempdir(), "/", gsub("[.]", "_", i), "_boxplot.png){ width=", graphic.width, " }")
     }
   }
   appendTo("debug", "Terminating printBiometrics.")
@@ -561,7 +561,7 @@ printDotplots <- function(status.df, invalid.dist) {
   p <- p + ggplot2::facet_grid(. ~ variable, scales = "free_x")
   p <- p + ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 45, vjust = 1, hjust = 1))
   p <- p + ggplot2::labs(x = "", y = "")
-  ggplot2::ggsave("Report/dotplots.png", width = 6, height = (1.3 + 0.115 * (nrow(t2) - 1)))
+  ggplot2::ggsave(paste0(tempdir(), "/dotplots.png"), width = 6, height = (1.3 + 0.115 * (nrow(t2) - 1)))
   appendTo("debug", "Terminating printDotplots.")
 }
 
@@ -611,7 +611,7 @@ printSurvivalGraphic <- function(section.overview) {
   p <- p + ggplot2::scale_y_continuous(limits = c(0, 1), expand = c(0, 0, 0.05, 0))
   p <- p + ggplot2::labs(x = "", y = "Survival")
   the.width <- max(2, sum(grepl("Disap.", colnames(section.overview))) * nrow(section.overview))
-  ggplot2::ggsave("Report/survival.png", width = the.width, height = 4)
+  ggplot2::ggsave(paste0(tempdir(), "/survival.png"), width = the.width, height = 4)
   appendTo("debug", "Terminating printSurvivalGraphic.")
 }
 
@@ -897,12 +897,12 @@ printIndividuals <- function(detections.list, bio, status.df = NULL, tz,
       the.height <- 4
     else
       the.height <- 4 + (length(levels(PlotData$Standard.name)) - 30) * 0.1
-    ggplot2::ggsave(paste0("Report/", fish, ".", extension), width = 5, height = the.height)  # better to save in png to avoid point overlapping issues
+    ggplot2::ggsave(paste0(tempdir(), "/", fish, ".", extension), width = 5, height = the.height)  # better to save in png to avoid point overlapping issues
     rm(PlotData, start.line, last.time, first.time)
     if (counter %% 2 == 0) {
-      individual.plots <<- paste0(individual.plots, "![](", fish, ".", extension, "){ width=50% }\n")
+      individual.plots <<- paste0(individual.plots, "![](", tempdir(), "/", fish, ".", extension, "){ width=50% }\n")
     } else {
-      individual.plots <<- paste0(individual.plots, "![](", fish, ".", extension, "){ width=50% }")
+      individual.plots <<- paste0(individual.plots, "![](", tempdir(), "/", fish, ".", extension, "){ width=50% }")
     }
     if (interactive())
       setTxtProgressBar(pb, counter)
@@ -942,7 +942,7 @@ printCircular <- function(times, bio, suffix = NULL){
       ylegend <- -0.97
     }
     prop <- roundDown(1 / max(unlist(lapply(trim.times, function(x) table(roundUp(x, to = 1)) / sum(!is.na(x))))), to = 1)
-    {grDevices::svg(paste0("Report/times_", names(times)[i], suffix, ".svg"), height = 5, width = 5, bg = "transparent")
+    {grDevices::svg(paste0(tempdir(), "/times_", names(times)[i], suffix, ".svg"), height = 5, width = 5, bg = "transparent")
     par(mar = c(1, 2, 2, 1))
     copyOfCirclePlotRad(main = names(times)[i], shrink = 1.05)
     params <- myRoseDiag(trim.times, bins = 24, radii.scale = "linear",
@@ -1482,7 +1482,7 @@ printSectionTimes <- function(section.times, bio, detections) {
     if (length(unique(plotdata$Group)) <= 8) {
       p <- p + ggplot2::scale_fill_manual(values = as.vector(cbPalette)[1:length(unique(plotdata$Group))], drop = FALSE)
     } 
-    ggplot2::ggsave(paste0("Report/", i,"_days.png"), width = 10, height = length(unique(plotdata$variable)) * 2)
+    ggplot2::ggsave(paste0(tempdir(), "/", i,"_days.png"), width = 10, height = length(unique(plotdata$variable)) * 2)
   })
 }
 
@@ -1514,7 +1514,7 @@ printGlobalRatios <- function(global.ratios, daily.ratios, sections) {
     colnames(plotdata) <- c("Date", "Location", "n")
     plotdata$Location <- factor(plotdata$Location, levels = unique.values)
     plotdata$Date <- as.Date(plotdata$Date)
-    p <- ggplot2::ggplot(data = plotdata, ggplot2::aes(x = Date, y = n, fill = Location))
+    p <- ggplot2::ggplot(data = plotdata, ggplot2::aes(x = Date, y = n, fill = Location, col = Location))
     p <- p + ggplot2::geom_bar(width = 1, stat = "identity")
     p <- p + ggplot2::theme_bw()
     if (ncol(global.ratios[[i]]) > 3)
@@ -1597,8 +1597,8 @@ printIndividualResidency <- function(ratios, dayrange, sections) {
       p <- p + ggplot2::guides(fill = ggplot2::guide_legend(ncol = 2))
     if (length(use.levels) > 10)
       p <- p + ggplot2::guides(fill = ggplot2::guide_legend(ncol = 3))
-    ggplot2::ggsave(paste0("Report/", i,"_residency.png"), width = 10, height = 1.5)
-    individual.plots <<- paste0(individual.plots, "![](", i, "_residency.png){ width=95% }\n")
+    ggplot2::ggsave(paste0(tempdir(), "/", i,"_residency.png"), width = 10, height = 1.5)
+    individual.plots <<- paste0(individual.plots, "![](", tempdir(), "/", i, "_residency.png){ width=95% }\n")
     if (interactive())
       setTxtProgressBar(pb, counter)
   })
@@ -1630,7 +1630,7 @@ printLastSeen <- function(input, sections) {
   p <- p + ggplot2::labs(x = "", y = "n")
   p <- p + ggplot2::scale_y_continuous(expand = c(0, 0, 0.05, 0))
   the.width <- max(2, (ncol(input) - 1) * nrow(input) * 0.7)
-  ggplot2::ggsave("Report/last_seen.png", width = the.width, height = 4)
+  ggplot2::ggsave(paste0(tempdir(), "/last_seen.png"), width = the.width, height = 4)
 }
 
 #' Print sensor data for each individual tag
@@ -1668,11 +1668,11 @@ printSensorData <- function(detections, extension = "png") {
         the.height <- 4 + ((length(unique(plotdata$Sensor.Unit)) - 2) * 2)
       else
         the.height <- 4
-      ggplot2::ggsave(paste0("Report/", fish, "_sensors.", extension), width = 5, height = the.height)  # better to save in png to avoid point overlapping issues
+      ggplot2::ggsave(paste0(tempdir(), "/", fish, "_sensors.", extension), width = 5, height = the.height)  # better to save in png to avoid point overlapping issues
       if (counter %% 2 == 0) {
-        individual.plots <<- paste0(individual.plots, "![](", fish, "_sensors.", extension, "){ width=50% }\n")
+        individual.plots <<- paste0(individual.plots, "![](", tempdir(), "/", fish, "_sensors.", extension, "){ width=50% }\n")
       } else {
-        individual.plots <<- paste0(individual.plots, "![](", fish, "_sensors.", extension, "){ width=50% }")
+        individual.plots <<- paste0(individual.plots, "![](", tempdir(), "/", fish, "_sensors.", extension, "){ width=50% }")
       }
       if (interactive())
         setTxtProgressBar(pb, counter)

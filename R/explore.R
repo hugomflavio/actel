@@ -388,37 +388,52 @@ detections.list <- study.data$detections.list
   
 # wrap up the txt report
   appendTo("Report", "\n-------------------")
-  if (file.exists("temp_UD.txt")) 
-    appendTo("Report", paste0("User interventions:\n-------------------\n", gsub("\r", "", readr::read_file("temp_UD.txt")), "-------------------")) # nocov
+  if (file.exists(paste(tempdir(), "temp_UD.txt", sep = "/")))
+    appendTo("Report", paste0("User interventions:\n-------------------\n", gsub("\r", "", readr::read_file(paste(tempdir(), "temp_UD.txt", sep = "/"))), "-------------------")) # nocov
   
   appendTo("Report", paste0("Function call:\n-------------------\n", the.function.call, "\n-------------------"))
 # ------------------
 
 # print html report
   if (report) {
-    appendTo("debug", "debug: Printing report")
-    rmarkdown::render(
-      reportname <- printExploreRmd(override.fragment = override.fragment,
-                                    biometric.fragment = biometric.fragment,
-                                    individual.plots = individual.plots,
-                                    circular.plots = circular.plots,
-                                    sensor.plots = sensor.plots,
-                                    spatial = spatial,
-                                    deployments = deployments,
-                                    detections = detections,
-                                    valid.detections = valid.detections),
-      quiet = TRUE)
+    if (file.exists(reportname <- "actel_explore_report.html")) {
+      continue <- TRUE
+      index <- 1
+      while (continue) {
+        if(file.exists(reportname <- paste0("actel_explore_report.", index, ".html"))) {
+          index <- index + 1
+        } else {
+          continue <- FALSE
+        }
+      }
+      appendTo("Screen", paste0("M: An actel report is already present in the current directory.\n   Saving new report as ", reportname, "."))
+      rm(continue, index)
+    } else {
+      appendTo("Screen", "M: Saving actel report as 'actel_explore_report.html'.")
+    }
+
+    appendTo("debug", "debug: Printing report rmd")
+    printExploreRmd(override.fragment = override.fragment,
+                    biometric.fragment = biometric.fragment,
+                    individual.plots = individual.plots,
+                    circular.plots = circular.plots,
+                    sensor.plots = sensor.plots,
+                    spatial = spatial,
+                    deployments = deployments,
+                    detections = detections,
+                    valid.detections = valid.detections)
+
+    appendTo("debug", "debug: Converting report to html")
+    rmarkdown::render(input = paste0(tempdir(), "/actel_explore_report.Rmd"), 
+      output_dir = tempdir(), quiet = TRUE)
+
     appendTo("debug", "debug: Moving report")
-    fs::file_move(sub("Rmd", "html", reportname), sub("Report/", "", sub("Rmd", "html", reportname)))
+    file.copy(paste0(tempdir(), "/actel_explore_report.html"), reportname)
     if (interactive() & auto.open) { # nocov start
       appendTo("debug", "debug: Opening report.")
-      browseURL(sub("Report/", "", sub("Rmd", "html", reportname)))
+      browseURL(reportname)
     } # nocov end
-    appendTo("debug", "debug: Removing toc_menu_explore.html")
-    if(file.exists("Report/toc_menu_explore.html"))
-      file.remove("Report/toc_menu_explore.html")
   }
-  appendTo("Screen", "M: Process finished successfully.")
 # ------------------
   
   jobname <- paste0(gsub(" |:", ".", as.character(Sys.time())), ".actel.log.txt")
@@ -462,22 +477,7 @@ detections.list <- study.data$detections.list
 #' 
 printExploreRmd <- function(override.fragment, biometric.fragment, individual.plots,
   circular.plots, sensor.plots, spatial, deployments, detections, valid.detections){
-  if (file.exists(reportname <- "Report/actel_explore_report.Rmd")) {
-    continue <- TRUE
-    index <- 1
-    while (continue) {
-      if(file.exists(reportname <- paste0("Report/actel_explore_report.", index, ".Rmd"))) {
-        index <- index + 1
-      } else {
-        continue <- FALSE
-      }
-    }
-    appendTo("Screen", paste0("M: An actel report is already present in the current directory.\n   Saving new report as 'actel_explore_report.", index, ".html'."))
-    rm(continue,index)
-  } else {
-    appendTo("Screen", "M: Saving actel report as 'actel_explore_report.html'.")
-  }
-  if (any(grepl("Ukn.", spatial$stations$Standard.name))) {
+ if (any(grepl("Ukn.", spatial$stations$Standard.name))) {
     unknown.fragment <- paste0('<span style="color:red"> Number of relevant unknown receivers: **', sum(grepl("Ukn.", spatial$stations$Standard.name)), '**</span>\n')
   } else {
     unknown.fragment <- ""
@@ -493,12 +493,12 @@ Note:
     sensor.fragment <- NULL
   }
 
-  report <- readr::read_file("temp_log.txt")
+  report <- readr::read_file(paste0(tempdir(), "/temp_log.txt"))
 
   oldoptions <- options(knitr.kable.NA = "-")
   on.exit(options(oldoptions), add = TRUE)
 
-  sink(reportname)
+  sink(paste0(tempdir(), "/actel_explore_report.rmd"))
   cat(paste0(
 '---
 title: "Acoustic telemetry exploratory analysis"
@@ -506,7 +506,7 @@ author: "Actel R package (', utils::packageVersion("actel"), ')"
 output: 
   html_document:
     includes:
-      after_body: toc_menu_explore.html
+      after_body: ', tempdir(), '/toc_menu_explore.html
 ---
 
 ### Summary
@@ -533,7 +533,7 @@ Found a bug? [**Report it here.**](https://github.com/hugomflavio/actel/issues)
 
 Release sites are marked with "R.S.". Arrays connected with an arrow indicate that the fish can only pass in one direction.
 
-<img src="mb_arrays.svg" alt="Missing file" style="padding-top: 15px;"/>
+<img src="', tempdir(), '/mb_arrays.svg" alt="Missing file" style="padding-top: 15px;"/>
 
 ### Receiver stations
 
@@ -550,13 +550,17 @@ Release sites are marked with "R.S.". Arrays connected with an arrow indicate th
 ### Warning messages
 
 ```{r warnings, echo = FALSE, comment = NA}
-if(file.exists("../temp_warnings.txt")) cat(gsub("\\r", "", readr::read_file("../temp_warnings.txt"))) else cat("No warnings were raised during the analysis.")
+cat("', ifelse(file.exists(paste0(tempdir(), '/temp_warnings.txt')),
+  gsub("\\r", "", readr::read_file(paste0(tempdir(), '/temp_warnings.txt'))),
+  'No warnings were raised during the analysis.'), '")
 ```
 
 ### User comments
 
 ```{r comments, echo = FALSE, comment = NA}
- if(file.exists("../temp_comments.txt")) cat(gsub("\\r", "", readr::read_file("../temp_comments.txt"))) else cat("No comments were included during the analysis.")
+cat("', ifelse(file.exists(paste0(tempdir(), '/temp_comments.txt')),
+  gsub("\\r", "", readr::read_file(paste0(tempdir(), '/temp_comments.txt'))),
+  'No comments were included during the analysis.'), '")
 ```
 
 ', ifelse(biometric.fragment == '', '', paste0('### Biometric graphics
@@ -598,15 +602,13 @@ Note:
 ### Full log
 
 ```{r log, echo = FALSE, comment = NA}
-cat(gsub("\\r", "", readr::read_file("../temp_log.txt")))
+cat("', gsub("\\r", "", readr::read_file(paste0(tempdir(), '/temp_log.txt'))), '")
 ```
 
 '), fill = TRUE)
 sink()
 
-if(file.exists("Report/toc_menu_explore.html"))
-  file.remove("Report/toc_menu_explore.html")
-sink("Report/toc_menu_explore.html")
+sink(paste0(tempdir(), "/toc_menu_explore.html"))
 cat(
 '<style>
 h3 {
@@ -693,7 +695,6 @@ h4 {
 </div>
 ', fill = TRUE)
 sink()
-return(reportname)
 }
 
 #' Compare original detections with the valid movements and exclude invalid detections

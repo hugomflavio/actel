@@ -569,42 +569,57 @@ migration <- function(tz, sections, success.arrays = NULL, max.interval = 60, mi
 
 # wrap up the txt report
   appendTo("Report", "\n-------------------")
-  if (file.exists("temp_UD.txt")) 
-    appendTo("Report", paste0("User interventions:\n-------------------\n", gsub("\r", "", readr::read_file("temp_UD.txt")), "-------------------")) # no cov
+  if (file.exists(paste(tempdir(), "temp_UD.txt", sep = "/")))
+    appendTo("Report", paste0("User interventions:\n-------------------\n", gsub("\r", "", readr::read_file(paste(tempdir(), "temp_UD.txt", sep = "/"))), "-------------------")) # nocov
   
   appendTo("Report", paste0("Function call:\n-------------------\n", the.function.call, "\n-------------------"))
 # ------------------
 
 # print html report
   if (report) {
-    appendTo("debug", "debug: Printing report")
-    rmarkdown::render(
-      reportname <- printMigrationRmd(override.fragment = override.fragment,
-                                      biometric.fragment = biometric.fragment,
-                                      section.overview = section.overview,
-                                      efficiency.fragment = efficiency.fragment,
-                                      display.progression = display.progression,
-                                      array.overview.fragment = array.overview.fragment,
-                                      survival.graph.size = survival.graph.size,
-                                      individual.plots = individual.plots,
-                                      circular.plots = circular.plots,
-                                      sensor.plots = sensor.plots,
-                                      spatial = spatial,
-                                      deployments = deployments,
-                                      valid.detections = valid.detections,
-                                      detections = detections),
-      quiet = TRUE)
+    if (file.exists(reportname <- "actel_migration_report.html")) {
+      continue <- TRUE
+      index <- 1
+      while (continue) {
+        if(file.exists(reportname <- paste0("actel_migration_report.", index, ".html"))) {
+          index <- index + 1
+        } else {
+          continue <- FALSE
+        }
+      }
+      appendTo("Screen", paste0("M: An actel report is already present in the current directory.\n   Saving new report as ", reportname, "."))
+      rm(continue, index)
+    } else {
+      appendTo("Screen", "M: Saving actel report as 'actel_migration_report.html'.")
+    }
+
+    appendTo("debug", "debug: Printing report rmd")
+      printMigrationRmd(override.fragment = override.fragment,
+                        biometric.fragment = biometric.fragment,
+                        section.overview = section.overview,
+                        efficiency.fragment = efficiency.fragment,
+                        display.progression = display.progression,
+                        array.overview.fragment = array.overview.fragment,
+                        survival.graph.size = survival.graph.size,
+                        individual.plots = individual.plots,
+                        circular.plots = circular.plots,
+                        sensor.plots = sensor.plots,
+                        spatial = spatial,
+                        deployments = deployments,
+                        valid.detections = valid.detections,
+                        detections = detections)
+    
+    appendTo("debug", "debug: Converting report to html")
+    rmarkdown::render(input = paste0(tempdir(), "/actel_migration_report.Rmd"), 
+      output_dir = tempdir(), quiet = TRUE)
+
     appendTo("debug", "debug: Moving report")
-    fs::file_move(sub("Rmd", "html", reportname), sub("Report/", "", sub("Rmd", "html", reportname)))
+    file.copy(paste0(tempdir(), "/actel_migration_report.html"), reportname)
     if (interactive() & auto.open) { # nocov start
       appendTo("debug", "debug: Opening report.")
-      browseURL(sub("Report/", "", sub("Rmd", "html", reportname)))
+      browseURL(reportname)
     } # nocov end
-    appendTo("debug", "debug: Removing toc_menu_explore.html")
-    if(file.exists("Report/toc_menu_explore.html"))
-      file.remove("Report/toc_menu_explore.html")
   }
-  appendTo("Screen", "M: Process finished successfully.")
 # ------------------
 
   jobname <- paste0(gsub(" |:", ".", as.character(Sys.time())), ".actel.log.txt")
@@ -652,21 +667,6 @@ migration <- function(tz, sections, success.arrays = NULL, max.interval = 60, mi
 printMigrationRmd <- function(override.fragment, biometric.fragment, section.overview,
   efficiency.fragment, display.progression, array.overview.fragment, survival.graph.size, 
   individual.plots, circular.plots, sensor.plots, spatial, deployments, valid.detections, detections){
-  if (file.exists(reportname <- "Report/actel_migration_report.Rmd")) {
-    continue <- TRUE
-    index <- 1
-    while (continue) {
-      if(file.exists(reportname <- paste0("Report/actel_migration_report.", index, ".Rmd"))) {
-        index <- index + 1
-      } else {
-        continue <- FALSE
-      }
-    }
-    appendTo("Screen", paste0("M: An actel report is already present in the current directory\n   Saving new report as 'actel_migration_report.", index, ".html'."))
-    rm(continue,index)
-  } else {
-    appendTo("Screen", "M: Saving actel report as 'actel_migration_report.html'.")
-  }
   if (any(grepl("Unknown", spatial$stations$Standard.name))) {
     unknown.fragment <- paste0('<span style="color:red"> Number of relevant unknown receivers: **', sum(grepl("Unknown", spatial$stations$Standard.name)), '**</span>\n')
   } else {
@@ -683,12 +683,12 @@ Note:
     sensor.fragment <- NULL
   }
 
-  report <- readr::read_file("temp_log.txt")
+  report <- readr::read_file(paste0(tempdir(), "/temp_log.txt"))
 
   oldoptions <- options(knitr.kable.NA = "-")
   on.exit(options(oldoptions), add = TRUE)
 
-  sink(reportname)
+  sink(paste0(tempdir(), "/actel_migration_report.rmd"))
   cat(paste0(
 '---
 title: "Acoustic telemetry migration analysis"
@@ -696,7 +696,7 @@ author: "Actel R package (', utils::packageVersion("actel"), ')"
 output: 
   html_document:
     includes:
-      after_body: toc_menu_migration.html
+      after_body: ', tempdir(), '/toc_menu_migration.html
 ---
 
 ### Summary
@@ -723,7 +723,7 @@ Found a bug? [**Report it here.**](https://github.com/hugomflavio/actel/issues)
 
 Arrays with the same background belong to the same section. Release sites are marked with "R.S.". Arrays connected with an arrow indicate that the fish can only pass in one direction.
 
-<img src="mb_arrays.svg" alt="Missing file" style="padding-top: 15px;"/>
+<img src="', tempdir(), '/mb_arrays.svg" alt="Missing file" style="padding-top: 15px;"/>
 
 ### Receiver stations
 
@@ -744,19 +744,18 @@ Arrays with the same background belong to the same section. Release sites are ma
 ### Warning messages
 
 ```{r warnings, echo = FALSE, comment = NA}
-if(file.exists("../temp_warnings.txt")) cat(gsub("\\r", "", readr::read_file("../temp_warnings.txt"))) else cat("No warnings were raised during the analysis.")
+cat("', ifelse(file.exists(paste0(tempdir(), '/temp_warnings.txt')),
+  gsub("\\r", "", readr::read_file(paste0(tempdir(), '/temp_warnings.txt'))),
+  'No warnings were raised during the analysis.'), '")
 ```
-
 
 ### User comments
 
-Note:
-  : Comments are also stored in the `status.df` object.
-  
 ```{r comments, echo = FALSE, comment = NA}
- if(file.exists("../temp_comments.txt")) cat(gsub("\\r", "", readr::read_file("../temp_comments.txt"))) else cat("No comments were included during the analysis.")
+cat("', ifelse(file.exists(paste0(tempdir(), '/temp_comments.txt')),
+  gsub("\\r", "", readr::read_file(paste0(tempdir(), '/temp_comments.txt'))),
+  'No comments were included during the analysis.'), '")
 ```
-
 
 ', ifelse(biometric.fragment == '', '', paste0('### Biometric graphics
 
@@ -776,21 +775,21 @@ Note:
 ', paste(knitr::kable(section.overview), collapse = "\n"), '
 
 <center>
-![](survival.png){ ',survival.graph.size ,' }
+![](', tempdir(), '/survival.png){ ',survival.graph.size ,' }
 </center>
 
 
 ### Progression
 
-', ifelse(display.progression, 'Zoom in or open the figure in a new tab to clearly read the text within each circle.
+', ifelse(display.progression, paste0('Zoom in or open the figure in a new tab to clearly read the text within each circle.
 
 Note:
   : The progression calculations **do not account for** intra-section backwards movements. This implies that the total number of fish to have been **last seen** at a given array **may be lower** than the displayed below. Please refer to the [section survival overview](#survival) to find out how many fish were considered to have disappeared per section.
   : The data used in this graphic is stored in the `overall.CJS` object, and the data used in the tables is stored in the `group.overview` object. You can find detailed progressions per release site in the `release.overview` object.
 
-<img src="mb_efficiency.svg" alt="Missing file" style="padding-top: 15px; padding-bottom: 15px;"/>
+<img src="', tempdir(), '/mb_efficiency.svg" alt="Missing file" style="padding-top: 15px; padding-bottom: 15px;"/>
 
-', 'Progression cannot be displayed if efficiencies are not calculated. See full log for more details.'), array.overview.fragment, '
+'), 'Progression cannot be displayed if efficiencies are not calculated. See full log for more details.'), array.overview.fragment, '
 
 
 ### Time of arrival at each Array
@@ -813,7 +812,7 @@ Note:
   : The data used in these graphics is stored in the `status.df` object.
 
 <center>
-![](dotplots.png){ width=95% }
+![](', tempdir(), '/dotplots.png){ width=95% }
 </center>
 
 
@@ -836,15 +835,13 @@ Note:
 ### Full log
 
 ```{r log, echo = FALSE, comment = NA}
-cat(gsub("\\r", "", readr::read_file("../temp_log.txt")))
+cat("', gsub("\\r", "", readr::read_file(paste0(tempdir(), '/temp_log.txt'))), '")
 ```
 
 '), fill = TRUE)
 sink()
 
-if(file.exists("Report/toc_menu_migration.html"))
-  file.remove("Report/toc_menu_migration.html")
-sink("Report/toc_menu_migration.html")
+sink(paste0(tempdir(), "/toc_menu_migration.html"))
 cat(
 '<style>
 h3 {
@@ -941,7 +938,6 @@ img[src*="#diagram"] {
 </div>
 ', fill = TRUE)
 sink()
-return(reportname)
 }
 
 #' Create the timetable
