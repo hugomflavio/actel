@@ -504,7 +504,8 @@ Note:
 
   report <- readr::read_file("temp_log.txt")
 
-  options(knitr.kable.NA = "-")
+  oldoptions <- options(knitr.kable.NA = "-")
+  on.exit(options(oldoptions), add = TRUE)
 
   sink(reportname)
   cat(paste0(

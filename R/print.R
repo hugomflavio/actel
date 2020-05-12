@@ -625,7 +625,8 @@ printSurvivalGraphic <- function(section.overview) {
 #' @keywords internal
 #' 
 printArrayOverview <- function(array.overview) {
-  options(knitr.kable.NA = '-')
+  oldoptions <- options(knitr.kable.NA = "-")
+  on.exit(options(oldoptions), add = TRUE)
   array.overview.fragment <- c("")
   for(i in 1:length(array.overview)) {
     array.overview.fragment <- paste0(array.overview.fragment, '
@@ -649,7 +650,8 @@ printArrayOverview <- function(array.overview) {
 #' @keywords internal
 #' 
 printEfficiency <- function(CJS = NULL, efficiency = NULL, intra.CJS, type = c("migration", "residency")){
-  options(knitr.kable.NA = "-")
+  oldoptions <- options(knitr.kable.NA = "-")
+  on.exit(options(oldoptions), add = TRUE)
   type <- match.arg(type)
   if (type == "migration") {
     if (is.null(CJS)) {
@@ -1043,7 +1045,8 @@ plotTimes <- function(times, night = NULL, col = NULL, alpha = 0.8, title = "", 
     grDevices::svg(file, height = 5, width = 5, bg = "transparent")
   }
   
-  par(mar = c(1, 2, 2, 1))
+  oldpar <- par(mar = c(1, 2, 2, 1))
+  on.exit(par(oldpar), add = TRUE)
   copyOfCirclePlotRad(main = title, shrink = 1.05)
   
   if (!is.null(night)) {

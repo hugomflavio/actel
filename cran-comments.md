@@ -6,6 +6,10 @@ In this version I have:
 * Included a reference to a supporting paper in the package
 description
 
+* Included "on.exit()" calls immediately after any changes
+imposed on the options() or par(), to ensure these changes are
+reverted when the function ends.
+
 
 * Removed markup from the package description
 
