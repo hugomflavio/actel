@@ -22,6 +22,7 @@ test_that("splitDetections' output is as expected", {
 	expect_true(any(grepl("Transmitter", colnames(output$bio))))
 	expect_equal(length(output$detections), sum(!is.na(output$bio$Transmitter)))
 })
+# n
 
 test_that("splitDetections excludes tags as requested.", {
 	expect_message(output <- splitDetections(detections = detections, bio = bio, exclude.tags = "R64K-4451"),
@@ -29,13 +30,7 @@ test_that("splitDetections excludes tags as requested.", {
 	expect_true(all(!grepl("R64K-4451", names(output$detections))))
 	expect_true(is.na(output$bio$Transmitter[bio$Signal == 4451]))
 })
-
-test_that("splitDetections stores strays in file.", {
-	strays <- read.csv("stray_tags.csv", stringsAsFactors = FALSE)
-	expect_equal(strays$Transmitter, "R64K-4451")
-	expect_equal(strays$N.detections, 18)
-	file.remove("stray_tags.csv")
-})
+# n
 
 test_that("splitDetections stops the analysis if no detections match the target tags", {
 	write.csv(example.biometrics[1, ], "biometrics.csv", row.names = FALSE)
@@ -93,6 +88,12 @@ test_that("splitDetections can handle multi-sensor tags", {
 	expect_equal(unique(output$detections.list[[2]]$Sensor.Unit), "A")
 	expect_true(all(is.na(output$detections.list[[3]]$Sensor.Unit)))
 })
+# n
+# n
+# n
+# n
+# n
+# n
 
 setwd(my.home)
 rm(list = ls())

@@ -20,7 +20,7 @@
 #' 
 #' @keywords internal
 #' 
-loadStudyData <- function(tz, override = NULL, start.time, stop.time, save.detections,
+loadStudyData <- function(tz, override = NULL, start.time, stop.time, save.detections = FALSE,
   sections = NULL, exclude.tags, disregard.parallels = TRUE) {
   appendTo(c("Screen", "Report"), "M: Importing data. This process may take a while.")
   bio <- loadBio(file = "biometrics.csv", tz = tz)
@@ -1289,7 +1289,10 @@ storeStrays <- function(){
         }
       }
     }
-    decision <- readline(paste0("Stray tags were detected in your study area. Would you like to save a summary to ", newname, "?(y/N) "))
+    if (interactive())
+      decision <- readline(paste0("Stray tags were detected in your study area. Would you like to save a summary to ", newname, "?(y/N) "))
+    else
+      decision <- "y"
     appendTo("UD", decision)
     if (decision == "y" | decision == "Y")
       file.copy(paste0(tempdir(), "/temp_strays.csv"), newname)

@@ -11,6 +11,7 @@ sections <- c("River", "Fjord", "Sea")
 
 study.data <- suppressWarnings(loadStudyData(tz = "Europe/Copenhagen", start.time = NULL, 
 	stop.time = NULL, sections = sections, exclude.tags = NULL))
+# n
 detections.list <- study.data$detections.list
 bio <- study.data$bio
 spatial <- study.data$spatial

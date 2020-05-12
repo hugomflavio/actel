@@ -27,7 +27,7 @@ NULL
 #' @keywords internal
 #' 
 getDualMatrices <- function(replicates, CJS = NULL, spatial, detections.list) {
-output <- list()
+  output <- list()
   for(i in 1:length(replicates)) {
     continue <- TRUE
     if (!is.null(CJS)) {
@@ -725,6 +725,7 @@ dualMatrix <- function(array, replicates, spatial, detections.list){
     efficiency[i, "original"] <- any(!is.na(match(original, detections.list[[i]]$Standard.name)))
     efficiency[i, "replicates"] <- any(!is.na(match(replicates, detections.list[[i]]$Standard.name)))
   }
+  colnames(efficiency) <- c("R1", "R2")
   appendTo("debug", "Terminating dualMatrix.")
   return(efficiency)
 }

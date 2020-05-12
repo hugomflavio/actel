@@ -107,8 +107,8 @@ test_that("mbSplitCJS can deal with multiple release sites (one site per group)"
   aux <- mbSplitCJS(mat = m.by.array, fixed.efficiency = overall.CJS$efficiency)
   ### ONLY RUN TO REPLACE REFERENCE
   # aux_mbSplitCJS_2R_2G <- aux
-  # save(aux_mbSplitCJS_2R_2G, file = "../aux_mbSplitCJS_2R_2G.RData")
-  load("../aux_mbSplitCJS_2R_2G.RData")
+  # save(aux_mbSplitCJS_2R_2G, file = paste0(find.package("actel"), "/tests/testthat/aux_mbSplitCJS_2R_2G.RData"))
+  load(paste0(find.package("actel"), "/tests/testthat/aux_mbSplitCJS_2R_2G.RData"))
   expect_equal(aux, aux_mbSplitCJS_2R_2G)
 })
 
@@ -116,8 +116,8 @@ test_that("mbGroupCJS can deal with multiple release sites (one site per group)"
   aux <- mbGroupCJS(mat = m.by.array, status.df = status.df, fixed.efficiency = overall.CJS$efficiency)
   ### ONLY RUN TO REPLACE REFERENCE
   # aux_mbGroupCJS_2R_2G <- aux
-  # save(aux_mbGroupCJS_2R_2G, file = "../aux_mbGroupCJS_2R_2G.RData")
-  load("../aux_mbGroupCJS_2R_2G.RData")
+  # save(aux_mbGroupCJS_2R_2G, file = paste0(find.package("actel"), "/tests/testthat/aux_mbGroupCJS_2R_2G.RData"))
+  load(paste0(find.package("actel"), "/tests/testthat/aux_mbGroupCJS_2R_2G.RData"))
   expect_equal(aux, aux_mbGroupCJS_2R_2G)
 })
 
@@ -130,6 +130,8 @@ rm(list = ls())
 
 # ---- FORCE TWO RELEASE SITES WITH ONE GROUP!
 
+my.home <- getwd()
+setwd(tempdir())
 exampleWorkspace()
 setwd("exampleWorkspace")
 
@@ -210,8 +212,8 @@ test_that("mbSplitCJS can deal with multiple release sites (two sites, single gr
   aux <- mbSplitCJS(mat = m.by.array, fixed.efficiency = overall.CJS$efficiency)
   ### ONLY RUN TO REPLACE REFERENCE
   # aux_mbSplitCJS_2R_1G <- aux
-  # save(aux_mbSplitCJS_2R_1G, file = "../aux_mbSplitCJS_2R_1G.RData")
-  load("../aux_mbSplitCJS_2R_1G.RData")
+  # save(aux_mbSplitCJS_2R_1G, file = paste0(find.package("actel"), "/tests/testthat/aux_mbSplitCJS_2R_1G.RData"))
+  load(paste0(find.package("actel"), "/tests/testthat/aux_mbSplitCJS_2R_1G.RData"))
   expect_equal(aux, aux_mbSplitCJS_2R_1G)
 })
 
@@ -219,8 +221,8 @@ test_that("mbGroupCJS can deal with multiple release sites (two sites, single gr
   aux <- mbGroupCJS(mat = m.by.array, status.df = status.df, fixed.efficiency = overall.CJS$efficiency)
   ### ONLY RUN TO REPLACE REFERENCE
   # aux_mbGroupCJS_2R_1G <- aux
-  # save(aux_mbGroupCJS_2R_1G, file = "../aux_mbGroupCJS_2R_1G.RData")
-  load("../aux_mbGroupCJS_2R_1G.RData")
+  # save(aux_mbGroupCJS_2R_1G, file = paste0(find.package("actel"), "/tests/testthat/aux_mbGroupCJS_2R_1G.RData"))
+  load(paste0(find.package("actel"), "/tests/testthat/aux_mbGroupCJS_2R_1G.RData"))
   expect_equal(aux, aux_mbGroupCJS_2R_1G)
 })
 

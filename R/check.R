@@ -75,9 +75,9 @@ tableInteraction <- function(moves, fish, trigger, GUI, force = FALSE) { # nocov
     }
   } else {
     if (nrow(moves) > min(800, (getOption("max.print") - 2))) {
-      message("The movements table for fish '", fish, "' is too large to display on the console and GUI is set to 'never'.\nTemporarily saving the table to 'actel_inspect_movements.csv'. Please inspect this file and decide if any events should be considered invalid.\nPlease use the 'Event' column as a reference for the event number.")
+      message("The movements table for fish '", fish, "' is too large to display on the console and GUI is set to 'never'.\nTemporarily saving the table to '", paste0(tempdir(), '/actel_inspect_movements.csv'), "'. Please inspect this file and decide if any events should be considered invalid.\nPlease use the 'Event' column as a reference for the event number.")
       to.print <- cbind(data.frame(Event = 1:nrow(moves)), to.print)
-      write.csv(to.print, "actel_inspect_movements.csv", row.names = FALSE)
+      write.csv(to.print, paste0(tempdir(), "/actel_inspect_movements.csv"), row.names = FALSE)
       if (force) {
         output <- invalidateEvents(movements = moves, fish = fish)
       } else {  
@@ -90,10 +90,10 @@ tableInteraction <- function(moves, fish, trigger, GUI, force = FALSE) { # nocov
         }
       }  
       first.try <- TRUE
-      while (file.exists("actel_inspect_movements.csv")) {
-        if (!suppressWarnings(file.remove("actel_inspect_movements.csv"))) {
+      while (file.exists(paste0(tempdir(), "/actel_inspect_movements.csv"))) {
+        if (!suppressWarnings(file.remove(paste0(tempdir(), "/actel_inspect_movements.csv")))) {
           if (first.try) {
-            warning("Please close the currently open 'actel_inspect_movements.csv' so the analysis can continue", immediate. = TRUE, call. = FALSE); flush.console()
+            warning("Please close the currently open 'actel_inspect_movements.csv' file so the analysis can continue", immediate. = TRUE, call. = FALSE); flush.console()
             first.try <- FALSE
           }
         }
@@ -146,11 +146,11 @@ checkGUI <- function(GUI = c("needed", "always", "never")) {
     if (any(missing.packages)) {
       appendTo(c("Screen", "Warning", "Report"), 
         paste0("GUI is set to '", GUI, "' but ", 
-          ifelse(sum(link) == 1, "package '", "packages '"),
+          ifelse(sum(missing.packages) == 1, "package '", "packages '"),
           paste(c("gWidgets2", "gWidgets2RGtk2", "RGtk2")[missing.packages], collapse = "', '"),
-          ifelse(sum(link) == 1, "' is", "' are"),
+          ifelse(sum(missing.packages) == 1, "' is", "' are"),
           " not available. Please install ",
-          ifelse(sum(link) == 1, "it", "them"),
+          ifelse(sum(missing.packages) == 1, "it", "them"),
           " if you intend to run GUI.\n         Disabling GUI (i.e. GUI = 'never') for the current run."))
       GUI <- "never"
     } else {
@@ -421,12 +421,12 @@ checkImpassables <- function(movements, fish, dotmat, GUI){
       if (any(is.na(distances))) {
         the.warning <- NULL
         sapply(which(is.na(distances)), function(i) {
-          appendTo(c("Screen", "Warning", "Report"), aux <- paste0("Fish ", fish, " made an impassable jump: It is not possible to go from array ", shifts[i, 1], " to ", shifts[i, 2], "."))
+          appendTo(c("Screen", "Warning", "Report"), aux <- paste0("Fish ", fish, " made an impassable jump: It is not possible to go from array ", shifts[i, 1], " to ", shifts[i, 2], ".\n         Please resolve this either by invalidating events or by adjusting your 'spatial.txt' file and restarting."))
           the.warning <- c(the.warning, aux)
         })
         if (interactive()) { # nocov start
           the.warning <- paste("Warning:", the.warning, collapse = "\n")
-          aux <- tableInteraction(moves = valid.moves, fish = fish, trigger = the.warning, GUI = GUI)
+          aux <- tableInteraction(moves = valid.moves, fish = fish, trigger = the.warning, GUI = GUI, force = TRUE)
           movements <- transferValidity(from = aux, to = movements)
           restart <- TRUE
         } else { # nocov end

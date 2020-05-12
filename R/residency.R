@@ -145,6 +145,10 @@ residency <- function(tz, sections, max.interval = 60, minimum.detections = 2,
   
   if (!is.logical(report))
     stop("'report' must be logical.\n", call. = FALSE)
+  if (!is.logical(auto.open))
+    stop("'auto.open' must be logical.\n", call. = FALSE)
+  if (!is.logical(save.detections))
+    stop("'save.detections' must be logical.\n", call. = FALSE)
 
   if (!is.null(replicates) && !is.list(replicates))
     stop("'replicates' must be a list.\n", call. = FALSE)
@@ -464,9 +468,12 @@ residency <- function(tz, sections, max.interval = 60, minimum.detections = 2,
     rm(continue, index)
   } 
 
-
-  decision <- readline(paste0("Would you like to save a copy of the results to ", resultsname, "?(y/N) "))
-  appendTo("UD", decision)
+  if (interactive()) {
+    decision <- readline(paste0("Would you like to save a copy of the results to ", resultsname, "?(y/N) "))
+    appendTo("UD", decision)
+  } else {
+    decision <- "n"
+  }
 
   if (decision == "y" | decision == "Y") {
     appendTo(c("Screen", "Report"), paste0("M: Saving results as '", resultsname, "'."))
@@ -575,14 +582,15 @@ residency <- function(tz, sections, max.interval = 60, minimum.detections = 2,
 
   jobname <- paste0(gsub(" |:", ".", as.character(Sys.time())), ".actel.log.txt")
 
-  if (!report) {
+  if (interactive() & !report) {
     decision <- readline(paste0("Would you like to save a copy of the analysis log to ", jobname, "?(y/N) "))
     appendTo("UD", decision)
-
-    if (decision == "y" | decision == "Y") {
-      appendTo("Screen", paste0("M: Saving job log as '",jobname, "'."))
-      file.copy(paste(tempdir(), "temp_log.txt", sep = "/"), jobname)
-    }
+  } else {
+    decision <- "n"
+  }
+  if (decision == "y" | decision == "Y") {
+    appendTo("Screen", paste0("M: Saving job log as '",jobname, "'."))
+    file.copy(paste(tempdir(), "temp_log.txt", sep = "/"), jobname)
   }
 
   appendTo("Screen", "M: Process finished successfully.")

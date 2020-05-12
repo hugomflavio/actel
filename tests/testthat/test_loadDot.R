@@ -358,16 +358,16 @@ River3 -- River6")
 	arrays <- dotPaths(input = arrays, dotmat = mat, disregard.parallels = TRUE)
 	# ONLY RUN THIS TO RESET REFERENCE
 	# aux_dotPaths_complex_text_disregard_parallels_true <- arrays
-	# save(aux_dotPaths_complex_text_disregard_parallels_true, file = "aux_dotPaths_complex_text_disregard_parallels_true.RData")
-	load("aux_dotPaths_complex_text_disregard_parallels_true.RData")
+	# save(aux_dotPaths_complex_text_disregard_parallels_true, file = paste0(find.package("actel"), "/tests/testthat/aux_dotPaths_complex_text_disregard_parallels_true.RData"))
+	load(paste0(find.package("actel"), "/tests/testthat/aux_dotPaths_complex_text_disregard_parallels_true.RData"))
 	expect_equal(arrays, aux_dotPaths_complex_text_disregard_parallels_true)
 
 	arrays <- dotList(input = dot, sections = c("River", "Fjord", "Sea"))
 	arrays <- dotPaths(input = arrays, dotmat = mat, disregard.parallels = FALSE)
 	# ONLY RUN THIS TO RESET REFERENCE
 	# aux_dotPaths_complex_text_disregard_parallels_false <- arrays
-	# save(aux_dotPaths_complex_text_disregard_parallels_false, file = "aux_dotPaths_complex_text_disregard_parallels_false.RData")
-	load("aux_dotPaths_complex_text_disregard_parallels_false.RData")
+	# save(aux_dotPaths_complex_text_disregard_parallels_false, file = paste0(find.package("actel"), "/tests/testthat/aux_dotPaths_complex_text_disregard_parallels_false.RData"))
+	load(paste0(find.package("actel"), "/tests/testthat/aux_dotPaths_complex_text_disregard_parallels_false.RData"))
 	expect_equal(arrays, aux_dotPaths_complex_text_disregard_parallels_false)
 })
 

@@ -82,30 +82,6 @@ test_that("appendTo stores comments.", {
 	file.remove("temp_comments.txt")
 })
 
-test_that("emergencyBreak stores UD.", {
-	appendTo("Report", "test start of report")
-	appendTo("UD", 1)
-	emergencyBreak()
-	x <- readLines(list.files(pattern = gsub("-","\\-", Sys.Date())))
-	expect_equal(x[6], "User interventions:")
-	expect_equal(x[8], "1")
-	file.remove(list.files(pattern = "*txt$"))
-})
-
-test_that("moveHelpers transfers helper files to new directory.", {
-	x <- getwd()
-	appendTo(c("Report", "Warning"), "create test files")
-	dir.create("temp")
-	setwd("temp")
-	moveHelpers(x)
-	expect_equal(list.files(), c("temp_debug.txt", "temp_log.txt", "temp_warnings.txt"))
-	setwd("..")
-	expect_false(file.exists("temp_debug.txt"))
-	expect_false(file.exists("temp_log.txt"))
-	expect_false(file.exists("temp_warnings.txt"))
-	unlink("temp", recursive = TRUE)
-})
-
 test_that("clearWorkspace removes target files.", {
 	test <- 1
 	save(test, file = "actel_migration_results.RData")
@@ -115,5 +91,6 @@ test_that("clearWorkspace removes target files.", {
 	sink()
 	expect_message(clearWorkspace(), "Workspace already clean.")
 })
+# y
 
 setwd(my.home)

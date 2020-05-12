@@ -87,6 +87,7 @@ test_that("transformSpatial handles sections properly", {
 	expect_error(suppressWarnings(transformSpatial(spatial = spatial, bio = bio, arrays = dot$arrays, sections = c("River", "Fjord"))),
 		"Array 'Sea1' was not assigned to any section. Stopping to prevent function failure.\nPlease either...\n   1) Rename these arrays to match a section,\n   2) Rename a section to match these arrays, or\n   3) Include a new section in the analysis.\n... and restart the analysis.", fixed = TRUE)
 })
+# y
 
 test_that("transformSpatial handles multiple expected first arrays correctly", {
 	xspatial <- spatial

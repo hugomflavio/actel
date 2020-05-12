@@ -3,7 +3,7 @@ skip_on_cran()
 my.home <- getwd()
 setwd(tempdir())
 
-load("aux_plotTimes.RData")
+load(paste0(find.package("actel"), "/tests/testthat/aux_plotTimes.RData"))
 times <- timesToCircular(times)
 
 test_that("plotTimes fail-safes kick in when needed", {

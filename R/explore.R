@@ -152,7 +152,11 @@ explore <- function(tz, max.interval = 60, minimum.detections = 2, start.time = 
   
   if (!is.logical(report))
     stop("'report' must be logical.\n", call. = FALSE)
-  
+  if (!is.logical(auto.open))
+    stop("'auto.open' must be logical.\n", call. = FALSE)
+  if (!is.logical(save.detections))
+    stop("'save.detections' must be logical.\n", call. = FALSE)
+
   if (!is.numeric(jump.warning))
     stop("'jump.warning' must be numeric.\n", call. = FALSE)
   if (jump.warning < 1)
@@ -371,8 +375,12 @@ detections.list <- study.data$detections.list
     rm(continue, index)
   }
 
-  decision <- readline(paste0("Would you like to save a copy of the results to ", resultsname, "?(y/N) "))
-  appendTo("UD", decision)
+  if (interactive()) {
+    decision <- readline(paste0("Would you like to save a copy of the results to ", resultsname, "?(y/N) "))
+    appendTo("UD", decision)
+  } else {
+    decision <- "n"
+  }
 
   if (decision == "y" | decision == "Y") {
     appendTo(c("Screen", "Report"), paste0("M: Saving results as '", resultsname, "'."))
@@ -458,14 +466,15 @@ detections.list <- study.data$detections.list
   
   jobname <- paste0(gsub(" |:", ".", as.character(Sys.time())), ".actel.log.txt")
 
-  if (!report) {
+  if (interactive() & !report) {
     decision <- readline(paste0("Would you like to save a copy of the analysis log to ", jobname, "?(y/N) "))
     appendTo("UD", decision)
-
-    if (decision == "y" | decision == "Y") {
-      appendTo("Screen", paste0("M: Saving job log as '",jobname, "'."))
-      file.copy(paste(tempdir(), "temp_log.txt", sep = "/"), jobname)
-    }
+  } else {
+    decision <- "n"
+  }
+  if (decision == "y" | decision == "Y") {
+    appendTo("Screen", paste0("M: Saving job log as '",jobname, "'."))
+    file.copy(paste(tempdir(), "temp_log.txt", sep = "/"), jobname)
   }
 
   appendTo("Screen", "M: Process finished successfully.")

@@ -8,6 +8,7 @@ setwd("exampleWorkspace")
 write.csv(example.distances, "distances.csv")
 study.data <- suppressWarnings(loadStudyData(tz = "Europe/Copenhagen", start.time = NULL, 
 	stop.time = NULL, sections = c("River", "Fjord", "Sea"), exclude.tags = NULL))
+# n
 detections.list <- study.data$detections.list
 bio <- study.data$bio
 spatial <- study.data$spatial
@@ -73,6 +74,12 @@ test_that("checkLinearity throws warning only if movements are not ordered", {
 		"Inter-section backwards movements were detected for fish test.", fixed = TRUE)
 	expect_equal(output$Valid, c(TRUE, TRUE, FALSE, FALSE, TRUE))
 })
+# 2:3
+# y
+# n
+# 3:4
+# y
+# n
 
 test_that("updateValidity correctly transfers invalid events.", {
 	xmoves <- moves[[1]]
@@ -85,7 +92,9 @@ test_that("updateValidity correctly transfers invalid events.", {
 	expect_equal(names(output), "test")
 	expect_equal(sum(!output[[1]]$Valid), 13)
 })
-
+# 3:4
+# y
+# n
 
 test_that("checkSMovesN throws warning only if movements are not ordered", {
 	aux <- sectionMovements(movements = moves[[1]], sections = sections, invalid.dist = invalid.dist)

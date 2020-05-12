@@ -670,6 +670,7 @@ timesToCircular <- function(x, by.group = FALSE) {
 #' It is highly recommended to read the vignette regarding distances matrix before running this function.
 #' You can find it by running \code{vignette('a-2_distances_matrix', 'actel')} or \code{browseVignettes('actel')}
 #' 
+#' @param path The system path to the 'shape' file. Defaults to the current directory.
 #' @param shape A shape file projected in a metric coordinate system.
 #' @param size The pixel size, in metres.
 #' @param EPSGcode The EPSG code of the shape file's coordinate system. DO NOT USE degree-based 
@@ -694,7 +695,7 @@ timesToCircular <- function(x, by.group = FALSE) {
 #' 
 #' @export
 #' 
-transitionLayer <- function(shape, size, EPSGcode, coord.x = NULL, coord.y = NULL, buffer = NULL, directions = c(16, 8, 4), force = FALSE){
+transitionLayer <- function(path = ".", shape, size, EPSGcode, coord.x = NULL, coord.y = NULL, buffer = NULL, directions = c(16, 8, 4), force = FALSE){
   aux <- c(
     length(suppressWarnings(packageDescription("raster"))),
     length(suppressWarnings(packageDescription("gdistance"))),
@@ -750,11 +751,15 @@ transitionLayer <- function(shape, size, EPSGcode, coord.x = NULL, coord.y = NUL
       warning("'coord.x' and 'coord.y' were set but could not find a spatial.csv file in the current working directory. Skipping spatial.csv check.", call. = FALSE, immediate. = TRUE)
     }
   }
-  if (!file.exists(shape))
+  if (path != "." & !file.exists(paste(path, shape, sep = "/")))
+    stop(paste0("Could not find file '", paste(path, shape, sep = "/"), "'.\n"), call. = FALSE)
+  
+  if (path == "." & !file.exists(shape))
     stop(paste0("Could not find file '", shape, "'.\n"), call. = FALSE)
+  
   if (tools::file_ext(shape) == "shp") {
     shape <- sub(".shp", "", shape)
-    shape <- rgdal::readOGR(dsn = ".", layer = shape, verbose = FALSE) #study area shapefile
+    shape <- rgdal::readOGR(dsn = path, layer = shape, verbose = FALSE) #study area shapefile
   } else {
     stop("'shape' must be a .shp file.\n", call. = FALSE)
   }
@@ -896,7 +901,7 @@ distancesMatrix <- function(t.layer, starters = NULL, targets = starters, EPSGco
       "' to operate. Please install ", ifelse(sum(missing.packages) > 1, "them", "it"), " before proceeding.\n"), call. = FALSE)
   }
 
-  if (class(transition.layer) == "TransitionLayer") 
+  if (class(t.layer) != "TransitionLayer") 
     stop("Could not recognise 't.layer' as a TransitionLayer object. Make sure to compile it using the function transitionLayer.\n", call. = FALSE)
 
   if (!is.numeric(EPSGcode))
@@ -926,9 +931,9 @@ distancesMatrix <- function(t.layer, starters = NULL, targets = starters, EPSGco
     id.col <- "Standard.name"
   }
 
-  if (!inherits(starters, data.frame))
+  if (!inherits(starters, "data.frame"))
     stop("'starters' must be a data frame.\n", call. = FALSE)
-  if (!file.exists(targets))
+  if (!inherits(targets, "data.frame"))
     stop("'targets' must be a data frame.\n", call. = FALSE)
 
   if (is.na(match(coord.x, colnames(starters))))
@@ -993,7 +998,7 @@ will artificially add water space around the shape file.", call. = FALSE)
     rownames(dist.mat) <- outputRows
   if (col.rename)
     colnames(dist.mat) <- outputCols
-  if (actel) {
+  if (interactive () & actel) {
     decision <- readline("Would you like to save an actel-compatible distances matrix as 'distances.csv' in the current work directory?(y/N) ")
     if (decision == "y" | decision == "Y") {
       if (file.exists('distances.csv')) {

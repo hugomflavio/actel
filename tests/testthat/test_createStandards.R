@@ -41,7 +41,7 @@ test_that("createStandards removes detections outside deployments", {
 	expect_equal(colnames(output), c('Timestamp', 'Receiver', 'CodeSpace', 'Signal', 'Sensor.Value', 'Sensor.Unit', 'Transmitter', 'Standard.name', 'Array'))
 	expect_equal(as.character(unique(output$Standard.name)), c("St.2", "St.6", "St.8"))
 })
+# b
 
-file.remove(list.files(pattern = "*txt$"))
 setwd(my.home)
 rm(list = ls())

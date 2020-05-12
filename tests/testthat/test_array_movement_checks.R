@@ -47,6 +47,9 @@ test_that("checkImpassables reacts as expected", {
   		"Fish test made an impassable jump: It is not possible to go from array River1 to River2.", fixed = TRUE), 	
 		"Preventing analysis from entering interactive mode in a non-interactive session.", fixed = TRUE)
 })
+# 1
+# y
+# n
 
 test_that("checkJumpDistance reacts as expected", {
 	# jump from release to first event
@@ -147,6 +150,7 @@ test_that("checkUpstream reacts as expected.", {
     warning = function(w) stop("A warning was issued where it should not have been."))
   expect_equal(output, xmoves)
 })
+# n
 
 test_that("simplifyMovements works as expected.", {
 	# no invalid events

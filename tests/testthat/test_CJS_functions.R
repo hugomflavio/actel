@@ -54,7 +54,7 @@ test_that("assembleMatrices works as expected", {
 
 
 	#### ONLY RUN THIS PART TO RESET REFERENCE TABLES
-		# sink("../aux_assembleMatrixes.R")
+		# sink(paste0(find.package("actel"), "/tests/testthat/aux_assembleMatrices.R"))
 		# cat("aux_assembleMatrixes <- list()\n")
 		# capture <- lapply(1:2, function(i) {
 		# 	lapply(1:2, function(j) {
@@ -66,7 +66,7 @@ test_that("assembleMatrices works as expected", {
 		# })
 		# sink()
 	
-	source("../aux_assembleMatrixes.R")
+	source(paste0(find.package("actel"), "/tests/testthat/aux_assembleMatrices.R"))
 
 	capture <- lapply(1:2, function(i) {
 		lapply(1:2, function(j) {
@@ -85,7 +85,7 @@ test_that("breakMatricesByArray works as expected.", {
   m.by.array <<- output
 
 	#### ONLY RUN THIS PART TO RESET REFERENCE TABLES
-		# sink("../aux_breakMatricesByArray.R")
+		# sink(paste0(find.package("actel"), "/tests/testthat/aux_breakMatricesByArray.R"))
 		# cat("aux_breakMatricesByArray <- list()\n")
 		# capture <- lapply(1:2, function(i) {
 		# 	lapply(1:2, function(j) {
@@ -97,7 +97,7 @@ test_that("breakMatricesByArray works as expected.", {
 		# })
 		# sink()
 	
-	source("../aux_breakMatricesByArray.R")
+	source(paste0(find.package("actel"), "/tests/testthat/aux_breakMatricesByArray.R"))
 
 	capture <- lapply(1:2, function(i) {
 		lapply(1:2, function(j) {
@@ -190,8 +190,8 @@ test_that("simpleCJS works as expected.", {
 	expect_equal(names(output), c("absolutes", "efficiency", "survival", "lambda"))
 	check <- read.csv(text = ',FakeStart,River1,AnyPeer
 "detected",30,26,26
-"here plus downstream",26,26,NA
-"not here but downstream",0,0,NA
+"here plus on peers",26,26,NA
+"not here but on peers",0,0,NA
 "known",30,26,26
 "estimated",30,26,NA', row.names = 1)
 	expect_equal(output$absolutes, as.matrix(check))
@@ -244,8 +244,8 @@ test_that("combineCJS works as expected.", {
 	expect_equal(names(output), c("absolutes", "efficiency", "survival", "lambda"))
 	check <- read.csv(text = ',FakeStart,River1,AnyPeer
 "detected",60,54,54
-"here plus downstream",54,54,NA
-"not here but downstream",0,0,NA
+"here plus on peers",54,54,NA
+"not here but on peers",0,0,NA
 "known",60,54,54
 "estimated",60,54,NA', row.names = 1)
 	expect_equal(output$absolutes, as.matrix(check))
@@ -311,6 +311,7 @@ test_that("getDualMatrices throws a warning if efficiency has already been calcu
 	expect_warning(getDualMatrices(replicates = list(Fjord1 = c("St.10", "St.11")), CJS = overall.CJS, spatial = spatial, detections.list = detections.list),
 		"An inter-array efficiency has already been calculated for array Fjord1", fixed = TRUE)
 })
+# n
 
 test_that("dualMatrix stops if stations that do not belong to the array are used as replicates (tested through getDualMatrices)", {
 	expect_error(getDualMatrices(replicates = list(Sea1 = c("St.14", "St.15")), CJS = overall.CJS, spatial = spatial, detections.list = detections.list),
@@ -327,7 +328,7 @@ test_that("includeIntraArrayEstimates throws errors if expected conditions are n
 test_that("replicate functions work as expected.", {
   intra.array.matrices <<- getDualMatrices(replicates = list(Sea1 = c("St.16", "St.17")), CJS = overall.CJS, spatial = spatial, detections.list = detections.list)
 
-  check <- read.csv(text = '"","original","replicates"
+  check <- read.csv(text = '"","R1","R2"
 "R64K-4451",TRUE,TRUE
 "R64K-4453",FALSE,TRUE
 "R64K-4454",FALSE,TRUE
@@ -404,26 +405,27 @@ test_that("replicate functions work as expected.", {
 
 	expect_equal(names(recipient$intra.CJS$Sea1), c("absolutes", "single.efficiency", "combined.efficiency"))
 
-	check <- as.matrix(read.csv(text = '"detected at original:",28
-"detected at replicates: ",31
-"detected at both:",24', header = FALSE, row.names = 1))
+	check <- as.matrix(read.csv(text = '"detected at R1: ",28
+"detected at R2: ",31
+"detected at both: ",24', header = FALSE, row.names = 1))
 	colnames(check) <- ""
 	expect_equal(recipient$intra.CJS$Sea1$absolutes, check)
 
-	expect_equal(round(recipient$intra.CJS$Sea1$single.efficiency, 5), c(original = 0.77419, replicates = 0.85714))
+	expect_equal(round(recipient$intra.CJS$Sea1$single.efficiency, 5), c(R1 = 0.77419, R2 = 0.85714))
 
 	expect_equal(round(recipient$intra.CJS$Sea1$combined.efficiency, 5), 0.96774)
 
 	overall.CJS <<- recipient[[1]]
 	intra.array.CJS <<- recipient[[2]]
 })
+# y
 
 test_that("advEfficiency can plot intra.array.CJS results", {
 	expect_message(output <- round(advEfficiency(intra.array.CJS[[1]], n = 10000), 1),
 		"M: For each quantile, 'Combined' estimates are calculated as 1-((1-R1)*(1-R2)).", fixed = TRUE)
 	check <- read.csv(text = '"","2.5%","50%","97.5%"
-"Replica.1",0.6,0.8,0.9
-"Replica.2",0.7,0.9,1.0
+"R1",0.6,0.8,0.9
+"R2",0.7,0.9,1.0
 "Combined",0.9,1.0,1.0
 ', row.names = 1)
 	colnames(check) <- c("2.5%","50%","97.5%")
@@ -451,8 +453,8 @@ test_that("split CJS functions work as expected.", {
   aux <- mbSplitCJS(mat = m.by.array, fixed.efficiency = overall.CJS$efficiency)
   ### ONLY RUN TO REPLACE REFERENCE
   # aux_mbSplitCJS <- aux
-  # save(aux_mbSplitCJS, file = "../aux_mbSplitCJS.RData")
-  load("../aux_mbSplitCJS.RData")
+  # save(aux_mbSplitCJS, file = paste0(find.package("actel"), "/tests/testthat/aux_mbSplitCJS.RData"))
+  load(paste0(find.package("actel"), "/tests/testthat/aux_mbSplitCJS.RData"))
   expect_equal(aux, aux_mbSplitCJS)
 
   xefficiency <- overall.CJS$efficiency
@@ -490,8 +492,8 @@ test_that("group CJS functions work as expected.", {
   aux <- mbGroupCJS(mat = m.by.array, status.df = status.df, fixed.efficiency = overall.CJS$efficiency)
   ### ONLY RUN TO REPLACE REFERENCE
   # aux_mbGroupCJS <- aux
-  # save(aux_mbGroupCJS, file = "../aux_mbGroupCJS.RData")
-  load("../aux_mbGroupCJS.RData")
+  # save(aux_mbGroupCJS, file = paste0(find.package("actel"), "/tests/testthat/aux_mbGroupCJS.RData"))
+  load(paste0(find.package("actel"), "/tests/testthat/aux_mbGroupCJS.RData"))
   expect_equal(aux, aux_mbGroupCJS)
 
   xefficiency <- overall.CJS$efficiency
