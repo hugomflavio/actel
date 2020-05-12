@@ -6,7 +6,7 @@ aux <- c(
   length(suppressWarnings(packageDescription("sp"))),
   length(suppressWarnings(packageDescription("tools"))),
   length(suppressWarnings(packageDescription("rgdal"))))
-missing.packages <- sapply(aux, function(x) x == 1 && is.na(x))
+missing.packages <- sapply(aux, function(x) x == 1)
 
 if (any(missing.packages)) {
   test_that("transitionLayer and distancesMatrix stop due to missing dependencies", {

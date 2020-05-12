@@ -702,7 +702,7 @@ transitionLayer <- function(path = ".", shape, size, EPSGcode, coord.x = NULL, c
     length(suppressWarnings(packageDescription("sp"))),
     length(suppressWarnings(packageDescription("tools"))),
     length(suppressWarnings(packageDescription("rgdal"))))
-  missing.packages <- sapply(aux, function(x) x == 1 && is.na(x))
+  missing.packages <- sapply(aux, function(x) x == 1)
   if (any(missing.packages)) {
     stop(paste0("This function requires packages '", paste(c("raster", "gdistance", "sp", "tools", "rgdal")[missing.packages], collapse = "', '"), 
       "' to operate. Please install ", ifelse(sum(missing.packages) > 1, "them", "it"), " before proceeding.\n"), call. = FALSE)
@@ -895,7 +895,7 @@ distancesMatrix <- function(t.layer, starters = NULL, targets = starters, EPSGco
     length(suppressWarnings(packageDescription("sp"))),
     length(suppressWarnings(packageDescription("tools"))),
     length(suppressWarnings(packageDescription("rgdal"))))
-  missing.packages <- sapply(aux, function(x) x == 1 && is.na(x))
+  missing.packages <- sapply(aux, function(x) x == 1)
   if (any(missing.packages)) {
     stop(paste0("This function requires packages '", paste(c("raster", "gdistance", "sp", "tools", "rgdal")[missing.packages], collapse = "', '"), 
       "' to operate. Please install ", ifelse(sum(missing.packages) > 1, "them", "it"), " before proceeding.\n"), call. = FALSE)

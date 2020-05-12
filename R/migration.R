@@ -717,7 +717,7 @@ Note:
   oldoptions <- options(knitr.kable.NA = "-")
   on.exit(options(oldoptions), add = TRUE)
 
-  sink(paste0(tempdir(), "/actel_migration_report.rmd"))
+  sink(paste0(tempdir(), "/actel_migration_report.Rmd"))
   cat(paste0(
 '---
 title: "Acoustic telemetry migration analysis"
@@ -748,7 +748,7 @@ Percentage of post-release valid detections: ', round(sum(unlist(lapply(valid.de
 
 Found a bug? [**Report it here.**](https://github.com/hugomflavio/actel/issues)
 
-Want to cite actel in a publication? Run citation("actel")
+Want to cite actel in a publication? Run `citation(\'actel\')`
 
 ### Study area
 

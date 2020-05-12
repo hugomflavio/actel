@@ -142,7 +142,7 @@ checkGUI <- function(GUI = c("needed", "always", "never")) {
       length(suppressWarnings(packageDescription("gWidgets2"))),
       length(suppressWarnings(packageDescription("gWidgets2RGtk2"))),
       length(suppressWarnings(packageDescription("RGtk2"))))
-    missing.packages <- sapply(aux, function(x) x == 1 && is.na(x))
+    missing.packages <- sapply(aux, function(x) x == 1)
     if (any(missing.packages)) {
       appendTo(c("Screen", "Warning", "Report"), 
         paste0("GUI is set to '", GUI, "' but ", 

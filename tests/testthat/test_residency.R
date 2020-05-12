@@ -127,7 +127,7 @@ test_that("residency stops when any argument does not make sense", {
     length(suppressWarnings(packageDescription("gWidgets2"))),
     length(suppressWarnings(packageDescription("gWidgets2RGtk2"))),
     length(suppressWarnings(packageDescription("RGtk2"))))
-  missing.packages <- sapply(aux, function(x) x == 1 && is.na(x))
+  missing.packages <- sapply(aux, function(x) x == 1)
   if (any(missing.packages)) {
 		expect_warning(residency(sections = c("River", "Fjord", "Sea"), tz = "Europe/Copenhagen", report = FALSE), 
       paste0("GUI is set to 'needed' but ", 
