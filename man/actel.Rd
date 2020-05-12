@@ -36,9 +36,7 @@ vignettes. Namely:
 }
 
 Once the example dataset is created, \code{\link{exampleWorkspace}} also provides
-you with an example code to run a \code{\link{migration}} analysis:\preformatted{results <- migration(path = 'exampleWorkspace', sections = c('River', 'Fjord', 'Sea'),
-                     success.arrays = 'Sea1', tz = 'Europe/Copenhagen')
-}
+you with an example code to run an \code{\link{explore}} analysis:
 
 In this example dataset, you will have to intervene twice. In both cases,
 actel will give you a suggestion, which you can easily follow by answering

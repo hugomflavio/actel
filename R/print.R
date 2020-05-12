@@ -14,7 +14,7 @@
 #'   "Array efficiency was estimated by drawing 10000 samples from a beta distribution 
 #'   (\eqn{\alpha} = number of tags detected subsequently and at the array, 
 #'   \eqn{\beta} = number of tags detected subsequently but not at the array) 
-#'   and calculating the median estimated efficiency value using the R package actel [citation]."
+#'   and calculating the median estimated efficiency value using the R package actel \[citation\]."
 #' 
 #' \item If advEfficiency was run on an \code{efficiency} object (i.e. residency analysis):
 #' 
@@ -23,14 +23,14 @@
 #'     "Array efficiency was estimated by drawing 10000 samples from a beta distribution 
 #'     (\eqn{\alpha} = number of events recorded by the array,
 #'     \eqn{\beta} = number of events known to have been missed by the array).
-#'     and calculating the median estimated efficiency value using the R package actel [citation]."
+#'     and calculating the median estimated efficiency value using the R package actel \[citation\]."
 #' 
 #' - If you are using minimum efficiency estimates:
 #' 
 #'     "Array efficiency was estimated by drawing 10000 samples from a beta distribution 
 #'     (\eqn{\alpha} = number of events recorded by the array, 
 #'     \eqn{\beta} = number of events both known to have been missed and potentially missed by the array).
-#'     and calculating the median estimated efficiency value using the R package actel [citation]."
+#'     and calculating the median estimated efficiency value using the R package actel \[citation\]."
 #' 
 #' \item If advEfficiency was run on an \code{intra.array.CJS} object:
 #' 
@@ -41,10 +41,10 @@
 #'   is being calculated) and calculating the median estimated efficiency value. The overall 
 #'   efficiency of the array was then estimated as 1-((1-R1)*(1-R2)), where R1 and R2 are
 #'   the median efficiency estimates for each replicate. These calculations were performed 
-#'   using the R package actel [citation]."
+#'   using the R package actel \[citation\]."
 #' }
 
-#' Replace [citation] with the output of `citation('actel')`
+#' Replace \[citation\] with the output of `citation('actel')`
 #' 
 #' @param x An efficiency object from actel (\code{overall.CJS}, \code{intra.array.CJS[[...]]} or \code{efficiency} objects)
 #' @param labels a vector of strings to substitute default plot labels
