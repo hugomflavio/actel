@@ -130,7 +130,7 @@ test_that("explore stops when any argument does not make sense", {
         ifelse(sum(missing.packages) == 1, "' is", "' are"),
         " not available. Please install ",
         ifelse(sum(missing.packages) == 1, "it", "them"),
-        " if you intend to run GUI.\n         Disabling GUI (i.e. GUI = 'never') for the current run."))
+        " if you intend to run GUI.\n         Disabling GUI (i.e. GUI = 'never') for the current run."), fixed = TRUE)
   }
 
 	expect_error(explore(tz = "Europe/Copenhagen", report = "a"),
