@@ -1,7 +1,6 @@
-cache: false
-
 # Use R language
 language: r
+cache: packages
 
 #Define R-versions
 r:
@@ -12,16 +11,16 @@ apt_packages:
   - libv8-dev
   - librsvg2-dev
 
-r_github_packages: 
-  - r-lib/testthat
-  - r-lib/covr
+# r_github_packages: 
+#   - r-lib/testthat
+#   - r-lib/covr
 
-r_binary_packages:
-  - devtools
-  - roxygen2
+# r_binary_packages:
+#   - devtools
+#   - roxygen2
 
-script:
-  - Rscript -e "devtools::load_all(); testthat::test_dir('tests/testthat', reporter = c('progress', 'fail'))"
+# script:
+#   - Rscript -e "devtools::load_all(); testthat::test_dir('tests/testthat', reporter = c('progress', 'fail'))"
 
 # environment variables set for all builds
 env:
