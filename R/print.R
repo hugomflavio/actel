@@ -148,7 +148,6 @@ advEfficiency <- function(x, labels = NULL, q = c(0.025, 0.5, 0.975), force.grid
 
     x <- seq(from = 0, to = 1, by = 0.005)
     y <- dbeta(x, alpha, beta)
-    plot(x, y)
 
     qb <- qbeta(q, alpha, beta)
     qm <- qbeta(0.5, alpha, beta)
