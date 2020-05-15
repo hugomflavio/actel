@@ -52,7 +52,7 @@ This is a great R package, so make sure to go check it out!
  -->
 ## Calculating efficiency ranges
 
-Both the `migration` and the `residency` analyses include efficiency calculations. However, these calculations are analytical (i.e. derived from resolving an equation), and can sometimes be somewhat limited. To get a better idea of your array efficiencies, you can run the function `advEfficiency` on the efficiency outputs of your actel analysis.
+Both the `migration` and the `residency` analyses include efficiency calculations. However, these calculations can sometimes be somewhat limited. To get a better idea of your array efficiencies, you can run the function `advEfficiency` on the efficiency outputs of your actel analysis.
 
 Let us assume that you have stored the results of your analysis in an object called `results` (i.e. you ran `results <- migration(...)` or `results <- residency(...)`).
 
@@ -115,7 +115,7 @@ x <- dualArrayCJS(m)
 advEfficiency(x)
 ```
 
-`advEfficiency` comes with some additional parameters that will help you get the results exactly as you need them. Find more by running `?advEfficiency`. The advEfficiency manual page (accessible by running ?advEfficiency) also includes additional information on how the calculations are made, and how you could explain them in a paper, if you need to!
+`advEfficiency` comes with some additional parameters that will help you get the results exactly as you need them. Find more by running `?advEfficiency`. The advEfficiency manual page also includes additional information on how the calculations are made, and how you could explain them in a paper, if you need to!
 
 ## Drawing personalized circular plots
 

@@ -1,17 +1,17 @@
 #' Calculate beta estimations for efficiency
 #' 
-#' advEfficiency estimates efficiency ranges by drawing n samples from a beta distribution 
+#' advEfficiency estimates efficiency ranges by fitting a beta distribution 
 #' with parameters \eqn{\alpha} = number of detected tags and \eqn{\beta} = number of missed 
-#' tags. The desired quantiles (argument `q`) are then calculated from the drawn values.
-#' Plots are also drawn showing the sample distribution, the median point (red dash) and
-#' the range between the lowest and largest quantile requested (bottom red band).
+#' tags. The desired quantiles (argument `q`) are then calculated from distribution.
+#' Plots are also drawn showing the distribution, the median point (dashed red line) and
+#' the range between the lowest and largest quantile requested (red shaded section).
 #' 
 #' Examples for inclusion in a paper:
 #' 
 #' \enumerate{
 #' \item If advEfficiency was run on an \code{overall.CJS} object (i.e. migration analysis):
 #' 
-#'   "Array efficiency was estimated by drawing 10000 samples from a beta distribution 
+#'   "Array efficiency was estimated by fitting a beta distribution 
 #'   (\eqn{\alpha} = number of tags detected subsequently and at the array, 
 #'   \eqn{\beta} = number of tags detected subsequently but not at the array) 
 #'   and calculating the median estimated efficiency value using the R package actel \[citation\]."
@@ -20,14 +20,14 @@
 #' 
 #' - If you are using maximum efficiency estimates:
 #' 
-#'     "Array efficiency was estimated by drawing 10000 samples from a beta distribution 
+#'     "Array efficiency was estimated by fitting a beta distribution
 #'     (\eqn{\alpha} = number of events recorded by the array,
 #'     \eqn{\beta} = number of events known to have been missed by the array).
 #'     and calculating the median estimated efficiency value using the R package actel \[citation\]."
 #' 
 #' - If you are using minimum efficiency estimates:
 #' 
-#'     "Array efficiency was estimated by drawing 10000 samples from a beta distribution 
+#'     "Array efficiency was estimated by fitting a beta distribution 
 #'     (\eqn{\alpha} = number of events recorded by the array, 
 #'     \eqn{\beta} = number of events both known to have been missed and potentially missed by the array).
 #'     and calculating the median estimated efficiency value using the R package actel \[citation\]."
@@ -35,10 +35,10 @@
 #' \item If advEfficiency was run on an \code{intra.array.CJS} object:
 #' 
 #'   "Intra-array efficiency was estimated by comparing the tags detected at each of the 
-#'   two replicates. For each replicate, 10000 samples were drawn from a beta distribution 
+#'   two replicates. For each replicate, a beta distribution was fitted
 #'   (\eqn{\alpha} = number of tags detected at both replicates, \eqn{\beta} = number 
 #'   of tags detected at the opposite replicate but not at the one for which efficiency 
-#'   is being calculated) and calculating the median estimated efficiency value. The overall 
+#'   is being calculated) and the median estimated efficiency value was calculated. The overall 
 #'   efficiency of the array was then estimated as 1-((1-R1)*(1-R2)), where R1 and R2 are
 #'   the median efficiency estimates for each replicate. These calculations were performed 
 #'   using the R package actel \[citation\]."
@@ -48,7 +48,6 @@
 #' 
 #' @param x An efficiency object from actel (\code{overall.CJS}, \code{intra.array.CJS[[...]]} or \code{efficiency} objects)
 #' @param labels a vector of strings to substitute default plot labels
-#' @param n Number of draws for each array.
 #' @param q The quantile values to be calculated. Defaults to \code{c(0.025, 0.5, 0.975)} (i.e. median and 95% CI)
 #' @param force.grid A vector of format c(nrow, ncol) that allows the user to define the number of rows and columns to distribute the plots in.
 #' @param paired Logical: For efficiency derived from residency analyses, should min. and max. estimates for an array be displayed next to each other?
@@ -100,10 +99,7 @@
 #' 
 #' @export
 #' 
-advEfficiency <- function(x, labels = NULL, n = 10000, q = c(0.025, 0.5, 0.975), force.grid = NULL, paired = TRUE, title = "") {
-  prob <- NULL
-  y <- NULL
-  ..density.. <- NULL
+advEfficiency <- function(x, labels = NULL, q = c(0.025, 0.5, 0.975), force.grid = NULL, paired = TRUE, title = "") {
 
   if (!inherits(x, "list") & !inherits(x, "data.frame") & !inherits(x, "matrix"))
     stop("Could not recognise the input as an efficiency object from actel.\n", call. = FALSE)
@@ -117,6 +113,7 @@ advEfficiency <- function(x, labels = NULL, n = 10000, q = c(0.025, 0.5, 0.975),
   else
     input <- x
 
+  # Preliminary preparation of input
   if (ncol(input) == 1) {
     input <- data.frame(Replica.1 = c(input[3], input[2] - input[3]), Replica.2 = c(input[3], input[1] - input[3]))
     colnames(input)[1:2] <- names(x$single.efficiency)
@@ -145,23 +142,44 @@ advEfficiency <- function(x, labels = NULL, n = 10000, q = c(0.025, 0.5, 0.975),
     colnames(input) <- labels
   } 
 
-  message("M: Drawing ", n, " beta samples for each array.")
+  beta.data <- lapply(1:ncol(input), function(i){
+    alpha <- input[1, i]
+    beta <- input[2, i]
 
-  if (n < 5000)
-    warning("Low n values may produce unreliable estimates.", immediate. = TRUE, call. = FALSE)
+    x <- seq(from = 0, to = 1, by = 0.005)
+    y <- dbeta(x, alpha, beta)
+    plot(x, y)
 
-  x <- lapply(1:ncol(input), function(i) rbeta(n, input[1, i], input[2, i]))
-  names(x) <- colnames(input)
+    qb <- qbeta(q, alpha, beta)
+    qm <- qbeta(0.5, alpha, beta)
+    qci <- range(qb)
 
-  ranges <- as.data.frame(data.table::rbindlist(lapply(x, function(i) as.data.frame(t(quantile(i, q))))))
-  rownames(ranges) <- names(x)
+    pdist <- data.frame(x = x, ymin = rep(0, length(y)), ymax = y)
+    pdist <- pdist[pdist$ymax > 0.0001, ]
+
+    return(list(pdist = pdist, qb = qb, qm = qm, qci = qci))
+  })
+  names(beta.data) <- colnames(input)
+
+  ranges <- as.data.frame(
+    data.table::rbindlist(
+      lapply(names(beta.data), function(i) {
+        as.data.frame(t(beta.data[[i]]$qb))
+        })
+      )
+    )
+  colnames(ranges) <- paste0(round(q * 100, 1), "%")
+  rownames(ranges) <- names(beta.data)
 
   if (calc.combined) {
     message("M: For each quantile, 'Combined' estimates are calculated as 1-((1-R1)*(1-R2)).")
     ranges <- rbind(ranges, Combined = apply(ranges, 2, function(i) (1 - prod(1 - i))))
-  }
+}
 
-  link <- sapply(x, function(i) length(unique(i))) != 1
+  link <- sapply(names(beta.data), function(i) {
+      length(unique(beta.data[[i]]$qb)) != 1
+    })
+
 
   if (all(!link)) {
     message("M: All arrays were estimated to have either 0% or 100% efficiency, skipping plotting for all arrays.")
@@ -171,41 +189,44 @@ advEfficiency <- function(x, labels = NULL, n = 10000, q = c(0.025, 0.5, 0.975),
   if (any(!link))
     message("M: Some arrays were estimated to have either 0% or 100% efficiency, skipping plotting for those arrays.")
 
-  aux <- lapply(x[link], function(i) {
-    out <- as.data.frame(i)
-    colnames(out) <- "prob"
-    return(out)
+  # prepare density curve
+  aux <- lapply(names(beta.data)[link], function(i) {
+    return(beta.data[[i]]$pdist)
   })
+  names(aux) <- names(beta.data)[link]
 
-  xx <- data.table::rbindlist(aux, idcol = "label")
-  xx$label <- factor(xx$label, levels = colnames(input))
-  head(xx)  
+  pdist <- data.table::rbindlist(aux, idcol = "label")
+  pdist$label <- factor(pdist$label, levels = colnames(input))
 
-  intervals <- as.data.frame(as.matrix(
-    aggregate(xx$prob, list(xx$label), function(i) quantile(i, c(min(q), max(q))))
-    ), stringsAsFactors = FALSE)
-  colnames(intervals) <- c("label", "x1", "x2")
-  intervals$x1 <- as.numeric(intervals$x1)
-  intervals$x2 <- as.numeric(intervals$x2)
-  int.data <- suppressWarnings(reshape2::melt(intervals, id.vars = "label"))
-  int.data$label <- factor(int.data$label, levels = colnames(input))
-  colnames(int.data)[ncol(int.data)] <- "x"
-  int.data$y <- 0
+  # prepare CI intervals and median
+  aux <- lapply(names(beta.data)[link], function(i) {
+    return(data.frame(
+      min = beta.data[[i]]$qci[1], 
+      qm = beta.data[[i]]$qm, 
+      max = beta.data[[i]]$qci[2]))
+  })
+  names(aux) <- names(beta.data)[link]
 
-  medians <- aggregate(xx$prob, list(xx$label), median)
-  colnames(medians) <- c("label", "x")
+  qci <- data.table::rbindlist(aux, idcol = "label")
+  qci$label <- factor(qci$label, levels = colnames(input))
 
+  # calculate best grid
   if (is.null(force.grid))
-    grid.dim <- nearsq(length(aux))
+    grid.dim <- nearsq(sum(link))
   else
     grid.dim <- force.grid
 
-  p <- ggplot2::ggplot(data = xx, ggplot2::aes(x = prob))
-  p <- p + ggplot2::geom_histogram(bins = 100, ggplot2::aes(y = ..density../100))
-  p <- p + ggplot2::geom_point(data = medians, ggplot2::aes(x = x, y = 0), size = 8, shape = "|", col = "red")
-  p <- p + ggplot2::geom_line(data = int.data, ggplot2::aes(x = x, y = y), size = 2, col = "red")
+  x <- ymin <- ymax <- qm <- title <- label <- NULL
+  p <- ggplot2::ggplot()
+  p <- p + ggplot2::geom_rect(data = qci, ggplot2::aes(xmin = min, xmax = max, ymin = 0, ymax = Inf), fill = "red", alpha = .1)
+  p <- p + ggplot2::geom_ribbon(data = pdist, ggplot2::aes(x = x, ymin = ymin, ymax = ymax))
+  p <- p + ggplot2::geom_vline(data = qci, ggplot2::aes(xintercept = min), col = "red")
+  p <- p + ggplot2::geom_vline(data = qci, ggplot2::aes(xintercept = max), col = "red")
+  p <- p + ggplot2::geom_vline(data = qci, ggplot2::aes(xintercept = qm), col = "red", linetype = "dashed")
+  p <- p + ggplot2::geom_point(data = qci, ggplot2::aes(x = qm, y = 0), size = 15, shape = "|", col = "red")
   p <- p + ggplot2::scale_y_continuous(expand = ggplot2::expansion(mult = c(0, 0.05)))
-  p <- p + ggplot2::labs(title = title, y = "prop.", x = "")
+  p <- p + ggplot2::scale_x_continuous(labels = scales::percent_format(accuracy = 1))
+  p <- p + ggplot2::labs(title = title, y = "Density", x = "Efficiency")
   p <- p + ggplot2::theme_bw()
   p <- p + ggplot2::facet_wrap(~ label, nrow = grid.dim[1], ncol = grid.dim[2], scales = "free", labeller = ggplot2::label_parsed)
   print(p)
@@ -722,7 +743,7 @@ printEfficiency <- function(CJS = NULL, efficiency = NULL, intra.CJS, type = c("
       efficiency.fragment <- paste0('
 Note:
   : The data used in the tables below is stored in the `overall.CJS` object. Auxiliary information can also be found in the `matrices` and `arrays` objects.
-  : These efficiency values are estimated using the analytical equations provided in the paper "Using mark-recapture models to estimate survival from telemetry data" by Perry et al. (2012). In some situations, more advanced efficiency estimation methods may be required.
+  : These efficiency values are estimated using the analytical equations provided in the paper "Using mark-recapture models to estimate survival from telemetry data" by [Perry et al. (2012)](<https://www.researchgate.net/publication/256443823_Using_mark-recapture_models_to_estimate_survival_from_telemetry_data>). In some situations, more advanced efficiency estimation methods may be required.
   : You can try running `advEfficiency([results]$overall.CJS)` to obtain beta-drawn efficiency distributions (replace `[results]` with the name of the object where you saved the analysis).
 
 **Individuals detected and estimated**
@@ -780,7 +801,7 @@ Note:
 
 Note:
   : The data used in the table(s) below is stored in the `intra.array.CJS` object. Auxiliary information can also be found in the `intra.array.matrices` object.
-  : These efficiency values are estimated using the analytical equations provided in the paper "Using mark-recapture models to estimate survival from telemetry data" by Perry et al. (2012). In some situations, more advanced efficiency estimation methods may be required.
+  : These efficiency values are estimated using the analytical equations provided in the paper "Using mark-recapture models to estimate survival from telemetry data" by [Perry et al. (2012)](<https://www.researchgate.net/publication/256443823_Using_mark-recapture_models_to_estimate_survival_from_telemetry_data>). In some situations, more advanced efficiency estimation methods may be required.
   : You can try running `advEfficiency([results]$intra.array.CJS$', names(intra.CJS)[1], ')` to obtain beta-drawn efficiency distributions (replace `[results]` with the name of the object where you saved the analysis).
 ')
     for (i in 1:length(intra.CJS)) {

@@ -188,46 +188,46 @@ test_that("res_efficiency works as expected, and can include intra array estimat
 # y
 
 test_that("advEfficiency can plot efficiency results", {
-  output <- round(advEfficiency(efficiency, n = 1000), 1)
+  output <- round(advEfficiency(efficiency), 7)
   check <- read.csv(text = '"","2.5%","50%","97.5%"
-"River1.min",1,1,1
-"River1.max",1,1,1
-"River2.min",0.1,0.5,0.9
-"River2.max",0.1,0.5,0.9
-"River3.min",0.1,0.5,0.9
-"River3.max",0.1,0.5,0.9
-"River4.min",0.1,0.5,0.9
-"River4.max",0.1,0.5,0.9
-"River5.min",0.1,0.5,0.9
-"River5.max",0.1,0.5,0.9
-"River6.min",0.1,0.5,0.9
-"River6.max",0.1,0.5,0.9
-"Fjord1.min",1,1,1
-"Fjord1.max",1,1,1
-"Fjord2.min",1,1,1
-"Fjord2.max",1,1,1
+"River1.min", 1.0000000, 1.0, 1.0000000
+"River1.max", 1.0000000, 1.0, 1.0000000
+"River2.min", 0.0942993, 0.5, 0.9057007
+"River2.max", 0.0942993, 0.5, 0.9057007
+"River3.min", 0.0942993, 0.5, 0.9057007
+"River3.max", 0.0942993, 0.5, 0.9057007
+"River4.min", 0.0942993, 0.5, 0.9057007
+"River4.max", 0.0942993, 0.5, 0.9057007
+"River5.min", 0.0942993, 0.5, 0.9057007
+"River5.max", 0.0942993, 0.5, 0.9057007
+"River6.min", 0.0942993, 0.5, 0.9057007
+"River6.max", 0.0942993, 0.5, 0.9057007
+"Fjord1.min", 1.0000000, 1.0, 1.0000000
+"Fjord1.max", 1.0000000, 1.0, 1.0000000
+"Fjord2.min", 1.0000000, 1.0, 1.0000000
+"Fjord2.max", 1.0000000, 1.0, 1.0000000
 ', row.names = 1)
   colnames(check) <- c("2.5%","50%","97.5%")
   expect_equal(output, check)
 
-  output <- round(advEfficiency(efficiency, n = 1000, paired = FALSE), 1)
+  output <- round(advEfficiency(efficiency, paired = FALSE), 7)
   check <- read.csv(text = '"","2.5%","50%","97.5%"
-"River1.max",1,1,1
-"River2.max",0.1,0.5,0.9
-"River3.max",0.1,0.5,0.9
-"River4.max",0.1,0.5,0.9
-"River5.max",0.1,0.5,0.9
-"River6.max",0.1,0.5,0.9
-"Fjord1.max",1,1,1
-"Fjord2.max",1,1,1
-"River1.min",1,1,1
-"River2.min",0.1,0.5,0.9
-"River3.min",0.1,0.5,0.9
-"River4.min",0.1,0.5,0.9
-"River5.min",0.1,0.5,0.9
-"River6.min",0.1,0.5,0.9
-"Fjord1.min",1,1,1
-"Fjord2.min",1,1,1
+"River1.max", 1.0000000, 1.0, 1.0000000
+"River2.max", 0.0942993, 0.5, 0.9057007
+"River3.max", 0.0942993, 0.5, 0.9057007
+"River4.max", 0.0942993, 0.5, 0.9057007
+"River5.max", 0.0942993, 0.5, 0.9057007
+"River6.max", 0.0942993, 0.5, 0.9057007
+"Fjord1.max", 1.0000000, 1.0, 1.0000000
+"Fjord2.max", 1.0000000, 1.0, 1.0000000
+"River1.min", 1.0000000, 1.0, 1.0000000
+"River2.min", 0.0942993, 0.5, 0.9057007
+"River3.min", 0.0942993, 0.5, 0.9057007
+"River4.min", 0.0942993, 0.5, 0.9057007
+"River5.min", 0.0942993, 0.5, 0.9057007
+"River6.min", 0.0942993, 0.5, 0.9057007
+"Fjord1.min", 1.0000000, 1.0, 1.0000000
+"Fjord2.min", 1.0000000, 1.0, 1.0000000
 ', row.names = 1)
   colnames(check) <- c("2.5%","50%","97.5%")
   expect_equal(output, check)

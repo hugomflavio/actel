@@ -7,7 +7,6 @@
 advEfficiency(
   x,
   labels = NULL,
-  n = 10000,
   q = c(0.025, 0.5, 0.975),
   force.grid = NULL,
   paired = TRUE,
@@ -18,8 +17,6 @@ advEfficiency(
 \item{x}{An efficiency object from actel (\code{overall.CJS}, \code{intra.array.CJS[[...]]} or \code{efficiency} objects)}
 
 \item{labels}{a vector of strings to substitute default plot labels}
-
-\item{n}{Number of draws for each array.}
 
 \item{q}{The quantile values to be calculated. Defaults to \code{c(0.025, 0.5, 0.975)} (i.e. median and 95\% CI)}
 
@@ -33,11 +30,11 @@ advEfficiency(
 A data frame with the required quantile values and a plot of the efficiency distributions.
 }
 \description{
-advEfficiency estimates efficiency ranges by drawing n samples from a beta distribution
+advEfficiency estimates efficiency ranges by fitting a beta distribution
 with parameters \eqn{\alpha} = number of detected tags and \eqn{\beta} = number of missed
-tags. The desired quantiles (argument \code{q}) are then calculated from the drawn values.
-Plots are also drawn showing the sample distribution, the median point (red dash) and
-the range between the lowest and largest quantile requested (bottom red band).
+tags. The desired quantiles (argument \code{q}) are then calculated from distribution.
+Plots are also drawn showing the distribution, the median point (dashed red line) and
+the range between the lowest and largest quantile requested (red shaded section).
 }
 \details{
 Examples for inclusion in a paper:
@@ -45,7 +42,7 @@ Examples for inclusion in a paper:
 \enumerate{
 \item If advEfficiency was run on an \code{overall.CJS} object (i.e. migration analysis):
 
-"Array efficiency was estimated by drawing 10000 samples from a beta distribution
+"Array efficiency was estimated by fitting a beta distribution
 (\eqn{\alpha} = number of tags detected subsequently and at the array,
 \eqn{\beta} = number of tags detected subsequently but not at the array)
 and calculating the median estimated efficiency value using the R package actel [citation]."
@@ -54,13 +51,13 @@ and calculating the median estimated efficiency value using the R package actel 
 \itemize{
 \item If you are using maximum efficiency estimates:
 
-"Array efficiency was estimated by drawing 10000 samples from a beta distribution
+"Array efficiency was estimated by fitting a beta distribution
 (\eqn{\alpha} = number of events recorded by the array,
 \eqn{\beta} = number of events known to have been missed by the array).
 and calculating the median estimated efficiency value using the R package actel [citation]."
 \item If you are using minimum efficiency estimates:
 
-"Array efficiency was estimated by drawing 10000 samples from a beta distribution
+"Array efficiency was estimated by fitting a beta distribution
 (\eqn{\alpha} = number of events recorded by the array,
 \eqn{\beta} = number of events both known to have been missed and potentially missed by the array).
 and calculating the median estimated efficiency value using the R package actel [citation]."
@@ -69,10 +66,10 @@ and calculating the median estimated efficiency value using the R package actel 
 \item If advEfficiency was run on an \code{intra.array.CJS} object:
 
 "Intra-array efficiency was estimated by comparing the tags detected at each of the
-two replicates. For each replicate, 10000 samples were drawn from a beta distribution
+two replicates. For each replicate, a beta distribution was fitted
 (\eqn{\alpha} = number of tags detected at both replicates, \eqn{\beta} = number
 of tags detected at the opposite replicate but not at the one for which efficiency
-is being calculated) and calculating the median estimated efficiency value. The overall
+is being calculated) and the median estimated efficiency value was calculated. The overall
 efficiency of the array was then estimated as 1-((1-R1)*(1-R2)), where R1 and R2 are
 the median efficiency estimates for each replicate. These calculations were performed
 using the R package actel [citation]."

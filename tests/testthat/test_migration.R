@@ -245,6 +245,12 @@ test_that("migration results contains all the expected elements.", {
 ', row.names = 1)
   expect_equal(output$group.overview[[2]], check) 
 })
+# 4
+# y
+# n
+# 4
+# y
+# n
 
 test_that("advEfficiency can calculate efficiency from release and group overviews", {
 	skip_on_cran()

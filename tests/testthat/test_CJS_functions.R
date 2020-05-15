@@ -291,17 +291,17 @@ test_that("assembleArrayCJS works as expected.",{
 })
 
 test_that("advEfficiency can plot overall.CJS results", {
-	expect_message(output <- round(advEfficiency(x = overall.CJS, n = 10000), 1),
+	expect_message(output <- round(advEfficiency(x = overall.CJS), 7),
 		"M: Some arrays were estimated to have either 0% or 100% efficiency, skipping plotting for those arrays.", fixed = TRUE)
 	check <- read.csv(text = '"","2.5%","50%","97.5%"
-"River1",1.0,1,1
-"River2",1.0,1,1
-"River3",0.9,1,1
-"River4",1.0,1,1
-"River5",1.0,1,1
-"River6",1.0,1,1
-"Fjord1",0.9,1,1
-"Fjord2",1.0,1,1
+"River1", 1.0000000, 1.0000000, 1.0000000
+"River2", 1.0000000, 1.0000000, 1.0000000
+"River3", 0.8955251, 0.9673092, 0.9952150
+"River4", 1.0000000, 1.0000000, 1.0000000
+"River5", 1.0000000, 1.0000000, 1.0000000
+"River6", 1.0000000, 1.0000000, 1.0000000
+"Fjord1", 0.9177889, 0.9840095, 0.9994114
+"Fjord2", 1.0000000, 1.0000000, 1.0000000
 ', row.names = 1)
 	colnames(check) <- c("2.5%","50%","97.5%")
 	expect_equal(output, check)
@@ -421,12 +421,12 @@ test_that("replicate functions work as expected.", {
 # y
 
 test_that("advEfficiency can plot intra.array.CJS results", {
-	expect_message(output <- round(advEfficiency(intra.array.CJS[[1]], n = 10000), 1),
+	expect_message(output <- round(advEfficiency(intra.array.CJS[[1]]), 7),
 		"M: For each quantile, 'Combined' estimates are calculated as 1-((1-R1)*(1-R2)).", fixed = TRUE)
 	check <- read.csv(text = '"","2.5%","50%","97.5%"
-"R1",0.6,0.8,0.9
-"R2",0.7,0.9,1.0
-"Combined",0.9,1.0,1.0
+"R1",       0.6143335, 0.7801434, 0.9006621
+"R2",       0.7084131, 0.8656773, 0.9581126
+"Combined", 0.8875447, 0.9704683, 0.9958390
 ', row.names = 1)
 	colnames(check) <- c("2.5%","50%","97.5%")
 	expect_equal(output, check)
@@ -436,9 +436,6 @@ test_that("advEfficiency can plot intra.array.CJS results", {
 
 	expect_error(advEfficiency(intra.array.CJS[[1]], labels = 1:3),
 		"Wrong number of panel names", fixed = TRUE)
-
-	expect_warning(advEfficiency(intra.array.CJS[[1]], n = 10),
-		"Low n values may produce unreliable estimates.", fixed = TRUE)
 
 	output <- advEfficiency(intra.array.CJS[[1]], force.grid = c(2, 1), title = "Top/Bottom")
 
