@@ -27,9 +27,6 @@ A list containing:
 \description{
 Computes an analytical CJS model for a presence/absence matrix.
 }
-\details{
-The internal calculations are based on 'Using mark-recapture models to estimate survival from telemetry data' by Perry et al. 2012
-}
 \examples{
 # prepare a dummy presence/absence matrix
 x <- matrix(c(TRUE, TRUE, TRUE, TRUE, FALSE, TRUE, TRUE, TRUE, FALSE), ncol = 3)
@@ -38,4 +35,7 @@ colnames(x) <- c("Release", "Array1", "Array2")
 # run CJS
 simpleCJS(x)
 
+}
+\references{
+Perry et al (2012), 'Using mark-recapture models to estimate survival from telemetry data'. url: \url{https://www.researchgate.net/publication/256443823_Using_mark-recapture_models_to_estimate_survival_from_telemetry_data}
 }

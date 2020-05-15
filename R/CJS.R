@@ -314,8 +314,8 @@ assembleMatrices <- function(spatial, movements, status.df, arrays, paths, dotma
 #'
 #' Computes an analytical CJS model for a presence/absence matrix.
 #' 
-#' The internal calculations are based on 'Using mark-recapture models to estimate survival from telemetry data' by Perry et al. 2012
-#'
+#' @references Perry et al (2012), 'Using mark-recapture models to estimate survival from telemetry data'. url: <https://www.researchgate.net/publication/256443823_Using_mark-recapture_models_to_estimate_survival_from_telemetry_data>
+#' 
 #' @inheritParams cjs_args
 #' 
 #' @examples
@@ -732,7 +732,7 @@ dualMatrix <- function(array, replicates, spatial, detections.list){
 
 #' Calculate estimated last-array efficiency
 #'
-#' The calculations are based on 'Using mark-recapture models to estimate survival from telemetry data' by Perry et al. 2012
+#' @references Perry et al (2012), 'Using mark-recapture models to estimate survival from telemetry data'. url: <https://www.researchgate.net/publication/256443823_Using_mark-recapture_models_to_estimate_survival_from_telemetry_data>
 #' 
 #' @inheritParams cjs_args
 #' 

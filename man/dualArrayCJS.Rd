@@ -18,7 +18,7 @@ A list containing:
 }
 }
 \description{
-The calculations are based on 'Using mark-recapture models to estimate survival from telemetry data' by Perry et al. 2012
+Calculate estimated last-array efficiency
 }
 \examples{
 # prepare a dummy presence/absence matrix
@@ -28,4 +28,7 @@ colnames(x) <- c("R1", "R2")
 # run CJS
 dualArrayCJS(x)
 
+}
+\references{
+Perry et al (2012), 'Using mark-recapture models to estimate survival from telemetry data'. url: \url{https://www.researchgate.net/publication/256443823_Using_mark-recapture_models_to_estimate_survival_from_telemetry_data}
 }
