@@ -4,7 +4,8 @@ This is a resubmission. As requested by Jelena Saf,
 In this version I have:
 
 * Included a reference to a supporting paper in the package
-description
+description, and also included a "references" field in the
+documentation for simpleCJS and dualArrayCJS.
 
 * Included "on.exit()" calls immediately after any changes
 imposed on the options() or par(), to ensure these changes are
@@ -76,6 +77,10 @@ were included for all functions.
 * Removed the startNote function as it is no longer relevant.
 
 * Updated the package vignettes accordingly.
+
+* In parallel with the requested revisions, I have upgraded the
+function advEfficiency to a more elegant method. This should
+not have any impact on the issues raised before.
 
 ## Package resubmission (1st revision)
 

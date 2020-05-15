@@ -36,7 +36,7 @@ Enhancements:
   * Allow intra-array efficiency to be calculated even if no inter-array efficiency could be calculated.
   * Allow the GUI to pop up if the number of lines to display goes over getOptions("max.print").
   * Hide biometrics' section from the report if no biometric data was found.
-  * New `advEfficiency` function allows user to get more robust efficiency estimates.
+  * New `advEfficiency` function allows user to calculate more robust efficiency estimates.
   * Improved release.overview and group.overview objects so they can be used as an input to advEfficiency().
   * New `plotTimes` function allows the user to create circular plots of specific subsets of the time data, with the ability to include night shades too.
   * `getTimes` and `timesToCircular` are now exported, allowing the user to quickly format the input for `plotTimes`.
