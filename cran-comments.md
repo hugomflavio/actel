@@ -1,7 +1,7 @@
 ## Package resubmission (3rd revision)
 
 This is a resubmission. As requested by Swetlana Herbrandt,
-in this version I have: 
+in this version I have:
 
 * Replaced "(explore, migration and residency,  allow" with 
 "(explore(), migration() and residency()) allow". Thanks for
@@ -20,7 +20,7 @@ that switching to \donttest{} in these cases would go
 against the "Please ensure that your functions do not 
 modify (save or delete) the user's home filespace in your 
 examples" policy. I.e. if the user invoked the function
-examples without analysing the code first they could 
+examples without analysing the code first, they could 
 unwillingly trigger the deployment of files in their 
 working directory. Please let me know if I am incorrect.
 
@@ -29,25 +29,23 @@ _only_ contain "dontrun" examples:
 
 distancesMatrix(): Requires the output of transitionLayer to
 be able to run. Since transtitionLayer() cannot operate without
-a shape file (see above), the examples in distancesMatrix() 
+a shape file (see below), the examples in distancesMatrix() 
 would lead to an error.
 
 exampleWorkspace(): This function is intended to deploy files
 in the user file system.
 
-explore(): Requires the presence of specific files in the
-current directory to run.
+explore(), migration() and residency(): These functions 
+require the presence of specific files in the current 
+directory to run. Successfully running the examples
+for these function would require either deploying files in the
+current directory or moving the R session back and forth
+between the temporary directory and the original directory.
 
 getTimes(): Requires the output of one of the three main 
 functions (explore, migration or residency), which in turn
 require the presence of specific files in the user file
 system.
-
-migration(): Requires the presence of specific files in the
-current directory to run.
-
-residency(): Requires the presence of specific files in the
-current directory to run.
 
 transitionLayer(): Requires the presence of a shape file to
 be able to run. Running the example in the absence of a valid
@@ -171,7 +169,7 @@ the functions are behaving as expected.
 
 ## R CMD check results
 
-On Windows server, MacOS and local Windows 10:
+On all tested platforms:
 
 0 errors | 0 warnings | 1 note
 
@@ -179,61 +177,3 @@ On Windows server, MacOS and local Windows 10:
 Maintainer: ‘Hugo Flávio <hdmfla@aqua.dtu.dk>’
 
 New submission
-
-On Ubuntu 16.04:
-
-0 errors | 0 warnings | 2 notes
-
-* checking CRAN incoming feasibility ... NOTE
-Maintainer: ‘Hugo Flávio <hdmfla@aqua.dtu.dk>’
-
-New submission
-
-* checking package dependencies ... NOTE
-Package suggested but not available for checking: ‘rgdal’
-
-## Comments
-
-'rgdal' is not an essential package for actel, and measures 
-were put in place to ensure that actel's functions stop orderly
-if the 'rgdal' is missing.
-
-
-## Obsolete comments
-
-NOTE: The text below was part of the original submission, but is
-no longer relevant! I am just keeping it here for continuity sake 
-(only visible in the source file).
-
-<!-- 
-actel must read/write files to operate. I understand that this
-is a sensible topic, and the user must be informed about it. The
-startup message of actel asks the users to run startNote(). This
-is a message-only function that contains the following text:
-
-```
-Writing/editing files:
-  To operate, actel must write/change files present in the target 
-  directory and create subdirectories. This includes the functions 
-  transitionLayer, distancesMatrix, emptyMatrix, createWorkspace, 
-  exampleWorkspace, clearWorkspace, explore, migration and residency. 
-  These actions are always related to the analysis processes being 
-  carried on (e.g. deploy examples, write reports, print graphics). 
-
-Opening the web browser:
-  actel has an auto-open feature for generated reports, which will 
-  trigger your browser to open at the end of the explore, migration 
-  and residency functions. If you would like to disable this, please 
-  run these functions with auto.open = FALSE. 
-
-Please only use actel if you agree with this.
-
-To get acquainted with how actel works, read the package vignettes.
-You can find them by running browseVignettes('actel')
-```
-
-I have also deployed checkpoints to transitionLayer, distancesMatrix,
-emptyMatrix, createWorkspace, exampleWorkspace, and clearWorkspace 
-that require user confirmation when there is a risk of file overwriting
-or deletion.
--->
