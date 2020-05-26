@@ -71,7 +71,7 @@
 #'  present in \code{\link[base]{timezones}}.
 #' 
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' # If needed, create an example workspace
 #' exampleWorkspace()
 #' 

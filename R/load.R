@@ -183,7 +183,7 @@ loadDot <- function(string = NULL, input = NULL, spatial, sections = NULL, disre
 #' 
 #' readDot(string = y)
 #' 
-#' \dontrun{
+#' \donttest{
 #' # Alternatively, connections can be read from a file
 #' readDot(input = "file.txt")
 #' }
@@ -638,7 +638,7 @@ loadDeployments <- function(file, tz){
 #' unnecessary elements when the function is being run manually by the user.
 #' 
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' # Assuming there is a 'spatial.csv' file in the current directory
 #' loadSpatial('spatial.csv')
 #' }

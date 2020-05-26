@@ -196,7 +196,7 @@ and other residency-focused variables, this is the analysis you are looking
 for!
 }
 \examples{
-\dontrun{
+\donttest{
 # If needed, create an example workspace
 exampleWorkspace()
 

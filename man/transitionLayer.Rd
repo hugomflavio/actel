@@ -51,7 +51,7 @@ It is highly recommended to read the vignette regarding distances matrix before 
 You can find it by running \code{vignette('a-2_distances_matrix', 'actel')} or \code{browseVignettes('actel')}
 }
 \examples{
-\dontrun{
+\donttest{
 # Assuming a shapefile was saved to 'shapefile.shp' in the current
 # working directory
 x <- transitionLayer("shapefile.shp", size = 20, EPSGcode = 32362)

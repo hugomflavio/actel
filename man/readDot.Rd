@@ -32,7 +32,7 @@ H--C")
 
 readDot(string = y)
 
-\dontrun{
+\donttest{
 # Alternatively, connections can be read from a file
 readDot(input = "file.txt")
 }

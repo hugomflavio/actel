@@ -23,7 +23,7 @@
 #' @inheritParams explore
 #' 
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' # If needed, create an example workspace
 #' exampleWorkspace()
 #' 

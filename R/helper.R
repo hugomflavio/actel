@@ -45,7 +45,7 @@ nearsq <- function(n, tol = 5/3+0.001) {
 #' @param source A RData file.
 #' 
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' dataTolist("Path/to/file.RData")
 #' }
 #' 
@@ -414,7 +414,7 @@ commentCheck <- function(line, tag) { # nocov start
 #' @param skip A vector of files to be ignored.
 #' 
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' # In a directory where you have saved actel results, run:
 #' clearWorkspace()
 #' # This will show you the files than can be removed and ask for confirmation.
@@ -463,7 +463,7 @@ clearWorkspace <- function(skip = NA){
 #' if "one" and type is "departure", the very last departure is returned.
 #' 
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' # Assuming x is the output of explore, migration or 
 #' # residency, run:
 #' getTimes(x)
@@ -685,7 +685,7 @@ timesToCircular <- function(x, by.group = FALSE) {
 #'  on one or both axes?
 #' 
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' # Assuming a shapefile was saved to 'shapefile.shp' in the current
 #' # working directory
 #' x <- transitionLayer("shapefile.shp", size = 20, EPSGcode = 32362)
@@ -868,7 +868,7 @@ size, rerun the function with force = TRUE.\n", call. = FALSE)
 #' @param actel Logical: Should the distance matrix be optimized for actel? Defaults to TRUE.
 #'
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' # Assuming a shapefile was saved to 'shapefile.shp' in the current
 #' # working directory
 #' x <- transitionLayer("shapefile.shp", size = 20, EPSGcode = 32362)
@@ -1021,7 +1021,7 @@ will artificially add water space around the shape file.", call. = FALSE)
 #' You can find it by running \code{vignette('a-2_distances_matrix', 'actel')} or \code{browseVignettes('actel')}
 #' 
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' # This function requires the presence of a 'spatial.csv' file
 #' # in the current working directory. 
 #' emptyMatrix()

@@ -16,7 +16,7 @@ No return value, called for side effects.
 Deletes previous analysis files from the current workspace. Input files are not deleted.
 }
 \examples{
-\dontrun{
+\donttest{
 # In a directory where you have saved actel results, run:
 clearWorkspace()
 # This will show you the files than can be removed and ask for confirmation.

@@ -199,7 +199,7 @@ odd. Multiple options allow you to tweak the analysis to fit your study
 perfectly.
 }
 \examples{
-\dontrun{
+\donttest{
 # If needed, create an example workspace
 exampleWorkspace()
 

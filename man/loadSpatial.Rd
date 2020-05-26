@@ -20,7 +20,7 @@ Loads a spatial file prepared for actel and appends the Standard.name column. Ad
 performs a series of quality checks on the contents of the target file.
 }
 \examples{
-\dontrun{
+\donttest{
 # Assuming there is a 'spatial.csv' file in the current directory
 loadSpatial('spatial.csv')
 }

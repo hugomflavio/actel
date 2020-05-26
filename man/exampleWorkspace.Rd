@@ -23,7 +23,7 @@ Note: This function will create a new sub-directory called 'exampleWorkspace'
 in the current directory and write files into it.
 }
 \examples{
-\dontrun{
+\donttest{
 # deploy a minimal dataset to try actel!
 exampleWorkspace()
 

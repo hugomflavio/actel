@@ -16,7 +16,7 @@ A list containing the objects present in the source RData file.
 Import RData in a list format
 }
 \examples{
-\dontrun{
+\donttest{
 dataTolist("Path/to/file.RData")
 }
 

@@ -133,7 +133,7 @@ input files are behaving as expected. It is also a good candidate if you just
 want to validate your detections for later use in other analyses.
 }
 \examples{
-\dontrun{
+\donttest{
 # If needed, create an example workspace
 exampleWorkspace()
 

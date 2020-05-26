@@ -3,10 +3,10 @@
 #' Produces the files and folders required to run the package, which the user can use as a template.
 #' Note: This function will create a new sub-directory in the current directory and write files into it.
 #' 
-#' @param dir The name of the target directory. Will be created if not present
+#' @param dir The name of the target directory. Will be created if not present.
 #'
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' # running createWorkspace deploys template files for an analysis
 #' # by default, createWorkspace creates a directory called 'actel_workspace'
 #' # but this can be changed with the argument 'dir'.
@@ -68,7 +68,7 @@ createWorkspace <- function(dir = "actel_workspace") {
 #' @param spatial,biometrics,detections,deployments Example datasets provided with the package.
 #'
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' # deploy a minimal dataset to try actel!
 #' exampleWorkspace()
 #' 

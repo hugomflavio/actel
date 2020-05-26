@@ -82,7 +82,7 @@
 #' # These cjs results can be used in advEfficiency
 #' advEfficiency(cjs.results)
 #' 
-#' \dontrun{
+#' \donttest{
 #' # Examples to run on the output of actel:
 #' 
 #' # Assuming 'results' is the output of a migration analysis.
