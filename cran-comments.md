@@ -1,7 +1,7 @@
 ## Package resubmission (3rd revision)
 
 This is a resubmission. As requested by Swetlana Herbrandt,
-in this version I have:
+in this version I have: 
 
 * Replaced "(explore, migration and residency,  allow" with 
 "(explore(), migration() and residency()) allow". Thanks for
