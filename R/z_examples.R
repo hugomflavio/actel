@@ -10,7 +10,7 @@
 #' # running createWorkspace deploys template files for an analysis
 #' # by default, createWorkspace creates a directory called 'actel_workspace'
 #' # but this can be changed with the argument 'dir'.
-#' createWorkspace(dir = tempdir())
+#' createWorkspace(dir = paste0(tempdir(), "/createWorkspace_example"))
 #' }
 #' 
 #' @return No return value, called for side effects
@@ -21,42 +21,46 @@ createWorkspace <- function(dir = "actel_workspace") {
   if (interactive() & dir.exists(dir)) {
     warning("The folder ", dir, " already exists. Continuing may overwrite some of its contents.", call. = FALSE, immediate. = TRUE)
     decision <- readline("Proceed? (y/N) ")
-    if (decision != "y" & decision != "Y")
-      stop("Function stopped by user command.\n", call. = FALSE)
+  } else {
+    decision <- "y"
   }
 
-  if (!dir.exists(dir))
-    dir.create(dir)
+  if (decision == "y" | decision == "Y") {
+    if (!dir.exists(dir))
+      dir.create(dir)
 
-  spatial <- data.frame(
-    Station.name = c("Example station1", "Example station2", "Example station3", "Example release1", "Example release2"),
-    Latitude = c(8.411, 8.521, 8.402, 8.442, 8.442),
-    Longitude = c(40.411, 40.521, 40.402, 40.442, 40.442), 
-    Array = c("River1", "River1", "River2", "River1", "River2"), 
-    Type = c("Hydrophone", "Hydrophone", "Hydrophone", "Release", "Release"))
+    spatial <- data.frame(
+      Station.name = c("Example station1", "Example station2", "Example station3", "Example release1", "Example release2"),
+      Latitude = c(8.411, 8.521, 8.402, 8.442, 8.442),
+      Longitude = c(40.411, 40.521, 40.402, 40.442, 40.442), 
+      Array = c("River1", "River1", "River2", "River1", "River2"), 
+      Type = c("Hydrophone", "Hydrophone", "Hydrophone", "Release", "Release"))
 
-  biometrics <- data.frame(
-    Release.date = c("2018-02-01 10:05:00", "2018-02-01 10:10:00", "2018-02-01 10:15:00"), 
-    Serial.nr = c("12340001", "12501034", "19340301"), 
-    Signal = c(1, 1034, 301), 
-    Length.mm = c(150, 160, 170), 
-    Weight.g = c(40, 60, 50), 
-    Group = c("Wild", "Hatchery", "Wild"), 
-    Release.site = c("Example release1", "Example release1", "Example release2"))
+    biometrics <- data.frame(
+      Release.date = c("2018-02-01 10:05:00", "2018-02-01 10:10:00", "2018-02-01 10:15:00"), 
+      Serial.nr = c("12340001", "12501034", "19340301"), 
+      Signal = c(1, 1034, 301), 
+      Length.mm = c(150, 160, 170), 
+      Weight.g = c(40, 60, 50), 
+      Group = c("Wild", "Hatchery", "Wild"), 
+      Release.site = c("Example release1", "Example release1", "Example release2"))
 
-  deployments <- data.frame(
-    Receiver = c("123001", "123002", "331"), 
-    Station.name = c("Example station1", "Example station2", "Example station3"),
-    Start = c("2018-01-25 12:00:00", "2018-01-25 12:00:00", "2018-01-25 12:00:00"),
-    Stop = c("2018-04-03 12:00:00", "2018-04-03 12:00:00", "2018-04-03 12:00:00"))
+    deployments <- data.frame(
+      Receiver = c("123001", "123002", "331"), 
+      Station.name = c("Example station1", "Example station2", "Example station3"),
+      Start = c("2018-01-25 12:00:00", "2018-01-25 12:00:00", "2018-01-25 12:00:00"),
+      Stop = c("2018-04-03 12:00:00", "2018-04-03 12:00:00", "2018-04-03 12:00:00"))
 
-  write.csv(spatial, paste(dir, "spatial.csv", sep ="/"), row.names = FALSE)
-  write.csv(biometrics, paste(dir, "biometrics.csv", sep ="/"), row.names = FALSE)
-  write.csv(deployments, paste(dir, "deployments.csv", sep ="/"), row.names = FALSE)
+    write.csv(spatial, paste(dir, "spatial.csv", sep ="/"), row.names = FALSE)
+    write.csv(biometrics, paste(dir, "biometrics.csv", sep ="/"), row.names = FALSE)
+    write.csv(deployments, paste(dir, "deployments.csv", sep ="/"), row.names = FALSE)
 
-  if (!dir.exists(paste(dir, "detections", sep ="/"))) 
-    dir.create(paste(dir, "detections", sep ="/"))
-  message(paste0("M: Workspace files created in folder '", dir,"'."))
+    if (!dir.exists(paste(dir, "detections", sep ="/"))) 
+      dir.create(paste(dir, "detections", sep ="/"))
+    message(paste0("M: Workspace files created in folder '", dir,"'."))
+  } else {
+    message("M: Function stopped by user command.")  
+  }
 }
 
 #' Deploy Example Data
@@ -68,7 +72,7 @@ createWorkspace <- function(dir = "actel_workspace") {
 #' @param spatial,biometrics,detections,deployments Example datasets provided with the package.
 #'
 #' @examples
-#' \donttest{
+#' \dontrun{
 #' # deploy a minimal dataset to try actel!
 #' exampleWorkspace()
 #' 
@@ -76,17 +80,14 @@ createWorkspace <- function(dir = "actel_workspace") {
 #' setwd("exampleWorkspace")
 #' 
 #' # and run the example analysis
-#' results <- explore(tz = 'Europe/Copenhagen', report = TRUE)
+#' results <- explore(tz = 'Europe/Copenhagen')
 #' 
 #' # Have a look at the results and the html report.
 #' names(results)
 #' 
 #' # you can also try running the migration and residency analyses
-#' m.results <- migration(tz = 'Europe/Copenhagen', 
-#'  sections = c('River', 'Fjord', 'Sea'), report = TRUE)
-#' 
-#' r.results <- migration(tz = 'Europe/Copenhagen', 
-#'  sections = c('River', 'Fjord', 'Sea'), report = TRUE)
+#' # by changing the function name and adding sections = c('River', 'Fjord', 'Sea')
+#' # to the function call.
 #' }
 #' 
 #' @return No return value, called for side effects.
