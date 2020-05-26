@@ -1,3 +1,64 @@
+## Package resubmission (3rd revision)
+
+This is a resubmission. As requested by Swetlana Herbrandt,
+in this version I have:
+
+* Replaced "(explore, migration and residency,  allow" with 
+"(explore(), migration() and residency()) allow". Thanks for
+pointing out that lost parenthesis.
+
+* Replaced 'createWorkspace(dir = "my_new_folder")' with
+'createWorkspace(dir = paste0(tempdir(), "/createWorkspace_example"))'
+in the example for the function createWorkspace().
+
+* Reviewed the function examples in an attempt to
+replace instances of \dontrun{} with \donttest{}. However,
+some functions either require the presence of specific files
+in the current working directory, or are intended to deploy 
+examples/template files. As such, it is my interpretation 
+that switching to \donttest{} in these cases would go 
+against the "Please ensure that your functions do not 
+modify (save or delete) the user's home filespace in your 
+examples" policy. I.e. if the user invoked the function
+examples without analysing the code first they could 
+unwillingly trigger the deployment of files in their 
+working directory. Please let me know if I am incorrect.
+
+Of the 21 functions exported by actel, the following seven
+_only_ contain "dontrun" examples:
+
+distancesMatrix(): Requires the output of transitionLayer to
+be able to run. Since transtitionLayer() cannot operate without
+a shape file (see above), the examples in distancesMatrix() 
+would lead to an error.
+
+exampleWorkspace(): This function is intended to deploy files
+in the user file system.
+
+explore(): Requires the presence of specific files in the
+current directory to run.
+
+getTimes(): Requires the output of one of the three main 
+functions (explore, migration or residency), which in turn
+require the presence of specific files in the user file
+system.
+
+migration(): Requires the presence of specific files in the
+current directory to run.
+
+residency(): Requires the presence of specific files in the
+current directory to run.
+
+transitionLayer(): Requires the presence of a shape file to
+be able to run. Running the example in the absence of a valid
+file will lead to an error. This is not a file I can easily
+generate in R's temporary directory.
+
+* In parallel with the requested revisions, I removed a 
+"plot(x, y)" command that had accidentally been left active
+in the function advEfficiency(). This should not have 
+any impact on the issues raised before.
+
 ## Package resubmission (2nd revision)
 
 This is a resubmission. As requested by Jelena Saf,
