@@ -10,7 +10,7 @@
 #' # running createWorkspace deploys template files for an analysis
 #' # by default, createWorkspace creates a directory called 'actel_workspace'
 #' # but this can be changed with the argument 'dir'.
-#' createWorkspace(dir = "my_new_folder")
+#' createWorkspace(dir = tempdir())
 #' }
 #' 
 #' @return No return value, called for side effects
