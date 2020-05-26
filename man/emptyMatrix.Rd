@@ -4,7 +4,10 @@
 \alias{emptyMatrix}
 \title{Create a Template Distances Matrix}
 \usage{
-emptyMatrix()
+emptyMatrix(file = "spatial.csv")
+}
+\arguments{
+\item{file}{The path to the file containing the spatial information.}
 }
 \value{
 An empty matrix with the rows and columns required to
@@ -20,10 +23,12 @@ It is highly recommended to read the vignette regarding distances matrix before 
 You can find it by running \code{vignette('a-2_distances_matrix', 'actel')} or \code{browseVignettes('actel')}
 }
 \examples{
-\donttest{
-# This function requires the presence of a 'spatial.csv' file
-# in the current working directory. 
-emptyMatrix()
-}
+# This function requires the presence of a file with spatial information
+
+# Let's create a dummy 'spatial.csv' file in R's temporary directory
+write.csv(example.spatial, file = paste0(tempdir(), "/spatial.csv"))
+
+# run emptyMatrix on the temporary spatial.csv file
+emptyMatrix(paste0(tempdir(), "/spatial.csv"))
 
 }

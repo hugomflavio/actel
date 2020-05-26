@@ -82,13 +82,13 @@
 #' # These cjs results can be used in advEfficiency
 #' advEfficiency(cjs.results)
 #' 
-#' \donttest{
+#' \dontrun{
 #' # Examples to run on the output of actel:
 #' 
-#' # Assuming 'results' is the output of a migration analysis.
+#' # Assuming the object 'results' is the output of a migration analysis.
 #' advEfficiency(results$overall.CJS)
 #' 
-#' # Assuming 'results' is the output of a residency analysis.
+#' # Assuming the object 'results' is the output of a residency analysis.
 #' advEfficiency(results$efficiency)
 #' 
 #' # Assuming intra-array estimates were calculated for array A1.

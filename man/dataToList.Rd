@@ -16,8 +16,21 @@ A list containing the objects present in the source RData file.
 Import RData in a list format
 }
 \examples{
-\donttest{
-dataTolist("Path/to/file.RData")
-}
+# Dummy example:
+# Create two objects:
+object_1 <- "This"
+object_2 <- "Worked!"
+
+# Save them as an RData file in R's temporary directory
+save(object_1, object_2, file = paste0(tempdir(), "/dataToList_example.RData"))
+
+# Remove the dummy objects as we don't need them anymore
+rm(object_1, object_2)
+
+# Load the RData file as a single object
+x <- dataToList(paste0(tempdir(), "/dataToList_example.RData"))
+
+# inspect x
+x
 
 }

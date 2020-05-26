@@ -199,7 +199,7 @@ odd. Multiple options allow you to tweak the analysis to fit your study
 perfectly.
 }
 \examples{
-\donttest{
+\dontrun{
 # If needed, create an example workspace
 exampleWorkspace()
 
@@ -209,11 +209,11 @@ setwd("exampleWorkspace")
 # run the migration analysis. Ensure the tz argument 
 # matches the time zone of the study area and that the
 # sections match your array names. The line below works 
-for the example data.
+# for the example data.
 results <- migration(tz = "Europe/Copenhagen", sections = c("River", "Fjord", "Sea"))
 
-# to obtain an HTML report, run the analysis 
-# with report = TRUE
+# to obtain an HTML report, run the 
+# analysis with report = TRUE, i.e.:
 results <- migration(tz = "Europe/Copenhagen", sections = c("River", "Fjord", "Sea"), report = TRUE)
 }
 

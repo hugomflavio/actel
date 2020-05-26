@@ -170,23 +170,27 @@ loadDot <- function(string = NULL, input = NULL, spatial, sections = NULL, disre
 #' 
 #' @examples
 #' # create dummy dot string
-#' x <- c("A--B--C--D--E--F")
+#' x1 <- c("A--B--C--D--E--F")
 #' 
 #' # run readDot
-#' readDot(string = x)
+#' readDot(string = x1)
 #' 
 #' # more complex strings are acceptable:
-#' y <- c(
+#' x2 <- c(
 #' "A--B--C--D--E--F
 #' A--G--H--I--E
 #' H--C")
 #' 
-#' readDot(string = y)
+#' readDot(string = x2)
 #' 
-#' \donttest{
 #' # Alternatively, connections can be read from a file
-#' readDot(input = "file.txt")
-#' }
+#' 
+#' # let's create a dummy file in R's temporary directory:
+#' write("A--B--C--D--E--F\nA--G--H--I--E\nH--C\n", 
+#'  file = paste0(tempdir(), "/dummy_dot.txt"))
+#' 
+#' # now we can read it using readDot
+#' readDot(input = paste0(tempdir(), "/dummy_dot.txt"))
 #' 
 #' @return A data frame with the connections present in the input.
 #' 
@@ -638,10 +642,13 @@ loadDeployments <- function(file, tz){
 #' unnecessary elements when the function is being run manually by the user.
 #' 
 #' @examples
-#' \donttest{
-#' # Assuming there is a 'spatial.csv' file in the current directory
-#' loadSpatial('spatial.csv')
-#' }
+#' # This function requires the presence of a file with spatial information
+#' 
+#' # Let's create a dummy 'spatial.csv' file in R's temporary directory
+#' write.csv(example.spatial, file = paste0(tempdir(), "/spatial.csv"), row.names = FALSE)
+#' 
+#' # run loadSpatial on the temporary spatial.csv file
+#' loadSpatial(file = paste0(tempdir(), '/spatial.csv'))
 #' 
 #' @return A data frame with the spatial information present in 'spatial.csv' and the Standard.name column.
 #' 

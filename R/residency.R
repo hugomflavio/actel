@@ -13,7 +13,7 @@
 #' @inheritParams explore
 #' 
 #' @examples
-#' \donttest{
+#' \dontrun{
 #' # If needed, create an example workspace
 #' exampleWorkspace()
 #' 
@@ -27,7 +27,7 @@
 #' results <- residency(tz = "Europe/Copenhagen", sections = c("River", "Fjord", "Sea"))
 #' 
 #' # to obtain an HTML report, run the analysis 
-#' # with report = TRUE
+#' # with report = TRUE, i.e.:
 #' results <- residency(tz = "Europe/Copenhagen", sections = c("River", "Fjord", "Sea"), report = TRUE)
 #' }
 #' 

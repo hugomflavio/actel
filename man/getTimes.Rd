@@ -31,7 +31,7 @@ A data frame with the timestamps for each fish (rows) and array (columns)
 Extract timestamps from the analysis results.
 }
 \examples{
-\donttest{
+\dontrun{
 # Assuming x is the output of explore, migration or 
 # residency, run:
 getTimes(x)

@@ -23,7 +23,7 @@ clearWorkspace()
 
 # If you want to keep a specific file, you can exclude it with the
 # skip argument. E.g., if I wanted to keep the file "file_to.keep":
-clearWokspace(skip = "file_to.keep")
+clearWorkspace(skip = "file_to.keep")
 }
 
 }

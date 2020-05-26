@@ -196,7 +196,7 @@ and other residency-focused variables, this is the analysis you are looking
 for!
 }
 \examples{
-\donttest{
+\dontrun{
 # If needed, create an example workspace
 exampleWorkspace()
 
@@ -210,7 +210,7 @@ for the example data.
 results <- residency(tz = "Europe/Copenhagen", sections = c("River", "Fjord", "Sea"))
 
 # to obtain an HTML report, run the analysis 
-# with report = TRUE
+# with report = TRUE, i.e.:
 results <- residency(tz = "Europe/Copenhagen", sections = c("River", "Fjord", "Sea"), report = TRUE)
 }
 

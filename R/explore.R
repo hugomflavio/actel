@@ -71,7 +71,7 @@
 #'  present in \code{\link[base]{timezones}}.
 #' 
 #' @examples
-#' \donttest{
+#' \dontrun{
 #' # If needed, create an example workspace
 #' exampleWorkspace()
 #' 
@@ -83,7 +83,7 @@
 #' results <- explore(tz = "Europe/Copenhagen")
 #' 
 #' # to obtain an HTML report, run the analysis 
-#' # with report = TRUE
+#' # with report = TRUE, i.e.:
 #' results <- explore(tz = "Europe/Copenhagen", report = TRUE)
 #' }
 #' 

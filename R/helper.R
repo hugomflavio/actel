@@ -45,9 +45,22 @@ nearsq <- function(n, tol = 5/3+0.001) {
 #' @param source A RData file.
 #' 
 #' @examples
-#' \donttest{
-#' dataTolist("Path/to/file.RData")
-#' }
+#' # Dummy example:
+#' # Create two objects:
+#' object_1 <- "This"
+#' object_2 <- "Worked!"
+#' 
+#' # Save them as an RData file in R's temporary directory
+#' save(object_1, object_2, file = paste0(tempdir(), "/dataToList_example.RData"))
+#' 
+#' # Remove the dummy objects as we don't need them anymore
+#' rm(object_1, object_2)
+#' 
+#' # Load the RData file as a single object
+#' x <- dataToList(paste0(tempdir(), "/dataToList_example.RData"))
+#' 
+#' # inspect x
+#' x
 #' 
 #' @return A list containing the objects present in the source RData file.
 #' 
@@ -421,7 +434,7 @@ commentCheck <- function(line, tag) { # nocov start
 #' 
 #' # If you want to keep a specific file, you can exclude it with the
 #' # skip argument. E.g., if I wanted to keep the file "file_to.keep":
-#' clearWokspace(skip = "file_to.keep")
+#' clearWorkspace(skip = "file_to.keep")
 #' }
 #' 
 #' @return No return value, called for side effects.
@@ -463,7 +476,7 @@ clearWorkspace <- function(skip = NA){
 #' if "one" and type is "departure", the very last departure is returned.
 #' 
 #' @examples
-#' \donttest{
+#' \dontrun{
 #' # Assuming x is the output of explore, migration or 
 #' # residency, run:
 #' getTimes(x)
@@ -685,7 +698,7 @@ timesToCircular <- function(x, by.group = FALSE) {
 #'  on one or both axes?
 #' 
 #' @examples
-#' \donttest{
+#' \dontrun{
 #' # Assuming a shapefile was saved to 'shapefile.shp' in the current
 #' # working directory
 #' x <- transitionLayer("shapefile.shp", size = 20, EPSGcode = 32362)
@@ -868,7 +881,7 @@ size, rerun the function with force = TRUE.\n", call. = FALSE)
 #' @param actel Logical: Should the distance matrix be optimized for actel? Defaults to TRUE.
 #'
 #' @examples
-#' \donttest{
+#' \dontrun{
 #' # Assuming a shapefile was saved to 'shapefile.shp' in the current
 #' # working directory
 #' x <- transitionLayer("shapefile.shp", size = 20, EPSGcode = 32362)
@@ -1020,12 +1033,16 @@ will artificially add water space around the shape file.", call. = FALSE)
 #' It is highly recommended to read the vignette regarding distances matrix before running this function.
 #' You can find it by running \code{vignette('a-2_distances_matrix', 'actel')} or \code{browseVignettes('actel')}
 #' 
+#' @param file The path to the file containing the spatial information.
+#' 
 #' @examples
-#' \donttest{
-#' # This function requires the presence of a 'spatial.csv' file
-#' # in the current working directory. 
-#' emptyMatrix()
-#' }
+#' # This function requires the presence of a file with spatial information
+#' 
+#' # Let's create a dummy 'spatial.csv' file in R's temporary directory
+#' write.csv(example.spatial, file = paste0(tempdir(), "/spatial.csv"))
+#' 
+#' # run emptyMatrix on the temporary spatial.csv file
+#' emptyMatrix(paste0(tempdir(), "/spatial.csv"))
 #' 
 #' @return An empty matrix with the rows and columns required to
 #'  operate with the 'spatial.csv' file present in the current
@@ -1033,11 +1050,11 @@ will artificially add water space around the shape file.", call. = FALSE)
 #' 
 #' @export
 #' 
-emptyMatrix <- function(){
-  if(!file.exists("spatial.csv"))
+emptyMatrix <- function(file = "spatial.csv"){
+  if(!file.exists(file))
     stop("Could not find a 'spatial.csv' file in the current working directory.\n", call. = FALSE)
 
-  input <- loadSpatial(file = "spatial.csv")
+  input <- loadSpatial(file = file)
 
   output <- matrix(nrow = nrow(input), ncol = nrow(input))
   colnames(output) <- rownames(output) <- input$Standard.name

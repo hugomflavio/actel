@@ -21,7 +21,7 @@ Note: This function will create a new sub-directory in the current directory and
 # running createWorkspace deploys template files for an analysis
 # by default, createWorkspace creates a directory called 'actel_workspace'
 # but this can be changed with the argument 'dir'.
-createWorkspace(dir = tempdir())
+createWorkspace(dir = paste0(tempdir(), "/createWorkspace_example"))
 }
 
 }

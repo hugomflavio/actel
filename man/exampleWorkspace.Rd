@@ -23,7 +23,7 @@ Note: This function will create a new sub-directory called 'exampleWorkspace'
 in the current directory and write files into it.
 }
 \examples{
-\donttest{
+\dontrun{
 # deploy a minimal dataset to try actel!
 exampleWorkspace()
 
@@ -31,17 +31,14 @@ exampleWorkspace()
 setwd("exampleWorkspace")
 
 # and run the example analysis
-results <- explore(tz = 'Europe/Copenhagen', report = TRUE)
+results <- explore(tz = 'Europe/Copenhagen')
 
 # Have a look at the results and the html report.
 names(results)
 
 # you can also try running the migration and residency analyses
-m.results <- migration(tz = 'Europe/Copenhagen', 
- sections = c('River', 'Fjord', 'Sea'), report = TRUE)
-
-r.results <- migration(tz = 'Europe/Copenhagen', 
- sections = c('River', 'Fjord', 'Sea'), report = TRUE)
+# by changing the function name and adding sections = c('River', 'Fjord', 'Sea')
+# to the function call.
 }
 
 }

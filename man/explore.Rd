@@ -133,7 +133,7 @@ input files are behaving as expected. It is also a good candidate if you just
 want to validate your detections for later use in other analyses.
 }
 \examples{
-\donttest{
+\dontrun{
 # If needed, create an example workspace
 exampleWorkspace()
 
@@ -145,7 +145,7 @@ setwd("exampleWorkspace")
 results <- explore(tz = "Europe/Copenhagen")
 
 # to obtain an HTML report, run the analysis 
-# with report = TRUE
+# with report = TRUE, i.e.:
 results <- explore(tz = "Europe/Copenhagen", report = TRUE)
 }
 
