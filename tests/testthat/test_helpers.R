@@ -82,15 +82,4 @@ test_that("appendTo stores comments.", {
 	file.remove("temp_comments.txt")
 })
 
-test_that("clearWorkspace removes target files.", {
-	test <- 1
-	save(test, file = "actel_migration_results.RData")
-	dir.create("Report")
-	sink("temp.txt")
-	clearWorkspace()
-	sink()
-	expect_message(clearWorkspace(), "Workspace already clean.")
-})
-# y
-
 setwd(tests.home)

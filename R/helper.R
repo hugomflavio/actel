@@ -454,7 +454,7 @@ clearWorkspace <- function(skip = NA){
     if (interactive()) {
       decision <- readline("Proceed?(y/N) ") # nocov
     } else {
-      decision <- "y"
+      decision <- "n"
     }
     if(decision == "y" | decision == "Y"){
       unlink(files, recursive = TRUE)
