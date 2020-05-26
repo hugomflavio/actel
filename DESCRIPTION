@@ -5,7 +5,7 @@ Authors@R: person("Hugo", "Flávio", role = c("aut", "cre"), email = "hdmfla@aqu
 Description: Designed for studies where fish tagged with acoustic tags are expected
     to move through receiver arrays. This package combines the advantages of automatic sorting and checking 
     of fish movements with the possibility for user intervention on tags that deviate from expected 
-    behaviour. The three analysis functions (explore, migration and residency, 
+    behaviour. The three analysis functions (explore(), migration() and residency()) 
     allow the users to analyse their data in a systematic way, making it easy to compare results from 
     different studies.
     CJS calculations are based on Perry et al. (2012) <https://www.researchgate.net/publication/256443823_Using_mark-recapture_models_to_estimate_survival_from_telemetry_data>.
