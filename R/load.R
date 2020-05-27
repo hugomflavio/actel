@@ -35,7 +35,7 @@ loadStudyData <- function(tz, override = NULL, start.time, stop.time, save.detec
   }
   deployments <- loadDeployments(file = "deployments.csv", tz = tz)
   checkDeploymentTimes(input = deployments) # check that receivers are not deployed before being retrieved
-  spatial <- loadSpatial(file = "spatial.csv", report = TRUE)
+  spatial <- loadSpatial(file = "spatial.csv")
   deployments <- checkDeploymentStations(input = deployments, spatial = spatial) # match Station.name in the deployments to Station.name in spatial, and vice-versa
   deployments <- createUniqueSerials(input = deployments) # Prepare serial numbers to overwrite the serials in detections
 
@@ -639,8 +639,6 @@ loadDeployments <- function(file, tz){
 #' performs a series of quality checks on the contents of the target file.
 #' 
 #' @param file an input file with spatial data in the actel format.
-#' @param report Logical: Is the function being run inside an actel analysis? Defaults to FALSE, to deactivate
-#' unnecessary elements when the function is being run manually by the user.
 #' 
 #' @examples
 #' # This function requires the presence of a file with spatial information
@@ -655,14 +653,12 @@ loadDeployments <- function(file, tz){
 #' 
 #' @export
 #' 
-loadSpatial <- function(file = "spatial.csv", report = FALSE){
-  if (report)
-    appendTo("debug", "Running loadSpatial.")
+loadSpatial <- function(file = "spatial.csv"){
+  appendTo("debug", "Running loadSpatial.")
   if (file.exists(file))
     input <- as.data.frame(data.table::fread(file))
   else {
-    if (report)
-      emergencyBreak()
+    emergencyBreak()
     stop("Could not find a '", file, "' file in the working directory.\n", call. = FALSE)
   }
   if (any(link <- duplicated(colnames(input))))
@@ -670,40 +666,30 @@ loadSpatial <- function(file = "spatial.csv", report = FALSE){
   if (!is.na(link <- match("Station.Name", colnames(input))))
     colnames(input)[link] <- "Station.name"
   if (!any(grepl("Station.name", colnames(input)))) {
-    if (report)
-      emergencyBreak()
+    emergencyBreak()
     stop("The ", file, " file must contain a 'Station.name' column.\n", call. = FALSE)
   } else {
     if (any(link <- table(input$Station.name) > 1)) {
-      if (report)
-        emergencyBreak()
+      emergencyBreak()
       stop("The 'Station.name' column in the ", file, " file must not have duplicated values.\nStations appearing more than once: ", paste(names(table(input$Station.name))[link], collapse = ", "), "\n", call. = FALSE)
     }
   }
   if (!any(grepl("Array", colnames(input)))) {
-    if (report)
-      emergencyBreak()
+    emergencyBreak()
     stop("The ", file, " file must contain an 'Array' column.\n", call. = FALSE)
   }
   if (any(is.na(input$Array)))
     stop("Some rows do not contain 'Array' information in the ",file, " file. Please double-check the input files.")
   if (any(grepl(" ", input$Array))) {
-    if (report)
-      appendTo("Screen", "M: Replacing spaces in array names to prevent function failure.")
-    else
-      message("M: Replacing spaces in array names to prevent function failure.")
+    appendTo("Screen", "M: Replacing spaces in array names to prevent function failure.")
     input$Array <- gsub(" ", "_", input$Array)
   }
   if (!any(grepl("Type", colnames(input)))) {
-    if (report)
-      appendTo(c("Screen", "Report"), paste0("M: No 'Type' column found in the ", file, " file. Assigning all rows as hydrophones."))
-    else
-      message("M: No 'Type' column found in the ", file, " file. Assigning all rows as hydrophones.")
+    appendTo(c("Screen", "Report"), paste0("M: No 'Type' column found in the ", file, " file. Assigning all rows as hydrophones."))
     input$Type <- "Hydrophone"
   } else {
-    if (any(is.na(match(unique(input$Type), c("Hydrophone","Release"))))){
-      if (report)
-        emergencyBreak()
+    if (any(is.na(match(unique(input$Type), c("Hydrophone", "Release"))))){
+      emergencyBreak()
       stop("Could not recognise the data in the 'Type' column as only one of 'Hydrophone' or 'Release'. Please double-check the ", file," file.\n", call. = FALSE)
     }
   }

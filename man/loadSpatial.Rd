@@ -4,13 +4,10 @@
 \alias{loadSpatial}
 \title{Load Spatial File}
 \usage{
-loadSpatial(file = "spatial.csv", report = FALSE)
+loadSpatial(file = "spatial.csv")
 }
 \arguments{
 \item{file}{an input file with spatial data in the actel format.}
-
-\item{report}{Logical: Is the function being run inside an actel analysis? Defaults to FALSE, to deactivate
-unnecessary elements when the function is being run manually by the user.}
 }
 \value{
 A data frame with the spatial information present in 'spatial.csv' and the Standard.name column.

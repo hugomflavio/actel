@@ -4,7 +4,7 @@ tests.home <- getwd()
 setwd(tempdir())
 
 test_that("loadSpatial stops if file is missing", {
-	expect_error(loadSpatial(file = "test", report = TRUE), 
+	expect_error(loadSpatial(file = "test"), 
 		"Could not find a 'test' file in the working directory.", fixed = TRUE)
 })
 
@@ -18,7 +18,7 @@ test_that("loadSpatial stops if columns are missing or duplicated", {
 	spatial <- example.spatial
 	colnames(spatial)[1] <- "test"
 	write.csv(spatial, "spatial.csv", row.names = FALSE)
-	expect_error(loadSpatial(report = TRUE),
+	expect_error(loadSpatial(),
 		"The spatial.csv file must contain a 'Station.name' column.", fixed = TRUE)
 
 	spatial <- example.spatial
@@ -29,7 +29,7 @@ test_that("loadSpatial stops if columns are missing or duplicated", {
 	spatial <- example.spatial
 	colnames(spatial)[4] <- "test"
 	write.csv(spatial, "spatial.csv", row.names = FALSE)
-	expect_error(loadSpatial(report = TRUE),
+	expect_error(loadSpatial(),
 		"The spatial.csv file must contain an 'Array' column.", fixed = TRUE)
 	})
 
@@ -37,19 +37,19 @@ test_that("loadSpatial responds correctly if data is missing or badly formatted"
 	spatial <- example.spatial
 	spatial$Station.name[1:2] <- "test"
 	write.csv(spatial, "spatial.csv", row.names = FALSE)
-	expect_error(loadSpatial(report = TRUE),
+	expect_error(loadSpatial(),
 		"The 'Station.name' column in the spatial.csv file must not have duplicated values.\nStations appearing more than once: test", fixed = TRUE)
 
 	spatial <- example.spatial
 	spatial$Array[1] <- NA
 	write.csv(spatial, "spatial.csv", row.names = FALSE)
-	expect_error(loadSpatial(report = TRUE),
+	expect_error(loadSpatial(),
 		"Some rows do not contain 'Array' information in the spatial.csv file. Please double-check the input files.", fixed = TRUE)
 
 	spatial <- example.spatial
 	spatial$Array[1] <- "River 0 a"
 	write.csv(spatial, "spatial.csv", row.names = FALSE)
-	expect_message(loadSpatial(report = TRUE),
+	expect_message(loadSpatial(),
 		"M: Replacing spaces in array names to prevent function failure.", fixed = TRUE)
 	
 	write.csv(spatial, "spatial.csv", row.names = FALSE)
@@ -61,13 +61,13 @@ test_that("loadSpatial responds correctly if data is missing or badly formatted"
 	expect_message(loadSpatial(),
 		"M: No 'Type' column found in the spatial.csv file. Assigning all rows as hydrophones.", fixed = TRUE)
 	write.csv(example.spatial[,-5], "spatial.csv", row.names = FALSE)
-	expect_message(loadSpatial(report = TRUE),
+	expect_message(loadSpatial(),
 		"M: No 'Type' column found in the spatial.csv file. Assigning all rows as hydrophones.", fixed = TRUE)
 
 	spatial <- example.spatial
 	spatial$Type[1] <- "test"
 	write.csv(spatial, "spatial.csv", row.names = FALSE)
-	expect_error(loadSpatial(report = TRUE),
+	expect_error(loadSpatial(),
 		"Could not recognise the data in the 'Type' column as only one of 'Hydrophone' or 'Release'. Please double-check the spatial.csv file.", fixed = TRUE)
 	file.remove("spatial.csv")
 })
