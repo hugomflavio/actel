@@ -661,37 +661,54 @@ loadSpatial <- function(file = "spatial.csv"){
     emergencyBreak()
     stop("Could not find a '", file, "' file in the working directory.\n", call. = FALSE)
   }
+  # Check duplicated columns
   if (any(link <- duplicated(colnames(input))))
     stop("The following columns are duplicated in the file 'spatial.csv': '", paste(unique(colnames(input)[link]), sep = "', '"), "'.", call. = FALSE)
+  # Check wrong capitals in Station.name
   if (!is.na(link <- match("Station.Name", colnames(input))))
     colnames(input)[link] <- "Station.name"
+  # Check missing Station.name
   if (!any(grepl("Station.name", colnames(input)))) {
     emergencyBreak()
     stop("The ", file, " file must contain a 'Station.name' column.\n", call. = FALSE)
   } else {
+    # Check all station names are unique
     if (any(link <- table(input$Station.name) > 1)) {
       emergencyBreak()
       stop("The 'Station.name' column in the ", file, " file must not have duplicated values.\nStations appearing more than once: ", paste(names(table(input$Station.name))[link], collapse = ", "), "\n", call. = FALSE)
     }
   }
+  # Check missing Array column
   if (!any(grepl("Array", colnames(input)))) {
     emergencyBreak()
     stop("The ", file, " file must contain an 'Array' column.\n", call. = FALSE)
   }
+  # check missing data in the arrays
   if (any(is.na(input$Array)))
     stop("Some rows do not contain 'Array' information in the ",file, " file. Please double-check the input files.")
+  # check spaces in the array names
   if (any(grepl(" ", input$Array))) {
     appendTo("Screen", "M: Replacing spaces in array names to prevent function failure.")
     input$Array <- gsub(" ", "_", input$Array)
   }
+  # check missing Type column
   if (!any(grepl("Type", colnames(input)))) {
     appendTo(c("Screen", "Report"), paste0("M: No 'Type' column found in the ", file, " file. Assigning all rows as hydrophones."))
     input$Type <- "Hydrophone"
   } else {
+    # check strange data in the Type column
     if (any(is.na(match(unique(input$Type), c("Hydrophone", "Release"))))){
       emergencyBreak()
       stop("Could not recognise the data in the 'Type' column as only one of 'Hydrophone' or 'Release'. Please double-check the ", file," file.\n", call. = FALSE)
     }
+  }
+  # check release arrays exist
+  hydro.arrays <- unique(input$Array[input$Type == "Hydrophone"])
+  release.arrays <- unique(unlist(sapply(input$Array[input$Type == "Release"], function(x) unlist(strsplit(x, "|", fixed = TRUE)))))
+  if (any(link <- is.na(match(release.arrays, hydro.arrays)))) {
+    emergencyBreak()
+    stop("Not all release sites are linked to arrays which exist.\nUnknown arrays: '", paste0(release.arrays[link], collapse = "', '"), "'.
+Please ensure the arrays listed in the release sites match the arrays listed in the hydrophone stations.", call. = FALSE)
   }
   input <- setSpatialStandards(input = input) # Create Standard.name for each station  
   return(input)

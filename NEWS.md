@@ -43,6 +43,7 @@ Enhancements:
   * `getTimes` and `timesToCircular` are now exported, allowing the user to quickly format the input for `plotTimes`.
   * A new page has been included in the vignettes aiming to explore what can be done with the results of actel's analyses.
   * Included usage examples on exported functions.
+  * Verify the names of the release site arrays as soon as the spatial.csv is loaded.
 
 ## actel 0.1.3
 
