@@ -219,7 +219,8 @@ readDot <- function (input = NULL, string = NULL) {
     stringsAsFactors = FALSE)
   for (i in 1:length(nodes)) {
     n <- length(nodes[[i]])
-    type <- gsub(paste0(nodes[[i]], collapse = "|"), "", paths[[i]])
+    escaped_nodes <- gsub(pattern = "([[:punct:]])", replacement = "\\\\\\1", nodes[[i]])
+    type <- gsub(paste0(escaped_nodes, collapse = "|"), "", paths[[i]])
     aux <- data.frame(
       A = nodes[[i]][1:(n - 1)], 
       to = sapply(seq(from = 1, to = nchar(type), by = 2), function(i) substr(type, i, i + 1)),
