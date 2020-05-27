@@ -70,6 +70,14 @@ test_that("loadSpatial responds correctly if data is missing or badly formatted"
 	expect_error(loadSpatial(),
 		"Could not recognise the data in the 'Type' column as only one of 'Hydrophone' or 'Release'. Please double-check the spatial.csv file.", fixed = TRUE)
 	file.remove("spatial.csv")
+
+	spatial <- example.spatial
+	spatial$Array[18] <- "test"
+	write.csv(spatial, "spatial.csv", row.names = FALSE)
+	expect_error(loadSpatial(),
+		"Not all the expected first arrays of the release sites exist.
+Unknown expected first arrays: 'test'.
+In the spatial.csv file, the expected first arrays of the release sites should match the arrays where hydrophone stations where deployed.", fixed = TRUE)
 })
 
 test_that("loadSpatial output is exactly as expected", {

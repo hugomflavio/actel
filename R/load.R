@@ -707,8 +707,8 @@ loadSpatial <- function(file = "spatial.csv"){
   release.arrays <- unique(unlist(sapply(input$Array[input$Type == "Release"], function(x) unlist(strsplit(x, "|", fixed = TRUE)))))
   if (any(link <- is.na(match(release.arrays, hydro.arrays)))) {
     emergencyBreak()
-    stop("Not all release sites are linked to arrays which exist.\nUnknown arrays: '", paste0(release.arrays[link], collapse = "', '"), "'.
-Please ensure the arrays listed in the release sites match the arrays listed in the hydrophone stations.", call. = FALSE)
+    stop("Not all the expected first arrays of the release sites exist.\nUnknown expected first arrays: '", paste0(release.arrays[link], collapse = "', '"), "'.
+In the spatial.csv file, the expected first arrays of the release sites should match the arrays where hydrophone stations where deployed.\n", call. = FALSE)
   }
   input <- setSpatialStandards(input = input) # Create Standard.name for each station  
   return(input)
@@ -1411,8 +1411,10 @@ transformSpatial <- function(spatial, bio, arrays, dotmat, sections = NULL, firs
   appendTo("debug", "Creating 'release.sites'.")
   # If there is any release site in the spatial file
   if (sum(spatial$Type == "Release") > 0) {
+    # If no release sites were specified in the biometrics
     if (length(unique(bio$Release.site)) == 1 && unique(bio$Release.site) == "unspecified") {
       appendTo(c("Screen", "Report", "Warning"), "At least one release site has been indicated in the spatial.csv file, but no release sites were specified in the biometrics file.\n         Discarding release site information and assuming all fish were released at the top level array to avoid function failure.\n         Please double-check your data.")
+      # Try to recover by assigning a first array, if possible
       if (is.null(first.array)) {
         emergencyBreak()
         stop("There is more than one top level array in the study area. Please specify release site(s) in the 'spatial.csv' file and in the 'biometrics.csv' file.\n", call. = FALSE)
@@ -1427,13 +1429,12 @@ transformSpatial <- function(spatial, bio, arrays, dotmat, sections = NULL, firs
     } else {
       A <- spatial$Standard.name[spatial$Type == "Release"]
       B <- unique(bio$Release.site)
-      if (any(is.na(match(B, A)))) {
+      # If any release sites in the biometrics are missing in the spatial
+      if (any(link <- is.na(match(B, A)))) {
         appendTo(c("Report", "Warning"), "There is a mismatch between the release sites reported and the release locations for the fish.")
         emergencyBreak()
-        stop("There is a mismatch between the release sites reported in the spatial.csv file and the release locations for the fish in the biometrics.csv file.\n       Release sites listed in the spatial.csv file: ", 
-          paste(A, collapse = ", "), "\n       Sites listed in the biometrics.csv file 'Release.site' column: ", 
-          paste(B, collapse = ", "), 
-          call. = FALSE)
+        stop("The following release sites were listed in the biometrics.csv file but are not part of the release sites listed in the spatial.csv file: ", 
+          paste(sort(B[link]), collapse = ", "), "\nPlease include the missing release sites in the spatial.csv file.", call. = FALSE)
       } else {
         from.row <- spatial$Type == "Release"
         from.col <- colnames(spatial)[!grepl("Receiver", colnames(spatial))]
@@ -1447,6 +1448,7 @@ transformSpatial <- function(spatial, bio, arrays, dotmat, sections = NULL, firs
         }
         row.names(release.sites) <- 1:nrow(release.sites)
       }
+      # just a fancy message
       if (any(link <- grepl("|", release.sites$Array, fixed = TRUE))) {
         if (sum(link) >= 6)
           appendTo(c("Screen", "Report"), "M: Multiple possible first arrays detected for more than five release sites.")
@@ -1458,20 +1460,6 @@ transformSpatial <- function(spatial, bio, arrays, dotmat, sections = NULL, firs
             appendTo(c("Screen", "Report", "Warning"), paste0("Release site ", release.sites$Standard.name[i], " has multiple possible first arrays (",
               paste(aux, collapse = ", "), "), but not all of these arrays appear to be directly connected with each other. Could there be a mistake in the input?"))
         }
-        B <- unlist(strsplit(release.sites$Array, "|", fixed = TRUE))
-      } else {
-        B <- unique(release.sites$Array)
-      }
-      A <- unique(stations$Array)
-      if (any(is.na(match(B, A)))) {
-        appendTo(c("Report", "Warning"), "There is a mismatch between the expected first array(s) of a release site and the list of arrays.")
-        emergencyBreak()
-        stop("There is a mismatch between the expected first array(s) of a release site and the list of arrays.\n       Arrays listed in the spatial.csv file: ", 
-          paste(A, collapse = ", "), 
-          "\n       Expected first arrays listed for the release sites: ", 
-          paste(B, collapse = ", "), 
-          "\nThe expected first arrays should match the arrays where stations where deployed in the spatial.csv file.\n", 
-          call. = FALSE)
       }
     }
   } else {
