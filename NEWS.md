@@ -11,6 +11,7 @@ Fixes:
   * Prevent crash if study area only has one array.
   * Fix replicates argument formulation in the log's function call carbon copy.
   * Prevent crash if array names contain regex characters.
+  * Fix bug causing crash when attempting to save a movements table to a temporary file.
 
 Changes:
   * maximum efficiency estimates in residency now only take into account known missed events and recorded events in the denominator (previously, potentially missed events were being included as well).
