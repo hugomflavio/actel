@@ -609,26 +609,31 @@ loadDeployments <- function(file, tz){
       ifelse(sum(is.na(link)) > 1, "' are", "' is"),
       " missing in the ", file, " file."), call. = FALSE)
   }
-  if (any(!grepl("^[1-2][0-9][0-9][0-9]-[0-1][0-9]-[0-3][0-9] [0-2][0-9]:[0-5][0-9]", input$Start))) {
+  if (any(!grepl("^[1-2][0-9][0-9][0-9]-[0-1][0-9]-[0-3][0-9][ |T|t][0-2][0-9]:[0-5][0-9]", input$Start))) {
     emergencyBreak()
     stop("Not all values in the 'Start' column appear to be in a 'yyyy-mm-dd hh:mm' format (seconds are optional). Please double-check the ", file, " file.\n", call. = FALSE)
   }
-  if (any(!grepl("^[1-2][0-9][0-9][0-9]-[0-1][0-9]-[0-3][0-9] [0-2][0-9]:[0-5][0-9]", input$Stop))) {
+  if (any(!grepl("^[1-2][0-9][0-9][0-9]-[0-1][0-9]-[0-3][0-9][ |T|t][0-2][0-9]:[0-5][0-9]", input$Stop))) {
     emergencyBreak()
     stop("Not all values in the 'Stop' column appear to be in a 'yyyy-mm-dd hh:mm' format (seconds are optional). Please double-check the ", file, " file.\n", call. = FALSE)
   }
-  if (inherits(try(as.POSIXct(input$Start), silent = TRUE), "try-error")){
+
+  timestamp_formats  <- c("%Y-%m-%d %H:%M:%OS", "%Y-%m-%dT%H:%M:%OS",
+                          "%Y-%m-%d %H:%M", "%Y-%m-%dT%H:%M",
+                          "%Y-%m-%d")
+
+  if (inherits(try(input$Start <- as.POSIXct(input$Start, tz = tz, tryFormats = timestamp_formats), silent = TRUE),"try-error")){
     emergencyBreak()
     stop("Could not recognise the data in the 'Start' column as POSIX-compatible timestamps. Please double-check the ", file," file.\n", call. = FALSE)
   }
-  if (inherits(try(as.POSIXct(input$Stop), silent = TRUE),"try-error")){
+
+  if (inherits(try(input$Stop <- as.POSIXct(input$Stop, tz = tz, tryFormats = timestamp_formats), silent = TRUE),"try-error")){
     emergencyBreak()
-    stop("Could not recognise the data in the 'Stop' column as POSIX-compatible timestamps. Please double-check the ", file, " file.\n", call. = FALSE)
+    stop("Could not recognise the data in the 'Stop' column as POSIX-compatible timestamps. Please double-check the ", file," file.\n", call. = FALSE)
   }
+
   input$Receiver <- as.character(input$Receiver)
   input$Receiver <- sapply(input$Receiver, function(x) tail(unlist(strsplit(x, "-")), 1))
-  input$Start <- as.POSIXct(input$Start, tz = tz)
-  input$Stop <- as.POSIXct(input$Stop, tz = tz)
   input <- input[order(input$Start), ]
   return(input)
 }
@@ -743,12 +748,16 @@ loadBio <- function(file, tz){
     stop("The biometrics.csv file must contain an 'Release.date' column.\n", call. = FALSE)
   }
 
-  if (any(!grepl("^[1-2][0-9][0-9][0-9]-[0-1][0-9]-[0-3][0-9] [0-2][0-9]:[0-5][0-9]", bio$Release.date))) {
+  if (any(!grepl("^[1-2][0-9][0-9][0-9]-[0-1][0-9]-[0-3][0-9][ |T|t][0-2][0-9]:[0-5][0-9]", bio$Release.date))) {
     emergencyBreak()
     stop("Not all values in the 'Release.date' column appear to be in a 'yyyy-mm-dd hh:mm' format (seconds are optional). Please double-check the biometrics.csv file.\n", call. = FALSE)
   }
-  
-  if (inherits(try(bio$Release.date <- as.POSIXct(bio$Release.date, tz = tz), silent = TRUE),"try-error")){
+
+  timestamp_formats  <- c("%Y-%m-%d %H:%M:%OS", "%Y-%m-%dT%H:%M:%OS",
+                          "%Y-%m-%d %H:%M", "%Y-%m-%dT%H:%M",
+                          "%Y-%m-%d")
+
+  if (inherits(try(bio$Release.date <- as.POSIXct(bio$Release.date, tz = tz, tryFormats = timestamp_formats), silent = TRUE),"try-error")){
     emergencyBreak()
     stop("Could not recognise the data in the 'Release.date' column as POSIX-compatible timestamps. Please double-check the biometrics.csv file.\n", call. = FALSE)
   }
