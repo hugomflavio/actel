@@ -103,9 +103,9 @@
 #' 
 migration <- function(tz, sections, success.arrays = NULL, max.interval = 60, minimum.detections = 2, 
   start.time = NULL, stop.time = NULL, speed.method = c("last to first", "first to first"), 
-  speed.warning = NULL, speed.error = NULL, jump.warning = 2, jump.error = 3, 
+  speed.warning = NULL, speed.error = NULL, jump.warning = 2, jump.error = 3,
   inactive.warning = NULL, inactive.error = NULL, exclude.tags = NULL, override = NULL, report = FALSE, auto.open = TRUE, 
-  save.detections = FALSE, if.last.skip.section = TRUE, replicates = NULL, disregard.parallels = TRUE, 
+  discard.orphans = FALSE, save.detections = FALSE, if.last.skip.section = TRUE, replicates = NULL, disregard.parallels = TRUE, 
   GUI = c("needed", "always", "never"), print.releases = TRUE) {
   
 # check argument quality
@@ -229,6 +229,7 @@ migration <- function(tz, sections, success.arrays = NULL, max.interval = 60, mi
       ", override = ", ifelse(is.null(override), "NULL", paste0("c('", paste(override, collapse = "', '"), "')")),
       ", report = ", ifelse(report, "TRUE", "FALSE"), 
       ", auto.open = ", ifelse(auto.open, "TRUE", "FALSE"), 
+      ", discard.orphans = ", ifelse(discard.orphans, "TRUE", "FALSE"), 
       ", save.detections = ", ifelse(save.detections, "TRUE", "FALSE"), 
       ", if.last.skip.section = ", ifelse(if.last.skip.section, "TRUE", "FALSE"),
       ", replicates = ", ifelse(is.null(replicates),"NULL", paste0("list(", paste(sapply(1:length(replicates), function(i) paste0("'", names(replicates)[i], "' = c('", paste(replicates[[i]], collapse = "', '"), "')")), collapse = ", "), ")")),
@@ -248,7 +249,7 @@ migration <- function(tz, sections, success.arrays = NULL, max.interval = 60, mi
 
 # Load, structure and check the inputs
   study.data <- loadStudyData(tz = tz, override = override, save.detections = save.detections,
-                              start.time = start.time, stop.time = stop.time,
+                              start.time = start.time, stop.time = stop.time, discard.orphans = discard.orphans,
                               sections = sections, exclude.tags = exclude.tags, disregard.parallels = disregard.parallels)
   bio <- study.data$bio
   sections <- study.data$sections

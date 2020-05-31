@@ -101,7 +101,7 @@ residency <- function(tz, sections, max.interval = 60, minimum.detections = 2,
   start.time = NULL, stop.time = NULL, speed.method = c("last to first", "first to first"), 
   speed.warning = NULL, speed.error = NULL, jump.warning = 2, jump.error = 3, 
   inactive.warning = NULL, inactive.error = NULL, exclude.tags = NULL, override = NULL, 
-  report = FALSE, auto.open = TRUE, save.detections = FALSE, section.minimum = 2, 
+  report = FALSE, auto.open = TRUE, discard.orphans = FALSE, save.detections = FALSE, section.minimum = 2, 
   replicates = NULL, GUI = c("needed", "always", "never"), print.releases = TRUE) {
 # check argument quality
   if (is.null(tz) || is.na(match(tz, OlsonNames())))
@@ -221,6 +221,7 @@ residency <- function(tz, sections, max.interval = 60, minimum.detections = 2,
       ", override = ", ifelse(is.null(override), "NULL", paste0("c('", paste(override, collapse = "', '"), "')")),
       ", report = ", ifelse(report, "TRUE", "FALSE"), 
       ", auto.open = ", ifelse(auto.open, "TRUE", "FALSE"), 
+      ", discard.orphans = ", ifelse(discard.orphans, "TRUE", "FALSE"), 
       ", save.detections = ", ifelse(save.detections, "TRUE", "FALSE"), 
       ", section.minimum = ", section.minimum,
       ", replicates = ", ifelse(is.null(replicates),"NULL", paste0("list(", paste(sapply(1:length(replicates), function(i) paste0("'", names(replicates)[i], "' = c('", paste(replicates[[i]], collapse = "', '"), "')")), collapse = ", "), ")")),
@@ -240,7 +241,7 @@ residency <- function(tz, sections, max.interval = 60, minimum.detections = 2,
 
 # Load, structure and check the inputs
   study.data <- loadStudyData(tz = tz, override = override, save.detections = save.detections,
-                              start.time = start.time, stop.time = stop.time,
+                              start.time = start.time, stop.time = stop.time, discard.orphans = discard.orphans,
                               sections = sections, exclude.tags = exclude.tags)
   bio <- study.data$bio
   sections <- study.data$sections

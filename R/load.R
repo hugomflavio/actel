@@ -21,7 +21,7 @@
 #' @keywords internal
 #' 
 loadStudyData <- function(tz, override = NULL, start.time, stop.time, save.detections = FALSE,
-  sections = NULL, exclude.tags, disregard.parallels = TRUE) {
+  sections = NULL, exclude.tags, disregard.parallels = TRUE, discard.orphans = FALSE) {
   appendTo(c("Screen", "Report"), "M: Importing data. This process may take a while.")
   bio <- loadBio(file = "biometrics.csv", tz = tz)
   appendTo(c("Screen", "Report"), paste0("M: Number of target tags: ", nrow(bio), "."))
@@ -41,7 +41,7 @@ loadStudyData <- function(tz, override = NULL, start.time, stop.time, save.detec
 
   detections <- loadDetections(start.time = start.time, stop.time = stop.time, tz = tz, save.detections = save.detections)
   detections <- checkDupDetections(input = detections)
-  detections <- createStandards(detections = detections, spatial = spatial, deployments = deployments) # get standardized station and receiver names, check for receivers with no detections
+  detections <- createStandards(detections = detections, spatial = spatial, deployments = deployments, discard.orphans = discard.orphans) # get standardized station and receiver names, check for receivers with no detections
   appendTo(c("Screen","Report"), paste0("M: Data time range: ", as.character(head(detections$Timestamp, 1)), " to ", as.character(tail(detections$Timestamp, 1)), " (", tz, ")."))
   checkUnknownReceivers(input = detections) # Check if there are detections from unknown detections
 
@@ -1332,7 +1332,7 @@ storeStrays <- function(){
 #'
 #' @keywords internal
 #' 
-createStandards <- function(detections, spatial, deployments) {
+createStandards <- function(detections, spatial, deployments, discard.orphans = FALSE) {
   detections$Receiver <- as.character(detections$Receiver)
   detections$Standard.name <- NA_character_
   detections$Array <- NA_character_
@@ -1356,32 +1356,40 @@ createStandards <- function(detections, spatial, deployments) {
         detections$Array[receiver.link][deployment.link] <- as.character(spatial$Array[the.station])
       }
       if (any(the.error <- is.na(detections$Standard.name[receiver.link]))) {
-        appendTo(c("Screen", "Report"), paste0("Error: ", sum(the.error), " detections for receiver ", names(deployments)[i], " do not fall within deployment periods."))
-        message("")
-        message(paste0(capture.output(print(detections[receiver.link][the.error, -c(6, 7)])), collapse = "\n"))
-        message("")
-        message("Possible options:\n   a) Stop and double-check the data (recommended)\n   b) Discard orphan detections.")
-        check <- TRUE
-        while (check) {
-          if (interactive()) { # nocov start
-            decision <- readline("Which option should be followed?(a/b) ")
-          } else { # nocov end
-            decision <- "b"
+        if (!discard.orphans) {
+          appendTo(c("Screen", "Report"), paste0("Error: ", sum(the.error), " detections for receiver ", names(deployments)[i], " do not fall within deployment periods."))
+          message("")
+          message(paste0(capture.output(print(detections[receiver.link][the.error, -c(6, 7)])), collapse = "\n"))
+          message("")
+          message("Possible options:\n   a) Stop and double-check the data (recommended)\n   b) Discard orphan detections in this instance.\n   c) Discard orphan detections for all instances.")
+          check <- TRUE
+          while (check) {
+            if (interactive()) { # nocov start
+              decision <- readline("Which option should be followed?(a/b/c) ")
+            } else { # nocov end
+              decision <- "b"
+            }
+            if (decision == "a" | decision == "A" | decision == "b" | decision == "B" | decision == "c" | decision == "C") 
+              check <- FALSE 
+            else 
+              message("Option not recognized, please try again."); flush.console()
+            appendTo("UD", decision)
           }
-          if (decision == "a" | decision == "A" | decision == "b" | decision == "B") 
-            check <- FALSE 
-          else 
-            message("Option not recognized, please try again."); flush.console()
-          appendTo("UD", decision)
-        }
-        if (decision == "a" | decision == "A") { # nocov start
-          emergencyBreak()
-          stop("Stopping analysis per user command.\n", call. = FALSE)
+          if (decision == "a" | decision == "A") { # nocov start
+            emergencyBreak()
+            stop("Stopping analysis per user command.\n", call. = FALSE)
+          } else { # nocov end
+            rows.to.remove <- detections[receiver.link, which = TRUE][the.error]
+            detections <- detections[-rows.to.remove]
+          }
+          if (decision == "c" | decision == "C")
+            discard.orphans <- TRUE
         } else { # nocov end
+          appendTo(c("Screen", "Report"), paste0("Error: ", sum(the.error), " detections for receiver ", names(deployments)[i], " do not fall within deployment periods. Discarding orphan detections."))
           rows.to.remove <- detections[receiver.link, which = TRUE][the.error]
           detections <- detections[-rows.to.remove]
         }
-       }
+      } 
     }
   }
   appendTo(c("Screen", "Report"), paste0("M: Number of ALS: ", length(deployments), " (of which ", length(empty.receivers), " had no detections)"))

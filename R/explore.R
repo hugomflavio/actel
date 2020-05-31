@@ -9,6 +9,8 @@
 #'  analysis is over? Defaults to TRUE. NOTE: If report = TRUE and auto.open = TRUE,
 #'  the web browser will automatically be launched to open the report once the 
 #'  function terminates.
+#' @param discard.orphans Logical: Should actel automatically discard
+#'  detections that do not fall within receiver deployment periods?
 #' @param exclude.tags A vector of tags that should be excluded from the 
 #'  detection data before any analyses are performed. Intended to be used if 
 #'  stray tags from a different code space but with the same signal as a target
@@ -109,8 +111,8 @@
 explore <- function(tz, max.interval = 60, minimum.detections = 2, start.time = NULL, stop.time = NULL, 
   speed.method = c("last to first", "first to first"), speed.warning = NULL, speed.error = NULL, 
   jump.warning = 2, jump.error = 3, inactive.warning = NULL, inactive.error = NULL, 
-  exclude.tags = NULL, override = NULL, report = FALSE, auto.open = TRUE, save.detections = FALSE, 
-  GUI = c("needed", "always", "never"), print.releases = TRUE) {
+  exclude.tags = NULL, override = NULL, report = FALSE, auto.open = TRUE, discard.orphans = FALSE, 
+  save.detections = FALSE, GUI = c("needed", "always", "never"), print.releases = TRUE) {
 
 # check arguments quality
   if (is.null(tz) || is.na(match(tz, OlsonNames())))
@@ -219,6 +221,7 @@ explore <- function(tz, max.interval = 60, minimum.detections = 2, start.time = 
       ", exclude.tags = ", ifelse(is.null(exclude.tags), "NULL", paste0("c('", paste(exclude.tags, collapse = "', '"), "')")), 
       ", override = ", ifelse(is.null(override), "NULL", paste0("c('", paste(override, collapse = "', '"), "')")),
       ", report = ", ifelse(report, "TRUE", "FALSE"), 
+      ", discard.orphans = ", ifelse(discard.orphans, "TRUE", "FALSE"), 
       ", auto.open = ", ifelse(auto.open, "TRUE", "FALSE"), 
       ", save.detections = ", ifelse(save.detections, "TRUE", "FALSE"),       
       ", GUI = '", GUI, "'",
@@ -236,7 +239,7 @@ explore <- function(tz, max.interval = 60, minimum.detections = 2, start.time = 
 
 # Load, structure and check the inputs
 study.data <- loadStudyData(tz = tz, override = override, save.detections = save.detections,
-                            start.time = start.time, stop.time = stop.time,
+                            start.time = start.time, stop.time = stop.time, discard.orphans = discard.orphans,
                             sections = NULL, exclude.tags = exclude.tags)
 bio <- study.data$bio
 sections <- study.data$sections

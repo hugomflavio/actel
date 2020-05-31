@@ -62,7 +62,8 @@ explore(tz, max.interval = 60, minimum.detections = 2, start.time = NULL, stop.t
   speed.method = c("last to first", "first to first"), speed.warning = NULL, 
   speed.error = NULL, jump.warning = 2, jump.error = 3, inactive.warning = NULL, 
   inactive.error = NULL, exclude.tags = NULL, override = NULL, report = FALSE, 
-  auto.open = TRUE, save.detections = FALSE, GUI = c("needed", "always", "never"))
+  auto.open = TRUE, discard.orphans = FALSE, save.detections = FALSE, 
+  GUI = c("needed", "always", "never"))
 ```
 
 ### tz
@@ -239,6 +240,10 @@ Here are some graphic examples:
 ### auto.open
 
 When the `report` option is activated, `auto.open` comes into play. If `auto.open` is TRUE (the default), then actel will automatically open your web browser and open the report as soon as it is completed!
+
+### discard.orphans
+
+This is a flow optimization argument. When actel finds detections outside of the receiver deployment periods, be default, it will ask the user what to do (discard those detections or stop the analysis so the user can check the data). However, you can tell actel to automatically discard any orphan detections by setting `discard.orphans` to TRUE.
 
 ### save.detections
 

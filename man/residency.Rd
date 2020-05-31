@@ -22,6 +22,7 @@ residency(
   override = NULL,
   report = FALSE,
   auto.open = TRUE,
+  discard.orphans = FALSE,
   save.detections = FALSE,
   section.minimum = 2,
   replicates = NULL,
@@ -102,6 +103,9 @@ automatically be launched to open the report once the function terminates.}
 analysis is over? Defaults to TRUE. NOTE: If report = TRUE and auto.open = TRUE,
 the web browser will automatically be launched to open the report once the
 function terminates.}
+
+\item{discard.orphans}{Logical: Should actel automatically discard
+detections that do not fall within receiver deployment periods?}
 
 \item{save.detections}{Logical: Should the processed detections be saved for
 future runs?}

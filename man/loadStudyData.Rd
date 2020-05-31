@@ -12,7 +12,8 @@ loadStudyData(
   save.detections = FALSE,
   sections = NULL,
   exclude.tags,
-  disregard.parallels = TRUE
+  disregard.parallels = TRUE,
+  discard.orphans = FALSE
 )
 }
 \arguments{
@@ -44,6 +45,9 @@ tag are detected in the study area.}
 
 \item{disregard.parallels}{Logical:  Should the presence of parallel arrays
 invalidate potential efficiency peers? See the vignettes for more details.}
+
+\item{discard.orphans}{Logical: Should actel automatically discard
+detections that do not fall within receiver deployment periods?}
 }
 \value{
 A list containing:
