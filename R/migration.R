@@ -406,8 +406,8 @@ migration <- function(tz, sections, success.arrays = NULL, max.interval = 60, mi
 
   appendTo(c("Screen", "Report"), "M: Filling in the timetable.")
 
-  timetable <- assembleTimetable(vm = valid.movements, all.moves = movements, sections = sections, 
-    arrays = arrays, dist.mat = dist.mat, invalid.dist = invalid.dist, speed.method = speed.method, 
+  timetable <- assembleTimetable(secmoves = section.movements, valid.moves = valid.movements, all.moves = movements, sections = sections, 
+    arrays = arrays, bio = bio, tz = tz, dist.mat = dist.mat, invalid.dist = invalid.dist, speed.method = speed.method, 
     if.last.skip.section = if.last.skip.section, success.arrays = success.arrays)
 
   appendTo(c("Screen", "Report"), "M: Timetable successfully filled. Fitting in the remaining variables.")
@@ -569,6 +569,7 @@ migration <- function(tz, sections, success.arrays = NULL, max.interval = 60, mi
     efficiency.fragment <- printEfficiency(CJS = overall.CJS, intra.CJS = intra.array.CJS, type = "migration")
     printDotplots(status.df = status.df, invalid.dist = invalid.dist)
     printSurvivalGraphic(section.overview = section.overview)
+    printLastArray(status.df = status.df)
     printDot(dot = dot, sections = sections, spatial = spatial, print.releases = print.releases)
     if (calculate.efficiency) {
       printProgression(dot = dot,  sections = sections, overall.CJS = overall.CJS, spatial = spatial, status.df = status.df, print.releases = print.releases)
@@ -799,7 +800,7 @@ Note:
 </center>
 ')), '
 
-### Survival
+### Section Survival
 
 Note:
   : The data used in this table and graphic is stored in the `section.overview` object.
@@ -811,12 +812,22 @@ Note:
 </center>
 
 
+### Last Seen Arrays
+
+Note:
+  : The data used in this graphic is stored in the `status.df` object (\'Very.last.array\' column).
+
+<center>
+![](', tempdir(), '/last_arrays.png){ width=66% }
+</center>
+
+
 ### Progression
 
 ', ifelse(display.progression, paste0('Zoom in or open the figure in a new tab to clearly read the text within each circle.
 
 Note:
-  : The progression calculations **do not account for** intra-section backwards movements. This implies that the total number of fish to have been **last seen** at a given array **may be lower** than the displayed below. Please refer to the [section survival overview](#survival) to find out how many fish were considered to have disappeared per section.
+  : The progression calculations **do not account for** backwards movements. This implies that the total number of fish to have been **last seen** at a given array **may be lower** than the displayed below. Please refer to the [section survival overview](#section-survival) and [last seen arrays](#last-seen-arrays) to find out how many fish were considered to have disappeared per section.
   : The data used in this graphic is stored in the `overall.CJS` object, and the data used in the tables is stored in the `group.overview` object. You can find detailed progressions per release site in the `release.overview` object.
 
 <img src="', tempdir(), '/mb_efficiency.svg" alt="Missing file" style="padding-top: 15px; padding-bottom: 15px;"/>
@@ -840,7 +851,7 @@ Note:
 Note:
   : The **top** 10% of the values for each panel are marked in **red**.
   : The **bottom** 10% of the values for each panel are marked in **blue**.
-  : The columns starting with "To" should be read as either "Time to ..." or "Speed to ...", depending on the unit used. The columns starting with "In" should be read as "Time in ...". These reductions were made to keep the column headers as short as possible.
+  : The columns starting with "To" should be read as either "Average time to ..." or "Average speed to ...", depending on the unit used. The columns starting with "In" should be read as "Total time in ...". These reductions were made to keep the column headers as short as possible.
   : The data used in these graphics is stored in the `status.df` object.
 
 <center>
@@ -956,11 +967,12 @@ img[src*="#diagram"] {
   <a href="#receiver-stations">Stations</a>
   <a href="#deployments">Deployments</a>
   <a href="#release-sites">Release sites</a>
-  <a href="#array-forward-efficiency">Efficiency</a>
+  <a href="#array-forward-efficiency">Array efficiency</a>
   <a href="#warning-messages">Warnings</a>
   <a href="#user-comments">Comments</a>',
   ifelse(biometric.fragment == '', '', '\n  <a href="#biometric-graphics">Biometrics</a>'),'
-  <a href="#survival">Survival</a>
+  <a href="#section-survival">Section survival</a>
+  <a href="#last-seen-arrays">Last seen</a>
   <a href="#progression">Progression</a>
   <a href="#time-of-arrival-at-each-array">Arrival times</a>
   <a href="#dotplots">Dotplots</a>
@@ -982,152 +994,209 @@ sink()
 #' @inheritParams loadDetections
 #' @inheritParams groupMovements
 #' @inheritParams assembleArrayCJS
-#' @param movements A list of movements for each target tag, created by groupMovements.
+#' @param secmoves the section-movements
+#' @param valid.moves the valid array movements
+#' @param all.moves all array movements
 #' 
 #' @return A data frame containing the entering and leaving timestamps for each section per target tag
 #' 
 #' @keywords internal
 #' 
-assembleTimetable <- function(vm, all.moves, sections, arrays,
+assembleTimetable <- function(secmoves, valid.moves, all.moves, sections, arrays, bio, tz,
   dist.mat, invalid.dist, speed.method, if.last.skip.section, success.arrays) {
   appendTo("debug", "Running assembleTimetable.")
 
   # NOTE: The NULL variables below are actually column names used by data.table.
   # This definition is just to prevent the package check from issuing a note due unknown variables.
+  Last.array <- NULL
+  Last.time <- NULL
+  Last.station <- NULL
+  Section <- NULL
   Valid <- NULL 
   Array <- NULL
   Detections <- NULL
- 
+
+  # temporarily calculate inter-section speeds
+  if (!invalid.dist) {
+    aux <- names(secmoves)
+    secmoves <- lapply(names(secmoves), function(fish) {
+      # cat(fish, "\n")
+      aux <- secmoves[[fish]]
+      aux$Speed.until <- NA
+
+      the.row <- match(fish, bio$Transmitter)
+      origin.time <- bio[the.row, "Release.date"]
+      origin.place <- as.character(bio[the.row, "Release.site"])
+      if (origin.time <= aux$First.time[1]) {
+        a.sec <- as.vector(difftime(aux$First.time[1], origin.time, units = "secs"))
+        my.dist <- dist.mat[aux$First.station[1], origin.place]
+        aux$Speed.until[1] <- round(my.dist/a.sec, 6)
+      }
+
+      if (nrow(aux) > 1) {
+        capture <- lapply(2:nrow(aux), function(i) {
+          if (speed.method == "last to first"){
+            a.sec <- as.vector(difftime(aux$First.time[i], aux$Last.time[i - 1], units = "secs"))
+            my.dist <- dist.mat[aux$First.station[i], gsub(" ", ".", aux$Last.station[i - 1])]
+          }
+          if (speed.method == "first to first"){
+            a.sec <- as.vector(difftime(aux$First.time[i], aux$First.time[i - 1], units = "secs"))
+            my.dist <- dist.mat[aux$First.station[i], gsub(" ", ".", aux$First.station[i - 1])]
+          }
+          aux$Speed.until[i] <<- round(my.dist/a.sec, 6)
+          rm(a.sec, my.dist)
+        })
+      }
+      return(aux)
+    })
+    names(secmoves) <- aux
+    rm(aux)
+  }
+
   # Create the timetable
   recipient <- vector()
   if (invalid.dist) {
     for (i in seq_len(length(sections))) {
-      recipient <- c(recipient, paste(c("Time.until", "First.station",
-        "Arrived", "Time.in", "Last.station", "Left"), sections[i], sep = "."))
+      recipient <- c(recipient, paste(c("Times.entered", "Average.time.until", "First.array", "First.station",
+        "First.arrived", "Average.time.in", "Last.array", "Last.station", "Last.left", "Total.time.in"), sections[i], sep = "."))
     }
   } else {
     for (i in seq_len(length(sections))) {
-      recipient <- c(recipient, paste(c("Time.until", "Speed.to", "First.station",
-        "Arrived", "Time.in", "Speed.in", "Last.station", "Left"), sections[i], sep = "."))
+      recipient <- c(recipient, paste(c("Times.entered", "Average.time.until", "Average.speed.to", "First.array", "First.station",
+        "First.arrived", "Average.time.in", "Average.speed.in", "Last.array", "Last.station", "Last.left", "Total.time.in"), sections[i], sep = "."))
     }
   }
-  recipient <- c(recipient, "Very.last.array", "Status", "Valid.detections", "Invalid.detections", "Backwards.movements", "Max.cons.back.moves", "P.type")
+  recipient <- c(recipient, "Very.last.array", "Very.last.time", "Status", "Valid.detections", "Valid.events", "Invalid.detections", "Invalid.events", "Backwards.movements", "Max.cons.back.moves", "P.type")
   if (!invalid.dist && speed.method == "first to first")
-    recipient <- recipient[!grepl("Speed.in",recipient)]
+    recipient <- recipient[!grepl("Average.speed.in",recipient)]
 
-  timetable <- matrix(nrow = length(vm), ncol = length(recipient))
+  timetable <- matrix(nrow = length(secmoves), ncol = length(recipient))
   timetable <- as.data.frame(timetable)
   
   colnames(timetable) <- recipient
   rm(recipient)
-  rownames(timetable) <- names(vm)
+  rownames(timetable) <- names(secmoves)
   
   # Start filling it up
-  capture <- lapply(names(all.moves), function(fish) {
-    if (!is.null(vm[[fish]])) {
-      # Find first and last events
-      aux <- lapply(seq_along(sections), function(i) {
-        x <- rep(NA_character_, nrow(vm[[fish]]))
-        x[grepl(sections[i], vm[[fish]]$Array)] <- sections[i]
-        return(x)
-      })
+  capture <- lapply(names(secmoves), function(fish) {
+    # cat(fish, "\n")
+    aux <- split(secmoves[[fish]], secmoves[[fish]]$Section)
+    appendTo("debug", paste0("Assembling timetable values for fish ", fish, "."))
+    recipient <- lapply(seq_along(aux), function(i) {
+      # cat(i, "\n")
+      recipient <- rep(NA, ncol(timetable))
+      names(recipient) <- colnames(timetable)
+      recipient <- t(as.data.frame(recipient))
 
-      event.index <- combine(aux)
-      aux <- rle(event.index)
+      total.time <- apply(aux[[i]][, c("First.time", "Last.time")], 1, function(x) difftime(x[2], x[1], units = "secs"))
+      recipient[1, paste0("Total.time.in.", names(aux)[i])] <- sum(total.time)
+      recipient[1, paste0("Average.time.in.", names(aux)[i])] <- mean(total.time)
 
-      last.events <- cumsum(aux$lengths)
-      names(last.events) <- aux$values
-      
-      first.events <- c(1, last.events[-length(last.events)] + 1)
-      names(first.events) <- aux$values
+      recipient[1, paste0("Times.entered.", names(aux)[i])] <- nrow(aux[[i]])
 
-      appendTo("debug", paste0("Deploying values for fish ", fish, "."))
-      capture <- lapply(1:length(last.events), function(i) {
-        the.section <- names(last.events)[i]
-        timetable[fish, paste("Arrived", the.section, sep = ".")] <- paste(vm[[fish]][[first.events[i], "First.time"]])
-        timetable[fish, paste("First.station", the.section, sep = ".")] <- vm[[fish]][[first.events[i], "First.station"]]
-        timetable[fish, paste("Left", the.section, sep = ".")] <- paste(vm[[fish]][[last.events[i], "Last.time"]])
-        timetable[fish, paste("Last.station", the.section, sep = ".")] <- vm[[fish]][[last.events[i], "Last.station"]]
-        timetable[fish, paste("Time.in", the.section, sep = ".")] <- 
-          as.vector(
-            difftime(
-              timetable[fish, paste("Left", the.section, sep = ".")], 
-              timetable[fish, paste("Arrived", the.section, sep = ".")], units = "secs"
-              )
-          )
+      recipient[1, paste0("First.array.", names(aux)[i])] <- aux[[i]]$First.array[1]
+      recipient[1, paste0("First.station.", names(aux)[i])] <- aux[[i]]$First.station[1]
+      recipient[1, paste0("First.arrived.", names(aux)[i])] <- as.character(aux[[i]]$First.time[1])
 
-        # If Time.in is to be calculated
-        if (speed.method == "last to first" && !invalid.dist) {
-          to.col <- paste("Speed.in", the.section, sep = ".")
-          dist.row <- timetable[fish, paste("First.station", the.section, sep = ".")]
-          dist.col <- timetable[fish, paste("Last.station", the.section, sep = ".")]
-          from.col <- paste("Time.in", the.section, sep = ".")
-          timetable[fish, to.col] <- dist.mat[dist.row, dist.col] / timetable[fish, from.col]
-        }
+      recipient[1, paste0("Last.array.", names(aux)[i])] <- aux[[i]][.N, Last.array]
+      recipient[1, paste0("Last.station.", names(aux)[i])] <- aux[[i]][.N, Last.station]
+      recipient[1, paste0("Last.left.", names(aux)[i])] <- as.character(aux[[i]][.N, Last.time])
 
-        # If this is not the first section
-        if (match(the.section, sections) > 1) {
-          previous.section <- sections[match(the.section, sections) - 1]
-          testA <- !is.na(timetable[fish, paste("Arrived", the.section, sep = ".")])
-          testB <- !is.na(timetable[fish, paste("Left", previous.section, sep = ".")])
-          if (testA & testB) {
-            to.col <- paste("Time.until", the.section, sep = ".")
-            from.colA <- paste("Arrived", the.section, sep = ".")
-            from.colB <- paste("Left", previous.section, sep = ".")
-            AtoB <- difftime(timetable[fish, from.colA], timetable[fish, from.colB], units = "secs")
-            timetable[fish, to.col] <- as.vector(AtoB)
-            if (!invalid.dist) {
-              to.col <- paste("Speed.to", the.section, sep = ".")
-              dist.row <- timetable[fish, paste("First.station", the.section, sep = ".")]
-              if (speed.method == "last to first"){
-                dist.col <- timetable[fish, paste("Last.station", previous.section, sep = ".")]
-                total.time <- timetable[fish, paste("Time.until", the.section, sep = ".")]
-              }
-              if (speed.method == "first to first"){
-                dist.col <- timetable[fish, paste("First.station", previous.section, sep = ".")]
-                total.time <- timetable[fish, paste("Time.in", previous.section, sep = ".")] + 
-                              timetable[fish, paste("Time.until", the.section, sep = ".")]
-              }
-              timetable[fish, to.col] <- dist.mat[dist.row, dist.col] / total.time
-            }
-          }
-        }
-      
-        # If this is the last last event
-        if (i == length(last.events)) {
-          # If we are not on the last section and the last last event was on an edge array of the section
-          not.last.section <- match(the.section, sections) != length(sections)
-          edge.array <- arrays[[vm[[fish]]$Array[tail(last.events, 1)]]]$edge
-          if (if.last.skip.section && not.last.section && edge.array) {
-            timetable[fish, "Status"] <- paste("Disap. in", sections[match(the.section, sections) + 1])
-          } else {
-            timetable[fish, "Status"] <- paste("Disap. in", the.section)
-          }
-          timetable[fish, "Very.last.array"] <- vm[[fish]]$Array[last.events[i]]
-        }
-        timetable <<- timetable
-        return(NULL)
-      })
-      timetable[fish, "Valid.detections"] <- vm[[fish]][, sum(Detections)]
+      if (!invalid.dist && speed.method == "last to first")
+        recipient[1, paste0("Average.speed.in.", names(aux)[i])] <- round(mean(aux[[i]]$Speed.in.section.m.s), 6)
+
+      recipient[1, paste0("Average.time.until.", names(aux)[i])] <- mean(decimalTime(aux[[i]]$Time.travelling, unit = "s"))
+
+      if (!invalid.dist)
+        recipient[1, paste0("Average.speed.to.", names(aux)[i])] <- round(mean(aux[[i]]$Speed.in.section.m.s), 6)
+
+      return(recipient)
+    })
+    recipient <- as.data.frame(combine(recipient), stringsAsFactors = FALSE)
+
+    # convert numbers to numeric and replace NAs where relevant
+    the.cols <- which(grepl("Times.entered.", colnames(recipient)))
+    recipient[, the.cols] <- as.numeric(recipient[, the.cols])
+    recipient[, the.cols[which(is.na(recipient[, the.cols]))]] <- 0
+
+    the.cols <- which(grepl("Average.speed.to.", colnames(recipient)))
+    recipient[, the.cols] <- as.numeric(recipient[, the.cols])    
+
+    the.cols <- which(grepl("Average.speed.in.", colnames(recipient)))
+    recipient[, the.cols] <- as.numeric(recipient[, the.cols])      
+    # --
+
+    recipient$Very.last.array <- secmoves[[fish]][.N, Last.array]
+    recipient$Very.last.time <- as.character(secmoves[[fish]][.N, Last.time])
+    recipient$Valid.detections <- sum(secmoves[[fish]]$Detections)
+    recipient$Valid.events <- nrow(valid.moves[[fish]])
+    if (any(!all.moves[[fish]]$Valid)) { 
+      recipient$Invalid.detections <- sum(all.moves[[fish]][!(Valid)]$Detections)
+      recipient$Invalid.events <- sum(!all.moves[[fish]]$Valid)
     } else {
-      timetable[fish, "Valid.detections"] <- 0
+      recipient$Invalid.detections <- 0
+      recipient$Invalid.events <- 0
     }
-    if (any(!all.moves[[fish]]$Valid)) {
-      timetable[fish, "Invalid.detections"] <- sum(all.moves[[fish]][!(Valid)]$Detections)
+    recipient$P.type <- attributes(secmoves[[fish]])$p.type
+
+    aux <- countBackMoves(movements = valid.moves[[fish]], arrays = arrays)
+    recipient$Backwards.movements <- aux[[1]]
+    recipient$Max.cons.back.moves <- aux[[2]]
+    recipient$P.type <- attributes(valid.moves[[fish]])$p.type
+
+
+    # assign fate
+    the.last.section <- secmoves[[fish]][.N, Section]
+    the.last.array <- secmoves[[fish]][.N, Last.array]
+    recipient$Status <- paste0("Disap. in ", the.last.section)
+
+    not.last.section <- match(the.last.section, sections) != length(sections)
+    edge.array <- arrays[[the.last.array]]$edge
+
+    if (if.last.skip.section && not.last.section && edge.array) {
+      recipient$Status <- paste("Disap. in", sections[match(the.last.section, sections) + 1])
     } else {
-      timetable[fish, "Invalid.detections"] <- 0
+      recipient$Status <- paste("Disap. in", the.last.section)
     }
-    recipient <- countBackMoves(movements = all.moves[[fish]], arrays = arrays)
-    timetable[fish, "Backwards.movements"] <- recipient[[1]]
-    timetable[fish, "Max.cons.back.moves"] <- recipient[[2]]
-    timetable[fish, "P.type"] <- attributes(all.moves[[fish]])$p.type
 
-    if(!is.null(vm[[fish]]) && !is.na(match(vm[[fish]]$Array[tail(last.events, 1)], success.arrays))) 
-      timetable[fish, "Status"] <- "Succeeded"
+    if(!is.na(match(the.last.array, success.arrays))) 
+      recipient$Status <- "Succeeded"
 
-    timetable <<- timetable
+    # deploy values
+    appendTo("debug", paste0("Deploy timetable values for fish ", fish, "."))
+    timetable[fish, ] <<- recipient
+
     return(NULL)
   })
+
+  # Convert time and timestamp data
+  for (section in sections) {
+    for (the.col in c("Average.time.until.", "Average.time.in.", "Total.time.in.")) {
+      # convert to numeric
+      timetable[, paste0(the.col, section)] <- as.numeric(timetable[, paste0(the.col, section)])
+      # grab the mean for later use
+      aux <- mean(timetable[, paste0(the.col, section)], na.rm = TRUE)
+      # convert to difftime
+      timetable[, paste0(the.col, section)] <- as.difftime(timetable[, paste0(the.col, section)], units = "secs")
+      units(timetable[, paste0(the.col, section)]) <- "secs"
+      if (!is.nan(aux)) {
+        if (aux > 86400)
+          units(timetable[, paste0(the.col, section)]) <- "days"
+        if (aux <= 86400 & aux > 3600)
+          units(timetable[, paste0(the.col, section)]) <- "hours"
+        if (aux <= 3600)
+          units(timetable[, paste0(the.col, section)]) <- "mins"
+      }
+      timetable[, paste0(the.col, section)] <- round(timetable[, paste0(the.col, section)], 3)
+    }
+    for (the.col in c("First.arrived.", "Last.left.")) {
+      # convert to numeric posix
+      timetable[, paste0(the.col, section)] <- as.POSIXct(timetable[, paste0(the.col, section)], tz = tz)
+    }
+  }
+
+  timetable$Very.last.time <- as.POSIXct(timetable$Very.last.time, tz = tz)
+
   timetable$Transmitter <- rownames(timetable)
   return(timetable)
 }
@@ -1199,56 +1268,9 @@ assembleOutput <- function(timetable, bio, spatial, sections, dist.mat, invalid.
   status.df$Valid.detections[is.na(status.df$Valid.detections)] <- 0
   status.df$Invalid.detections[is.na(status.df$Invalid.detections)] <- 0
 
-  the.cols <- grepl("Release.date", colnames(status.df)) | grepl("Arrived",colnames(status.df)) | grepl("Left",colnames(status.df))
-  for (i in colnames(status.df)[the.cols]) {
-    status.df[, i] <- as.POSIXct(status.df[,i], tz = tz)
-  }
-  rm(the.cols)
-  
-  appendTo("debug", "Calculating time from release to first detection.")
-  for (i in 1:nrow(status.df)) {
-    appendTo("debug", paste0("(status.df) Analysing fish ", status.df$Transmitter[i], " (", i, ")."))
-    arriving.points <- status.df[i, paste("Arrived", sections, sep = ".")]
-    if (any(!is.na(arriving.points))) {
-      first.section <- sections[head(which(!is.na(arriving.points)), 1)]
-      pointA <- as.POSIXct(status.df[i, paste("Arrived", first.section, sep = ".")], tz = tz)
-      pointB <- as.POSIXct(status.df[i, "Release.date"], tz = tz)
-      AtoB <- as.vector(difftime(pointA, pointB, units = "secs"))
-      status.df[i, paste("Time.until", first.section, sep = ".")] <- AtoB
-      if (!invalid.dist) {
-        dist.row <- status.df[i, paste("First.station", first.section, sep = ".")]
-        dist.col <- as.character(status.df[i, "Release.site"])
-        df.to.col <- paste("Speed.to", first.section, sep = ".")
-        df.from.col <- paste("Time.until", first.section, sep = ".")
-        status.df[i, df.to.col] <- dist.mat[dist.row, dist.col]/status.df[i, df.from.col]
-      }
-      rm(AtoB)
-    }
-  }
-  rm(i)
-
-  # Convert time data
-  for (section in sections) {
-    for (the.col in c("Time.in.", "Time.until.")) {
-      # convert to numeric
-      status.df[, paste0(the.col, section)] <- as.numeric(status.df[, paste0(the.col, section)])
-      # grab the mean for later use
-      aux <- mean(status.df[, paste0(the.col, section)], na.rm = TRUE)
-      # convert to difftime
-      status.df[, paste0(the.col, section)] <- as.difftime(status.df[, paste0(the.col, section)], units = "secs")
-      units(status.df[, paste0(the.col, section)]) <- "secs"
-      if (aux > 86400)
-        units(status.df[, paste0(the.col, section)]) <- "days"
-      if (aux <= 86400 & aux > 3600)
-        units(status.df[, paste0(the.col, section)]) <- "hours"
-      if (aux <= 3600)
-        units(status.df[, paste0(the.col, section)]) <- "mins"
-      status.df[, paste0(the.col, section)] <- round(status.df[, paste0(the.col, section)], 3)
-    }
-  }  
-
-  if (file.exists("temp_comments.txt")) { # nocov start
-    temp <- read.table("temp_comments.txt", header = F, sep = "\t")
+  appendTo("debug", "Appending comments.")
+  if (file.exists(paste0(tempdir(), "/temp_comments.txt"))) { # nocov start
+    temp <- read.table(paste0(tempdir(), "/temp_comments.txt"), header = FALSE, sep = "\t")
     status.df[, "Comments"] <- NA
     for (i in seq_len(nrow(temp))) {
       link <- match(temp[i, 1], status.df$Transmitter)

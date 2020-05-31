@@ -467,42 +467,19 @@ checkSMovesN <- function(secmoves, fish, section.minimum, GUI) {
 #' @keywords internal
 #' 
 checkLinearity <- function(secmoves, fish, sections, arrays, GUI) {
-  try.again <- TRUE
-  double.call <- FALSE
-  while (try.again) {
-    vsm <- secmoves[secmoves$Valid, ]
-    back.check <- match(vsm$Section, sections)
-    turn.check <- rev(match(sections, rev(vsm$Section))) # captures the last event of each section. Note, the values count from the END of the events
-    if (is.unsorted(back.check)) {
-      if (double.call) {
-        appendTo(c("Screen", "Warning"), the.warning <- paste0("The last interaction did not linearise the movements for fish ", fish, ". Trying again.")) # nocov
-      } else {
-        if (is.unsorted(turn.check, na.rm = TRUE))
-          appendTo(c("Screen", "Report", "Warning"), the.warning <- paste0("Inter-section backwards movements were detected for fish ", fish, " and the last events are not ordered!"))
-        else
-          appendTo(c("Screen", "Report", "Warning"), the.warning <- paste0("Inter-section backwards movements were detected for fish ", fish, "."))
-      }
-      suggestion <- rep(FALSE, length(back.check))
-      for(i in unique(back.check)) {
-        first.time <- match(i, back.check)
-        to.remove <- back.check[first.time:length(back.check)] < i
-        suggestion[first.time:length(back.check)][to.remove] <- TRUE
-      }
-      suggestion <- which(suggestion)
-      if (interactive()) { # nocov start
-        appendTo("Screen", aux <- paste0("To linearise the movements, actel suggests invalidating the following events: ", paste(suggestion, collapse = ", ")))
-        the.warning <- paste0("Warning: ", the.warning, "\n", aux)
-        aux <- tableInteraction(moves = vsm, fish = fish, trigger = the.warning, GUI = GUI, force = TRUE)
-        secmoves <- transferValidity(from = aux, to = secmoves)
-      } else { # nocov end
-        vsm$Valid[suggestion] <- FALSE
-        secmoves <- transferValidity(from = vsm, to = secmoves)
-      }
-      # Prepare double call warning
-      double.call <- TRUE
-    } else {
-      try.again <- FALSE
-    }
+  hide <- c("First.station", "Last.station")
+  vsm <- secmoves[secmoves$Valid, !hide, with = FALSE]
+  back.check <- match(vsm$Section, sections)
+  turn.check <- rev(match(sections, rev(vsm$Section))) # captures the last event of each section. Note, the values count from the END of the events
+  if (is.unsorted(back.check)) {
+      if (is.unsorted(turn.check, na.rm = TRUE))
+        appendTo(c("Screen", "Report", "Warning"), the.warning <- paste0("Inter-section backwards movements were detected for fish ", fish, " and the last events are not ordered!"))
+      else
+        appendTo(c("Screen", "Report", "Warning"), the.warning <- paste0("Inter-section backwards movements were detected for fish ", fish, "."))
+    if (interactive()) { # nocov start
+      aux <- tableInteraction(moves = vsm, fish = fish, trigger = the.warning, GUI = GUI, force = FALSE)
+      secmoves <- transferValidity(from = aux, to = secmoves)
+    } # nocov end
   }
   return(secmoves)
 }

@@ -511,7 +511,7 @@ residency <- function(tz, sections, max.interval = 60, minimum.detections = 2,
     dayrange[2] <- dayrange[2] + 1
     individual.residency.plots <- printIndividualResidency(ratios = daily.ratios, dayrange = dayrange, sections = sections)
     efficiency.fragment <- printEfficiency(efficiency = efficiency, intra.CJS = intra.array.CJS, type = "residency")
-    printLastSeen(input = last.seen, sections = sections)
+    printLastSection(input = last.seen, sections = sections)
     if (nrow(last.seen) > 3) 
       last.seen.graph.size <- "width=90%" else last.seen.graph.size <- "height=4in"
     if (any(sapply(valid.detections, function(x) any(!is.na(x$Sensor.Value))))) {
@@ -733,7 +733,7 @@ Note:
 ', paste(knitr::kable(last.seen), collapse = "\n"), '
 
 <center>
-![](', tempdir(), '/last_seen.png){ ',last.seen.graph.size ,' }
+![](', tempdir(), '/last_section.png){ ',last.seen.graph.size ,' }
 </center>
 
 
@@ -946,7 +946,6 @@ sink()
 
 #' Collect summary information for the residency analysis
 #' 
-#' @param secmoves the section-movements
 #' @param movements the array-movements (Valid and invalid)
 #' @inheritParams migration
 #' 

@@ -590,22 +590,22 @@ printDotplots <- function(status.df, invalid.dist) {
   Transmitter <- NULL
 
   appendTo("debug", "Starting printDotplots.")
-  t1 <- status.df[status.df$Valid.detections > 0, c("Transmitter", "Valid.detections", colnames(status.df)[grepl("Time.until", colnames(status.df)) | grepl("Speed.to", colnames(status.df)) | grepl("Time.in", 
+  t1 <- status.df[status.df$Valid.detections > 0, c("Transmitter", "Valid.detections", colnames(status.df)[grepl("Average.time.until", colnames(status.df)) | grepl("Average.speed.to", colnames(status.df)) | grepl("Total.time.in", 
     colnames(status.df))])]
   t1 <- t1[, apply(t1, 2, function(x) !all(is.na(x)))]
   t1$Transmitter <- factor(t1$Transmitter, levels = rev(t1$Transmitter))
   link <- unlist(sapply(colnames(t1), function(x) attributes(t1[,x])$units))
   colnames(t1)[match(names(link), colnames(t1))] <- paste0(names(link), "\n(", link, ")")
-  colnames(t1)[grepl("Speed.to", colnames(t1))] <- paste0(colnames(t1)[grepl("Speed.to", colnames(t1))], "\n(m/s)")
+  colnames(t1)[grepl("Average.speed.to", colnames(t1))] <- paste0(colnames(t1)[grepl("Average.speed.to", colnames(t1))], "\n(m/s)")
   colnames(t1)[2] <- "Detections\n(n)"
   if (!invalid.dist) {
-    t2 <- t1[, !grepl("Time.until", colnames(t1))]
+    t2 <- t1[, !grepl("Average.time.until", colnames(t1))]
   } else {
-    t2 <- t1[, !grepl("Speed.to", colnames(t1))]
+    t2 <- t1[, !grepl("Average.speed.to", colnames(t1))]
   }
-  colnames(t2) <- sub("Time.i", "I", colnames(t2))
-  colnames(t2) <- sub("Time.until", "To", colnames(t2))
-  colnames(t2) <- sub("Speed.t", "T", colnames(t2))
+  colnames(t2) <- sub("Total.time.i", "I", colnames(t2))
+  colnames(t2) <- sub("Average.time.until", "To", colnames(t2))
+  colnames(t2) <- sub("Average.speed.t", "T", colnames(t2))
   PlotData <- suppressWarnings(suppressMessages(reshape2::melt(t2)))
   PlotData$Colour <- "#ba009e" # purple, for bugs
   for (j in colnames(t2)[-1]) {
@@ -741,6 +741,7 @@ printEfficiency <- function(CJS = NULL, efficiency = NULL, intra.CJS, type = c("
 
       efficiency.fragment <- paste0('
 Note:
+  : These efficiency calculations **do not account for** backwards movements. This implies that the total number of fish to have been **last seen** at a given array **may be lower** than the displayed below. Please refer to the [section survival overview](#section-survival) and [last seen arrays](#last-seen-arrays) to find out how many fish were considered to have disappeared per section.
   : The data used in the tables below is stored in the `overall.CJS` object. Auxiliary information can also be found in the `matrices` and `arrays` objects.
   : These efficiency values are estimated using the analytical equations provided in the paper "Using mark-recapture models to estimate survival from telemetry data" by [Perry et al. (2012)](<https://www.researchgate.net/publication/256443823_Using_mark-recapture_models_to_estimate_survival_from_telemetry_data>). In some situations, more advanced efficiency estimation methods may be required.
   : You can try running `advEfficiency([results]$overall.CJS)` to obtain beta-drawn efficiency distributions (replace `[results]` with the name of the object where you saved the analysis).
@@ -897,7 +898,7 @@ printIndividuals <- function(detections.list, bio, status.df = NULL, tz,
 
     if (!is.null(status.df)) {
       status.row <- which(status.df$Transmitter == fish)
-      relevant.line <- status.df[status.row, (grepl("Arrived", colnames(status.df)) | grepl("Left", colnames(status.df)))]
+      relevant.line <- status.df[status.row, (grepl("First.arrived", colnames(status.df)) | grepl("Last.left", colnames(status.df)))]
     }
 
     appendTo("debug", paste0("Debug: Printing graphic for fish", fish, "."))
@@ -1735,7 +1736,7 @@ printIndividualResidency <- function(ratios, dayrange, sections) {
 #' 
 #' @keywords internal
 #' 
-printLastSeen <- function(input, sections) {
+printLastSection <- function(input, sections) {
   Section <- NULL
   n <- NULL
   cbPalette <- c("#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7", "#999999")
@@ -1751,7 +1752,39 @@ printLastSeen <- function(input, sections) {
   p <- p + ggplot2::labs(x = "", y = "n")
   p <- p + ggplot2::scale_y_continuous(expand = c(0, 0, 0.05, 0))
   the.width <- max(2, (ncol(input) - 1) * nrow(input) * 0.7)
-  ggplot2::ggsave(paste0(tempdir(), "/last_seen.png"), width = the.width, height = 4)
+  ggplot2::ggsave(paste0(tempdir(), "/last_section.png"), width = the.width, height = 4)
+}
+
+#' Print a simple barplot with the number of fish last seen at each section
+#' 
+#' @param input a table with the last seen data
+#' @param sections the order of the sections
+#' 
+#' @return No return value, called to plot and save graphic.
+#' 
+#' @keywords internal
+#' 
+printLastArray <- function(status.df) {
+  Very.last.array <- NULL
+  Group <- NULL
+  cbPalette <- c("#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7", "#999999")
+  names(cbPalette) <- c("Orange", "Blue", "Green", "Yellow", "Darkblue", "Darkorange", "Pink", "Grey")
+
+  if (length(levels(status.df$Group)) <= 8)
+      the.colours <- as.vector(cbPalette)[1:length(levels(status.df$Group))]
+  else
+      the.colours <- gg_colour_hue(length(levels(status.df$Group)))
+
+  p <- ggplot2::ggplot(status.df, ggplot2::aes(x = Very.last.array))
+  p <- p + ggplot2::geom_bar(ggplot2::aes(fill = Group), colour = "transparent", width = 0.5, position = ggplot2::position_dodge2(preserve = "single", padding = 0))
+  p <- p + ggplot2::scale_fill_manual(values = the.colours, drop = FALSE)
+  p <- p + ggplot2::scale_x_discrete(drop = FALSE)
+  p <- p + ggplot2::theme_bw()
+  p <- p + ggplot2::labs(x = "Last seen at...", y = "n")
+  p <- p + ggplot2::coord_flip()
+  p <- p + ggplot2::guides(fill = ggplot2::guide_legend(reverse = TRUE))
+  the.height <- max(2, ((length(levels(status.df$Very.last.array)) - 1) * 0.5))
+  ggplot2::ggsave(paste0(tempdir(), "/last_arrays.png"), width = 6, height = the.height)
 }
 
 #' Print sensor data for each individual tag

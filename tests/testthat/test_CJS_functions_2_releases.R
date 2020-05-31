@@ -52,9 +52,17 @@ for (i in link) {
 vm <- lapply(xmoves, function(x) x[x$Valid, ])
 vm <- vm[sapply(vm, nrow) != 0]
 
-timetable <- assembleTimetable(vm = vm, all.moves = xmoves, sections = sections, 
+secmoves <- lapply(seq_along(vm), function(i) {
+  fish <- names(vm)[i]
+  appendTo("debug", paste0("debug: Compiling valid section movements for fish ", fish,"."))
+  output <- sectionMovements(movements = vm[[i]], sections = sections, invalid.dist = invalid.dist)
+  return(output)
+})
+names(secmoves) <- names(vm)
+
+timetable <- assembleTimetable(secmoves = secmoves, valid.moves = vm, all.moves = xmoves, sections = sections, 
   arrays = arrays, dist.mat = dist.mat, invalid.dist = invalid.dist, speed.method = "last to first", 
-  if.last.skip.section = TRUE, success.arrays = "Sea1")
+  if.last.skip.section = TRUE, success.arrays = "Sea1", bio = bio, tz = "Europe/Copenhagen")
 
 status.df <- assembleOutput(timetable = timetable, bio = bio, spatial = spatial, 
   sections = sections, dist.mat = dist.mat, invalid.dist = invalid.dist, tz = "Europe/Copenhagen")
@@ -182,9 +190,17 @@ for (i in link) {
 vm <- lapply(xmoves, function(x) x[x$Valid, ])
 vm <- vm[sapply(vm, nrow) != 0]
 
-timetable <- assembleTimetable(vm = vm, all.moves = xmoves, sections = sections, 
+secmoves <- lapply(seq_along(vm), function(i) {
+  fish <- names(vm)[i]
+  appendTo("debug", paste0("debug: Compiling valid section movements for fish ", fish,"."))
+  output <- sectionMovements(movements = vm[[i]], sections = sections, invalid.dist = invalid.dist)
+  return(output)
+})
+names(secmoves) <- names(vm)
+
+timetable <- assembleTimetable(secmoves = secmoves, valid.moves = vm, all.moves = xmoves, sections = sections, 
   arrays = arrays, dist.mat = dist.mat, invalid.dist = invalid.dist, speed.method = "last to first", 
-  if.last.skip.section = TRUE, success.arrays = "Sea1")
+  if.last.skip.section = TRUE, success.arrays = "Sea1", bio = bio, tz = "Europe/Copenhagen")
 
 status.df <- assembleOutput(timetable = timetable, bio = bio, spatial = spatial, 
   sections = sections, dist.mat = dist.mat, invalid.dist = invalid.dist, tz = "Europe/Copenhagen")
