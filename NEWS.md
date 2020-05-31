@@ -45,6 +45,8 @@ Enhancements:
   * A new page has been included in the vignettes aiming to explore what can be done with the results of actel's analyses.
   * Included usage examples on exported functions.
   * Verify the names of the release site arrays as soon as the spatial.csv is loaded.
+  * Added support for timestamps using a "T" separator between date and time in the biometrics and deployments files.
+  * new 'discard.orphans' argument allows the user to automatically discard all detections that do not fall within receiver deployment periods.
 
 ## actel 0.1.3
 
