@@ -102,7 +102,7 @@
 #' @export
 #' 
 migration <- function(tz, sections, success.arrays = NULL, max.interval = 60, minimum.detections = 2, 
-  start.time = NULL, stop.time = NULL, speed.method = c("last to first", "first to first"), 
+  start.time = NULL, stop.time = NULL, speed.method = c("last to first", "last to last"), 
   speed.warning = NULL, speed.error = NULL, jump.warning = 2, jump.error = 3,
   inactive.warning = NULL, inactive.error = NULL, exclude.tags = NULL, override = NULL, report = FALSE, auto.open = TRUE, 
   discard.orphans = FALSE, save.detections = FALSE, if.last.skip.section = TRUE, replicates = NULL, disregard.parallels = TRUE, 
@@ -121,7 +121,7 @@ migration <- function(tz, sections, success.arrays = NULL, max.interval = 60, mi
     stop("'max.interval' must be positive.\n", call. = FALSE)
 
   if (!is.character(speed.method))
-    stop("'speed.method' should be one of 'first to first' or 'last to first'.\n", call. = FALSE)
+    stop("'speed.method' should be one of 'last to first' or 'last to last'.\n", call. = FALSE)
   speed.method <- match.arg(speed.method)
 
   if (!is.null(speed.warning) && !is.numeric(speed.warning))
@@ -297,7 +297,7 @@ migration <- function(tz, sections, success.arrays = NULL, max.interval = 60, mi
   aux <- names(movements)
   movements <- lapply(names(movements), function(fish) {
       speedReleaseToFirst(fish = fish, bio = bio, movements = movements[[fish]],
-                          dist.mat = dist.mat, invalid.dist = invalid.dist)
+                          dist.mat = dist.mat, invalid.dist = invalid.dist, speed.method = speed.method)
     })
   names(movements) <- aux
   rm(aux)
@@ -1039,8 +1039,8 @@ assembleTimetable <- function(secmoves, valid.moves, all.moves, sections, arrays
             a.sec <- as.vector(difftime(aux$First.time[i], aux$Last.time[i - 1], units = "secs"))
             my.dist <- dist.mat[aux$First.station[i], gsub(" ", ".", aux$Last.station[i - 1])]
           }
-          if (speed.method == "first to first"){
-            a.sec <- as.vector(difftime(aux$First.time[i], aux$First.time[i - 1], units = "secs"))
+          if (speed.method == "last to last"){
+            a.sec <- as.vector(difftime(aux$Last.time[i], aux$Last.time[i - 1], units = "secs"))
             my.dist <- dist.mat[aux$First.station[i], gsub(" ", ".", aux$First.station[i - 1])]
           }
           aux$Speed.until[i] <<- round(my.dist/a.sec, 6)
@@ -1067,7 +1067,7 @@ assembleTimetable <- function(secmoves, valid.moves, all.moves, sections, arrays
     }
   }
   recipient <- c(recipient, "Very.last.array", "Very.last.time", "Status", "Valid.detections", "Valid.events", "Invalid.detections", "Invalid.events", "Backwards.movements", "Max.cons.back.moves", "P.type")
-  if (!invalid.dist && speed.method == "first to first")
+  if (!invalid.dist && speed.method == "last to last")
     recipient <- recipient[!grepl("Average.speed.in",recipient)]
 
   timetable <- matrix(nrow = length(secmoves), ncol = length(recipient))
@@ -1108,7 +1108,7 @@ assembleTimetable <- function(secmoves, valid.moves, all.moves, sections, arrays
       recipient[1, paste0("Average.time.until.", names(aux)[i])] <- mean(decimalTime(aux[[i]]$Time.travelling, unit = "s"))
 
       if (!invalid.dist)
-        recipient[1, paste0("Average.speed.to.", names(aux)[i])] <- round(mean(aux[[i]]$Speed.in.section.m.s), 6)
+        recipient[1, paste0("Average.speed.to.", names(aux)[i])] <- round(mean(aux[[i]]$Speed.until), 6)
 
       return(recipient)
     })

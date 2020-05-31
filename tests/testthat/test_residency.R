@@ -44,7 +44,7 @@ test_that("residency stops when any argument does not make sense", {
 		"'stop.time' must be in 'yyyy-mm-dd hh:mm:ss' format.", fixed = TRUE)
 	
 	expect_error(residency(sections = c("River", "Fjord", "Sea"), tz = "Europe/Copenhagen", speed.method = 1), 
-		"'speed.method' should be one of 'first to first' or 'last to first'.", fixed = TRUE)
+		"'speed.method' should be one of 'last to first' or 'last to last'.", fixed = TRUE)
 	
 	expect_error(residency(sections = c("River", "Fjord", "Sea"), tz = "Europe/Copenhagen", speed.method = "abc"), 
 		"'arg' should be one of ", fixed = TRUE)

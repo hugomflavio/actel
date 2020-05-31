@@ -98,7 +98,7 @@
 #' @export
 #' 
 residency <- function(tz, sections, max.interval = 60, minimum.detections = 2, 
-  start.time = NULL, stop.time = NULL, speed.method = c("last to first", "first to first"), 
+  start.time = NULL, stop.time = NULL, speed.method = c("last to first", "last to last"), 
   speed.warning = NULL, speed.error = NULL, jump.warning = 2, jump.error = 3, 
   inactive.warning = NULL, inactive.error = NULL, exclude.tags = NULL, override = NULL, 
   report = FALSE, auto.open = TRUE, discard.orphans = FALSE, save.detections = FALSE, section.minimum = 2, 
@@ -118,7 +118,7 @@ residency <- function(tz, sections, max.interval = 60, minimum.detections = 2,
     stop("'max.interval' must be positive.\n", call. = FALSE)
 
   if (!is.character(speed.method))
-    stop("'speed.method' should be one of 'first to first' or 'last to first'.\n", call. = FALSE)
+    stop("'speed.method' should be one of 'last to first' or 'last to last'.\n", call. = FALSE)
   speed.method <- match.arg(speed.method)
 
   if (!is.null(speed.warning) && !is.numeric(speed.warning))
@@ -269,7 +269,7 @@ residency <- function(tz, sections, max.interval = 60, minimum.detections = 2,
   aux <- names(movements)
   movements <- lapply(names(movements), function(fish) {
       speedReleaseToFirst(fish = fish, bio = bio, movements = movements[[fish]],
-                          dist.mat = dist.mat, invalid.dist = invalid.dist)
+                          dist.mat = dist.mat, invalid.dist = invalid.dist, speed.method = speed.method)
     })
   names(movements) <- aux
   rm(aux)

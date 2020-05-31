@@ -26,7 +26,8 @@ moves <- groupMovements(detections.list = detections.list[1:2], bio = bio, spati
 aux <- names(moves)
 moves <- lapply(names(moves), function(fish) {
     speedReleaseToFirst(fish = fish, bio = bio, movements = moves[[fish]],
-                        dist.mat = dist.mat, invalid.dist = invalid.dist)
+                        dist.mat = dist.mat, invalid.dist = invalid.dist,
+                        speed.method = "last to first")
   })
 names(moves) <- aux
 rm(aux)
@@ -81,13 +82,14 @@ test_that("assembleTimetable correctly extracts fish information", {
 
 test_that("assembleTimetable correctly handles speed methods and invalid.dist", {
   moves.ff <- groupMovements(detections.list = detections.list[1:2], bio = bio, spatial = spatial,
-      speed.method = "first to first", max.interval = 60, tz = "Europe/Copenhagen", 
+      speed.method = "last to last", max.interval = 60, tz = "Europe/Copenhagen", 
       dist.mat = dist.mat, invalid.dist = invalid.dist)
 
   aux <- names(moves.ff)
   xmoves <- lapply(names(moves.ff), function(fish) {
       speedReleaseToFirst(fish = fish, bio = bio, movements = moves.ff[[fish]],
-                          dist.mat = dist.mat, invalid.dist = invalid.dist)
+                          dist.mat = dist.mat, invalid.dist = invalid.dist,
+                          speed.method = "last to last")
     })
   names(xmoves) <- aux
   rm(aux)
@@ -107,7 +109,7 @@ test_that("assembleTimetable correctly handles speed methods and invalid.dist", 
   names(secmoves.ff) <- names(vm.ff)
 
   output <- assembleTimetable(secmoves = secmoves.ff, valid.moves = vm.ff, all.moves = xmoves.ff, sections = sections, 
-    arrays = arrays, dist.mat = dist.mat, invalid.dist = invalid.dist, speed.method = "first to first", 
+    arrays = arrays, dist.mat = dist.mat, invalid.dist = invalid.dist, speed.method = "last to last", 
     if.last.skip.section = FALSE, success.arrays = "Sea1", bio = bio, tz = "Europe/Copenhagen")
   expect_equal(colnames(output), c('Times.entered.River', 'Average.time.until.River', 'Average.speed.to.River', 
     'First.array.River', 'First.station.River', 'First.arrived.River', 'Average.time.in.River', 
@@ -124,7 +126,7 @@ test_that("assembleTimetable correctly handles speed methods and invalid.dist", 
   expect_equal(output$Status, c("Disap. in Fjord", "Succeeded"))
 
   output <- assembleTimetable(secmoves = secmoves.ff, valid.moves = vm.ff, all.moves = xmoves.ff, sections = sections, 
-    arrays = arrays, dist.mat = dist.mat, invalid.dist = TRUE, speed.method = "first to first", 
+    arrays = arrays, dist.mat = dist.mat, invalid.dist = TRUE, speed.method = "last to last", 
     if.last.skip.section = FALSE, success.arrays = "Sea1", bio = bio, tz = "Europe/Copenhagen")
   expect_equal(colnames(output), c('Times.entered.River', 'Average.time.until.River', 
     'First.array.River', 'First.station.River', 'First.arrived.River', 'Average.time.in.River', 
@@ -153,14 +155,14 @@ test_that("assembleTimetable correctly handles speed methods and invalid.dist", 
   names(secmoves.ff) <- names(vm.ff)
 
   output <- assembleTimetable(secmoves = secmoves.ff, valid.moves = vm.ff, all.moves = xmoves.ff, sections = sections, 
-    arrays = arrays, dist.mat = dist.mat, invalid.dist = invalid.dist, speed.method = "first to first", 
+    arrays = arrays, dist.mat = dist.mat, invalid.dist = invalid.dist, speed.method = "last to last", 
     if.last.skip.section = FALSE, success.arrays = "Sea1", bio = bio, tz = "Europe/Copenhagen")
   expect_equal(output$Backwards.movements, c(3))
   expect_equal(output$Max.cons.back.moves, c(2))
 
   xmoves.ff[[2]] <- xmoves.ff[[2]][1, ]
   output <- assembleTimetable(secmoves = secmoves.ff, valid.moves = vm.ff, all.moves = xmoves.ff, sections = sections, 
-    arrays = arrays, dist.mat = dist.mat, invalid.dist = invalid.dist, speed.method = "first to first", 
+    arrays = arrays, dist.mat = dist.mat, invalid.dist = invalid.dist, speed.method = "last to last", 
     if.last.skip.section = FALSE, success.arrays = "Sea1", bio = bio, tz = "Europe/Copenhagen")
   expect_equal(output$Backwards.movements, c(3))
   expect_equal(output$Max.cons.back.moves, c(2))

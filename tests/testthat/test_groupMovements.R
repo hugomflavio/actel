@@ -76,7 +76,7 @@ test_that("groupMovements can handle unknown detections", {
 
 test_that("Switching speed.method leads to different speed results.", {
 	aux <- groupMovements(detections.list = detections.list[1:2], bio = bio, spatial = spatial,
-	    speed.method = "first to first", max.interval = 60, tz = "Europe/Copenhagen", 
+	    speed.method = "last to last", max.interval = 60, tz = "Europe/Copenhagen", 
 	    dist.mat = dist.mat, invalid.dist = invalid.dist)
 	expect_true(aux[[1]]$Average.speed.m.s[3] != moves[[1]]$Average.speed.m.s[3])
 })
@@ -85,7 +85,7 @@ test_that("Movement events with one detection have '0:00' residency time.", {
 	d <- detections.list[1:2]
 	d[[1]] <- d[[1]][-c(2:12, 14:17), ] 
 	aux <- groupMovements(detections.list = d, bio = bio, spatial = spatial,
-	    speed.method = "first to first", max.interval = 60, tz = "Europe/Copenhagen", 
+	    speed.method = "last to last", max.interval = 60, tz = "Europe/Copenhagen", 
 	    dist.mat = dist.mat, invalid.dist = invalid.dist)
 	# First event
 	expect_equal(aux[[1]]$Detections[1], 1)
@@ -99,7 +99,8 @@ test_that("speedReleaseToFirst can handle unknown events", {
   aux <- names(moves)
   output <- lapply(names(moves), function(fish) {
       speedReleaseToFirst(fish = fish, bio = bio, movements = moves[[fish]],
-                          dist.mat = dist.mat, invalid.dist = invalid.dist)
+                          dist.mat = dist.mat, invalid.dist = invalid.dist,
+                          speed.method = "last to last")
     })
   names(output) <- aux
   rm(aux)
@@ -115,7 +116,8 @@ test_that("speedReleaseToFirst can handle a first detection previous to release"
   aux <- names(moves)
   output <- lapply(names(moves), function(fish) {
       speedReleaseToFirst(fish = fish, bio = xbio, movements = moves[[fish]],
-                          dist.mat = dist.mat, invalid.dist = invalid.dist)
+                          dist.mat = dist.mat, invalid.dist = invalid.dist,
+                          speed.method = "last to last")
     })
   names(output) <- aux
   rm(aux)

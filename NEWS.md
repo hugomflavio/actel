@@ -26,6 +26,7 @@ Changes:
   * distancesMatrix now receives the transition layer as an R object rather than a file name.
   * distancesMatrix now requires user confirmation before writing a 'distances.csv' file into the working directory.
   * createMatrix and completeMatrix now work with R objects rather than files. The user must manually save the function output to a 'distances.csv' file to include it in the next analysis.
+  * The possible values of speed.method have been changed to 'last to first' and 'last to last', for a more logical interpretation of the results. The explore vignette has been updated accordingly.
 
 Enhancements:
   * Perform early quality checks on the content of 'sections' before advancing with migration and residency analysis.

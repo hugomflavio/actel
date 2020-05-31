@@ -128,7 +128,7 @@ simplifyMovements <- function(movements, fish, bio, speed.method, dist.mat, inva
     if (!invalid.dist)
         aux <- movementSpeeds(movements = aux, speed.method = speed.method, dist.mat = dist.mat)
     output <- speedReleaseToFirst(fish = fish, bio = bio, movements = aux,
-     dist.mat = dist.mat, invalid.dist = invalid.dist)
+     dist.mat = dist.mat, invalid.dist = invalid.dist, speed.method = speed.method)
     return(output)
   } else {
     return(NULL)
@@ -158,8 +158,8 @@ movementSpeeds <- function(movements, speed.method, dist.mat) {
           a.sec <- as.vector(difftime(movements$First.time[i], movements$Last.time[i - 1], units = "secs"))
           my.dist <- dist.mat[movements$First.station[i], gsub(" ", ".", movements$Last.station[i - 1])]
         }
-        if (speed.method == "first to first"){
-          a.sec <- as.vector(difftime(movements$First.time[i], movements$First.time[i - 1], units = "secs"))
+        if (speed.method == "last to last"){
+          a.sec <- as.vector(difftime(movements$Last.time[i], movements$Last.time[i - 1], units = "secs"))
           my.dist <- dist.mat[movements$First.station[i], gsub(" ", ".", movements$First.station[i - 1])]
         }
         movements$Average.speed.m.s[i] <<- round(my.dist/a.sec, 6)
@@ -229,7 +229,7 @@ movementTimes <- function(movements, type = c("array", "section")){
 #' 
 #' @keywords internal
 #' 
-speedReleaseToFirst <- function(fish, bio, movements, dist.mat, invalid.dist = FALSE){
+speedReleaseToFirst <- function(fish, bio, movements, dist.mat, speed.method, invalid.dist = FALSE){
   appendTo("debug", "Running speedReleaseToFirst.")
   the.row <- match(fish, bio$Transmitter)
   origin.time <- bio[the.row, "Release.date"]
@@ -242,9 +242,16 @@ speedReleaseToFirst <- function(fish, bio, movements, dist.mat, invalid.dist = F
       m <- paste0("0", m)
     movements$Time.travelling[1] <- paste(h, m, sep = ":")
     if (!invalid.dist & movements$Array[1] != "Unknown") {
-      a.sec <- as.vector(difftime(movements$First.time[1], origin.time, units = "secs"))
-      my.dist <- dist.mat[movements$First.station[1], origin.place]
-      movements$Average.speed.m.s[1] <- round(my.dist/a.sec, 6)
+      if (speed.method == "last to first") {
+        a.sec <- as.vector(difftime(movements$First.time[1], origin.time, units = "secs"))
+        my.dist <- dist.mat[movements$First.station[1], origin.place]
+        movements$Average.speed.m.s[1] <- round(my.dist/a.sec, 6)
+      }
+      if (speed.method == "last to last") {
+        a.sec <- as.vector(difftime(movements$Last.time[1], origin.time, units = "secs"))
+        my.dist <- dist.mat[movements$Last.station[1], origin.place]
+        movements$Average.speed.m.s[1] <- round(my.dist/a.sec, 6)
+      }
     }
   } else {
     movements$Time.travelling[1] <- NA
