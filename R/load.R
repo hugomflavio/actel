@@ -111,7 +111,7 @@ loadStudyData <- function(tz, override = NULL, start.time, stop.time, save.detec
     stop("Something went wrong when assigning recipient objects (unknownReceivers). If this error persists, contact the developer.\n", call. = FALSE)# nocov
   rm(recipient)
 
-  detections.list <- checkDetectionsBeforeRelease(input = detections.list, bio = bio)
+  detections.list <- checkDetectionsBeforeRelease(input = detections.list, bio = bio, discard.orphans = discard.orphans)
   appendTo(c("Screen", "Report"), "M: Data successfully imported!")
   return(list(bio = bio, sections = sections, deployments = deployments, spatial = spatial, dot = dot,
    arrays = arrays, dotmat = dotmat, dist.mat = dist.mat, invalid.dist = invalid.dist, 

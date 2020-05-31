@@ -808,36 +808,42 @@ includeUnknownReceiver <- function(spatial, deployments, unknown.receivers){
 #'
 #' @return A list containing the detections without invalid data.
 #' 
-checkDetectionsBeforeRelease <- function(input, bio){
+checkDetectionsBeforeRelease <- function(input, bio, discard.orphans = FALSE){
   appendTo("debug", "Running detectionBeforeReleaseCheck.")  
   remove.tag <- NULL
   link <- match(bio$Transmitter, names(input))
   for(i in seq_len(length(link))) {
     if (!is.na(link[i])) {
       if (any(to.remove <- !(input[[link[i]]]$Timestamp > bio$Release.date[i]))) {
-        appendTo(c("Screen", "Warning", "Report"), paste0("Fish ", names(input)[link[i]], " was detected before being released!"))
-        appendTo("Screen", paste0("  Release time: ", bio$Release.date[i]))
-        appendTo("Screen", paste0("  First detection time: ", input[[link[i]]]$Timestamp[1]))
-        appendTo("Screen", paste0("  Number of detections before release: ", sum(to.remove)))
-        message("")
-        appendTo("Screen", "You may either:\n  a) Stop the analysis and check the data;\n  b) Discard the before-release detections and continue.")
-        message("")
-        if (interactive()) { # nocov start
-          unknown.input = TRUE
-          while (unknown.input) {
-            decision <- commentCheck(line = "Decision:(a/b/comment) ", tag = bio$Transmitter[i])
-            if (decision == "a" | decision == "A") {
-              unknown.input = FALSE
-              emergencyBreak()
-              stop("Function stopped by user command.", call. = FALSE)
+        if (discard.orphans) {
+          appendTo(c("Screen", "Warning", "Report"), paste0("Fish ", names(input)[link[i]], " was detected before being released!"))
+          appendTo("Screen", paste0("  Release time: ", bio$Release.date[i]))
+          appendTo("Screen", paste0("  First detection time: ", input[[link[i]]]$Timestamp[1]))
+          appendTo("Screen", paste0("  Number of detections before release: ", sum(to.remove)))
+          message("\nPossible options:\n   a) Stop and double-check the data (recommended)\n   b) Discard orphan detections in this instance.\n   c) Discard orphan detections for all instances.\n")
+          if (interactive()) { # nocov start
+            unknown.input = TRUE
+            while (unknown.input) {
+              decision <- commentCheck(line = "Decision:(a/b/c/comment) ", tag = bio$Transmitter[i])
+              if (decision == "a" | decision == "A") {
+                unknown.input = FALSE
+                emergencyBreak()
+                stop("Function stopped by user command.", call. = FALSE)
+              }
+              if (decision == "b" | decision == "B")
+                unknown.input = FALSE
+              if (decision == "c" | decision == "C") {
+                unknown.input = FALSE
+                discard.orphans = TRUE
+              }
+              if (unknown.input)
+                message("Option not recognised, please input either 'a' or 'b'.")
             }
-            if (decision == "b" | decision == "B")
-              unknown.input = FALSE
-            if (unknown.input)
-              message("Option not recognised, please input either 'a' or 'b'.")
-          }
-          appendTo("UD", decision)
-        } # nocov end
+            appendTo("UD", decision)
+          } # nocov end
+        } else {
+          appendTo(c("Screen", "Warning", "Report"), paste0("Fish ", names(input)[link[i]], " was detected before being released!"))
+        }
         if (all(to.remove)) {
           appendTo(c("Screen", "Report"), paste0("ALL detections from Fish ", names(input)[link[i]], " were removed per user command."))
           remove.tag <- c(remove.tag, link[i])
