@@ -1054,7 +1054,7 @@ processVemcoFile <- function(input) {
   input[, "Signal"] <- unlist(lapply(transmitter_aux, function(x) x[3])) # extract only signal
   input[, "Receiver"] <- sapply(input$Receiver, function(x) tail(unlist(strsplit(x, "-")), 1)) # extract only the serial
   appendTo("Debug", "Done!")
-  colnames(input)[1] <- c("Timestamp")
+  colnames(input)[grep("^Date.and.Time", colnames(input))] <- c("Timestamp")
   colnames(input) <- gsub(" ", ".", colnames(input))
   if (any(grepl("^Sensor.Value$", colnames(input)))) {
     input <- input[, c("Timestamp", "Receiver", "CodeSpace", "Signal", "Sensor.Value", "Sensor.Unit")]  
