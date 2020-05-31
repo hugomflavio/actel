@@ -54,17 +54,29 @@
 #'  \item \code{status.df}: A data.frame containing summary information for each fish, including the
 #'   following columns:
 #'    \itemize{
-#'      \item \emph{Time.until.\[section\]}: Time spent between leaving one
-#'        section and reaching the next.
-#'      \item \emph{Speed.to.\[section\]}: Average speed from one section to the
-#'        next (if a distance matrix is provided)
+#'      \item \emph{Times.entered.\[section\]}: Number of times the fish was recorded
+#'        entering a given section.
+#'      \item \emph{Average.time.until.\[section\]}: Time spent between release
+#'        or leaving another section and reaching at the given section.
+#'      \item \emph{Average.speed.to.\[section\]}: Average speed from release or leaving
+#'        one section and reaching the given section (if speed.method = "last to first"),
+#'        or from release/leaving one section and leaving the given section (if speed.method
+#'        = "last to last").
+#'      \item \emph{First.array.\[section\]}: Array in which the fish was
+#'        first detected in a given section
 #'      \item \emph{First.station.\[section\]}: Standard name of the first station
 #'        where the fish was detected in a given section
-#'      \item \emph{Arrived.\[section\]}: Arrival time at a given section
-#'      \item \emph{Time.in.\[section\]}: Total time spent within a given section
+#'      \item \emph{First.arrived.\[section\]}: Very first arrival time at a given section
+#'      \item \emph{Average.time.in.\[section\]}: Average time spent within a given section
+#'        at each stay.
+#'      \item \emph{Average.speed.in.\[section\]}: Average speed within a given section
+#'        at each stay (only displayed if speed.method = "last to first").
+#'      \item \emph{Last.array.\[section\]}: Array in which the fish was
+#'        last detected in a given section
 #'      \item \emph{Last.station.\[section\]}: Standard name of the last station
 #'        where the fish was detected in a given section
-#'      \item \emph{Left.\[section\]}: Departure time from a given section
+#'      \item \emph{Last.left.\[section\]}: Very last departure time from a given section
+#'      \item \emph{Total.time.in\[section\]}: Total time spent in a given section
 #'      \item \emph{Very.last.array}: Last array where the fish was detected
 #'      \item \emph{Status}: Fate assigned to the fish
 #'      \item \emph{Valid.detections}: Number of valid detections

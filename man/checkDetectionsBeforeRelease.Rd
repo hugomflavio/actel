@@ -4,7 +4,7 @@
 \alias{checkDetectionsBeforeRelease}
 \title{Check if there are detections for the target tags before release.}
 \usage{
-checkDetectionsBeforeRelease(input, bio)
+checkDetectionsBeforeRelease(input, bio, discard.orphans = FALSE)
 }
 \arguments{
 \item{input}{The list of detections}

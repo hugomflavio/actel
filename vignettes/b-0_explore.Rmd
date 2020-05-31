@@ -149,12 +149,14 @@ Note:
 
 ### speed.method
 
-When calculating movement speeds from one array to the next, it is important to know if actel should count the time **from the last** detection in one array **to the first** detection in the next, or if you want actel to count the time **from the first detection** in one array  **to the first detection** in the next. This is what `speed.method` is doing. You can choose one of `"last to first"` or `"first to first"`. The example below illustrates the difference between both methods:
+When calculating movement speeds from one array to the next, it is important to know if actel should count the time **from the last detection** in the previous array **to the first detection** in the target array, or if you want actel to count the time **from the last detection** in the previous array  **to the last detection** in the target array. This is what `speed.method` is doing. You can choose one of `"last to first"` or `"last to last"`. The example below illustrates the difference between both methods:
 
 <img src="speed_method.svg" alt="drawing" width="680"/>
 
 Note:
   : If you do not supply a distance matrix, speeds cannot be calculated. Instead, the time difference will be displayed.
+
+There are two main consequences of choosing different options for speed.method. The first is that the "average.speed.m.s" column in the movement events will reflect the respective "Speed to X" in the graphic above. The second is only relevant during the migration analysis: if speed.method = "first to last", speed will be displayed in two columns in the `status.df` object: "Average.speed.to.[Section]" and "Average.speed.in.[Section]"; while if speed.method = "last to last", only the "Average.speed.to.[Section]" will be generated.
 
 ### speed.warning and speed.error
 
@@ -243,7 +245,7 @@ When the `report` option is activated, `auto.open` comes into play. If `auto.ope
 
 ### discard.orphans
 
-This is a flow optimization argument. When actel finds detections outside of the receiver deployment periods, be default, it will ask the user what to do (discard those detections or stop the analysis so the user can check the data). However, you can tell actel to automatically discard any orphan detections by setting `discard.orphans` to TRUE.
+This is a flow optimization argument. When actel finds detections outside of the receiver deployment periods, or that were recorded before their respective fish were released, by default, actel will ask the user what to do (discard those detections or stop the analysis so the user can check the data). However, you can tell actel to automatically discard any orphan detections by setting `discard.orphans` to TRUE.
 
 ### save.detections
 

@@ -4,7 +4,14 @@
 \alias{speedReleaseToFirst}
 \title{Calculate time and speed since release.}
 \usage{
-speedReleaseToFirst(fish, bio, movements, dist.mat, invalid.dist = FALSE)
+speedReleaseToFirst(
+  fish,
+  bio,
+  movements,
+  dist.mat,
+  speed.method,
+  invalid.dist = FALSE
+)
 }
 \arguments{
 \item{fish}{The tag ID of the fish currently being analysed}
@@ -14,6 +21,12 @@ speedReleaseToFirst(fish, bio, movements, dist.mat, invalid.dist = FALSE)
 \item{movements}{A list of movements for each target tag, created by groupMovements.}
 
 \item{dist.mat}{A matrix of the distances between the deployed ALS.}
+
+\item{speed.method}{Can take two forms: 'last to first' or 'last to last'.
+If 'last to first' (default), the last detection on the previous array is matched
+to the first detection on the target array to perform the calculations.
+If 'last to last', the last detection on ´the previous array is matched to the
+last detection on the target array to perform the calculations.}
 
 \item{invalid.dist}{Whether or not the distance matrix supplied is valid for the study area.}
 }

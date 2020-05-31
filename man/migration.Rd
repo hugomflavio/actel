@@ -12,7 +12,7 @@ migration(
   minimum.detections = 2,
   start.time = NULL,
   stop.time = NULL,
-  speed.method = c("last to first", "first to first"),
+  speed.method = c("last to first", "last to last"),
   speed.warning = NULL,
   speed.error = NULL,
   jump.warning = 2,
@@ -60,11 +60,11 @@ the analysis.}
 \code{stop.time} (in YYYY-MM-DD HH:MM:SS format) is not considered during
 the analysis.}
 
-\item{speed.method}{Can take two forms: 'last to first' or 'first to first'.
-If 'last to first' (default), the last detection on a given array is matched
-to the first detection on the next array to perform the calculations.
-If 'first to first', the first detection on a given array is matched to the
-first detection on the next array to perform the calculations.}
+\item{speed.method}{Can take two forms: 'last to first' or 'last to last'.
+If 'last to first' (default), the last detection on the previous array is matched
+to the first detection on the target array to perform the calculations.
+If 'last to last', the last detection on ´the previous array is matched to the
+last detection on the target array to perform the calculations.}
 
 \item{speed.warning}{If a fish moves at a speed equal or greater than
 \code{speed.warning} (in metres per second), a warning is issued. If left
@@ -111,7 +111,8 @@ the web browser will automatically be launched to open the report once the
 function terminates.}
 
 \item{discard.orphans}{Logical: Should actel automatically discard
-detections that do not fall within receiver deployment periods?}
+detections that do not fall within receiver deployment periods, or that
+were recorded before the respective fish were released?}
 
 \item{save.detections}{Logical: Should the processed detections be saved for
 future runs?}
@@ -151,17 +152,29 @@ A list containing:
 \item \code{status.df}: A data.frame containing summary information for each fish, including the
 following columns:
 \itemize{
-\item \emph{Time.until.[section]}: Time spent between leaving one
-section and reaching the next.
-\item \emph{Speed.to.[section]}: Average speed from one section to the
-next (if a distance matrix is provided)
+\item \emph{Times.entered.[section]}: Number of times the fish was recorded
+entering a given section.
+\item \emph{Average.time.until.[section]}: Time spent between release
+or leaving another section and reaching at the given section.
+\item \emph{Average.speed.to.[section]}: Average speed from release or leaving
+one section and reaching the given section (if speed.method = "last to first"),
+or from release/leaving one section and leaving the given section (if speed.method
+= "last to last").
+\item \emph{First.array.[section]}: Array in which the fish was
+first detected in a given section
 \item \emph{First.station.[section]}: Standard name of the first station
 where the fish was detected in a given section
-\item \emph{Arrived.[section]}: Arrival time at a given section
-\item \emph{Time.in.[section]}: Total time spent within a given section
+\item \emph{First.arrived.[section]}: Very first arrival time at a given section
+\item \emph{Average.time.in.[section]}: Average time spent within a given section
+at each stay.
+\item \emph{Average.speed.in.[section]}: Average speed within a given section
+at each stay (only displayed if speed.method = "last to first").
+\item \emph{Last.array.[section]}: Array in which the fish was
+last detected in a given section
 \item \emph{Last.station.[section]}: Standard name of the last station
 where the fish was detected in a given section
-\item \emph{Left.[section]}: Departure time from a given section
+\item \emph{Last.left.[section]}: Very last departure time from a given section
+\item \emph{Total.time.in[section]}: Total time spent in a given section
 \item \emph{Very.last.array}: Last array where the fish was detected
 \item \emph{Status}: Fate assigned to the fish
 \item \emph{Valid.detections}: Number of valid detections

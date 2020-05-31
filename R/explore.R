@@ -10,7 +10,8 @@
 #'  the web browser will automatically be launched to open the report once the 
 #'  function terminates.
 #' @param discard.orphans Logical: Should actel automatically discard
-#'  detections that do not fall within receiver deployment periods?
+#'  detections that do not fall within receiver deployment periods, or that
+#'  were recorded before the respective fish were released?
 #' @param exclude.tags A vector of tags that should be excluded from the 
 #'  detection data before any analyses are performed. Intended to be used if 
 #'  stray tags from a different code space but with the same signal as a target
@@ -53,11 +54,11 @@
 #' @param speed.error If a fish moves at a speed equal or greater than 
 #'  \code{speed.error} (in metres per second), user intervention is suggested. 
 #'  If left NULL (default), user intervention is never suggested. 
-#' @param speed.method Can take two forms: 'last to first' or 'first to first'. 
-#'  If 'last to first' (default), the last detection on a given array is matched 
-#'  to the first detection on the next array to perform the calculations. 
-#'  If 'first to first', the first detection on a given array is matched to the
-#'  first detection on the next array to perform the calculations.
+#' @param speed.method Can take two forms: 'last to first' or 'last to last'. 
+#'  If 'last to first' (default), the last detection on the previous array is matched 
+#'  to the first detection on the target array to perform the calculations. 
+#'  If 'last to last', the last detection on ´the previous array is matched to the
+#'  last detection on the target array to perform the calculations.
 #' @param speed.warning If a fish moves at a speed equal or greater than 
 #'  \code{speed.warning} (in metres per second), a warning is issued. If left 
 #'  NULL (default), no warnings are issued.

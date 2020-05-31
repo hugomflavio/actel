@@ -99,9 +99,7 @@ If you provided intra-array estimates in the [replicates argument](c-0_migration
 
 The migration function saves [outputs similar to those saved by explore](b-2_explore_results.html#results-in-your-working-directory). The main differences are in the two elements listed below.
 
-### If you said "y" during the relevant analysis questions:
-
-#### actel_migration_results.RData
+### actel_migration_results.RData
 
 ``
 Would you like to save a copy of the results to actel_migration_results.RData?(y/N) 
@@ -110,7 +108,7 @@ Would you like to save a copy of the results to actel_migration_results.RData?(y
 To make sure that you don't accidentally lose your results, you can save them right away in the current directory. The results present in this file are the same as the ones you obtain directly in your R console (see above). It differs from the explore() output both in name and content.
 
 
-#### actel_migration_report.html (if report = TRUE)
+### actel_migration_report.html (if report = TRUE)
 
 This is the main non-R output. If you activated the `report` option, actel will compile an html report for you. The migration report contains the same sections as the explore report, plus the following:
 
@@ -118,9 +116,13 @@ This is the main non-R output. If you activated the `report` option, actel will 
 
   Here you can see how efficient your receiver arrays were at detecting the fish that moved past them. These results can also be found in the `overall.CJS` object, which is in your results in R. If you supplied replicates, the results of the intra-array estimations will also show up here.
 
-2. **Survival**
+2. **Section survival**
 
   The survival is displayed both as a table and a figure, both of which use the content of the `section.overview` object, which is in your results in R.
+
+2. **Last seen arrays**
+
+  This graphic compiles the information on where each fish was last seen. The information used for this graphic can be found in the `status.df` object, which is in your results in R (more specifically in the 'Very.last.array' column).
 
 3. **Progression**
 

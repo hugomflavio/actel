@@ -47,7 +47,8 @@ tag are detected in the study area.}
 invalidate potential efficiency peers? See the vignettes for more details.}
 
 \item{discard.orphans}{Logical: Should actel automatically discard
-detections that do not fall within receiver deployment periods?}
+detections that do not fall within receiver deployment periods, or that
+were recorded before the respective fish were released?}
 }
 \value{
 A list containing:

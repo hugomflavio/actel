@@ -48,39 +48,6 @@ Note :
 
 ### Exceptions while importing the data:
 
-<!-- 1. **The target path does not exist** -->
-
-```
-Error: The selected path does not exist. Details:
-  Current directory: [...]
-  Path: [...]
-You may either:
-  a) continue the analysis in the current directory;
-  b) restart the function.
-Decision:(a/b) 
-```
-
-It would appear that you asked actel to move to a folder that does not exist. Revise the `path` argument and make sure you typed the path correctly. If the problem persists, try moving to the target directory before hand (e.g. with `setwd()`) and running actel without setting a `path`.
-
-----------------------
-
-<!-- 1. **Report exceptions** -->
-
-```
-Warning: 'Report' option can only be activated if 'ggplot2' and 'reshape2' are installed. Please install these. Deactivating 'Report' for the current job.
-```
-
-Actel could not access libraries ggplot2 and reshape2. Please install these so actel can draw graphics.
-
-----------------------
-
-```
-Warning: 'Report' directory already present. Overwriting files already present.
-```
-
-If you are running actel for the second time in a given folder, the 'Report' directory may have already been created. If the folder exists, previously present files may get overwritten.
-
-----------------------
 
 <!-- 1. **Some files are missing** -->
 
@@ -197,10 +164,8 @@ Similarly to above, it seems there is a mismatch between the release sites repor
 ----------------------
 
 ````
-Error: There is a mismatch between the release sites reported and the release locations for the fish.
-       Release sites listed in the spatial.csv file: [...]
-       Sites listed in the biometrics.csv file 'Release.site' column: [...]
-Error :The release names should be identical in the spatial.csv file and in the biometrics.csv file.
+Error: The following release sites were listed in the biometrics.csv file but are not part of the release sites listed in the spatial.csv file: [...]
+Please include the missing release sites in the spatial.csv file.
 ````
 
 Release sites were indicated both in the spatial.csv file and in the biometrics.csv file, but the names differ between them. Please correct the input data before continuing. You can use the additional information displayed in the error to help you find the source of the issue.
@@ -208,10 +173,8 @@ Release sites were indicated both in the spatial.csv file and in the biometrics.
 ----------------------
 
 ````
-Error: There is a mismatch between the expected first array of a release site and the list of arrays.
-       Arrays listed in the spatial.csv file:
-       Expected first arrays of the release sites:
-Error: The expected first arrays should match the arrays where stations where deployed in the spatial.csv file.
+Error: Not all the expected first arrays of the release sites exist.\nUnknown expected first arrays: [...].
+In the spatial.csv file, the expected first arrays of the release sites should match the arrays where hydrophone stations where deployed.
 ````
 
 It would appear that something is wrong in the "Array" column of the spatial.csv file. The arrays listed in the release sites must match those used in the stations.
@@ -355,11 +318,12 @@ Error: [#] detections for receiver [...] do not fall within deployment periods.
 
 Possible options:
    a) Stop and double-check the data (recommended)
-   b) Discard orphan detections.
-Which option should be followed?(a/b)
+   b) Discard orphan detections in this instance.
+   c) Discard orphan detections for all instances.
+Which option should be followed?(a/b/c)
 ````
 
-It would appear that some detections for a receiver were registered when the receiver was not deployed. If those detections are real, you should edit the deployment times for the receiver. Otherwise, if those are erroneous detections (e.g. recorded during transport or tag activation), then you can simply discard them.
+It would appear that some detections for a receiver were registered when the receiver was not deployed. If those detections are real, you should edit the deployment times for the receiver. Otherwise, if those are erroneous detections (e.g. recorded during transport or tag activation), then you can simply discard them. If you already know that these exceptions are not a problem, you can select option "c", or run the the analysis with `discard.orphans = TRUE`.
 
 ----------------------
 
@@ -402,11 +366,12 @@ Error: Fish R64K-1111 was detected before being released!
   First detection time: 2018-04-10 09:33:02
   Number of detections before release: 1
 
-You may either:
-  a) Stop the analysis and check the data;
-  b) Discard the before-release detections and continue.
+Possible options:
+   a) Stop and double-check the data (recommended)
+   b) Discard orphan detections in this instance.
+   c) Discard orphan detections for all instances.
 
-Decision:(a/b/comment) 
+Decision:(a/b/c/comment) 
 ```
 
 Usually this can mean one of three things: The first and most obvious is that there is a mistake in the release time information. Secondly, either that tag may have been used as a tester before being implanted or one receiver may have been used to activate the tags before deployment. Lastly, the tag and the receiver may have been in close range in transport and the receiver has picked up some detections on the way.
@@ -534,7 +499,7 @@ Warning: Inter-section backwards movements were detected for Fish [...].
 Warning: Inter-section backwards movements were detected for Fish [...] and the last events are not ordered!
 ```
 
-A fish moving a bit up and down is not much to worry about. But if these backward movements involve moving from one section of your study area to another (i.e. a fish migrating downstream moved to the sea and then back to the river), actel will issue a warning. You must then verify the movements and take action.
+A fish moving a bit up and down is not much to worry about. But if these backward movements involve moving from one section of your study area to another (i.e. a fish migrating downstream moved to the sea and then back to the river), actel will issue a warning. You must then verify the movements and take action if desired.
 
 You can [read more about backward movements here.](c-1_migration_processes.html#backwards-movements)
 
