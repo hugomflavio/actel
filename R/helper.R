@@ -848,11 +848,11 @@ transitionLayer <- function(path = ".", shape, size, EPSGcode, coord.x = NULL, c
 fail due to lack of free RAM to allocate the results. If you really want to use this pixel
 size, rerun the function with force = TRUE.\n", call. = FALSE)
   } else {
-    ras <- raster::raster(nrow = pixel.res["y"], ncol = pixel.res["x"], crs = raster::crs(shape)) # create a recipient raster
+    ras <- suppressWarnings(raster::raster(nrow = pixel.res["y"], ncol = pixel.res["x"], crs = raster::crs(shape))) # create a recipient raster
     raster::extent(ras) <- raster::extent(shape) #Make the raster have the same extent as the shapefile
     #### "Burn" the shapefile into the raster
     message("M: Constructing the transition layer. This process may take several minutes depending on the study area size and chosen pixel size."); flush.console()
-    shape.mask <- raster::rasterize(shape, ras)
+    shape.mask <- suppressWarnings(raster::rasterize(shape, ras))
     project.raster <- is.na(shape.mask)
     project.raster[project.raster == 0] <- NA # make land impossible to cross
     #### The transition layer will be used as the shape for calculating least-cost distance
