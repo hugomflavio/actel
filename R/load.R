@@ -1030,7 +1030,7 @@ processThelmaOldFile <- function(input) {
   appendTo("debug", "Running processThelmaOldFile.")
   input <- as.data.frame(input)
   output <- data.table(
-    Timestamp = fasttime::fastPOSIXct(sapply(input[, 1], function(x) gsub("Z", "", gsub("T", " ", x))), tz = "UTC"),
+    Timestamp = fasttime::fastPOSIXct(sapply(input[, grep("^Date.and.Time", colnames(input))], function(x) gsub("Z", "", gsub("T", " ", x))), tz = "UTC"),
     Receiver = input$`TBR Serial Number`,
     CodeSpace = input$CodeType,
     Signal = input$Id,
@@ -1053,7 +1053,7 @@ processThelmaNewFile <- function(input) {
   appendTo("debug", "Running processThelmaNewFile.")
   input <- as.data.frame(input)
   output <- data.table(
-    Timestamp = fasttime::fastPOSIXct(sapply(input[, 1], function(x) gsub("Z", "", gsub("T", " ", x))), tz = "UTC"),
+    Timestamp = fasttime::fastPOSIXct(sapply(input[, grep("^Date.and.Time", colnames(input))], function(x) gsub("Z", "", gsub("T", " ", x))), tz = "UTC"),
     Receiver = input$Receiver,
     CodeSpace = sapply(input$Protocol, function(x) unlist(strsplit(x, "-", fixed = TRUE))[1]),
     Signal = input$ID,
