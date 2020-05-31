@@ -1,5 +1,5 @@
 ---
-title: "5) Manual mode"
+title: "5.0) Manual mode"
 author: "Hugo Flávio"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette

@@ -47,6 +47,7 @@ Enhancements:
   * Verify the names of the release site arrays as soon as the spatial.csv is loaded.
   * Added support for timestamps using a "T" separator between date and time in the biometrics and deployments files.
   * new 'discard.orphans' argument allows the user to automatically discard all detections that do not fall within receiver deployment periods.
+  * Users can now create and use a generic detections file. Details for the format of this file are provided in the "Detections" section of vignette 1.0.
 
 ## actel 0.1.3
 

@@ -1,5 +1,5 @@
 ---
-title: "6) Beyond the three main analyses"
+title: "6.0) Beyond the three main analyses"
 author: "Hugo Flávio"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette

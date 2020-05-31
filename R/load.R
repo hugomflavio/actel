@@ -930,6 +930,11 @@ compileDetections <- function(path = "detections", start.time = NULL, stop.time 
     aux <- data.table::fread(i, fill = TRUE, sep = ",", showProgress = FALSE)
     if(nrow(aux) > 0){
       unknown.file <- TRUE
+      if (unknown.file && (any(grepl("CodeSpace", colnames(aux))) & any(grepl("Signal", colnames(aux))))) {
+        appendTo("debug", paste0("File '", i, "' matches a Standard log."))
+        output <- processStandardFile(input = aux)
+        unknown.file <- FALSE
+      }
       if (unknown.file && any(grepl("CodeType", colnames(aux)))) {
         appendTo("debug", paste0("File '", i, "' matches a Thelma log."))
         output <- processThelmaOldFile(input = aux)
@@ -987,6 +992,27 @@ compileDetections <- function(path = "detections", start.time = NULL, stop.time 
   output <- convertTimes(input = output, start.time = start.time, 
     stop.time = stop.time, tz = tz)
 
+  return(output)
+}
+
+#' Standard detections file created for actel
+#' 
+#' @param input the detections data frame.
+#'
+#' @return A data frame of standardized detections from the input file.
+#'
+#' @keywords internal
+#' 
+processStandardFile <- function(input) {
+  appendTo("debug", "Running processStandardFile.")
+  input <- as.data.frame(input)
+  output <- data.table(
+    Timestamp = fasttime::fastPOSIXct(sapply(input$Timestamp, function(x) gsub("Z", "", gsub("T", " ", x))), tz = "UTC"),
+    Receiver = input$Receiver,
+    CodeSpace = input$CodeSpace,
+    Signal = input$Signal,
+    Sensor.Value = input$Sensor.Value,
+    Sensor.Unit = input$Sensor.Unit)
   return(output)
 }
 
