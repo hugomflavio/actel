@@ -815,8 +815,8 @@ checkDetectionsBeforeRelease <- function(input, bio, discard.orphans = FALSE){
   for(i in seq_len(length(link))) {
     if (!is.na(link[i])) {
       if (any(to.remove <- !(input[[link[i]]]$Timestamp > bio$Release.date[i]))) {
-        if (discard.orphans) {
-          appendTo(c("Screen", "Warning", "Report"), paste0("Fish ", names(input)[link[i]], " was detected before being released!"))
+        appendTo(c("Screen", "Warning", "Report"), paste0("Fish ", names(input)[link[i]], " was detected before being released!"))
+        if (!discard.orphans) {
           appendTo("Screen", paste0("  Release time: ", bio$Release.date[i]))
           appendTo("Screen", paste0("  First detection time: ", input[[link[i]]]$Timestamp[1]))
           appendTo("Screen", paste0("  Number of detections before release: ", sum(to.remove)))
@@ -841,8 +841,6 @@ checkDetectionsBeforeRelease <- function(input, bio, discard.orphans = FALSE){
             }
             appendTo("UD", decision)
           } # nocov end
-        } else {
-          appendTo(c("Screen", "Warning", "Report"), paste0("Fish ", names(input)[link[i]], " was detected before being released!"))
         }
         if (all(to.remove)) {
           appendTo(c("Screen", "Report"), paste0("ALL detections from Fish ", names(input)[link[i]], " were removed per user command."))
