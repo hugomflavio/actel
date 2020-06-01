@@ -1582,18 +1582,18 @@ excludeTags <- function(input, exclude.tags, silent){
   appendTo("debug", "Running excludeTags.")  
   if (length(exclude.tags) != 0) {
     link <- match(exclude.tags, names(input))
-    if (any(is.na(link))) {
-      missing.tags <- which(is.na(link))
+    logical_link <- !is.na(link)
+    if (any(!logical_link)) {
       appendTo(c("Screen", "Report", "Warning"), paste0("The user asked for ",
-        ifelse(length(missing.tags) > 1, "tags '", "tag '"),
-        paste(exclude.tags[missing.tags], collapse = "', '"),
+        ifelse(sum(!logical_link) > 1, "tags '", "tag '"),
+        paste(exclude.tags[!logical_link], collapse = "', '"),
         "' to be excluded from the analysis, but ",
-        ifelse(length(missing.tags) > 1, "these tags are", "this tag is"),
+        ifelse(sum(!logical_link) > 1, "these tags are", "this tag is"),
         " not present in the detections."))
-      link <- link[-missing.tags]
     }
-    if (!all(is.na(link))) {
-      appendTo(c("Screen", "Report"), paste0("M: Excluding tag(s) ", paste(exclude.tags[link], collapse = ", "), " from the analysis per used command (detections removed: ", paste(unlist(lapply(input[link], nrow)), collapse = ", "), ", respectively)."))
+    if (!all(!logical_link)) {
+      link <- link[!is.na(link)]
+      appendTo(c("Screen", "Report"), paste0("M: Excluding tag(s) ", paste(exclude.tags[logical_link], collapse = ", "), " from the analysis per used command (detections removed: ", paste(unlist(lapply(input[link], nrow)), collapse = ", "), ", respectively)."))
       collectStrays(input = input[link], restart = TRUE)
       return(input[-link])
     } else {
