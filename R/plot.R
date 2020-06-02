@@ -5,12 +5,12 @@
 #' 
 #' @param input The results of an actel analysis (either explore, migration or residency).
 #' @param tag The transmitter to be plotted.
-#' @param title An optional title for the plot. If left emptry, a default title will be added.
-#' @param xlab,ylab Optional axis names for the plot. If left emptry, default axis names will be added.
+#' @param title An optional title for the plot. If left empty, a default title will be added.
+#' @param xlab,ylab Optional axis names for the plot. If left empty, default axis names will be added.
 #' @param col An optional colour scheme for the detections. If left empty, default colours will be added.
 #' @param array.alias A named vector of format c("old_array_name" = "new_array_name") to replace 
 #'  default array names with user defined ones.
-#' @param frame.warning Logical. By default, actel highlights manually changed or overriden tags in yellow
+#' @param frame.warning Logical. By default, actel highlights manually changed or overridden tags in yellow
 #'  and red plot frames, respectively. Set to FALSE to deactivate this behaviour.
 #' 
 #' @return A ggplot object.
