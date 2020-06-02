@@ -50,6 +50,7 @@ Enhancements:
   * new 'discard.orphans' argument allows the user to automatically discard all detections that do not fall within receiver deployment periods.
   * Users can now create and use a generic detections file. Details for the format of this file are provided in the "Detections" section of vignette 1.0.
   * migration() has been upgraded to be capable of handling backwards movements. The status.df has also been improved, and a new graphic was included to the report (last array).
+  * new `plotMoves` function allows the user to create personalised detection plots for specific tags.
 
 ## actel 0.1.3
 
