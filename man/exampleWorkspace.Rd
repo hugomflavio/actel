@@ -23,7 +23,10 @@ Note: This function will create a new sub-directory called 'exampleWorkspace'
 in the current directory and write files into it.
 }
 \examples{
-\dontrun{
+# Move to a temporary working directory
+old.wd <- getwd()
+setwd(tempdir())
+
 # deploy a minimal dataset to try actel!
 exampleWorkspace()
 
@@ -39,6 +42,8 @@ names(results)
 # you can also try running the migration and residency analyses
 # by changing the function name and adding sections = c('River', 'Fjord', 'Sea')
 # to the function call.
-}
+
+# return to original directory
+setwd(old.wd)
 
 }

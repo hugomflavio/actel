@@ -13,22 +13,29 @@
 #' @inheritParams explore
 #' 
 #' @examples
-#' \dontrun{
-#' # If needed, create an example workspace
+#' \donttest{
+#' # Start by moving to a temporary directory
+#' old.wd <- getwd()
+#' setwd(tempdir())
+#' 
+#' # Deploy the example workspace
 #' exampleWorkspace()
 #' 
-#' # Move your R session into your target folder (e.g. "exampleWokspace")
+#' # Move your R session into the example workspace
 #' setwd("exampleWorkspace")
 #' 
-#' # Run the residency analysis. Ensure the tz argument 
+#' # run the residency analysis. Ensure the tz argument 
 #' # matches the time zone of the study area and that the
 #' # sections match your array names. The line below works 
-#' for the example data.
+#' # for the example data.
 #' results <- residency(tz = "Europe/Copenhagen", sections = c("River", "Fjord", "Sea"))
 #' 
-#' # to obtain an HTML report, run the analysis 
-#' # with report = TRUE, i.e.:
+#' # to obtain an HTML report, run the 
+#' # analysis with report = TRUE, i.e.:
 #' results <- residency(tz = "Europe/Copenhagen", sections = c("River", "Fjord", "Sea"), report = TRUE)
+#' 
+#' # return to original working directory
+#' setwd(old.wd)
 #' }
 #' 
 #' @return A list containing:

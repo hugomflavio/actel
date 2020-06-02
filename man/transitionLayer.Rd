@@ -51,10 +51,12 @@ It is highly recommended to read the vignette regarding distances matrix before 
 You can find it by running \code{vignette('a-2_distances_matrix', 'actel')} or \code{browseVignettes('actel')}
 }
 \examples{
-\dontrun{
-# Assuming a shapefile was saved to 'shapefile.shp' in the current
-# working directory
-x <- transitionLayer("shapefile.shp", size = 20, EPSGcode = 32362)
+\donttest{
+# Fetch actel's example shapefile location
+aux <- system.file("example_shapefile", package = "actel")[1]
+
+# import the shape file
+x <- transitionLayer(path = aux, shape = "example_shapefile.shp", size = 20, EPSGcode = 32632)
 }
 
 }

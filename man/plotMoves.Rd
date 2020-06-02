@@ -40,19 +40,16 @@ The output of plotMoves is a ggplot object, which means you can then use it in c
 with other ggplot functions, or even together with other packages such as patchwork.
 }
 \examples{
-\dontrun{
-# Assuming 'results' is the output of an actel analysis
-# and the tag 'R64K-1995' is part of the target tags.
-plotMoves(results, 'R64K-1995')
+# Using the example results that come with actel
+plotMoves(example.results, 'R64K-4451')
 
 # Because plotMoves returns a ggplot object, you can store
 # it and edit it manually, e.g.:
 library(ggplot2)
-p <- plotMoves(results, 'R64K-1995')
+p <- plotMoves(example.results, 'R64K-4451')
 p <- p + xlab("changed the x axis label a posteriori")
 p
 
 # You can also save the plot using ggsave!
-}
 
 }

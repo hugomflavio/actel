@@ -23,11 +23,15 @@
 #' @inheritParams explore
 #' 
 #' @examples
-#' \dontrun{
-#' # If needed, create an example workspace
+#' \donttest{
+#' # Start by moving to a temporary directory
+#' old.wd <- getwd()
+#' setwd(tempdir())
+#' 
+#' # Deploy the example workspace
 #' exampleWorkspace()
 #' 
-#' # Move your R session into your target folder (e.g. "exampleWokspace")
+#' # Move your R session into the example workspace
 #' setwd("exampleWorkspace")
 #' 
 #' # run the migration analysis. Ensure the tz argument 
@@ -39,6 +43,9 @@
 #' # to obtain an HTML report, run the 
 #' # analysis with report = TRUE, i.e.:
 #' results <- migration(tz = "Europe/Copenhagen", sections = c("River", "Fjord", "Sea"), report = TRUE)
+#' 
+#' # return to original working directory
+#' setwd(old.wd)
 #' }
 #' 
 #' @return A list containing:

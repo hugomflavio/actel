@@ -476,23 +476,20 @@ clearWorkspace <- function(skip = NA){
 #' if "one" and type is "departure", the very last departure is returned.
 #' 
 #' @examples
-#' \dontrun{
-#' # Assuming x is the output of explore, migration or 
-#' # residency, run:
-#' getTimes(x)
+#' # using the example results loaded with actel
+#' getTimes(example.results)
 #' 
 #' # You can specifcy which events to extract with 'event.type'
-#' getTimes(x, event.type = "arrival")
+#' getTimes(example.results, event.type = "arrival")
 #' # or
-#' getTimes(x, event.type = "departure")
+#' getTimes(example.results, event.type = "departure")
 #' 
 #' # and also how many events per fish.
-#' getTimes(x, n.events = "first")
+#' getTimes(example.results, n.events = "first")
 #' # or
-#' getTimes(x, n.events = "all")
+#' getTimes(example.results, n.events = "all")
 #' # or
-#' getTimes(x, n.events = "last")
-#' }
+#' getTimes(example.results, n.events = "last")
 #' 
 #' @return A data frame with the timestamps for each fish (rows) and array (columns)
 #' 
@@ -698,10 +695,12 @@ timesToCircular <- function(x, by.group = FALSE) {
 #'  on one or both axes?
 #' 
 #' @examples
-#' \dontrun{
-#' # Assuming a shapefile was saved to 'shapefile.shp' in the current
-#' # working directory
-#' x <- transitionLayer("shapefile.shp", size = 20, EPSGcode = 32362)
+#' \donttest{
+#' # Fetch actel's example shapefile location
+#' aux <- system.file("example_shapefile", package = "actel")[1]
+#' 
+#' # import the shape file
+#' x <- transitionLayer(path = aux, shape = "example_shapefile.shp", size = 20, EPSGcode = 32632)
 #' }
 #' 
 #' @return A TransitionLayer object.
@@ -720,7 +719,7 @@ transitionLayer <- function(path = ".", shape, size, EPSGcode, coord.x = NULL, c
     stop(paste0("This function requires packages '", paste(c("raster", "gdistance", "sp", "tools", "rgdal")[missing.packages], collapse = "', '"), 
       "' to operate. Please install ", ifelse(sum(missing.packages) > 1, "them", "it"), " before proceeding.\n"), call. = FALSE)
   }
-  directions <- as.character(directions)
+  directions <- as.character(directions[1])
   directions <- match.arg(directions)
 
   if (!is.numeric(EPSGcode))
@@ -799,19 +798,19 @@ transitionLayer <- function(path = ".", shape, size, EPSGcode, coord.x = NULL, c
     ymin <- min(spatial[, xy[2]]) - size
 
     if (shape@bbox[1, 1] > xmin) {
-      message("Extending shape's minimum X range to ensure the stations fit in the range."); flush.console()
+      message("Extending shape's minimum X range with open water to ensure the stations fit in the range."); flush.console()
       shape@bbox[1, 1] <- xmin
     }
     if (shape@bbox[1, 2] < xmax) {
-      message("Extending shape's maximum X range to ensure the stations fit in the range."); flush.console()
+      message("Extending shape's maximum X range with open water to ensure the stations fit in the range."); flush.console()
       shape@bbox[1, 2] <- xmax
     }
     if (shape@bbox[2, 1] > ymin) {
-      message("Extending shape's minimum Y range to ensure the stations fit in the range."); flush.console()
+      message("Extending shape's minimum Y range with open water to ensure the stations fit in the range."); flush.console()
       shape@bbox[2, 1] <- ymin
     }
     if (shape@bbox[2, 2] < ymax) {
-      message("Extending shape's maximum Y range to ensure the stations fit in the range."); flush.console()
+      message("Extending shape's maximum Y range with open water to ensure the stations fit in the range."); flush.console()
       shape@bbox[2, 2] <- ymax
     }
   }
@@ -881,19 +880,34 @@ size, rerun the function with force = TRUE.\n", call. = FALSE)
 #' @param actel Logical: Should the distance matrix be optimized for actel? Defaults to TRUE.
 #'
 #' @examples
-#' \dontrun{
-#' # Assuming a shapefile was saved to 'shapefile.shp' in the current
-#' # working directory
-#' x <- transitionLayer("shapefile.shp", size = 20, EPSGcode = 32362)
+#' \donttest{
+#' # move to a temporary directory
+#' old.wd <- getwd()
+#' setwd(tempdir())
 #' 
-#' # Assuming there is a 'spatial.txt' file in the current directory,
-#' # with a 'x' and 'y' column specifying coordinates in the same system
-#' # coordinate system as the original shapefile.
+#' # Fetch actel's example shapefile location
+#' aux <- system.file("example_shapefile", package = "actel")[1]
+#' 
+#' # create a temporary spatial.csv file
+#' write.csv(example.spatial, file = "spatial.csv", row.names = FALSE)
+#' 
+#' # import the shape file and use the spatial.csv file to check
+#' # the extents.
+#' x <- transitionLayer(path = aux, shape = "example_shapefile.shp", 
+#' coord.x = "x", coord.y = "y", size = 20, EPSGcode = 32632)
+#' 
+#' # compile the distances matrix. Columns x and y in the spatial dataframe
+#' # contain the coordinates of the stations and release sites.
 #' distancesMatrix(x, coord.x = 'x', coord.y = 'y', EPSGcode = 32632)
 #' 
 #' # Alternatively, if you want to calculate a distances matrix that is not
 #' # optimised for future actel analyses, you can set 'actel' to FALSE and 
-#' # determine the 'starters', 'targets' and 'id.col' manually.
+#' # set at least a data frame for the starters. e.g.
+#' distancesMatrix(x, coord.x = 'x', coord.y = 'y', EPSGcode = 32632, 
+#'  starters = example.spatial, actel = FALSE)
+#' 
+#' # return to original directory
+#' setwd(old.wd)
 #' }
 #' 
 #' @return A matrix with the distances between each pair of points.

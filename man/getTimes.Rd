@@ -31,22 +31,19 @@ A data frame with the timestamps for each fish (rows) and array (columns)
 Extract timestamps from the analysis results.
 }
 \examples{
-\dontrun{
-# Assuming x is the output of explore, migration or 
-# residency, run:
-getTimes(x)
+# using the example results loaded with actel
+getTimes(example.results)
 
 # You can specifcy which events to extract with 'event.type'
-getTimes(x, event.type = "arrival")
+getTimes(example.results, event.type = "arrival")
 # or
-getTimes(x, event.type = "departure")
+getTimes(example.results, event.type = "departure")
 
 # and also how many events per fish.
-getTimes(x, n.events = "first")
+getTimes(example.results, n.events = "first")
 # or
-getTimes(x, n.events = "all")
+getTimes(example.results, n.events = "all")
 # or
-getTimes(x, n.events = "last")
-}
+getTimes(example.results, n.events = "last")
 
 }

@@ -1,3 +1,49 @@
+## Package resubmission (4th revision)
+
+This is a resubmission. As requested by Martina Schmirl,
+in this version I have:
+
+* Created an example.results object and deployed an example 
+shapefile (in 'inst/example_shapefile') to remove all instances
+of \dontrun{} in the examples. Some examples require moving to
+tempdir() to avoid writing in the user's home directory, but 
+that is always reversed at the end of the example.
+
+* Fixed a missing comment sign in an example as part of the
+restructuring done above.
+
+* The reviewer made a coment regarding changing options(), working
+directories or par(). All potentially troublesome instances of
+this have been fixed in an earlier revision round, so I believe 
+the reviewer was just reminding me to do the same in the examples, 
+which I did.
+
+* The reviewer commented regarding modifying the global 
+environment (e.g. by using <<-) in the package's functions.
+I have repeatedly used "<<-" within lapply loops, but these
+only bring the respective variables higher within the function
+being carried out, never bleeding out to the global environment.
+The only instance where "<<-" is not used within a lapply loop
+is in "btn_function", a child function of "graphicalInvalidate".
+However, this btn_function only works within graphicalInvalidate
+and, as such, the respective variable is only transported into the
+master function, and never into the global environment.
+
+I have throughly searched for "<<" instances in my code before
+writing this reply, but if I have missed something, I would be
+really grateful if you could point out the exception location
+more specifically.
+
+* In parallel with the revisions, I have merged a few updates,
+The most relevant including a new internal function (processStandarFile)
+and a new exported function (plotMoves). Additionally, a new
+argument was added to explore(), residency() and migration().
+These updates should not have any impact on the issues raised 
+before. In particular, I have ensured that plotMoves contains
+working examples, does not change options, and does not change
+the user's global environment.
+
+
 ## Package resubmission (3rd revision)
 
 This is a resubmission. As requested by Swetlana Herbrandt,

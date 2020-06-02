@@ -105,17 +105,8 @@ cjs.results <- dualArrayCJS(x)
 # These cjs results can be used in advEfficiency
 advEfficiency(cjs.results)
 
-\dontrun{
-# Examples to run on the output of actel:
-
-# Assuming the object 'results' is the output of a migration analysis.
-advEfficiency(results$overall.CJS)
-
-# Assuming the object 'results' is the output of a residency analysis.
-advEfficiency(results$efficiency)
-
-# Assuming intra-array estimates were calculated for array A1.
-advEfficiency(results$intra.array.CJS$A1)
-}
+# advEfficiency can also be run with the output from the main analyses.
+# the example.results dataset is the output of a migration analysis
+advEfficiency(example.results$overall.CJS)
 
 }

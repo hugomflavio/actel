@@ -47,7 +47,7 @@ test_that("transformSpatial handles release site mismatches properly and deliver
 
 	expect_equal(as.character(output$spatial$release.sites$Array), "River1")
 
-	xspatial <- spatial[-18, -5]
+	xspatial <- spatial[-18, -7]
 	xspatial$Array <- factor(xspatial$Array, levels = levels(output$spatial$stations$Array))
 	expect_equal(output$spatial$stations, xspatial)
 

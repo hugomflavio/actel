@@ -46,22 +46,7 @@ For more details about the original functions, visit the circular package homepa
 }
 \examples{
 # The output of timesToCircular can be used as an input to plotTimes.
-x <- data.frame(ID = c(1:5), 
- Group = c("A", "A", "B", "B", "B"), 
- A1 = as.POSIXct(
-   c("2019-01-03 11:21:12",
-     "2019-01-04 12:22:21",
-     "2019-01-05 13:31:34",
-     "2019-01-06 14:32:43",
-     "2019-01-07 15:23:52")),
- A2 = as.POSIXct(
-   c("2019-01-08 16:51:55",
-     "2019-01-09 17:42:42",
-     "2019-01-10 18:33:33",
-     "2019-01-11 19:24:32",
-     "2019-01-12 20:15:22")),
- stringsAsFactors = TRUE)
-
+x <- getTimes(example.results, location = "River1", n.events = "first", event.type = "arrival")
 times <- timesToCircular(x)
 
 # plot times

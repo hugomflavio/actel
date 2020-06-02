@@ -27,7 +27,7 @@ test_that("loadSpatial stops if columns are missing or duplicated", {
 	expect_equal(colnames(loadSpatial())[1],"Station.name", fixed = TRUE)
 
 	spatial <- example.spatial
-	colnames(spatial)[4] <- "test"
+	colnames(spatial)[6] <- "test"
 	write.csv(spatial, "spatial.csv", row.names = FALSE)
 	expect_error(loadSpatial(),
 		"The spatial.csv file must contain an 'Array' column.", fixed = TRUE)
@@ -57,10 +57,10 @@ test_that("loadSpatial responds correctly if data is missing or badly formatted"
 		"M: Replacing spaces in array names to prevent function failure.", fixed = TRUE)
 	expect_equal(output$Array[1], "River_0_a")
 
-	write.csv(example.spatial[,-5], "spatial.csv", row.names = FALSE)
+	write.csv(example.spatial[,-7], "spatial.csv", row.names = FALSE)
 	expect_message(loadSpatial(),
 		"M: No 'Type' column found in the spatial.csv file. Assigning all rows as hydrophones.", fixed = TRUE)
-	write.csv(example.spatial[,-5], "spatial.csv", row.names = FALSE)
+	write.csv(example.spatial[,-7], "spatial.csv", row.names = FALSE)
 	expect_message(loadSpatial(),
 		"M: No 'Type' column found in the spatial.csv file. Assigning all rows as hydrophones.", fixed = TRUE)
 

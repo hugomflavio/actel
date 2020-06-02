@@ -201,19 +201,19 @@ will artificially add water space around the shape file.", fixed = TRUE)
 		test_that("transitionLayer expands the grid range if the spatial objects are outside the shape range.", {
 			expect_message(transitionLayer(path = tests.home, shape = "aux_transitionLayer.shp", size = 10, EPSGcode = 32632, 
 					coord.x = "x.32632", coord.y = "y.32632", directions = 4, force = FALSE),
-			"Extending shape's minimum X range to ensure the stations fit in the range.", fixed = TRUE)
+			"Extending shape's minimum X range with open water to ensure the stations fit in the range.", fixed = TRUE)
 
 			expect_message(transitionLayer(path = tests.home, shape = "aux_transitionLayer.shp", size = 10, EPSGcode = 32632, 
 					coord.x = "x.32632", coord.y = "y.32632", directions = 4, force = FALSE),
-			"Extending shape's maximum X range to ensure the stations fit in the range.", fixed = TRUE)
+			"Extending shape's maximum X range with open water to ensure the stations fit in the range.", fixed = TRUE)
 
 			expect_message(transitionLayer(path = tests.home, shape = "aux_transitionLayer.shp", size = 10, EPSGcode = 32632, 
 					coord.x = "x.32632", coord.y = "y.32632", directions = 4, force = FALSE),
-			"Extending shape's minimum Y range to ensure the stations fit in the range.", fixed = TRUE)
+			"Extending shape's minimum Y range with open water to ensure the stations fit in the range.", fixed = TRUE)
 
 			expect_message(transitionLayer(path = tests.home, shape = "aux_transitionLayer.shp", size = 10, EPSGcode = 32632, 
 					coord.x = "x.32632", coord.y = "y.32632", directions = 4, force = FALSE),
-			"Extending shape's maximum Y range to ensure the stations fit in the range.", fixed = TRUE)
+			"Extending shape's maximum Y range with open water to ensure the stations fit in the range.", fixed = TRUE)
 		})
 
 		file.remove("spatial.csv")

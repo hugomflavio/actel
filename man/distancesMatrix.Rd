@@ -44,19 +44,34 @@ It is highly recommended to read the vignette regarding distances matrix before 
 You can find it by running \code{vignette('a-2_distances_matrix', 'actel')} or \code{browseVignettes('actel')}
 }
 \examples{
-\dontrun{
-# Assuming a shapefile was saved to 'shapefile.shp' in the current
-# working directory
-x <- transitionLayer("shapefile.shp", size = 20, EPSGcode = 32362)
+\donttest{
+# move to a temporary directory
+old.wd <- getwd()
+setwd(tempdir())
 
-# Assuming there is a 'spatial.txt' file in the current directory,
-# with a 'x' and 'y' column specifying coordinates in the same system
-# coordinate system as the original shapefile.
+# Fetch actel's example shapefile location
+aux <- system.file("example_shapefile", package = "actel")[1]
+
+# create a temporary spatial.csv file
+write.csv(example.spatial, file = "spatial.csv", row.names = FALSE)
+
+# import the shape file and use the spatial.csv file to check
+# the extents.
+x <- transitionLayer(path = aux, shape = "example_shapefile.shp", 
+coord.x = "x", coord.y = "y", size = 20, EPSGcode = 32632)
+
+# compile the distances matrix. Columns x and y in the spatial dataframe
+# contain the coordinates of the stations and release sites.
 distancesMatrix(x, coord.x = 'x', coord.y = 'y', EPSGcode = 32632)
 
 # Alternatively, if you want to calculate a distances matrix that is not
 # optimised for future actel analyses, you can set 'actel' to FALSE and 
-# determine the 'starters', 'targets' and 'id.col' manually.
+# set at least a data frame for the starters. e.g.
+distancesMatrix(x, coord.x = 'x', coord.y = 'y', EPSGcode = 32632, 
+ starters = example.spatial, actel = FALSE)
+
+# return to original directory
+setwd(old.wd)
 }
 
 }

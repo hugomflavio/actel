@@ -138,20 +138,28 @@ input files are behaving as expected. It is also a good candidate if you just
 want to validate your detections for later use in other analyses.
 }
 \examples{
-\dontrun{
-# If needed, create an example workspace
+\donttest{
+# Start by moving to a temporary directory
+old.wd <- getwd()
+setwd(tempdir())
+
+# Deploy the example workspace
 exampleWorkspace()
 
-# Move your R session into your target folder (e.g. "exampleWokspace")
+# Move your R session into the example workspace
 setwd("exampleWorkspace")
 
 # run the explore analysis. Ensure the tz argument 
-# matches the time zone of the study area
+# matches the time zone of the study area. For the
+# example dataset, tz = "Europe/Copenhagen"
 results <- explore(tz = "Europe/Copenhagen")
 
 # to obtain an HTML report, run the analysis 
 # with report = TRUE, i.e.:
 results <- explore(tz = "Europe/Copenhagen", report = TRUE)
+
+# return to original working directory
+setwd(old.wd)
 }
 
 }
