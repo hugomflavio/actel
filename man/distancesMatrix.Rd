@@ -61,8 +61,6 @@ if (any(missing.packages)) {
     " before proceeding.")
 } else {
   if (suppressWarnings(require("rgdal"))) {
-    message("Sorry, it appears that rgdal is not being able to load.")
-  } else {
     # move to a temporary directory
     old.wd <- getwd()
     setwd(tempdir())
@@ -91,6 +89,8 @@ if (any(missing.packages)) {
     # return to original directory
     setwd(old.wd)
     rm(old.wd)
+  } else {
+    message("Sorry, it appears that rgdal is not being able to load.")
   }
 }
 rm(aux, missing.packages)

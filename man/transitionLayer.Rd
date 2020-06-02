@@ -68,13 +68,13 @@ if (any(missing.packages)) {
     " before proceeding.")
 } else {
   if (suppressWarnings(require("rgdal"))) {
-    message("Sorry, it appears that rgdal is not being able to load.")
-  } else {
     # Fetch actel's example shapefile location
     aux <- system.file("example_shapefile", package = "actel")[1]
 
     # import the shape file
     x <- transitionLayer(path = aux, shape = "example_shapefile.shp", size = 20, EPSGcode = 32632)
+  } else {
+    message("Sorry, it appears that rgdal is not being able to load.")
   }
 }
 rm(aux, missing.packages)

@@ -712,13 +712,13 @@ timesToCircular <- function(x, by.group = FALSE) {
 #'     " before proceeding.")
 #' } else {
 #'   if (suppressWarnings(require("rgdal"))) {
-#'     message("Sorry, it appears that rgdal is not being able to load.")
-#'   } else {
 #'     # Fetch actel's example shapefile location
 #'     aux <- system.file("example_shapefile", package = "actel")[1]
 #' 
 #'     # import the shape file
 #'     x <- transitionLayer(path = aux, shape = "example_shapefile.shp", size = 20, EPSGcode = 32632)
+#'   } else {
+#'     message("Sorry, it appears that rgdal is not being able to load.")
 #'   }
 #' }
 #' rm(aux, missing.packages)
@@ -917,8 +917,6 @@ size, rerun the function with force = TRUE.\n", call. = FALSE)
 #'     " before proceeding.")
 #' } else {
 #'   if (suppressWarnings(require("rgdal"))) {
-#'     message("Sorry, it appears that rgdal is not being able to load.")
-#'   } else {
 #'     # move to a temporary directory
 #'     old.wd <- getwd()
 #'     setwd(tempdir())
@@ -947,6 +945,8 @@ size, rerun the function with force = TRUE.\n", call. = FALSE)
 #'     # return to original directory
 #'     setwd(old.wd)
 #'     rm(old.wd)
+#'   } else {
+#'     message("Sorry, it appears that rgdal is not being able to load.")
 #'   }
 #' }
 #' rm(aux, missing.packages)
