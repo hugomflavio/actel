@@ -80,7 +80,7 @@ To install actel, you will need to have the remotes package installed.
 
 * <span style="color:red">actel 0.1.3 is currently outdated. actel 1.0.0 (currently in the development branch) is ready for deployment, but I am working on getting it published to CRAN.</span> 
 
-To install actel 1.0.0 (currently in the develomnet branch), run the following line:
+To install actel 1.0.0 (currently in the development branch), run the following line:
 
     remotes::install_github("hugomflavio/actel", ref = "dev", build_opts = c("--no-resave-data", "--no-manual"), build_vignettes = TRUE)
 
