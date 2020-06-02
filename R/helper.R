@@ -696,13 +696,33 @@ timesToCircular <- function(x, by.group = FALSE) {
 #' 
 #' @examples
 #' \donttest{
-#' # Fetch actel's example shapefile location
-#' aux <- system.file("example_shapefile", package = "actel")[1]
+#' # check if R can run the distance functions
+#' aux <- c(
+#'   length(suppressWarnings(packageDescription("raster"))),
+#'   length(suppressWarnings(packageDescription("gdistance"))),
+#'   length(suppressWarnings(packageDescription("sp"))),
+#'   length(suppressWarnings(packageDescription("tools"))),
+#'   length(suppressWarnings(packageDescription("rgdal"))))
+#' missing.packages <- sapply(aux, function(x) x == 1)
 #' 
-#' # import the shape file
-#' x <- transitionLayer(path = aux, shape = "example_shapefile.shp", size = 20, EPSGcode = 32632)
+#' if (any(missing.packages)) {
+#'   message("Sorry, this function requires packages '", 
+#'     paste(c("raster", "gdistance", "sp", "tools", "rgdal")[missing.packages], collapse = "', '"), 
+#'     "' to operate. Please install ", ifelse(sum(missing.packages) > 1, "them", "it"), 
+#'     " before proceeding.")
+#' } else {
+#'   if (suppressWarnings(require("rgdal"))) {
+#'     message("Sorry, it appears that rgdal is not being able to load.")
+#'   } else {
+#'     # Fetch actel's example shapefile location
+#'     aux <- system.file("example_shapefile", package = "actel")[1]
+#' 
+#'     # import the shape file
+#'     x <- transitionLayer(path = aux, shape = "example_shapefile.shp", size = 20, EPSGcode = 32632)
+#'   }
 #' }
-#' 
+#' rm(aux, missing.packages)
+#' }
 #' @return A TransitionLayer object.
 #' 
 #' @export
@@ -881,34 +901,55 @@ size, rerun the function with force = TRUE.\n", call. = FALSE)
 #'
 #' @examples
 #' \donttest{
-#' # move to a temporary directory
-#' old.wd <- getwd()
-#' setwd(tempdir())
+#' # check if R can run the distance functions
+#' aux <- c(
+#'   length(suppressWarnings(packageDescription("raster"))),
+#'   length(suppressWarnings(packageDescription("gdistance"))),
+#'   length(suppressWarnings(packageDescription("sp"))),
+#'   length(suppressWarnings(packageDescription("tools"))),
+#'   length(suppressWarnings(packageDescription("rgdal"))))
+#' missing.packages <- sapply(aux, function(x) x == 1)
 #' 
-#' # Fetch actel's example shapefile location
-#' aux <- system.file("example_shapefile", package = "actel")[1]
+#' if (any(missing.packages)) {
+#'   message("Sorry, this function requires packages '", 
+#'     paste(c("raster", "gdistance", "sp", "tools", "rgdal")[missing.packages], collapse = "', '"), 
+#'     "' to operate. Please install ", ifelse(sum(missing.packages) > 1, "them", "it"), 
+#'     " before proceeding.")
+#' } else {
+#'   if (suppressWarnings(require("rgdal"))) {
+#'     message("Sorry, it appears that rgdal is not being able to load.")
+#'   } else {
+#'     # move to a temporary directory
+#'     old.wd <- getwd()
+#'     setwd(tempdir())
 #' 
-#' # create a temporary spatial.csv file
-#' write.csv(example.spatial, file = "spatial.csv", row.names = FALSE)
+#'     # Fetch actel's example shapefile location
+#'     aux <- system.file("example_shapefile", package = "actel")[1]
 #' 
-#' # import the shape file and use the spatial.csv file to check
-#' # the extents.
-#' x <- transitionLayer(path = aux, shape = "example_shapefile.shp", 
-#' coord.x = "x", coord.y = "y", size = 20, EPSGcode = 32632)
+#'     # create a temporary spatial.csv file
+#'     write.csv(example.spatial, file = "spatial.csv", row.names = FALSE)
 #' 
-#' # compile the distances matrix. Columns x and y in the spatial dataframe
-#' # contain the coordinates of the stations and release sites.
-#' distancesMatrix(x, coord.x = 'x', coord.y = 'y', EPSGcode = 32632)
+#'     # import the shape file and use the spatial.csv file to check
+#'     # the extents.
+#'     x <- transitionLayer(path = aux, shape = "example_shapefile.shp", 
+#'     coord.x = "x", coord.y = "y", size = 20, EPSGcode = 32632)
 #' 
-#' # Alternatively, if you want to calculate a distances matrix that is not
-#' # optimised for future actel analyses, you can set 'actel' to FALSE and 
-#' # set at least a data frame for the starters. e.g.
-#' distancesMatrix(x, coord.x = 'x', coord.y = 'y', EPSGcode = 32632, 
-#'  starters = example.spatial, actel = FALSE)
+#'     # compile the distances matrix. Columns x and y in the spatial dataframe
+#'     # contain the coordinates of the stations and release sites.
+#'     distancesMatrix(x, coord.x = 'x', coord.y = 'y', EPSGcode = 32632)
 #' 
-#' # return to original directory
-#' setwd(old.wd)
-#' rm(old.wd)
+#'     # Alternatively, if you want to calculate a distances matrix that is not
+#'     # optimised for future actel analyses, you can set 'actel' to FALSE and 
+#'     # set at least a data frame for the starters. e.g.
+#'     distancesMatrix(x, coord.x = 'x', coord.y = 'y', EPSGcode = 32632, 
+#'       starters = example.spatial, actel = FALSE)
+#' 
+#'     # return to original directory
+#'     setwd(old.wd)
+#'     rm(old.wd)
+#'   }
+#' }
+#' rm(aux, missing.packages)
 #' }
 #' 
 #' @return A matrix with the distances between each pair of points.

@@ -52,11 +52,31 @@ You can find it by running \code{vignette('a-2_distances_matrix', 'actel')} or \
 }
 \examples{
 \donttest{
-# Fetch actel's example shapefile location
-aux <- system.file("example_shapefile", package = "actel")[1]
+# check if R can run the distance functions
+aux <- c(
+  length(suppressWarnings(packageDescription("raster"))),
+  length(suppressWarnings(packageDescription("gdistance"))),
+  length(suppressWarnings(packageDescription("sp"))),
+  length(suppressWarnings(packageDescription("tools"))),
+  length(suppressWarnings(packageDescription("rgdal"))))
+missing.packages <- sapply(aux, function(x) x == 1)
 
-# import the shape file
-x <- transitionLayer(path = aux, shape = "example_shapefile.shp", size = 20, EPSGcode = 32632)
+if (any(missing.packages)) {
+  message("Sorry, this function requires packages '", 
+    paste(c("raster", "gdistance", "sp", "tools", "rgdal")[missing.packages], collapse = "', '"), 
+    "' to operate. Please install ", ifelse(sum(missing.packages) > 1, "them", "it"), 
+    " before proceeding.")
+} else {
+  if (suppressWarnings(require("rgdal"))) {
+    message("Sorry, it appears that rgdal is not being able to load.")
+  } else {
+    # Fetch actel's example shapefile location
+    aux <- system.file("example_shapefile", package = "actel")[1]
+
+    # import the shape file
+    x <- transitionLayer(path = aux, shape = "example_shapefile.shp", size = 20, EPSGcode = 32632)
+  }
 }
-
+rm(aux, missing.packages)
+}
 }
