@@ -54,7 +54,7 @@ plotMoves <- function(input, tag, title, xlab, ylab, col, array.alias, frame.war
     stop("Could not find tag ", tag, " in the input.", call. = FALSE)
 
   # start preparing inputs
-  tz <- results$rsp.info$tz
+  tz <- input$rsp.info$tz
 
   # relevant detection data
   detections <- input$detections[[tag]]
@@ -67,6 +67,7 @@ plotMoves <- function(input, tag, title, xlab, ylab, col, array.alias, frame.war
   # grey dashes (for migration only)
   if (input$rsp.info$analysis.type == "migration") {
     like.migration <- TRUE
+    status.df <- input$status.df
     relevant.line <- status.df[which(status.df$Transmitter == tag), (grepl("First.arrived", colnames(status.df)) | grepl("Last.left", colnames(status.df)))]
   } else {
     like.migration <- FALSE
