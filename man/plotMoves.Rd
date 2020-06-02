@@ -20,16 +20,16 @@ plotMoves(
 
 \item{tag}{The transmitter to be plotted.}
 
-\item{title}{An optional title for the plot. If left emptry, a default title will be added.}
+\item{title}{An optional title for the plot. If left empty, a default title will be added.}
 
-\item{xlab, ylab}{Optional axis names for the plot. If left emptry, default axis names will be added.}
+\item{xlab, ylab}{Optional axis names for the plot. If left empty, default axis names will be added.}
 
 \item{col}{An optional colour scheme for the detections. If left empty, default colours will be added.}
 
 \item{array.alias}{A named vector of format c("old_array_name" = "new_array_name") to replace
 default array names with user defined ones.}
 
-\item{frame.warning}{Logical. By default, actel highlights manually changed or overriden tags in yellow
+\item{frame.warning}{Logical. By default, actel highlights manually changed or overridden tags in yellow
 and red plot frames, respectively. Set to FALSE to deactivate this behaviour.}
 }
 \value{
