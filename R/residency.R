@@ -30,12 +30,11 @@
 #' # for the example data.
 #' results <- residency(tz = "Europe/Copenhagen", sections = c("River", "Fjord", "Sea"))
 #' 
-#' # to obtain an HTML report, run the 
-#' # analysis with report = TRUE, i.e.:
-#' results <- residency(tz = "Europe/Copenhagen", sections = c("River", "Fjord", "Sea"), report = TRUE)
+#' # to obtain an HTML report, run the analysis with report = TRUE
 #' 
 #' # return to original working directory
 #' setwd(old.wd)
+#' rm(old.wd)
 #' }
 #' 
 #' @return A list containing:

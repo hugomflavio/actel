@@ -90,12 +90,11 @@
 #' # example dataset, tz = "Europe/Copenhagen"
 #' results <- explore(tz = "Europe/Copenhagen")
 #' 
-#' # to obtain an HTML report, run the analysis 
-#' # with report = TRUE, i.e.:
-#' results <- explore(tz = "Europe/Copenhagen", report = TRUE)
+#' # to obtain an HTML report, run the analysis with report = TRUE
 #' 
 #' # return to original working directory
 #' setwd(old.wd)
+#' rm(old.wd)
 #' }
 #' 
 #' @return A list containing:

@@ -23,6 +23,7 @@ Note: This function will create a new sub-directory called 'exampleWorkspace'
 in the current directory and write files into it.
 }
 \examples{
+\donttest{
 # Move to a temporary working directory
 old.wd <- getwd()
 setwd(tempdir())
@@ -45,5 +46,7 @@ names(results)
 
 # return to original directory
 setwd(old.wd)
+rm(old.wd)
+}
 
 }

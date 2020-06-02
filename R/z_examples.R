@@ -72,6 +72,7 @@ createWorkspace <- function(dir = "actel_workspace") {
 #' @param spatial,biometrics,detections,deployments Example datasets provided with the package.
 #'
 #' @examples
+#' \donttest{
 #' # Move to a temporary working directory
 #' old.wd <- getwd()
 #' setwd(tempdir())
@@ -94,6 +95,8 @@ createWorkspace <- function(dir = "actel_workspace") {
 #' 
 #' # return to original directory
 #' setwd(old.wd)
+#' rm(old.wd)
+#' }
 #' 
 #' @return No return value, called for side effects.
 #' 

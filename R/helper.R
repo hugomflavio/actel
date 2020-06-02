@@ -908,6 +908,7 @@ size, rerun the function with force = TRUE.\n", call. = FALSE)
 #' 
 #' # return to original directory
 #' setwd(old.wd)
+#' rm(old.wd)
 #' }
 #' 
 #' @return A matrix with the distances between each pair of points.

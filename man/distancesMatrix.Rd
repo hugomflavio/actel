@@ -72,6 +72,7 @@ distancesMatrix(x, coord.x = 'x', coord.y = 'y', EPSGcode = 32632,
 
 # return to original directory
 setwd(old.wd)
+rm(old.wd)
 }
 
 }
