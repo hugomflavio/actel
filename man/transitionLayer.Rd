@@ -4,45 +4,20 @@
 \alias{transitionLayer}
 \title{Calculate Transition Layer}
 \usage{
-transitionLayer(
-  path = ".",
-  shape,
-  size,
-  EPSGcode,
-  coord.x = NULL,
-  coord.y = NULL,
-  buffer = NULL,
-  directions = c(16, 8, 4),
-  force = FALSE
-)
+transitionLayer(x, directions = c(16, 8, 4))
 }
 \arguments{
-\item{path}{The system path to the 'shape' file. Defaults to the current directory.}
-
-\item{shape}{A shape file projected in a metric coordinate system.}
-
-\item{size}{The pixel size, in metres.}
-
-\item{EPSGcode}{The EPSG code of the shape file's coordinate system. DO NOT USE degree-based
-coordinate systems.}
-
-\item{coord.x, coord.y}{The names of the columns containing the x and y positions of the stations
-in the spatial.csv file. Must be in the same coordinate system as the shape file.}
-
-\item{buffer}{Artificially expand the shape file edges. Can be a single value (applied to all edges)
-or four values (xmin, xmax, ymin, ymax).}
+\item{x}{A water raster; for example the output of \code{\link{loadShape}}}
 
 \item{directions}{The number of directions considered for every movement situation during cost
 calculation. See the vignettes for more details.}
-
-\item{force}{Logical: Should the process continue even if the transition layer has 2000 pixels
-on one or both axes?}
 }
 \value{
 A TransitionLayer object.
 }
 \description{
-\code{transitionLayer()} imports a shape file into R and prepares it to be used in distance
+Using a previously imported shape file that has been converted to a raster (see \code{\link{loadShape}}),
+Prepares a TransitionLayer object to be used in distance
 estimations. Adapted from Grant Adams' script "distance to closest mpa". This function creates
 a 'transition.layer.RData' file in the current directory, which is then used by \code{\link{distancesMatrix}}.
 }
@@ -72,7 +47,11 @@ if (any(missing.packages)) {
     aux <- system.file("example_shapefile", package = "actel")[1]
 
     # import the shape file
-    x <- transitionLayer(path = aux, shape = "example_shapefile.shp", size = 20, EPSGcode = 32632)
+    x <- loadShape(path = aux, shape = "example_shapefile.shp", size = 20)
+
+    # Build the transition layer
+    t.layer <- transitionLayer(x)
+
   } else {
     message("Sorry, it appears that rgdal is not being able to load.")
   }

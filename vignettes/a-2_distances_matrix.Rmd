@@ -40,15 +40,15 @@ knitr::opts_chunk$set(
 
 A distances matrix is a table that contains information on  the distance (in metres) between every pair of spatial elements in your study area (i.e. your receiver stations and your release sites). It looks like the table below:
 
-|        |     St.1|     St.2|     St.3|     St.4|       St.5|       St.6|   Release|
-|:-------|--------:|--------:|--------:|--------:|----------:|----------:|---------:|
-|St.1    |    0.000| 1366.153| 3417.379| 6912.118|  8863.6829|  9272.5684|  2229.759|
-|St.2    | 1366.153|    0.000| 2051.225| 5545.964|  7497.5297|  7906.4151|  3569.994|
-|St.3    | 3417.379| 2051.225|    0.000| 3528.232|  5479.7976|  5888.6830|  5621.219|
-|St.4    | 6912.118| 5545.964| 3528.232|    0.000|  1963.4126|  2372.2981|  9115.958|
-|St.5    | 8863.683| 7497.530| 5479.798| 1963.413|     0.0000|   408.8854| 11067.524|
-|St.6    | 9272.568| 7906.415| 5888.683| 2372.298|   408.8854|     0.0000| 11476.409|
-|Release | 2229.759| 3569.994| 5621.219| 9115.958| 11067.5236| 11476.4090|     0.000|
+|        | St.1| St.2| St.3| St.4|  St.5|  St.6| Release|
+|:-------|----:|----:|----:|----:|-----:|-----:|-------:|
+|St.1    |    0| 1366| 3417| 6912|  8863|  9272|    2229|
+|St.2    | 1366|    0| 2051| 5545|  7497|  7906|    3569|
+|St.3    | 3417| 2051|    0| 3528|  5479|  5888|    5621|
+|St.4    | 6912| 5545| 3528|    0|  1963|  2372|    9115|
+|St.5    | 8863| 7497| 5479| 1963|     0|   408|   11067|
+|St.6    | 9272| 7906| 5888| 2372|   408|     0|   11476|
+|Release | 2229| 3569| 5621| 9115| 11067| 11476|       0|
 
 Note:
   : The matrix is symmetric (i.e. the entries of the matrix are symmetric with respect to the main diagonal).
@@ -110,10 +110,10 @@ Note:
 
 ### The automatic way
 
-As your studies start having more and more receivers, it might get complicated to find and write down the distances between every single combination of receivers and release sites. To avoid doing this manually, you can get R to do it for your. To get R to compute the distances for you, you will need:
+As your studies start having more and more receivers, it might get complicated to find and write down the distances between every single combination of receivers and release sites. To avoid doing this manually, you can get R to do it for you. To get R to compute the distances for you, you will need:
 
-1. A shapefile with a land polygon of your study area, in a metric system
-1. The coordinates of your receivers and release sites in **the same** metric system
+1. A shapefile with a land polygon of your study area.
+1. The coordinates of your receivers and release sites in **the same coordinate system as the shape file**.
 
 If you are not familiar with shapefiles and GIS, it might be a good idea to ask for a colleague's help.
 
@@ -122,37 +122,53 @@ If you are not familiar with shapefiles and GIS, it might be a good idea to ask 
 To begin, you need to create a shapefile that extends over all your receivers and release sites. This shapefile is expected to contain polygons of the land masses, which means that your rivers, lakes, fjords and any water bodies must be "empty space". The width of your water channels is important, as the shapefile will be converted into a raster later on (i.e. a image made of pixels). If your pixels represent squares of 30 by 30 metres, and your channel width originally was of five metres, then the river path will be lost during the conversion process. Try to ensure, as best as possible, that the corners of your shapefile are aligned (i.e. the shape as a rectangular/quadrangular form).
 
 Note:
-  : You **must** save the shapefile in a metric coordinate system, or otherwise the distance calculation will return wrong measurements.
+  : Make sure that the shape file is in the same coordinate system as the points in your spatial file!
 
 Below is an example of the study area in the left, and the respective shapefile in the right:
 
 <img src="distances_shape_1.png" alt="drawing" width="330"/> <img src="distances_shape_2.png" alt="drawing" width="330"/>
 
-Once you have your shapefile ready, copy the shapefile and respective auxiliary files to the folder where you have your 'spatial.csv'. Later on you will need to know the **EPSG code** of the coordinate system being used (e.g. 29902).
+Once you have your shapefile ready, copy the shapefile and respective auxiliary files to the folder where you have your 'spatial.csv'. Do make sure to copy the auxiliary files, as they contain information regarding the coordinate system of the shape file!
 
 ##### Preparing the spatial.csv file
 
-In your spatial file, you must include two columns with the coordinates for your receiver stations and release sites. These coordinates **must** be in the same metric system as the shapefile you just created before. Later on, you will need to know the *column names* of the columns that contain the X and Y coordinates.
+In your spatial file, you must include two columns with the coordinates for your receiver stations and release sites. These coordinates **must** be in the same coordinate system as the shapefile you just created before. Later on, you will need to know the *column names* of the columns that contain the X and Y coordinates.
 
 
-#### Creating a transition layer
+#### Importing the shapefile and preparing it
 
-Now that both your shapefile and your spatial.csv file are ready, lets get back to R. The first thing you need to do is create a transition layer, which will convert your shapefile into an object that R can use to track distances. The function you will need to run is:
+Now that both your shapefile and your spatial.csv file are ready, lets get back to R. The first thing you need to do is import your shapefile and convert to a raster. I have created a function that can perform these steps for you, called `loadShape`.
 
 ```r
-transitionLayer(shape, size, EPSGcode, coord.x, coord.y, buffer, directions)
+base.raster <- loadShape(shape, size, spatial, coord.x, coord.y, buffer)
 ```
 
 1. The `shape` is the name of your shapefile, including the ".shp" extension. 
-1. The `size` determines the size of the transition layer's pixels. 
+1. The `size` determines the size of the raster's pixels.
   
     For example, if `size = 20`, then each pixel will have 20 by 20 meters. 
 
     Keep in mind that your pixel size must allow R to still capture the presence of your river channels. If the river channels are too slim, you can go back to your shapefile and artificially enlarge them.
 
-1. The `EPSGcode` is the code of the coordinate system that the shapefile was saved in.
-1. The `coord.x` and `coord.y` allow actel to search your spatial.csv file and match the station positions with the extent of the shapefile. Write the names of the columns containing the x and y coordinates in these two arguments.
+1. The `coord.x` and `coord.y` allow actel to search your spatial.csv file and match the station positions with the extent of the shapefile. Write the names of the columns containing the x and y coordinates in these two arguments to activate these checks.
 1. The `buffer` allows you to request an expansion of the shapefile limits (can come in handy to ensure your stations are not cut-off from each other).
+
+Once the shapefile is successfully loaded, you can have a quick look at the resulting raster by running `raster::plot()`; i.e.:
+
+```r
+raster::plot(base.raster)
+```
+
+This should show you a plot where only the water areas are painted. Some water may show up around the edges of the original shapefiles due to the range adgustements made by loadShape. Converting shape files into rasters can take a while, specially if the original shape file is very big and the pixel size is low.
+
+#### Creating a transition layer
+
+A transition layer is an object that allows R to estimate least cost paths between two locations. Using the raster generated above, creating a transtion layer is straight forward:
+
+```r
+t.layer <- transitionLayer(base.raster, directions = 16)
+```
+
 1. The `directions` determine the complexity of R's distance tracking techniques. It can take one of four values: four, eight or sixteen, defaulting to the latter.
 
     * If `directions = 4`, the fish can only in the direction of the cardinal winds (North, South, East and West). 
@@ -161,19 +177,17 @@ transitionLayer(shape, size, EPSGcode, coord.x, coord.y, buffer, directions)
 
     Increasing the `directions` improves the distance estimation fidelity, but also increases computation time.
 
-Transition layers can take a long time to compute. To avoid waiting a long time and finding out something went wrong, we recommend that you start with a larger pixel `size`. For example, if your shapefile has 20000 by 7000 metres, you can start with `size = 20` (i.e. 1000 by 350 pixels), and then move on to `size = 10` if you feel you could gain more detail from it. Also, do not forget to allocate the output of the function to an R object!
-
-The hard part is done!
+Transition layers can take a long time to compute, expecially for larger rasters, so you may have to bear with your computer for a bit here. To avoid having to go through this process multiple times, it may be a good idea to save the output of loadShape and transitionLayer in a separate RData file, for later use.
 
 #### Creating the distances matrix
 
-Once you have your transition layer, you can use it to calculate multiple distances matrixes, as long as the target objects fall within the extent of the original shapefile. To create your distances matrix, you must run this function in the same working directory as your transition layer and your 'spatial.csv' file:
+Once you have your transition layer, you can use it to calculate multiple distances matrixes, as long as the target objects fall within the extent of the original shapefile, and all targets are within water. To create your distances matrix, you must run `distancesMatrix` in the same working directory as your 'spatial.csv' file. This will allow it you automatically load the spatial file into the function environment.
 
 ```r
-distancesMatrix(t.layer, coord.x, coord.y, EPSGcode)
+dist.mat <- distancesMatrix(t.layer, coord.x, coord.y)
 ```
 
-The `t.layer` is the transition layer you just calculated. Fill in the column names of the X and Y coordinates of your 'spatial.csv' file in `coord.x` and `coord.y`. Like before, the `EPSGcode` is the code of the coordinate system of the points (the same as the shapefile's). When you run this command, actel will ask you if you want to save the output to a 'distances.csv' file. Alternatively, you can check the output within R and then save the matrix yourself!
+The `t.layer` is the transition layer you just calculated. Fill in the column names of the X and Y coordinates of your 'spatial.csv' file in `coord.x` and `coord.y`. When you run this command, actel will ask you if you want to save the output to a 'distances.csv' file. Alternatively, you can check the output within R and then save the matrix yourself!
 
 Actel will automatically recognise the 'distances.csv' file and activate speed calculations in your next analysis!
 
@@ -184,23 +198,32 @@ Note:
 Here is a minimum example:
 
 ```r
-# Start by creating a transition layer:
-x <- transitionLayer(shape = "my_shapefile.shp", size = 20, EPSGcode = 32632)
+# Fetch actel's example shapefile location
+aux <- system.file("example_shapefile", package = "actel")[1]
 
-# You can opt to save the transition layer for later use by running
-# save(x, file = "transition.layer.RData")
-# You can then load it by running
-# load("transition.layer.RData")
-# This will restore the object "x" to your R session
+# create a temporary spatial.csv file
+write.csv(example.spatial, file = "spatial.csv", row.names = FALSE)
 
-dist.mat <- distancesMatrix(t.layer = x, coord.x = "x", coord.y = "y", EPSGcode = 32632)
-# Reply "y" when prompted to save the distances matrix directly to a 'distances.csv' file
-# or, alternatively, inspect the output and save it manually.
+# import the shape file and use the spatial.csv file to check
+# the extents.
+base.raster <- loadShape(path = aux, shape = "example_shapefile.shp", 
+coord.x = "x", coord.y = "y", size = 20)
 
-dist.mat
+# Build the transition layer
+t.layer <- transitionLayer(base.raster)
 
-write.csv(dist.mat, "distances.csv", row.names = TRUE)
+# compile the distances matrix. Columns x and y in the spatial dataframe
+# contain the coordinates of the stations and release sites.
+distancesMatrix(t.layer, coord.x = 'x', coord.y = 'y')
+
+# Alternatively, if you want to calculate a distances matrix that is not
+# optimised for future actel analyses, you can set 'actel' to FALSE and 
+# set at least a data frame for the starters. e.g.
+distancesMatrix(t.layer, coord.x = 'x', coord.y = 'y', 
+  starters = example.spatial, actel = FALSE)
 ```
+
+Remember that you can find more information about each of these functions by visiting their help pages, e.g. `?loadShape`, or `?transitionLayer`.
 
 **<a href="javascript:history.back()">Return to previous page</a>**
 

@@ -27,6 +27,7 @@ Changes:
   * distancesMatrix now requires user confirmation before writing a 'distances.csv' file into the working directory.
   * createMatrix and completeMatrix now work with R objects rather than files. The user must manually save the function output to a 'distances.csv' file to include it in the next analysis.
   * The possible values of speed.method have been changed to 'last to first' and 'last to last', for a more logical interpretation of the results. The explore vignette has been updated accordingly.
+  * Separated part of `transitionLayer` into a preceeding function `loadShape`.
 
 Enhancements:
   * Perform early quality checks on the content of 'sections' before advancing with migration and residency analysis.
@@ -51,6 +52,8 @@ Enhancements:
   * Users can now create and use a generic detections file. Details for the format of this file are provided in the "Detections" section of vignette 1.0.
   * migration() has been upgraded to be capable of handling backwards movements. The status.df has also been improved, and a new graphic was included to the report (last array).
   * new `plotMoves` function allows the user to create personalised detection plots for specific tags.
+  * EPSGcode argument has been removed from all distances matrix related functions. actel now looks for the coordinate system within the shape file supplied.
+  * distances matrix functions can now work with degree-based coordinate systems too.
 
 ## actel 0.1.3
 
