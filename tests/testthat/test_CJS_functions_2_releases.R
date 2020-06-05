@@ -4,7 +4,7 @@ skip_on_cran()
 
 tests.home <- getwd()
 setwd(tempdir())
-exampleWorkspace()
+exampleWorkspace("exampleWorkspace")
 setwd("exampleWorkspace")
 
 xbio <- example.biometrics
@@ -142,7 +142,7 @@ rm(list = ls())
 
 tests.home <- getwd()
 setwd(tempdir())
-exampleWorkspace()
+exampleWorkspace("exampleWorkspace")
 setwd("exampleWorkspace")
 
 xbio <- example.biometrics

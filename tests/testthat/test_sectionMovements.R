@@ -3,7 +3,7 @@ skip_on_cran()
 tests.home <- getwd()
 setwd(tempdir())
 
-exampleWorkspace()
+exampleWorkspace("exampleWorkspace")
 setwd("exampleWorkspace")
 write.csv(example.distances, "distances.csv")
 study.data <- suppressWarnings(loadStudyData(tz = "Europe/Copenhagen", start.time = NULL, 

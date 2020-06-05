@@ -20,7 +20,8 @@ checkInactiveness(
 
 \item{fish}{The fish being analysed}
 
-\item{detections.list}{A list of the detections split by each target tag, created by \code{splitDetections}.}
+\item{detections.list}{A list of the detections split by each target tag,
+created by \code{\link{splitDetections}}.}
 
 \item{inactive.warning}{If a fish spends a number of days equal or greater
 than \code{inactive.error} in a given array at the tail of the respective

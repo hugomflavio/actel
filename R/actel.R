@@ -74,7 +74,8 @@
 #' for!
 #' 
 #' 
-#' @seealso \code{\link{explore}}, \code{\link{migration}}, \code{\link{residency}}
+#' @seealso \code{\link{explore}}, \code{\link{migration}}, \code{\link{residency}}, 
+#' \code{\link{exampleWorkspace}}, \code{\link{createWorkspace}}
 #' 
 #' @importFrom circular sd.circular mean.circular var.circular
 #' @import stats

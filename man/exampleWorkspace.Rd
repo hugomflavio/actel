@@ -4,49 +4,21 @@
 \alias{exampleWorkspace}
 \title{Deploy Example Data}
 \usage{
-exampleWorkspace(
-  spatial = example.spatial,
-  biometrics = example.biometrics,
-  detections = example.detections,
-  deployments = example.deployments
-)
+exampleWorkspace(dir)
 }
 \arguments{
-\item{spatial, biometrics, detections, deployments}{Example datasets provided with the package.}
+\item{dir}{The name of the target directory. Will be created if not present.}
 }
 \value{
 No return value, called for side effects.
 }
 \description{
 Creates a ready-to-run workspace with example data.
-Note: This function will create a new sub-directory called 'exampleWorkspace'
-in the current directory and write files into it.
 }
 \examples{
 \donttest{
-# Move to a temporary working directory
-old.wd <- getwd()
-setwd(tempdir())
-
 # deploy a minimal dataset to try actel!
-exampleWorkspace()
-
-# you can then move into the newly created folder
-setwd("exampleWorkspace")
-
-# and run the example analysis
-results <- explore(tz = 'Europe/Copenhagen')
-
-# Have a look at the results and the html report.
-names(results)
-
-# you can also try running the migration and residency analyses
-# by changing the function name and adding sections = c('River', 'Fjord', 'Sea')
-# to the function call.
-
-# return to original directory
-setwd(old.wd)
-rm(old.wd)
+exampleWorkspace(paste0(tempdir(), "/exampleWorkspace"))
 }
 
 }

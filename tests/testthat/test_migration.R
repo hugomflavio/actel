@@ -1,7 +1,7 @@
 tests.home <- getwd()
 setwd(tempdir())
 
-exampleWorkspace()
+exampleWorkspace("exampleWorkspace")
 setwd("exampleWorkspace")
 write.csv(example.distances, "distances.csv")
 

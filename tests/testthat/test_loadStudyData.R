@@ -3,7 +3,7 @@ skip_on_cran()
 tests.home <- getwd()
 setwd(tempdir())
 
-exampleWorkspace()
+exampleWorkspace("exampleWorkspace")
 setwd("exampleWorkspace")
 
 test_that("loadStudyData contains all the required elements", {

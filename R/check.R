@@ -2,7 +2,8 @@
 #' 
 #' @param arrays a list containing information for each array
 #' @param bio A table with the tags and biometrics of the studied fish.
-#' @param detections.list A list of the detections split by each target tag, created by \code{splitDetections}.
+#' @param detections.list A list of the detections split by each target tag, 
+#'  created by \code{\link{splitDetections}}.
 #' @param dotmat The matrix of distances between arrays
 #' @param fish The fish being analysed
 #' @param GUI One of "needed", "always" or "never". If "needed", a new window is

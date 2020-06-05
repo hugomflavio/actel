@@ -8,7 +8,8 @@
 
 \item{bio}{A table with the tags and biometrics of the studied fish.}
 
-\item{detections.list}{A list of the detections split by each target tag, created by \code{splitDetections}.}
+\item{detections.list}{A list of the detections split by each target tag,
+created by \code{\link{splitDetections}}.}
 
 \item{dotmat}{The matrix of distances between arrays}
 

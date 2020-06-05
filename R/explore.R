@@ -80,7 +80,7 @@
 #' setwd(tempdir())
 #' 
 #' # Deploy the example workspace
-#' exampleWorkspace()
+#' exampleWorkspace("exampleWorkspace")
 #' 
 #' # Move your R session into the example workspace
 #' setwd("exampleWorkspace")

@@ -44,7 +44,7 @@ if (any(missing.packages)) {
 } else {
   if (suppressWarnings(require("rgdal"))) {
     # Fetch actel's example shapefile location
-    aux <- system.file("example_shapefile", package = "actel")[1]
+    aux <- system.file(package = "actel")[1]
 
     # import the shape file
     x <- loadShape(path = aux, shape = "example_shapefile.shp", size = 20)

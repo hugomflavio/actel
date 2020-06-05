@@ -21,7 +21,7 @@ loadShape(
 
 \item{size}{The pixel size, in metres.}
 
-\item{spatial}{Either a character string specifying the path to a spatial.csv file or a spatial dataframe.
+\item{spatial}{Either a character string specifying the path to a spatial.csv file or a spatial data frame.
 This argument is not mandatory, but can be used to perform an early check of the shape file's compatibility
 with the study stations and release sites.}
 
@@ -65,7 +65,7 @@ if (any(missing.packages)) {
 } else {
   if (suppressWarnings(require("rgdal"))) {
     # Fetch actel's example shapefile location
-    aux <- system.file("example_shapefile", package = "actel")[1]
+    aux <- system.file(package = "actel")[1]
 
     # import the shape file
     x <- loadShape(path = aux, shape = "example_shapefile.shp", size = 20)

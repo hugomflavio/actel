@@ -11,8 +11,7 @@ emptyMatrix(file = "spatial.csv")
 }
 \value{
 An empty matrix with the rows and columns required to
-operate with the 'spatial.csv' file present in the current
-work directory.
+operate with the target spatial file.
 }
 \description{
 Creates an empty matrix based on the local 'spatial.csv' file and saves it to 'distances.csv' so the
@@ -23,12 +22,12 @@ It is highly recommended to read the vignette regarding distances matrix before 
 You can find it by running \code{vignette('a-2_distances_matrix', 'actel')} or \code{browseVignettes('actel')}
 }
 \examples{
-# This function requires the presence of a file with spatial information
+# This function requires a file with spatial information
 
-# Let's create a dummy 'spatial.csv' file in R's temporary directory
-write.csv(example.spatial, file = paste0(tempdir(), "/spatial.csv"))
+# Fetch location of actel's example files
+aux <- system.file(package = "actel")[1]
 
 # run emptyMatrix on the temporary spatial.csv file
-emptyMatrix(paste0(tempdir(), "/spatial.csv"))
+emptyMatrix(paste0(aux, "/example_spatial.csv"))
 
 }

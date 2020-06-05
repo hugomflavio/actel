@@ -62,16 +62,16 @@ if (any(missing.packages)) {
     old.wd <- getwd()
     setwd(tempdir())
 
-    # Fetch actel's example shapefile location
-    aux <- system.file("example_shapefile", package = "actel")[1]
+    # Fetch location of actel's example files
+    aux <- system.file(package = "actel")[1]
 
     # create a temporary spatial.csv file
-    write.csv(example.spatial, file = "spatial.csv", row.names = FALSE)
+    file.copy(paste0(aux, "/example_spatial.csv"), "spatial.csv")
 
-    # import the shape file and use the spatial.csv file to check
-    # the extents.
+    # import the shape file and use the spatial.csv 
+    # to check the extents.
     x <- loadShape(path = aux, shape = "example_shapefile.shp", 
-    coord.x = "x", coord.y = "y", size = 20)
+      coord.x = "x", coord.y = "y", size = 20)
 
     # Build the transition layer
     t.layer <- transitionLayer(x)
@@ -79,12 +79,6 @@ if (any(missing.packages)) {
     # compile the distances matrix. Columns x and y in the spatial dataframe
     # contain the coordinates of the stations and release sites.
     distancesMatrix(t.layer, coord.x = 'x', coord.y = 'y')
-
-    # Alternatively, if you want to calculate a distances matrix that is not
-    # optimised for future actel analyses, you can set 'actel' to FALSE and 
-    # set at least a data frame for the starters. e.g.
-    distancesMatrix(t.layer, coord.x = 'x', coord.y = 'y', 
-      starters = example.spatial, actel = FALSE)
 
     # return to original directory
     setwd(old.wd)

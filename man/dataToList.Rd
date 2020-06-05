@@ -24,7 +24,7 @@ object_2 <- "Worked!"
 # Save them as an RData file in R's temporary directory
 save(object_1, object_2, file = paste0(tempdir(), "/dataToList_example.RData"))
 
-# Remove the dummy objects as we don't need them anymore
+# Remove the dummy objects as we don't need them any more
 rm(object_1, object_2)
 
 # Load the RData file as a single object

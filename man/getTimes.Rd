@@ -34,7 +34,7 @@ Extract timestamps from the analysis results.
 # using the example results loaded with actel
 getTimes(example.results)
 
-# You can specifcy which events to extract with 'event.type'
+# You can specify which events to extract with 'event.type'
 getTimes(example.results, event.type = "arrival")
 # or
 getTimes(example.results, event.type = "departure")

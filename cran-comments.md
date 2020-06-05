@@ -1,3 +1,24 @@
+## Package resubmission (5th revision)
+
+This is a resubmission. After a brief discussion with
+Swetlana Herbrandt and Uwe Ligges, in this version I have:
+
+* Changed the functions exampleWorkspace() and createWorkspace()
+to require a target directory that must be specified by the user.
+
+* moved the example inputs to 'R/sysdata.rda' so they can be used inside
+exampleWorkspace() without the need for additional arguments.
+
+* added an 'example_spatial.csv' file to the package's inst/, so
+it can be accessed for example purposes. Also moved the shape
+example files to 'inst/' (as opposed to 'inst/example_shapefile'),
+for simplification.
+
+* In parallel with the required revisions, I have split
+the transitionLayer() function into loadShape() and
+transitionLayer(), and deleted the function clearWorkspace(),
+since it is no longer relevant.
+
 ## Package resubmission (4th revision)
 
 This is a resubmission. As requested by Martina Schmirl,

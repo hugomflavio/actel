@@ -648,11 +648,11 @@ loadDeployments <- function(file, tz){
 #' @examples
 #' # This function requires the presence of a file with spatial information
 #' 
-#' # Let's create a dummy 'spatial.csv' file in R's temporary directory
-#' write.csv(example.spatial, file = paste0(tempdir(), "/spatial.csv"), row.names = FALSE)
+#' # Fetch location of actel's example files
+#' aux <- system.file(package = "actel")[1]
 #' 
 #' # run loadSpatial on the temporary spatial.csv file
-#' loadSpatial(file = paste0(tempdir(), '/spatial.csv'))
+#' loadSpatial(file = paste0(aux, '/example_spatial.csv'))
 #' 
 #' @return A data frame with the spatial information present in 'spatial.csv' and the Standard.name column.
 #' 

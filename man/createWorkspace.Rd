@@ -4,7 +4,7 @@
 \alias{createWorkspace}
 \title{Create a Default Workspace}
 \usage{
-createWorkspace(dir = "actel_workspace")
+createWorkspace(dir)
 }
 \arguments{
 \item{dir}{The name of the target directory. Will be created if not present.}
@@ -13,15 +13,14 @@ createWorkspace(dir = "actel_workspace")
 No return value, called for side effects
 }
 \description{
-Produces the files and folders required to run the package, which the user can use as a template.
-Note: This function will create a new sub-directory in the current directory and write files into it.
+Produces template files and folders required to run the \code{\link{explore}},
+\code{\link{migration}} and \code{\link{residency}} functions.
 }
 \examples{
 \donttest{
-# running createWorkspace deploys template files for an analysis
-# by default, createWorkspace creates a directory called 'actel_workspace'
-# but this can be changed with the argument 'dir'.
-createWorkspace(dir = paste0(tempdir(), "/createWorkspace_example"))
+# running createWorkspace deploys template 
+# files to a directory specified by the user
+createWorkspace(paste0(tempdir(), "/createWorkspace_example"))
 }
 
 }
