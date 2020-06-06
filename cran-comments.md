@@ -33,7 +33,7 @@ that is always reversed at the end of the example.
 * Fixed a missing comment sign in an example as part of the
 restructuring done above.
 
-* The reviewer made a coment regarding changing options(), working
+* The reviewer made a comment regarding changing options(), working
 directories or par(). All potentially troublesome instances of
 this have been fixed in an earlier revision round, so I believe 
 the reviewer was just reminding me to do the same in the examples, 
