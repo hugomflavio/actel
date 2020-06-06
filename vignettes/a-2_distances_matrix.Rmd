@@ -113,7 +113,7 @@ Note:
 As your studies start having more and more receivers, it might get complicated to find and write down the distances between every single combination of receivers and release sites. To avoid doing this manually, you can get R to do it for you. To get R to compute the distances for you, you will need:
 
 1. A shapefile with a land polygon of your study area.
-1. The coordinates of your receivers and release sites in **the same coordinate system as the shape file**.
+1. The coordinates of your receivers and release sites in **the same coordinate system as the shapefile**.
 
 If you are not familiar with shapefiles and GIS, it might be a good idea to ask for a colleague's help.
 
@@ -122,13 +122,13 @@ If you are not familiar with shapefiles and GIS, it might be a good idea to ask 
 To begin, you need to create a shapefile that extends over all your receivers and release sites. This shapefile is expected to contain polygons of the land masses, which means that your rivers, lakes, fjords and any water bodies must be "empty space". The width of your water channels is important, as the shapefile will be converted into a raster later on (i.e. a image made of pixels). If your pixels represent squares of 30 by 30 metres, and your channel width originally was of five metres, then the river path will be lost during the conversion process. Try to ensure, as best as possible, that the corners of your shapefile are aligned (i.e. the shape as a rectangular/quadrangular form).
 
 Note:
-  : Make sure that the shape file is in the same coordinate system as the points in your spatial file!
+  : Make sure that the shapefile is in the same coordinate system as the points in your spatial file!
 
 Below is an example of the study area in the left, and the respective shapefile in the right:
 
 <img src="distances_shape_1.png" alt="drawing" width="330"/> <img src="distances_shape_2.png" alt="drawing" width="330"/>
 
-Once you have your shapefile ready, copy the shapefile and respective auxiliary files to the folder where you have your 'spatial.csv'. Do make sure to copy the auxiliary files, as they contain information regarding the coordinate system of the shape file!
+Once you have your shapefile ready, copy the shapefile and respective auxiliary files to the folder where you have your 'spatial.csv'. Do make sure to copy the auxiliary files, as they contain information regarding the coordinate system of the shapefile!
 
 ##### Preparing the spatial.csv file
 
@@ -159,11 +159,11 @@ Once the shapefile is successfully loaded, you can have a quick look at the resu
 raster::plot(base.raster)
 ```
 
-This should show you a plot where only the water areas are painted. Some water may show up around the edges of the original shapefiles due to the range adgustements made by loadShape. Converting shape files into rasters can take a while, specially if the original shape file is very big and the pixel size is low.
+This should show you a plot where only the water areas are painted. Some water may show up around the edges of the original shapefile due to the range adjustments made by loadShape. Converting a shapefile into a raster can take a while, specially if the original shapefile is very big and the pixel size is low.
 
 #### Creating a transition layer
 
-A transition layer is an object that allows R to estimate least cost paths between two locations. Using the raster generated above, creating a transtion layer is straight forward:
+A transition layer is an object that allows R to estimate least cost paths between two locations. Using the raster generated above, creating a transition layer is straight forward:
 
 ```r
 t.layer <- transitionLayer(base.raster, directions = 16)
@@ -177,11 +177,11 @@ t.layer <- transitionLayer(base.raster, directions = 16)
 
     Increasing the `directions` improves the distance estimation fidelity, but also increases computation time.
 
-Transition layers can take a long time to compute, expecially for larger rasters, so you may have to bear with your computer for a bit here. To avoid having to go through this process multiple times, it may be a good idea to save the output of loadShape and transitionLayer in a separate RData file, for later use.
+Transition layers can take a long time to compute, especially for larger rasters, so you may have to bear with your computer for a bit here. To avoid having to go through this process multiple times, it may be a good idea to save the output of loadShape and transitionLayer in a separate RData file, for later use.
 
 #### Creating the distances matrix
 
-Once you have your transition layer, you can use it to calculate multiple distances matrixes, as long as the target objects fall within the extent of the original shapefile, and all targets are within water. To create your distances matrix, you must run `distancesMatrix` in the same working directory as your 'spatial.csv' file. This will allow it you automatically load the spatial file into the function environment.
+Once you have your transition layer, you can use it to calculate multiple distances matrices, as long as the target objects fall within the extent of the original shapefile, and all targets are within water. To create your distances matrix, you must run `distancesMatrix` in the same working directory as your 'spatial.csv' file. This will allow it you automatically load the spatial file into the function environment.
 
 ```r
 dist.mat <- distancesMatrix(t.layer, coord.x, coord.y)
@@ -199,7 +199,7 @@ Here is a minimum example:
 
 ```r
 # move to a temporary directory to avoid
-# overwritting local files
+# overwriting local files
 old.wd <- getwd()
 setwd(tempdir())
 
@@ -209,7 +209,7 @@ aux <- system.file(package = "actel")[1]
 # deploy the example spatial.csv file
 file.copy(paste0(aux, "/example_spatial.csv"), "spatial.csv")
 
-# import the example shape file and use the spatial.csv file to check
+# import the example shapefile and use the spatial.csv file to check
 # the extents.
 base.raster <- loadShape(path = aux, shape = "example_shapefile.shp", 
 coord.x = "x", coord.y = "y", size = 20)
