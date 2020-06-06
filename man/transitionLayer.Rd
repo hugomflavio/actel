@@ -18,8 +18,7 @@ A TransitionLayer object.
 \description{
 Using a previously imported shape file that has been converted to a raster (see \code{\link{loadShape}}),
 Prepares a TransitionLayer object to be used in distance
-estimations. Adapted from Grant Adams' script "distance to closest mpa". This function creates
-a 'transition.layer.RData' file in the current directory, which is then used by \code{\link{distancesMatrix}}.
+estimations (see \code{\link{distancesMatrix}}). Adapted from Grant Adams' script "distance to closest mpa".
 }
 \details{
 It is highly recommended to read the vignette regarding distances matrix before running this function.
@@ -51,6 +50,9 @@ if (any(missing.packages)) {
 
     # Build the transition layer
     t.layer <- transitionLayer(x)
+
+    # inspect the output
+    t.layer
 
   } else {
     message("Sorry, it appears that rgdal is not being able to load.")

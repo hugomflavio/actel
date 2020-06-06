@@ -671,6 +671,10 @@ timesToCircular <- function(x, by.group = FALSE) {
 #' 
 #'     # import the shape file
 #'     x <- loadShape(path = aux, shape = "example_shapefile.shp", size = 20)
+#' 
+#'     # have a look at the resulting raster,
+#'     # where the blank spaces are the land areas
+#'     raster::plot(x)
 #'   } else {
 #'     message("Sorry, it appears that rgdal is not being able to load.")
 #'   }
@@ -854,8 +858,7 @@ loadShape <- function(path = ".", shape, size, spatial = "spatial.csv", coord.x 
 #' 
 #' Using a previously imported shape file that has been converted to a raster (see \code{\link{loadShape}}),
 #' Prepares a TransitionLayer object to be used in distance
-#' estimations. Adapted from Grant Adams' script "distance to closest mpa". This function creates
-#' a 'transition.layer.RData' file in the current directory, which is then used by \code{\link{distancesMatrix}}.
+#' estimations (see \code{\link{distancesMatrix}}). Adapted from Grant Adams' script "distance to closest mpa".
 #' 
 #' It is highly recommended to read the vignette regarding distances matrix before running this function.
 #' You can find it by running \code{vignette('a-2_distances_matrix', 'actel')} or \code{browseVignettes('actel')}
@@ -890,6 +893,9 @@ loadShape <- function(path = ".", shape, size, spatial = "spatial.csv", coord.x 
 #' 
 #'     # Build the transition layer
 #'     t.layer <- transitionLayer(x)
+#' 
+#'     # inspect the output
+#'     t.layer
 #' 
 #'   } else {
 #'     message("Sorry, it appears that rgdal is not being able to load.")

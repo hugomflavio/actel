@@ -69,6 +69,10 @@ if (any(missing.packages)) {
 
     # import the shape file
     x <- loadShape(path = aux, shape = "example_shapefile.shp", size = 20)
+
+    # have a look at the resulting raster,
+    # where the blank spaces are the land areas
+    raster::plot(x)
   } else {
     message("Sorry, it appears that rgdal is not being able to load.")
   }
