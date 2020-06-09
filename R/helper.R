@@ -647,6 +647,7 @@ timesToCircular <- function(x, by.group = FALSE) {
 #' @param buffer Artificially expand the shape file edges. Can be a single value (applied to all edges) 
 #'  or four values (xmin, xmax, ymin, ymax). The unit of the buffer depends on the shape file's
 #'  coordinate system.
+#' @param type The type of shapefile being loaded. One of "land" or "water".
 #' 
 #' @examples
 #' \donttest{
@@ -685,7 +686,8 @@ timesToCircular <- function(x, by.group = FALSE) {
 #' 
 #' @export
 #' 
-loadShape <- function(path = ".", shape, size, spatial = "spatial.csv", coord.x = NULL, coord.y = NULL, buffer = NULL){
+loadShape <- function(path = ".", shape, size, spatial = "spatial.csv", 
+  coord.x = NULL, coord.y = NULL, buffer = NULL, type = c("land", "water")){
   # initial checks on package presence
   aux <- c(
     length(suppressWarnings(packageDescription("raster"))),
@@ -699,6 +701,8 @@ loadShape <- function(path = ".", shape, size, spatial = "spatial.csv", coord.x 
       "' to operate. Please install ", ifelse(sum(missing.packages) > 1, "them", "it"), " before proceeding.\n"), call. = FALSE)
   }
   
+  type <- match.arg(type)
+
   if (!is.null(buffer) & length(buffer) != 4 & length(buffer) != 1)
     stop("'buffer' must either contain one value (applied to all four corners), or four values (applied to xmin, xmax, ymin and ymax, respectively).\n", call. = FALSE)
   if (!is.null(buffer) & !is.numeric(buffer))
@@ -834,6 +838,13 @@ loadShape <- function(path = ".", shape, size, spatial = "spatial.csv", coord.x 
   project.raster <- is.na(shape.mask)
   project.raster[project.raster == 0] <- NA # make land impossible to cross
 
+  if (type == "water") {
+    # invert raster
+    project.raster[is.na(project.raster)] <- 2
+    project.raster[project.raster == 1] <- NA
+    project.raster[project.raster == 2] <- 1
+  }
+  
   # check if stations are in water
   if (!is.null(spatial)) {
     sp_points <- sp::SpatialPoints(data.frame(

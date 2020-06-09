@@ -11,7 +11,8 @@ loadShape(
   spatial = "spatial.csv",
   coord.x = NULL,
   coord.y = NULL,
-  buffer = NULL
+  buffer = NULL,
+  type = c("land", "water")
 )
 }
 \arguments{
@@ -31,6 +32,8 @@ in the spatial.csv file. these coordinates MUST BE in the same coordinate system
 \item{buffer}{Artificially expand the shape file edges. Can be a single value (applied to all edges)
 or four values (xmin, xmax, ymin, ymax). The unit of the buffer depends on the shape file's
 coordinate system.}
+
+\item{type}{The type of shapefile being loaded. One of "land" or "water".}
 }
 \value{
 A raster object.
