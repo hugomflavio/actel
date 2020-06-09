@@ -69,7 +69,7 @@ tableInteraction <- function(moves, fish, trigger, GUI, force = FALSE) { # nocov
   if (popup) {
     output <- graphicalInvalidate(moves = moves, fish = fish, trigger = trigger)
     decision <- readline(paste0("Would you like to leave a comment for fish ", fish, "?(y/N) "))
-    appendTo(c("UD"), "Comment")
+    appendTo(c("UD"), decision)
     if (decision == "y" | decision == "Y") {
       appendTo(c("UD", "Comment"), readline(paste0("New comment on fish ", fish, ": " )), fish)
       appendTo("Screen", "M: Comment successfully stored, returning to the previous interaction.")
