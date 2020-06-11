@@ -57,6 +57,7 @@ Enhancements:
   * distances matrix functions can now work with degree-based coordinate systems too.
   * the shapefiles of the study areas can now be water or land polygons. Use the new argument "time" in loadShape() to switch from land shapefiles (the default) to water shapefiles.
   * Paint groups consistently in circular plots.
+  * Improved handling of long array lists in individual detection plots.
 
 ## actel 0.1.3
 

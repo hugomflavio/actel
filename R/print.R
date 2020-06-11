@@ -735,17 +735,39 @@ printIndividuals <- function(detections.list, bio, status.df = NULL, tz,
       p <- p + ggplot2::labs(title = paste0(fish, " (", status.df[status.df$Transmitter == fish, "Status"], ")"), x = paste("tz:", tz), y = "Station Standard Name")
     else
       p <- p + ggplot2::labs(title = paste0(fish, " (", nrow(PlotData), " detections)"), x = paste("tz:", tz), y = "Station Standard Name")
-    # Save
+    # decide height
     if (length(levels(PlotData$Standard.name)) <= 30)
       the.height <- 4
     else
-      the.height <- 4 + (length(levels(PlotData$Standard.name)) - 30) * 0.1
-    ggplot2::ggsave(paste0(tempdir(), "/", fish, ".", extension), width = 5, height = the.height)  # better to save in png to avoid point overlapping issues
+      the.height <- 4 + (length(levels(PlotData$Standard.name)) - 30) * 0.1    
+    # default width:
+    the.width <- 5
+    # Adjustments depending on number of arrays
+    if (length(levels(PlotData$Array)) > 14 & length(levels(PlotData$Array)) <= 29) {
+      if (counter %% 2 == 0) {
+        p <- p + ggplot2::guides(colour = ggplot2::guide_legend(ncol = 2))
+        the.width <- 6
+      } else {
+        p <- p + ggplot2::theme(legend.position = "none")
+        the.width <- 4
+      }
+    }
+    if (length(levels(PlotData$Array)) > 29) {
+      if (counter %% 2 == 0) {
+        p <- p + ggplot2::guides(colour = ggplot2::guide_legend(ncol = 3))
+        the.width <- 7.5
+      } else {
+        p <- p + ggplot2::theme(legend.position = "none")
+        the.width <- 2.5
+      }
+    }
+    # Save
+    ggplot2::ggsave(paste0(tempdir(), "/", fish, ".", extension), width = the.width, height = the.height)  # better to save in png to avoid point overlapping issues
     rm(PlotData, start.line, last.time, first.time)
     if (counter %% 2 == 0) {
-      individual.plots <<- paste0(individual.plots, "![](", tempdir(), "/", fish, ".", extension, "){ width=50% }\n")
+      individual.plots <<- paste0(individual.plots, "![](", tempdir(), "/", fish, ".", extension, "){ width=", the.width * 10, "% }\n")
     } else {
-      individual.plots <<- paste0(individual.plots, "![](", tempdir(), "/", fish, ".", extension, "){ width=50% }")
+      individual.plots <<- paste0(individual.plots, "![](", tempdir(), "/", fish, ".", extension, "){ width=", the.width * 10, "% }")
     }
     if (interactive())
       setTxtProgressBar(pb, counter)
