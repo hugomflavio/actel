@@ -831,6 +831,7 @@ Note:
   : The detections are coloured by array. The vertical black dashed line shows the time of release. The vertical grey dashed lines show the assigned moments of entry and exit for each study area section. The full dark-grey line shows the movement events considered valid, while the dashed dark-grey line shows the movement events considered invalid.
   : The movement event lines move straight between the first and last station of each event (i.e. in-between detections will not be individually linked by the line).
   : Manually **edited** fish are highlighted with **yellow** graphic borders.
+  : Manually **overridden** fish are highlighted with **red** graphic borders.
   : The stations have been grouped by array, following the array order provided either in the spatial.csv file or in the spatial.txt file.
   : The data used in these graphics is stored in the `detections` and `movements` objects (and respective valid counterparts).
 
@@ -937,7 +938,7 @@ img[src*="#diagram"] {
   <a href="#user-comments">Comments</a>',
   ifelse(biometric.fragment == '', '', '\n  <a href="#biometric-graphics">Biometrics</a>'),'
   <a href="#last-seen">Last seen</a>
-  <a href="#average-time-of-arrival-at-each-array">Arrival days</a>
+  <a href="#average-time-of-arrival-at-each-array">Array times</a>
   <a href="#time-details-for-each-section">Section times</a>
   <a href="#section-progression">Section progression</a>
   <a href="#individual-residency-plots">Individual residency</a>
