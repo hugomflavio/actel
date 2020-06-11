@@ -56,6 +56,7 @@ Enhancements:
   * EPSGcode argument has been removed from all distances matrix related functions. actel now looks for the coordinate system within the shape file supplied.
   * distances matrix functions can now work with degree-based coordinate systems too.
   * the shapefiles of the study areas can now be water or land polygons. Use the new argument "time" in loadShape() to switch from land shapefiles (the default) to water shapefiles.
+  * Paint groups consistently in circular plots.
 
 ## actel 0.1.3
 

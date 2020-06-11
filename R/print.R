@@ -772,6 +772,7 @@ printCircular <- function(times, bio, suffix = NULL){
   cbPalette <- c("#56B4E9", "#c0ff3e", "#E69F00", "#F0E442", "#0072B2", "#D55E00", "#CC79A7", "#999999")
   circular.plots <- ""
   colours <- paste0(cbPalette[c(1:length(unique(bio$Group)))], 80)
+  names(colours) <- sort(unique(bio$Group))
   for (i in 1:length(times)) {
     if (length(unique(bio$Group)) > 1) {
       link <- match(names(times[[i]]), bio$Transmitter)
@@ -784,12 +785,13 @@ printCircular <- function(times, bio, suffix = NULL){
       names(trim.times) <- unique(bio$Group)
       ylegend <- -0.97
     }
+    colours.to.use <- colours[names(trim.times)]
     prop <- roundDown(1 / max(unlist(lapply(trim.times, function(x) table(roundUp(x, to = 1)) / sum(!is.na(x))))), to = 1)
     {grDevices::svg(paste0(tempdir(), "/times_", names(times)[i], suffix, ".svg"), height = 5, width = 5, bg = "transparent")
     par(mar = c(1, 2, 2, 1))
     copyOfCirclePlotRad(main = names(times)[i], shrink = 1.05)
     params <- myRoseDiag(trim.times, bins = 24, radii.scale = "linear",
-      prop = prop, tcl.text = -0.1, tol = 0.05, col = colours, border = "black")
+      prop = prop, tcl.text = -0.1, tol = 0.05, col = colours.to.use, border = "black")
     roseMean(trim.times, col = params$col, mean.length = c(0.07, -0.07), mean.lwd = 6,
       box.range = "std.error", fill = "white", border = "black",
       box.size = c(1.015, 0.985), edge.length = c(0.025, -0.025),
