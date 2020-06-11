@@ -101,7 +101,11 @@ tableInteraction <- function(moves, fish, trigger, GUI, force = FALSE) { # nocov
       }
     } else {
       message("Opening movements list for inspection:\n")
-      message(paste0(capture.output(print(moves, topn = nrow(moves))), collapse = "\n"))
+      if (colnames(moves)[1] == "Section")
+        to.display <- moves[, -c(5, 7)]
+      else
+        to.display <- moves
+      message(paste0(capture.output(print(to.display, topn = nrow(to.display))), collapse = "\n"))
       if (nrow(moves) >= 100)
         message("\nM: Long table detected, repeating warning(s) that triggered the interaction:\n-----\n", trigger, "\n-----")
       if (nrow(moves) < 100 & nrow(moves) >= 30)
@@ -978,9 +982,13 @@ invalidateEvents <- function(movements, fish) { # nocov start
               decision <- readline("Would you like to render any more movements invalid?(y/N) ")
               appendTo("UD", decision)
               if (decision == "y" | decision == "Y") {
+                if (colnames(movements)[1] == "Section")
+                  to.display <- movements[, -c(5, 7)]
+                else
+                  to.display <- movements
                 check <- TRUE
                 appendTo("Screen", paste0("M: Updated movement table of fish ", fish, ":"))
-                message(paste0(capture.output(print(movements, topn = nrow(movements))), collapse = "\n"))
+                message(paste0(capture.output(print(to.display, topn = nrow(to.display))), collapse = "\n"))
                 appendTo("Screen", "Note: You can select multiple events at once by separating them with a space.")
               } else {
                 check <- FALSE
