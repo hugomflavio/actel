@@ -1121,7 +1121,7 @@ will artificially add water space around the shape file.", call. = FALSE)
         decision <- readline("Continuing will overwrite this file. Would you like to continue?(y/N) ")
       }
       if (decision == "y" | decision == "Y")
-        write.csv(dist.mat, "distances.csv", row.names = TRUE)
+        write.csv(round(dist.mat, 0), "distances.csv", row.names = TRUE)
     }
   }
   return(round(dist.mat, 0))
