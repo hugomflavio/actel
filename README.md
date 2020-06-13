@@ -3,8 +3,8 @@ Jump to [**installation instructions**](#installing-actel)
 # actel<img src="vignettes/actel_logo.png" align="right" width="120" />
 
 [![R-CMD-check](https://github.com/hugomflavio/actel/workflows/R-CMD-check/badge.svg)](https://github.com/hugomflavio/actel/actions)
-[![Travis Build Status](https://travis-ci.com/hugomflavio/actel.svg?branch=dev)](https://travis-ci.org/hugomflavio/actel)
-[![codecov](https://codecov.io/github/hugomflavio/actel/branch/dev/graphs/badge.svg)](https://codecov.io/github/hugomflavio/actel)<sup> of non-interactive code*</sup>
+[![Travis Build Status](https://travis-ci.com/hugomflavio/actel.svg?branch=master)](https://travis-ci.org/hugomflavio/actel)
+[![codecov](https://codecov.io/github/hugomflavio/actel/branch/master/graphs/badge.svg)](https://codecov.io/github/hugomflavio/actel)<sup> of non-interactive code*</sup>
 
 Read the [latest news here!](https://github.com/hugomflavio/actel/blob/master/NEWS.md#news)
 
@@ -68,26 +68,20 @@ Here are some examples:
 
 ## Installing actel 
 
-Master version: 0.1.3
+**CRAN version: 1.0.0**
 
-Dev version: 1.0.0
+actel is available on CRAN. To install the latest stable version, simply run:
 
-To install actel, you will need to have the remotes package installed.
+    install.packages("actel")
 
-    install.packages("remotes")
-    library("remotes")
-    
-<span style="color:red">**Note:**</span> 
 
-* <span style="color:red">actel 0.1.3 is currently outdated. actel 1.0.0 (currently in the development branch) is ready for deployment, but I am working on getting it published to CRAN.</span> 
+**Development version**
 
-To install actel 1.0.0 (currently in the development branch), run the following line:
-
-    remotes::install_github("hugomflavio/actel", ref = "dev", build_opts = c("--no-resave-data", "--no-manual"), build_vignettes = TRUE)
-
-To install actel 0.1.3 (current master branch - known bugs present), run the following line:
+If you would like to install the latest updates (which have not been integrated to CRAN yet), you can run the line below. Note that you need to have the packate `remotes` installed!
 
     remotes::install_github("hugomflavio/actel", build_opts = c("--no-resave-data", "--no-manual"), build_vignettes = TRUE)
+
+You can also have a look at the latest developments by [checking out the NEWS page.](https://github.com/hugomflavio/actel/blob/master/NEWS.md#news)
 
 **Have a look at the manual:**
 
@@ -97,9 +91,7 @@ After installing, you should read the package vignettes (i.e. the manual), which
 
 **Note:**
 
-1. If the vignettes are not showing up with the command above, you can download them directly here: 
-   * For actel 1.0.0: [**actel_vignettes.zip**](https://github.com/hugomflavio/actel/raw/dev/actel_vignettes.zip)
-   * For actel 0.1.3: [**actel_vignettes.zip**](https://github.com/hugomflavio/actel/raw/master/actel_vignettes.zip)
+1. If the vignettes are not showing up with the command above, you can download them directly here: [**actel_vignettes.zip**](https://github.com/hugomflavio/actel/raw/master/actel_vignettes.zip)
 1. If you are getting "pandoc document conversion" errors during the package installation, try installing the [newest version of pandoc](https://pandoc.org/installing.html), restarting R and trying again.
 
 
