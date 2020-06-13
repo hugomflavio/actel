@@ -10,7 +10,7 @@ createUniqueSerials(input)
 \item{input}{A data frame with the deployments}
 }
 \value{
-A list of deployments, with unique serial numbers per deployment
+A list of deployments, with unique serial numbers per deployment.
 }
 \description{
 Include the deployment in the serial number of the receive

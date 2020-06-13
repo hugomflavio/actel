@@ -4,16 +4,21 @@
 \alias{exampleWorkspace}
 \title{Deploy Example Data}
 \usage{
-exampleWorkspace(
-  spatial = example.spatial,
-  biometrics = example.biometrics,
-  detections = example.detections,
-  deployments = example.deployments
-)
+exampleWorkspace(dir)
 }
 \arguments{
-\item{spatial, biometrics, detections, deployments}{Example datasets provided with the package.}
+\item{dir}{The name of the target directory. Will be created if not present.}
+}
+\value{
+No return value, called for side effects.
 }
 \description{
 Creates a ready-to-run workspace with example data.
+}
+\examples{
+\donttest{
+# deploy a minimal dataset to try actel!
+exampleWorkspace(paste0(tempdir(), "/exampleWorkspace"))
+}
+
 }

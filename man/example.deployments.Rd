@@ -4,13 +4,15 @@
 \name{example.deployments}
 \alias{example.deployments}
 \title{Example deployment data}
-\format{A data frame with 17 rows and 4 variables:
+\format{
+A data frame with 17 rows and 4 variables:
 \describe{
 \item{Receiver}{The receiver serial number}
 \item{Station.name}{The name given to the receiver}
 \item{Start}{The date and time of the deployment}
 \item{Stop}{The date and time of the retrieval}
-}}
+}
+}
 \source{
 Data collected by the authors.
 }

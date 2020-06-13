@@ -10,7 +10,7 @@ printArrayOverview(array.overview)
 \item{array.overview}{a list of absolute detection numbers for each group}
 }
 \value{
-Rmd fragment
+An rmd string to be included in the report.
 }
 \description{
 print Rmd fragment for inclusion in the report

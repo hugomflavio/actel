@@ -9,10 +9,10 @@ getResidency(movements, spatial)
 \arguments{
 \item{movements}{the movements list}
 
-\item{spatial}{A list of spatial objects in the study area}
+\item{spatial}{A list of spatial objects in the study area.}
 }
 \value{
-a list of residency tables
+a list containing residency tables for each fish.
 }
 \description{
 Assemble residency tables per fish

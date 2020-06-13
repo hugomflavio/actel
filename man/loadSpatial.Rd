@@ -4,16 +4,25 @@
 \alias{loadSpatial}
 \title{Load Spatial File}
 \usage{
-loadSpatial(file = "spatial.csv", report = FALSE)
+loadSpatial(file = "spatial.csv")
 }
 \arguments{
-\item{file}{an input file with spatial data.}
-
-\item{report}{Logical: If TRUE, the appendTo function is enabled.}
+\item{file}{an input file with spatial data in the actel format.}
 }
 \value{
-The spatial dataframe
+A data frame with the spatial information present in 'spatial.csv' and the Standard.name column.
 }
 \description{
-Load Spatial File
+Loads a spatial file prepared for actel and appends the Standard.name column. Additionally,
+performs a series of quality checks on the contents of the target file.
+}
+\examples{
+# This function requires the presence of a file with spatial information
+
+# Fetch location of actel's example files
+aux <- system.file(package = "actel")[1]
+
+# run loadSpatial on the temporary spatial.csv file
+loadSpatial(file = paste0(aux, '/example_spatial.csv'))
+
 }

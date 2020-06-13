@@ -12,7 +12,7 @@ printIndividualResidency(ratios, dayrange, sections)
 \item{dayrange}{the overall first and last detection dates}
 }
 \value{
-a Rmarkdown string to be included in the report
+A string of file locations in rmd syntax, to be included in printRmd
 }
 \description{
 print the individual locations per day

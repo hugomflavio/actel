@@ -1,16 +1,28 @@
 #' Create a Default Workspace
 #'
-#' Produces the files and folders required to run the package, which the user can use as a template.
+#' Produces template files and folders required to run the \code{\link{explore}}, 
+#' \code{\link{migration}} and \code{\link{residency}} functions.
 #' 
-#' @param dir The name of the target directory. Will be created if not present
+#' @param dir The name of the target directory. Will be created if not present.
 #'
+#' @examples
+#' \donttest{
+#' # running createWorkspace deploys template 
+#' # files to a directory specified by the user
+#' createWorkspace(paste0(tempdir(), "/createWorkspace_example"))
+#' }
+#' 
+#' @return No return value, called for side effects
+#' 
 #' @export
 #' 
-createWorkspace <- function(dir = "actel_workspace") {
-  if (dir.exists(dir))
-    stop("Directory '", dir, "' already exists. Stopping to prevent file overwrite. Please choose a new target directory.\n", call. = FALSE)
-  else
+createWorkspace <- function(dir) {
+  if (missing(dir))
+    stop("Please specify a target directory", call = FALSE)
+
+  if (!dir.exists(dir))
     dir.create(dir)
+
   spatial <- data.frame(
     Station.name = c("Example station1", "Example station2", "Example station3", "Example release1", "Example release2"),
     Latitude = c(8.411, 8.521, 8.402, 8.442, 8.442),
@@ -46,26 +58,40 @@ createWorkspace <- function(dir = "actel_workspace") {
 #'
 #' Creates a ready-to-run workspace with example data.
 #' 
-#' @param spatial,biometrics,detections,deployments Example datasets provided with the package.
+#' @inheritParams createWorkspace
 #'
+#' @examples
+#' \donttest{
+#' # deploy a minimal dataset to try actel!
+#' exampleWorkspace(paste0(tempdir(), "/exampleWorkspace"))
+#' }
+#' 
+#' @return No return value, called for side effects.
+#' 
 #' @export
 #' 
-exampleWorkspace <- function(spatial = example.spatial, biometrics = example.biometrics, detections = example.detections, deployments = example.deployments) {
-  if (!dir.exists("exampleWorkspace")) 
-    dir.create("exampleWorkspace")
-  write.csv(spatial, "exampleWorkspace/spatial.csv", row.names = FALSE)
-  write.csv(biometrics, "exampleWorkspace/biometrics.csv", row.names = FALSE)
-  write.csv(deployments, "exampleWorkspace/deployments.csv", row.names = FALSE)
-  if (!dir.exists("exampleWorkspace/detections")) 
-    dir.create("exampleWorkspace/detections")
-  my.list <- split(detections, detections$Receiver)
+exampleWorkspace <- function(dir) {
+  if (missing(dir))
+    stop("Please specify a target directory", call = FALSE)
+
+  if (!dir.exists(dir))
+    dir.create(dir)
+
+  write.csv(example.spatial, paste(dir, "spatial.csv", sep ="/"), row.names = FALSE)
+  write.csv(example.biometrics, paste(dir, "biometrics.csv", sep ="/"), row.names = FALSE)
+  write.csv(example.deployments, paste(dir, "deployments.csv", sep ="/"), row.names = FALSE)
+  if (!dir.exists(paste(dir, "detections", sep ="/"))) 
+    dir.create(paste(dir, "detections", sep ="/"))
+  my.list <- split(example.detections, example.detections$Receiver)
   for (i in names(my.list)) {
-    write.csv(my.list[[i]], paste0("exampleWorkspace/detections/", i, ".csv"), row.names = FALSE)
+    write.csv(my.list[[i]], paste0(dir, "/detections/", i, ".csv"), row.names = FALSE)
   }
   message("M: The example workspace is now ready. To run the analysis on the example data, run:\n
-  results <- migration(path = 'exampleWorkspace', sections = c('River', 'Fjord', 'Sea'), 
-  \t\t     success.arrays = 'Sea1', tz = 'Europe/Copenhagen')\n
-And follow the instructions as they come. Once finished, explore the object 'results' for the output.")
+  # move into the newly created folder
+  setwd('", dir, "')\n
+  # Run analysis. Note: This will open an analysis report on your web browser.
+  results <- explore(tz = 'Europe/Copenhagen', report = TRUE)\n
+Once finished, explore the html report and the object 'results' for the output.")
 }
 
 #' Example spatial data
@@ -75,8 +101,10 @@ And follow the instructions as they come. Once finished, explore the object 'res
 #' @format A data frame with 18 rows and 6 variables:
 #' \describe{
 #'   \item{Station.name}{The name of the ALS or release site}
-#'   \item{Latitude}{The latitude of the ALS or release site}
-#'   \item{Longitude}{The longitude of the ALS or release site}
+#'   \item{Latitude}{The latitude of the ALS or release site in WGS84}
+#'   \item{Longitude}{The longitude of the ALS or release site in WGS84}
+#'   \item{x}{The x coordinate of the ALS or release site in EPSG 32632}
+#'   \item{y}{The y coordinate of the ALS or release site in EPSG 32632}
 #'   \item{Array}{The Array to which the ALS belongs, or the first ALS array downstream of the release site.}
 #'   \item{Type}{The type of spatial object (must be either Hydrophone or Release)}
 #' }
@@ -150,3 +178,15 @@ And follow the instructions as they come. Once finished, explore the object 'res
 #' @keywords internal
 #' 
 "example.distances"
+
+
+#' Example migration results
+#'
+#' A list with the results of a migration analysis ran on the example data.
+#'
+#' @format A list of outputs from migration()
+#' @source Data collected by the authors.
+#' 
+#' @keywords internal
+#' 
+"example.results"

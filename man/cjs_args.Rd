@@ -28,11 +28,11 @@
 
 \item{paths}{A list containing the shortest paths between arrays with distance > 1.}
 
-\item{estimate}{an estimate of the last array's efficiency.}
+\item{estimate}{An estimate of the last array's efficiency, between 0 and 1.}
 
-\item{fixed.efficiency}{A vector of fixed efficiency estimates from a more complete CJS model.}
+\item{fixed.efficiency}{A vector of fixed efficiency estimates [0, 1]. \code{length(fixed.efficiency)} must match \code{ncol(input)}.}
 
-\item{silent}{Logical: Should messages be printed?}
+\item{silent}{Logical: Should messages be printed? This argument is mainly intended for function calls running within actel's analyses.}
 }
 \description{
 CJS.R arguments

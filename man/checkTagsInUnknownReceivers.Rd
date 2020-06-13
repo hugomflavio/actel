@@ -7,12 +7,20 @@
 checkTagsInUnknownReceivers(detections.list, deployments, spatial)
 }
 \arguments{
-\item{detections.list}{A list of the detections split by each target tag, created by \code{splitDetections}.}
+\item{detections.list}{A list of the detections split by each target tag,
+created by \code{\link{splitDetections}}.}
 
 \item{spatial}{The spatial data frame, as loaded by loadSpatial}
 }
 \value{
 A list containing an updated spatial list and a TRUE/FALSE object indicating whether or not Standard station names must be reprocessed.
+
+A list containing:
+\itemize{
+\item \code{spatial}: A list containing the spatial elements of the study, with data for the unknown receivers, if relevant.
+\item \code{deployments}: A list containing the receiver deployments, with data for the unknown receivers, if relevant.
+\item \code{detections.list}: A list containing the detections for each fish, with updated station names.
+}
 }
 \description{
 Check for target data in the unknown receivers

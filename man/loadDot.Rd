@@ -13,11 +13,11 @@ loadDot(
 )
 }
 \arguments{
-\item{string}{A dot string}
+\item{string}{A string of dot connections.}
 
-\item{input}{The name of the dot file}
+\item{input}{The name of a file containing dot connections.}
 
-\item{spatial}{A spatial data frame}
+\item{spatial}{A spatial data frame.}
 
 \item{sections}{The sections in which the study area is divided. Must be
 coincident with the names given to the arrays. See the vignettes for more
@@ -27,7 +27,13 @@ details.}
 invalidate potential efficiency peers? See the vignettes for more details.}
 }
 \value{
-The dot list
+A list containing:
+\itemize{
+\item \code{dot}: A data frame containing the connections between arrays
+\item \code{arrays}: A list containing detailed information on the arrays
+\item \code{dotmat}: A matrix of the distance (in number of arrays) between pairs of arrays
+\item \code{paths}: A list of the all array paths between each pair of arrays.
+}
 }
 \description{
 Load spatial.dot

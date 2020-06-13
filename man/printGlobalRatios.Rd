@@ -15,6 +15,9 @@ printGlobalRatios(global.ratios, daily.ratios, sections)
 coincident with the names given to the arrays. See the vignettes for more
 details.}
 }
+\value{
+No return value, called to plot and save graphic.
+}
 \description{
 print the distribution of fish per location
 }

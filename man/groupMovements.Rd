@@ -20,11 +20,11 @@ groupMovements(
 
 \item{bio}{A table with the tags and biometrics of the studied fish.}
 
-\item{speed.method}{Can take two forms: 'last to first' or 'first to first'.
-If 'last to first' (default), the last detection on a given array is matched
-to the first detection on the next array to perform the calculations.
-If 'first to first', the first detection on a given array is matched to the
-first detection on the next array to perform the calculations.}
+\item{speed.method}{Can take two forms: 'last to first' or 'last to last'.
+If 'last to first' (default), the last detection on the previous array is matched
+to the first detection on the target array to perform the calculations.
+If 'last to last', the last detection on ´the previous array is matched to the
+last detection on the target array to perform the calculations.}
 
 \item{max.interval}{The number of minutes that must pass between detections
 for a new event to be created. Defaults to 60.}
@@ -37,7 +37,7 @@ present in \code{\link[base]{timezones}}.}
 \item{invalid.dist}{Whether or not the distance matrix supplied is valid for the study area.}
 }
 \value{
-A list of movement events for each fish.
+A list containing the movement events for each fish.
 }
 \description{
 Crawls trough the detections of each fish and groups them based on ALS arrays and time requirements.

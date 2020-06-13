@@ -4,13 +4,15 @@
 \name{example.detections}
 \alias{example.detections}
 \title{Example detection data}
-\format{A data frame with 14549 rows and 4 variables:
+\format{
+A data frame with 14549 rows and 4 variables:
 \describe{
 \item{Date.and.Time.UTC}{The date and time of the detections}
 \item{Receiver}{The ALS serial number}
 \item{Transmitter}{The detected tag code space and signal}
 \item{Station.Name}{The name given to the ALS}
-}}
+}
+}
 \source{
 Data collected by the authors.
 }

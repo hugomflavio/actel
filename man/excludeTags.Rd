@@ -16,6 +16,9 @@ tag are detected in the study area.}
 
 \item{silent}{logical: if TRUE, suppress messages.}
 }
+\value{
+A list of detections for each tag that does not contain the excluded tags.
+}
 \description{
 Collect summary information on the tags detected but that are not part of the study.
 }

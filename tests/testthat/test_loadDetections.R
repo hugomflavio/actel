@@ -1,3 +1,8 @@
+skip_on_cran()
+
+tests.home <- getwd()
+setwd(tempdir())
+
 test_that("loadDetections fails with expected message if no detections are present.", {
 	expect_error(loadDetections(tz = "Europe/Copenhagen"),
 		"Could not find a 'detections' folder nor a 'detections.csv' file.", fixed = TRUE)
@@ -69,15 +74,6 @@ for (i in names(aux)[1:3]) {
 
 test_that("loadDetections can handle the presence of a detections folder and detections file", {
 	output <- loadDetections(start.time = NULL, stop.time = NULL, tz = "Europe/Copenhagen", force = FALSE)
-
-	file.copy("detections/actel.detections.RData", "actel.detections.RData")
-	expect_warning(loadDetections(start.time = NULL, stop.time = NULL, tz = "Europe/Copenhagen", force = TRUE),
-		"Previously compiled detections were found both in the current directory and in a 'detections' folder.\n   Loading ONLY the compiled detections present in the 'detections' folder.", fixed = TRUE)
-	file.remove("detections/actel.detections.RData")
-
-	expect_message(loadDetections(start.time = NULL, stop.time = NULL, tz = "Europe/Copenhagen", force = TRUE),
-		"M: Using detections previously compiled on [\\.]*...")
-	file.remove("actel.detections.RData")
 
 	file.copy("detections/VR2W-132908.csv", "detections.csv")
 	expect_warning(output <- loadDetections(start.time = NULL, stop.time = NULL, tz = "Europe/Copenhagen", force = FALSE),
@@ -154,6 +150,7 @@ test_that("checkDupDetections kicks in if needed.", {
   	"412 duplicated detections were found. Could an input file be duplicated?", fixed = TRUE)
 	unlink("detections", recursive = TRUE)
 })
+# b
 
 dir.create("detections")
 aux <- split(example.detections, example.detections$Receiver)
@@ -182,6 +179,8 @@ test_that("checkDetectionsBeforeRelease kicks in if needed.", {
 
   expect_equal(length(output), length(detections.list) - 1)
 })
+# b
+# b
 
-file.remove(list.files(pattern = "*txt$"))
+setwd(tests.home)
 rm(list = ls())

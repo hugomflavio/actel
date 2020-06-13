@@ -4,7 +4,7 @@
 \alias{checkDupSignals}
 \title{Check if there are duplicated signals in the detected tags.}
 \usage{
-checkDupSignals(input, bio, tag.list)
+checkDupSignals(input, bio)
 }
 \arguments{
 \item{input}{list of detections}
@@ -12,6 +12,9 @@ checkDupSignals(input, bio, tag.list)
 \item{bio}{A table with the tags and biometrics of the studied fish.}
 
 \item{tag.list}{list of the target signals}
+}
+\value{
+No return value, called for side effects.
 }
 \description{
 Check if there are duplicated signals in the detected tags.

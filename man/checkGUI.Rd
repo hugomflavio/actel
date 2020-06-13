@@ -13,15 +13,16 @@ checkGUI(GUI = c("needed", "always", "never"))
 opened to inspect the movements only when the movements table is too big to be
 displayed in R's console. If "always", a graphical interface is always created
 when the possibility to invalidate events emerges. If "never", a graphical
-interface is never invoqued. In this case, if the table to be displayed does
+interface is never invoked. In this case, if the table to be displayed does
 not fit in R's console, a temporary file will be saved and the user will be
 prompted to open that file and examine it. Defaults to "needed".}
 }
 \value{
-An updated GUI argument
+An updated GUI argument (character string)
 }
 \description{
 Check if the dependencies required to open a GUI are installed, and if
 opening a GUI does not throw an error. Some code adapted from RGtk2's
 .onLoad function.
 }
+\keyword{internal}

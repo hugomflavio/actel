@@ -12,7 +12,7 @@ findPeers(input, dotmat, type = c("before", "after"), disregard.parallels)
 \item{type}{The type of peers to be found ("before" or "after")}
 }
 \value{
-The array list with efficiency peers
+The array list with efficiency peers.
 }
 \description{
 Find efficiency peers for each array

@@ -5,8 +5,13 @@
 #' input files are behaving as expected. It is also a good candidate if you just
 #' want to validate your detections for later use in other analyses.
 #' 
-#' @param debug Logical: Should temporary files be kept at the end of the 
-#'  analysis?
+#' @param auto.open Logical: Should the report be automatically opened once the
+#'  analysis is over? Defaults to TRUE. NOTE: If report = TRUE and auto.open = TRUE,
+#'  the web browser will automatically be launched to open the report once the 
+#'  function terminates.
+#' @param discard.orphans Logical: Should actel automatically discard
+#'  detections that do not fall within receiver deployment periods, or that
+#'  were recorded before the respective fish were released?
 #' @param exclude.tags A vector of tags that should be excluded from the 
 #'  detection data before any analyses are performed. Intended to be used if 
 #'  stray tags from a different code space but with the same signal as a target
@@ -15,7 +20,7 @@
 #'  opened to inspect the movements only when the movements table is too big to be
 #'  displayed in R's console. If "always", a graphical interface is always created
 #'  when the possibility to invalidate events emerges. If "never", a graphical
-#'  interface is never invoqued. In this case, if the table to be displayed does
+#'  interface is never invoked. In this case, if the table to be displayed does
 #'  not fit in R's console, a temporary file will be saved and the user will be
 #'  prompted to open that file and examine it. Defaults to "needed".
 #' @param inactive.error If a fish spends a number of days equal or greater than 
@@ -40,58 +45,84 @@
 #'  Defaults to 2.
 #' @param override A vector of tags for which the user intends to manually 
 #' define which movement events are valid and invalid.
-#' @param path Path to the folder containing the data. If left NULL (default), 
-#'  the analysis runs in the current folder.
+#' @param print.releases Logical: Should the release sites be printed in the
+#'  study area diagrams?
 #' @param report Logical. Should an HTML report be created at the end of the
-#'  analysis?
+#'  analysis? NOTE: Setting report to TRUE will generate an HTML file in the current 
+#'  directory. Additionally, if auto.open = TRUE (default), the web browser will 
+#'  automatically be launched to open the report once the function terminates.
 #' @param speed.error If a fish moves at a speed equal or greater than 
 #'  \code{speed.error} (in metres per second), user intervention is suggested. 
 #'  If left NULL (default), user intervention is never suggested. 
-#' @param speed.method Can take two forms: 'last to first' or 'first to first'. 
-#'  If 'last to first' (default), the last detection on a given array is matched 
-#'  to the first detection on the next array to perform the calculations. 
-#'  If 'first to first', the first detection on a given array is matched to the
-#'  first detection on the next array to perform the calculations.
+#' @param speed.method Can take two forms: 'last to first' or 'last to last'. 
+#'  If 'last to first' (default), the last detection on the previous array is matched 
+#'  to the first detection on the target array to perform the calculations. 
+#'  If 'last to last', the last detection on ´the previous array is matched to the
+#'  last detection on the target array to perform the calculations.
 #' @param speed.warning If a fish moves at a speed equal or greater than 
 #'  \code{speed.warning} (in metres per second), a warning is issued. If left 
 #'  NULL (default), no warnings are issued.
 #' @param start.time Detection data prior to the timestamp set in 
 #'  \code{start.time} (in YYYY-MM-DD HH:MM:SS format) is not considered during 
 #'  the analysis.
+#' @param save.detections Logical: Should the processed detections be saved for
+#'  future runs?
 #' @param stop.time Detection data posterior to the timestamp set in 
 #'  \code{stop.time} (in YYYY-MM-DD HH:MM:SS format) is not considered during 
 #'  the analysis.
 #' @param tz The time zone of the study area. Must match one of the values
 #'  present in \code{\link[base]{timezones}}.
 #' 
+#' @examples
+#' \donttest{
+#' # Start by moving to a temporary directory
+#' old.wd <- getwd()
+#' setwd(tempdir())
+#' 
+#' # Deploy the example workspace
+#' exampleWorkspace("exampleWorkspace")
+#' 
+#' # Move your R session into the example workspace
+#' setwd("exampleWorkspace")
+#' 
+#' # run the explore analysis. Ensure the tz argument 
+#' # matches the time zone of the study area. For the
+#' # example dataset, tz = "Europe/Copenhagen"
+#' results <- explore(tz = "Europe/Copenhagen")
+#' 
+#' # to obtain an HTML report, run the analysis with report = TRUE
+#' 
+#' # return to original working directory
+#' setwd(old.wd)
+#' rm(old.wd)
+#' }
+#' 
 #' @return A list containing:
 #' \itemize{
-#'  \item \code{detections}: All detections for each target fish;
-#'  \item \code{valid.detections}: Valid detections for each target fish;
-#'  \item \code{spatial}: The spatial information used during the analysis;
-#'  \item \code{deployments}: The deployments of each receiver;
-#'  \item \code{arrays}: The array details used during the analysis;
-#'  \item \code{movements}: All movement events for each target fish;
-#'  \item \code{valid.movements}: Valid movemenet events for each target fish;
-#'  \item \code{times}: All arrival times (per fish) at each array;
-#'  \item \code{rsp.info}: Appendix information for the RSP package;
-#'  \item \code{dist.mat}: The distance matrix used in the analysis (if a valid
+#'  \item \code{detections}: A list containing all detections for each target fish;
+#'  \item \code{valid.detections}: A list containing the valid detections for each target fish;
+#'  \item \code{spatial}: A list containing the spatial information used during the analysis;
+#'  \item \code{deployments}: A data frame containing the deployments of each receiver;
+#'  \item \code{arrays}: A list containing the array details used during the analysis;
+#'  \item \code{movements}: A list containing all movement events for each target fish;
+#'  \item \code{valid.movements}: A list containing the valid movement events for each target fish;
+#'  \item \code{times}: A data frame containing all arrival times (per fish) at each array;
+#'  \item \code{rsp.info}: A list containing containing appendix information for the RSP package;
+#'  \item \code{dist.mat}: A matrix containing the distance matrix used in the analysis (if a valid
 #'   distance matrix was supplied)
 #' }
 #' 
 #' @seealso \code{\link{migration}}, \code{\link{residency}}
-
+#' 
 #' @export
 #' 
-explore <- function(path = NULL, tz, max.interval = 60, minimum.detections = 2, start.time = NULL, stop.time = NULL, 
-  speed.method = c("last to first", "first to first"), speed.warning = NULL, speed.error = NULL, 
+explore <- function(tz, max.interval = 60, minimum.detections = 2, start.time = NULL, stop.time = NULL, 
+  speed.method = c("last to first", "last to last"), speed.warning = NULL, speed.error = NULL, 
   jump.warning = 2, jump.error = 3, inactive.warning = NULL, inactive.error = NULL, 
-  exclude.tags = NULL, override = NULL, report = TRUE, GUI = c("needed", "always", "never"), debug = FALSE) {
+  exclude.tags = NULL, override = NULL, report = FALSE, auto.open = TRUE, discard.orphans = FALSE, 
+  save.detections = FALSE, GUI = c("needed", "always", "never"), print.releases = TRUE) {
 
 # check arguments quality
-  my.home <- getwd()
-  if (!is.null(path) && !is.character(path))
-    path <- as.character(path)
   if (is.null(tz) || is.na(match(tz, OlsonNames())))
     stop("'tz' could not be recognized as a timezone. Check available timezones with OlsonNames()\n", call. = FALSE)
   if (!is.numeric(minimum.detections))
@@ -104,7 +135,7 @@ explore <- function(path = NULL, tz, max.interval = 60, minimum.detections = 2, 
     stop("'max.interval' must be positive.\n", call. = FALSE)
 
   if (!is.character(speed.method))
-    stop("'speed.method' should be one of 'first to first' or 'last to first'.\n", call. = FALSE)
+    stop("'speed.method' should be one of 'last to first' or 'last to last'.\n", call. = FALSE)
   speed.method <- match.arg(speed.method)
 
   if (!is.null(speed.warning) && !is.numeric(speed.warning))
@@ -131,7 +162,11 @@ explore <- function(path = NULL, tz, max.interval = 60, minimum.detections = 2, 
   
   if (!is.logical(report))
     stop("'report' must be logical.\n", call. = FALSE)
-  
+  if (!is.logical(auto.open))
+    stop("'auto.open' must be logical.\n", call. = FALSE)
+  if (!is.logical(save.detections))
+    stop("'save.detections' must be logical.\n", call. = FALSE)
+
   if (!is.numeric(jump.warning))
     stop("'jump.warning' must be numeric.\n", call. = FALSE)
   if (jump.warning < 1)
@@ -167,68 +202,52 @@ explore <- function(path = NULL, tz, max.interval = 60, minimum.detections = 2, 
 
   GUI <- checkGUI(GUI)
 
-  if (!is.logical(debug))
-    stop("'debug' must be logical.\n", call. = FALSE)
+  if (!is.logical(print.releases))
+    stop("'print.releases' must be logical.\n", call. = FALSE)
 # ------------------------
 
 # Prepare clean-up before function ends
-  if (debug) {
-    on.exit(save(list = ls(), file = "explore_debug.RData"), add = TRUE)
-    appendTo("Screen", "!!!--- Debug mode has been activated ---!!!")
-  } else {
-    on.exit(deleteHelpers(), add = TRUE)
-  }
-  on.exit(setwd(my.home), add = TRUE)
+  if (file.exists(paste0(tempdir(), "/actel_debug_file.txt")))
+    file.remove(paste0(tempdir(), "/actel_debug_file.txt"))
+  on.exit(deleteHelpers(), add = TRUE)
   on.exit(tryCatch(sink(), warning = function(w) {hide <- NA}), add = TRUE)
-  if (!debug)
-    on.exit(deleteHelpers(), add = TRUE)
-  deleteHelpers()
 # --------------------------------------
 
 # Store function call
-  the.function.call <- paste0("explore(path = ", ifelse(is.null(path), "NULL", paste0("'", path, "'")), 
+  the.function.call <- paste0("explore(tz = ", ifelse(is.null(tz), "NULL", paste0("'", tz, "'")), 
       ", max.interval = ", max.interval,
       ", minimum.detections = ", minimum.detections,
+      ", start.time = ", ifelse(is.null(start.time), "NULL", paste0("'", start.time, "'")),
+      ", stop.time = ", ifelse(is.null(stop.time), "NULL", paste0("'", stop.time, "'")),
       ", speed.method = ", paste0("c('", speed.method, "')"),
       ", speed.warning = ", ifelse(is.null(speed.warning), "NULL", speed.warning), 
       ", speed.error = ", ifelse(is.null(speed.error), "NULL", speed.error), 
-      ", tz = ", ifelse(is.null(tz), "NULL", paste0("'", tz, "'")), 
-      ", start.time = ", ifelse(is.null(start.time), "NULL", paste0("'", start.time, "'")),
-      ", stop.time = ", ifelse(is.null(stop.time), "NULL", paste0("'", stop.time, "'")),
-      ", report = ", ifelse(report, "TRUE", "FALSE"), 
-      ", exclude.tags = ", ifelse(is.null(exclude.tags), "NULL", paste0("c('", paste(exclude.tags, collapse = "', '"), "')")), 
-      ", override = ", ifelse(is.null(override), "NULL", paste0("c('", paste(override, collapse = "', '"), "')")),
       ", jump.warning = ", jump.warning,
       ", jump.error = ", jump.error,
       ", inactive.warning = ", ifelse(is.null(inactive.warning), "NULL", inactive.warning),
       ", inactive.error = ", ifelse(is.null(inactive.error), "NULL", inactive.error), 
+      ", exclude.tags = ", ifelse(is.null(exclude.tags), "NULL", paste0("c('", paste(exclude.tags, collapse = "', '"), "')")), 
+      ", override = ", ifelse(is.null(override), "NULL", paste0("c('", paste(override, collapse = "', '"), "')")),
+      ", report = ", ifelse(report, "TRUE", "FALSE"), 
+      ", discard.orphans = ", ifelse(discard.orphans, "TRUE", "FALSE"), 
+      ", auto.open = ", ifelse(auto.open, "TRUE", "FALSE"), 
+      ", save.detections = ", ifelse(save.detections, "TRUE", "FALSE"),       
       ", GUI = '", GUI, "'",
-      ", debug = ", ifelse(debug, "TRUE", "FALSE"), 
+      ", print.releases = ", ifelse(print.releases, "TRUE", "FALSE"), 
       ")")
 # --------------------
 
 # Final arrangements before beginning
-  inst.ver <- utils::packageVersion("actel")
-  inst.ver.short <- substr(inst.ver, start = 1, stop = nchar(as.character(inst.ver)) - 5) 
-  appendTo("Report", paste0("Actel R package report.\nVersion: ", inst.ver.short, "\n"))
-  rm(inst.ver)
-
-  path <- checkPath(my.home = my.home, path = path)  
-
-  if (debug)
-    appendTo("Report", "!!!--- Debug mode has been activated ---!!!\n")
+  appendTo("Report", paste0("Actel R package report.\nVersion: ", utils::packageVersion("actel"), "\n"))
 
   appendTo(c("Report"), paste0("Target folder: ", getwd(), "\nTimestamp: ", the.time <- Sys.time(), "\nFunction: explore()\n"))
 
-  if (!is.null(path))
-    appendTo(c("Screen"), "M: Moving to selected work directory")
-  
   report <- checkReport(report = report)
 # -----------------------------------
 
 # Load, structure and check the inputs
-study.data <- loadStudyData(tz = tz, override = override, 
-                            start.time = start.time, stop.time = stop.time,
+study.data <- loadStudyData(tz = tz, override = override, save.detections = save.detections,
+                            start.time = start.time, stop.time = stop.time, discard.orphans = discard.orphans,
                             sections = NULL, exclude.tags = exclude.tags)
 bio <- study.data$bio
 sections <- study.data$sections
@@ -237,7 +256,6 @@ spatial <- study.data$spatial
 dot <- study.data$dot
 arrays <- study.data$arrays
 dotmat <- study.data$dotmat
-detections <- study.data$detections
 dist.mat <- study.data$dist.mat
 invalid.dist <- study.data$invalid.dist
 detections.list <- study.data$detections.list
@@ -252,7 +270,7 @@ detections.list <- study.data$detections.list
   aux <- names(movements)
   movements <- lapply(names(movements), function(fish) {
       speedReleaseToFirst(fish = fish, bio = bio, movements = movements[[fish]],
-                          dist.mat = dist.mat, invalid.dist = invalid.dist)
+                          dist.mat = dist.mat, invalid.dist = invalid.dist, speed.method = speed.method)
     })
   names(movements) <- aux
   rm(aux)
@@ -332,7 +350,9 @@ detections.list <- study.data$detections.list
   names(valid.movements) <- names(movements)
   valid.movements <- valid.movements[!unlist(lapply(valid.movements, is.null))]
 
-  times <- getTimes(movements = valid.movements, spatial = spatial, type = "arrival", events = "first")
+  aux <- list(valid.movements = valid.movements, spatial = spatial, rsp.info = list(bio = bio, analysis.type = "explore"))
+  times <- getTimes(input = aux, move.type = "array", event.type = "arrival", n.events = "first")
+  rm(aux)
 
   appendTo("Screen", "M: Validating detections...")
 
@@ -346,7 +366,7 @@ detections.list <- study.data$detections.list
   deployments <- do.call(rbind.data.frame, deployments)
   
   # extra info for potential RSP analysis
-  rsp.info <- list(analysis.type = "explore", analysis.time = the.time, bio = bio, tz = tz, actel.version = inst.ver.short)
+  rsp.info <- list(analysis.type = "explore", analysis.time = the.time, bio = bio, tz = tz, actel.version = utils::packageVersion("actel"))
 
   if (!is.null(override))
     override.fragment <- paste0('<span style="color:red">Manual mode has been triggered for **', length(override),'** fish.</span>\n')
@@ -363,26 +383,43 @@ detections.list <- study.data$detections.list
         continue <- FALSE
       }
     }
-    appendTo("Screen", paste0("M: An actel explore results file is already present in the current directory.\n   Saving new results as '", resultsname,"'."))
     rm(continue, index)
-  } else {
-    appendTo(c("Screen", "Report"), paste0("M: Saving results as '", resultsname, "'."))
   }
 
-  if (invalid.dist)
-    save(detections, valid.detections, spatial, deployments, arrays, movements, valid.movements, times, rsp.info, file = resultsname)
-  else
-    save(detections, valid.detections, spatial, deployments, arrays, movements, valid.movements, times, rsp.info, dist.mat, file = resultsname)
+  if (interactive()) {
+    decision <- readline(paste0("Would you like to save a copy of the results to ", resultsname, "?(y/N) "))
+    appendTo("UD", decision)
+  } else {
+    decision <- "n"
+  }
+
+  if (decision == "y" | decision == "Y") {
+    appendTo(c("Screen", "Report"), paste0("M: Saving results as '", resultsname, "'."))
+    if (invalid.dist)
+      save(detections, valid.detections, spatial, deployments, arrays, movements, valid.movements, times, rsp.info, file = resultsname)
+    else
+      save(detections, valid.detections, spatial, deployments, arrays, movements, valid.movements, times, rsp.info, dist.mat, file = resultsname)
+  } else {
+    appendTo(c("Screen", "Report"), paste0("M: Skipping saving of the results."))
+  }
+  rm(decision)
+
 # ------------
 
 # Print graphics
   if (report) {
     appendTo(c("Screen", "Report"), "M: Producing the report.")
     biometric.fragment <- printBiometrics(bio = bio)
-    printDot(dot = dot, sections = NULL, spatial = spatial)
+    printDot(dot = dot, sections = NULL, spatial = spatial, print.releases = print.releases)
     individual.plots <- printIndividuals(detections.list = detections, spatial = spatial, 
       tz = tz, movements = movements, valid.movements = valid.movements, bio = bio)
-    circular.plots <- printCircular(times = convertTimesToCircular(times), bio = bio)
+    circular.plots <- printCircular(times = timesToCircular(times), bio = bio)
+    if (any(sapply(valid.detections, function(x) any(!is.na(x$Sensor.Value))))) {
+      appendTo(c("Screen", "Report"), "M: Printing sensor values for tags with sensor data.")
+      sensor.plots <- printSensorData(detections = valid.detections)
+    } else {
+      sensor.plots <- NULL
+    } 
   }
   
   appendTo("Report", "M: Process finished successfully.")
@@ -390,44 +427,68 @@ detections.list <- study.data$detections.list
   
 # wrap up the txt report
   appendTo("Report", "\n-------------------")
-  if (file.exists("temp_UD.txt")) 
-    appendTo("Report", paste0("User interventions:\n-------------------\n", gsub("\r", "", readr::read_file("temp_UD.txt")), "-------------------")) # nocov
+  if (file.exists(paste(tempdir(), "temp_UD.txt", sep = "/")))
+    appendTo("Report", paste0("User interventions:\n-------------------\n", gsub("\r", "", readr::read_file(paste(tempdir(), "temp_UD.txt", sep = "/"))), "-------------------")) # nocov
   
   appendTo("Report", paste0("Function call:\n-------------------\n", the.function.call, "\n-------------------"))
 # ------------------
 
 # print html report
   if (report) {
-    appendTo("debug", "debug: Printing report")
-    rmarkdown::render(
-      reportname <- printExploreRmd(override.fragment = override.fragment,
-                                    biometric.fragment = biometric.fragment,
-                                    individual.plots = individual.plots,
-                                    circular.plots = circular.plots,
-                                    spatial = spatial,
-                                    deployments = deployments,
-                                    detections = detections,
-                                    valid.detections = valid.detections),
-      quiet = TRUE)
+    if (file.exists(reportname <- "actel_explore_report.html")) {
+      continue <- TRUE
+      index <- 1
+      while (continue) {
+        if(file.exists(reportname <- paste0("actel_explore_report.", index, ".html"))) {
+          index <- index + 1
+        } else {
+          continue <- FALSE
+        }
+      }
+      appendTo("Screen", paste0("M: An actel report is already present in the current directory.\n   Saving new report as ", reportname, "."))
+      rm(continue, index)
+    } else {
+      appendTo("Screen", "M: Saving actel report as 'actel_explore_report.html'.")
+    }
+
+    appendTo("debug", "debug: Printing report rmd")
+    printExploreRmd(override.fragment = override.fragment,
+                    biometric.fragment = biometric.fragment,
+                    individual.plots = individual.plots,
+                    circular.plots = circular.plots,
+                    sensor.plots = sensor.plots,
+                    spatial = spatial,
+                    deployments = deployments,
+                    detections = detections,
+                    valid.detections = valid.detections)
+
+    appendTo("debug", "debug: Converting report to html")
+    rmarkdown::render(input = paste0(tempdir(), "/actel_explore_report.Rmd"), 
+      output_dir = tempdir(), quiet = TRUE)
+
     appendTo("debug", "debug: Moving report")
-    fs::file_move(sub("Rmd", "html", reportname), sub("Report/", "", sub("Rmd", "html", reportname)))
-    if (interactive()) { # nocov start
+    file.copy(paste0(tempdir(), "/actel_explore_report.html"), reportname)
+    if (interactive() & auto.open) { # nocov start
       appendTo("debug", "debug: Opening report.")
-      browseURL(sub("Report/", "", sub("Rmd", "html", reportname)))
+      browseURL(reportname)
     } # nocov end
-    appendTo("debug", "debug: Removing toc_menu_explore.html")
-    if(file.exists("Report/toc_menu_explore.html"))
-      file.remove("Report/toc_menu_explore.html")
   }
-  appendTo("Screen", "M: Process finished successfully.")
 # ------------------
   
   jobname <- paste0(gsub(" |:", ".", as.character(Sys.time())), ".actel.log.txt")
-  appendTo("Screen", paste0("M: Saving job log as '",jobname, "'."))
-  file.rename("temp_log.txt", jobname)
-  
-  if (!debug)
-    deleteHelpers()
+
+  if (interactive() & !report) {
+    decision <- readline(paste0("Would you like to save a copy of the analysis log to ", jobname, "?(y/N) "))
+    appendTo("UD", decision)
+  } else {
+    decision <- "n"
+  }
+  if (decision == "y" | decision == "Y") {
+    appendTo("Screen", paste0("M: Saving job log as '",jobname, "'."))
+    file.copy(paste(tempdir(), "temp_log.txt", sep = "/"), jobname)
+  }
+
+  appendTo("Screen", "M: Process finished successfully.")
 
   if (invalid.dist) {
     return(list(detections = detections, valid.detections = valid.detections, spatial = spatial, deployments = deployments, arrays = arrays,
@@ -441,55 +502,53 @@ detections.list <- study.data$detections.list
 
 #' Print Rmd report
 #'
-#' Creates a Rmd report and converts it to hmtl.
+#' Creates a Rmd report and converts it to html.
 #' 
 #' @param override.fragment Rmarkdown string specifying the type of report for the header.
 #' @param biometric.fragment Rmarkdown string specifying the biometric graphics drawn.
 #' @param individual.plots Rmarkdown string specifying the name of the individual plots.
 #' @param circular.plots Rmarkdown string specifying the name of the circular plots.
+#' @param sensor.plots Rmarkdown string specifying the name of the sensor plots.
 #' @param detections All the detections used in the study
 #' @param valid.detectiosn The valid detections used in the study
 #' @inheritParams loadDetections
 #' 
+#' @return No return value, called for side effects.
+#' 
 #' @keywords internal
 #' 
 printExploreRmd <- function(override.fragment, biometric.fragment, individual.plots,
-  circular.plots, spatial, deployments, detections, valid.detections){
-  inst.ver <- utils::packageVersion("actel")
-  inst.ver.short <- substr(inst.ver, start = 1, stop = nchar(as.character(inst.ver)) - 5) 
-  if (file.exists(reportname <- "Report/actel_explore_report.Rmd")) {
-    continue <- TRUE
-    index <- 1
-    while (continue) {
-      if(file.exists(reportname <- paste0("Report/actel_explore_report.", index, ".Rmd"))) {
-        index <- index + 1
-      } else {
-        continue <- FALSE
-      }
-    }
-    appendTo("Screen", paste0("M: An actel report is already present in the current directory.\n   Saving new report as 'actel_explore_report.", index, ".html'."))
-    rm(continue,index)
-  } else {
-    appendTo("Screen", "M: Saving actel report as 'actel_explore_report.html'.")
-  }
-  if (any(grepl("Ukn.", spatial$stations$Standard.name))) {
+  circular.plots, sensor.plots, spatial, deployments, detections, valid.detections){
+ if (any(grepl("Ukn.", spatial$stations$Standard.name))) {
     unknown.fragment <- paste0('<span style="color:red"> Number of relevant unknown receivers: **', sum(grepl("Ukn.", spatial$stations$Standard.name)), '**</span>\n')
   } else {
     unknown.fragment <- ""
   } 
-  report <- readr::read_file("temp_log.txt")
+  if (!is.null(sensor.plots)) {
+    sensor.fragment <- paste0("### Sensor plots
 
-  options(knitr.kable.NA = "-")
+Note:
+  : The data used for these graphics is stored in the `valid.detections` object.
 
-  sink(reportname)
+<center>\n", sensor.plots, "\n</center>")
+  } else {
+    sensor.fragment <- NULL
+  }
+
+  report <- readr::read_file(paste0(tempdir(), "/temp_log.txt"))
+
+  oldoptions <- options(knitr.kable.NA = "-")
+  on.exit(options(oldoptions), add = TRUE)
+
+  sink(paste0(tempdir(), "/actel_explore_report.Rmd"))
   cat(paste0(
 '---
 title: "Acoustic telemetry exploratory analysis"
-author: "Actel R package (', inst.ver.short, ')"
+author: "Actel R package (', utils::packageVersion("actel"), ')"
 output: 
   html_document:
     includes:
-      after_body: toc_menu_explore.html
+      after_body: ', tempdir(), '/toc_menu_explore.html
 ---
 
 ### Summary
@@ -512,11 +571,13 @@ Percentage of post-release valid detections: ', round(sum(unlist(lapply(valid.de
 
 Found a bug? [**Report it here.**](https://github.com/hugomflavio/actel/issues)
 
+Want to cite actel in a publication? Run `citation(\'actel\')`
+
 ### Study area
 
 Release sites are marked with "R.S.". Arrays connected with an arrow indicate that the fish can only pass in one direction.
 
-<img src="mb_arrays.svg" alt="Missing file" style="padding-top: 15px;"/>
+<img src="', tempdir(), '/mb_arrays.svg" alt="Missing file" style="padding-top: 15px;"/>
 
 ### Receiver stations
 
@@ -533,16 +594,20 @@ Release sites are marked with "R.S.". Arrays connected with an arrow indicate th
 ### Warning messages
 
 ```{r warnings, echo = FALSE, comment = NA}
-if(file.exists("../temp_warnings.txt")) cat(gsub("\\r", "", readr::read_file("../temp_warnings.txt"))) else cat("No warnings were raised during the analysis.")
+cat("', ifelse(file.exists(paste0(tempdir(), '/temp_warnings.txt')),
+  gsub("\\r", "", readr::read_file(paste0(tempdir(), '/temp_warnings.txt'))),
+  'No warnings were raised during the analysis.'), '")
 ```
 
 ### User comments
 
 ```{r comments, echo = FALSE, comment = NA}
- if(file.exists("../temp_comments.txt")) cat(gsub("\\r", "", readr::read_file("../temp_comments.txt"))) else cat("No comments were included during the analysis.")
+cat("', ifelse(file.exists(paste0(tempdir(), '/temp_comments.txt')),
+  gsub("\\r", "", readr::read_file(paste0(tempdir(), '/temp_comments.txt'))),
+  'No comments were included during the analysis.'), '")
 ```
 
-### Biometric graphics
+', ifelse(biometric.fragment == '', '', paste0('### Biometric graphics
 
 Note:
   : The data used in this graphic is the data present in the biometrics.csv file.
@@ -550,7 +615,7 @@ Note:
 <center>
 ', biometric.fragment,'
 </center>
-
+')), '
 
 ### Average time of arrival at each Array
 
@@ -576,18 +641,18 @@ Note:
 ', individual.plots,'
 </center>
 
+', sensor.fragment,'
+
 ### Full log
 
 ```{r log, echo = FALSE, comment = NA}
-cat(gsub("\\r", "", readr::read_file("../temp_log.txt")))
+cat("', gsub("\\r", "", readr::read_file(paste0(tempdir(), '/temp_log.txt'))), '")
 ```
 
 '), fill = TRUE)
 sink()
 
-if(file.exists("Report/toc_menu_explore.html"))
-  file.remove("Report/toc_menu_explore.html")
-sink("Report/toc_menu_explore.html")
+sink(paste0(tempdir(), "/toc_menu_explore.html"))
 cat(
 '<style>
 h3 {
@@ -665,15 +730,15 @@ h4 {
   <a href="#deployments">Deployments</a>
   <a href="#release-sites">Release sites</a>
   <a href="#warning-messages">Warnings</a>
-  <a href="#user-comments">Comments</a>
-  <a href="#biometric-graphics">Biometrics</a>
+  <a href="#user-comments">Comments</a>',
+  ifelse(biometric.fragment == '', '', '\n  <a href="#biometric-graphics">Biometrics</a>'),'
   <a href="#average-time-of-arrival-at-each-array">Arrival times</a>
-  <a href="#individual-plots">Individuals</a>
+  <a href="#individual-plots">Individuals</a>',
+  ifelse(is.null(sensor.fragment), '', '\n  <a href="#sensor-plots">Sensor data</a>'),'
   <a href="#full-log">Full log</a>
 </div>
 ', fill = TRUE)
 sink()
-return(reportname)
 }
 
 #' Compare original detections with the valid movements and exclude invalid detections
@@ -681,14 +746,15 @@ return(reportname)
 #' @param detections.list The list of detections per fish
 #' @param movements The list of movements to be matched
 #' 
-#' @return A list of valid detections per fish
+#' @return A list containing the valid detections per fish-
 #' 
 #' @keywords internal
 #' 
 validateDetections <- function(detections.list, movements) {
   Valid <- NULL
   counter <- 0
-  pb <- txtProgressBar(min = 0, max = sum(unlist(lapply(movements, nrow))), style = 3, width = 60)
+  if (interactive())
+    pb <- txtProgressBar(min = 0, max = sum(unlist(lapply(movements, nrow))), style = 3, width = 60)
   output.all <- lapply(names(detections.list), function(i) {
     # cat(i, "\n")
     aux <- detections.list[[i]]
@@ -703,10 +769,12 @@ validateDetections <- function(detections.list, movements) {
       }))
       aux$Valid[valid.rows] <- TRUE
     }
-    setTxtProgressBar(pb, counter)
+    if (interactive())
+      setTxtProgressBar(pb, counter)
     return(data.table::as.data.table(aux))
   })
-  close(pb)
+  if(interactive())
+    close(pb)
   names(output.all) <- names(detections.list)
   attributes(output.all)$actel <- "all.detections"
   output.valid <- lapply(output.all, function(x) {

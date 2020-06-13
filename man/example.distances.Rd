@@ -4,7 +4,9 @@
 \name{example.distances}
 \alias{example.distances}
 \title{Example distances matrix}
-\format{A 18 * 18 matrix}
+\format{
+A 18 * 18 matrix
+}
 \source{
 Data collected by the authors.
 }

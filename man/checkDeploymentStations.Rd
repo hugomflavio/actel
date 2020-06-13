@@ -11,6 +11,9 @@ checkDeploymentStations(input, spatial)
 
 \item{spatial}{The spatial data frame, as loaded by loadSpatial}
 }
+\value{
+A data frame with the deployment locations
+}
 \description{
 Confirm that the station names in the deployments table match those listed in the spatial file
 }

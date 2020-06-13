@@ -1,6 +1,10 @@
+skip_on_cran()
+
 # ---- FORCE TWO RELEASE SITES
 
-exampleWorkspace()
+tests.home <- getwd()
+setwd(tempdir())
+exampleWorkspace("exampleWorkspace")
 setwd("exampleWorkspace")
 
 xbio <- example.biometrics
@@ -34,7 +38,8 @@ moves <- groupMovements(detections.list = detections.list, bio = bio, spatial = 
 aux <- names(moves)
 moves <- lapply(names(moves), function(fish) {
     speedReleaseToFirst(fish = fish, bio = bio, movements = moves[[fish]],
-                        dist.mat = dist.mat, invalid.dist = invalid.dist)
+                        dist.mat = dist.mat, invalid.dist = invalid.dist,
+                        speed.method = "last to first")
   })
 names(moves) <- aux
 rm(aux)
@@ -48,9 +53,17 @@ for (i in link) {
 vm <- lapply(xmoves, function(x) x[x$Valid, ])
 vm <- vm[sapply(vm, nrow) != 0]
 
-timetable <- assembleTimetable(vm = vm, all.moves = xmoves, sections = sections, 
+secmoves <- lapply(seq_along(vm), function(i) {
+  fish <- names(vm)[i]
+  appendTo("debug", paste0("debug: Compiling valid section movements for fish ", fish,"."))
+  output <- sectionMovements(movements = vm[[i]], sections = sections, invalid.dist = invalid.dist)
+  return(output)
+})
+names(secmoves) <- names(vm)
+
+timetable <- assembleTimetable(secmoves = secmoves, valid.moves = vm, all.moves = xmoves, sections = sections, 
   arrays = arrays, dist.mat = dist.mat, invalid.dist = invalid.dist, speed.method = "last to first", 
-  if.last.skip.section = TRUE, success.arrays = "Sea1")
+  if.last.skip.section = TRUE, success.arrays = "Sea1", bio = bio, tz = "Europe/Copenhagen")
 
 status.df <- assembleOutput(timetable = timetable, bio = bio, spatial = spatial, 
   sections = sections, dist.mat = dist.mat, invalid.dist = invalid.dist, tz = "Europe/Copenhagen")
@@ -94,7 +107,7 @@ test_that("assembleArrayCJS can cope with 0% efficiency", {
   })
 
   overall.CJS <- assembleArrayCJS(mat = xmatrices, CJS = CJS.list, arrays = arrays, releases = release_nodes)
-  expect_equal(overall.CJS$absolutes$River5, c(3, 0, 25, 28))
+  expect_equal(overall.CJS$absolutes$River5, c(3, 0, 25, 28, 28))
 })
 
 overall.CJS <- assembleArrayCJS(mat = the.matrices, CJS = CJS.list, arrays = arrays, releases = release_nodes)
@@ -103,8 +116,8 @@ test_that("mbSplitCJS can deal with multiple release sites (one site per group)"
   aux <- mbSplitCJS(mat = m.by.array, fixed.efficiency = overall.CJS$efficiency)
   ### ONLY RUN TO REPLACE REFERENCE
   # aux_mbSplitCJS_2R_2G <- aux
-  # save(aux_mbSplitCJS_2R_2G, file = "../aux_mbSplitCJS_2R_2G.RData")
-  load("../aux_mbSplitCJS_2R_2G.RData")
+  # save(aux_mbSplitCJS_2R_2G, file = paste0(tests.home, "/aux_mbSplitCJS_2R_2G.RData"))
+  load(paste0(tests.home, "/aux_mbSplitCJS_2R_2G.RData"))
   expect_equal(aux, aux_mbSplitCJS_2R_2G)
 })
 
@@ -112,13 +125,14 @@ test_that("mbGroupCJS can deal with multiple release sites (one site per group)"
   aux <- mbGroupCJS(mat = m.by.array, status.df = status.df, fixed.efficiency = overall.CJS$efficiency)
   ### ONLY RUN TO REPLACE REFERENCE
   # aux_mbGroupCJS_2R_2G <- aux
-  # save(aux_mbGroupCJS_2R_2G, file = "../aux_mbGroupCJS_2R_2G.RData")
-  load("../aux_mbGroupCJS_2R_2G.RData")
+  # save(aux_mbGroupCJS_2R_2G, file = paste0(tests.home, "/aux_mbGroupCJS_2R_2G.RData"))
+  load(paste0(tests.home, "/aux_mbGroupCJS_2R_2G.RData"))
   expect_equal(aux, aux_mbGroupCJS_2R_2G)
 })
 
 setwd("..")
 unlink("exampleWorkspace", recursive = TRUE)
+setwd(tests.home)
 rm(list = ls())
 
 
@@ -126,7 +140,9 @@ rm(list = ls())
 
 # ---- FORCE TWO RELEASE SITES WITH ONE GROUP!
 
-exampleWorkspace()
+tests.home <- getwd()
+setwd(tempdir())
+exampleWorkspace("exampleWorkspace")
 setwd("exampleWorkspace")
 
 xbio <- example.biometrics
@@ -161,7 +177,8 @@ moves <- groupMovements(detections.list = detections.list, bio = bio, spatial = 
 aux <- names(moves)
 moves <- lapply(names(moves), function(fish) {
     speedReleaseToFirst(fish = fish, bio = bio, movements = moves[[fish]],
-                        dist.mat = dist.mat, invalid.dist = invalid.dist)
+                        dist.mat = dist.mat, invalid.dist = invalid.dist,
+                        speed.method = "last to first")
   })
 names(moves) <- aux
 rm(aux)
@@ -175,9 +192,17 @@ for (i in link) {
 vm <- lapply(xmoves, function(x) x[x$Valid, ])
 vm <- vm[sapply(vm, nrow) != 0]
 
-timetable <- assembleTimetable(vm = vm, all.moves = xmoves, sections = sections, 
+secmoves <- lapply(seq_along(vm), function(i) {
+  fish <- names(vm)[i]
+  appendTo("debug", paste0("debug: Compiling valid section movements for fish ", fish,"."))
+  output <- sectionMovements(movements = vm[[i]], sections = sections, invalid.dist = invalid.dist)
+  return(output)
+})
+names(secmoves) <- names(vm)
+
+timetable <- assembleTimetable(secmoves = secmoves, valid.moves = vm, all.moves = xmoves, sections = sections, 
   arrays = arrays, dist.mat = dist.mat, invalid.dist = invalid.dist, speed.method = "last to first", 
-  if.last.skip.section = TRUE, success.arrays = "Sea1")
+  if.last.skip.section = TRUE, success.arrays = "Sea1", bio = bio, tz = "Europe/Copenhagen")
 
 status.df <- assembleOutput(timetable = timetable, bio = bio, spatial = spatial, 
   sections = sections, dist.mat = dist.mat, invalid.dist = invalid.dist, tz = "Europe/Copenhagen")
@@ -206,8 +231,8 @@ test_that("mbSplitCJS can deal with multiple release sites (two sites, single gr
   aux <- mbSplitCJS(mat = m.by.array, fixed.efficiency = overall.CJS$efficiency)
   ### ONLY RUN TO REPLACE REFERENCE
   # aux_mbSplitCJS_2R_1G <- aux
-  # save(aux_mbSplitCJS_2R_1G, file = "../aux_mbSplitCJS_2R_1G.RData")
-  load("../aux_mbSplitCJS_2R_1G.RData")
+  # save(aux_mbSplitCJS_2R_1G, file = paste0(tests.home, "/aux_mbSplitCJS_2R_1G.RData"))
+  load(paste0(tests.home, "/aux_mbSplitCJS_2R_1G.RData"))
   expect_equal(aux, aux_mbSplitCJS_2R_1G)
 })
 
@@ -215,13 +240,14 @@ test_that("mbGroupCJS can deal with multiple release sites (two sites, single gr
   aux <- mbGroupCJS(mat = m.by.array, status.df = status.df, fixed.efficiency = overall.CJS$efficiency)
   ### ONLY RUN TO REPLACE REFERENCE
   # aux_mbGroupCJS_2R_1G <- aux
-  # save(aux_mbGroupCJS_2R_1G, file = "../aux_mbGroupCJS_2R_1G.RData")
-  load("../aux_mbGroupCJS_2R_1G.RData")
+  # save(aux_mbGroupCJS_2R_1G, file = paste0(tests.home, "/aux_mbGroupCJS_2R_1G.RData"))
+  load(paste0(tests.home, "/aux_mbGroupCJS_2R_1G.RData"))
   expect_equal(aux, aux_mbGroupCJS_2R_1G)
 })
 
 setwd("..")
 unlink("exampleWorkspace", recursive = TRUE)
+setwd(tests.home)
 rm(list = ls())
 
 

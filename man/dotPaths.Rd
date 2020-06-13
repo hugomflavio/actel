@@ -15,7 +15,7 @@ dotPaths(input, dotmat, disregard.parallels)
 invalidate potential efficiency peers? See the vignettes for more details.}
 }
 \value{
-The input list, with an extra element for each array with valid efficiency peers
+A list of the all array paths between each pair of arrays.
 }
 \description{
 Find arrays valid for efficiency calculation

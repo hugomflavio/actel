@@ -1,3 +1,8 @@
+skip_on_cran()
+
+tests.home <- getwd()
+setwd(tempdir())
+
 test_that("loadDeployments stops if file is missing", {
 	expect_error(loadDeployments(file = "test"), 
 		"Could not find a 'test' file in the working directory.", fixed = TRUE)
@@ -71,7 +76,7 @@ test_that("checkDeployments kicks in if deployment periods overlap", {
 	write.csv(dep, "deployments.csv", row.names = FALSE)
 	deployments <- loadDeployments(file = "deployments.csv", tz = "Europe/Copenhagen")
 	write.csv(example.spatial, "spatial.csv", row.names = FALSE)
-  spatial <- loadSpatial(file = "spatial.csv", report = TRUE)
+  spatial <- loadSpatial(file = "spatial.csv")
   expect_warning(
   	expect_error(checkDeploymentStations(input = deployments, spatial = spatial),
   		"Station 'Station 1' is listed in the spatial file but no receivers were ever deployed there.", fixed = TRUE),
@@ -87,4 +92,4 @@ test_that("loadDeployments output is exactly as expected", {
 	file.remove("deployments.csv")
 })
 
-file.remove(list.files(pattern = "*txt$"))
+setwd(tests.home)

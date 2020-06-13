@@ -12,7 +12,7 @@ findDirectChains(input, dotmat, type = c("before", "after"))
 \item{type}{The direction in which to expand the chain ("before" or "after")}
 }
 \value{
-The array list with all linked arrays
+The array list with all linked arrays.
 }
 \description{
 Find all arrays linked to an array in a given direction

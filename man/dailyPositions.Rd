@@ -10,7 +10,7 @@ dailyPositions(ratios)
 \item{ratios}{the daily ratios}
 }
 \value{
-a data frame with the transmitters as columns and the days as rows
+A data frame containing the section in which each fish spent more time per day.
 }
 \description{
 Find the location where the fish spent most time per day

@@ -1,3 +1,5 @@
+skip_on_cran()
+
 test_that("createUniqueSerials correctly assigns receivers in the deployments", {
 	xdep <- example.deployments
 	xdep$Receiver[1] <- 132908

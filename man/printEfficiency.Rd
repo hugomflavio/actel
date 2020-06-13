@@ -4,10 +4,24 @@
 \alias{printEfficiency}
 \title{Print efficiency fragment}
 \usage{
-printEfficiency(intra.CJS, type = c("migration", "residency"))
+printEfficiency(
+  CJS = NULL,
+  efficiency = NULL,
+  intra.CJS,
+  type = c("migration", "residency")
+)
 }
 \arguments{
+\item{CJS}{the overall CJS result from a migration analysis. Used to assess if efficiency should be printed.}
+
+\item{efficiency}{the overall efficiency result from a residency analysis. Used to assess if efficiency should be printed.}
+
 \item{intra.CJS}{The output of the getEstimate calculations.}
+
+\item{type}{The type of analysis being run (migration or residency)}
+}
+\value{
+A rmd string to be included in the report.
 }
 \description{
 Prints the ALS inter-array efficiency for inclusion in printRmd.

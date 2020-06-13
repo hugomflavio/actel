@@ -1,8 +1,14 @@
-exampleWorkspace()
+skip_on_cran()
+
+tests.home <- getwd()
+setwd(tempdir())
+
+exampleWorkspace("exampleWorkspace")
 setwd("exampleWorkspace")
 write.csv(example.distances, "distances.csv")
 study.data <- suppressWarnings(loadStudyData(tz = "Europe/Copenhagen", start.time = NULL, 
 	stop.time = NULL, sections = c("River", "Fjord", "Sea"), exclude.tags = NULL))
+# n
 detections.list <- study.data$detections.list
 bio <- study.data$bio
 spatial <- study.data$spatial
@@ -18,7 +24,8 @@ moves <- groupMovements(detections.list = detections.list[1:2], bio = bio, spati
 aux <- names(moves)
 moves <- lapply(names(moves), function(fish) {
     speedReleaseToFirst(fish = fish, bio = bio, movements = moves[[fish]],
-                        dist.mat = dist.mat, invalid.dist = invalid.dist)
+                        dist.mat = dist.mat, invalid.dist = invalid.dist,
+                        speed.method = "last to first")
   })
 names(moves) <- aux
 rm(aux)
@@ -26,18 +33,20 @@ rm(aux)
 
 test_that("sectionMovements correctly compresses array movements", {
 	output <- sectionMovements(movements = moves[[1]], sections = sections, invalid.dist = invalid.dist)
-	expect_equal(colnames(output), c('Section', 'Events', 'Detections', 'First.array', 'Last.array', 'First.time', 'Last.time', 'Time.travelling', 'Time.in.section', 'Speed.in.section.m.s', 'Valid'))
+	expect_equal(colnames(output), c('Section', 'Events', 'Detections', 'First.array', 'First.station', 'Last.array', 'Last.station', 'First.time', 'Last.time', 'Time.travelling', 'Time.in.section', 'Speed.in.section.m.s', 'Valid'))
 	expect_equal(output$Section, sections)
 	expect_equal(output$Events, c(6, 11, 1))
 	expect_equal(output$First.array, c("River1", "Fjord1", "Sea1"))
+	expect_equal(output$First.station, c("St.2", "St.11", "St.15"))
 	expect_equal(output$Last.array, c("River6", "Fjord2", "Sea1"))
+	expect_equal(output$Last.station, c("St.7", "St.14", "St.15"))
 	expect_equal(output$First.time, moves[[1]]$First.time[c(1, 7, 18)])
 	expect_equal(output$Last.time, moves[[1]]$Last.time[c(6, 17, 18)])
 	expect_equal(output$Time.travelling, moves[[1]]$Time.travelling[c(1, 7, 18)])
 	expect_equal(output$Time.in.section, c("26:06", "380:05", "0:04"))
 
 	output <- sectionMovements(movements = moves[[1]], sections = sections, invalid.dist = TRUE)
-	expect_equal(colnames(output), c('Section', 'Events', 'Detections', 'First.array', 'Last.array', 'First.time', 'Last.time', 'Time.travelling', 'Time.in.section', 'Valid'))
+	expect_equal(colnames(output), c('Section', 'Events', 'Detections', 'First.array', 'First.station', 'Last.array', 'Last.station', 'First.time', 'Last.time', 'Time.travelling', 'Time.in.section', 'Valid'))
 
 	xmoves <- moves[[1]]
 	xmoves$Array[4] <- "Sea1"
@@ -66,21 +75,24 @@ test_that("checkLinearity throws warning only if movements are not ordered", {
 	aux <- sectionMovements(movements = xmoves, sections = sections, invalid.dist = TRUE)
 	expect_warning(output <- checkLinearity(secmoves = aux, fish = "test", sections = sections, arrays = arrays, GUI = "never"),
 		"Inter-section backwards movements were detected for fish test.", fixed = TRUE)
-	expect_equal(output$Valid, c(TRUE, TRUE, FALSE, FALSE, TRUE))
+	expect_equal(output$Valid, c(TRUE, TRUE, TRUE, TRUE, TRUE))
 })
+# n
+# n
 
 test_that("updateValidity correctly transfers invalid events.", {
 	xmoves <- moves[[1]]
 	xmoves$Array[4] <- "Sea1"
-	aux <- sectionMovements(movements = xmoves, sections = sections, invalid.dist = TRUE)
-	secmoves <- suppressWarnings(checkLinearity(secmoves = aux, fish = "test", sections = sections, arrays = arrays, GUI = "never"))
+	secmoves <- sectionMovements(movements = xmoves, sections = sections, invalid.dist = TRUE)
+	secmoves$Valid[3:4] <- FALSE
+
 	expect_message(output <- updateValidity(arrmoves = list(test = xmoves), secmoves = list(test = secmoves)),
 		"M: Rendering 13 array movement(s) invalid for fish test as the respective section movements were discarded by the user.", fixed = TRUE)
 	expect_type(output, "list")
 	expect_equal(names(output), "test")
 	expect_equal(sum(!output[[1]]$Valid), 13)
 })
-
+# n
 
 test_that("checkSMovesN throws warning only if movements are not ordered", {
 	aux <- sectionMovements(movements = moves[[1]], sections = sections, invalid.dist = invalid.dist)
@@ -94,5 +106,6 @@ test_that("checkSMovesN throws warning only if movements are not ordered", {
 
 setwd("..")
 unlink("exampleWorkspace", recursive = TRUE)
+setwd(tests.home)
 rm(list = ls())
 

@@ -1,5 +1,5 @@
 ---
-title: "1) Preparing your data"
+title: "1.0) Preparing your data"
 author: "Hugo Flávio"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
@@ -33,7 +33,8 @@ knitr::opts_chunk$set(
     1. [Inspecting the residency() results](d-2_residency_results.html)
     1. [Multi-way efficiency estimations](d-3_residency_efficiency.html)
 1. [Manual mode](e-0_manual_mode.html)
-1. [Errors and messages](f-0_messages.html)
+1. [Beyond the three main analyses](f-0_post_functions.html)
+1. [Errors and messages](g-0_messages.html)
 
 ## Preparing your data
 
@@ -46,15 +47,16 @@ To create a blank workspace ready to be used, run `createWorkspace()`, and a tem
 Your biometrics file should look similar to this:
 
 ```{r, echo=FALSE, results='asis'}
-biometrics <- data.frame(Release.date=c("2018-02-01 10:05:00","2018-02-01 10:10:00","2018-02-01 10:15:00")
-    ,Serial.nr=c("12340001","A12-3456-1001","19340301")
-    ,Signal=c(1,1001,301)
-    ,Length.mm=c(150,160,170)
-    ,Weight.g=c(40,60,50)
-    ,Group=c("Wild","Hatchery","Wild")
-    ,Release.site=c("Site A","Site A","Site B")
-    ,...=c("...","...","...")
-    )
+biometrics <- data.frame(
+  Release.date = c("2018-02-01 10:05:00", "2018-02-01 10:10:00", "2018-02-01 10:15:00"),
+  Serial.nr = c("12340001", "A12-3456-1001", "19340301"),
+  Signal = c(1, 1001, 301),
+  Length.mm = c(150, 160, 170),
+  Weight.g = c(40, 60, 50),
+  Group = c("Wild", "Hatchery", "Wild"),
+  Release.site = c("Site A", "Site A", "Site B"),
+  ... = c("...", "...", "..."))
+
 knitr::kable(biometrics)
 ```
 
@@ -76,17 +78,43 @@ M: No 'Group' column found in the biometrics file. Assigning all fish to group '
 Note:
   : You can append as many columns as you want to **biometrics.csv**. Importantly, if the biometrics have columns with keywords such as *length*, *weight* or *mass*, graphics showing the distribution of these parameters per fish group will be drawn for you in the report.
 
+### Tags with sensors
+
+Tags with single or multiple sensors (and multiple signals) can be listed in the biometrics file. If you have a tag that emits more than one signal, simply list both signals separated with "|" in the "Signal" column. Additionally, you can specify the respective sensor units by creating a new "Sensor.unit" column (only the first letter is capitalised), and including the units being recorded by each signal separated with a "|". You can name your sensor units in whichever way you prefer, as long as you separate them with a single "|". If your tag has three or more sensors, simply add the signals and respective sensor units separated with additional "|"'s.
+
+If your tag only has one sensor, list it as usual in the signal column and, if you want to personalise the sensor unit name, include it also in the "Sensor.unit" column.
+
+For example:
+
+```{r, echo=FALSE, results='asis'}
+biometrics <- data.frame(
+  Release.date=c("2018-02-01 10:05:00", "2018-02-01 10:15:00", "2018-02-01 10:15:00"),
+  Signal = c("501", "502|503", "504|505|506"),
+  Sensor.unit = c("T", "T|D", "T|D|A"),
+  Length.mm = c(150, 160, 170),
+  Weight.g = c(40, 60, 50),
+  Group = c("Wild", "Hatchery", "Wild"),
+  Release.site = c("Site A", "Site A", "Site B"),
+  ...=c("...", "...", "..."))
+
+knitr::kable(biometrics)
+```
+
+Note:
+  : If you do not include a "Sensor.unit" column, actel will simply use whatever sensor unit it can find in the raw detections file. To ensure that no issues arise from different manufacturers handling unit names differently, I recommend that you write the sensor unit even for single sensor tags.
+
 ## Spatial file
 
 Your spatial file should look similar to this:
 
 ```{r, echo=FALSE, results='asis'}
-  spatial <- data.frame(Station.name=c("River East","River West","Estuary","Site A","Site B")
-    ,Latitude=c(8.411,8.521,8.402,8.442,8.442)
-    ,Longitude=c(40.411,40.521,40.402,40.442,40.442)
-    ,Array=c("River1","River1","River2","River1","River2")
-    ,Type=c("Hydrophone","Hydrophone","Hydrophone","Release","Release")
-    )
+spatial <- data.frame(
+  Station.name = c("River East", "River West", "Estuary", "Site A", "Site B"),
+  Latitude = c(8.411, 8.521, 8.402, 8.442, 8.442),
+  Longitude = c(40.411, 40.521, 40.402, 40.442, 40.442),
+  Array = c("River1", "River1", "River2", "River1", "River2"),
+  Type = c("Hydrophone", "Hydrophone", "Hydrophone", "Release", "Release"))
+
 knitr::kable(spatial)
 ```
 
@@ -114,7 +142,7 @@ Type
   1. If the spatial table contains release site information, but the biometrics table does not, release site information will be discarded and the following warning is issued:
     
 ```
-W: At least one release site has been indicated in the spatial file, but no release sites were specified in the biometrics file.
+Warning: At least one release site has been indicated in the spatial file, but no release sites were specified in the biometrics file.
    Discarding release site information to avoid script failure. Please doublecheck your data.
 ```
 
@@ -125,11 +153,12 @@ W: At least one release site has been indicated in the spatial file, but no rele
 The deployments file is where you will list the receivers you used in the study. here is an example:
 
 ```{r, echo=FALSE, results='asis'}
-  deployments <- data.frame(Receiver = c(11111, 22222, 33333),
-    Station.name = c("River East","River West","Estuary")
-    ,Start = c("2018-01-01 11:30:00", "2018-01-01 11:33:00", "2018-01-01 11:34:00")
-    ,Stop = c("2018-05-03 09:30:00", "2018-05-04 08:33:00", "2018-05-05 12:00:00")
-    )
+deployments <- data.frame(
+  Receiver = c(11111, 22222, 33333),
+  Station.name = c("River East", "River West", "Estuary"),
+  Start = c("2018-01-01 11:30:00", "2018-01-01 11:33:00", "2018-01-01 11:34:00"),
+  Stop = c("2018-05-03 09:30:00", "2018-05-04 08:33:00", "2018-05-05 12:00:00"))
+
 knitr::kable(deployments)
 ```
 
@@ -146,34 +175,55 @@ Start and Stop
 
 ## Detections
 
-Including your detections is the easiest part. Copy the *.csv* files offloaded from your receivers to the *detections* folder that was created by the *createWorkspace()* function and actel will know they are to be imported. Right now actel can upload files generated from VEMCO and THELMA manufactured receivers. If you have an receiver from a different manufacturer, or if you are using one of the supported manufacturers and get the warning displayed below, please to contact me so we can solve the issue.
+Including your detections is the easiest part. Copy the *.csv* files offloaded from your receivers to the *detections* folder that was created by the *createWorkspace()* function and actel will know they are to be imported. Right now actel can upload files [generated specifically for actel](#standard-detections-file), or generated by VEMCO and THELMA manufactured receivers. If you have an receiver from a different manufacturer, or if you are using one of the supported manufacturers and get the warning displayed below, please to contact me so we can solve the issue.
 
 ```
-W: File 'filename' does not match to any of the supported hydrophone file formats! If your file corresponds to a hydrophone log and actel did not recognize it, please get in contact through www.github.com/hugomflavio/actel/issues/new
+Warning: File 'filename' does not match to any of the supported hydrophone file formats! If your file corresponds to a hydrophone log and actel did not recognize it, please get in contact through www.github.com/hugomflavio/actel/issues/new
 ```
 
 Note:
   : **The detection timestamps must be in UTC**. This is the default time zone used by the receivers, so as long as you did not edit the raw files, all should be ready to go.
+
+### Standard detections file
+
+If you are working with a large database, odds are your detection data is no longer in the format of any given manufacturer. To import this data into actel, please prepare a .csv file with the following format:
+
+```{r, echo=FALSE, results='asis'}
+detections <- data.frame(
+  Timestamp = c("2018-01-01 11:30:00", "2018-01-01 11:33:00", "2018-01-01 11:34:00"),
+  Receiver = c(11111, 22222, 33333),
+  CodeSpace = c("A12-3456", "A12-3456", "R64K"),
+  Signal = c(1234, 1235, 203),
+  Sensor.Value = c(10.0, 5.3, 13.6),
+  Sensor.Unit = c("T", "D", "T"))
+
+knitr::kable(detections)
+```
+
+Note:
+  : Timestamp data can use a space separator or a "T" separator between the date and time, but **should always be in UTC**.
+  : Only list the receiver's **serial number** in the receiver column (e.g. "13014" rather than "VR2W-13014", or "111" rather than "TBR-111").
+  : The column order is irrelevant, but the **column names should be an exact match** to what is displayed.
   
 ## Optional: Distances matrix
 
 A distances matrix is a table that contains information on the distance (in metres) between every pair of spatial elements in your study area (i.e. your stations and your release sites). It looks like the table below:
 
-|        |     St.1|     St.2|     St.3|     St.4|       St.5|       St.6|   Release|
-|:-------|--------:|--------:|--------:|--------:|----------:|----------:|---------:|
-|St.1    |    0.000| 1366.153| 3417.379| 6912.118|  8863.6829|  9272.5684|  2229.759|
-|St.2    | 1366.153|    0.000| 2051.225| 5545.964|  7497.5297|  7906.4151|  3569.994|
-|St.3    | 3417.379| 2051.225|    0.000| 3528.232|  5479.7976|  5888.6830|  5621.219|
-|St.4    | 6912.118| 5545.964| 3528.232|    0.000|  1963.4126|  2372.2981|  9115.958|
-|St.5    | 8863.683| 7497.530| 5479.798| 1963.413|     0.0000|   408.8854| 11067.524|
-|St.6    | 9272.568| 7906.415| 5888.683| 2372.298|   408.8854|     0.0000| 11476.409|
-|Release | 2229.759| 3569.994| 5621.219| 9115.958| 11067.5236| 11476.4090|     0.000|
+|        | St.1| St.2| St.3| St.4|  St.5|  St.6| Release|
+|:-------|----:|----:|----:|----:|-----:|-----:|-------:|
+|St.1    |    0| 1366| 3417| 6912|  8863|  9272|    2229|
+|St.2    | 1366|    0| 2051| 5545|  7497|  7906|    3569|
+|St.3    | 3417| 2051|    0| 3528|  5479|  5888|    5621|
+|St.4    | 6912| 5545| 3528|    0|  1963|  2372|    9115|
+|St.5    | 8863| 7497| 5479| 1963|     0|   408|   11067|
+|St.6    | 9272| 7906| 5888| 2372|   408|     0|   11476|
+|Release | 2229| 3569| 5621| 9115| 11067| 11476|       0|
 
 **[You can learn more about creating distances matrices in this page.](a-2_distances_matrix.html)**
 
 ## Optional: spatial.txt file
 
-If your study area has multiple branches, then you need to tell actel how your arrays connect with each other. This file is optional because, if ommitted, actel will assume that your study area is composed by a single branch and that the array order is the one listed in the spatial.csv file.
+If your study area has multiple branches, then you need to tell actel how your arrays connect with each other. This file is optional because, if omitted, actel will assume that your study area is composed by a single branch and that the array order is the one listed in the spatial.csv file.
 
 The spatial.txt file is very simple; all you need to do is connect your arrays with either dashes or arrows (find out the difference below). You can connect your arrays in pairs or make longer strings. To decide whether or not two arrays should be connected, ask yourself the following: "Can fish move from A to B without having to pass through any other array?" If the answer is yes, then the arrays should be connected. Let's have a look at some examples:
 

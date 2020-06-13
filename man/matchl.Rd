@@ -12,7 +12,7 @@ matchl(input, match)
 \item{match}{vector of elements where to look for the input.}
 }
 \value{
-TRUE/FALSE vector for the input values.
+A logical vector.
 }
 \description{
 Looks for matches of a list on a target, but returns TRUE/FALSE instead of the position where the match was found.

@@ -7,8 +7,6 @@
 assembleResidency(secmoves, movements, sections)
 }
 \arguments{
-\item{secmoves}{the section-movements}
-
 \item{movements}{the array-movements (Valid and invalid)}
 
 \item{sections}{The sections in which the study area is divided. Must be
@@ -16,7 +14,7 @@ coincident with the names given to the arrays. See the vignettes for more
 details.}
 }
 \value{
-A residency summary table
+A data frame with the compiled residency values
 }
 \description{
 Collect summary information for the residency analysis

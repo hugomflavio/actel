@@ -20,7 +20,8 @@ checkInactiveness(
 
 \item{fish}{The fish being analysed}
 
-\item{detections.list}{A list of the detections split by each target tag, created by \code{splitDetections}.}
+\item{detections.list}{A list of the detections split by each target tag,
+created by \code{\link{splitDetections}}.}
 
 \item{inactive.warning}{If a fish spends a number of days equal or greater
 than \code{inactive.error} in a given array at the tail of the respective
@@ -41,7 +42,7 @@ not fit in R's console, a temporary file will be saved and the user will be
 prompted to open and examine that file. Defaults to "needed".}
 }
 \value{
-The valid movements list with valid/invalid rows
+A list of movements with updated 'Valid' columns
 }
 \description{
 Find if a fish is standing still in an array

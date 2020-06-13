@@ -11,6 +11,9 @@ checkNoDetections(input, bio)
 
 \item{bio}{A table with the tags and biometrics of the studied fish.}
 }
+\value{
+No return value, called for side effects.
+}
 \description{
 Check if there are detections matching the target tags.
 }

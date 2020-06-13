@@ -36,6 +36,9 @@ copyOfRosediagRad(
 
 \item{col}{the colour for filling the rose diagram. The default, NULL, is to leave rose diagram unfilled. The values are recycled if needed.}
 }
+\value{
+No return value, adds to an existing plot.
+}
 \description{
 This function is an EXACT copy of the function RosediagRad() in the circular package.
 As the function is not exported by the original package, I have copied it here to resolve

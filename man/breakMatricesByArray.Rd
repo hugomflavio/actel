@@ -16,7 +16,7 @@ breakMatricesByArray(m, arrays, type = c("peers", "all"), verbose = TRUE)
 \item{verbose}{Logical: Should appendTo be used?}
 }
 \value{
-a list of matrices, split by array
+A list containing the split matrices for each array
 }
 \description{
 Break the detection matrices per array

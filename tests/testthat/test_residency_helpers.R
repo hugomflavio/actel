@@ -1,8 +1,14 @@
-exampleWorkspace()
+skip_on_cran()
+
+tests.home <- getwd()
+setwd(tempdir())
+
+exampleWorkspace("exampleWorkspace")
 setwd("exampleWorkspace")
 write.csv(example.distances, "distances.csv")
 study.data <- suppressWarnings(loadStudyData(tz = "Europe/Copenhagen", start.time = NULL, 
 	stop.time = NULL, sections = c("River", "Fjord", "Sea"), exclude.tags = NULL))
+# n
 detections.list <- study.data$detections.list
 bio <- study.data$bio
 spatial <- study.data$spatial
@@ -20,7 +26,8 @@ moves <- groupMovements(detections.list = detections.list[1:2], bio = bio, spati
 aux <- names(moves)
 moves <- lapply(names(moves), function(fish) {
     speedReleaseToFirst(fish = fish, bio = bio, movements = moves[[fish]],
-                        dist.mat = dist.mat, invalid.dist = invalid.dist)
+                        dist.mat = dist.mat, invalid.dist = invalid.dist,
+                        speed.method = "last to first")
   })
 names(moves) <- aux
 rm(aux)
@@ -126,9 +133,9 @@ test_that("dailyRatios works as expected", {
 
   ### ONLY RUN THIS TO RESET REFERENCE
   # aux_dailyRatios <- daily.ratios
-  # save(aux_dailyRatios, file = "../aux_dailyRatios.RData")
+  # save(aux_dailyRatios, file = paste0(tests.home, "/aux_dailyRatios.RData"))
 
-  load("../aux_dailyRatios.RData")
+  load(paste0(tests.home, "/aux_dailyRatios.RData"))
   expect_equal(daily.ratios, aux_dailyRatios)
 })
 
@@ -148,19 +155,19 @@ test_that("globalRatios works as expected.", {
 
   ### ONLY RUN THIS TO RESET REFERENCE
   # aux_globalRatios <- global.ratios
-  # save(aux_globalRatios, file = "../aux_globalRatios.RData")
+  # save(aux_globalRatios, file = paste0(tests.home, "/aux_globalRatios.RData"))
 
-  load("../aux_globalRatios.RData")
+  load(paste0(tests.home, "/aux_globalRatios.RData"))
   expect_equal(global.ratios, aux_globalRatios)
 })
 
 test_that("res_efficiency works as expected, and can include intra array estimates", {
-  efficiency <- res_efficiency(arrmoves = moves, bio = bio, spatial = spatial, arrays = arrays, paths = paths, dotmat = dotmat)
+  efficiency <<- res_efficiency(arrmoves = moves, bio = bio, spatial = spatial, arrays = arrays, paths = paths, dotmat = dotmat)
   expect_equal(names(efficiency), c("absolutes", "max.efficiency", "min.efficiency",  "values.per.fish"))
   ### ONLY RUN THIS TO RESET REFERENCE
   # aux_res_efficiency <- efficiency
-  # save(aux_res_efficiency, file = "../aux_res_efficiency.RData")
-  load("../aux_res_efficiency.RData")
+  # save(aux_res_efficiency, file = paste0(tests.home, "/aux_res_efficiency.RData"))
+  load(paste0(tests.home, "/aux_res_efficiency.RData"))
   expect_equal(efficiency, aux_res_efficiency)
 
   tryCatch(x <- getDualMatrices(replicates = list(Sea1 = c("St.16")), CJS = efficiency, spatial = spatial, detections.list = detections.list), 
@@ -172,12 +179,59 @@ test_that("res_efficiency works as expected, and can include intra array estimat
   output <- includeIntraArrayEstimates(m = intra.array.matrices, efficiency = efficiency, CJS = NULL)
   ### ONLY RUN THIS TO RESET REFERENCE
   # aux_includeIntraArrayEstimates <- output
-  # save(aux_includeIntraArrayEstimates, file = "../aux_includeIntraArrayEstimates.RData")
-  load("../aux_includeIntraArrayEstimates.RData")
+  # save(aux_includeIntraArrayEstimates, file = paste0(tests.home, "/aux_includeIntraArrayEstimates.RData"))
+  load(paste0(tests.home, "/aux_includeIntraArrayEstimates.RData"))
   expect_equal(output, aux_includeIntraArrayEstimates)
 
   output <- includeIntraArrayEstimates(m = list(), efficiency = efficiency, CJS = NULL)
   expect_equal(output$intra.CJS, NULL)
+})
+# y
+
+test_that("advEfficiency can plot efficiency results", {
+  output <- round(advEfficiency(efficiency), 7)
+  check <- read.csv(text = '"","2.5%","50%","97.5%"
+"River1.min", 1.0000000, 1.0, 1.0000000
+"River1.max", 1.0000000, 1.0, 1.0000000
+"River2.min", 0.0942993, 0.5, 0.9057007
+"River2.max", 0.0942993, 0.5, 0.9057007
+"River3.min", 0.0942993, 0.5, 0.9057007
+"River3.max", 0.0942993, 0.5, 0.9057007
+"River4.min", 0.0942993, 0.5, 0.9057007
+"River4.max", 0.0942993, 0.5, 0.9057007
+"River5.min", 0.0942993, 0.5, 0.9057007
+"River5.max", 0.0942993, 0.5, 0.9057007
+"River6.min", 0.0942993, 0.5, 0.9057007
+"River6.max", 0.0942993, 0.5, 0.9057007
+"Fjord1.min", 1.0000000, 1.0, 1.0000000
+"Fjord1.max", 1.0000000, 1.0, 1.0000000
+"Fjord2.min", 1.0000000, 1.0, 1.0000000
+"Fjord2.max", 1.0000000, 1.0, 1.0000000
+', row.names = 1)
+  colnames(check) <- c("2.5%","50%","97.5%")
+  expect_equal(output, check)
+
+  output <- round(advEfficiency(efficiency, paired = FALSE), 7)
+  check <- read.csv(text = '"","2.5%","50%","97.5%"
+"River1.max", 1.0000000, 1.0, 1.0000000
+"River2.max", 0.0942993, 0.5, 0.9057007
+"River3.max", 0.0942993, 0.5, 0.9057007
+"River4.max", 0.0942993, 0.5, 0.9057007
+"River5.max", 0.0942993, 0.5, 0.9057007
+"River6.max", 0.0942993, 0.5, 0.9057007
+"Fjord1.max", 1.0000000, 1.0, 1.0000000
+"Fjord2.max", 1.0000000, 1.0, 1.0000000
+"River1.min", 1.0000000, 1.0, 1.0000000
+"River2.min", 0.0942993, 0.5, 0.9057007
+"River3.min", 0.0942993, 0.5, 0.9057007
+"River4.min", 0.0942993, 0.5, 0.9057007
+"River5.min", 0.0942993, 0.5, 0.9057007
+"River6.min", 0.0942993, 0.5, 0.9057007
+"Fjord1.min", 1.0000000, 1.0, 1.0000000
+"Fjord2.min", 1.0000000, 1.0, 1.0000000
+', row.names = 1)
+  colnames(check) <- c("2.5%","50%","97.5%")
+  expect_equal(output, check)
 })
 
 test_that("firstArrayFailure is able to deal with multile first expected arrays", {
@@ -207,4 +261,5 @@ Fjord1 -- Fjord2 -- Fjord1
 
 setwd("..")
 unlink("exampleWorkspace", recursive = TRUE)
+setwd(tests.home)
 rm(list = ls())

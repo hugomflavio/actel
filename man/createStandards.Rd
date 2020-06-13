@@ -4,7 +4,7 @@
 \alias{createStandards}
 \title{Standardize serial numbers, stations and arrays in the detections}
 \usage{
-createStandards(detections, spatial, deployments)
+createStandards(detections, spatial, deployments, discard.orphans = FALSE)
 }
 \arguments{
 \item{detections}{a data frame of detections}

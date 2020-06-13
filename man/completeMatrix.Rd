@@ -4,8 +4,36 @@
 \alias{completeMatrix}
 \title{Complete a Distances Matrix}
 \usage{
-completeMatrix()
+completeMatrix(x)
+}
+\arguments{
+\item{x}{A distances matrix to be completed.}
+}
+\value{
+A matrix of distances between pairs of points.
 }
 \description{
-Completes a matrix that has the upper diagonal half filled.
+Completes the bottom diagonal of a matrix with the same number of rows and columns.
+}
+\details{
+It is highly recommended to read the vignette regarding distances matrix before running this function.
+You can find it by running \code{vignette('a-2_distances_matrix', 'actel')} or \code{browseVignettes('actel')}
+}
+\examples{
+# Create dummy matrix with upper diagonal filled.
+x <- matrix(
+ c( 0,  1,  2,  3,  4, 5,
+   NA,  0,  1,  2,  3, 4,
+   NA, NA,  0,  1,  2, 3,
+   NA, NA, NA,  0,  1, 2,
+   NA, NA, NA, NA,  0, 1,
+   NA, NA, NA, NA, NA, 0), 
+ ncol = 6, byrow = TRUE)
+
+# inspect x
+x
+
+# run completeMatrix
+completeMatrix(x)
+
 }

@@ -1,4 +1,9 @@
-exampleWorkspace()
+skip_on_cran()
+
+tests.home <- getwd()
+setwd(tempdir())
+
+exampleWorkspace("exampleWorkspace")
 setwd("exampleWorkspace")
 
 test_that("loadStudyData contains all the required elements", {
@@ -6,7 +11,7 @@ test_that("loadStudyData contains all the required elements", {
 	  sections = NULL, exclude.tags = NULL, disregard.parallels = TRUE),
 		"No detections were found for receiver(s) 132907.", fixed = TRUE)
 	file.remove("detections/actel.detections.RData")
-	expect_equal(names(output), c('bio', 'sections', 'deployments', 'spatial', 'dot', 'arrays', 'dotmat', 'detections', 'dist.mat', 'invalid.dist', 'detections.list', 'paths'))
+	expect_equal(names(output), c('bio', 'sections', 'deployments', 'spatial', 'dot', 'arrays', 'dotmat', 'dist.mat', 'invalid.dist', 'detections.list', 'paths'))
 })
 
 test_that("loadStudyData stops if override contains unknown data.", {
@@ -55,6 +60,9 @@ test_that("loadStudyData can handle detections in unknown receivers", {
 	expect_equal(tail(names(output$deployments), 1), "132918")
 	expect_equal(as.character(output$deployments$`132918`$Station.name), "Unknown")
 })
+# b
+# b
 
 setwd("..")
 unlink("exampleWorkspace", recursive = TRUE)
+setwd(tests.home)

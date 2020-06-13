@@ -1,5 +1,5 @@
 ---
-title: "3) migration()"
+title: "3.0) migration()"
 author: "Hugo Flávio"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
@@ -33,7 +33,8 @@ knitr::opts_chunk$set(
     1. [Inspecting the residency() results](d-2_residency_results.html)
     1. [Multi-way efficiency estimations](d-3_residency_efficiency.html)
 1. [Manual mode](e-0_manual_mode.html)
-1. [Errors and messages](f-0_messages.html)
+1. [Beyond the three main analyses](f-0_post_functions.html)
+1. [Errors and messages](g-0_messages.html)
 
 ## The migration() function
 
@@ -51,12 +52,12 @@ migration(tz = "Europe/Copenhagen", sections = c("River", "Fjord", "Sea"))
 Study areas can differ considerably. The arguments within migration() allow you to capture that diversity!
 
 ```r
-migration(path = NULL, tz, sections, success.arrays = NULL, max.interval = 60, minimum.detections = 2, 
+migration(tz, sections, success.arrays = NULL, max.interval = 60, minimum.detections = 2, 
   start.time = NULL, stop.time = NULL, speed.method = c("last to first", "first to first"), 
   speed.warning = NULL, speed.error = NULL, jump.warning = 2, jump.error = 3, 
-  inactive.warning = NULL, inactive.error = NULL, exclude.tags = NULL, override = NULL, report = TRUE,
-  if.last.skip.section = TRUE, replicates = NULL, disregard.parallels = TRUE, 
-  GUI = c("needed", "always", "never"))
+  inactive.warning = NULL, inactive.error = NULL, exclude.tags = NULL, override = NULL, report = FALSE,
+  auto.open = TRUE, discard.orphans = FALSE, save.detections = FALSE, if.last.skip.section = TRUE, 
+  replicates = NULL, disregard.parallels = TRUE, GUI = c("needed", "always", "never"))
 ```
 
 Below are listed only new arguments that do not exist in [explore](b-0_explore.html#general-arguments). 
@@ -101,7 +102,7 @@ Note:
 
 #### Setting up the replicates argument
 
-You **must use the stations standard names** (i.e. St.10, St.12) when referring to replicates. If you are not sure what the Standard names are, you can run `loadSpatial()` in the same folder as your spatial.csv file or `loadSpatial(file = "path/to/spatial.csv")` to check them out (look at the last column).
+You **must use the stations standard names** (i.e. St.10, St.12) when referring to replicates. If you are not sure what the Standard names are, you can run `loadSpatial()` in the same folder as your spatial.csv file or `loadSpatial(file = "path/to/spatial.csv")` to check them out (see the "Standard.name" column).
 
 Once you know which replicates you want to list for your array(s), you can include them in the analysis. Lets imagine you want to use stations St.1 and St.2 as replicates for the array River1, and St.3 as a replicate for array River3. This is how they should be listed:
 
@@ -115,7 +116,7 @@ It is important that you list replicates using the `list(Array = "Replicate")` c
 
 ### disregard.parallels
 
-This argument controls wether or not the presence of parallel arrays (in multi-branch analyses) should potentially lead to the invalidation of efficiency peers. This argument is a bit tough to explain in few words, so I recommend that you [have a look at how efficiency is calculated in migration()](c-3_migration_efficiency.html#cjs-and-multiple-branches).
+This argument controls whether or not the presence of parallel arrays (in multi-branch analyses) should potentially lead to the invalidation of efficiency peers. This argument is a bit tough to explain in few words, so I recommend that you [have a look at how efficiency is calculated in migration()](c-3_migration_efficiency.html#cjs-and-multiple-branches).
 
 
 Now that you know how to run the migration analysis, you may want to:

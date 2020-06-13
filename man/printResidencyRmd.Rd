@@ -13,6 +13,7 @@ printResidencyRmd(
   array.circular.plots,
   section.arrival.circular.plots,
   section.departure.circular.plots,
+  sensor.plots,
   spatial,
   deployments,
   detections,
@@ -27,8 +28,13 @@ printResidencyRmd(
 \item{biometric.fragment}{Rmarkdown string specifying the biometric graphics drawn.}
 
 \item{efficiency.fragment}{Rmarkdown string specifying the efficiency results.}
+
+\item{sensor.plots}{Rmarkdown string specifying the name of the sensor plots.}
+}
+\value{
+No return value, called for side effects.
 }
 \description{
-Creates a Rmd report and converts it to hmtl.
+Creates a Rmd report and converts it to html.
 }
 \keyword{internal}

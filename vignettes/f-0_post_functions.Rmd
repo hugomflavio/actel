@@ -1,0 +1,225 @@
+---
+title: "6.0) Beyond the three main analyses"
+author: "Hugo Flávio"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{6.0) Beyond the three main analyses}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+## Index
+
+1. [Preparing your data](a-0_workspace_requirements.html)
+    1. [Structuring the study area](a-1_study_area.html)
+    1. [Creating a distances matrix](a-2_distances_matrix.html)
+1. [explore()](b-0_explore.html)
+    1. [Processes behind explore()](b-1_explore_processes.html)
+    1. [Inspecting the explore() results](b-2_explore_results.html)
+1. [migration()](c-0_migration.html)
+    1. [Processes behind migration()](c-1_migration_processes.html)
+    1. [Inspecting the migration() results](c-2_migration_results.html)
+    1. [One-way efficiency estimations](c-3_migration_efficiency.html)
+1. [residency()](d-0_residency.html)
+    1. [Processes behind residency()](d-1_residency_processes.html)
+    1. [Inspecting the residency() results](d-2_residency_results.html)
+    1. [Multi-way efficiency estimations](d-3_residency_efficiency.html)
+1. [Manual mode](e-0_manual_mode.html)
+1. [__Beyond the three main analyses__](f-0_post_functions.html)
+1. [Errors and messages](g-0_messages.html)
+
+## Expanding on what actel can give you
+
+First of all, congratulations! If you are reading this page, you must have successfully ran an actel analysis on your data. I hope you have found the results useful :)
+
+Here you will find some additional examples of things you can do using the output of your analysis. As actel connects to other packages and expands its capacities, so will this page.
+
+<!-- ## Calculating utilization distribution areas and space-use overlaps
+
+The R package RSP ([github](https://github.com/YuriNiella/RSP)) allows you to run spatial analyses on the habitat use of your fish using the output of your actel analysis. With the RSP toolkit you can analyse the fine scale movements of aquatic animals while accounting for the surrounding land masses. The animal movements between detections are recreated to have occurred exclusively in water and the utilization distribution areas are limited by the land contours, providing realistic estimations of space use. 
+
+Depending on the research questions being addressed the utilization distribution areas can be calculated for the entire monitoring periods, or in fine-scale according to fixed temporal intervals in hours (timeframes). This approach allows spatial ecologists to use the outputs from such fine scale space use models (areas of use, or between-group overlap frequencies) as input for further statistical analysis.
+
+This is a great R package, so make sure to go check it out!
+ -->
+## Calculating efficiency ranges
+
+Both the `migration` and the `residency` analyses include efficiency calculations. However, these calculations can sometimes be somewhat limited. To get a better idea of your array efficiencies, you can run the function `advEfficiency` on the efficiency outputs of your actel analysis.
+
+Let us assume that you have stored the results of your analysis in an object called `results` (i.e. you ran `results <- migration(...)` or `results <- residency(...)`).
+
+You can run `advEfficiency` on three different contexts:
+
+1. On the progression results from the migration analysis:
+
+```r
+# Run estimation on the overall detections
+advEfficiency(results$overall.CJS)
+
+# Run estimation on the detections for a specific group
+advEfficiency(results$group.overview$name)
+# Replace "name" with the actual name of the group.
+
+# Run estimation on the detections for a specific group from a specific release site
+advEfficiency(results$release.overview$A.B) 
+# Replace "A" with the group name and "B" with the name of the release site.
+```
+
+2. On the efficiency results from the residency analysis:
+
+```r
+# advEfficiency will estimate both the maximum and minimum efficiency.
+advEfficiency(results$efficiency)
+
+# additionally, you can choose how these are plotted by manipulating 
+# the 'paired' and 'force.grid' arguments, e.g.:
+advEfficiency(results$efficiency, paired = TRUE, force.grid = c(1, 4))
+```
+
+3. On the efficiency results from an intra-array estimation:
+
+```r
+advEfficiency(results$intra.array.CJS$name)
+# Replace "name" with the name of the array for which the intra-array efficiency was calculated.
+```
+
+__Bonus case:__ If you want to know intra-array estimations for a specific group, you can adapt and run the code below:
+
+```r
+# Fetch the detection matrix for the intra array estimate 
+# (replace "name" with the actual name of the array)
+m <- results$intra.array.matrices$name
+
+# Fetch the signals of the tags of the group you are interest in 
+# (replace "group_name" with the name of the group)
+tags <- results$status.df$Signal[results$status.df$Group == "group_name"]
+
+# Extract only the matrix rows that match the target group
+m <- x[match(tags, stripCodeSpaces(rownames(m))), ]
+
+# Remove any NA leftovers
+m <- m[complete.cases(m), ]
+
+# Re-calculate the intra-array CJS
+x <- dualArrayCJS(m)
+
+# Run advEfficiency on the new results
+advEfficiency(x)
+```
+
+`advEfficiency` comes with some additional parameters that will help you get the results exactly as you need them. Find more by running `?advEfficiency`. The advEfficiency manual page also includes additional information on how the calculations are made, and how you could explain them in a paper, if you need to!
+
+## Drawing personalized circular plots
+
+Circular plots are a great way to display your results in a publication. Examples include differences between groups or between arrival points at different places. Although actel provides circular plots with its analyses, these default plots may not be exactly what you are looking for. As such, I created the function `plotTimes`, to help you get your plot just right.
+
+You can prepare the input for plotTimes by using two other functions (which may also be useful on their own): `getTimes` and `timesToCircular`.
+
+For example, if you want to plot the arrival times for all your fish at two arrays:
+
+```r
+# Extrat the times from your 'results' object
+x <- getTimes(results, locations = c("A", "B"))
+
+# Convert the times to a circular object
+x <- timesToCircular(x)
+
+# and plot it
+plotTimes(x)
+
+# You can include a night period by using the night argument, e.g.:
+plotTimes(x, night = c("20:00", "06:00"))
+```
+
+This will plot two data series (one for array "A" and one for array "B"), with all your fish pooled together.
+
+However, if you want to plot the arrival times at a specific array per group, you could do the following:
+
+```r
+x <- getTimes(results, locations = "A")
+x <- timesToCircular(x, by.group = TRUE)
+plotTimes(x)
+
+# You can change the names on the legend by changing the
+# names of object 'x' (run 'names(x)' to see them).
+```
+
+This will plot each group that arrived at array "A" in a different colour.
+
+You can then choose the combination that makes more sense for the point you are trying to prove. Additionally, plotTimes allows you to shade a portion of the graphic to highlight the night period, and comes with a series of other arguments that allow you to personalise your plot until it is on point (see `?plotTimes` for more details).
+
+__Bonus case:__ You can combine time data from multiple analyses. For example, if you ran your study during two years, you can plot the arrival times at a given array for both years and see if there is any variation.
+
+```r
+# Load the results from both years:
+y1 <- dataToList("actel_migration_results_year1.RData")
+y2 <- dataToList("actel_migration_results_year2.RData")
+
+# extract the time data for a specific array:
+x1 <- getTimes(y1, locations = "A")
+x2 <- getTimes(y2, locations = "A")
+
+# Convert the times to circular, and combine them in a single list
+x <- list(
+  year.1 = timesToCircular(x1)[[1]],
+  year.2 = timesToCircular(x2)[[1]])
+# The names you choose for each object above will be used in the plot legend,
+# for example, in this plot, the legend would read "year.1" and "year.2".
+
+# plot both years together!
+plotTimes(x)
+
+# You can also choose your own colours, and even give it a title:
+plotTimes(x, col = c("blue", "orange"), title = "A plot of two datasets!")
+```
+
+You can expand on the example above to plot different groups too. Once you have finished your plot, you can save it to an svg file by adding a name to the 'file' argument.
+
+## Drawing personalised detection plots
+
+Detection plots provide a lot of information. However, the default plots printed in the reports may be to small to analyse, or perhaps you would like to edit them to use in a presentation or paper. `plotMoves` is the function you are looking for.
+
+
+```r
+# Assuming you saved the output of an actel analysis as 'results',
+# you can then plot the detections for single individuals. Imagine
+# you want to see tag 'R64K-1995'. You can run:
+plotMoves(results, tag = "R64K-1995")
+
+# plotMoves comes with some additional personalisation arguments,
+# such as title, or array.alias. array.alias allows you to replace
+# default name of an array with a name of your choosing, e.g.:
+plotMoves(results, tag = "R64K-1995", array.alias = c("River1" = "My_first_array"))
+
+# additionally, if you give the same name to multiple arrays, they
+# will be combined automatically! e.g.:
+plotMoves(results, tag = "R64K-1995", array.alias = c("River1" = "River", "River2" = "River"))
+
+# You can find all the details about plotMoves arguments by running
+?plotMoves
+
+# plotMoves returns a ggplot object, which means you can edit it further!
+# Very simple example:
+library(ggplot2)
+p <- plotMoves(results, tag = "R64K-1995")
+p <- p + xlab("changing the label after running plotMoves is possible!")
+p
+
+# Of course, you can also save your new plots using ggsave.
+```
+
+## What would you like to see here?
+
+actel is a work in progress. Is there any anything you would like to do or see in your data that is missing? Do you think it could be a useful function for actel? [Get in touch!](mailto:hdmfla@aqua.dtu.dk)
+
+I hope you enjoy using actel!
+
+

@@ -16,7 +16,7 @@ efficiencyMatrix(movements, arrays, paths, dotmat)
 \item{dotmat}{The matrix of distances between arrays.}
 }
 \value{
-a matrix of detection histories per fish.
+A matrix of detection histories per fish.
 }
 \description{
 Compile inter-array detection matrix

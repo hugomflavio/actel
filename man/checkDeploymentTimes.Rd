@@ -9,6 +9,9 @@ checkDeploymentTimes(input)
 \arguments{
 \item{input}{The table of deployments}
 }
+\value{
+No return value, called for side effects.
+}
 \description{
 Confirm that receivers were not re-deployed before being retrieved
 }

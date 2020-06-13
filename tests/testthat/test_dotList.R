@@ -1,3 +1,5 @@
+skip_on_cran()
+
 test_that("dotList correctly assigns before, after and neighbours", {
 	dot <- readDot(string = "A1--A2--B1--B2--B3--C1--C2")
 	output <- dotList(input = dot)

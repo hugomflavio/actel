@@ -1,3 +1,8 @@
+skip_on_cran()
+
+tests.home <- getwd()
+setwd(tempdir())
+
 test_that("loadDot stops if arguments or file are missing", {
 	expect_error(loadDot(), "No dot file or dot string were specified.", fixed = TRUE)
 })
@@ -19,14 +24,14 @@ test_that("loadDot stops if contents of file do not match spatial", {
 	cat("River1--River2--River3--River4--River5--River6\n")
 	sink()
 	expect_error(loadDot(input = "spatial.dot", spatial = example.spatial, disregard.parallels = TRUE),
-		"Not all the arrays listed in the spatial.csv file are present in the spatial.dot.", fixed = TRUE)
+		"Not all the arrays listed in the spatial.csv file are present in the spatial.dot.\nMissing arrays: River0, Fjord1, Fjord2, Sea", fixed = TRUE)
 	file.remove("spatial.dot")
 
 	sink("spatial.txt")
 	cat("River1--River2--River3--River4--River5--River6\n")
 	sink()
 	expect_error(loadDot(input = "spatial.txt", spatial = example.spatial, disregard.parallels = TRUE),
-		"Not all the arrays listed in the spatial.csv file are present in the spatial.txt.", fixed = TRUE)
+		"Not all the arrays listed in the spatial.csv file are present in the spatial.txt.\nMissing arrays: River0, Fjord1, Fjord2, Sea", fixed = TRUE)
 	file.remove("spatial.txt")
 })
 
@@ -353,17 +358,18 @@ River3 -- River6")
 	arrays <- dotPaths(input = arrays, dotmat = mat, disregard.parallels = TRUE)
 	# ONLY RUN THIS TO RESET REFERENCE
 	# aux_dotPaths_complex_text_disregard_parallels_true <- arrays
-	# save(aux_dotPaths_complex_text_disregard_parallels_true, file = "aux_dotPaths_complex_text_disregard_parallels_true.RData")
-	load("aux_dotPaths_complex_text_disregard_parallels_true.RData")
+	# save(aux_dotPaths_complex_text_disregard_parallels_true, file = paste0(tests.home, "/aux_dotPaths_complex_text_disregard_parallels_true.RData"))
+	load(paste0(tests.home, "/aux_dotPaths_complex_text_disregard_parallels_true.RData"))
 	expect_equal(arrays, aux_dotPaths_complex_text_disregard_parallels_true)
 
 	arrays <- dotList(input = dot, sections = c("River", "Fjord", "Sea"))
 	arrays <- dotPaths(input = arrays, dotmat = mat, disregard.parallels = FALSE)
 	# ONLY RUN THIS TO RESET REFERENCE
 	# aux_dotPaths_complex_text_disregard_parallels_false <- arrays
-	# save(aux_dotPaths_complex_text_disregard_parallels_false, file = "aux_dotPaths_complex_text_disregard_parallels_false.RData")
-	load("aux_dotPaths_complex_text_disregard_parallels_false.RData")
+	# save(aux_dotPaths_complex_text_disregard_parallels_false, file = paste0(tests.home, "/aux_dotPaths_complex_text_disregard_parallels_false.RData"))
+	load(paste0(tests.home, "/aux_dotPaths_complex_text_disregard_parallels_false.RData"))
 	expect_equal(arrays, aux_dotPaths_complex_text_disregard_parallels_false)
 })
 
-file.remove(list.files(pattern = "*txt$"))
+setwd(tests.home)
+

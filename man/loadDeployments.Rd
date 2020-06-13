@@ -10,7 +10,7 @@ loadDeployments(file, tz)
 \item{file}{an input file with spatial data.}
 }
 \value{
-The deployments dataframe
+A data frame with the deployments information
 }
 \description{
 Load deployments file and Check the structure

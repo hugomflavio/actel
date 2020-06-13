@@ -9,7 +9,7 @@
 #' @inheritParams splitDetections
 #' @inheritParams loadDetections
 #' 
-#' @return A list of movement events for each fish.
+#' @return A list containing the movement events for each fish.
 #' 
 #' @keywords internal
 #' 
@@ -20,7 +20,8 @@ groupMovements <- function(detections.list, bio, spatial, speed.method, max.inte
   round.points <- roundDown(seq(from = length(detections.list)/10, to = length(detections.list), length.out = 10), to = 1)
   counter <- 1
   {
-    pb <- txtProgressBar(min = 0, max = sum(unlist(lapply(detections.list, nrow))), style = 3, width = 60)
+    if (interactive())
+      pb <- txtProgressBar(min = 0, max = sum(unlist(lapply(detections.list, nrow))), style = 3, width = 60)
     movements <- lapply(names(detections.list), function(i) {
       appendTo("debug", paste0("Debug: (Movements) Analysing fish ", i, "."))
       if (invalid.dist) {
@@ -71,7 +72,8 @@ groupMovements <- function(detections.list, bio, spatial, speed.method, max.inte
         counter <<- counter + stop - start + 1
         if (i == tail(names(detections.list), 1)) 
           counter <<- sum(unlist(lapply(detections.list, nrow)))
-        setTxtProgressBar(pb, counter)
+        if (interactive())
+          setTxtProgressBar(pb, counter)
         flush.console()
       })
       counter <<- counter
@@ -92,7 +94,8 @@ groupMovements <- function(detections.list, bio, spatial, speed.method, max.inte
       return(recipient)
     })
     names(movements) <- names(detections.list)
-    close(pb)
+    if (interactive())
+      close(pb)
   }
 
   if (trigger.unknown)
@@ -110,9 +113,9 @@ groupMovements <- function(detections.list, bio, spatial, speed.method, max.inte
 #' @inheritParams groupMovements
 #' @param movements A list of movements for each target tag, created by groupMovements.
 #' 
-#' @keywords internal
+#' @return The movement data frame containing only valid events for the target fish.
 #' 
-#' @return The movement data frame containing only valid events
+#' @keywords internal
 #' 
 simplifyMovements <- function(movements, fish, bio, speed.method, dist.mat, invalid.dist) {
   # NOTE: The NULL variables below are actually column names used by data.table.
@@ -125,7 +128,7 @@ simplifyMovements <- function(movements, fish, bio, speed.method, dist.mat, inva
     if (!invalid.dist)
         aux <- movementSpeeds(movements = aux, speed.method = speed.method, dist.mat = dist.mat)
     output <- speedReleaseToFirst(fish = fish, bio = bio, movements = aux,
-     dist.mat = dist.mat, invalid.dist = invalid.dist)
+     dist.mat = dist.mat, invalid.dist = invalid.dist, speed.method = speed.method)
     return(output)
   } else {
     return(NULL)
@@ -141,7 +144,7 @@ simplifyMovements <- function(movements, fish, bio, speed.method, dist.mat, inva
 #' @inheritParams simplifyMovements
 #' @inheritParams groupMovements
 #' 
-#' @return The movement data frame with time and speed calculations
+#' @return The movement data frame with speed calculations for the target fish.
 #' 
 #' @keywords internal
 #' 
@@ -155,8 +158,8 @@ movementSpeeds <- function(movements, speed.method, dist.mat) {
           a.sec <- as.vector(difftime(movements$First.time[i], movements$Last.time[i - 1], units = "secs"))
           my.dist <- dist.mat[movements$First.station[i], gsub(" ", ".", movements$Last.station[i - 1])]
         }
-        if (speed.method == "first to first"){
-          a.sec <- as.vector(difftime(movements$First.time[i], movements$First.time[i - 1], units = "secs"))
+        if (speed.method == "last to last"){
+          a.sec <- as.vector(difftime(movements$Last.time[i], movements$Last.time[i - 1], units = "secs"))
           my.dist <- dist.mat[movements$First.station[i], gsub(" ", ".", movements$First.station[i - 1])]
         }
         movements$Average.speed.m.s[i] <<- round(my.dist/a.sec, 6)
@@ -175,7 +178,7 @@ movementSpeeds <- function(movements, speed.method, dist.mat) {
 #' @inheritParams movementSpeeds
 #' @param type The type of movements being analysed. One of "array" or "section".
 #' 
-#' @return The movement data frame with time and speed calculations
+#' @return The movement data frame with time calculations for the target fish.
 #' 
 #' @keywords internal
 #' 
@@ -222,13 +225,13 @@ movementTimes <- function(movements, type = c("array", "section")){
 #' @inheritParams movementSpeeds
 #' @param fish The tag ID of the fish currently being analysed
 #' 
-#' @return The movement data frame containing the missing information.
+#' @return The movement data frame containing time and speed from release to first event.
 #' 
 #' @keywords internal
 #' 
-speedReleaseToFirst <- function(fish, bio, movements, dist.mat, invalid.dist = FALSE){
+speedReleaseToFirst <- function(fish, bio, movements, dist.mat, speed.method, invalid.dist = FALSE){
   appendTo("debug", "Running speedReleaseToFirst.")
-  the.row <- match(fish,bio$Transmitter)
+  the.row <- match(fish, bio$Transmitter)
   origin.time <- bio[the.row, "Release.date"]
   origin.place <- as.character(bio[the.row, "Release.site"])
   if (origin.time <= movements$First.time[1]) {
@@ -239,9 +242,16 @@ speedReleaseToFirst <- function(fish, bio, movements, dist.mat, invalid.dist = F
       m <- paste0("0", m)
     movements$Time.travelling[1] <- paste(h, m, sep = ":")
     if (!invalid.dist & movements$Array[1] != "Unknown") {
-      a.sec <- as.vector(difftime(movements$First.time[1], origin.time, units = "secs"))
-      my.dist <- dist.mat[movements$First.station[1], origin.place]
-      movements$Average.speed.m.s[1] <- round(my.dist/a.sec, 6)
+      if (speed.method == "last to first") {
+        a.sec <- as.vector(difftime(movements$First.time[1], origin.time, units = "secs"))
+        my.dist <- dist.mat[movements$First.station[1], origin.place]
+        movements$Average.speed.m.s[1] <- round(my.dist/a.sec, 6)
+      }
+      if (speed.method == "last to last") {
+        a.sec <- as.vector(difftime(movements$Last.time[1], origin.time, units = "secs"))
+        my.dist <- dist.mat[movements$Last.station[1], origin.place]
+        movements$Average.speed.m.s[1] <- round(my.dist/a.sec, 6)
+      }
     }
   } else {
     movements$Time.travelling[1] <- NA
@@ -255,7 +265,7 @@ speedReleaseToFirst <- function(fish, bio, movements, dist.mat, invalid.dist = F
 #' @inheritParams simplifyMovements
 #' @inheritParams migration
 #' 
-#' @return the section movements
+#' @return A data frame containing the section movements for the target fish.
 #' 
 #' @keywords internal
 #' 
@@ -284,7 +294,9 @@ sectionMovements <- function(movements, sections, invalid.dist) {
       Events = aux$lengths,
       Detections = unlist(lapply(seq_along(aux$values), function(i) sum(vm$Detections[first.events[i]:last.events[i]]))),
       First.array = vm$Array[first.events],
+      First.station = vm$First.station[first.events],
       Last.array = vm$Array[last.events],
+      Last.station = vm$Last.station[last.events],
       First.time = vm$First.time[first.events],
       Last.time = vm$Last.time[last.events],
       Time.travelling = c(vm$Time.travelling[1], rep(NA_character_, length(aux$values) - 1)),
@@ -298,7 +310,9 @@ sectionMovements <- function(movements, sections, invalid.dist) {
       Events = aux$lengths,
       Detections = unlist(lapply(seq_along(aux$values), function(i) sum(vm$Detections[first.events[i]:last.events[i]]))),
       First.array = vm$Array[first.events],
+      First.station = vm$First.station[first.events],
       Last.array = vm$Array[last.events],
+      Last.station = vm$Last.station[last.events],
       First.time = vm$First.time[first.events],
       Last.time = vm$Last.time[last.events],
       Time.travelling = c(vm$Time.travelling[1], rep(NA_character_, length(aux$values) - 1)),
@@ -318,7 +332,7 @@ sectionMovements <- function(movements, sections, invalid.dist) {
 #' @param arrmoves the array movements
 #' @param secmoves the section movements
 #' 
-#' @return the updated array movements
+#' @return A data frame with the array movements for the target fish, with an updated 'Valid' column.
 #' 
 #' @keywords internal
 #' 

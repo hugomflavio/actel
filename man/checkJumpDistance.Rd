@@ -40,7 +40,7 @@ not fit in R's console, a temporary file will be saved and the user will be
 prompted to open and examine that file. Defaults to "needed".}
 }
 \value{
-a checked movements list
+A list of movements with updated 'Valid' columns
 }
 \description{
 Check if fish are jumping over arrays

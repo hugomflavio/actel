@@ -18,7 +18,7 @@ copyOfCirclePlotRad(
 )
 }
 \arguments{
-\item{xlim, ylim}{the ranges to be encompassed by the x and y axes. Useful for centering the plot.}
+\item{xlim, ylim}{the ranges to be encompassed by the x and y axes. Useful for centring the plot.}
 
 \item{uin}{desired values for the units per inch parameter. If of length 1, the desired units per inch on the x axis.}
 
@@ -29,6 +29,9 @@ copyOfCirclePlotRad(
 \item{main, sub, xlab, ylab}{title, subtitle, x label and y label of the plot.}
 
 \item{control.circle}{parameters passed to plot.default in order to draw the circle. The function circle.control is used to set the parameters.}
+}
+\value{
+No return value, adds to an existing plot.
 }
 \description{
 This function is an EXACT copy of the function circlePlotRad() in the circular package.

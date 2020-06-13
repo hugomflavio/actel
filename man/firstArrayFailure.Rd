@@ -20,7 +20,7 @@ firstArrayFailure(fish, bio, spatial, first.array, paths, dotmat)
 \item{dotmat}{A dot distance matrix}
 }
 \value{
-NULL if no arrays failed, or a list of arrays which failed.
+NULL if no arrays failed, or a list of arrays that failed.
 }
 \description{
 Determine if the first array after release has failed

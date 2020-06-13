@@ -2,23 +2,40 @@
 % Please edit documentation in R/CJS.R
 \name{simpleCJS}
 \alias{simpleCJS}
-\title{Compute simple CJS model}
+\title{Analytical CJS model}
 \usage{
 simpleCJS(input, estimate = NULL, fixed.efficiency = NULL, silent = TRUE)
 }
 \arguments{
 \item{input}{A presence/absence matrix.}
 
-\item{estimate}{an estimate of the last array's efficiency.}
+\item{estimate}{An estimate of the last array's efficiency, between 0 and 1.}
 
-\item{fixed.efficiency}{A vector of fixed efficiency estimates from a more complete CJS model.}
+\item{fixed.efficiency}{A vector of fixed efficiency estimates [0, 1]. \code{length(fixed.efficiency)} must match \code{ncol(input)}.}
 
-\item{silent}{Logical: Should messages be printed?}
+\item{silent}{Logical: Should messages be printed? This argument is mainly intended for function calls running within actel's analyses.}
 }
 \value{
-A summary of the CJS results
+A list containing:
+\itemize{
+\item \code{absolutes} A data frame with the absolute number of tags detected and missed,
+\item \code{efficiency} A vector of calculated array detection efficiencies,
+\item \code{survival} A matrix of calculated survivals,
+\item \code{lambda} A combined detection efficiency * survival estimate for the last array.
+}
 }
 \description{
-The calculations are based on 'Using mark-recapture models to estimate survival from telemetry data' by Perry et al. 2012
+Computes an analytical CJS model for a presence/absence matrix.
 }
-\keyword{internal}
+\examples{
+# prepare a dummy presence/absence matrix
+x <- matrix(c(TRUE, TRUE, TRUE, TRUE, FALSE, TRUE, TRUE, TRUE, FALSE), ncol = 3)
+colnames(x) <- c("Release", "Array1", "Array2")
+
+# run CJS
+simpleCJS(x)
+
+}
+\references{
+Perry et al (2012), 'Using mark-recapture models to estimate survival from telemetry data'. url: \url{https://www.researchgate.net/publication/256443823_Using_mark-recapture_models_to_estimate_survival_from_telemetry_data}
+}

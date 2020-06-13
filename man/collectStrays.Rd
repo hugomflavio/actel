@@ -11,6 +11,9 @@ collectStrays(input, restart = FALSE)
 
 \item{restart}{logical: if TRUE, remove file 'temp_strays.csv' from the working directory.}
 }
+\value{
+No return value, called for side effects.
+}
 \description{
 Collect summary information on the tags detected but that are not part of the study.
 }

@@ -14,7 +14,7 @@ assembleGroupCJS(mat, CJS, arrays, releases, intra.CJS = NULL)
 \item{arrays}{A list containing information for each array.}
 }
 \value{
-A CJS results table for each group
+A data frame containing the CJS results for each group
 }
 \description{
 Assembles CJS tables for all groups

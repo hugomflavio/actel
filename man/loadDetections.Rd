@@ -4,7 +4,13 @@
 \alias{loadDetections}
 \title{Load ALS detections}
 \usage{
-loadDetections(start.time = NULL, stop.time = NULL, tz, force = FALSE)
+loadDetections(
+  start.time = NULL,
+  stop.time = NULL,
+  tz,
+  force = FALSE,
+  save.detections = FALSE
+)
 }
 \arguments{
 \item{start.time}{Detection data prior to the timestamp set in
@@ -17,9 +23,12 @@ the analysis.}
 
 \item{tz}{The time zone of the study area. Must match one of the values
 present in \code{\link[base]{timezones}}.}
+
+\item{save.detections}{Logical: Should the processed detections be saved for
+future runs?}
 }
 \value{
-A dataframe with all the detections
+A data frame with all the detections
 }
 \description{
 If there are previously compiled detections present, offers the chance to reuse. Otherwise triggers combineDetections.

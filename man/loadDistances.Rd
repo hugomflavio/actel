@@ -7,10 +7,14 @@
 loadDistances(spatial)
 }
 \arguments{
-\item{spatial}{A list of spatial objects in the study area}
+\item{spatial}{A list of spatial objects in the study area.}
 }
 \value{
-a list containing the distances matrix and a TRUE/FALSE value indicating whether or not that distances matrix is valid for the target study area.
+a list containing:
+\itemize{
+\item \code{dist.mat}: A matrix of the distances (in metres) between stations (if a 'distances.csv' is present)
+\item \code{invalid.dist}: Logical: Is the distances matrix valid?
+}
 }
 \description{
 Load distances matrix

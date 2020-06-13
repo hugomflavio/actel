@@ -1,3 +1,8 @@
+skip_on_cran()
+
+tests.home <- getwd()
+setwd(tempdir())
+
 dir.create("detections")
 aux <- split(example.detections, example.detections$Receiver)
 for (i in names(aux)[1:3]) {
@@ -17,6 +22,7 @@ test_that("splitDetections' output is as expected", {
 	expect_true(any(grepl("Transmitter", colnames(output$bio))))
 	expect_equal(length(output$detections), sum(!is.na(output$bio$Transmitter)))
 })
+# n
 
 test_that("splitDetections excludes tags as requested.", {
 	expect_message(output <- splitDetections(detections = detections, bio = bio, exclude.tags = "R64K-4451"),
@@ -24,13 +30,7 @@ test_that("splitDetections excludes tags as requested.", {
 	expect_true(all(!grepl("R64K-4451", names(output$detections))))
 	expect_true(is.na(output$bio$Transmitter[bio$Signal == 4451]))
 })
-
-test_that("splitDetections stores strays in file.", {
-	strays <- read.csv("stray_tags.csv", stringsAsFactors = FALSE)
-	expect_equal(strays$Transmitter, "R64K-4451")
-	expect_equal(strays$N.detections, 18)
-	file.remove("stray_tags.csv")
-})
+# n
 
 test_that("splitDetections stops the analysis if no detections match the target tags", {
 	write.csv(example.biometrics[1, ], "biometrics.csv", row.names = FALSE)
@@ -49,5 +49,51 @@ test_that("splitDetections stops analysis if duplicated signals are present", {
 		"One or more signals match more than one tag in the detections! Showing relevant signals/tags.\n   Signal 4519 was found on tags A69-1303-4519, R64K-4519.\n   Signal 4529 was found on tags A69-1303-4529, R64K-4529.", fixed = TRUE)
 })
 
-file.remove(list.files(pattern = "*txt$"))
+test_that("splitDetections can handle multi-sensor tags", {
+	xbio <- bio[-(1:4), ]
+	xbio$Signal <- as.character(xbio$Signal)
+	xbio$Signal[1] <- "4453|4454"
+	tryCatch(output <- splitDetections(detections = detections, bio = xbio), warning = function(w) stop("A warning was produced where it should not have been.", call = FALSE))
+	expect_equal(output$bio$Transmitter[1], "R64K-4453")
+	expect_equal(unique(output$detections.list[[1]]$Signal), c("4454", "4453"))
+	expect_equal(names(output$detections.list)[1], "R64K-4453")
+
+	xbio$Sensor.unit <- ""
+	expect_warning(output <- splitDetections(detections = detections, bio = xbio),
+		"The number of sensor units provided does not match the number of signals emitted ('' < '4453|4454').\n         Aborting sensor unit attribution.", fixed = TRUE)
+	expect_true(all(is.na(output$detections.list[[1]]$Sensor.Unit)))
+	expect_true(all(is.na(output$detections.list[[2]]$Sensor.Unit)))
+
+	xbio$Sensor.unit[1] <- "A|B|C"
+	expect_warning(output <- splitDetections(detections = detections, bio = xbio),
+		"The number of sensor units provided does not match the number of signals emitted ('A|B|C' > '4453|4454').\n         Aborting sensor unit attribution.", fixed = TRUE)
+	expect_true(all(is.na(output$detections.list[[1]]$Sensor.Unit)))
+	expect_true(all(is.na(output$detections.list[[2]]$Sensor.Unit)))
+
+	xbio$Sensor.unit[1] <- "A|B"
+	tryCatch(output <- splitDetections(detections = detections, bio = xbio), warning = function(w) stop("A warning was produced where it should not have been.", call = FALSE))
+	expect_equal(as.vector(with(output$detections.list[[1]], table(Signal, Sensor.Unit))), c(14, 0, 0, 24))
+	expect_equal(unique(output$detections.list[[1]]$Sensor.Unit), c("B", "A"))
+	expect_true(all(is.na(output$detections.list[[2]]$Sensor.Unit)))
+
+	xbio$Sensor.unit[2] <- "A|B"
+	expect_warning(output <- splitDetections(detections = detections, bio = xbio),
+		"The tag with signal 4456 appears to have more than one sensor unit ('A|B'). Could there be an error in the input data?", fixed = TRUE)
+	expect_equal(unique(output$detections.list[[2]]$Sensor.Unit), "A|B")
+	
+	xbio$Sensor.unit[2] <- "A"
+	tryCatch(output <- splitDetections(detections = detections, bio = xbio), warning = function(w) stop("A warning was produced where it should not have been.", call = FALSE))
+	expect_equal(as.vector(with(output$detections.list[[1]], table(Signal, Sensor.Unit))), c(14, 0, 0, 24))
+	expect_equal(unique(output$detections.list[[1]]$Sensor.Unit), c("B", "A"))
+	expect_equal(unique(output$detections.list[[2]]$Sensor.Unit), "A")
+	expect_true(all(is.na(output$detections.list[[3]]$Sensor.Unit)))
+})
+# n
+# n
+# n
+# n
+# n
+# n
+
+setwd(tests.home)
 rm(list = ls())

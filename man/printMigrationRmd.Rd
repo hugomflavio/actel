@@ -14,6 +14,7 @@ printMigrationRmd(
   survival.graph.size,
   individual.plots,
   circular.plots,
+  sensor.plots,
   spatial,
   deployments,
   valid.detections,
@@ -38,8 +39,13 @@ printMigrationRmd(
 \item{individual.plots}{Rmarkdown string specifying the name of the individual plots.}
 
 \item{circular.plots}{Rmarkdown string specifying the name of the circular plots.}
+
+\item{sensor.plots}{Rmarkdown string specifying the name of the sensor plots.}
+}
+\value{
+No return value, called for side effects.
 }
 \description{
-Creates a Rmd report and converts it to hmtl.
+Creates a Rmd report and converts it to html.
 }
 \keyword{internal}

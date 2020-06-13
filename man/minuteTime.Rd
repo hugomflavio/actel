@@ -14,7 +14,7 @@ minuteTime(x, format = c("h", "m", "s"), seconds = TRUE)
 \item{seconds}{Logical; If TRUE, output is returned in HH:MM:SS format.}
 }
 \value{
-Decimal hour equivalent (single value or vector)
+a string or vector of strings corresponding to the character hour equivalent of the numeric input.
 }
 \description{
 Convert numeric time to HH:MM

@@ -14,7 +14,7 @@ countArrayFailures(moves, paths, dotmat)
 \item{dotmat}{A dot distance matrix}
 }
 \value{
-NULL if no arrays failed, or a list of arrays which failed
+NULL if no arrays failed, or a list containing information on the arrays that failed
 }
 \description{
 Find and list arrays which failed during the movements of the fish

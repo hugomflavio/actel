@@ -4,11 +4,23 @@
 \alias{createWorkspace}
 \title{Create a Default Workspace}
 \usage{
-createWorkspace(dir = "actel_workspace")
+createWorkspace(dir)
 }
 \arguments{
-\item{dir}{The name of the target directory. Will be created if not present}
+\item{dir}{The name of the target directory. Will be created if not present.}
+}
+\value{
+No return value, called for side effects
 }
 \description{
-Produces the files and folders required to run the package, which the user can use as a template.
+Produces template files and folders required to run the \code{\link{explore}},
+\code{\link{migration}} and \code{\link{residency}} functions.
+}
+\examples{
+\donttest{
+# running createWorkspace deploys template 
+# files to a directory specified by the user
+createWorkspace(paste0(tempdir(), "/createWorkspace_example"))
+}
+
 }

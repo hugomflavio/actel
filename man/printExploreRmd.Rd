@@ -9,6 +9,7 @@ printExploreRmd(
   biometric.fragment,
   individual.plots,
   circular.plots,
+  sensor.plots,
   spatial,
   deployments,
   detections,
@@ -24,11 +25,16 @@ printExploreRmd(
 
 \item{circular.plots}{Rmarkdown string specifying the name of the circular plots.}
 
+\item{sensor.plots}{Rmarkdown string specifying the name of the sensor plots.}
+
 \item{detections}{All the detections used in the study}
 
 \item{valid.detectiosn}{The valid detections used in the study}
 }
+\value{
+No return value, called for side effects.
+}
 \description{
-Creates a Rmd report and converts it to hmtl.
+Creates a Rmd report and converts it to html.
 }
 \keyword{internal}

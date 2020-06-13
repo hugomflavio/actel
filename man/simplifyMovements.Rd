@@ -11,18 +11,18 @@ simplifyMovements(movements, fish, bio, speed.method, dist.mat, invalid.dist)
 
 \item{bio}{A table with the tags and biometrics of the studied fish.}
 
-\item{speed.method}{Can take two forms: 'last to first' or 'first to first'.
-If 'last to first' (default), the last detection on a given array is matched
-to the first detection on the next array to perform the calculations.
-If 'first to first', the first detection on a given array is matched to the
-first detection on the next array to perform the calculations.}
+\item{speed.method}{Can take two forms: 'last to first' or 'last to last'.
+If 'last to first' (default), the last detection on the previous array is matched
+to the first detection on the target array to perform the calculations.
+If 'last to last', the last detection on ´the previous array is matched to the
+last detection on the target array to perform the calculations.}
 
 \item{dist.mat}{A matrix of the distances between the deployed ALS.}
 
 \item{invalid.dist}{Whether or not the distance matrix supplied is valid for the study area.}
 }
 \value{
-The movement data frame containing only valid events
+The movement data frame containing only valid events for the target fish.
 }
 \description{
 Remove invalid movement events and recalculate times/speeds.

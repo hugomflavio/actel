@@ -14,7 +14,7 @@ assembleArrayCJS(mat, CJS, arrays, releases)
 \item{arrays}{A list containing information for each array.}
 }
 \value{
-A list with the CJS absolute numbers and efficiency estimates
+A list containing the CJS absolute numbers and efficiency estimates
 }
 \description{
 Combine the individual CJS's of each array into a single table

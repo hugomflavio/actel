@@ -5,13 +5,12 @@
 \title{Explorative Analysis}
 \usage{
 explore(
-  path = NULL,
   tz,
   max.interval = 60,
   minimum.detections = 2,
   start.time = NULL,
   stop.time = NULL,
-  speed.method = c("last to first", "first to first"),
+  speed.method = c("last to first", "last to last"),
   speed.warning = NULL,
   speed.error = NULL,
   jump.warning = 2,
@@ -20,15 +19,15 @@ explore(
   inactive.error = NULL,
   exclude.tags = NULL,
   override = NULL,
-  report = TRUE,
+  report = FALSE,
+  auto.open = TRUE,
+  discard.orphans = FALSE,
+  save.detections = FALSE,
   GUI = c("needed", "always", "never"),
-  debug = FALSE
+  print.releases = TRUE
 )
 }
 \arguments{
-\item{path}{Path to the folder containing the data. If left NULL (default),
-the analysis runs in the current folder.}
-
 \item{tz}{The time zone of the study area. Must match one of the values
 present in \code{\link[base]{timezones}}.}
 
@@ -48,11 +47,11 @@ the analysis.}
 \code{stop.time} (in YYYY-MM-DD HH:MM:SS format) is not considered during
 the analysis.}
 
-\item{speed.method}{Can take two forms: 'last to first' or 'first to first'.
-If 'last to first' (default), the last detection on a given array is matched
-to the first detection on the next array to perform the calculations.
-If 'first to first', the first detection on a given array is matched to the
-first detection on the next array to perform the calculations.}
+\item{speed.method}{Can take two forms: 'last to first' or 'last to last'.
+If 'last to first' (default), the last detection on the previous array is matched
+to the first detection on the target array to perform the calculations.
+If 'last to last', the last detection on ´the previous array is matched to the
+last detection on the target array to perform the calculations.}
 
 \item{speed.warning}{If a fish moves at a speed equal or greater than
 \code{speed.warning} (in metres per second), a warning is issued. If left
@@ -89,32 +88,46 @@ tag are detected in the study area.}
 define which movement events are valid and invalid.}
 
 \item{report}{Logical. Should an HTML report be created at the end of the
-analysis?}
+analysis? NOTE: Setting report to TRUE will generate an HTML file in the current
+directory. Additionally, if auto.open = TRUE (default), the web browser will
+automatically be launched to open the report once the function terminates.}
+
+\item{auto.open}{Logical: Should the report be automatically opened once the
+analysis is over? Defaults to TRUE. NOTE: If report = TRUE and auto.open = TRUE,
+the web browser will automatically be launched to open the report once the
+function terminates.}
+
+\item{discard.orphans}{Logical: Should actel automatically discard
+detections that do not fall within receiver deployment periods, or that
+were recorded before the respective fish were released?}
+
+\item{save.detections}{Logical: Should the processed detections be saved for
+future runs?}
 
 \item{GUI}{One of "needed", "always" or "never". If "needed", a new window is
 opened to inspect the movements only when the movements table is too big to be
 displayed in R's console. If "always", a graphical interface is always created
 when the possibility to invalidate events emerges. If "never", a graphical
-interface is never invoqued. In this case, if the table to be displayed does
+interface is never invoked. In this case, if the table to be displayed does
 not fit in R's console, a temporary file will be saved and the user will be
 prompted to open that file and examine it. Defaults to "needed".}
 
-\item{debug}{Logical: Should temporary files be kept at the end of the
-analysis?}
+\item{print.releases}{Logical: Should the release sites be printed in the
+study area diagrams?}
 }
 \value{
 A list containing:
 \itemize{
-\item \code{detections}: All detections for each target fish;
-\item \code{valid.detections}: Valid detections for each target fish;
-\item \code{spatial}: The spatial information used during the analysis;
-\item \code{deployments}: The deployments of each receiver;
-\item \code{arrays}: The array details used during the analysis;
-\item \code{movements}: All movement events for each target fish;
-\item \code{valid.movements}: Valid movemenet events for each target fish;
-\item \code{times}: All arrival times (per fish) at each array;
-\item \code{rsp.info}: Appendix information for the RSP package;
-\item \code{dist.mat}: The distance matrix used in the analysis (if a valid
+\item \code{detections}: A list containing all detections for each target fish;
+\item \code{valid.detections}: A list containing the valid detections for each target fish;
+\item \code{spatial}: A list containing the spatial information used during the analysis;
+\item \code{deployments}: A data frame containing the deployments of each receiver;
+\item \code{arrays}: A list containing the array details used during the analysis;
+\item \code{movements}: A list containing all movement events for each target fish;
+\item \code{valid.movements}: A list containing the valid movement events for each target fish;
+\item \code{times}: A data frame containing all arrival times (per fish) at each array;
+\item \code{rsp.info}: A list containing containing appendix information for the RSP package;
+\item \code{dist.mat}: A matrix containing the distance matrix used in the analysis (if a valid
 distance matrix was supplied)
 }
 }
@@ -123,6 +136,31 @@ distance matrix was supplied)
 \code{explore} to get a general feel for the study results, and check if the
 input files are behaving as expected. It is also a good candidate if you just
 want to validate your detections for later use in other analyses.
+}
+\examples{
+\donttest{
+# Start by moving to a temporary directory
+old.wd <- getwd()
+setwd(tempdir())
+
+# Deploy the example workspace
+exampleWorkspace("exampleWorkspace")
+
+# Move your R session into the example workspace
+setwd("exampleWorkspace")
+
+# run the explore analysis. Ensure the tz argument 
+# matches the time zone of the study area. For the
+# example dataset, tz = "Europe/Copenhagen"
+results <- explore(tz = "Europe/Copenhagen")
+
+# to obtain an HTML report, run the analysis with report = TRUE
+
+# return to original working directory
+setwd(old.wd)
+rm(old.wd)
+}
+
 }
 \seealso{
 \code{\link{migration}}, \code{\link{residency}}

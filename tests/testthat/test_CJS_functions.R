@@ -1,4 +1,8 @@
-exampleWorkspace()
+skip_on_cran()
+
+tests.home <- getwd()
+setwd(tempdir())
+exampleWorkspace("exampleWorkspace")
 setwd("exampleWorkspace")
 write.csv(example.distances, "distances.csv")
 
@@ -22,11 +26,11 @@ moves <- groupMovements(detections.list = detections.list, bio = bio, spatial = 
 aux <- names(moves)
 moves <- lapply(names(moves), function(fish) {
     speedReleaseToFirst(fish = fish, bio = bio, movements = moves[[fish]],
-                        dist.mat = dist.mat, invalid.dist = invalid.dist)
+                        dist.mat = dist.mat, invalid.dist = invalid.dist,
+                        speed.method = "last to first")
   })
 names(moves) <- aux
 rm(aux)
-
 
 xmoves <- moves
 attributes(xmoves[[1]])$p.type <- "Manual"
@@ -34,9 +38,17 @@ xmoves[[1]]$Valid[18] <- FALSE
 vm <- xmoves
 vm[[1]] <- vm[[1]][-18, ]
 
-timetable <- assembleTimetable(vm = vm, all.moves = xmoves, sections = sections, 
+secmoves <- lapply(seq_along(vm), function(i) {
+  fish <- names(vm)[i]
+  appendTo("debug", paste0("debug: Compiling valid section movements for fish ", fish,"."))
+  output <- sectionMovements(movements = vm[[i]], sections = sections, invalid.dist = invalid.dist)
+  return(output)
+})
+names(secmoves) <- names(vm)
+
+timetable <- assembleTimetable(secmoves = secmoves, valid.moves = vm, all.moves = xmoves, sections = sections, 
   arrays = arrays, dist.mat = dist.mat, invalid.dist = invalid.dist, speed.method = "last to first", 
-  if.last.skip.section = TRUE, success.arrays = "Sea1")
+  if.last.skip.section = TRUE, success.arrays = "Sea1", bio = bio, tz = "Europe/Copenhagen")
 
 status.df <- assembleOutput(timetable = timetable, bio = bio, spatial = spatial, 
   sections = sections, dist.mat = dist.mat, invalid.dist = invalid.dist, tz = "Europe/Copenhagen")
@@ -50,7 +62,7 @@ test_that("assembleMatrices works as expected", {
 
 
 	#### ONLY RUN THIS PART TO RESET REFERENCE TABLES
-		# sink("../aux_assembleMatrixes.R")
+		# sink(paste0(tests.home, "/aux_assembleMatrices.R"))
 		# cat("aux_assembleMatrixes <- list()\n")
 		# capture <- lapply(1:2, function(i) {
 		# 	lapply(1:2, function(j) {
@@ -62,7 +74,7 @@ test_that("assembleMatrices works as expected", {
 		# })
 		# sink()
 	
-	source("../aux_assembleMatrixes.R")
+	source(paste0(tests.home, "/aux_assembleMatrices.R"))
 
 	capture <- lapply(1:2, function(i) {
 		lapply(1:2, function(j) {
@@ -81,7 +93,7 @@ test_that("breakMatricesByArray works as expected.", {
   m.by.array <<- output
 
 	#### ONLY RUN THIS PART TO RESET REFERENCE TABLES
-		# sink("../aux_breakMatricesByArray.R")
+		# sink(paste0(tests.home, "/aux_breakMatricesByArray.R"))
 		# cat("aux_breakMatricesByArray <- list()\n")
 		# capture <- lapply(1:2, function(i) {
 		# 	lapply(1:2, function(j) {
@@ -93,7 +105,7 @@ test_that("breakMatricesByArray works as expected.", {
 		# })
 		# sink()
 	
-	source("../aux_breakMatricesByArray.R")
+	source(paste0(tests.home, "/aux_breakMatricesByArray.R"))
 
 	capture <- lapply(1:2, function(i) {
 		lapply(1:2, function(j) {
@@ -170,15 +182,15 @@ test_that("simpleCJS works as expected.", {
 
 	xm <- m.by.array[[1]][[1]]
 	output <- simpleCJS(xm, fixed.efficiency = c(1, 0.2, 1), silent = FALSE)
-	expect_equal(output$absolutes[4, "River1"], 30)
+	expect_equal(output$absolutes["estimated", "River1"], 30)
 	expect_equal(output$efficiency, c(FakeStart = 1.0, River1 = 0.2, AnyPeer = 1.0))
 
 	output <- simpleCJS(xm, estimate = 0, silent = FALSE)
-	expect_equal(output$absolutes[4, "AnyPeer"], 26)
+	expect_equal(output$absolutes["estimated", "AnyPeer"], 26)
 	expect_equal(output$efficiency, c(FakeStart = 1, River1 = 1, AnyPeer = 0))
 
 	output <- simpleCJS(xm, estimate = 0.2, silent = FALSE)
-	expect_equal(output$absolutes[4, "AnyPeer"], 26)
+	expect_equal(output$absolutes["estimated", "AnyPeer"], 26)
 	expect_equal(output$efficiency, c(FakeStart = 1.0, River1 = 1.0, AnyPeer = 0.2))
 	expect_equal(output$survival[2], 1)
 
@@ -186,8 +198,9 @@ test_that("simpleCJS works as expected.", {
 	expect_equal(names(output), c("absolutes", "efficiency", "survival", "lambda"))
 	check <- read.csv(text = ',FakeStart,River1,AnyPeer
 "detected",30,26,26
-"here plus downstream",26,26,NA
-"not here but downstream",0, 0,NA
+"here plus on peers",26,26,NA
+"not here but on peers",0,0,NA
+"known",30,26,26
 "estimated",30,26,NA', row.names = 1)
 	expect_equal(output$absolutes, as.matrix(check))
 	expect_equal(output$efficiency, c(FakeStart = 1, River1 = 1, AnyPeer = NA))
@@ -239,8 +252,9 @@ test_that("combineCJS works as expected.", {
 	expect_equal(names(output), c("absolutes", "efficiency", "survival", "lambda"))
 	check <- read.csv(text = ',FakeStart,River1,AnyPeer
 "detected",60,54,54
-"here plus downstream",54,54,NA
-"not here but downstream",0, 0,NA
+"here plus on peers",54,54,NA
+"not here but on peers",0,0,NA
+"known",60,54,54
 "estimated",60,54,NA', row.names = 1)
 	expect_equal(output$absolutes, as.matrix(check))
 	expect_equal(output$efficiency, c(FakeStart = 1, River1 = 1, AnyPeer = NA))
@@ -273,6 +287,7 @@ test_that("assembleArrayCJS works as expected.",{
 "detected",0,54,54,52,52,52,52,49,44,34
 "here plus on peers",NA,54,54,50,52,52,50,43,34,NA
 "not here but on peers",NA,0,0,2,0,0,0,1,0,NA
+"known",0,54,54,54,52,52,52,50,44,34
 "estimated",NA,54,54,54,52,52,52,50,44,NA', row.names = 1)	
 
 	expect_equal(output$absolutes, check)
@@ -283,10 +298,28 @@ test_that("assembleArrayCJS works as expected.",{
 	overall.CJS <<- output
 })
 
+test_that("advEfficiency can plot overall.CJS results", {
+	expect_message(output <- round(advEfficiency(x = overall.CJS), 7),
+		"M: Some arrays were estimated to have either 0% or 100% efficiency, skipping plotting for those arrays.", fixed = TRUE)
+	check <- read.csv(text = '"","2.5%","50%","97.5%"
+"River1", 1.0000000, 1.0000000, 1.0000000
+"River2", 1.0000000, 1.0000000, 1.0000000
+"River3", 0.8955251, 0.9673092, 0.9952150
+"River4", 1.0000000, 1.0000000, 1.0000000
+"River5", 1.0000000, 1.0000000, 1.0000000
+"River6", 1.0000000, 1.0000000, 1.0000000
+"Fjord1", 0.9177889, 0.9840095, 0.9994114
+"Fjord2", 1.0000000, 1.0000000, 1.0000000
+', row.names = 1)
+	colnames(check) <- c("2.5%","50%","97.5%")
+	expect_equal(output, check)
+})
+
 test_that("getDualMatrices throws a warning if efficiency has already been calculated", {
 	expect_warning(getDualMatrices(replicates = list(Fjord1 = c("St.10", "St.11")), CJS = overall.CJS, spatial = spatial, detections.list = detections.list),
 		"An inter-array efficiency has already been calculated for array Fjord1", fixed = TRUE)
 })
+# n
 
 test_that("dualMatrix stops if stations that do not belong to the array are used as replicates (tested through getDualMatrices)", {
 	expect_error(getDualMatrices(replicates = list(Sea1 = c("St.14", "St.15")), CJS = overall.CJS, spatial = spatial, detections.list = detections.list),
@@ -296,16 +329,14 @@ test_that("dualMatrix stops if stations that do not belong to the array are used
 })
 
 test_that("includeIntraArrayEstimates throws errors if expected conditions are not met", {
-  expect_error(includeIntraArrayEstimates(m = intra.array.matrices, CJS = overall.CJS, efficiency  = "test"),
+  expect_error(includeIntraArrayEstimates(m = NULL, CJS = overall.CJS, efficiency  = "test"),
   	"Use only one of 'efficiency' or 'CJS' at a time.", fixed = TRUE)
-  expect_error(includeIntraArrayEstimates(m = intra.array.matrices),
-  	"Include a 'efficiency' or 'CJS' argument.", fixed = TRUE)
 })
 
 test_that("replicate functions work as expected.", {
   intra.array.matrices <<- getDualMatrices(replicates = list(Sea1 = c("St.16", "St.17")), CJS = overall.CJS, spatial = spatial, detections.list = detections.list)
 
-  check <- read.csv(text = '"","original","replicates"
+  check <- read.csv(text = '"","R1","R2"
 "R64K-4451",TRUE,TRUE
 "R64K-4453",FALSE,TRUE
 "R64K-4454",FALSE,TRUE
@@ -371,6 +402,7 @@ test_that("replicate functions work as expected.", {
 "detected",0,54,54,52,52,52,52,49,44,34
 "here plus on peers",NA,54,54,50,52,52,50,43,34,NA
 "not here but on peers",NA,0,0,2,0,0,0,1,0,NA
+"known",0,54,54,54,52,52,52,50,44,34
 "estimated",NA,54,54,54,52,52,52,50,44,35', row.names = 1)	
 	expect_equal(recipient$CJS$absolutes, check)
 
@@ -381,28 +413,53 @@ test_that("replicate functions work as expected.", {
 
 	expect_equal(names(recipient$intra.CJS$Sea1), c("absolutes", "single.efficiency", "combined.efficiency"))
 
-	check <- as.matrix(read.csv(text = '"detected at original:",28
-"detected at replicates: ",31
-"detected at both:",24', header = FALSE, row.names = 1))
+	check <- as.matrix(read.csv(text = '"detected at R1: ",28
+"detected at R2: ",31
+"detected at both: ",24', header = FALSE, row.names = 1))
 	colnames(check) <- ""
 	expect_equal(recipient$intra.CJS$Sea1$absolutes, check)
 
-	expect_equal(round(recipient$intra.CJS$Sea1$single.efficiency, 5), c(original = 0.77419, replicates = 0.85714))
+	expect_equal(round(recipient$intra.CJS$Sea1$single.efficiency, 5), c(R1 = 0.77419, R2 = 0.85714))
 
 	expect_equal(round(recipient$intra.CJS$Sea1$combined.efficiency, 5), 0.96774)
 
 	overall.CJS <<- recipient[[1]]
 	intra.array.CJS <<- recipient[[2]]
-
 })
+# y
 
+test_that("advEfficiency can plot intra.array.CJS results", {
+	expect_message(output <- round(advEfficiency(intra.array.CJS[[1]]), 7),
+		"M: For each quantile, 'Combined' estimates are calculated as 1-((1-R1)*(1-R2)).", fixed = TRUE)
+	check <- read.csv(text = '"","2.5%","50%","97.5%"
+"R1",       0.6143335, 0.7801434, 0.9006621
+"R2",       0.7084131, 0.8656773, 0.9581126
+"Combined", 0.8875447, 0.9704683, 0.9958390
+', row.names = 1)
+	colnames(check) <- c("2.5%","50%","97.5%")
+	expect_equal(output, check)
+
+	output <- advEfficiency(intra.array.CJS[[1]], labels = c(1, 2))
+	expect_equal(row.names(output), c("1", "2", "Combined"))
+
+	expect_error(advEfficiency(intra.array.CJS[[1]], labels = 1:3),
+		"Wrong number of panel names", fixed = TRUE)
+
+	output <- advEfficiency(intra.array.CJS[[1]], force.grid = c(2, 1), title = "Top/Bottom")
+
+	expect_error(advEfficiency(x = 1),
+		"Could not recognise the input as an efficiency object from actel", fixed = TRUE)
+
+	expect_error(advEfficiency(x = list(a = 1)),
+		"Could not recognise the input as an efficiency object from actel", fixed = TRUE)
+})
 
 test_that("split CJS functions work as expected.", {
   aux <- mbSplitCJS(mat = m.by.array, fixed.efficiency = overall.CJS$efficiency)
   ### ONLY RUN TO REPLACE REFERENCE
   # aux_mbSplitCJS <- aux
-  # save(aux_mbSplitCJS, file = "../aux_mbSplitCJS.RData")
-  load("../aux_mbSplitCJS.RData")
+  # save(aux_mbSplitCJS, file = paste0(tests.home, "/aux_mbSplitCJS.RData"))
+  load(paste0(tests.home, "/aux_mbSplitCJS.RData"))
   expect_equal(aux, aux_mbSplitCJS)
 
   xefficiency <- overall.CJS$efficiency
@@ -419,7 +476,9 @@ test_that("split CJS functions work as expected.", {
 "detected",0,26,26,25,26,26,26,26,25,19
 "here plus on peers",NA,26,26,25,26,26,26,25,19,NA
 "not here but on peers",NA,0,0,1,0,0,0,0,0,NA
+"known",0,26,26,26,26,26,26,26,25,19
 "estimated",NA,26,26,26,26,26,26,26,25,20
+"difference",NA,0,0,0,0,0,0,0,0,1
 ', row.names = 1)
   expect_equal(split.CJS[[1]], check)
 
@@ -427,33 +486,19 @@ test_that("split CJS functions work as expected.", {
 "detected",0,28,28,27,26,26,26,23,19,15
 "here plus on peers",NA,28,28,25,26,26,24,18,15,NA
 "not here but on peers",NA,0,0,1,0,0,0,1,0,NA
+"known",0,28,28,28,26,26,26,24,19,15
 "estimated",NA,28,28,28,26,26,26,24,19,16
+"difference",NA,0,0,0,0,0,0,0,0,1
 ', row.names = 1)
   expect_equal(split.CJS[[2]], check)
-
-  aux <- mbAssembleArrayOverview(input = split.CJS)
-
-  check <- read.csv(text = '"","River0","River1","River2","River3","River4","River5","River6","Fjord1","Fjord2","Sea1"
-"Known",0,26,26,26,26,26,26,26,25,19
-"Estimated",NA,26,26,26,26,26,26,26,25,20
-"Difference",NA,0,0,0,0,0,0,0,0,1
-', row.names = 1)
-  expect_equal(aux[[1]], check)
-
-  check <- read.csv(text = '"","River0","River1","River2","River3","River4","River5","River6","Fjord1","Fjord2","Sea1"
-"Known",0,28,28,28,26,26,26,24,19,15
-"Estimated",NA,28,28,28,26,26,26,24,19,16
-"Difference",NA,0,0,0,0,0,0,0,0,1
-', row.names = 1)
-  expect_equal(aux[[2]], check) 
 })
 
 test_that("group CJS functions work as expected.", {
   aux <- mbGroupCJS(mat = m.by.array, status.df = status.df, fixed.efficiency = overall.CJS$efficiency)
   ### ONLY RUN TO REPLACE REFERENCE
   # aux_mbGroupCJS <- aux
-  # save(aux_mbGroupCJS, file = "../aux_mbGroupCJS.RData")
-  load("../aux_mbGroupCJS.RData")
+  # save(aux_mbGroupCJS, file = paste0(tests.home, "/aux_mbGroupCJS.RData"))
+  load(paste0(tests.home, "/aux_mbGroupCJS.RData"))
   expect_equal(aux, aux_mbGroupCJS)
 
   xefficiency <- overall.CJS$efficiency
@@ -469,7 +514,9 @@ test_that("group CJS functions work as expected.", {
 "detected",0,26,26,25,26,26,26,26,25,19
 "here plus on peers",NA,26,26,25,26,26,26,25,19,NA
 "not here but on peers",NA,0,0,1,0,0,0,0,0,NA
+"known",0,26,26,26,26,26,26,26,25,19
 "estimated",NA,26,26,26,26,26,26,26,25,20
+"difference",NA,0,0,0,0,0,0,0,0,1
 ', row.names = 1)
   expect_equal(group.CJS[[1]], check)
 
@@ -477,24 +524,11 @@ test_that("group CJS functions work as expected.", {
 "detected",0,28,28,27,26,26,26,23,19,15
 "here plus on peers",NA,28,28,25,26,26,24,18,15,NA
 "not here but on peers",NA,0,0,1,0,0,0,1,0,NA
+"known",0,28,28,28,26,26,26,24,19,15
 "estimated",NA,28,28,28,26,26,26,24,19,16
+"difference",NA,0,0,0,0,0,0,0,0,1
 ', row.names = 1)
   expect_equal(group.CJS[[2]], check)
-
-  aux <- mbAssembleArrayOverview(input = group.CJS)
- check <- read.csv(text = '"","River0","River1","River2","River3","River4","River5","River6","Fjord1","Fjord2","Sea1"
-"Known",0,26,26,26,26,26,26,26,25,19
-"Estimated",NA,26,26,26,26,26,26,26,25,20
-"Difference",NA,0,0,0,0,0,0,0,0,1
-', row.names = 1)
-  expect_equal(aux[[1]], check)
-
-  check <- read.csv(text = '"","River0","River1","River2","River3","River4","River5","River6","Fjord1","Fjord2","Sea1"
-"Known",0,28,28,28,26,26,26,24,19,15
-"Estimated",NA,28,28,28,26,26,26,24,19,16
-"Difference",NA,0,0,0,0,0,0,0,0,1
-', row.names = 1)
-  expect_equal(aux[[2]], check) 
 })
 
 
@@ -505,4 +539,5 @@ test_that("special cases in oneWayMoves are working as expected", {
 
 setwd("..")
 unlink("exampleWorkspace", recursive = TRUE)
+setwd(tests.home)
 rm(list = ls())

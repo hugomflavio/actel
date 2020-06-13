@@ -14,7 +14,7 @@ coincident with the names given to the arrays. See the vignettes for more
 details.}
 }
 \value{
-A list containing, for each array, the arrays that connect to it and to which it connects.
+A list containing detailed information on the arrays
 }
 \description{
 Break the dot data frame into a list

@@ -4,10 +4,10 @@
 \alias{deleteHelpers}
 \title{Delete temporary files}
 \usage{
-deleteHelpers(emergency = FALSE)
+deleteHelpers()
 }
-\arguments{
-\item{emergency}{Logical: Should temp_debug.txt be kept?}
+\value{
+No return value, called for side effects.
 }
 \description{
 At the end of the function actel or emergencyBreak, removes temporary files.

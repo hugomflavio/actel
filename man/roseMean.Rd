@@ -38,6 +38,9 @@ roseMean(
 
 \item{edge.lwd}{Width of the edge whiskers in the range box.}
 }
+\value{
+No return value, adds to an existing plot.
+}
 \description{
 Computes and draws the mean value for a given dataset, may also plot standard error of the mean
 or standard deviation ranges.

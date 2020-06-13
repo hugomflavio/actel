@@ -10,8 +10,12 @@ globalRatios(positions)
 \item{positions}{a positions table, supplied by dailyPositions}
 }
 \value{
-A list with 1) a table containing the absolute number of fish at each location per day,
-and 2) the respective percentage table.
+A list containing:
+\itemize{
+\item \code{absolutes}: A data frame containing the absolute number of fish at each location per day,
+\item \code{percentages}: A data frame containing the percentage of fish relative to the total
+number of active fish at each location per day.
+}
 }
 \description{
 Calculate number/percentage of fish at each location for each day

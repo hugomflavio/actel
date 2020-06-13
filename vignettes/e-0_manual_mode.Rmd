@@ -1,10 +1,10 @@
 ---
-title: "5) Manual mode"
+title: "5.0) Manual mode"
 author: "Hugo Flávio"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{5) Manual mode}
+  %\VignetteIndexEntry{5.0) Manual mode}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -33,7 +33,8 @@ knitr::opts_chunk$set(
     1. [Inspecting the residency() results](d-2_residency_results.html)
     1. [Multi-way efficiency estimations](d-3_residency_efficiency.html)
 1. [__Manual mode__](e-0_manual_mode.html)
-1. [Errors and messages](f-0_messages.html)
+1. [Beyond the three main analyses](f-0_post_functions.html)
+1. [Errors and messages](g-0_messages.html)
 
 ## Refining the results
 

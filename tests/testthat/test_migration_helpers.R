@@ -1,4 +1,9 @@
-exampleWorkspace()
+skip_on_cran()
+
+tests.home <- getwd()
+setwd(tempdir())
+
+exampleWorkspace("exampleWorkspace")
 setwd("exampleWorkspace")
 write.csv(example.distances, "distances.csv")
 
@@ -6,6 +11,7 @@ sections <- c("River", "Fjord", "Sea")
 
 study.data <- suppressWarnings(loadStudyData(tz = "Europe/Copenhagen", start.time = NULL, 
 	stop.time = NULL, sections = sections, exclude.tags = NULL))
+# n
 detections.list <- study.data$detections.list
 bio <- study.data$bio
 spatial <- study.data$spatial
@@ -20,7 +26,8 @@ moves <- groupMovements(detections.list = detections.list[1:2], bio = bio, spati
 aux <- names(moves)
 moves <- lapply(names(moves), function(fish) {
     speedReleaseToFirst(fish = fish, bio = bio, movements = moves[[fish]],
-                        dist.mat = dist.mat, invalid.dist = invalid.dist)
+                        dist.mat = dist.mat, invalid.dist = invalid.dist,
+                        speed.method = "last to first")
   })
 names(moves) <- aux
 rm(aux)
@@ -32,100 +39,151 @@ test_that("assembleTimetable correctly extracts fish information", {
   vm <- xmoves
   vm[[1]] <- vm[[1]][-18, ]
 
-  output <- assembleTimetable(vm = vm, all.moves = xmoves, sections = sections, 
+  secmoves <- lapply(seq_along(vm), function(i) {
+    fish <- names(vm)[i]
+    appendTo("debug", paste0("debug: Compiling valid section movements for fish ", fish,"."))
+    output <- sectionMovements(movements = vm[[i]], sections = sections, invalid.dist = invalid.dist)
+    return(output)
+  })
+  names(secmoves) <- names(vm)
+
+  output <- assembleTimetable(secmoves = secmoves, valid.moves = vm, all.moves = xmoves, sections = sections, 
     arrays = arrays, dist.mat = dist.mat, invalid.dist = invalid.dist, speed.method = "last to first", 
-    if.last.skip.section = TRUE, success.arrays = "Sea1")
+    if.last.skip.section = TRUE, success.arrays = "Sea1", bio = bio, tz = "Europe/Copenhagen")
   timetable <<- output
 
-  expect_equal(colnames(output), c('Time.until.River', 'Speed.to.River', 'First.station.River', 'Arrived.River', 
-    'Time.in.River', 'Speed.in.River', 'Last.station.River', 'Left.River', 'Time.until.Fjord', 'Speed.to.Fjord', 
-    'First.station.Fjord', 'Arrived.Fjord', 'Time.in.Fjord', 'Speed.in.Fjord', 'Last.station.Fjord', 'Left.Fjord', 
-    'Time.until.Sea', 'Speed.to.Sea', 'First.station.Sea', 'Arrived.Sea', 'Time.in.Sea', 'Speed.in.Sea', 
-    'Last.station.Sea', 'Left.Sea', 'Very.last.array', 'Status', 'Valid.detections', 'Invalid.detections', 
-    'Backwards.movements', 'Max.cons.back.moves', 'P.type', 'Transmitter'))
-  expect_equal(output$Arrived.River[1], as.character(moves[[1]]$First.time[1]))
-  expect_equal(output$Left.River[2], as.character(moves[[2]]$Last.time[6]))
-  expect_equal(output$Arrived.Fjord[1], as.character(moves[[1]]$First.time[7]))
-  expect_equal(output$Left.Fjord[2], as.character(moves[[2]]$Last.time[12]))
-  expect_equal(output$Arrived.Sea[1], NA_character_)
-  expect_equal(output$Left.Sea[2], as.character(moves[[2]]$Last.time[13]))
+  expect_equal(colnames(output), c('Times.entered.River', 'Average.time.until.River', 'Average.speed.to.River', 
+    'First.array.River', 'First.station.River', 'First.arrived.River', 'Average.time.in.River', 
+    'Average.speed.in.River', 'Last.array.River', 'Last.station.River', 'Last.left.River', 
+    'Total.time.in.River', 'Times.entered.Fjord', 'Average.time.until.Fjord', 'Average.speed.to.Fjord', 
+    'First.array.Fjord', 'First.station.Fjord', 'First.arrived.Fjord', 'Average.time.in.Fjord', 
+    'Average.speed.in.Fjord', 'Last.array.Fjord', 'Last.station.Fjord', 'Last.left.Fjord', 
+    'Total.time.in.Fjord', 'Times.entered.Sea', 'Average.time.until.Sea', 'Average.speed.to.Sea', 
+    'First.array.Sea', 'First.station.Sea', 'First.arrived.Sea', 'Average.time.in.Sea', 'Average.speed.in.Sea', 
+    'Last.array.Sea', 'Last.station.Sea', 'Last.left.Sea', 'Total.time.in.Sea', 'Very.last.array', 
+    'Very.last.time', 'Status', 'Valid.detections', 'Valid.events', 'Invalid.detections', 
+    'Invalid.events', 'Backwards.movements', 'Max.cons.back.moves', 'P.type', 'Transmitter'))
+  expect_equal(output$First.arrived.River[1], moves[[1]]$First.time[1])
+  expect_equal(output$Last.left.River[2], moves[[2]]$Last.time[6])
+  expect_equal(output$First.arrived.Fjord[1], moves[[1]]$First.time[7])
+  expect_equal(output$Last.left.Fjord[2], moves[[2]]$Last.time[12])
+  expect_equal(as.numeric(output$First.arrived.Sea[1]), NA_real_)
+  expect_equal(output$Last.left.Sea[2], moves[[2]]$Last.time[13])
   expect_equal(output$Invalid.detections, c(11, 0))
   expect_equal(output$Very.last.array, c("Fjord2", "Sea1"))
   expect_equal(output$Status, c("Disap. in Sea", "Succeeded"))
   expect_equal(output$P.type, c("Manual", "Auto"))
   expect_equal(output$Transmitter, names(moves))
-  expect_equal(output$Time.until.River, c(NA, NA)) # Time.until first section is only filled in during assembleOutput
-  expect_equal(output$Time.in.River, c(94010, 133524))
-  expect_equal(output$Time.in.Fjord, c(1368315, 929074))
-  expect_equal(output$Time.in.Sea, c(NA, 33))
+  expect_equal(as.numeric(output$Average.time.until.River), c(12.322, 13.917)) # Time.until first section is only filled in during assembleOutput
+  expect_equal(as.numeric(output$Total.time.in.River), c(1.088, 1.545))
+  expect_equal(as.numeric(output$Total.time.in.Fjord), c(15.837, 10.753))
+  expect_equal(as.numeric(output$Total.time.in.Sea), c(NA, 0.55))
+})
 
-  to.match <- output
-  output <- assembleTimetable(vm = vm, all.moves = xmoves, sections = sections, 
-    arrays = arrays, dist.mat = dist.mat, invalid.dist = invalid.dist, speed.method = "first to first", 
-    if.last.skip.section = FALSE, success.arrays = "Sea1")
-  expect_equal(colnames(output), c('Time.until.River', 'Speed.to.River', 'First.station.River', 'Arrived.River', 
-    'Time.in.River', 'Last.station.River', 'Left.River', 'Time.until.Fjord', 'Speed.to.Fjord', 
-    'First.station.Fjord', 'Arrived.Fjord', 'Time.in.Fjord', 'Last.station.Fjord', 'Left.Fjord', 
-    'Time.until.Sea', 'Speed.to.Sea', 'First.station.Sea', 'Arrived.Sea', 'Time.in.Sea', 
-    'Last.station.Sea', 'Left.Sea', 'Very.last.array', 'Status', 'Valid.detections', 'Invalid.detections', 
-    'Backwards.movements', 'Max.cons.back.moves', 'P.type', 'Transmitter'))
-  expect_false(any(to.match$Speed.to.Fjord == output$Speed.to.Fjord))
-  expect_true(to.match$Speed.to.Sea[2] != output$Speed.to.Sea[2])
+test_that("assembleTimetable correctly handles speed methods and invalid.dist", {
+  moves.ff <- groupMovements(detections.list = detections.list[1:2], bio = bio, spatial = spatial,
+      speed.method = "last to last", max.interval = 60, tz = "Europe/Copenhagen", 
+      dist.mat = dist.mat, invalid.dist = invalid.dist)
+
+  aux <- names(moves.ff)
+  xmoves <- lapply(names(moves.ff), function(fish) {
+      speedReleaseToFirst(fish = fish, bio = bio, movements = moves.ff[[fish]],
+                          dist.mat = dist.mat, invalid.dist = invalid.dist,
+                          speed.method = "last to last")
+    })
+  names(xmoves) <- aux
+  rm(aux)
+
+  xmoves.ff <- moves.ff
+  attributes(xmoves.ff[[1]])$p.type <- "Manual"
+  xmoves.ff[[1]]$Valid[18] <- FALSE
+  vm.ff <- xmoves.ff
+  vm.ff[[1]] <- vm.ff[[1]][-18, ]
+
+  secmoves.ff <- lapply(seq_along(vm.ff), function(i) {
+    fish <- names(vm.ff)[i]
+    appendTo("debug", paste0("debug: Compiling valid section movements for fish ", fish,"."))
+    output <- sectionMovements(movements = vm.ff[[i]], sections = sections, invalid.dist = invalid.dist)
+    return(output)
+  })
+  names(secmoves.ff) <- names(vm.ff)
+
+  output <- assembleTimetable(secmoves = secmoves.ff, valid.moves = vm.ff, all.moves = xmoves.ff, sections = sections, 
+    arrays = arrays, dist.mat = dist.mat, invalid.dist = invalid.dist, speed.method = "last to last", 
+    if.last.skip.section = FALSE, success.arrays = "Sea1", bio = bio, tz = "Europe/Copenhagen")
+  expect_equal(colnames(output), c('Times.entered.River', 'Average.time.until.River', 'Average.speed.to.River', 
+    'First.array.River', 'First.station.River', 'First.arrived.River', 'Average.time.in.River', 
+    'Last.array.River', 'Last.station.River', 'Last.left.River', 'Total.time.in.River', 'Times.entered.Fjord', 
+    'Average.time.until.Fjord', 'Average.speed.to.Fjord', 'First.array.Fjord', 'First.station.Fjord', 
+    'First.arrived.Fjord', 'Average.time.in.Fjord', 'Last.array.Fjord', 'Last.station.Fjord', 'Last.left.Fjord', 
+    'Total.time.in.Fjord', 'Times.entered.Sea', 'Average.time.until.Sea', 'Average.speed.to.Sea', 
+    'First.array.Sea', 'First.station.Sea', 'First.arrived.Sea', 'Average.time.in.Sea', 'Last.array.Sea', 
+    'Last.station.Sea', 'Last.left.Sea', 'Total.time.in.Sea', 'Very.last.array', 'Very.last.time', 'Status', 
+    'Valid.detections', 'Valid.events', 'Invalid.detections', 'Invalid.events', 'Backwards.movements', 
+    'Max.cons.back.moves', 'P.type', 'Transmitter'))
+  expect_false(any(timetable$Average.speed.to.Fjord == output$Average.speed.to.Fjord))
+  expect_true(timetable$Average.speed.to.Sea[2] != output$Average.speed.to.Sea[2])
   expect_equal(output$Status, c("Disap. in Fjord", "Succeeded"))
 
-  output <- assembleTimetable(vm = vm, all.moves = xmoves, sections = sections, 
-    arrays = arrays, dist.mat = dist.mat, invalid.dist = TRUE, speed.method = "first to first", 
-    if.last.skip.section = FALSE, success.arrays = "Sea1")
-  expect_equal(colnames(output), c('Time.until.River', 'First.station.River', 'Arrived.River', 
-    'Time.in.River', 'Last.station.River', 'Left.River', 'Time.until.Fjord', 
-    'First.station.Fjord', 'Arrived.Fjord', 'Time.in.Fjord', 'Last.station.Fjord', 'Left.Fjord', 
-    'Time.until.Sea', 'First.station.Sea', 'Arrived.Sea', 'Time.in.Sea', 
-    'Last.station.Sea', 'Left.Sea', 'Very.last.array', 'Status', 'Valid.detections', 'Invalid.detections', 
-    'Backwards.movements', 'Max.cons.back.moves', 'P.type', 'Transmitter'))
+  output <- assembleTimetable(secmoves = secmoves.ff, valid.moves = vm.ff, all.moves = xmoves.ff, sections = sections, 
+    arrays = arrays, dist.mat = dist.mat, invalid.dist = TRUE, speed.method = "last to last", 
+    if.last.skip.section = FALSE, success.arrays = "Sea1", bio = bio, tz = "Europe/Copenhagen")
+  expect_equal(colnames(output), c('Times.entered.River', 'Average.time.until.River', 
+    'First.array.River', 'First.station.River', 'First.arrived.River', 'Average.time.in.River', 
+    'Last.array.River', 'Last.station.River', 'Last.left.River', 'Total.time.in.River', 
+    'Times.entered.Fjord', 'Average.time.until.Fjord', 'First.array.Fjord', 'First.station.Fjord', 
+    'First.arrived.Fjord', 'Average.time.in.Fjord', 'Last.array.Fjord', 'Last.station.Fjord', 
+    'Last.left.Fjord', 'Total.time.in.Fjord', 'Times.entered.Sea', 'Average.time.until.Sea', 
+    'First.array.Sea', 'First.station.Sea', 'First.arrived.Sea', 'Average.time.in.Sea', 
+    'Last.array.Sea', 'Last.station.Sea', 'Last.left.Sea', 'Total.time.in.Sea', 'Very.last.array', 
+    'Very.last.time', 'Status', 'Valid.detections', 'Valid.events', 'Invalid.detections', 
+    'Invalid.events', 'Backwards.movements', 'Max.cons.back.moves', 'P.type', 'Transmitter'))
 
-  xmoves <- moves
-  xmoves[[1]]$Array[7] <- "River5"
-  xmoves[[1]]$Array[8] <- "River4"
-  xmoves[[1]]$Array[11] <- "Fjord2"
-  xmoves[[2]]$Valid <- FALSE
-  vm <- xmoves[1]
-  vm[[1]] <- vm[[1]][-18, ]
+  xmoves.ff <- moves.ff
+  xmoves.ff[[1]]$Array[7] <- "River5"
+  xmoves.ff[[1]]$Array[8] <- "River4"
+  xmoves.ff[[1]]$Array[11] <- "Fjord2"
+  xmoves.ff[[2]]$Valid <- FALSE
+  vm.ff <- xmoves.ff[1]
+  vm.ff[[1]] <- vm.ff[[1]][-18, ]
+  secmoves.ff <- lapply(seq_along(vm.ff), function(i) {
+    fish <- names(vm.ff)[i]
+    appendTo("debug", paste0("debug: Compiling valid section movements for fish ", fish,"."))
+    output <- sectionMovements(movements = vm.ff[[i]], sections = sections, invalid.dist = invalid.dist)
+    return(output)
+  })
+  names(secmoves.ff) <- names(vm.ff)
 
-  output <- assembleTimetable(vm = vm, all.moves = xmoves, sections = sections, 
-    arrays = arrays, dist.mat = dist.mat, invalid.dist = invalid.dist, speed.method = "first to first", 
-    if.last.skip.section = FALSE, success.arrays = "Sea1")
-  expect_equal(output$Backwards.movements, c(3, 0))
-  expect_equal(output$Max.cons.back.moves, c(2, 0))
+  output <- assembleTimetable(secmoves = secmoves.ff, valid.moves = vm.ff, all.moves = xmoves.ff, sections = sections, 
+    arrays = arrays, dist.mat = dist.mat, invalid.dist = invalid.dist, speed.method = "last to last", 
+    if.last.skip.section = FALSE, success.arrays = "Sea1", bio = bio, tz = "Europe/Copenhagen")
+  expect_equal(output$Backwards.movements, c(3))
+  expect_equal(output$Max.cons.back.moves, c(2))
 
-  xmoves[[2]] <- xmoves[[2]][1, ]
-  output <- assembleTimetable(vm = vm, all.moves = xmoves, sections = sections, 
-    arrays = arrays, dist.mat = dist.mat, invalid.dist = invalid.dist, speed.method = "first to first", 
-    if.last.skip.section = FALSE, success.arrays = "Sea1")
-  expect_equal(output$Backwards.movements, c(3, 0))
-  expect_equal(output$Max.cons.back.moves, c(2, 0))
+  xmoves.ff[[2]] <- xmoves.ff[[2]][1, ]
+  output <- assembleTimetable(secmoves = secmoves.ff, valid.moves = vm.ff, all.moves = xmoves.ff, sections = sections, 
+    arrays = arrays, dist.mat = dist.mat, invalid.dist = invalid.dist, speed.method = "last to last", 
+    if.last.skip.section = FALSE, success.arrays = "Sea1", bio = bio, tz = "Europe/Copenhagen")
+  expect_equal(output$Backwards.movements, c(3))
+  expect_equal(output$Max.cons.back.moves, c(2))
 })
 
 test_that("assembleOutput correctly combines the timetable and the biometrics", {
   output <- assembleOutput(timetable = timetable, bio = bio, spatial = spatial, 
     sections = sections, dist.mat = dist.mat, invalid.dist = invalid.dist, tz = "Europe/Copenhagen")
   expect_equal(colnames(output), c('Transmitter', 'Release.date', 'Release.site', 'Serial.nr', 'Signal', 
-    'Group', 'Total.Length.mm', 'Mass.g', 'Time.until.River', 'Speed.to.River', 'First.station.River', 
-    'Arrived.River', 'Time.in.River', 'Speed.in.River', 'Last.station.River', 'Left.River', 'Time.until.Fjord', 
-    'Speed.to.Fjord', 'First.station.Fjord', 'Arrived.Fjord', 'Time.in.Fjord', 'Speed.in.Fjord', 
-    'Last.station.Fjord', 'Left.Fjord', 'Time.until.Sea', 'Speed.to.Sea', 'First.station.Sea', 
-    'Arrived.Sea', 'Time.in.Sea', 'Speed.in.Sea', 'Last.station.Sea', 'Left.Sea', 'Very.last.array', 
-    'Status', 'Valid.detections', 'Invalid.detections', 'Backwards.movements', 'Max.cons.back.moves', 'P.type'))
-  expect_false(all(is.na(output$Time.until.River)))
-  expect_false(all(is.na(output$Speed.to.River)))
-  expect_equal(class(output$Arrived.River), c("POSIXct", "POSIXt"))
-  expect_equal(class(output$Time.in.River), "difftime")
-  expect_equal(class(output$Left.River), c("POSIXct", "POSIXt"))
-  expect_equal(class(output$Arrived.Fjord), c("POSIXct", "POSIXt"))
-  expect_equal(class(output$Time.in.Fjord), "difftime")
-  expect_equal(class(output$Left.Fjord), c("POSIXct", "POSIXt"))
-  expect_equal(class(output$Arrived.Sea), c("POSIXct", "POSIXt"))
-  expect_equal(class(output$Time.in.Sea), "difftime")
-  expect_equal(class(output$Left.Sea), c("POSIXct", "POSIXt"))
+    'Group', 'Total.Length.mm', 'Mass.g', 'Times.entered.River', 'Average.time.until.River', 
+    'Average.speed.to.River', 'First.array.River', 'First.station.River', 'First.arrived.River', 
+    'Average.time.in.River', 'Average.speed.in.River', 'Last.array.River', 'Last.station.River', 
+    'Last.left.River', 'Total.time.in.River', 'Times.entered.Fjord', 'Average.time.until.Fjord', 
+    'Average.speed.to.Fjord', 'First.array.Fjord', 'First.station.Fjord', 'First.arrived.Fjord', 
+    'Average.time.in.Fjord', 'Average.speed.in.Fjord', 'Last.array.Fjord', 'Last.station.Fjord', 
+    'Last.left.Fjord', 'Total.time.in.Fjord', 'Times.entered.Sea', 'Average.time.until.Sea', 
+    'Average.speed.to.Sea', 'First.array.Sea', 'First.station.Sea', 'First.arrived.Sea', 
+    'Average.time.in.Sea', 'Average.speed.in.Sea', 'Last.array.Sea', 'Last.station.Sea', 'Last.left.Sea', 
+    'Total.time.in.Sea', 'Very.last.array', 'Very.last.time', 'Status', 'Valid.detections', 'Valid.events', 
+    'Invalid.detections', 'Invalid.events', 'Backwards.movements', 'Max.cons.back.moves', 'P.type'))
+  expect_equal(class(output$Total.time.in.Sea), "difftime")
   expect_false(any(is.na(output$Valid.detections)))
   expect_false(any(is.na(output$All.detections)))
   expect_false(any(is.na(output$Status)))
@@ -140,9 +198,17 @@ xmoves[[1]]$Valid[18] <- FALSE
 vm <- xmoves
 vm[[1]] <- vm[[1]][-18, ]
 
-timetable <- assembleTimetable(vm = vm, all.moves = xmoves, sections = sections, 
+secmoves <- lapply(seq_along(vm), function(i) {
+  fish <- names(vm)[i]
+  appendTo("debug", paste0("debug: Compiling valid section movements for fish ", fish,"."))
+  output <- sectionMovements(movements = vm[[i]], sections = sections, invalid.dist = invalid.dist)
+  return(output)
+})
+names(secmoves) <- names(vm)
+
+timetable <- assembleTimetable(secmoves = secmoves, valid.moves = vm, all.moves = xmoves, sections = sections, 
   arrays = arrays, dist.mat = dist.mat, invalid.dist = invalid.dist, speed.method = "last to first", 
-  if.last.skip.section = TRUE, success.arrays = "Sea1")
+  if.last.skip.section = TRUE, success.arrays = "Sea1", bio = bio, tz = "Europe/Copenhagen")
 
 status.df <- assembleOutput(timetable = timetable, bio = bio, spatial = spatial, 
   sections = sections, dist.mat = dist.mat, invalid.dist = invalid.dist, tz = "Europe/Copenhagen")
@@ -161,4 +227,5 @@ test_that("assembleGroupOverview is working as expected", {
 
 setwd("..")
 unlink("exampleWorkspace", recursive = TRUE)
+setwd(tests.home)
 rm(list = ls())

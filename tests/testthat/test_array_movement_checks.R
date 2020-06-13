@@ -1,4 +1,8 @@
-exampleWorkspace()
+skip_on_cran()
+
+tests.home <- getwd()
+setwd(tempdir())
+exampleWorkspace("exampleWorkspace")
 setwd("exampleWorkspace")
 write.csv(example.distances, "distances.csv")
 
@@ -19,7 +23,8 @@ moves <- groupMovements(detections.list = detections.list[1:2], bio = bio, spati
 aux <- names(moves)
 moves <- lapply(names(moves), function(fish) {
     speedReleaseToFirst(fish = fish, bio = bio, movements = moves[[fish]],
-                        dist.mat = dist.mat, invalid.dist = invalid.dist)
+                        dist.mat = dist.mat, invalid.dist = invalid.dist,
+                        speed.method = "last to first")
   })
 names(moves) <- aux
 rm(aux)
@@ -43,6 +48,9 @@ test_that("checkImpassables reacts as expected", {
   		"Fish test made an impassable jump: It is not possible to go from array River1 to River2.", fixed = TRUE), 	
 		"Preventing analysis from entering interactive mode in a non-interactive session.", fixed = TRUE)
 })
+# 1
+# y
+# n
 
 test_that("checkJumpDistance reacts as expected", {
 	# jump from release to first event
@@ -143,6 +151,7 @@ test_that("checkUpstream reacts as expected.", {
     warning = function(w) stop("A warning was issued where it should not have been."))
   expect_equal(output, xmoves)
 })
+# n
 
 test_that("simplifyMovements works as expected.", {
 	# no invalid events
@@ -194,5 +203,5 @@ test_that("validateDetections works as expected.", {
 
 setwd("..")
 unlink("exampleWorkspace", recursive = TRUE)
+setwd(tests.home)
 rm(list = ls())
-

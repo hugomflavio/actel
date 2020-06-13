@@ -10,7 +10,7 @@ dailyRatiosIndOut(input)
 \item{input}{a list containing the output of findSecondsPerSection for each day}
 }
 \value{
-the daily ratios table for the fish
+A data frame with the daily ratios table for the target fish
 }
 \description{
 compile output of dailyRatios

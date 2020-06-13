@@ -5,7 +5,6 @@
 \title{Migration Analysis}
 \usage{
 migration(
-  path = NULL,
   tz,
   sections,
   success.arrays = NULL,
@@ -13,7 +12,7 @@ migration(
   minimum.detections = 2,
   start.time = NULL,
   stop.time = NULL,
-  speed.method = c("last to first", "first to first"),
+  speed.method = c("last to first", "last to last"),
   speed.warning = NULL,
   speed.error = NULL,
   jump.warning = 2,
@@ -22,18 +21,18 @@ migration(
   inactive.error = NULL,
   exclude.tags = NULL,
   override = NULL,
-  report = TRUE,
+  report = FALSE,
+  auto.open = TRUE,
+  discard.orphans = FALSE,
+  save.detections = FALSE,
   if.last.skip.section = TRUE,
   replicates = NULL,
   disregard.parallels = TRUE,
   GUI = c("needed", "always", "never"),
-  debug = FALSE
+  print.releases = TRUE
 )
 }
 \arguments{
-\item{path}{Path to the folder containing the data. If left NULL (default),
-the analysis runs in the current folder.}
-
 \item{tz}{The time zone of the study area. Must match one of the values
 present in \code{\link[base]{timezones}}.}
 
@@ -61,11 +60,11 @@ the analysis.}
 \code{stop.time} (in YYYY-MM-DD HH:MM:SS format) is not considered during
 the analysis.}
 
-\item{speed.method}{Can take two forms: 'last to first' or 'first to first'.
-If 'last to first' (default), the last detection on a given array is matched
-to the first detection on the next array to perform the calculations.
-If 'first to first', the first detection on a given array is matched to the
-first detection on the next array to perform the calculations.}
+\item{speed.method}{Can take two forms: 'last to first' or 'last to last'.
+If 'last to first' (default), the last detection on the previous array is matched
+to the first detection on the target array to perform the calculations.
+If 'last to last', the last detection on ´the previous array is matched to the
+last detection on the target array to perform the calculations.}
 
 \item{speed.warning}{If a fish moves at a speed equal or greater than
 \code{speed.warning} (in metres per second), a warning is issued. If left
@@ -102,7 +101,21 @@ tag are detected in the study area.}
 define which movement events are valid and invalid.}
 
 \item{report}{Logical. Should an HTML report be created at the end of the
-analysis?}
+analysis? NOTE: Setting report to TRUE will generate an HTML file in the current
+directory. Additionally, if auto.open = TRUE (default), the web browser will
+automatically be launched to open the report once the function terminates.}
+
+\item{auto.open}{Logical: Should the report be automatically opened once the
+analysis is over? Defaults to TRUE. NOTE: If report = TRUE and auto.open = TRUE,
+the web browser will automatically be launched to open the report once the
+function terminates.}
+
+\item{discard.orphans}{Logical: Should actel automatically discard
+detections that do not fall within receiver deployment periods, or that
+were recorded before the respective fish were released?}
+
+\item{save.detections}{Logical: Should the processed detections be saved for
+future runs?}
 
 \item{if.last.skip.section}{Logical: Should a fish detected at the last array
 of a given section be considered to have disappeared in the next section?}
@@ -118,38 +131,50 @@ invalidate potential efficiency peers? See the vignettes for more details.}
 opened to inspect the movements only when the movements table is too big to be
 displayed in R's console. If "always", a graphical interface is always created
 when the possibility to invalidate events emerges. If "never", a graphical
-interface is never invoqued. In this case, if the table to be displayed does
+interface is never invoked. In this case, if the table to be displayed does
 not fit in R's console, a temporary file will be saved and the user will be
 prompted to open that file and examine it. Defaults to "needed".}
 
-\item{debug}{Logical: Should temporary files be kept at the end of the
-analysis?}
+\item{print.releases}{Logical: Should the release sites be printed in the
+study area diagrams?}
 }
 \value{
 A list containing:
 \itemize{
-\item \code{detections}: All detections for each target fish;
-\item \code{valid.detections}: Valid detections for each target fish;
-\item \code{spatial}: The spatial information used during the analysis;
-\item \code{deployments}: The deployments of each receiver;
-\item \code{arrays}: The array details used during the analysis;
-\item \code{movements}: All movement events for each target fish;
-\item \code{valid.movements}: Valid movemenet events for each target fish;
-\item \code{section.movements}: Valid section shifts for each target fish;
-\item \code{status.df}: Summary information for each fish, including the
+\item \code{detections}: A list containing all detections for each target fish;
+\item \code{valid.detections}: A list containing the valid detections for each target fish;
+\item \code{spatial}: A list containing the spatial information used during the analysis;
+\item \code{deployments}: A data frame containing the deployments of each receiver;
+\item \code{arrays}: A list containing the array details used during the analysis;
+\item \code{movements}: A list containing all movement events for each target fish;
+\item \code{valid.movements}: A list containing the valid movement events for each target fish;
+\item \code{section.movements}: A list containing the valid section shifts for each target fish;
+\item \code{status.df}: A data.frame containing summary information for each fish, including the
 following columns:
 \itemize{
-\item \emph{Time.until.[section]}: Time spent between leaving one
-section and reaching the next.
-\item \emph{Speed.to.[section]}: Average speed from one section to the
-next (if a distance matrix is provided)
+\item \emph{Times.entered.[section]}: Number of times the fish was recorded
+entering a given section.
+\item \emph{Average.time.until.[section]}: Time spent between release
+or leaving another section and reaching at the given section.
+\item \emph{Average.speed.to.[section]}: Average speed from release or leaving
+one section and reaching the given section (if speed.method = "last to first"),
+or from release/leaving one section and leaving the given section (if speed.method
+= "last to last").
+\item \emph{First.array.[section]}: Array in which the fish was
+first detected in a given section
 \item \emph{First.station.[section]}: Standard name of the first station
 where the fish was detected in a given section
-\item \emph{Arrived.[section]}: Arrival time at a given section
-\item \emph{Time.in.[section]}: Total time spent within a given section
+\item \emph{First.arrived.[section]}: Very first arrival time at a given section
+\item \emph{Average.time.in.[section]}: Average time spent within a given section
+at each stay.
+\item \emph{Average.speed.in.[section]}: Average speed within a given section
+at each stay (only displayed if speed.method = "last to first").
+\item \emph{Last.array.[section]}: Array in which the fish was
+last detected in a given section
 \item \emph{Last.station.[section]}: Standard name of the last station
 where the fish was detected in a given section
-\item \emph{Left.[section]}: Departure time from a givem section
+\item \emph{Last.left.[section]}: Very last departure time from a given section
+\item \emph{Total.time.in[section]}: Total time spent in a given section
 \item \emph{Very.last.array}: Last array where the fish was detected
 \item \emph{Status}: Fate assigned to the fish
 \item \emph{Valid.detections}: Number of valid detections
@@ -167,17 +192,17 @@ changes to the validity of the events,
 }
 \item \emph{Comments}: Comments left by the user during the analysis
 }
-\item \code{section.overview}: Summary table of the number of fish that
+\item \code{section.overview}: A data frame containing the number of fish that
 disappeared in each section;
-\item \code{group.overview}: Number of known and estimated fish to have
-passed through each array, divided by group;
-\item \code{release.overview}: Number of known and estimated fish to have
-passed through each array, divided by group and release sites;
-\item \code{matrices}: CJS matrices used for the efficiency calculations;
-\item \code{overall.CJS}: Results of the inter-array CJS calculations;
-\item \code{intra.array.CJS}: Results of the intra-array CJS calculations;
-\item \code{times}: All arrival times (per fish) at each array;
-\item \code{rsp.info}: Appendix information for the RSP package;
+\item \code{group.overview}: A list containing the number of known and
+estimated fish to have passed through each array, divided by group;
+\item \code{release.overview}: A list containing the number of known and
+estimated fish to have passed through each array, divided by group and release sites;
+\item \code{matrices}: A list of CJS matrices used for the efficiency calculations;
+\item \code{overall.CJS}: A list of CJS results of the inter-array CJS calculations;
+\item \code{intra.array.CJS}: A list of CJS results of the intra-array CJS calculations;
+\item \code{times}: A data frame containing all arrival times (per fish) at each array;
+\item \code{rsp.info}: A list containing appendix information for the RSP package;
 \item \code{dist.mat}: The distance matrix used in the analysis (if a valid
 distance matrix was supplied)
 }
@@ -189,6 +214,32 @@ that lead to success, you can define whether or not your fish survived the
 migration. Additional plots help you find out if some fish has been acting
 odd. Multiple options allow you to tweak the analysis to fit your study
 perfectly.
+}
+\examples{
+\donttest{
+# Start by moving to a temporary directory
+old.wd <- getwd()
+setwd(tempdir())
+
+# Deploy the example workspace
+exampleWorkspace("exampleWorkspace")
+
+# Move your R session into the example workspace
+setwd("exampleWorkspace")
+
+# run the migration analysis. Ensure the tz argument 
+# matches the time zone of the study area and that the
+# sections match your array names. The line below works 
+# for the example data.
+results <- migration(tz = "Europe/Copenhagen", sections = c("River", "Fjord", "Sea"))
+
+# to obtain an HTML report, run the analysis with report = TRUE
+
+# return to original working directory
+setwd(old.wd)
+rm(old.wd)
+}
+
 }
 \seealso{
 \code{\link{explore}}, \code{\link{residency}}

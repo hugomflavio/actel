@@ -4,6 +4,8 @@
 #' 
 #' @param n The number of colours to be generated
 #' 
+#' @return a vector of colours with the same length as n
+#' 
 #' @keywords internal
 #' 
 gg_colour_hue <- function(n) {
@@ -13,15 +15,18 @@ gg_colour_hue <- function(n) {
 
 #' Print progression diagram
 #'
+#' @inheritParams explore
 #' @inheritParams migration
 #' @inheritParams createStandards
 #' @param dot a dot data frame
 #' @param overall.CJS a single CJS with all the groups and release sites merged
 #' @param status.df A data frame with the final migration results
 #'  
+#' @return No return value, called to plot and save graphic.
+#' 
 #' @keywords internal
 #' 
-printProgression <- function(dot, sections, overall.CJS, spatial, status.df) {
+printProgression <- function(dot, sections, overall.CJS, spatial, status.df, print.releases) {
   cbPalette <- c("#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7", "#999999")
   names(cbPalette) <- c("Orange", "Blue", "Green", "Yellow", "Darkblue", "Darkorange", "Pink", "Grey")
 
@@ -47,33 +52,36 @@ printProgression <- function(dot, sections, overall.CJS, spatial, status.df) {
     link <- grep(diagram_nodes$label[i], names(overall.CJS$absolutes))
     diagram_nodes$label[i] <- paste0(diagram_nodes$label[i], 
       "\\nEfficiency: ", ifelse(is.na(overall.CJS$efficiency[link]), "--", round(overall.CJS$efficiency[link] * 100, 0)),
-      "%\\nDetected: ", overall.CJS$absolutes[1, link], 
-      "\\nMax.Est.: ", ifelse(is.na(overall.CJS$absolutes[4, link]), "--",overall.CJS$absolutes[4, link]))
+      "%\\nDetected: ", overall.CJS$absolutes["detected", link], 
+      "\\nMax.Est.: ", ifelse(is.na(overall.CJS$absolutes["estimated", link]), "--",overall.CJS$absolutes["estimated", link]))
   }
 
  # Release nodes
-  release_nodes <- spatial$release.sites[, c("Standard.name", "Array")]
-  release_nodes$n <- 0
-  n <- table(status.df$Release.site)
-  link <- match(names(n), release_nodes$Standard.name)
-  release_nodes$n[link] <- n
-  release_nodes$label <- apply(release_nodes, 1, function(s) {
-    paste0(s[1], "\\nn = ", s[3])
-  })
-  if (any(link <- grepl( "|", release_nodes$Array, fixed = TRUE))) {
-    expanded <- NULL
-    for(i in which(link)) {
-      aux <- data.frame(Standard.name = release_nodes$Standard.name[i],
-        Array = unlist(strsplit(release_nodes$Array[i], "|", fixed = TRUE)),
-        n = release_nodes$n[i],
-        label = release_nodes$label[i])
-      expanded <- rbind(expanded, aux)
+  if (print.releases) {
+    release_nodes <- spatial$release.sites[, c("Standard.name", "Array")]
+    release_nodes$n <- 0
+    n <- table(status.df$Release.site)
+    link <- match(names(n), release_nodes$Standard.name)
+    release_nodes$n[link] <- n
+    release_nodes$label <- apply(release_nodes, 1, function(s) {
+      paste0(s[1], "\\nn = ", s[3])
+    })
+    if (any(link <- grepl( "|", release_nodes$Array, fixed = TRUE))) {
+      expanded <- NULL
+      for(i in which(link)) {
+        aux <- data.frame(Standard.name = release_nodes$Standard.name[i],
+          Array = unlist(strsplit(release_nodes$Array[i], "|", fixed = TRUE)),
+          n = release_nodes$n[i],
+          label = release_nodes$label[i])
+        expanded <- rbind(expanded, aux)
+      }
+      release_nodes <- rbind(release_nodes[-which(link), ], expanded)
+      rm(expanded)
     }
-    release_nodes <- rbind(release_nodes[-which(link), ], expanded)
-    rm(expanded)
+    release_nodes$id <- nrow(diagram_nodes) + as.numeric(as.factor(release_nodes$label))
+  } else {
+    release_nodes <- NULL
   }
-  release_nodes$id <- nrow(diagram_nodes) + as.numeric(as.factor(release_nodes$label))
-  # Release nodes
 
   # node string
   node_list <- split(diagram_nodes, diagram_nodes$fillcolor)
@@ -82,35 +90,56 @@ printProgression <- function(dot, sections, overall.CJS, spatial, status.df) {
     s <- paste0(s, paste0(n$id, " [label = '", n$label, "']", collapse = "\n"), "\n")
   })), collapse = "\n")
 
-  node_fragment <- paste0(node_aux, "\n", 
-    paste0("node [fillcolor = '#e0f4ff'\nfontcolor = '#727475'\nstyle = 'rounded, filled'\nshape = box]\n", 
-    paste0(release_nodes$id, " [label = 'R.S.: ", release_nodes$label, "']", collapse = "\n"), "\n"))
+  if (print.releases) {
+    node_fragment <- paste0(node_aux, "\n", 
+      paste0("node [fillcolor = '#e0f4ff'\nfontcolor = '#727475'\nstyle = 'rounded, filled'\nshape = box]\n", 
+      paste0(release_nodes$id, " [label = 'R.S.: ", release_nodes$label, "']", collapse = "\n"), "\n"))
+  } else {
+    node_fragment <- node_aux
+  }
 
   # prepare edge data frame
-  if (nrow(dot) == 1)
-    diagram_edges <- as.data.frame(t(apply(dot[, c(1, 3), drop = FALSE], 2, function(x) match(x, diagram_nodes$original.label))))
-  else 
+  if (nrow(dot) == 1) {
+    if (dot[1, 1] == dot[1, 3]) {
+      diagram_edges <- NULL
+      complete <- FALSE
+    } else {
+      diagram_edges <- as.data.frame(t(apply(dot[, c(1, 3), drop = FALSE], 2, function(x) match(x, diagram_nodes$original.label))))
+      complete <- TRUE
+    }
+  } else  {
     diagram_edges <- as.data.frame(apply(dot[, c(1, 3), drop = FALSE], 2, function(x) match(x, diagram_nodes$original.label)))
-  diagram_edges$type <- NA_character_
-  diagram_edges$type[dot$to == "--"] <- "[dir = none]"
-  diagram_edges$type[dot$to == "->"] <- "[arrowtail = tee, arrowhead = normal, dir = both]"
-  diagram_edges$type[dot$to == "<-"] <- "[arrowtail = normal, arrowhead = tee, dir = both]"
-  colnames(diagram_edges) <- c("from", "to", "type")
-
+    complete <- TRUE
+  }
+  if (complete) {
+    diagram_edges$type <- NA_character_
+    diagram_edges$type[dot$to == "--"] <- "[dir = none]"
+    diagram_edges$type[dot$to == "->"] <- "[arrowtail = tee, arrowhead = normal, dir = both]"
+    diagram_edges$type[dot$to == "<-"] <- "[arrowtail = normal, arrowhead = tee, dir = both]"
+    colnames(diagram_edges) <- c("from", "to", "type")
+  }
   # Release edges
-  release_edges <- data.frame(from = release_nodes$id,
-    to = diagram_nodes$id[match(release_nodes$Array, diagram_nodes$original.label)],
-    type = rep("[arrowtype='normal']", nrow(release_nodes)))
+  if (print.releases) {
+    release_edges <- data.frame(from = release_nodes$id,
+      to = diagram_nodes$id[match(release_nodes$Array, diagram_nodes$original.label)],
+      type = rep("[arrowtype='normal']", nrow(release_nodes)))
 
-  # edge string
-  combined_edges <- rbind(diagram_edges, release_edges)
+    # edge string
+    combined_edges <- rbind(diagram_edges, release_edges)
+  } else {
+    combined_edges <- diagram_edges
+  }
 
-  edge_list <- split(combined_edges, combined_edges$type)
+  if (!is.null(combined_edges)) {
+    edge_list <- split(combined_edges, combined_edges$type)
 
-  edge_fragment <- paste0(unlist(lapply(edge_list, function(n) {
-    s <- paste0("edge ", n$type[1], "\n")
-    s <- paste0(s, paste0(apply(n, 1, function(x) paste0(x[1:2], collapse = "->")), collapse = "\n"), "\n")
-  })), collapse = "\n")
+    edge_fragment <- paste0(unlist(lapply(edge_list, function(n) {
+      s <- paste0("edge ", n$type[1], "\n")
+      s <- paste0(s, paste0(apply(n, 1, function(x) paste0(x[1:2], collapse = "->")), collapse = "\n"), "\n")
+    })), collapse = "\n")
+  } else {
+    edge_fragment <- ""
+  }
 
   x <- paste0("digraph {
   rankdir = LR
@@ -129,18 +158,21 @@ printProgression <- function(dot, sections, overall.CJS, spatial, status.df) {
   plot <- DiagrammeR::grViz(x)
   plot_string <- DiagrammeRsvg::export_svg(plot)
   plot_raw <- charToRaw(plot_string)
-  rsvg::rsvg_svg(svg = plot_raw, file = "Report/mb_efficiency.svg")
+  rsvg::rsvg_svg(svg = plot_raw, file = paste0(tempdir(), "/mb_efficiency.svg"))
 }
 
 #' Print DOT diagram
 #' 
 #' @param dot a dot data frame
+#' @inheritParams explore
 #' @inheritParams migration
 #' @inheritParams setSpatialStandards
 #' 
+#' @return No return value, called to plot and save graphic.
+#' 
 #' @keywords internal
 #' 
-printDot <- function(dot, sections = NULL, spatial) {
+printDot <- function(dot, sections = NULL, spatial, print.releases) {
 # requires:
 # DiagrammeR
 # DiagrammeRsvg
@@ -163,19 +195,23 @@ printDot <- function(dot, sections = NULL, spatial) {
   }
 
  # Release nodes
-  release_nodes <- spatial$release.sites[, c("Standard.name", "Array")]
-  if (any(link <- grepl( "|", release_nodes$Array, fixed = TRUE))) {
-    expanded <- NULL
-    for(i in which(link)) {
-      aux <- data.frame(Standard.name = release_nodes$Standard.name[i],
-        Array = unlist(strsplit(release_nodes$Array[i], "|", fixed = TRUE)))
-      expanded <- rbind(expanded, aux)
+  if (print.releases) {
+    release_nodes <- spatial$release.sites[, c("Standard.name", "Array")]
+    if (any(link <- grepl( "|", release_nodes$Array, fixed = TRUE))) {
+      expanded <- NULL
+      for(i in which(link)) {
+        aux <- data.frame(Standard.name = release_nodes$Standard.name[i],
+          Array = unlist(strsplit(release_nodes$Array[i], "|", fixed = TRUE)))
+        expanded <- rbind(expanded, aux)
+      }
+      release_nodes <- rbind(release_nodes[-which(link), ], expanded)
+      rm(expanded)
     }
-    release_nodes <- rbind(release_nodes[-which(link), ], expanded)
-    rm(expanded)
+    colnames(release_nodes)[1] <- "label"
+    release_nodes$id <- nrow(diagram_nodes) + as.numeric(as.factor(release_nodes$label))
+  } else {
+    release_nodes <- NULL
   }
-  colnames(release_nodes)[1] <- "label"
-  release_nodes$id <- nrow(diagram_nodes) + as.numeric(as.factor(release_nodes$label))
 
   # node string
   node_list <- split(diagram_nodes, diagram_nodes$fillcolor)
@@ -184,35 +220,57 @@ printDot <- function(dot, sections = NULL, spatial) {
     s <- paste0(s, paste0(n$id, " [label = '", n$label, "']", collapse = "\n"), "\n")
   })), collapse = "\n")
 
-  node_fragment <- paste0(node_aux, "\n", 
-    paste0("node [fillcolor = '#e0f4ff'\nfontcolor = '#727475'\nstyle = 'rounded, filled'\nshape = box]\n", 
-    paste0(release_nodes$id, " [label = 'R.S.: ", release_nodes$label, "']", collapse = "\n"), "\n"))
+  if (print.releases) {
+    node_fragment <- paste0(node_aux, "\n", 
+      paste0("node [fillcolor = '#e0f4ff'\nfontcolor = '#727475'\nstyle = 'rounded, filled'\nshape = box]\n", 
+      paste0(release_nodes$id, " [label = 'R.S.: ", release_nodes$label, "']", collapse = "\n"), "\n"))
+  } else {
+    node_fragment <- node_aux
+  }
 
   # prepare edge data frame
-  if (nrow(dot) == 1)
-    diagram_edges <- as.data.frame(t(apply(dot[, c(1, 3), drop = FALSE], 2, function(x) match(x, diagram_nodes$label))))
-  else 
+  if (nrow(dot) == 1) {
+    if (dot[1, 1] == dot[1, 3]) {
+      diagram_edges <- NULL
+      complete <- FALSE
+    } else {
+      diagram_edges <- as.data.frame(t(apply(dot[, c(1, 3), drop = FALSE], 2, function(x) match(x, diagram_nodes$label))))
+      complete <- TRUE
+    }
+  } else {
     diagram_edges <- as.data.frame(apply(dot[, c(1, 3), drop = FALSE], 2, function(x) match(x, diagram_nodes$label)))
-  diagram_edges$type <- NA_character_
-  diagram_edges$type[dot$to == "--"] <- "[dir = none]"
-  diagram_edges$type[dot$to == "->"] <- "[arrowtail = tee, arrowhead = normal, dir = both]"
-  diagram_edges$type[dot$to == "<-"] <- "[arrowtail = normal, arrowhead = tee, dir = both]"
-  colnames(diagram_edges) <- c("from", "to", "type")
+    complete <- TRUE
+  }
+  if (complete) {
+    diagram_edges$type <- NA_character_
+    diagram_edges$type[dot$to == "--"] <- "[dir = none]"
+    diagram_edges$type[dot$to == "->"] <- "[arrowtail = tee, arrowhead = normal, dir = both]"
+    diagram_edges$type[dot$to == "<-"] <- "[arrowtail = normal, arrowhead = tee, dir = both]"
+    colnames(diagram_edges) <- c("from", "to", "type")
+  }
 
   # Release edges
-  release_edges <- data.frame(from = release_nodes$id,
-    to = diagram_nodes$id[match(release_nodes$Array, diagram_nodes$label)],
-    type = rep("[arrowtype='normal']", nrow(release_nodes)))
+  if (print.releases) {  
+    release_edges <- data.frame(from = release_nodes$id,
+      to = diagram_nodes$id[match(release_nodes$Array, diagram_nodes$label)],
+      type = rep("[arrowtype='normal']", nrow(release_nodes)))
 
-  # edge string
-  combined_edges <- rbind(diagram_edges, release_edges)
+    # edge string
+    combined_edges <- rbind(diagram_edges, release_edges)
+  } else {
+    combined_edges <- diagram_edges
+  }
 
-  edge_list <- split(combined_edges, combined_edges$type)
+  if (!is.null(combined_edges)) {
+    edge_list <- split(combined_edges, combined_edges$type)
 
-  edge_fragment <- paste0(unlist(lapply(edge_list, function(n) {
-    s <- paste0("edge ", n$type[1], "\n")
-    s <- paste0(s, paste0(apply(n, 1, function(x) paste0(x[1:2], collapse = "->")), collapse = "\n"), "\n")
-  })), collapse = "\n")
+    edge_fragment <- paste0(unlist(lapply(edge_list, function(n) {
+      s <- paste0("edge ", n$type[1], "\n")
+      s <- paste0(s, paste0(apply(n, 1, function(x) paste0(x[1:2], collapse = "->")), collapse = "\n"), "\n")
+    })), collapse = "\n")
+  } else {
+    edge_fragment <- ""
+  }
 
   x <- paste0("digraph {
   rankdir = LR
@@ -231,7 +289,7 @@ printDot <- function(dot, sections = NULL, spatial) {
   plot <- DiagrammeR::grViz(x)
   plot_string <- DiagrammeRsvg::export_svg(plot)
   plot_raw <- charToRaw(plot_string)
-  rsvg::rsvg_svg(svg = plot_raw, file = "Report/mb_arrays.svg")
+  rsvg::rsvg_svg(svg = plot_raw, file = paste0(tempdir(), "/mb_arrays.svg"))
 }
 
 #' Print biometric graphics 
@@ -240,7 +298,7 @@ printDot <- function(dot, sections = NULL, spatial) {
 #' 
 #' @inheritParams splitDetections
 #' 
-#' @return string to be included in printRmd
+#' @return A string of file locations in rmd syntax, to be included in printRmd
 #'  
 #' @keywords internal
 #' 
@@ -267,15 +325,14 @@ printBiometrics <- function(bio) {
       p <- p + ggplot2::theme_bw()
       p <- p + ggplot2::theme(panel.grid.minor.x = ggplot2::element_blank(), panel.grid.major.x = ggplot2::element_blank())
       p <- p + ggplot2::labs(x = "", y = i)
-      ggplot2::ggsave(paste0("Report/", gsub("[.]", "_", i), "_boxplot.png"), width = 3, height = 4)
+      ggplot2::ggsave(paste0(tempdir(), "/", gsub("[.]", "_", i), "_boxplot.png"), width = 3, height = 4)
       rm(p)
       if (counter %% 2 == 0)
-        biometric.fragment <- paste0(biometric.fragment, "![](", gsub("[.]", "_", i), "_boxplot.png){ width=", graphic.width, " }\n")
+        biometric.fragment <- paste0(biometric.fragment, "![](", tempdir(), "/", gsub("[.]", "_", i), "_boxplot.png){ width=", graphic.width, " }\n")
       else
-        biometric.fragment <- paste0(biometric.fragment, "![](", gsub("[.]", "_", i), "_boxplot.png){ width=", graphic.width, " }")
+        biometric.fragment <- paste0(biometric.fragment, "![](", tempdir(), "/", gsub("[.]", "_", i), "_boxplot.png){ width=", graphic.width, " }")
     }
   }
-  rm(C, graphic.width)
   appendTo("debug", "Terminating printBiometrics.")
   return(biometric.fragment)
 }
@@ -287,6 +344,8 @@ printBiometrics <- function(bio) {
 #' @inheritParams simplifyMovements
 #' @inheritParams groupMovements
 #' 
+#' @return No return value, called to plot and save graphic.
+#' 
 #' @keywords internal
 #' 
 printDotplots <- function(status.df, invalid.dist) {
@@ -296,22 +355,22 @@ printDotplots <- function(status.df, invalid.dist) {
   Transmitter <- NULL
 
   appendTo("debug", "Starting printDotplots.")
-  t1 <- status.df[status.df$Valid.detections > 0, c("Transmitter", "Valid.detections", colnames(status.df)[grepl("Time.until", colnames(status.df)) | grepl("Speed.to", colnames(status.df)) | grepl("Time.in", 
+  t1 <- status.df[status.df$Valid.detections > 0, c("Transmitter", "Valid.detections", colnames(status.df)[grepl("Average.time.until", colnames(status.df)) | grepl("Average.speed.to", colnames(status.df)) | grepl("Total.time.in", 
     colnames(status.df))])]
   t1 <- t1[, apply(t1, 2, function(x) !all(is.na(x)))]
   t1$Transmitter <- factor(t1$Transmitter, levels = rev(t1$Transmitter))
   link <- unlist(sapply(colnames(t1), function(x) attributes(t1[,x])$units))
   colnames(t1)[match(names(link), colnames(t1))] <- paste0(names(link), "\n(", link, ")")
-  colnames(t1)[grepl("Speed.to", colnames(t1))] <- paste0(colnames(t1)[grepl("Speed.to", colnames(t1))], "\n(m/s)")
+  colnames(t1)[grepl("Average.speed.to", colnames(t1))] <- paste0(colnames(t1)[grepl("Average.speed.to", colnames(t1))], "\n(m/s)")
   colnames(t1)[2] <- "Detections\n(n)"
   if (!invalid.dist) {
-    t2 <- t1[, !grepl("Time.until", colnames(t1))]
+    t2 <- t1[, !grepl("Average.time.until", colnames(t1))]
   } else {
-    t2 <- t1[, !grepl("Speed.to", colnames(t1))]
+    t2 <- t1[, !grepl("Average.speed.to", colnames(t1))]
   }
-  colnames(t2) <- sub("Time.i", "I", colnames(t2))
-  colnames(t2) <- sub("Time.until", "To", colnames(t2))
-  colnames(t2) <- sub("Speed.t", "T", colnames(t2))
+  colnames(t2) <- sub("Total.time.i", "I", colnames(t2))
+  colnames(t2) <- sub("Average.time.until", "To", colnames(t2))
+  colnames(t2) <- sub("Average.speed.t", "T", colnames(t2))
   PlotData <- suppressWarnings(suppressMessages(reshape2::melt(t2)))
   PlotData$Colour <- "#ba009e" # purple, for bugs
   for (j in colnames(t2)[-1]) {
@@ -340,7 +399,7 @@ printDotplots <- function(status.df, invalid.dist) {
   p <- p + ggplot2::facet_grid(. ~ variable, scales = "free_x")
   p <- p + ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 45, vjust = 1, hjust = 1))
   p <- p + ggplot2::labs(x = "", y = "")
-  ggplot2::ggsave("Report/dotplots.png", width = 6, height = (1.3 + 0.115 * (nrow(t2) - 1)))
+  ggplot2::ggsave(paste0(tempdir(), "/dotplots.png"), width = 6, height = (1.3 + 0.115 * (nrow(t2) - 1)))
   appendTo("debug", "Terminating printDotplots.")
 }
 
@@ -350,10 +409,14 @@ printDotplots <- function(status.df, invalid.dist) {
 #' 
 #' @param section.overview A data frame containing the survival per group of fish present in the biometrics. Supplied by assembleOverview.
 #' 
+#' @return No return value, called to plot and save graphic.
+#' 
 #' @keywords internal
 #' 
 printSurvivalGraphic <- function(section.overview) {
   appendTo("debug", "Starting printSurvivalGraphic.")
+  section <- NULL
+  value <- NULL
   cbPalette <- c("#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7", "#999999")
   names(cbPalette) <- c("Orange", "Blue", "Green", "Yellow", "Darkblue", "Darkorange", "Pink", "Grey")
   survival <- data.frame(group = character(), section = character(), value = vector(), stringsAsFactors = FALSE)
@@ -381,14 +444,14 @@ printSurvivalGraphic <- function(section.overview) {
     survival$value[active.row] <- section.overview[j, ncol(section.overview)]/section.overview[j, 1]
   }
   survival$section <- factor(survival$section, levels = unique(survival$section))
-  p <- ggplot2::ggplot(survival, ggplot2::aes(x = survival$section, y = survival$value))
+  p <- ggplot2::ggplot(survival, ggplot2::aes(x = section, y = value))
   p <- p + ggplot2::geom_bar(stat = "identity", fill = cbPalette[[2]], colour = cbPalette[[2]])
   p <- p + ggplot2::facet_grid(. ~ group)
   p <- p + ggplot2::theme_bw()
   p <- p + ggplot2::scale_y_continuous(limits = c(0, 1), expand = c(0, 0, 0.05, 0))
   p <- p + ggplot2::labs(x = "", y = "Survival")
   the.width <- max(2, sum(grepl("Disap.", colnames(section.overview))) * nrow(section.overview))
-  ggplot2::ggsave("Report/survival.png", width = the.width, height = 4)
+  ggplot2::ggsave(paste0(tempdir(), "/survival.png"), width = the.width, height = 4)
   appendTo("debug", "Terminating printSurvivalGraphic.")
 }
 
@@ -397,12 +460,13 @@ printSurvivalGraphic <- function(section.overview) {
 #' 
 #' @param array.overview a list of absolute detection numbers for each group
 #' 
-#' @return Rmd fragment
+#' @return An rmd string to be included in the report.
 #' 
 #' @keywords internal
 #' 
 printArrayOverview <- function(array.overview) {
-  options(knitr.kable.NA = '-')
+  oldoptions <- options(knitr.kable.NA = "-")
+  on.exit(options(oldoptions), add = TRUE)
   array.overview.fragment <- c("")
   for(i in 1:length(array.overview)) {
     array.overview.fragment <- paste0(array.overview.fragment, '
@@ -418,72 +482,92 @@ printArrayOverview <- function(array.overview) {
 #'
 #' Prints the ALS inter-array efficiency for inclusion in printRmd.
 #' 
+#' @param CJS the overall CJS result from a migration analysis. Used to assess if efficiency should be printed.
+#' @param efficiency the overall efficiency result from a residency analysis. Used to assess if efficiency should be printed.
 #' @param intra.CJS The output of the getEstimate calculations.
+#' @param type The type of analysis being run (migration or residency)
+#' 
+#' @return A rmd string to be included in the report.
 #' 
 #' @keywords internal
 #' 
-printEfficiency <- function(intra.CJS, type = c("migration", "residency")){
+printEfficiency <- function(CJS = NULL, efficiency = NULL, intra.CJS, type = c("migration", "residency")){
+  oldoptions <- options(knitr.kable.NA = "-")
+  on.exit(options(oldoptions), add = TRUE)
   type <- match.arg(type)
   if (type == "migration") {
-    efficiency.fragment <- paste('
+    if (is.null(CJS)) {
+      efficiency.fragment <- "Inter-array efficiency could not be calculated. See full log for more details.\n"
+    } else {
+      to.print <- t(paste0(round(CJS$efficiency * 100, 1), "%"))
+      to.print[grepl("NA", to.print)] <- "-"
+      colnames(to.print) <- names(CJS$efficiency)
+      rownames(to.print) <- "efficiency"
+
+      efficiency.fragment <- paste0('
 Note:
-  : The data used in the tables below is stored in the `overall.CJS` object. Auxiliary information can also be found in the `matrixes` and `arrays` objects.
+  : These efficiency calculations **do not account for** backwards movements. This implies that the total number of fish to have been **last seen** at a given array **may be lower** than the displayed below. Please refer to the [section survival overview](#section-survival) and [last seen arrays](#last-seen-arrays) to find out how many fish were considered to have disappeared per section.
+  : The data used in the tables below is stored in the `overall.CJS` object. Auxiliary information can also be found in the `matrices` and `arrays` objects.
+  : These efficiency values are estimated using the analytical equations provided in the paper "Using mark-recapture models to estimate survival from telemetry data" by [Perry et al. (2012)](<https://www.researchgate.net/publication/256443823_Using_mark-recapture_models_to_estimate_survival_from_telemetry_data>). In some situations, more advanced efficiency estimation methods may be required.
+  : You can try running `advEfficiency([results]$overall.CJS)` to obtain beta-drawn efficiency distributions (replace `[results]` with the name of the object where you saved the analysis).
 
 **Individuals detected and estimated**
 
-```{r efficiency1, echo = FALSE}
-knitr::kable(overall.CJS$absolutes)
-```
+', paste(knitr::kable(CJS$absolutes), collapse = "\n"), '
 
 **Array efficiency**
 
-```{r efficiency2, echo = FALSE}
-to.print <- t(paste0(round(overall.CJS$efficiency * 100, 1), "%"))
-to.print[grepl("NA", to.print)] <- "-"
-colnames(to.print) <- names(overall.CJS$efficiency)
-rownames(to.print) <- "efficiency"
-knitr::kable(to.print)
-```
+**Note:** These values already include any intra-array efficiency estimates that have been requested.
 
-#### Intra array efficiency estimates
+', paste(knitr::kable(to.print), collapse = "\n"), '
+
 ')
+    }
   } else {
-    efficiency.fragment <- paste('
+    if (is.null(efficiency)) {
+      efficiency.fragment <- "Inter-array efficiency could not be calculated. See full log for more details.\n"
+    } else {
+      absolutes <- as.data.frame(apply(efficiency$absolutes, c(1, 2), function(x) ifelse(is.na(x), "-", x)))
+
+      minmax <- t(paste0(round(efficiency$max.efficiency * 100, 1), "%"))
+      minmax[grepl("NA", minmax)] <- "-"
+      minmax <- as.data.frame(minmax, stringsAsFactors = FALSE)
+      colnames(minmax) <- names(efficiency$max.efficiency)
+
+      aux <- t(paste0(round(efficiency$min.efficiency * 100, 1), "%"))
+      aux[grepl("NA", aux)] <- "-"
+      minmax[2, ] <- aux
+
+      rownames(minmax) <- c("Maximum efficiency", "Minimum efficiency")
+
+      efficiency.fragment <- paste0('
 Note:
   : More information on the differences between "Known missed events" and "Potentially missed events" can be found in the package vignettes.
   : The data used in this table is stored in the `efficiency` object.
+  : These efficiency values are estimated using a simple step-by-step method (described in the package vignettes). In some situations, more advanced efficiency estimation methods may be required.
+  : You can try running `advEfficiency([results]$efficiency)` to obtain beta-drawn efficiency distributions (replace `[results]` with the name of the object where you saved the analysis).
 
 **Events recorded and missed**
 
-```{r efficiency1, echo = FALSE}
-to.print <- as.data.frame(apply(efficiency$absolutes, c(1, 2), function(x) ifelse(is.na(x), "-", x)))
-knitr::kable(to.print)
-```
+', paste(knitr::kable(absolutes), collapse = "\n"), '
 
 **Array efficiency**
 
-```{r efficiency2, echo = FALSE}
-to.print <- t(paste0(round(efficiency$max.efficiency * 100, 1), "%"))
-to.print[grepl("NA", to.print)] <- "-"
-to.print <- as.data.frame(to.print, stringsAsFactors = FALSE)
-colnames(to.print) <- names(efficiency$max.efficiency)
+**Note:** These values already include any intra-array efficiency estimates that have been requested.
 
-aux <- t(paste0(round(efficiency$min.efficiency * 100, 1), "%"))
-aux[grepl("NA", aux)] <- "-"
-to.print[2, ] <- aux
+', paste(knitr::kable(minmax), collapse = "\n"), '
 
-rownames(to.print) <- c("Maximum efficiency", "Minimum efficiency")
-
-knitr::kable(to.print)
-```
-
-#### Intra array efficiency estimates
-')    
+')
+    }
   }
   if (!is.null(intra.CJS)){
     efficiency.fragment <- paste0(efficiency.fragment, '
+#### Intra array efficiency estimates
+
 Note:
-  : The data used in the table(s) below is stored in the `intra.array.CJS` object.
+  : The data used in the table(s) below is stored in the `intra.array.CJS` object. Auxiliary information can also be found in the `intra.array.matrices` object.
+  : These efficiency values are estimated using the analytical equations provided in the paper "Using mark-recapture models to estimate survival from telemetry data" by [Perry et al. (2012)](<https://www.researchgate.net/publication/256443823_Using_mark-recapture_models_to_estimate_survival_from_telemetry_data>). In some situations, more advanced efficiency estimation methods may be required.
+  : You can try running `advEfficiency([results]$intra.array.CJS$', names(intra.CJS)[1], ')` to obtain beta-drawn efficiency distributions (replace `[results]` with the name of the object where you saved the analysis).
 ')
     for (i in 1:length(intra.CJS)) {
     efficiency.fragment <- paste0(efficiency.fragment, '
@@ -495,12 +579,7 @@ knitr::kable(intra.array.CJS[[',i ,']]$absolutes)
 
 *Estimated efficiency:* ', round(intra.CJS[[i]]$combined.efficiency * 100, 2), "%\n")
     }
-  } else {
-    efficiency.fragment <- paste0(efficiency.fragment, '
-```{r efficiency3, echo = FALSE,  comment = NA}
-cat("No intra-array replicates were indicated.")
-```')
-  }
+  } 
   return(efficiency.fragment)
 }
 
@@ -514,7 +593,7 @@ cat("No intra-array replicates were indicated.")
 #' @inheritParams assembleMatrices
 #' @param extension the format of the generated graphics
 #' 
-#' @return String to be included in printRmd
+#' @return A string of file locations in rmd syntax, to be included in printRmd
 #' 
 #' @keywords internal
 #' 
@@ -539,7 +618,8 @@ printIndividuals <- function(detections.list, bio, status.df = NULL, tz,
   link <- as.numeric(names(link))
   y.order <- spatial$stations$Standard.name[link]
 
-  pb <- txtProgressBar(min = 0, max = length(detections.list), style = 3, width = 60)
+  if (interactive())
+    pb <- txtProgressBar(min = 0, max = length(detections.list), style = 3, width = 60)
   counter <- 0
   individual.plots <- ""
   
@@ -583,7 +663,7 @@ printIndividuals <- function(detections.list, bio, status.df = NULL, tz,
 
     if (!is.null(status.df)) {
       status.row <- which(status.df$Transmitter == fish)
-      relevant.line <- status.df[status.row, (grepl("Arrived", colnames(status.df)) | grepl("Left", colnames(status.df)))]
+      relevant.line <- status.df[status.row, (grepl("First.arrived", colnames(status.df)) | grepl("Last.left", colnames(status.df)))]
     }
 
     appendTo("debug", paste0("Debug: Printing graphic for fish", fish, "."))
@@ -655,21 +735,45 @@ printIndividuals <- function(detections.list, bio, status.df = NULL, tz,
       p <- p + ggplot2::labs(title = paste0(fish, " (", status.df[status.df$Transmitter == fish, "Status"], ")"), x = paste("tz:", tz), y = "Station Standard Name")
     else
       p <- p + ggplot2::labs(title = paste0(fish, " (", nrow(PlotData), " detections)"), x = paste("tz:", tz), y = "Station Standard Name")
-    # Save
+    # decide height
     if (length(levels(PlotData$Standard.name)) <= 30)
       the.height <- 4
     else
-      the.height <- 4 + (length(levels(PlotData$Standard.name)) - 30) * 0.1
-    ggplot2::ggsave(paste0("Report/", fish, ".", extension), width = 5, height = the.height)  # better to save in png to avoid point overlapping issues
+      the.height <- 4 + (length(levels(PlotData$Standard.name)) - 30) * 0.1    
+    # default width:
+    the.width <- 5
+    # Adjustments depending on number of arrays
+    if (length(levels(PlotData$Array)) > 14 & length(levels(PlotData$Array)) <= 29) {
+      if (counter %% 2 == 0) {
+        p <- p + ggplot2::guides(colour = ggplot2::guide_legend(ncol = 2))
+        the.width <- 6
+      } else {
+        p <- p + ggplot2::theme(legend.position = "none")
+        the.width <- 4
+      }
+    }
+    if (length(levels(PlotData$Array)) > 29) {
+      if (counter %% 2 == 0) {
+        p <- p + ggplot2::guides(colour = ggplot2::guide_legend(ncol = 3))
+        the.width <- 7.5
+      } else {
+        p <- p + ggplot2::theme(legend.position = "none")
+        the.width <- 2.5
+      }
+    }
+    # Save
+    ggplot2::ggsave(paste0(tempdir(), "/", fish, ".", extension), width = the.width, height = the.height)  # better to save in png to avoid point overlapping issues
     rm(PlotData, start.line, last.time, first.time)
     if (counter %% 2 == 0) {
-      individual.plots <<- paste0(individual.plots, "![](", fish, ".", extension, "){ width=50% }\n")
+      individual.plots <<- paste0(individual.plots, "![](", tempdir(), "/", fish, ".", extension, "){ width=", the.width * 10, "% }\n")
     } else {
-      individual.plots <<- paste0(individual.plots, "![](", fish, ".", extension, "){ width=50% }")
+      individual.plots <<- paste0(individual.plots, "![](", tempdir(), "/", fish, ".", extension, "){ width=", the.width * 10, "% }")
     }
-    setTxtProgressBar(pb, counter)
+    if (interactive())
+      setTxtProgressBar(pb, counter)
   })
-  close(pb)
+  if (interactive())
+    close(pb)
   return(individual.plots)
 }
 
@@ -684,12 +788,13 @@ printIndividuals <- function(detections.list, bio, status.df = NULL, tz,
 #' 
 #' @keywords internal
 #' 
-#' @return A rmd string to be attached to the report.
+#' @return A string of file locations in rmd syntax, to be included in printRmd
 #' 
 printCircular <- function(times, bio, suffix = NULL){
   cbPalette <- c("#56B4E9", "#c0ff3e", "#E69F00", "#F0E442", "#0072B2", "#D55E00", "#CC79A7", "#999999")
   circular.plots <- ""
   colours <- paste0(cbPalette[c(1:length(unique(bio$Group)))], 80)
+  names(colours) <- sort(unique(bio$Group))
   for (i in 1:length(times)) {
     if (length(unique(bio$Group)) > 1) {
       link <- match(names(times[[i]]), bio$Transmitter)
@@ -702,15 +807,13 @@ printCircular <- function(times, bio, suffix = NULL){
       names(trim.times) <- unique(bio$Group)
       ylegend <- -0.97
     }
+    colours.to.use <- colours[names(trim.times)]
     prop <- roundDown(1 / max(unlist(lapply(trim.times, function(x) table(roundUp(x, to = 1)) / sum(!is.na(x))))), to = 1)
-    {grDevices::svg(paste0("Report/times_", names(times)[i], suffix, ".svg"), height = 5, width = 5, bg = "transparent")
+    {grDevices::svg(paste0(tempdir(), "/times_", names(times)[i], suffix, ".svg"), height = 5, width = 5, bg = "transparent")
     par(mar = c(1, 2, 2, 1))
     copyOfCirclePlotRad(main = names(times)[i], shrink = 1.05)
-    # circularSection(from = sunset, 
-    #   to = sunrize, units = "hours", template = "clock24", 
-    #   limits = c(1, 0), fill = scales::alpha("grey", 0.3), border = "transparent")
     params <- myRoseDiag(trim.times, bins = 24, radii.scale = "linear",
-      prop = prop, tcl.text = -0.1, tol = 0.05, col = colours, border = "black")
+      prop = prop, tcl.text = -0.1, tol = 0.05, col = colours.to.use, border = "black")
     roseMean(trim.times, col = params$col, mean.length = c(0.07, -0.07), mean.lwd = 6,
       box.range = "std.error", fill = "white", border = "black",
       box.size = c(1.015, 0.985), edge.length = c(0.025, -0.025),
@@ -729,34 +832,36 @@ printCircular <- function(times, bio, suffix = NULL){
   return(circular.plots)
 }
 
-# #' Draw a section on the outside of the circle
-# #' 
-# #' @param from value where the section should start
-# #' @param to value where the section should end
-# #' @param units units of the from and to variables, defaults to "hours"
-# #' @param template variable to feed into the circular package base functions
-# #' @param limits two values controlling the vertical start and end points of the section
-# #' @param fill The colour of the section
-# #' @param border The colour of the section's border
-# #' 
-# #' @keywords internal
-# #' 
-# circularSection <- function(from, to, units = "hours", template = "clock24", limits = c(1, 0), fill = "white", border = "black"){
-#   if( inherits(from,"character") ){
-#     hour.from <- circular::circular(decimalTime(from), units = units, template = template)
-#     hour.to <- circular::circular(decimalTime(to), units = units, template = template)
-#   } else {
-#     hour.from <- circular::circular(from, units = units, template = template)
-#     hour.to <- circular::circular(to, units = units, template = template)
-#   }
-#   if(hour.to < hour.from) hour.to <- hour.to + 24
-#   zero <- attr(hour.from,"circularp")$zero # extracted from the circular data
-#   xmin <- as.numeric(circular::conversion.circular(hour.from, units = "radians")) * -1
-#   xmax <- as.numeric(circular::conversion.circular(hour.to, units = "radians")) * -1
-#   xx <- c(limits[1] * cos(seq(xmin, xmax, length = 1000) + zero), rev(limits[2] * cos(seq(xmin, xmax, length = 1000) + zero)))
-#   yy <- c(limits[1] * sin(seq(xmin, xmax, length = 1000) + zero), rev(limits[2] * sin(seq(xmin, xmax, length = 1000) + zero)))
-#   polygon(xx, yy, col = fill, border = border)
-# }
+#' Draw a section on the outside of the circle
+#' 
+#' @param from value where the section should start
+#' @param to value where the section should end
+#' @param units units of the from and to variables, defaults to "hours"
+#' @param template variable to feed into the circular package base functions
+#' @param limits two values controlling the vertical start and end points of the section
+#' @param fill The colour of the section
+#' @param border The colour of the section's border
+#' 
+#' @return No return value, adds to an existing plot.
+#' 
+#' @keywords internal
+#' 
+circularSection <- function(from, to, units = "hours", template = "clock24", limits = c(1, 0), fill = "white", border = "black"){
+  if( inherits(from,"character") ){
+    hour.from <- circular::circular(decimalTime(from), units = units, template = template)
+    hour.to <- circular::circular(decimalTime(to), units = units, template = template)
+  } else {
+    hour.from <- circular::circular(from, units = units, template = template)
+    hour.to <- circular::circular(to, units = units, template = template)
+  }
+  if(hour.to < hour.from) hour.to <- hour.to + 24
+  zero <- attr(hour.from,"circularp")$zero # extracted from the circular data
+  xmin <- as.numeric(circular::conversion.circular(hour.from, units = "radians")) * -1
+  xmax <- as.numeric(circular::conversion.circular(hour.to, units = "radians")) * -1
+  xx <- c(limits[1] * cos(seq(xmin, xmax, length = 1000) + zero), rev(limits[2] * cos(seq(xmin, xmax, length = 1000) + zero)))
+  yy <- c(limits[1] * sin(seq(xmin, xmax, length = 1000) + zero), rev(limits[2] * sin(seq(xmin, xmax, length = 1000) + zero)))
+  polygon(xx, yy, col = fill, border = border)
+}
 
 #' Edited rose diagram function
 #' 
@@ -779,7 +884,7 @@ printCircular <- function(times, bio, suffix = NULL){
 #' @param col the colour for filling the rose diagram. The default, NULL, is to leave rose diagram unfilled. The values are recycled if needed.
 #' @param tol proportion of white space at the margins of plot.
 #' @param uin desired values for the units per inch parameter. If of length 1, the desired units per inch on the x axis.
-#' @param xlim,ylim the ranges to be encompassed by the x and y axes. Useful for centering the plot
+#' @param xlim,ylim the ranges to be encompassed by the x and y axes. Useful for centring the plot
 #' @param prop numerical constant determining the radii of the sectors. By default, prop = 1. 
 #' @param digits number of digits used to print axis values.
 #' @param plot.info an object from plot.circular that contains information on the zero, the rotation and next.points.
@@ -909,6 +1014,8 @@ myRoseDiag <- function (x, pch = 16, cex = 1, axes = TRUE, shrink = 1, bins = 24
 #' 
 #' @inheritParams myRoseDiag
 #' 
+#' @return No return value, adds to an existing plot.
+#' 
 #' @keywords internal
 #'  
 ringsRel <- function(plot.params, border, rings.lty, 
@@ -943,6 +1050,8 @@ ringsRel <- function(plot.params, border, rings.lty,
 #' @param box.size Vertical size of the range box.
 #' @param edge.length Vertical size of the edge whiskers in the range box.
 #' @param edge.lwd Width of the edge whiskers in the range box.
+#' 
+#' @return No return value, adds to an existing plot.
 #' 
 #' @keywords internal
 #' 
@@ -995,12 +1104,14 @@ roseMean <- function(input, col = c("cornflowerblue", "chartreuse3", "deeppink")
 #' 
 #' For more details about the original function, visit the circular package homepage at \url{https://github.com/cran/circular}
 #' 
-#' @param xlim,ylim the ranges to be encompassed by the x and y axes. Useful for centering the plot.
+#' @param xlim,ylim the ranges to be encompassed by the x and y axes. Useful for centring the plot.
 #' @param uin desired values for the units per inch parameter. If of length 1, the desired units per inch on the x axis.
 #' @param shrink parameter that controls the size of the plotted circle. Default is 1. Larger values shrink the circle, while smaller values enlarge the circle.
 #' @param tol proportion of white space at the margins of plot.
 #' @param main,sub,xlab,ylab title, subtitle, x label and y label of the plot.
 #' @param control.circle parameters passed to plot.default in order to draw the circle. The function circle.control is used to set the parameters.
+#' 
+#' @return No return value, adds to an existing plot.
 #' 
 #' @keywords internal
 #' 
@@ -1061,6 +1172,9 @@ copyOfCirclePlotRad <- function (xlim = c(-1, 1), ylim = c(-1, 1), uin = NULL, s
 #' For more details about the original function, visit the circular package homepage at \url{https://github.com/cran/circular}
 #' 
 #' @inheritParams myRoseDiag
+#' 
+#' @return No return value, adds to an existing plot.
+#' 
 #' @keywords internal
 #' 
 copyOfRosediagRad <- function (x, zero, rotation, bins, upper, radii.scale, prop, 
@@ -1104,6 +1218,8 @@ copyOfRosediagRad <- function (x, zero, rotation, bins, upper, radii.scale, prop
 #' @inheritParams splitDetections
 #' @param detections A valid detections list
 #' 
+#' @return No return value, called to plot and save graphic.
+#' 
 #' @keywords internal
 #' 
 printSectionTimes <- function(section.times, bio, detections) {
@@ -1131,7 +1247,7 @@ printSectionTimes <- function(section.times, bio, detections) {
     if (length(unique(plotdata$Group)) <= 8) {
       p <- p + ggplot2::scale_fill_manual(values = as.vector(cbPalette)[1:length(unique(plotdata$Group))], drop = FALSE)
     } 
-    ggplot2::ggsave(paste0("Report/", i,"_days.png"), width = 10, height = length(unique(plotdata$variable)) * 2)
+    ggplot2::ggsave(paste0(tempdir(), "/", i,"_days.png"), width = 10, height = length(unique(plotdata$variable)) * 2)
   })
 }
 
@@ -1140,6 +1256,8 @@ printSectionTimes <- function(section.times, bio, detections) {
 #' @param global.ratios the global ratios
 #' @param daily.ratios the daily ratios
 #' @inheritParams migration
+#' 
+#' @return No return value, called to plot and save graphic.
 #' 
 #' @keywords internal
 #' 
@@ -1163,7 +1281,7 @@ printGlobalRatios <- function(global.ratios, daily.ratios, sections) {
     colnames(plotdata) <- c("Date", "Location", "n")
     plotdata$Location <- factor(plotdata$Location, levels = unique.values)
     plotdata$Date <- as.Date(plotdata$Date)
-    p <- ggplot2::ggplot(data = plotdata, ggplot2::aes(x = Date, y = n, fill = Location))
+    p <- ggplot2::ggplot(data = plotdata, ggplot2::aes(x = Date, y = n, fill = Location, col = Location))
     p <- p + ggplot2::geom_bar(width = 1, stat = "identity")
     p <- p + ggplot2::theme_bw()
     if (ncol(global.ratios[[i]]) > 3)
@@ -1177,10 +1295,11 @@ printGlobalRatios <- function(global.ratios, daily.ratios, sections) {
       p <- p + ggplot2::scale_y_continuous(limits = c(0,  max.y), expand = c(0, 0))
       p <- p + ggplot2::labs(x = "", y = "% fish")
     }
-    if (length(unique(plotdata$Location)) <= 8)
+    if (length(unique(plotdata$Location)) <= 8) {
       p <- p + ggplot2::scale_fill_manual(values = as.vector(cbPalette)[1:length(unique.values)], drop = FALSE)
-    ggplot2::ggsave(paste0("Report/global_ratios_", i,".png"), width = 10, height = 4)
-    ggplot2::ggsave(paste0("Report/global_ratios_", i,".svg"), width = 10, height = 4)
+      p <- p + ggplot2::scale_colour_manual(values = as.vector(cbPalette)[1:length(unique.values)], drop = FALSE)
+    }
+    ggplot2::ggsave(paste0(tempdir(), "/global_ratios_", i,".svg"), width = 10, height = 4)
   })
 }
 
@@ -1189,7 +1308,7 @@ printGlobalRatios <- function(global.ratios, daily.ratios, sections) {
 #' @param ratios the daily ratios
 #' @param dayrange the overall first and last detection dates
 #' 
-#' @return a Rmarkdown string to be included in the report
+#' @return A string of file locations in rmd syntax, to be included in printRmd
 #' 
 #' @keywords internal
 #' 
@@ -1210,7 +1329,13 @@ printIndividualResidency <- function(ratios, dayrange, sections) {
   link <- unlist(sapply(sections, function(i) which(grepl(paste0("^", i), unordered.unique.values))))
   unique.values <- unordered.unique.values[link]
 
-  pb <- txtProgressBar(min = 0, max = length(ratios), style = 3, width = 60)
+  if (length(unique.values) <= 8)
+    unique.colours <- as.vector(cbPalette)[1:length(unique.values)]
+  else
+    unique.colours <- gg_colour_hue(length(unique.values))
+
+  if (interactive())
+    pb <- txtProgressBar(min = 0, max = length(ratios), style = 3, width = 60)
   capture <- lapply(names(ratios), function(i) {
     counter <<- counter + 1
     x <- ratios[[i]]
@@ -1222,24 +1347,31 @@ printIndividualResidency <- function(ratios, dayrange, sections) {
     plotdata <- suppressMessages(reshape2::melt(x))
     colnames(plotdata) <- c("Date", "Location", "n")
     plotdata$Date <- as.Date(plotdata$Date)
-    plotdata$Location <- factor(plotdata$Location, levels = unique.values)
+    
+    level.link <- !is.na(match(unique.values, unique(plotdata$Location)))
+    use.levels <- unique.values[level.link]
+    use.colours <- unique.colours[level.link]
+
+    plotdata$Location <- factor(plotdata$Location, levels = use.levels)
+    
     p <- ggplot2::ggplot(data = plotdata, ggplot2::aes(x = Date, y = n, fill = Location))
     p <- p + ggplot2::geom_bar(width = 1, stat = "identity")
     p <- p + ggplot2::theme_bw()
     p <- p + ggplot2::scale_y_continuous(limits = c(0,  max(apply(ratios[[i]][, aux, drop = FALSE], 1, sum))), expand = c(0, 0))
     p <- p + ggplot2::labs(title = paste0(i, " (", substring(x$Date[1], 1, 10), " to ", substring(x$Date[nrow(x)], 1, 10), ")") , x = "", y = "% time per day")
     p <- p + ggplot2::scale_x_date(limits = dayrange)
-    if (length(unique.values) <= 8)
-      p <- p + ggplot2::scale_fill_manual(values = as.vector(cbPalette)[1:length(unique.values)], drop = FALSE)
-    if (length(unique.values) > 5)
+    p <- p + ggplot2::scale_fill_manual(values = use.colours, drop = TRUE)
+    if (length(use.levels) > 5 & length(use.levels) <= 10)
       p <- p + ggplot2::guides(fill = ggplot2::guide_legend(ncol = 2))
-    if (length(unique.values) > 10)
+    if (length(use.levels) > 10)
       p <- p + ggplot2::guides(fill = ggplot2::guide_legend(ncol = 3))
-    ggplot2::ggsave(paste0("Report/", i,"_residency.png"), width = 10, height = 1.5)
-    individual.plots <<- paste0(individual.plots, "![](", i, "_residency.png){ width=95% }\n")
-    setTxtProgressBar(pb, counter)
+    ggplot2::ggsave(paste0(tempdir(), "/", i,"_residency.png"), width = 10, height = 1.5)
+    individual.plots <<- paste0(individual.plots, "![](", tempdir(), "/", i, "_residency.png){ width=95% }\n")
+    if (interactive())
+      setTxtProgressBar(pb, counter)
   })
-  close(pb)
+  if (interactive())
+    close(pb)
   return(individual.plots)
 }
 
@@ -1248,9 +1380,11 @@ printIndividualResidency <- function(ratios, dayrange, sections) {
 #' @param input a table with the last seen data
 #' @param sections the order of the sections
 #' 
+#' @return No return value, called to plot and save graphic.
+#' 
 #' @keywords internal
 #' 
-printLastSeen <- function(input, sections) {
+printLastSection <- function(input, sections) {
   Section <- NULL
   n <- NULL
   cbPalette <- c("#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7", "#999999")
@@ -1266,5 +1400,87 @@ printLastSeen <- function(input, sections) {
   p <- p + ggplot2::labs(x = "", y = "n")
   p <- p + ggplot2::scale_y_continuous(expand = c(0, 0, 0.05, 0))
   the.width <- max(2, (ncol(input) - 1) * nrow(input) * 0.7)
-  ggplot2::ggsave("Report/last_seen.png", width = the.width, height = 4)
+  ggplot2::ggsave(paste0(tempdir(), "/last_section.png"), width = the.width, height = 4)
+}
+
+#' Print a simple barplot with the number of fish last seen at each section
+#' 
+#' @param input a table with the last seen data
+#' @param sections the order of the sections
+#' 
+#' @return No return value, called to plot and save graphic.
+#' 
+#' @keywords internal
+#' 
+printLastArray <- function(status.df) {
+  Very.last.array <- NULL
+  Group <- NULL
+  cbPalette <- c("#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7", "#999999")
+  names(cbPalette) <- c("Orange", "Blue", "Green", "Yellow", "Darkblue", "Darkorange", "Pink", "Grey")
+
+  if (length(levels(status.df$Group)) <= 8)
+      the.colours <- as.vector(cbPalette)[1:length(levels(status.df$Group))]
+  else
+      the.colours <- gg_colour_hue(length(levels(status.df$Group)))
+
+  p <- ggplot2::ggplot(status.df, ggplot2::aes(x = Very.last.array))
+  p <- p + ggplot2::geom_bar(ggplot2::aes(fill = Group), colour = "transparent", width = 0.5, position = ggplot2::position_dodge2(preserve = "single", padding = 0))
+  p <- p + ggplot2::scale_fill_manual(values = the.colours, drop = FALSE)
+  p <- p + ggplot2::scale_x_discrete(drop = FALSE)
+  p <- p + ggplot2::theme_bw()
+  p <- p + ggplot2::labs(x = "Last seen at...", y = "n")
+  p <- p + ggplot2::coord_flip()
+  p <- p + ggplot2::guides(fill = ggplot2::guide_legend(reverse = TRUE))
+  the.height <- max(2, ((length(levels(status.df$Very.last.array)) - 1) * 0.5))
+  ggplot2::ggsave(paste0(tempdir(), "/last_arrays.png"), width = 6, height = the.height)
+}
+
+#' Print sensor data for each individual tag
+#' 
+#' @param detections A valid detections list
+#' @param extension the format of the generated graphics
+#' 
+#' @keywords internal
+#' 
+#' @return A string of file locations in rmd syntax, to be included in printRmd
+#' 
+printSensorData <- function(detections, extension = "png") {
+  individual.plots <- NULL
+  Timestamp <- NULL
+  Sensor.Value <- NULL
+  Sensor.Unit <- NULL
+  if (interactive())
+    pb <- txtProgressBar(min = 0, max = length(detections), style = 3, width = 60)
+  counter <- 0
+  individual.plots <- ""
+  capture <- lapply(names(detections), function(fish) {
+    counter <<- counter + 1
+    if (any(!is.na(detections[[fish]]$Sensor.Value))) {
+      plotdata <- detections[[fish]]
+      if (any(link <- is.na(plotdata$Sensor.Unit) | plotdata$Sensor.Unit == ""))
+        plotdata$Sensor.Unit[link] <- paste0("? (", plotdata$Signal[link], ")")
+      p <- ggplot2::ggplot(data = plotdata, ggplot2::aes(x = Timestamp, y = Sensor.Value, by = Sensor.Unit))
+      p <- p + ggplot2::geom_line(col = "grey40")
+      p <- p + ggplot2::geom_point(col = "black", size = 0.5)
+      p <- p + ggplot2::labs(title = fish, x = "", y = "Sensor value")
+      p <- p + ggplot2::theme_bw()
+      p <- p + ggplot2::facet_grid(Sensor.Unit ~ ., scales = "free_y")
+      p <- p + ggplot2::theme(legend.position = "none")
+      if (length(unique(plotdata$Sensor.Unit)) > 2)
+        the.height <- 4 + ((length(unique(plotdata$Sensor.Unit)) - 2) * 2)
+      else
+        the.height <- 4
+      ggplot2::ggsave(paste0(tempdir(), "/", fish, "_sensors.", extension), width = 5, height = the.height)  # better to save in png to avoid point overlapping issues
+      if (counter %% 2 == 0) {
+        individual.plots <<- paste0(individual.plots, "![](", tempdir(), "/", fish, "_sensors.", extension, "){ width=50% }\n")
+      } else {
+        individual.plots <<- paste0(individual.plots, "![](", tempdir(), "/", fish, "_sensors.", extension, "){ width=50% }")
+      }
+      if (interactive())
+        setTxtProgressBar(pb, counter)
+    }
+  })
+  if (interactive())
+    close(pb)
+  return(individual.plots)
 }

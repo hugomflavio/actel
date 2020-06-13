@@ -22,7 +22,7 @@ not fit in R's console, a temporary file will be saved and the user will be
 prompted to open and examine that file. Defaults to "needed".}
 }
 \value{
-the movements list with valid/invalid rows
+A list of movements with updated 'Valid' columns
 }
 \description{
 Find out if a fish moved in an impossible direction

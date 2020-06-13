@@ -9,6 +9,9 @@ gg_colour_hue(n)
 \arguments{
 \item{n}{The number of colours to be generated}
 }
+\value{
+a vector of colours with the same length as n
+}
 \description{
 Copied from: \url{https://stackoverflow.com/questions/8197559/emulate-ggplot2-default-color-palette}.
 }

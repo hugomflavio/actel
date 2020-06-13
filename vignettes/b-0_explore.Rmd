@@ -1,5 +1,5 @@
 ---
-title: "2) explore()"
+title: "2.0) explore()"
 author: "Hugo Flávio"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
@@ -33,7 +33,8 @@ knitr::opts_chunk$set(
     1. [Inspecting the residency() results](d-2_residency_results.html)
     1. [Multi-way efficiency estimations](d-3_residency_efficiency.html)
 1. [Manual mode](e-0_manual_mode.html)
-1. [Errors and messages](f-0_messages.html)
+1. [Beyond the three main analyses](f-0_post_functions.html)
+1. [Errors and messages](g-0_messages.html)
 
 
 ## The explore() function
@@ -57,15 +58,13 @@ Need help going through the output of explore()? [Find more details here.](b-2_e
 All the arguments of explore(), which also exist in migration() and residency(), are explained below.
 
 ```r
-explore(path = NULL, tz, max.interval = 60, minimum.detections = 2, start.time = NULL, stop.time = NULL,
-  speed.method = c("last to first", "first to first"), speed.warning = NULL, speed.error = NULL, 
-  jump.warning = 2, jump.error = 3, inactive.warning = NULL, inactive.error = NULL, exclude.tags = NULL, 
-  override = NULL, report = TRUE, GUI = c("needed", "always", "never"))
+explore(tz, max.interval = 60, minimum.detections = 2, start.time = NULL, stop.time = NULL,
+  speed.method = c("last to first", "first to first"), speed.warning = NULL, 
+  speed.error = NULL, jump.warning = 2, jump.error = 3, inactive.warning = NULL, 
+  inactive.error = NULL, exclude.tags = NULL, override = NULL, report = FALSE, 
+  auto.open = TRUE, discard.orphans = FALSE, save.detections = FALSE, 
+  GUI = c("needed", "always", "never"))
 ```
-
-### path
-
-The `path` is the way to the folder where you want to run the analysis. If you are already working in the folder where you have your data files, leave path as `NULL` and the analysis will be run in the current directory.
 
 ### tz
 
@@ -150,12 +149,14 @@ Note:
 
 ### speed.method
 
-When calculating movement speeds from one array to the next, it is important to know if actel should count the time **from the last** detection in one array **to the first** detection in the next, or if you want actel to count the time **from the first detection** in one array  **to the first detection** in the next. This is what `speed.method` is doing. You can choose one of `"last to first"` or `"first to first"`. The example below illustrates the difference between both methods:
+When calculating movement speeds from one array to the next, it is important to know if actel should count the time **from the last detection** in the previous array **to the first detection** in the target array, or if you want actel to count the time **from the last detection** in the previous array  **to the last detection** in the target array. This is what `speed.method` is doing. You can choose one of `"last to first"` or `"last to last"`. The example below illustrates the difference between both methods:
 
 <img src="speed_method.svg" alt="drawing" width="680"/>
 
 Note:
   : If you do not supply a distance matrix, speeds cannot be calculated. Instead, the time difference will be displayed.
+
+There are two main consequences of choosing different options for speed.method. The first is that the "average.speed.m.s" column in the movement events will reflect the respective "Speed to X" in the graphic above. The second is only relevant during the migration analysis: if speed.method = "first to last", speed will be displayed in two columns in the `status.df` object: "Average.speed.to.[Section]" and "Average.speed.in.[Section]"; while if speed.method = "last to last", only the "Average.speed.to.[Section]" will be generated.
 
 ### speed.warning and speed.error
 
@@ -165,12 +166,12 @@ These two variables control the speed checks. By default, they are NULL, and no 
 M: 'speed.warning'/'speed.error' were not set, skipping speed checks.
 ````
 
-However, if you include a distances matrix in the analysis, you can specify the maximum espected speed for your fish, in metres per second. If a fish goes over these values, [warnings and user interaction will be activated, as necessary.](b-1_explore_processes.html#average-speed)
+However, if you include a distances matrix in the analysis, you can specify the maximum expected speed for your fish, in metres per second. If a fish goes over these values, [warnings and user interaction will be activated, as necessary.](b-1_explore_processes.html#average-speed)
 
 Speed checks cannot be performed without a distance matrix. If you attempt to do this, actel will complain:
 
 ````
-W: 'speed.warning'/'speed.error' were set, but a valid distance matrix is not present. Aborting speed checks.
+Warning: 'speed.warning'/'speed.error' were set, but a valid distance matrix is not present. Aborting speed checks.
 ````
 
 ### jump.warning and jump.error
@@ -188,7 +189,7 @@ These two variables control the inactiveness checks. `inactive.warning` and `ina
 M: 'inactive.warning'/'inactive.error' were not set, skipping inactivity checks.
 ````
 
-Altough it is not a requirement, inactiveness checks work best if a distances matrix is present. If you choose to run inactiveness checks without a distances matrix, actel will remind you of this with the following message:
+Although it is not a requirement, inactiveness checks work best if a distances matrix is present. If you choose to run inactiveness checks without a distances matrix, actel will remind you of this with the following message:
 
 ````
 M: Running inactiveness checks without a distance matrix. Performance may be limited.
@@ -232,24 +233,29 @@ You can find more information on [how to operate full manual mode here](e-0_manu
 
 ### report
 
-The `report` option activates a series of print functions that draw tables and figures for later integration in an html report. When you activate this option, a new *Report* subdirectory is created, where all the relevant files are stored. Before finishing, actel assembles the [html report](b-2_explore_results.html#actel_explore_report.html-if-report-true) and stores it in your working directory. If you already have a report in your working directory, actel will create a new file with a different name.
+The `report` option activates a series of print functions that draw tables and figures for later integration in an html report. When you activate this option, actel assembles the [html report](b-2_explore_results.html#actel_explore_report.html-if-report-true) and stores it in your working directory. If you already have a report in your working directory, actel will create a new file with a different name.
 
-You can also inspect each graphic individually in the *Report* subdirectory.
-
-Here are some examples:
+Here are some graphic examples:
 
 <img src="LaTeX_example_survival.svg" alt="drawing" width="330"/> <img src="R64K-4526.png" alt="drawing" width="330"/>
 
-Note:
-  : Even if something fails during the report printing, your results will still be saved the *actel_explore_results.RData* file in your working directory!
+### auto.open
 
+When the `report` option is activated, `auto.open` comes into play. If `auto.open` is TRUE (the default), then actel will automatically open your web browser and open the report as soon as it is completed!
+
+### discard.orphans
+
+This is a flow optimization argument. When actel finds detections outside of the receiver deployment periods, or that were recorded before their respective fish were released, by default, actel will ask the user what to do (discard those detections or stop the analysis so the user can check the data). However, you can tell actel to automatically discard any orphan detections by setting `discard.orphans` to TRUE.
+
+### save.detections
+
+Detections can take a long time to compile. To save some time when importing the detections, you can set `save.detections` to TRUE and actel will save an 'actel.detections.RData' file in your current working directory (or in the detections sub-directory) for later use. This option is particularly useful when handling very large detection datasets.
 
 ### GUI
 
-actel comes with a graphical interface, intended to allow users to deal with very long movement tables that would otherwise overflow R's output limits. However, this graphical interface requires additional packages installed, so it may not always be an option to rely on it. This is where `GUI` comes in. Defaulting to 'needed', the graphical user interface will only kick in for very long tables. The other two options are 'always' and 'never', both of which are self explanatory.
+actel comes with a graphical interface intended to allow users to deal with very long movement tables that would otherwise overflow R's output limits. However, this graphical interface requires additional packages installed, so it may not always be an option to rely on it. This is where `GUI` comes in. Defaulting to 'needed', the graphical user interface will only kick in for very long tables. The other two options are 'always' and 'never', both of which are self explanatory.
 
-If you cannot run the GUI on your computer and are faced with a very long table, do not worry! actel has a fall-back system, where the table is saved to a temporary file, which you can open in an external program such as Microsoft Excel of LibreOffice Calc. Have a look at the movements table there, let R know what you want to do, close the file and the analysis will continue automatically.
-
+If you cannot run the GUI on your computer and are faced with a very long table, do not worry! actel has a fall-back system, where the table is saved to a temporary file, which you can open in an external program such as Microsoft Excel of LibreOffice Calc. Have a look at the movements table there, let R know what you want to do, close the file and the analysis will continue automatically. This option requires a bit more work, but at least you can still complete your analysis :)
 
 ### All done!
 

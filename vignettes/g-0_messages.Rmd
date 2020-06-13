@@ -1,0 +1,563 @@
+---
+title: "7.0) Errors and messages"
+author: "Hugo Flávio"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{7.0) Errors and messages}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+## Index
+
+1. [Preparing your data](a-0_workspace_requirements.html)
+    1. [Structuring the study area](a-1_study_area.html)
+    1. [Creating a distances matrix](a-2_distances_matrix.html)
+1. [explore()](b-0_explore.html)
+    1. [Processes behind explore()](b-1_explore_processes.html)
+    1. [Inspecting the explore() results](b-2_explore_results.html)
+1. [migration()](c-0_migration.html)
+    1. [Processes behind migration()](c-1_migration_processes.html)
+    1. [Inspecting the migration() results](c-2_migration_results.html)
+    1. [One-way efficiency estimations](c-3_migration_efficiency.html)
+1. [residency()](d-0_residency.html)
+    1. [Processes behind residency()](d-1_residency_processes.html)
+    1. [Inspecting the residency() results](d-2_residency_results.html)
+    1. [Multi-way efficiency estimations](d-3_residency_efficiency.html)
+1. [Manual mode](e-0_manual_mode.html)
+1. [Beyond the three main analyses](f-0_post_functions.html)
+1. [__Errors and messages__](g-0_messages.html)
+
+## List of Exceptions
+
+In this page you can find additional help if you run into trouble using actel. Each message/warning/error in this page is followed by a short text detailing the problem. If your problem persists after trying out the proposed solutions, feel free to contact the development team.
+
+Note :
+  : Errors related to function arguments (i.e. `'maximum.time' must be numerical.`) are not displayed here.
+  : Less relevant messages may have been left out to keep the page shorter.
+  : Similar errors were grouped in the same code box.
+  : As actel evolves, some new errors and messages may accidentally be left out of this page. If you need help with a message, warning or error that is not reported here, please open an issue at [actel's GitHub repository.](https://github.com/hugomflavio/actel/issues/new)
+
+### Exceptions while importing the data:
+
+
+<!-- 1. **Some files are missing** -->
+
+```
+Error: Could not find a 'spatial.csv' file in the working directory.
+
+Error: Could not find a 'biometrics.csv' file in the working directory.
+
+Error: Could not find a 'deployments.csv' file in the working directory.
+
+Error: Could not find a 'detections' folder nor a 'detections.csv' file.
+```
+
+Actel could not find one of the needed files in the working directory. Please make sure that you are targeting the correct directory, and that the files are named exactly as described.
+
+----------------------
+
+<!-- 1. **Something is wrong in the input files**
+-->
+```
+Error: The contents of the 'spatial.txt' file could not be recognised by the readDot function.
+
+Error: Not all the arrays listed in the spatial.csv file are present in the dot table.
+```
+
+It appear something is wrong with your spatial.txt file. Please make sure that the arrays are named exactly as in the spatial.csv file, and that you only connected arrays using `--`, `->` or `<-`. Also note that array names should not contain spaces.
+
+If you get the second error without having provided a spatial.txt or spatial.dot file in the analysis, please open an issue at [actel's GitHub repository.](https://github.com/hugomflavio/actel/issues/new)
+
+----------------------
+
+```
+Error: No 'Array' column found in the spatial.csv file, but a 'Group' column is present. Use the 'Group' column to define the arrays? (Y/n)
+```
+
+Earlier versions of actel used a 'Group' column to group arrays. This fail-safe allows you to bypass this issue by renaming the "Group" column to "Array" on the fly.
+
+----------------------
+
+```
+Error: The spatial.csv file must contain a 'Station.Name' column
+
+Error: The spatial.csv file must contain an 'Array' column.
+
+Error: The spatial.csv file must contain at least one 'Receiver' column.
+
+Error: The biometrics.csv file must contain an 'Release.date' column.
+
+Error: The biometrics.csv file must contain an 'Signal' column.
+
+Error: Column(s) [...] are missing in the deployments.csv file.
+```
+
+Actel could not find an essential column in your input files. Please double-check the spelling of the columns in the input files.
+
+----------------------
+
+```
+Error: Not all values in the 'Start' column appear to be in a 'yyyy-mm-dd hh:mm' format (seconds are optional). Please double-check the deployments.csv file.
+
+Error: Not all values in the 'Stop' column appear to be in a 'yyyy-mm-dd hh:mm' format (seconds are optional). Please double-check the deployments.csv file.
+
+Error: Not all values in the 'Release.date' column appear to be in a 'yyyy-mm-dd hh:mm' format (seconds are optional). Please double-check the biometrics.csv file.
+
+Error: Could not recognise the data in the 'Start' column as POSIX-compatible timestamps. Please double-check the deployments.csv file.
+
+Error: Could not recognise the data in the 'Stop' column as POSIX-compatible timestamps. Please double-check the deployments.csv file.
+
+Error: Could not recognise the data in the 'Release.date' column as POSIX-compatible timestamps. Please double-check the biometrics.csv file.
+```
+
+Some of the input data that should be timestamps failed to be recognized as such. Have a look at the specific column in your input file, sometimes a lost letter or space can disrupt the nature of the data. If the problem persists, attempt manually loading the file to R and check the contents in R for any inconsistencies.
+
+----------------------
+
+````
+Error: The 'Station.Name' column in the spatial.csv file must not have duplicated values.
+Stations appearing more than once: [...]
+````
+
+The 'Station.Name' column in the spatial.csv file is used to match the receivers to their respective deployment sites. As such, these values must be unique. Please double-check the names in the spatial.csv file and make the necessary corrections.
+
+----------------------
+
+````
+Error: Could not recognise the data in the 'Type' column as only one of 'Hydrophone' or 'Release'. Please double-check the spatial.csv file.
+````
+
+The values in the 'Type' column of the spatial.csv file must be one of 'Hydrophone' or 'Release'. Please check your spatial.csv file to see if there is a lost character or space at one of the cells.
+
+----------------------
+
+````
+Warning: At least one release site has been indicated in the spatial.csv file, but no release sites were specified in the biometrics.csv file.
+   Discarding release site information and assuming all fish were released at the top level array to avoid function failure.
+   Please double-check your data.
+
+Error: There is more than one top level array in the study area. Please specify release site(s) in the spatial.csv file and in the biometrics.csv file.
+````
+
+It would appear that there are rows with Type = "Release" in the spatial.csv file, but there is no "Release.site" column in the biometrics. As such, actel discards the release site information and tries to find a solution. However, if there are more than one top-level array (i.e. arrays with no arrays before them), actel can no longer solve the exception, and you must manually include release sites in the biometrics.
+
+----------------------
+
+````
+Warning: Release sites were not specified in the spatial.csv file but more than one release site is reported in the biometric data.
+   Assuming all released fish start at the top level array.
+
+Error: There is more than one top level array in the study area. Please specify release site(s) in the spatial.csv file and in the biometrics.csv file.
+````
+
+Similarly to above, it seems there is a mismatch between the release sites reported in the biometrics.csv file and in the spatial.csv file. Actel tries to assume all released fish start at the top level array, but if there is more than one top level array, the analysis will be stopped. Include additional information in your input data to correct the error.
+
+----------------------
+
+````
+Error: The following release sites were listed in the biometrics.csv file but are not part of the release sites listed in the spatial.csv file: [...]
+Please include the missing release sites in the spatial.csv file.
+````
+
+Release sites were indicated both in the spatial.csv file and in the biometrics.csv file, but the names differ between them. Please correct the input data before continuing. You can use the additional information displayed in the error to help you find the source of the issue.
+
+----------------------
+
+````
+Error: Not all the expected first arrays of the release sites exist.\nUnknown expected first arrays: [...].
+In the spatial.csv file, the expected first arrays of the release sites should match the arrays where hydrophone stations where deployed.
+````
+
+It would appear that something is wrong in the "Array" column of the spatial.csv file. The arrays listed in the release sites must match those used in the stations.
+
+----------------------
+
+````
+Warning: No arrays were found that match section(s) [...]. There could be a typing mistake!
+   Continue the analysis?(y/N) 
+````
+
+It seems that one or more sections have no arrays associated to them. Remember that arrays should be named in a specific fashion. [You can learn more about this in this manual page.](a-1_study_area.html#arrays)
+
+----------------------
+
+````
+Error: Some fish have no 'Signal' information. Please double-check the biometrics.csv file.
+
+Error: Could not recognise the data in the 'Signal' column as integers. Please double-check the biometrics.csv file.	
+
+Error: Signal(s) [...] are duplicated in the biometrics.csv file.
+````
+
+A fish with no signal cannot be tracked. Similarly, signals must be unique, or else it is impossible to know which fish they belong to. Lastly, signals are expected to be integers (e.g. 1004). Double-check your biometrics.csv file and look for any missing values or lost characters that could be preventing actel from recognising 'Signal' as a number.
+
+
+----------------------
+
+```
+Warning: File [...] does not match to any of the supported hydrophone file formats!
+   If your file corresponds to a hydrophone log and actel did not recognize it, please get in contact through www.github.com/hugomflavio/actel/issues/new
+
+Warning: One file was excluded from further analyses.
+
+Warning: # files were excluded from further analyses.
+```
+
+Not all files in your 'detections' folder were recognised as receiver logs. Make sure you did not edit the detection files manually before feeding them to Actel. If the problem persists, file in a new issue at [actel's GitHub repository.](https://github.com/hugomflavio/actel/issues/new)
+
+----------------------
+
+```
+Error: The distance matrix appears to be missing data (ncol != nrow). Deactivating speed calculation to avoid function failure.
+
+Error: The column and row names in the distance matrix do not match each other. Deactivating speed calculation to avoid function failure.
+       Row names missing in the columns: [...]
+       Column names missing in the rows: [...]
+
+Error: The number of spatial points does not match the number of rows in the distance matrix. Deactivating speed calculation to avoid function failure.
+       Number of stations and release sites listed: [...]
+       Number of rows/columns in the distance matrix: [...]
+
+Error: Some stations and/or release sites are not present in the distance matrix. Deactivating speed calculation to avoid function failure.
+       Release sites missing: [...]
+       Stations missing: [...]
+```
+
+It appears that your distances matrix is wrongly configured. Please make sure that you are using standard names in the rows and columns of the matrix. You can find more information on [how to assemble a distances matrix in this manual page](a-2_distances_matrix.html).
+
+----------------------
+
+<!-- 1. **Automatic handling of exceptions**
+-->
+````
+Warning: Replacing spaces in array names to prevent function failure.
+````
+
+The array names must not contain any spaces, to avoid issues when other data sources are split by space (e.g. the spatial.txt file). As such, actel corrects this automatically in the spatial.csv file. Note that, if you provided a spatial.txt file and the array names contain spaces there, the function will still crash at a later point.
+
+----------------------
+
+```
+M: No 'Type' column found in the spatial.csv file. Assigning all rows as hydrophones.
+
+M: No Release site has been indicated in the biometrics.csv file. Creating a 'Release.site' column to avoid function failure. Filling with 'unspecified'.
+
+Warning: Some fish contain no release site information. You may want to double-check the data.
+   Filling the blanks with 'unspecified'.
+
+M: No 'Group' column found in the biometrics.csv file. Assigning all fish to group 'All'.
+
+Warning: Some fish contain no group information. You may want to double-check the data.
+   Filling the blanks with 'unspecified'.
+```
+
+Actel can fix some gaps automatically for you. However, you will always receive a message notifying you of what was done, so you can be sure that everything is fine. For example, it is unexpected that only part of the fish would have no group or no release site information. It is up to you to decide if something is wrong.
+
+----------------------
+
+<!-- 1. **Previously compiled actel detections found**
+-->
+```
+M: The detections have been processed on [...].
+   If the input detection files were not changed, it is safe to use these again.
+   Reuse processed detections? (Y/n)
+```
+In large datasets, processing the detections can take a considerable amount of time. When you run actel in a set of data, actel saves the processed detections in your 'detections' folder, so you can use them later and save time. If you are running actel again on the same dataset, and you have not changed the detection files, you can reuse the processed detections. If you are not sure, tell actel to not use the processed detections, and the detection files will be loaded and processed again.
+
+----------------------
+
+<!-- 1. **No valid detections were found**
+-->
+````
+Error: No valid detection files were found.
+````
+
+This error shows up if no detections were found in the files of the 'detections' folder. If you are sure that your files are in the right folder and have the right format, open an issue at [actel's GitHub repository.](https://github.com/hugomflavio/actel/issues/new)
+
+----------------------
+
+### Exceptions during the data analysis:
+
+#### Initial checks
+
+<!-- 1. **Something is off with the receivers**
+-->
+```
+Warning: Detections from receivers [...] are present in the data, but these receivers are not part of the study's stations. Double-check potential errors.
+```
+
+Somewhere in your detection files, there are detections for receivers that are not listed in the deployments.csv file. If some of your target tags are detected in these receivers, this warning will escalate to the one below.
+
+----------------------
+
+```
+Warning: Fish [...] was detected in one or more receivers that are not listed in the study area (receiver(s): [...])!
+Possible options:
+   a) Stop and double-check the data (recommended)
+   b) Temporarily include the hydrophone(s) to the stations list
+Which option should be followed?(a/b) 
+```
+
+At least one of your target tags was detected in a receiver that is not listed in the spatial.csv file. If you are truly unsure about the provenance of this unknown receiver, you can temporarily include it to the stations list, and then have a look at the movement events to find out when were your fish detected there. Note that this receiver will not be used to determine the fish's arrival/departure points from the various sections in the migration analysis.
+
+----------------------
+
+````
+Error: [#] detections for receiver [...] do not fall within deployment periods.
+
+[...]
+
+Possible options:
+   a) Stop and double-check the data (recommended)
+   b) Discard orphan detections in this instance.
+   c) Discard orphan detections for all instances.
+Which option should be followed?(a/b/c)
+````
+
+It would appear that some detections for a receiver were registered when the receiver was not deployed. If those detections are real, you should edit the deployment times for the receiver. Otherwise, if those are erroneous detections (e.g. recorded during transport or tag activation), then you can simply discard them. If you already know that these exceptions are not a problem, you can select option "c", or run the the analysis with `discard.orphans = TRUE`.
+
+----------------------
+
+```
+Warning: No detections were found for receiver(s) [...].
+```
+
+One or more of the receivers listed in the deployments.csv file had 0 detections in the detection files (not even noise/stray detections). While this is not bad on its own (perhaps nothing passed through that receiver), it may also mean that there are some detection files missing from the 'detections' folder. It is up to you to decide if something looks odd or not.
+
+----------------------
+
+<!-- 1. **Something is off with the transmitters**
+-->
+```
+M: No detections were found in the input data which matched the target signals.
+Error: Stopping analysis due to absence of valid detections.
+```
+
+None of the signals in the biometrics.csv file match the signals present in the detection files. Could there be something wrong with the signals in the biometrics.csv file? If you are sure that your fish were detected and actel keeps showing this message, please open an issue at [actel's GitHub repository.](https://github.com/hugomflavio/actel/issues/new)
+
+----------------------
+
+```
+Error: One or more signals match more than one tag in the detections! Showing relevant signals/tags.
+   Signal [Signal] was found on tags [...]
+Error: Fatal exception found. Stopping analysis.
+```
+
+To simplify the sorting and analysing process, actel works based on the tag signals alone. Usually, all the tags you are working with will be operating in the same code space, so this is not a problem. However, it is possible for a stray tag (i.e. a tag from an animal tagged by someone else) to come within range of your receivers while your study is going on. Should this stray tag have an identical signal to one of your target tags, then actel will not know which of the tag is yours.
+
+To fix this, find out which of the tags listed is yours, and include all the others with the same signal in the 'excluded.tags' argument.
+
+----------------------
+
+<!-- 1. **Detections before release**
+-->
+```
+Error: Fish R64K-1111 was detected before being released!
+  Release time: 2018-04-10 12:00:00
+  First detection time: 2018-04-10 09:33:02
+  Number of detections before release: 1
+
+Possible options:
+   a) Stop and double-check the data (recommended)
+   b) Discard orphan detections in this instance.
+   c) Discard orphan detections for all instances.
+
+Decision:(a/b/c/comment) 
+```
+
+Usually this can mean one of three things: The first and most obvious is that there is a mistake in the release time information. Secondly, either that tag may have been used as a tester before being implanted or one receiver may have been used to activate the tags before deployment. Lastly, the tag and the receiver may have been in close range in transport and the receiver has picked up some detections on the way.
+
+If you are sure that the release time information is correct, and the detections before release seem consistent with the second or third case presented above, you can tell actel to discard the troublesome detections, or use the `start.timestamp` argument to trim the detection data and remove the undesired detections. However, we recommend that you **always** exhaust other possibilities before doing this, to make sure there are no real mistakes in the data.
+
+----------------------
+
+#### Exceptions during array movement event creation
+
+<!-- 1. **Impassable movement**
+ -->
+````
+Warning: Fish [...] made an impassable jump: It is not possible to go from array [...] to [...].
+
+Opening valid movement table for inspection:
+
+[...]
+
+You may either:
+
+a) Render movement events invalid to resolve the impassable exception.
+b) Stop the analysis and modify the spatial.txt file.
+
+Decision:(a/b/comment)
+````
+
+It would seem that a fish has moved through an impassable obstacle. You can [find more information about this warning here.](b-1_explore_processes.html#impassables)
+
+----------------------
+
+<!-- 1. **Jump distance**
+-->
+````
+Warning: Fish [...] jumped through [#] arrays in events [#] -> [#] ([Array] -> [Array])
+M: Opening valid movements table of fish [...] for inspection:
+[...]
+Would you like to render any movement event invalid?(y/N/comment)
+````
+
+It seems that a fish has passed multiple arrays undetected. You can [find more information about this warning here.](b-1_explore_processes.html#jumping-arrays)
+
+----------------------
+
+<!-- 1. **Speed limits**
+-->
+````
+Warning: Fish [...] had an average speed of [#] m/s from valid event [#] to [#] ([Array] -> [Array])
+M: Opening valid movements table of fish [...] for inspection:
+[...]
+Would you like to render any movement event invalid?(y/N/comment)
+````
+
+It seems that a fish has moved faster than you expected. You can [find more information about this warning here.](b-1_explore_processes.html#average-speed)
+
+----------------------
+
+<!-- 1. **Inactiveness**
+-->
+````
+M: Running inactiveness checks without a distance matrix. Performance may be limited.
+````
+
+If possible, inactiveness checks make use of the distances matrix to determine the distances between the stations that recorded detections when the fish was inactive. If a distances matrix is not present, actel will use the number of individual stations instead. You can [find more information about this warning here.](b-1_explore_processes.html#inactiveness)
+
+----------------------
+
+````
+Warning: Fish [...] was detected [#] times at three or less stations of array [...] over [#] days and then disappeared. Could it be inactive?
+
+Warning: Fish [...] was detected [#] times at stations less than 1.5 km apart in array [...] over [#] days and then disappeared. Could it be inactive?
+M: Opening valid movements table of fish [...] for inspection (inactiveness started on [...]):
+[...]
+Would you like to render any movement event invalid?(y/N/comment)
+````
+
+It seems that a fish has been stopped in an array for a very long time. You can [find more information about this warning here.](b-1_explore_processes.html#inactiveness)
+
+----------------------
+
+<!-- 1. **Triggering override** --> 
+
+```
+M: Override has been triggered for fish [...]. Entering full manual mode.
+```
+
+If you included any transmitters in the `override` argument, this message will show up when it is their turn to be analysed. You can find more details on [how to operate full manual mode here.](e-0_manual_mode.html)
+
+----------------------
+
+```
+M: Fish [...] only has one movement entry ([...]) with [#] detections. Considered invalid.
+```
+
+If a fish only has one movement event and the number of detections within that event is below the number set at `minimum.detections`, the detection(s) for this fish will be considered invalid and the fish will be considered lost at release.
+
+----------------------
+
+### Exceptions exclusive to the migration function
+
+<!-- 1. **Detections outside the expected path** -->  
+
+```
+Warning: Fish [...] was detected in an array that is not after its release site! Opening relevant data for inspection.
+   Release site: [...]
+   Expected first array: [...]
+   Movement table for fish [...]:
+   [...]
+   You may either:
+     a) Stop the analysis if the expected first array is wrong;
+     b) Continue as is (does not impact the results);
+     c) Remove a movement event, if you are confident it is a false detection.
+Decision:(a/b/c/comment) 
+```
+
+A fish being released and moving in the opposite direction to what we expected is definitely not impossible. However, it is usually worth a close look. As such, when a fish is at an array that is not directly or indirectly after its release site, actel will display a summary and let you decide what to do. If the movement seems real, you can always let the analysis run as it is.
+
+----------------------
+
+<!-- 1. **Backwards movements**
+-->
+```
+Warning: Inter-section backwards movements were detected for Fish [...].
+
+Warning: Inter-section backwards movements were detected for Fish [...] and the last events are not ordered!
+```
+
+A fish moving a bit up and down is not much to worry about. But if these backward movements involve moving from one section of your study area to another (i.e. a fish migrating downstream moved to the sea and then back to the river), actel will issue a warning. You must then verify the movements and take action if desired.
+
+You can [read more about backward movements here.](c-1_migration_processes.html#backwards-movements)
+
+----------------------
+
+### Exceptions exclusive to the residency function
+
+
+````
+Warning: Section movements with less than [#] detections are present for fish [...].
+````
+
+This exception is controlled by the `section.minimum` argument. If a fish has a number of consecutive detections that is lower than this threshold, you are given a chance to inspect the data and render movement events invalid, if necessary.
+
+----------------------
+
+### Exceptions during CJS calculations
+
+````
+Warning: No fish passed through array [...].
+
+Warning: No fish passed through any of the efficiency peers of array [...].
+
+Warning: None of the arrays has valid efficiency peers.
+
+Warning: Aborting efficiency calculations (will limit the report's output).
+````
+
+The two top warnings inform you that, for some reason, array efficiency cannot be calculated for a given array. There is nothing you can do about this, unless something is wrong in the input files. If efficiency cannot be calculated for any array (either because of lack of passing fish, or lack of valid efficiency peers), actel cannot calculate efficiency estimates at all, and the last warning is issued.
+
+
+----------------------
+
+````
+Error: Multiple release sites match the matrix name. Make sure that the release sites' names are not contained within the fish groups or within themselves.
+````
+
+Actel needs to be able to find each release site in a string that contains both release sites and fish groups. As such, fish groups and release sites must be independent. For example, you cannot have a release site called "RS" and a release site called "RS1", as the first is contained in the second. If the error persists after you have fixed any potential issues, please open an issue at [actel's GitHub repository.](https://github.com/hugomflavio/actel/issues/new)
+
+----------------------
+
+````
+Error: In replicates: Stations [...] are not part of [array] (available stations: [...]).
+````
+
+It would appear that you requested for a station to be used as a replicate for an array, but that station is not part of the array you specified. I.e. if St.1 and St.2 belong to array A, and St.3 and St.4 belong to array B, it is not possible to list St.4 as a replicate of array A. Please correct the data in the replicates argument and try again.
+
+----------------------
+
+````
+Warning: An inter-array efficiency has already been calculated for array [...].
+   Do you want to replace this with an intra-array efficiency estimate?(y/N) 
+````
+
+This warning informs you that you requested intra-efficiency estimations to be calculated for an array which has efficiency peers (i.e. for which inter-array efficiency has been calculated). If this is intentional, you can tell actel to proceed, otherwise, something may be wrong in your definition of the replicates argument.
+
+----------------------
+
+**<a href="javascript:history.back()">Return to previous page</a>**
+
+[Back to top.](#)

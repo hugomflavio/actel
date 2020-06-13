@@ -12,7 +12,7 @@ substrRight(input, n)
 \item{n}{Number of characters to be removed.}
 }
 \value{
-Trimmed character string
+A trimmed string or vector of trimmed strings.
 }
 \description{
 Allows to quickly remove a given number of characters from the end of a string

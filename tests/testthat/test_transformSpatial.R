@@ -1,3 +1,7 @@
+skip_on_cran()
+
+tests.home <- getwd()
+setwd(tempdir())
 
 write.csv(example.spatial, "spatial.csv", row.names = FALSE)
 spatial <- loadSpatial()
@@ -23,12 +27,7 @@ test_that("transformSpatial handles release site mismatches properly and stops w
 	xbio$Release.site[2] <- "test"
 	
 	expect_error(transformSpatial(spatial = spatial, bio = xbio, arrays = dot$arrays, first.array = NULL),
-		"There is a mismatch between the release sites reported in the spatial.csv file and the release locations for the fish in the biometrics.csv file.\n       Release sites listed in the spatial.csv file: RS1\n       Sites listed in the biometrics.csv file 'Release.site' column: RS1, test", fixed = TRUE)
-
-	xspatial <- spatial
-	xspatial$Array[18] <- "test"
-	expect_error(transformSpatial(spatial = xspatial, bio = bio, arrays = dot$arrays, first.array = NULL),
-		"There is a mismatch between the expected first array(s) of a release site and the list of arrays.\n       Arrays listed in the spatial.csv file: River0, River1, River2, River3, River4, River5, River6, Fjord1, Fjord2, Sea1\n       Expected first arrays listed for the release sites: test\nThe expected first arrays should match the arrays where stations where deployed in the spatial.csv file.", fixed = TRUE)
+		"The following release sites were listed in the biometrics.csv file but are not part of the release sites listed in the spatial.csv file: test\nPlease include the missing release sites in the spatial.csv file.", fixed = TRUE)
 
 	xspatial <- spatial[-18, ]
 	expect_warning(
@@ -48,7 +47,7 @@ test_that("transformSpatial handles release site mismatches properly and deliver
 
 	expect_equal(as.character(output$spatial$release.sites$Array), "River1")
 
-	xspatial <- spatial[-18, -5]
+	xspatial <- spatial[-18, -7]
 	xspatial$Array <- factor(xspatial$Array, levels = levels(output$spatial$stations$Array))
 	expect_equal(output$spatial$stations, xspatial)
 
@@ -83,6 +82,7 @@ test_that("transformSpatial handles sections properly", {
 	expect_error(suppressWarnings(transformSpatial(spatial = spatial, bio = bio, arrays = dot$arrays, sections = c("River", "Fjord"))),
 		"Array 'Sea1' was not assigned to any section. Stopping to prevent function failure.\nPlease either...\n   1) Rename these arrays to match a section,\n   2) Rename a section to match these arrays, or\n   3) Include a new section in the analysis.\n... and restart the analysis.", fixed = TRUE)
 })
+# y
 
 test_that("transformSpatial handles multiple expected first arrays correctly", {
 	xspatial <- spatial
@@ -108,5 +108,5 @@ test_that("transformSpatial handles multiple expected first arrays correctly", {
 		"Multiple possible first arrays detected for more than five release sites.", fixed = TRUE)
 })
 
-file.remove(list.files(pattern = "*txt$"))
+setwd(tests.home)
 rm(list = ls())

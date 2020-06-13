@@ -9,6 +9,9 @@ printDotplots(status.df, invalid.dist)
 \arguments{
 \item{invalid.dist}{Whether or not the distance matrix supplied is valid for the study area.}
 }
+\value{
+No return value, called to plot and save graphic.
+}
 \description{
 Prints dotplots of multiple variables.
 }

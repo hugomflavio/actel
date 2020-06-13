@@ -12,7 +12,7 @@ transferValidity(from, to)
 \item{to}{The target movements table}
 }
 \value{
-the all movements table with valid/invalid updated
+A data frame with the movement events for the target fish and an updated 'Valid' column.
 }
 \description{
 Transfer validity updates from valid movements to all movements

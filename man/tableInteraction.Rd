@@ -24,7 +24,7 @@ prompted to open and examine that file. Defaults to "needed".}
 \item{force}{Logical: If TRUE, the user is moved directly to indicating which movements should be invalidated.}
 }
 \value{
-The updated movements table
+A data frame with the updated movements table
 }
 \description{
 Handler for table interaction events

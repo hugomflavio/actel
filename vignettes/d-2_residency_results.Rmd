@@ -33,7 +33,8 @@ knitr::opts_chunk$set(
     1. [__Inspecting the residency() results__](d-2_residency_results.html)
     1. [Multi-way efficiency estimations](d-3_residency_efficiency.html)
 1. [Manual mode](e-0_manual_mode.html)
-1. [Errors and messages](f-0_messages.html)
+1. [Beyond the three main analyses](f-0_post_functions.html)
+1. [Errors and messages](g-0_messages.html)
 
 
 ## Results within R
@@ -169,10 +170,13 @@ If you provided intra-array estimates in the [replicates argument](d-0_residency
 
 The residency function saves [outputs similar to those saved by explore](b-2_explore_results.html#results-in-your-working-directory). The main differences are in the two elements listed below.
 
-
 ### actel_residency_results.RData
 
-To make sure that you don't accidentally lose your results, actel stores them right away in the target folder. The results present in this file are the same as the ones you obtain directly in your R console (see above). It differs from the explore() output both in name and content.
+``
+Would you like to save a copy of the results to actel_residency_results.RData?(y/N) 
+``
+
+To make sure that you don't accidentally lose your results, you can save them right away in the current directory. The results present in this file are the same as the ones you obtain directly in your R console (see above). It differs from the explore() output both in name and content.
 
 
 ### actel_residency_report.html (if report = TRUE)

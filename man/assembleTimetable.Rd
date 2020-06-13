@@ -5,10 +5,13 @@
 \title{Create the timetable}
 \usage{
 assembleTimetable(
-  vm,
+  secmoves,
+  valid.moves,
   all.moves,
   sections,
   arrays,
+  bio,
+  tz,
   dist.mat,
   invalid.dist,
   speed.method,
@@ -17,21 +20,32 @@ assembleTimetable(
 )
 }
 \arguments{
+\item{secmoves}{the section-movements}
+
+\item{valid.moves}{the valid array movements}
+
+\item{all.moves}{all array movements}
+
 \item{sections}{The sections in which the study area is divided. Must be
 coincident with the names given to the arrays. See the vignettes for more
 details.}
 
 \item{arrays}{A list containing information for each array.}
 
+\item{bio}{A table with the tags and biometrics of the studied fish.}
+
+\item{tz}{The time zone of the study area. Must match one of the values
+present in \code{\link[base]{timezones}}.}
+
 \item{dist.mat}{A matrix of the distances between the deployed ALS.}
 
 \item{invalid.dist}{Whether or not the distance matrix supplied is valid for the study area.}
 
-\item{speed.method}{Can take two forms: 'last to first' or 'first to first'.
-If 'last to first' (default), the last detection on a given array is matched
-to the first detection on the next array to perform the calculations.
-If 'first to first', the first detection on a given array is matched to the
-first detection on the next array to perform the calculations.}
+\item{speed.method}{Can take two forms: 'last to first' or 'last to last'.
+If 'last to first' (default), the last detection on the previous array is matched
+to the first detection on the target array to perform the calculations.
+If 'last to last', the last detection on ´the previous array is matched to the
+last detection on the target array to perform the calculations.}
 
 \item{if.last.skip.section}{Logical: Should a fish detected at the last array
 of a given section be considered to have disappeared in the next section?}
@@ -39,11 +53,9 @@ of a given section be considered to have disappeared in the next section?}
 \item{success.arrays}{The arrays that mark the end of the study area. If a
 fish crosses one of these arrays, it is considered to have successfully
 migrated through the study area.}
-
-\item{movements}{A list of movements for each target tag, created by groupMovements.}
 }
 \value{
-A table of the entering and leaving points for each section per target tag
+A data frame containing the entering and leaving timestamps for each section per target tag
 }
 \description{
 Crawls trough the movement events of each fish to find when it entered and left each section of the study area.

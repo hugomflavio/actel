@@ -12,7 +12,7 @@ printCircular(times, bio, suffix = NULL)
 \item{bio}{A table with the tags and biometrics of the studied fish.}
 }
 \value{
-A rmd string to be attached to the report.
+A string of file locations in rmd syntax, to be included in printRmd
 }
 \description{
 Prints the time of first entry point on each of the arrays. Contains functions adapted from the circular R package.

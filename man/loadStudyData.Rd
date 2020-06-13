@@ -9,9 +9,11 @@ loadStudyData(
   override = NULL,
   start.time,
   stop.time,
+  save.detections = FALSE,
   sections = NULL,
   exclude.tags,
-  disregard.parallels = TRUE
+  disregard.parallels = TRUE,
+  discard.orphans = FALSE
 )
 }
 \arguments{
@@ -29,6 +31,9 @@ the analysis.}
 \code{stop.time} (in YYYY-MM-DD HH:MM:SS format) is not considered during
 the analysis.}
 
+\item{save.detections}{Logical: Should the processed detections be saved for
+future runs?}
+
 \item{sections}{The sections in which the study area is divided. Must be
 coincident with the names given to the arrays. See the vignettes for more
 details.}
@@ -40,9 +45,26 @@ tag are detected in the study area.}
 
 \item{disregard.parallels}{Logical:  Should the presence of parallel arrays
 invalidate potential efficiency peers? See the vignettes for more details.}
+
+\item{discard.orphans}{Logical: Should actel automatically discard
+detections that do not fall within receiver deployment periods, or that
+were recorded before the respective fish were released?}
 }
 \value{
-a list of objects to be used for data analysis
+A list containing:
+\itemize{
+\item \code{bio}: A data frame corresponding to 'biometrics.csv'
+\item \code{sections}: A vector of the study area sections (or NULL in the case of the \code{explore} function)
+\item \code{deployments}: A list corresponding to 'deployments.csv'
+\item \code{spatial}: A list corresponding to 'spatial.csv'
+\item \code{dot}: A data frame containing the connections between arrays
+\item \code{arrays}: A list containing detailed information on the arrays
+\item \code{dotmat}: A matrix of the distance (in number of arrays) between pairs of arrays
+\item \code{dist.mat}: A matrix of the distances (in metres) between stations (if a 'distances.csv' is present)
+\item \code{invalid.dist}: Logical: Is the distances matrix valid?
+\item \code{detections.list}: A list containing the detection data for each fish
+\item \code{paths}: A list of the all array paths between each pair of arrays.
+}
 }
 \description{
 Load, structure and check the inputs

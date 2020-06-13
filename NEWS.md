@@ -2,6 +2,63 @@
 
 Find out the main highlights of each update.
 
+## actel 1.0.0
+
+Fixes:
+  * Sort deployment rows by start time. Avoids false triggering of redeployment-before-retrieval errors.
+  * Prevent failure to identify receivers if the model-serial combination has two or more "-" characters.
+  * Prevent residence crash if no fish entered a given section.
+  * Prevent crash if study area only has one array.
+  * Fix replicates argument formulation in the log's function call carbon copy.
+  * Prevent crash if array names contain regex characters.
+  * Fix bug causing crash when attempting to save a movements table to a temporary file.
+
+Changes:
+  * maximum efficiency estimates in residency now only take into account known missed events and recorded events in the denominator (previously, potentially missed events were being included as well).
+  * GUI interaction mechanisms were changed as a consequence of updating from package gWidgets to gWidgets2.
+  * The argument 'path' has been removed from `explore`, `migration` and `residency`. The user must now move to the target directory using `setwd()` before running the analyses.
+  * Analysis files are saved in a temporary folder and are only made permanent by user request.
+  * The 'report' argument now defaults to FALSE. By setting 'report' to TRUE, the user acknowledges that a file will be written in the current working directory.
+  * Auxiliary files to the report are now saved in a temporary directory. The user can still access the report figures by right-clicking them in the html report and saving them.
+  * actel no longer saves compiled detections to the user's working directory by default. A new argument 'save.detections' (defaults to FALSE) was added to allow users to mimic the old behaviour.
+  * actel no longer saves the stray tags summary to the user's working directory by default. If there are stray tags in the data, the users will be asked if they would like to save a copy of the summary.
+  * transitionLayer no longer saves the output automatically into the working directory.
+  * distancesMatrix now receives the transition layer as an R object rather than a file name.
+  * distancesMatrix now requires user confirmation before writing a 'distances.csv' file into the working directory.
+  * createMatrix and completeMatrix now work with R objects rather than files. The user must manually save the function output to a 'distances.csv' file to include it in the next analysis.
+  * The possible values of speed.method have been changed to 'last to first' and 'last to last', for a more logical interpretation of the results. The explore vignette has been updated accordingly.
+  * Separated part of `transitionLayer` into a preceding function `loadShape`.
+  * `exampleWorkspace` and `createWorkspace` now require a target directory.
+
+Enhancements:
+  * Perform early quality checks on the content of 'sections' before advancing with migration and residency analysis.
+  * Allow user to hide release sites from the study area diagrams.
+  * Improve spatial.csv vs spatial.txt mismatch error messaging by showing missing arrays.
+  * Improve colour and caption handling on individual residency plots for study areas with many sections.
+  * Improve handling of spatial file in distancesMatrix (including new fail-safes).
+  * Added support for tags that emit multiple signals (i.e. multi-sensor tags).
+  * Plot sensor data in the reports.
+  * Allow intra-array efficiency to be calculated even if no inter-array efficiency could be calculated.
+  * Allow the GUI to pop up if the number of lines to display goes over getOptions("max.print").
+  * Hide biometrics' section from the report if no biometric data was found.
+  * New `advEfficiency` function allows user to calculate more robust efficiency estimates.
+  * Improved release.overview and group.overview objects so they can be used as an input to advEfficiency().
+  * New `plotTimes` function allows the user to create circular plots of specific subsets of the time data, with the ability to include night shades too.
+  * `getTimes` and `timesToCircular` are now exported, allowing the user to quickly format the input for `plotTimes`.
+  * A new page has been included in the vignettes aiming to explore what can be done with the results of actel's analyses.
+  * Included usage examples on exported functions.
+  * Verify the names of the release site arrays as soon as the spatial.csv is loaded.
+  * Added support for timestamps using a "T" separator between date and time in the biometrics and deployments files.
+  * new 'discard.orphans' argument allows the user to automatically discard all detections that do not fall within receiver deployment periods.
+  * Users can now create and use a generic detections file. Details for the format of this file are provided in the "Detections" section of vignette 1.0.
+  * migration() has been upgraded to be capable of handling backwards movements. The status.df has also been improved, and a new graphic was included to the report (last array).
+  * new `plotMoves` function allows the user to create personalised detection plots for specific tags.
+  * EPSGcode argument has been removed from all distances matrix related functions. actel now looks for the coordinate system within the shape file supplied.
+  * distances matrix functions can now work with degree-based coordinate systems too.
+  * the shapefiles of the study areas can now be water or land polygons. Use the new argument "time" in loadShape() to switch from land shapefiles (the default) to water shapefiles.
+  * Paint groups consistently in circular plots.
+  * Improved handling of long array lists in individual detection plots.
+
 ## actel 0.1.3
 
 Fixes:
