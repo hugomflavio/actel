@@ -2,7 +2,14 @@
 
 Find out the main highlights of each update.
 
-## actel 1.0.0
+## Development
+
+Enhancements:
+  * the shapefiles of the study areas can now be water or land polygons. Use the new argument "time" in loadShape() to switch from land shapefiles (the default) to water shapefiles.
+  * Paint groups consistently in circular plots.
+  * Improved handling of long array lists in individual detection plots.
+  
+## actel 1.0.0 (CRAN)
 
 Fixes:
   * Sort deployment rows by start time. Avoids false triggering of redeployment-before-retrieval errors.
@@ -55,9 +62,7 @@ Enhancements:
   * new `plotMoves` function allows the user to create personalised detection plots for specific tags.
   * EPSGcode argument has been removed from all distances matrix related functions. actel now looks for the coordinate system within the shape file supplied.
   * distances matrix functions can now work with degree-based coordinate systems too.
-  * the shapefiles of the study areas can now be water or land polygons. Use the new argument "time" in loadShape() to switch from land shapefiles (the default) to water shapefiles.
-  * Paint groups consistently in circular plots.
-  * Improved handling of long array lists in individual detection plots.
+
 
 ## actel 0.1.3
 
