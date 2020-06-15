@@ -155,14 +155,14 @@ test_that("checkUpstream reacts as expected.", {
 
 test_that("simplifyMovements works as expected.", {
 	# no invalid events
-  output <- simplifyMovements(movements = moves[[1]], fish = "R64K-4451", bio = bio, 
+  output <- simplifyMovements(movements = moves[[1]], fish = "R64K-4451", bio = bio, discard.first = NULL,
     speed.method = "last to first", dist.mat = dist.mat, invalid.dist = invalid.dist)
   expect_equal(output, moves[[1]])
   # invalid events
   xmoves <- moves[[1]]
   xmoves$Valid <- rep(c(TRUE, FALSE), 9)
   # With dist.mat
-  output <- simplifyMovements(movements = xmoves, fish = "R64K-4451", bio = bio, 
+  output <- simplifyMovements(movements = xmoves, fish = "R64K-4451", bio = bio, discard.first = NULL,
     speed.method = "last to first", dist.mat = dist.mat, invalid.dist = invalid.dist)
   expect_equal(nrow(output), 9)
   expect_equal(output$Array, xmoves$Array[(1:9 * 2) - 1])
@@ -174,7 +174,7 @@ test_that("simplifyMovements works as expected.", {
   expect_false(all(A == B))
 
   # Without dist.mat
-  output <- simplifyMovements(movements = xmoves, fish = "R64K-4451", bio = bio, 
+  output <- simplifyMovements(movements = xmoves, fish = "R64K-4451", bio = bio, discard.first = NULL,
     speed.method = "last to first", dist.mat = dist.mat, invalid.dist = TRUE)
   expect_equal(nrow(output), 9)
   expect_equal(output$Array, xmoves$Array[(1:9 * 2) - 1])
@@ -184,7 +184,7 @@ test_that("simplifyMovements works as expected.", {
   # Fully invalid
   xmoves <- moves[[1]]
   xmoves$Valid <- FALSE
-  output <- simplifyMovements(movements = xmoves, fish = "R64K-4451", bio = bio, 
+  output <- simplifyMovements(movements = xmoves, fish = "R64K-4451", bio = bio, discard.first = NULL,
     speed.method = "last to first", dist.mat = dist.mat, invalid.dist = invalid.dist)
   expect_equal(output, NULL)
 })
@@ -192,7 +192,7 @@ test_that("simplifyMovements works as expected.", {
 test_that("validateDetections works as expected.", {
   xmoves <- moves[[1]]
   xmoves$Valid <- rep(c(TRUE, FALSE), 9)
-  vm <- list("R64K-4451" = simplifyMovements(movements = xmoves, fish = "R64K-4451", bio = bio, 
+  vm <- list("R64K-4451" = simplifyMovements(movements = xmoves, fish = "R64K-4451", bio = bio, discard.first = NULL,
     speed.method = "last to first", dist.mat = dist.mat, invalid.dist = invalid.dist))
   vd <- validateDetections(detections.list = detections.list, movements = vm)[[2]]
   expect_equal(sum(moves[[1]]$Detections), nrow(detections.list[[1]]))

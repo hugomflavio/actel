@@ -9,6 +9,9 @@
 #'  analysis is over? Defaults to TRUE. NOTE: If report = TRUE and auto.open = TRUE,
 #'  the web browser will automatically be launched to open the report once the 
 #'  function terminates.
+#' @param discard.first A threshold amount of time (in hours) that must pass after
+#'  release for the respective detections to be valid. Set to 0 to discard only
+#'  the release-to-first-detection calculations.
 #' @param discard.orphans Logical: Should actel automatically discard
 #'  detections that do not fall within receiver deployment periods, or that
 #'  were recorded before the respective fish were released?
@@ -119,7 +122,7 @@
 explore <- function(tz, max.interval = 60, minimum.detections = 2, start.time = NULL, stop.time = NULL, 
   speed.method = c("last to first", "last to last"), speed.warning = NULL, speed.error = NULL, 
   jump.warning = 2, jump.error = 3, inactive.warning = NULL, inactive.error = NULL, 
-  exclude.tags = NULL, override = NULL, report = FALSE, auto.open = TRUE, discard.orphans = FALSE, 
+  exclude.tags = NULL, override = NULL, report = FALSE, auto.open = TRUE, discard.orphans = FALSE, discard.first = NULL,
   save.detections = FALSE, GUI = c("needed", "always", "never"), print.releases = TRUE) {
 
   if (!is.null(options("actel.debug")[[1]]) && options("actel.debug")[[1]]) {
@@ -268,18 +271,26 @@ detections.list <- study.data$detections.list
 # -------------------------------------
   
 # Process the data
+
+  if (!is.null(discard.first) && discard.first > 0)
+    detections.list <- discardFirst(input = detections.list, bio, trim = discard.first)
+
   appendTo(c("Screen", "Report"), "M: Creating movement records for the valid tags.")
   movements <- groupMovements(detections.list = detections.list, bio = bio, spatial = spatial,
     speed.method = speed.method, max.interval = max.interval, tz = tz, 
     dist.mat = dist.mat, invalid.dist = invalid.dist)
 
-  aux <- names(movements)
-  movements <- lapply(names(movements), function(fish) {
-      speedReleaseToFirst(fish = fish, bio = bio, movements = movements[[fish]],
-                          dist.mat = dist.mat, invalid.dist = invalid.dist, speed.method = speed.method)
-    })
-  names(movements) <- aux
-  rm(aux)
+  if (is.null(discard.first)) {
+    aux <- names(movements)
+    movements <- lapply(names(movements), function(fish) {
+        speedReleaseToFirst(fish = fish, bio = bio, movements = movements[[fish]],
+                            dist.mat = dist.mat, invalid.dist = invalid.dist, speed.method = speed.method)
+      })
+    names(movements) <- aux
+    rm(aux)
+  } else {
+    appendTo(c("Screen", "Report"), "M: Not calculating time/speed from release to first detection because 'discard.first' was set.")
+  }
 
   appendTo(c("Screen", "Report"), "M: Checking movement events quality.")
 
@@ -327,7 +338,7 @@ detections.list <- study.data$detections.list
                                   jump.warning = jump.warning, jump.error = jump.error, GUI = GUI)
 
       if (do.checkSpeeds) {
-        temp.valid.movements <- simplifyMovements(movements = output, fish = fish, bio = bio, 
+        temp.valid.movements <- simplifyMovements(movements = output, fish = fish, bio = bio, discard.first = discard.first, 
           speed.method = speed.method, dist.mat = dist.mat, invalid.dist = invalid.dist)
         output <- checkSpeeds(movements = output, fish = fish, valid.movements = temp.valid.movements, 
           speed.warning = speed.warning, speed.error = speed.error, GUI = GUI)
@@ -350,7 +361,7 @@ detections.list <- study.data$detections.list
   appendTo(c("Screen", "Report"), "M: Filtering valid array movements.")
 
   valid.movements <- lapply(seq_along(movements), function(i){
-    output <- simplifyMovements(movements = movements[[i]], fish = names(movements)[i], bio = bio, 
+    output <- simplifyMovements(movements = movements[[i]], fish = names(movements)[i], bio = bio, discard.first = discard.first,
       speed.method = speed.method, dist.mat = dist.mat, invalid.dist = invalid.dist)
   })
   names(valid.movements) <- names(movements)
@@ -752,7 +763,7 @@ sink()
 #' @param detections.list The list of detections per fish
 #' @param movements The list of movements to be matched
 #' 
-#' @return A list containing the valid detections per fish-
+#' @return A list containing the valid detections per fish.
 #' 
 #' @keywords internal
 #' 
@@ -795,3 +806,27 @@ validateDetections <- function(detections.list, movements) {
 }
 
 
+#' Discard early detections
+#' 
+#' @param input The detections list
+#' @param bio The biometrics table
+#' @param trim The threshold time after elease, in hours
+#' 
+#' @return the updated detections list
+#' 
+#' @keywords internal
+#' 
+discardFirst <- function(input, bio, trim) {
+  link <- match(names(input), bio$Transmitter)
+  count <- 0
+  output <- lapply(seq_along(input), function(i) {
+    output_i <- input[[i]]
+    output_i$Valid[output_i$Timestamp <= bio$Release.date[i] + (trim * 3600)] <- FALSE
+    count <<- count + (sum(!output_i$Valid))
+    appendTo("debug", paste0("M: ", sum(!output_i$Valid), " early detection(s) invalidated for tag ", names(input)[i], "."))
+    return(output_i)
+  })  
+  names(output) <- names(input)
+  appendTo("Screen", paste0("M: ", count, " detection(s) were invalidated because they were recorded before the time set in 'discard.first' had passed."))
+  return(output)
+}

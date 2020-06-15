@@ -123,8 +123,8 @@ migration <- function(tz, sections, success.arrays = NULL, max.interval = 60, mi
   start.time = NULL, stop.time = NULL, speed.method = c("last to first", "last to last"), 
   speed.warning = NULL, speed.error = NULL, jump.warning = 2, jump.error = 3,
   inactive.warning = NULL, inactive.error = NULL, exclude.tags = NULL, override = NULL, report = FALSE, auto.open = TRUE, 
-  discard.orphans = FALSE, save.detections = FALSE, if.last.skip.section = TRUE, replicates = NULL, disregard.parallels = TRUE, 
-  GUI = c("needed", "always", "never"), print.releases = TRUE) {
+  discard.orphans = FALSE, discard.first = NULL, save.detections = FALSE, if.last.skip.section = TRUE, 
+  replicates = NULL, disregard.parallels = TRUE, GUI = c("needed", "always", "never"), print.releases = TRUE) {
 
   if (!is.null(options("actel.debug")[[1]]) && options("actel.debug")[[1]]) {
     on.exit(message("Debug: Saving carbon copy to ", paste0(tempdir(), "/actel.debug.RData")))
@@ -312,19 +312,27 @@ migration <- function(tz, sections, success.arrays = NULL, max.interval = 60, mi
   }
 # -------------------------------------
   
+# Discard early detections, if required
+  if (!is.null(discard.first) && discard.first > 0)
+    detections.list <- discardFirst(input = detections.list, bio, trim = discard.first)
+
 # Compile array movements
   appendTo(c("Screen", "Report"), "M: Creating movement records for the valid tags.")
   movements <- groupMovements(detections.list = detections.list, bio = bio, spatial = spatial,
     speed.method = speed.method, max.interval = max.interval, tz = tz, 
     dist.mat = dist.mat, invalid.dist = invalid.dist)
 
-  aux <- names(movements)
-  movements <- lapply(names(movements), function(fish) {
-      speedReleaseToFirst(fish = fish, bio = bio, movements = movements[[fish]],
-                          dist.mat = dist.mat, invalid.dist = invalid.dist, speed.method = speed.method)
-    })
-  names(movements) <- aux
-  rm(aux)
+  if (is.null(discard.first)) {
+    aux <- names(movements)
+    movements <- lapply(names(movements), function(fish) {
+        speedReleaseToFirst(fish = fish, bio = bio, movements = movements[[fish]],
+                            dist.mat = dist.mat, invalid.dist = invalid.dist, speed.method = speed.method)
+      })
+    names(movements) <- aux
+    rm(aux)
+  } else {
+    appendTo(c("Screen", "Report"), "M: Not calculating time/speed from release to first detection because 'discard.first' was set.")
+  }
 
   appendTo(c("Screen", "Report"), "M: Checking movement events quality.")
 
@@ -374,7 +382,7 @@ migration <- function(tz, sections, success.arrays = NULL, max.interval = 60, mi
                                   jump.warning = jump.warning, jump.error = jump.error, GUI = GUI)
 
       if (do.checkSpeeds) {
-        temp.valid.movements <- simplifyMovements(movements = output, fish = fish, bio = bio, 
+        temp.valid.movements <- simplifyMovements(movements = output, fish = fish, bio = bio, discard.first = discard.first,
           speed.method = speed.method, dist.mat = dist.mat, invalid.dist = invalid.dist)
         output <- checkSpeeds(movements = output, fish = fish, valid.movements = temp.valid.movements, 
           speed.warning = speed.warning, speed.error = speed.error, GUI = GUI)
@@ -414,7 +422,7 @@ migration <- function(tz, sections, success.arrays = NULL, max.interval = 60, mi
   appendTo(c("Screen", "Report"), "M: Filtering valid array and section movements.")
 
   valid.movements <- lapply(seq_along(movements), function(i){
-    output <- simplifyMovements(movements = movements[[i]], fish = names(movements)[i], bio = bio, 
+    output <- simplifyMovements(movements = movements[[i]], fish = names(movements)[i], bio = bio, discard.first = discard.first,
       speed.method = speed.method, dist.mat = dist.mat, invalid.dist = invalid.dist)
   })
   names(valid.movements) <- names(movements)

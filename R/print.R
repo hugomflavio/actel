@@ -635,13 +635,18 @@ printIndividuals <- function(detections.list, bio, status.df = NULL, tz,
     if (any(!PlotData$Valid))
       PlotData$Array[!PlotData$Valid] <- "Invalid"
     
-    all.moves.line <- data.frame(
-      Station = as.vector(t(movements[[fish]][, c("First.station", "Last.station")])),
-      Timestamp = as.vector(t(movements[[fish]][, c("First.time", "Last.time")]))
-    )
-    all.moves.line$Station <- factor(all.moves.line$Station, levels = levels(PlotData$Standard.name))
-    all.moves.line$Timestamp <- as.POSIXct(all.moves.line$Timestamp, tz = tz)
-    
+    if (!is.null(movements[[fish]])) {
+      add.movements <- TRUE
+      all.moves.line <- data.frame(
+        Station = as.vector(t(movements[[fish]][, c("First.station", "Last.station")])),
+        Timestamp = as.vector(t(movements[[fish]][, c("First.time", "Last.time")]))
+      )
+      all.moves.line$Station <- factor(all.moves.line$Station, levels = levels(PlotData$Standard.name))
+      all.moves.line$Timestamp <- as.POSIXct(all.moves.line$Timestamp, tz = tz)
+    } else {
+      add.movements <- FALSE
+    }
+
     add.valid.movements <- FALSE
     if (!is.null(valid.movements[[fish]])) {
       add.valid.movements <- TRUE
@@ -666,12 +671,12 @@ printIndividuals <- function(detections.list, bio, status.df = NULL, tz,
       relevant.line <- status.df[status.row, (grepl("First.arrived", colnames(status.df)) | grepl("Last.left", colnames(status.df)))]
     }
 
-    appendTo("debug", paste0("Debug: Printing graphic for fish", fish, "."))
+    appendTo("debug", paste0("Debug: Printing detection graphic for fish ", fish, "."))
     # Start plot
     p <- ggplot2::ggplot(PlotData, ggplot2::aes(x = Timestamp, y = Standard.name, colour = Array))
     # Choose background
     default.cols <- TRUE
-    if (attributes(movements[[fish]])$p.type == "Overridden") { # nocov start
+    if (add.movements && attributes(movements[[fish]])$p.type == "Overridden") { # nocov start
       p <- p + ggplot2::theme(
         panel.background = ggplot2::element_rect(fill = "white"),
         panel.border = ggplot2::element_rect(fill = NA, colour = "#ef3b32" , size = 2),
@@ -681,7 +686,7 @@ printIndividuals <- function(detections.list, bio, status.df = NULL, tz,
         )
       default.cols <- FALSE
     } # nocov end
-    if (attributes(movements[[fish]])$p.type == "Manual") {
+    if (add.movements && attributes(movements[[fish]])$p.type == "Manual") {
        p <- p + ggplot2::theme(
         panel.background = ggplot2::element_rect(fill = "white"),
         panel.border = ggplot2::element_rect(fill = NA, colour = "#ffd016" , size = 2),
@@ -706,10 +711,10 @@ printIndividuals <- function(detections.list, bio, status.df = NULL, tz,
       rm(l, relevant.line)
     }
     # Plot movements
-    p <- p + ggplot2::geom_path(data = all.moves.line, ggplot2::aes(x = Timestamp, y = Station, group = 1), col = "grey40", linetype = "dashed")
-    if (add.valid.movements) {
+    if (add.movements)
+      p <- p + ggplot2::geom_path(data = all.moves.line, ggplot2::aes(x = Timestamp, y = Station, group = 1), col = "grey40", linetype = "dashed")
+    if (add.valid.movements)
       p <- p + ggplot2::geom_path(data = simple.moves.line, ggplot2::aes(x = Timestamp, y = Station, group = 1), col = "grey40")
-    }
     # Trim graphic
     p <- p + ggplot2::xlim(first.time, last.time)
     # Paint

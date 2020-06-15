@@ -182,6 +182,15 @@ test_that("explore can handle multi-sensor data", {
 	output <- suppressWarnings(explore(tz = 'Europe/Copenhagen', GUI = "never"))
 })
 
+write.csv(example.distances, "distances.csv")
+
+test_that("the discard.first argument is working properly", {
+	expect_message(output <- suppressWarnings(explore(tz = 'Europe/Copenhagen', GUI = "never", jump.warning = Inf, jump.error = Inf, discard.first = 24 * 30)),
+		"M: 12918 detection(s) were invalidated because they were recorded before the time set in 'discard.first' had passed.", fixed = TRUE)
+	expect_true(is.na(output$valid.movements[[1]]$Time.travelling[1]))
+	expect_true(is.na(output$valid.movements[[1]]$Average.speed.m.s[1]))
+})
+
 setwd("..")
 unlink("exampleWorkspace", recursive = TRUE)
 setwd(tests.home)

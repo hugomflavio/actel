@@ -263,6 +263,17 @@ test_that("residency can handle multi-sensor data", {
 	xbio$Signal[1] <- "4453|4454"
 	write.csv(xbio, "biometrics.csv", row.names = FALSE)
 	output <- suppressWarnings(residency(sections = c("River", "Fjord", "Sea"), tz = 'Europe/Copenhagen', GUI = "never"))
+	write.csv(example.biometrics, "biometrics.csv", row.names = FALSE)
+})
+
+write.csv(example.distances, "distances.csv")
+
+test_that("the discard.first argument is working properly", {
+	expect_message(output <- suppressWarnings(residency(sections = c("River", "Fjord", "Sea"), tz = 'Europe/Copenhagen', GUI = "never", jump.warning = Inf, jump.error = Inf, discard.first = 24 * 30)),
+		"M: 13467 detection(s) were invalidated because they were recorded before the time set in 'discard.first' had passed.", fixed = TRUE)
+	expect_true(is.na(output$valid.movements[[1]]$Time.travelling[1]))
+	expect_true(is.na(output$valid.movements[[1]]$Average.speed.m.s[1]))
+	expect_true(is.na(output$section.movements[[1]]$Time.travelling[1]))
 })
 
 setwd("..")

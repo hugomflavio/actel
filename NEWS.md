@@ -12,6 +12,7 @@ Enhancements:
   * Paint groups consistently in circular plots.
   * Improved handling of long array lists in individual detection plots.
   * Display event number on inactiveness checks.
+  * New argument `discard.first` allows the user to discard detections that happen before a given amount of time has passed after release.
   
 ## actel 1.0.0 (CRAN)
 

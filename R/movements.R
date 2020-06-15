@@ -21,79 +21,92 @@ groupMovements <- function(detections.list, bio, spatial, speed.method, max.inte
   counter <- 1
   {
     if (interactive())
-      pb <- txtProgressBar(min = 0, max = sum(unlist(lapply(detections.list, nrow))), style = 3, width = 60)
+      pb <- txtProgressBar(min = 0, max = sum(sapply(detections.list, function(x) sum(x$Valid))), style = 3, width = 60)
     movements <- lapply(names(detections.list), function(i) {
       appendTo("debug", paste0("Debug: (Movements) Analysing fish ", i, "."))
-      if (invalid.dist) {
-        recipient <- data.frame(
-          Array = NA_character_, 
-          Detections = NA_integer_, 
-          First.station = NA_character_, 
-          Last.station = NA_character_, 
-          First.time = as.POSIXct(NA_character_, tz = tz, format = "%y-%m-%d %H:%M:%S"), 
-          Last.time = as.POSIXct(NA_character_, tz = tz, format = "%y-%m-%d %H:%M:%S"), 
-          Time.travelling = NA_character_, 
-          Time.in.array = NA_character_, 
-          Valid = NA,
-          stringsAsFactors = FALSE
-          )
-      } else {
-        recipient <- data.frame(
-          Array = NA_character_, 
-          Detections = NA_integer_, 
-          First.station = NA_character_, 
-          Last.station = NA_character_, 
-          First.time = as.POSIXct(NA_character_, tz = tz, format = "%y-%m-%d %H:%M:%S"), 
-          Last.time = as.POSIXct(NA_character_, tz = tz, format = "%y-%m-%d %H:%M:%S"), 
-          Time.travelling = NA_character_, 
-          Time.in.array = NA_character_, 
-          Average.speed.m.s = NA_real_,
-          Valid = NA,
-          stringsAsFactors = FALSE
-          )
-      }
-      z <- 1
-      array.shifts <- c(which(detections.list[[i]]$Array[-1] != detections.list[[i]]$Array[-length(detections.list[[i]]$Array)]), nrow(detections.list[[i]]))
-      time.shifts <- which(difftime(detections.list[[i]]$Timestamp[-1], detections.list[[i]]$Timestamp[-length(detections.list[[i]]$Timestamp)], units = "mins") > max.interval)
-      all.shifts <- sort(unique(c(array.shifts, time.shifts)))
-      capture <- lapply(seq_len(length(all.shifts)), function(j) {
-        if (j == 1)
-          start <- 1
-        else
-          start <- all.shifts[j - 1] + 1
-        stop <- all.shifts[j]
-        recipient[z, "Array"] <<- paste(detections.list[[i]]$Array[start])
-        recipient[z, "Detections"] <<- stop - start + 1
-        recipient[z, "First.station"] <<- paste(detections.list[[i]]$Standard.name[start])
-        recipient[z, "First.time"] <<- detections.list[[i]]$Timestamp[start]
-        recipient[z, "Last.station"] <<- paste(detections.list[[i]]$Standard.name[stop])
-        recipient[z, "Last.time"] <<- detections.list[[i]]$Timestamp[stop]
-        z <<- z + 1
-        counter <<- counter + stop - start + 1
-        if (i == tail(names(detections.list), 1)) 
-          counter <<- sum(unlist(lapply(detections.list, nrow)))
-        if (interactive())
-          setTxtProgressBar(pb, counter)
-        flush.console()
-      })
-      counter <<- counter
+      x <- detections.list[[i]]
+      # discount invalid detections
+      x <- x[x$Valid, ]
 
-      recipient$Valid <- TRUE
-      if (any(link <- recipient$Array == "Unknown")) {
-        recipient$Valid[recipient$Array == "Unknown"] <- FALSE
-        trigger.unknown <<- TRUE
+      # only start if there are valid detections
+      if (nrow(x) > 0) {
+        if (invalid.dist) {
+          recipient <- data.frame(
+            Array = NA_character_, 
+            Detections = NA_integer_, 
+            First.station = NA_character_, 
+            Last.station = NA_character_, 
+            First.time = as.POSIXct(NA_character_, tz = tz, format = "%y-%m-%d %H:%M:%S"), 
+            Last.time = as.POSIXct(NA_character_, tz = tz, format = "%y-%m-%d %H:%M:%S"), 
+            Time.travelling = NA_character_, 
+            Time.in.array = NA_character_, 
+            Valid = NA,
+            stringsAsFactors = FALSE
+            )
+        } else {
+          recipient <- data.frame(
+            Array = NA_character_, 
+            Detections = NA_integer_, 
+            First.station = NA_character_, 
+            Last.station = NA_character_, 
+            First.time = as.POSIXct(NA_character_, tz = tz, format = "%y-%m-%d %H:%M:%S"), 
+            Last.time = as.POSIXct(NA_character_, tz = tz, format = "%y-%m-%d %H:%M:%S"), 
+            Time.travelling = NA_character_, 
+            Time.in.array = NA_character_, 
+            Average.speed.m.s = NA_real_,
+            Valid = NA,
+            stringsAsFactors = FALSE
+            )
+        }
+        z <- 1
+        array.shifts <- c(which(x$Array[-1] != x$Array[-length(x$Array)]), nrow(x))
+        time.shifts <- which(difftime(x$Timestamp[-1], x$Timestamp[-length(x$Timestamp)], units = "mins") > max.interval)
+        all.shifts <- sort(unique(c(array.shifts, time.shifts)))
+        capture <- lapply(seq_len(length(all.shifts)), function(j) {
+          if (j == 1)
+            start <- 1
+          else
+            start <- all.shifts[j - 1] + 1
+          stop <- all.shifts[j]
+          recipient[z, "Array"] <<- paste(x$Array[start])
+          recipient[z, "Detections"] <<- stop - start + 1
+          recipient[z, "First.station"] <<- paste(x$Standard.name[start])
+          recipient[z, "First.time"] <<- x$Timestamp[start]
+          recipient[z, "Last.station"] <<- paste(x$Standard.name[stop])
+          recipient[z, "Last.time"] <<- x$Timestamp[stop]
+          z <<- z + 1
+          counter <<- counter + stop - start + 1
+          if (i == tail(names(detections.list), 1)) 
+            counter <<- sum(unlist(lapply(detections.list, nrow)))
+          if (interactive())
+            setTxtProgressBar(pb, counter)
+          flush.console()
+        })
+        counter <<- counter
+
+        recipient$Valid <- TRUE
+        if (any(link <- recipient$Array == "Unknown")) {
+          recipient$Valid[recipient$Array == "Unknown"] <- FALSE
+          trigger.unknown <<- TRUE
+        }
+        
+        recipient <- data.table::as.data.table(recipient)
+        recipient <- movementTimes(movements = recipient, type = "array")
+        if (!invalid.dist)
+          recipient <- movementSpeeds(movements = recipient, 
+            speed.method = speed.method, dist.mat = dist.mat)
+        
+        attributes(recipient)$p.type <- "Auto"
+      } else {
+        recipient <- NULL
       }
-      
-      recipient <- data.table::as.data.table(recipient)
-      recipient <- movementTimes(movements = recipient, type = "array")
-      if (!invalid.dist)
-        recipient <- movementSpeeds(movements = recipient, 
-          speed.method = speed.method, dist.mat = dist.mat)
-      
-      attributes(recipient)$p.type <- "Auto"
       return(recipient)
     })
     names(movements) <- names(detections.list)
+    
+    # remove potentially empty movement sets
+    movements <- movements[sapply(movements, function(x) !is.null(x))]
+
     if (interactive())
       close(pb)
   }
@@ -117,7 +130,7 @@ groupMovements <- function(detections.list, bio, spatial, speed.method, max.inte
 #' 
 #' @keywords internal
 #' 
-simplifyMovements <- function(movements, fish, bio, speed.method, dist.mat, invalid.dist) {
+simplifyMovements <- function(movements, discard.first, fish, bio, speed.method, dist.mat, invalid.dist) {
   # NOTE: The NULL variables below are actually column names used by data.table.
   # This definition is just to prevent the package check from issuing a note due unknown variables.
   Valid <- NULL
@@ -127,8 +140,14 @@ simplifyMovements <- function(movements, fish, bio, speed.method, dist.mat, inva
     aux <- movementTimes(movements = simple.movements, type = "array")
     if (!invalid.dist)
         aux <- movementSpeeds(movements = aux, speed.method = speed.method, dist.mat = dist.mat)
-    output <- speedReleaseToFirst(fish = fish, bio = bio, movements = aux,
-     dist.mat = dist.mat, invalid.dist = invalid.dist, speed.method = speed.method)
+
+    if (is.null(discard.first)) {
+      output <- speedReleaseToFirst(fish = fish, bio = bio, movements = aux,
+        dist.mat = dist.mat, invalid.dist = invalid.dist, speed.method = speed.method)
+    } else {
+      output <- aux
+    }
+    
     return(output)
   } else {
     return(NULL)

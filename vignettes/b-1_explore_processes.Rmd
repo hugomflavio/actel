@@ -193,7 +193,7 @@ Warning: Fish R64K-1234 was detected 7 times at three or less stations of array 
 Since `inactive.error` was also set to three, this situation would trigger the possibility for user interaction:
 
 ````
-M: Opening valid movement table of fish R64K-1234 for inspection (inactiveness started on 2019-05-17):
+M: Opening valid movement table of fish R64K-1234 for inspection. Inactiveness started on event [#] (2019-05-17):
 
 [...]
 

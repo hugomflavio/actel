@@ -4,10 +4,22 @@
 \alias{simplifyMovements}
 \title{Removes invalid events}
 \usage{
-simplifyMovements(movements, fish, bio, speed.method, dist.mat, invalid.dist)
+simplifyMovements(
+  movements,
+  discard.first,
+  fish,
+  bio,
+  speed.method,
+  dist.mat,
+  invalid.dist
+)
 }
 \arguments{
 \item{movements}{A list of movements for each target tag, created by groupMovements.}
+
+\item{discard.first}{A threshold amount of time (in hours) that must pass after
+release for the respective detections to be valid. Set to 0 to discard only
+the release-to-first-detection calculations.}
 
 \item{bio}{A table with the tags and biometrics of the studied fish.}
 

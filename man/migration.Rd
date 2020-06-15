@@ -24,6 +24,7 @@ migration(
   report = FALSE,
   auto.open = TRUE,
   discard.orphans = FALSE,
+  discard.first = NULL,
   save.detections = FALSE,
   if.last.skip.section = TRUE,
   replicates = NULL,
@@ -113,6 +114,10 @@ function terminates.}
 \item{discard.orphans}{Logical: Should actel automatically discard
 detections that do not fall within receiver deployment periods, or that
 were recorded before the respective fish were released?}
+
+\item{discard.first}{A threshold amount of time (in hours) that must pass after
+release for the respective detections to be valid. Set to 0 to discard only
+the release-to-first-detection calculations.}
 
 \item{save.detections}{Logical: Should the processed detections be saved for
 future runs?}

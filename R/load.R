@@ -891,6 +891,8 @@ loadDetections <- function(start.time = NULL, stop.time = NULL, tz, force = FALS
   if (recompile)
     detections <- compileDetections(path = "detections", start.time = start.time, 
       stop.time = stop.time, tz = tz, save.detections = save.detections)
+
+  detections$Valid <- TRUE
   return(detections)
 }
 

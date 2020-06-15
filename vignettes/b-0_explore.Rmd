@@ -62,8 +62,8 @@ explore(tz, max.interval = 60, minimum.detections = 2, start.time = NULL, stop.t
   speed.method = c("last to first", "first to first"), speed.warning = NULL, 
   speed.error = NULL, jump.warning = 2, jump.error = 3, inactive.warning = NULL, 
   inactive.error = NULL, exclude.tags = NULL, override = NULL, report = FALSE, 
-  auto.open = TRUE, discard.orphans = FALSE, save.detections = FALSE, 
-  GUI = c("needed", "always", "never"))
+  auto.open = TRUE, discard.orphans = FALSE, discard.first = NULL, discard.orphans = FALSE, 
+  save.detections = FALSE, GUI = c("needed", "always", "never"))
 ```
 
 ### tz
@@ -246,6 +246,10 @@ When the `report` option is activated, `auto.open` comes into play. If `auto.ope
 ### discard.orphans
 
 This is a flow optimization argument. When actel finds detections outside of the receiver deployment periods, or that were recorded before their respective fish were released, by default, actel will ask the user what to do (discard those detections or stop the analysis so the user can check the data). However, you can tell actel to automatically discard any orphan detections by setting `discard.orphans` to TRUE.
+
+### discard.first
+
+This argument allows you to discard any detections that happen too soon after the fish was released. You may want to do this to ensure your results are not biased by post-handling disturbance effects. `discard.first` is set in hours, but if for example you want to set a time in days, you can always state that `discard.first = 24 * 7` (for seven days in this case).
 
 ### save.detections
 
