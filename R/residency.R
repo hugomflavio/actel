@@ -109,6 +109,13 @@ residency <- function(tz, sections, max.interval = 60, minimum.detections = 2,
   inactive.warning = NULL, inactive.error = NULL, exclude.tags = NULL, override = NULL, 
   report = FALSE, auto.open = TRUE, discard.orphans = FALSE, save.detections = FALSE, section.minimum = 2, 
   replicates = NULL, GUI = c("needed", "always", "never"), print.releases = TRUE) {
+
+  if (!is.null(options("actel.debug")[[1]]) && options("actel.debug")[[1]]) {
+    on.exit(message("Debug: Saving carbon copy to ", paste0(tempdir(), "/actel.debug.RData")))
+    on.exit(save(list = ls(), file = paste0(tempdir(), "/actel.debug.RData")), add = TRUE)
+    message("!!!--- Debug mode has been activated ---!!!")
+  } 
+
 # check argument quality
   if (is.null(tz) || is.na(match(tz, OlsonNames())))
     stop("'tz' could not be recognized as a timezone. Check available timezones with OlsonNames()\n", call. = FALSE)
