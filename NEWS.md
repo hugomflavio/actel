@@ -11,6 +11,7 @@ Enhancements:
   * the shapefiles of the study areas can now be water or land polygons. Use the new argument "time" in loadShape() to switch from land shapefiles (the default) to water shapefiles.
   * Paint groups consistently in circular plots.
   * Improved handling of long array lists in individual detection plots.
+  * Display event number on inactiveness checks.
   
 ## actel 1.0.0 (CRAN)
 

@@ -393,8 +393,8 @@ checkInactiveness <- function(movements, fish, detections.list,
       }
       # Trigger user interaction
       if (trigger.error) { # nocov start
-        appendTo("Screen", paste0("M: ", fish, " has been inactive for more than ", inactive.error," days (inactiveness started on ", as.Date(valid.moves$First.time[start_i]),")"))
-        aux <- tableInteraction(moves = valid.moves, fish = fish, trigger = the.warning, GUI = GUI)
+        appendTo("Screen", error.message <- paste0("M: ", fish, " has been inactive for more than ", inactive.error," days. Inactiveness started on event ", start_i, " (", as.Date(valid.moves$First.time[start_i]),")."))
+        aux <- tableInteraction(moves = valid.moves, fish = fish, trigger = paste0(the.warning, "\n", error.message), GUI = GUI)
         movements <- transferValidity(from = aux, to = movements)
       } # nocov end
       iteration <- iteration + 1
