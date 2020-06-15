@@ -25,8 +25,7 @@ the vignette pages directly through this link:
 \section{Example dataset}{
 If this is the first time you are using actel, you can try running it on an
 example dataset using the \code{\link{exampleWorkspace}} function. This function
-creates a new folder in your working directory (named 'exampleWorkspace'),
-and creates example files following the structure described in the package
+deploys a set of example files following the structure described in the package
 vignettes. Namely:
 \itemize{
 \item biometrics.csv
@@ -36,11 +35,22 @@ vignettes. Namely:
 }
 
 Once the example dataset is created, \code{\link{exampleWorkspace}} also provides
-you with an example code to run an \code{\link{explore}} analysis:
+you with example code to run an \code{\link{explore}} analysis.
 
-In this example dataset, you will have to intervene twice. In both cases,
-actel will give you a suggestion, which you can easily follow by answering
-'a' to both questions.
+Note that you can also run the \code{\link{migration}} and \code{\link{residency}}
+analyses on the example dataset, by adding the argument
+\code{sections = c('River', 'Fjord', 'Sea')} to the command provided for the
+explore function.
+
+E.g.:
+
+\code{results <- migration(tz = 'Europe/Copenhagen', sections = c('River', 'Fjord', 'Sea'), report = TRUE)}
+
+or
+
+\code{results <- residency(tz = 'Europe/Copenhagen', sections = c('River', 'Fjord', 'Sea'), report = TRUE)}
+
+Note: Running these lines with \code{report = TRUE} will open an analysis report on your web browser.
 }
 
 \section{Main functions}{
