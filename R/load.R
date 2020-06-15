@@ -1203,6 +1203,7 @@ createUniqueSerials <- function(input) {
 #' 
 splitDetections <- function(detections, bio, exclude.tags = NULL, silent = FALSE) {
   appendTo("debug", "Running splitDetections.")
+  detections$Transmitter <- droplevels(detections$Transmitter) # failsafe in case all detections for a transmitter were previously excluded
   my.list <- split(detections, detections$Transmitter)
   my.list <- excludeTags(input = my.list, exclude.tags = exclude.tags)
   

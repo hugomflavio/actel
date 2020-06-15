@@ -4,6 +4,9 @@ Find out the main highlights of each update.
 
 ## Development
 
+Fixes:
+  * Prevent crash if all detections for a given stray tag were removed during detection quality checks.
+
 Enhancements:
   * the shapefiles of the study areas can now be water or land polygons. Use the new argument "time" in loadShape() to switch from land shapefiles (the default) to water shapefiles.
   * Paint groups consistently in circular plots.
