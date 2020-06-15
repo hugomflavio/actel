@@ -718,7 +718,7 @@ printIndividuals <- function(detections.list, bio, status.df = NULL, tz,
     # Trim graphic
     p <- p + ggplot2::xlim(first.time, last.time)
     # Paint
-    if (length(levels(detections$Array)) <= 8) {
+    if (length(levels(PlotData$Array)) <= 8) {
       the.colours <- as.vector(cbPalette)[c(1:(length(levels(PlotData$Array)) - 1), 8)]
     } else {
       the.colours <- c(gg_colour_hue(length(levels(PlotData$Array)) - 1), "#999999")
