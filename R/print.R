@@ -685,7 +685,7 @@ printIndividuals <- function(detections.list, bio, status.df = NULL, tz,
         legend.key = ggplot2::element_rect(fill = "white", colour = "white"),
         )
       default.cols <- FALSE
-    } # nocov end
+    } 
     if (add.movements && attributes(movements[[fish]])$p.type == "Manual") {
        p <- p + ggplot2::theme(
         panel.background = ggplot2::element_rect(fill = "white"),
@@ -695,7 +695,7 @@ printIndividuals <- function(detections.list, bio, status.df = NULL, tz,
         legend.key = ggplot2::element_rect(fill = "white", colour = "white"),
         )
       default.cols <- FALSE
-    } 
+    } # nocov end
     if (default.cols) {
       p <- p + ggplot2::theme_bw()
     }
@@ -718,16 +718,10 @@ printIndividuals <- function(detections.list, bio, status.df = NULL, tz,
     # Trim graphic
     p <- p + ggplot2::xlim(first.time, last.time)
     # Paint
-    if (length(levels(PlotData$Array)) <= 7 | (length(levels(PlotData$Array)) == 8 & any(levels(PlotData$Array) == "Invalid"))) {
-      if (any(levels(PlotData$Array) == "Invalid"))
-        the.colours <- as.vector(cbPalette)[c(1:(length(levels(PlotData$Array)) - 1), 8)]
-      else
-        the.colours <- as.vector(cbPalette)[1:length(levels(PlotData$Array))]
+    if (length(levels(detections$Array)) <= 8) {
+      the.colours <- as.vector(cbPalette)[c(1:(length(levels(PlotData$Array)) - 1), 8)]
     } else {
-      if (any(levels(PlotData$Array) == "Invalid"))
-        the.colours <- c(gg_colour_hue(length(levels(PlotData$Array)) - 1), "#999999")
-      else
-        the.colours <- gg_colour_hue(length(levels(PlotData$Array)))
+      the.colours <- c(gg_colour_hue(length(levels(PlotData$Array)) - 1), "#999999")
     }
     p <- p + ggplot2::scale_color_manual(values = the.colours, drop = FALSE)
     # Plot points

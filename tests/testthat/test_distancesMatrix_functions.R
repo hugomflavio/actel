@@ -46,7 +46,7 @@ if (any(missing.packages)) {
 
 		test_that("loadShape complains if coord.y or coord.x are not valid column names", {
 			expect_warning(loadShape(path = tests.home, shape = "aux_transitionLayer.shp", size = 10,
-					coord.x = "test", coord.y = "y.32632"),
+					coord.x = "test", coord.y = "y.32632", type = "water"),
 			"Could not find column 'test' in the spatial data frame. Skipping range check.", fixed = TRUE)	
 
 			expect_warning(loadShape(path = tests.home, shape = "aux_transitionLayer.shp", size = 10,
@@ -76,6 +76,9 @@ if (any(missing.packages)) {
 		})
 
 		test_that("loadShape stops if shape is not present or is not .shp", {
+			expect_error(loadShape(path = "test", shape = "test.shp", size = 10, buffer = 100),
+			"Could not find file 'test/test.shp'.", fixed = TRUE)
+
 			expect_error(loadShape(shape = "test.shp", size = 10, buffer = 100),
 			"Could not find file 'test.shp'.", fixed = TRUE)
 
@@ -205,6 +208,10 @@ for(i in 2:ncol(dist.mat)) {
 }
 
 test_that("completeMatrix works as expected", {
+	expect_error(completeMatrix("a"), "The input must be a matrix", fixed = TRUE)
+
+	expect_error(completeMatrix(matrix(ncol = 2, nrow = 3)), "The matrix does not contain the same number of columns and rows. Aborting.", fixed = TRUE)
+
 	output <- completeMatrix(dist.mat)
 	for(i in 2:ncol(output)) {
 		for(j in 1:(i - 1)) {

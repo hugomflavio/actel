@@ -599,7 +599,7 @@ getTimes <- function(input, locations = NULL, move.type = c("array", "section"),
 #' @export
 #' 
 timesToCircular <- function(x, by.group = FALSE) {
-  if (!all(sapply(x[, 3:ncol(x)], function(i) any(class(i) == "POSIXt"))))
+  if (is.null(dim(x)) | ncol(x) < 3 | !all(sapply(x[, 3:ncol(x)], function(i) any(class(i) == "POSIXt"))))
     stop("timesToCircular only works on data frames where the second column is a grouping structure and columns three and onwards are timestamps.", call. = FALSE)
 
   output <- list()
@@ -1113,7 +1113,7 @@ will artificially add water space around the shape file.", call. = FALSE)
     rownames(dist.mat) <- outputRows
   if (col.rename)
     colnames(dist.mat) <- outputCols
-  if (interactive () & actel) {
+  if (interactive () & actel) { # nocov start
     decision <- readline("Would you like to save an actel-compatible distances matrix as 'distances.csv' in the current work directory?(y/N) ")
     if (decision == "y" | decision == "Y") {
       if (file.exists('distances.csv')) {
@@ -1123,7 +1123,7 @@ will artificially add water space around the shape file.", call. = FALSE)
       if (decision == "y" | decision == "Y")
         write.csv(round(dist.mat, 0), "distances.csv", row.names = TRUE)
     }
-  }
+  } # nocov end
   return(round(dist.mat, 0))
 }
 

@@ -48,7 +48,7 @@ plotMoves <- function(input, tag, title, xlab, ylab, col, array.alias, frame.war
     stop("Could not recognise the input as an actel results object.", call. = FALSE)
 
   if (is.na(match(tag, names(input$detections))))
-    stop("Could not find tag ", tag, " in the input.", call. = FALSE)
+    stop("Could not find tag '", tag, "' in the input.", call. = FALSE)
 
   # start preparing inputs
   tz <- input$rsp.info$tz
@@ -111,13 +111,17 @@ plotMoves <- function(input, tag, title, xlab, ylab, col, array.alias, frame.war
   }
 
   # movements lines
-  all.moves.line <- data.frame(
-    Station = as.vector(t(movements[, c("First.station", "Last.station")])),
-    Timestamp = as.vector(t(movements[, c("First.time", "Last.time")]))
-  )
-
-  all.moves.line$Station <- factor(all.moves.line$Station, levels = levels(detections$Standard.name))
-  all.moves.line$Timestamp <- as.POSIXct(all.moves.line$Timestamp, tz = tz)
+  if (!is.null(movements)) {
+    add.movements <- TRUE
+    all.moves.line <- data.frame(
+      Station = as.vector(t(movements[, c("First.station", "Last.station")])),
+      Timestamp = as.vector(t(movements[, c("First.time", "Last.time")]))
+    )
+    all.moves.line$Station <- factor(all.moves.line$Station, levels = levels(detections$Standard.name))
+    all.moves.line$Timestamp <- as.POSIXct(all.moves.line$Timestamp, tz = tz)
+  } else {
+    add.movements <- FALSE
+  }
   
   add.valid.movements <- FALSE
   if (!is.null(valid.movements)) {
@@ -148,7 +152,7 @@ plotMoves <- function(input, tag, title, xlab, ylab, col, array.alias, frame.war
 
   # Choose background
   default.cols <- TRUE
-  if (frame.warning & attributes(movements)$p.type == "Overridden") { # nocov start
+  if ((frame.warning & add.movements) && attributes(movements)$p.type == "Overridden") {
     p <- p + ggplot2::theme(
       panel.background = ggplot2::element_rect(fill = "white"),
       panel.border = ggplot2::element_rect(fill = NA, colour = "#ef3b32" , size = 2),
@@ -157,8 +161,8 @@ plotMoves <- function(input, tag, title, xlab, ylab, col, array.alias, frame.war
       legend.key = ggplot2::element_rect(fill = "white", colour = "white"),
       )
     default.cols <- FALSE
-  } # nocov end
-  if (frame.warning & attributes(movements)$p.type == "Manual") {
+  }
+  if ((frame.warning & add.movements) && attributes(movements)$p.type == "Manual") {
      p <- p + ggplot2::theme(
       panel.background = ggplot2::element_rect(fill = "white"),
       panel.border = ggplot2::element_rect(fill = NA, colour = "#ffd016" , size = 2),
@@ -183,10 +187,10 @@ plotMoves <- function(input, tag, title, xlab, ylab, col, array.alias, frame.war
     rm(l, relevant.line)
   }
   # Plot movements
-  p <- p + ggplot2::geom_path(data = all.moves.line, ggplot2::aes(x = Timestamp, y = Station, group = 1), col = "grey40", linetype = "dashed")
-  if (add.valid.movements) {
+  if (add.movements)
+    p <- p + ggplot2::geom_path(data = all.moves.line, ggplot2::aes(x = Timestamp, y = Station, group = 1), col = "grey40", linetype = "dashed")
+  if (add.valid.movements)
     p <- p + ggplot2::geom_path(data = simple.moves.line, ggplot2::aes(x = Timestamp, y = Station, group = 1), col = "grey40")
-  }
   # Trim graphic
   p <- p + ggplot2::xlim(first.time, last.time)
   # Paint

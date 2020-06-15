@@ -21,6 +21,21 @@ moves <- groupMovements(detections.list = detections.list[1:2], bio = bio, spati
 
 aux <- list(valid.movements = moves, spatial = spatial, rsp.info = list(bio = bio, analysis.type = "explore"))
 
+test_that("getTimes's failsafes kick in if necessary", {
+  expect_error(getTimes("a"), "Could not recognise the input as an actel results object.", fixed = TRUE)
+  
+  expect_error(getTimes(list("a")), "Could not recognise the input as an actel results object.", fixed = TRUE)
+
+  expect_error(getTimes(aux, locations = "test"), "Array 'test' is not part of this study's arrays.", fixed = TRUE)
+
+  expect_error(getTimes(example.results, move.type = "section", locations = "test"), 
+    "Section 'test' is not part of this study's sections.", fixed = TRUE)
+
+  expect_error(getTimes(aux, move.type = "section", locations = "test"), 
+    "Section times are not calculated for analyses of type 'explore'.", fixed = TRUE)
+})
+
+
 test_that("getTimes operates correctly under all options.", {
   times <- getTimes(input = aux, move.type = "array", event.type = "arrival", n.events = "all")
   expect_equal(colnames(times), as.vector(c("Transmitter", "Group", unlist(spatial$array.order)[-1])))
@@ -63,6 +78,8 @@ test_that("getTimes operates correctly under all options.", {
   expect_equal(times$River1[2], moves[[2]]$Last.time[1])
   expect_equal(times$Fjord1[2], moves[[2]]$Last.time[7])
  	expect_false(any(is.na(times)))  
+
+  getTimes(input = aux, location = "River1")
 })
 
 setwd("..")

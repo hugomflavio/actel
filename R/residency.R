@@ -111,11 +111,11 @@ residency <- function(tz, sections, max.interval = 60, minimum.detections = 2,
   save.detections = FALSE, section.minimum = 2, 
   replicates = NULL, GUI = c("needed", "always", "never"), print.releases = TRUE) {
 
-  if (!is.null(options("actel.debug")[[1]]) && options("actel.debug")[[1]]) {
+  if (!is.null(options("actel.debug")[[1]]) && options("actel.debug")[[1]]) { # nocov start
     on.exit(message("Debug: Saving carbon copy to ", paste0(tempdir(), "/actel.debug.RData")))
     on.exit(save(list = ls(), file = paste0(tempdir(), "/actel.debug.RData")), add = TRUE)
     message("!!!--- Debug mode has been activated ---!!!")
-  } 
+  } # nocov end
 
 # check argument quality
   if (is.null(tz) || is.na(match(tz, OlsonNames())))
