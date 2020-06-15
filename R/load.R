@@ -1413,7 +1413,7 @@ createStandards <- function(detections, spatial, deployments, discard.orphans = 
           }
           if (decision == "c" | decision == "C")
             discard.orphans <- TRUE
-        } else { # nocov end
+        } else {
           appendTo(c("Screen", "Report"), paste0("Error: ", sum(the.error), " detections for receiver ", names(deployments)[i], " do not fall within deployment periods. Discarding orphan detections."))
           rows.to.remove <- detections[receiver.link, which = TRUE][the.error]
           detections <- detections[-rows.to.remove]
