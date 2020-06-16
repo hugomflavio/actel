@@ -472,17 +472,15 @@ checkSMovesN <- function(secmoves, fish, section.minimum, GUI) {
 #' @keywords internal
 #' 
 checkLinearity <- function(secmoves, fish, sections, arrays, GUI) {
-  hide <- c("First.station", "Last.station")
-  vsm <- secmoves[secmoves$Valid, !hide, with = FALSE]
-  back.check <- match(vsm$Section, sections)
-  turn.check <- rev(match(sections, rev(vsm$Section))) # captures the last event of each section. Note, the values count from the END of the events
+  back.check <- match(secmoves$Section, sections)
+  turn.check <- rev(match(sections, rev(secmoves$Section))) # captures the last event of each section. Note, the values count from the END of the events
   if (is.unsorted(back.check)) {
       if (is.unsorted(turn.check, na.rm = TRUE))
         appendTo(c("Screen", "Report", "Warning"), the.warning <- paste0("Inter-section backwards movements were detected for fish ", fish, " and the last events are not ordered!"))
       else
         appendTo(c("Screen", "Report", "Warning"), the.warning <- paste0("Inter-section backwards movements were detected for fish ", fish, "."))
     if (interactive()) { # nocov start
-      aux <- tableInteraction(moves = vsm, fish = fish, trigger = the.warning, GUI = GUI, force = FALSE)
+      aux <- tableInteraction(moves = secmoves, fish = fish, trigger = the.warning, GUI = GUI, force = FALSE)
       secmoves <- transferValidity(from = aux, to = secmoves)
     } # nocov end
   }

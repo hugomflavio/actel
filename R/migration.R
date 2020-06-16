@@ -410,11 +410,15 @@ migration <- function(tz, sections, success.arrays = NULL, max.interval = 60, mi
     fish <- names(movements)[i]
     appendTo("debug", paste0("debug: Compiling section movements for fish ", fish,"."))
     aux <- sectionMovements(movements = movements[[i]], sections = sections, invalid.dist = invalid.dist)
-    output <- checkLinearity(secmoves = aux, fish = fish, sections = sections, arrays = arrays, GUI = GUI)
-    return(output)
+    if (!is.null(aux)) {
+      output <- checkLinearity(secmoves = aux, fish = fish, sections = sections, arrays = arrays, GUI = GUI)
+      return(output)
+    } else {
+      return(NULL)
+    }
   })
   names(section.movements) <- names(movements)
-
+  section.movements <- section.movements[!sapply(section.movements, is.null)]
   # Update array movements based on section movements validity
   movements <- updateValidity(arrmoves = movements, secmoves = section.movements)
 
@@ -426,7 +430,7 @@ migration <- function(tz, sections, success.arrays = NULL, max.interval = 60, mi
       speed.method = speed.method, dist.mat = dist.mat, invalid.dist = invalid.dist)
   })
   names(valid.movements) <- names(movements)
-  valid.movements <- valid.movements[!unlist(lapply(valid.movements, is.null))]
+  valid.movements <- valid.movements[!sapply(valid.movements, is.null)]
 
   section.movements <- lapply(seq_along(valid.movements), function(i) {
     fish <- names(valid.movements)[i]
