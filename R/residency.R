@@ -1285,7 +1285,7 @@ getResidency <- function(movements, spatial){
 dailyRatios <- function(res) {
   counter <- 0
   if (interactive())
-    pb <- txtProgressBar(min = 0, max = length(res), style = 3, width = 60) # nocov start
+    pb <- txtProgressBar(min = 0, max = length(res), style = 3, width = 60) # nocov
   output <- lapply(res, function(x) {
     counter <<- counter + 1
     # cat("\n", counter, "\n")
