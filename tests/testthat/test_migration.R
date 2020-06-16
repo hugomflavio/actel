@@ -292,6 +292,9 @@ test_that("migration is able to run speed and inactiveness checks.", {
 	  'section.overview', 'spatial', 'status.df', 'times', 'valid.detections', 'valid.movements')))))
 })
 
+# Throw in a fake report just to test the number appending code
+write(1, file = "actel_migration_report.html")
+
 test_that("migration can handle multiple expected first arrays", {
 	skip_on_cran()
 	xspatial <- example.spatial
@@ -301,6 +304,10 @@ test_that("migration can handle multiple expected first arrays", {
 		tz = 'Europe/Copenhagen', report = TRUE, success.arrays = "Sea1", GUI = "never")),
 		"Multiple possible first arrays detected for release site 'RS1'.", fixed = TRUE)
 })
+
+# Throw in a fake results object just to test the number appending code
+a = 1
+save(a, file = "actel_migration_results.RData")
 
 test_that("migration can handle multi-sensor data", {
 	skip_on_cran()
@@ -317,6 +324,7 @@ test_that("migration can handle multi-sensor data", {
 	xbio$Signal[1] <- "4453|4454"
 	write.csv(xbio, "biometrics.csv", row.names = FALSE)
 	output <- suppressWarnings(migration(sections = c("River", "Fjord", "Sea"), tz = 'Europe/Copenhagen', GUI = "never"))
+	write.csv(example.biometrics, "biometrics.csv", row.names = FALSE)
 })
 
 setwd("..")

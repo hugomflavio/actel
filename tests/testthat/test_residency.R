@@ -237,6 +237,9 @@ test_that("residency can handle multiple release sites.", {
 	write.csv(example.spatial, "spatial.csv", row.names = FALSE)
 })
 
+# Throw in a fake report just to test the number appending code
+write(1, file = "actel_residency_report.html")
+
 test_that("residency can handle multiple expected first arrays", {
 	skip_on_cran()
 	xspatial <- example.spatial
@@ -267,6 +270,10 @@ test_that("residency can handle multi-sensor data", {
 })
 
 write.csv(example.distances, "distances.csv")
+
+# Throw in a fake results object just to test the number appending code
+a = 1
+save(a, file = "actel_residency_results.RData")
 
 test_that("the discard.first argument is working properly", {
 	expect_message(output <- suppressWarnings(residency(sections = c("River", "Fjord", "Sea"), tz = 'Europe/Copenhagen', GUI = "never", jump.warning = Inf, jump.error = Inf, discard.first = 24 * 30)),

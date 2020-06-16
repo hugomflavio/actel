@@ -184,8 +184,15 @@ test_that("explore can handle multi-sensor data", {
 
 write.csv(example.distances, "distances.csv")
 
+# Throw in a fake results object just to test the number appending code
+a = 1
+save(a, file = "actel_explore_results.RData")
+# Throw in a fake report just to test the number appending code
+write(1, file = "actel_explore_report.html")
+
 test_that("the discard.first argument is working properly", {
-	expect_message(output <- suppressWarnings(explore(tz = 'Europe/Copenhagen', GUI = "never", jump.warning = Inf, jump.error = Inf, discard.first = 24 * 30)),
+	expect_message(output <- suppressWarnings(explore(tz = 'Europe/Copenhagen', GUI = "never", jump.warning = Inf, 
+			jump.error = Inf, discard.first = 24 * 30, report = TRUE)),
 		"M: 12918 detection(s) were invalidated because they were recorded before the time set in 'discard.first' had passed.", fixed = TRUE)
 	expect_true(is.na(output$valid.movements[[1]]$Time.travelling[1]))
 	expect_true(is.na(output$valid.movements[[1]]$Average.speed.m.s[1]))

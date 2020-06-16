@@ -185,10 +185,19 @@ printDot <- function(dot, sections = NULL, spatial, print.releases) {
     id = 1:length(unique(unlist(dot[, c(1, 3)]))),
     label = unique(unlist(dot[, c(1, 3)])),
     stringsAsFactors = FALSE)
-  if (!is.null(sections) && length(sections) <= length(cbPalette)) {
-    diagram_nodes$fillcolor <- rep(NA_character_, nrow(diagram_nodes))
-    for (i in 1:length(sections)) {
-       diagram_nodes$fillcolor[grepl(sections[i], diagram_nodes$label)] <- cbPalette[i]
+
+  if (!is.null(sections)) {
+    if (length(sections) <= length(cbPalette)) {
+      diagram_nodes$fillcolor <- rep(NA_character_, nrow(diagram_nodes))
+      for (i in 1:length(sections)) {
+         diagram_nodes$fillcolor[grepl(sections[i], diagram_nodes$label)] <- cbPalette[i]
+      }
+    } else {
+      diagram_nodes$fillcolor <- rep(NA_character_, nrow(diagram_nodes))
+      new.fill <- gg_colour_hue(length(sections))
+      for (i in 1:length(sections)) {
+         diagram_nodes$fillcolor[grepl(sections[i], diagram_nodes$label)] <- new.fill[i]
+      }
     }
   } else {
     diagram_nodes$fillcolor <- rep("#56B4E9", nrow(diagram_nodes))
@@ -310,18 +319,14 @@ printBiometrics <- function(bio) {
   appendTo("debug", "Starting printBiometrics.")
   biometric.fragment <- ""
   if (any(C <- grepl("Length", colnames(bio)) | grepl("Weight", colnames(bio)) | grepl("Mass", colnames(bio)) | grepl("Size", colnames(bio)))) {
-    if (sum(C) > 1) {
-      graphic.width <- paste0(90 / sum(C), "%")
-    } else {
-      graphic.width <- 0.45
-      graphic.width <- paste0(45, "%")
-    }
+    graphic.width <- 0.45
+    graphic.width <- paste0(45, "%")
     counter <- 1
     for (i in colnames(bio)[C]) {
       appendTo("debug", paste0("Debug: Creating graphic '", gsub("[.]", "_", i), "_boxplot.png'."))
       p <- ggplot2::ggplot(bio, ggplot2::aes(x = as.factor(Group), y = bio[, i]))
-      p <- p + ggplot2::stat_boxplot(geom = "errorbar", na.rm = T)
-      p <- p + ggplot2::geom_boxplot(na.rm = T)
+      p <- p + ggplot2::stat_boxplot(geom = "errorbar", na.rm = TRUE)
+      p <- p + ggplot2::geom_boxplot(na.rm = TRUE)
       p <- p + ggplot2::theme_bw()
       p <- p + ggplot2::theme(panel.grid.minor.x = ggplot2::element_blank(), panel.grid.major.x = ggplot2::element_blank())
       p <- p + ggplot2::labs(x = "", y = i)
@@ -331,6 +336,7 @@ printBiometrics <- function(bio) {
         biometric.fragment <- paste0(biometric.fragment, "![](", tempdir(), "/", gsub("[.]", "_", i), "_boxplot.png){ width=", graphic.width, " }\n")
       else
         biometric.fragment <- paste0(biometric.fragment, "![](", tempdir(), "/", gsub("[.]", "_", i), "_boxplot.png){ width=", graphic.width, " }")
+      counter <- counter + 1
     }
   }
   appendTo("debug", "Terminating printBiometrics.")
@@ -619,7 +625,7 @@ printIndividuals <- function(detections.list, bio, status.df = NULL, tz,
   y.order <- spatial$stations$Standard.name[link]
 
   if (interactive())
-    pb <- txtProgressBar(min = 0, max = length(detections.list), style = 3, width = 60)
+    pb <- txtProgressBar(min = 0, max = length(detections.list), style = 3, width = 60) # nocov
   counter <- 0
   individual.plots <- ""
   

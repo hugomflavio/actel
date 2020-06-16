@@ -492,10 +492,10 @@ residency <- function(tz, sections, max.interval = 60, minimum.detections = 2,
     rm(continue, index)
   } 
 
-  if (interactive()) {
+  if (interactive()) { # nocov start
     decision <- readline(paste0("Would you like to save a copy of the results to ", resultsname, "?(y/N) "))
     appendTo("UD", decision)
-  } else {
+  } else { # nocov end
     decision <- "n"
   }
 
@@ -606,16 +606,16 @@ residency <- function(tz, sections, max.interval = 60, minimum.detections = 2,
 
   jobname <- paste0(gsub(" |:", ".", as.character(Sys.time())), ".actel.log.txt")
 
-  if (interactive() & !report) {
+  if (interactive() & !report) { # nocov start
     decision <- readline(paste0("Would you like to save a copy of the analysis log to ", jobname, "?(y/N) "))
     appendTo("UD", decision)
-  } else {
+  } else { # nocov end
     decision <- "n"
   }
-  if (decision == "y" | decision == "Y") {
+  if (decision == "y" | decision == "Y") { # nocov start
     appendTo("Screen", paste0("M: Saving job log as '",jobname, "'."))
     file.copy(paste(tempdir(), "temp_log.txt", sep = "/"), jobname)
-  }
+  } # nocov end
 
   appendTo("Screen", "M: Process finished successfully.")
 
@@ -1285,7 +1285,7 @@ getResidency <- function(movements, spatial){
 dailyRatios <- function(res) {
   counter <- 0
   if (interactive())
-    pb <- txtProgressBar(min = 0, max = length(res), style = 3, width = 60)
+    pb <- txtProgressBar(min = 0, max = length(res), style = 3, width = 60) # nocov start
   output <- lapply(res, function(x) {
     counter <<- counter + 1
     # cat("\n", counter, "\n")
@@ -1296,12 +1296,12 @@ dailyRatios <- function(res) {
       findSecondsPerSection(res = x, day = d, the.range = range(dayrange))
     })
     if (interactive())
-      setTxtProgressBar(pb, counter)
+      setTxtProgressBar(pb, counter) # nocov start
     names(days.list) <- round.POSIXt(dayrange, units = "days")
     dailyRatiosIndOut(input = days.list)
   })
   if (interactive())
-    close(pb)
+    close(pb) # nocov end
   return(output)
 }
 
