@@ -872,7 +872,7 @@ checkDetectionsBeforeRelease <- function(input, bio, discard.orphans = FALSE){
 #' 
 checkNoDetections <- function(input, bio){
   appendTo("debug", "Running noDetectionsCheck.")  
-  tag.list <- stripCodeSpaces(names(input))
+  tag.list <- extractSignals(names(input))
   signal_check <- suppressWarnings(as.numeric(unlist(strsplit(as.character(bio$Signal), "|", fixed = TRUE))))
   link <- match(signal_check, tag.list)
   if (all(is.na(link))) {
@@ -894,7 +894,7 @@ checkNoDetections <- function(input, bio){
 #' 
 checkDupSignals <- function(input, bio){
   appendTo("debug", "Running dupSignalsCheck.")
-  tag.list <- stripCodeSpaces(names(input))
+  tag.list <- extractSignals(names(input))
   signal_check <- suppressWarnings(as.numeric(unlist(strsplit(as.character(bio$Signal), "|", fixed = TRUE))))  
   failsafe <- match(tag.list, signal_check)
   if (any(table(failsafe) > 1)) {

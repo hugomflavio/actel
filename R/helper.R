@@ -72,6 +72,7 @@ dataToList <- function(source){
   return(as.list(e))
 }
 
+
 #' Remove Code Spaces from transmitter names
 #' 
 #' @param input A vector of transmitter names
@@ -88,7 +89,46 @@ dataToList <- function(source){
 #' @export
 #' 
 stripCodeSpaces <- function(input) {
+  .Deprecated("extractSignals")
+  extractSignals(input)
+}
+
+#' Extract signals from transmitter names
+#' 
+#' @param input A vector of transmitter names
+#' 
+#' @examples
+#' # create dummy string
+#' x <- c("R64K-1234", "A69-1303-12")
+#' 
+#' # run extractSignals
+#' extractSignals(x)
+#' 
+#' @return A vector of transmitter signals
+#' 
+#' @export
+#' 
+extractSignals <- function(input) {
   unlist(lapply(input, function(x) tail(unlist(strsplit(x, "-")), 1)))
+}
+
+#' Extract Code Spaces from transmitter names
+#' 
+#' @param input A vector of transmitter names
+#' 
+#' @examples
+#' # create dummy string
+#' x <- c("R64K-1234", "A69-1303-12")
+#' 
+#' # run stripCodeSpaces
+#' stripCodeSpaces(x)
+#' 
+#' @return A vector of transmitter signals
+#' 
+#' @export
+#' 
+extractCodeSpaces <- function(input) {
+  sapply(input, function(x) sub("-[0-9]*$", "", x))
 }
 
 
