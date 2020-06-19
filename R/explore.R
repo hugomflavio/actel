@@ -119,11 +119,13 @@
 #' 
 #' @export
 #' 
-explore <- function(tz, max.interval = 60, minimum.detections = 2, start.time = NULL, stop.time = NULL, 
+explore <- function(tz = NULL, datapack = NULL, max.interval = 60, minimum.detections = 2, start.time = NULL, stop.time = NULL, 
   speed.method = c("last to first", "last to last"), speed.warning = NULL, speed.error = NULL, 
   jump.warning = 2, jump.error = 3, inactive.warning = NULL, inactive.error = NULL, 
   exclude.tags = NULL, override = NULL, report = FALSE, auto.open = TRUE, discard.orphans = FALSE, discard.first = NULL,
   save.detections = FALSE, GUI = c("needed", "always", "never"), print.releases = TRUE) {
+
+  deleteHelpers()
 
   if (!is.null(options("actel.debug")[[1]]) && options("actel.debug")[[1]]) { # nocov start
     on.exit(message("Debug: Saving carbon copy to ", paste0(tempdir(), "/actel.debug.RData")))
@@ -132,6 +134,10 @@ explore <- function(tz, max.interval = 60, minimum.detections = 2, start.time = 
   } # nocov end
 
 # check arguments quality
+  if (!missing(datapack))
+    checkToken(token = attributes(datapack)$actel.token, 
+      timestamp = attributes(datapack)$timestamp)
+
   speed.method <- match.arg(speed.method)
 
   aux <- checkArguments(dp = datapack,
@@ -171,7 +177,8 @@ explore <- function(tz, max.interval = 60, minimum.detections = 2, start.time = 
 # --------------------------------------
 
 # Store function call
-  the.function.call <- paste0("explore(tz = ", ifelse(is.null(tz), "NULL", paste0("'", tz, "'")), 
+  the.function.call <- paste0("explore(tz = ", ifelse(is.null(tz), "NULL", paste0("'", tz, "'")),
+      ", datapack = ", ifelse(is.null(datapack), "NULL", deparse(substitute(datapack))),
       ", max.interval = ", max.interval,
       ", minimum.detections = ", minimum.detections,
       ", start.time = ", ifelse(is.null(start.time), "NULL", paste0("'", start.time, "'")),
@@ -203,9 +210,17 @@ explore <- function(tz, max.interval = 60, minimum.detections = 2, start.time = 
 # -----------------------------------
 
 # Load, structure and check the inputs
-study.data <- loadStudyData(tz = tz, override = override, save.detections = save.detections,
-                            start.time = start.time, stop.time = stop.time, discard.orphans = discard.orphans,
-                            sections = NULL, exclude.tags = exclude.tags)
+if (missing(datapack)) {
+  study.data <- loadStudyData(tz = tz, override = override, save.detections = save.detections,
+                              start.time = start.time, stop.time = stop.time, discard.orphans = discard.orphans,
+                              sections = NULL, exclude.tags = exclude.tags)
+} else {
+  appendTo(c("Screen", "Report"), paste0("M: Running analysis on preloaded data (compiled on ", attributes(datapack)$timestamp, ")."))
+  study.data <- datapack
+  tz <- study.data$tz
+  disregard.parallels <- study.data$disregard.parallels
+}
+
 bio <- study.data$bio
 sections <- study.data$sections
 deployments <- study.data$deployments
