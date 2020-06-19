@@ -132,87 +132,35 @@ explore <- function(tz, max.interval = 60, minimum.detections = 2, start.time = 
   } # nocov end
 
 # check arguments quality
-  if (is.null(tz) || is.na(match(tz, OlsonNames())))
-    stop("'tz' could not be recognized as a timezone. Check available timezones with OlsonNames()\n", call. = FALSE)
-  if (!is.numeric(minimum.detections))
-    stop("'minimum.detections' must be numeric.\n", call. = FALSE)
-  if (minimum.detections <= 0)
-    stop("'minimum.detections' must be positive.\n", call. = FALSE)
-  if (!is.numeric(max.interval))
-    stop("'max.interval' must be numeric.\n", call. = FALSE)
-  if (max.interval <= 0)
-    stop("'max.interval' must be positive.\n", call. = FALSE)
-
-  if (!is.character(speed.method))
-    stop("'speed.method' should be one of 'last to first' or 'last to last'.\n", call. = FALSE)
   speed.method <- match.arg(speed.method)
 
-  if (!is.null(speed.warning) && !is.numeric(speed.warning))
-    stop("'speed.warning' must be numeric.\n", call. = FALSE)
-  if (!is.null(speed.warning) && speed.warning <= 0)
-    stop("'speed.warning' must be positive.\n", call. = FALSE) 
+  aux <- checkArguments(dp = datapack,
+    tz = tz, 
+    minimum.detections = minimum.detections, 
+    max.interval = max.interval,
+    speed.method = speed.method,
+    speed.warning = speed.warning,
+    speed.error = speed.error,
+    start.time = start.time,
+    stop.time = stop.time,
+    report = report,
+    auto.open = auto.open,
+    save.detections = save.detections,
+    jump.warning = jump.warning,
+    jump.error = jump.error,
+    inactive.warning = inactive.warning,
+    inactive.error = inactive.error,
+    exclude.tags = exclude.tags,
+    override = override,
+    print.releases = print.releases)
 
-  if (!is.null(speed.error) && !is.numeric(speed.error))
-    stop("'speed.error' must be numeric.\n", call. = FALSE)    
-  if (!is.null(speed.error) && speed.error <= 0)
-    stop("'speed.error' must be positive.\n", call. = FALSE)
-
-  if (!is.null(speed.error) & is.null(speed.warning))
-    speed.warning <- speed.error
-  if (!is.null(speed.error) && speed.error < speed.warning)
-    stop("'speed.error' must not be lower than 'speed.warning'.\n", call. = FALSE)
-  if (!is.null(speed.warning) & is.null(speed.error))
-    speed.error <- Inf
-  
-  if (!is.null(start.time) && !grepl("^[1-2][0-9][0-9][0-9]-[0-1][0-9]-[0-3][0-9] [0-2][0-9]:[0-5][0-9]:[0-5][0-9]", start.time))
-    stop("'start.time' must be in 'yyyy-mm-dd hh:mm:ss' format.\n", call. = FALSE)
-  if (!is.null(stop.time) && !grepl("^[1-2][0-9][0-9][0-9]-[0-1][0-9]-[0-3][0-9] [0-2][0-9]:[0-5][0-9]:[0-5][0-9]", stop.time))
-    stop("'stop.time' must be in 'yyyy-mm-dd hh:mm:ss' format.\n", call. = FALSE)
-  
-  if (!is.logical(report))
-    stop("'report' must be logical.\n", call. = FALSE)
-  if (!is.logical(auto.open))
-    stop("'auto.open' must be logical.\n", call. = FALSE)
-  if (!is.logical(save.detections))
-    stop("'save.detections' must be logical.\n", call. = FALSE)
-
-  if (!is.numeric(jump.warning))
-    stop("'jump.warning' must be numeric.\n", call. = FALSE)
-  if (jump.warning < 1)
-    stop("'jump.warning' must not be lower than 1.\n", call. = FALSE)
-  if (!is.numeric(jump.error))
-    stop("'jump.error' must be numeric.\n", call. = FALSE)
-  if (jump.error < 1)
-    stop("'jump.error' must not be lower than 1.\n", call. = FALSE)
-  if (jump.error < jump.warning)
-    stop("'jump.error' must not be lower than 'jump.warning'.\n", call. = FALSE)
-
-  if (!is.null(inactive.warning) && !is.numeric(inactive.warning))
-    stop("'inactive.warning' must be numeric.\n", call. = FALSE)    
-  if (!is.null(inactive.warning) && inactive.warning <= 0)
-    stop("'inactive.warning' must be positive.\n", call. = FALSE)
-
-  if (!is.null(inactive.error) && !is.numeric(inactive.error))
-    stop("'inactive.error' must be numeric.\n", call. = FALSE)    
-  if (!is.null(inactive.error) && inactive.error <= 0)
-    stop("'inactive.error' must be positive.\n", call. = FALSE)
-
-  if (!is.null(inactive.error) & is.null(inactive.warning))
-    inactive.warning <- inactive.error
-  if (!is.null(inactive.error) && inactive.error < inactive.warning)
-    stop("'inactive.error' must not be lower than 'inactive.warning'.\n", call. = FALSE)
-  if (!is.null(inactive.warning) & is.null(inactive.error))
-    inactive.error <- Inf
-  
-  if (!is.null(exclude.tags) && any(!grepl("-", exclude.tags, fixed = TRUE)))
-    stop("Not all contents in 'exclude.tags' could be recognized as tags (i.e. 'codespace-signal'). Valid examples: 'R64K-1234', A69-1303-1234'\n", call. = FALSE)
-  if (!is.null(override) && any(!grepl("-", override, fixed = TRUE)))
-    stop("Not all contents in 'override' could be recognized as tags (i.e. 'codespace-signal'). Valid examples: 'R64K-1234', A69-1303-1234'\n", call. = FALSE)
+  speed.warning <- aux$speed.warning
+  speed.error <- aux$speed.error
+  inactive.warning <- aux$inactive.warning
+  inactive.error <- aux$inactive.error  
+  rm(aux)
 
   GUI <- checkGUI(GUI)
-
-  if (!is.logical(print.releases))
-    stop("'print.releases' must be logical.\n", call. = FALSE)
 # ------------------------
 
 # Prepare clean-up before function ends
