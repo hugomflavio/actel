@@ -26,7 +26,7 @@ loadStudyData <- function(tz, override = NULL, start.time, stop.time, save.detec
   bio <- loadBio(file = "biometrics.csv", tz = tz)
   appendTo(c("Screen", "Report"), paste0("M: Number of target tags: ", nrow(bio), "."))
   
-  # Check that all the overriden fish are part of the study
+  # Check that all the overridden fish are part of the study
   if (!is.null(override)) {
     override_signals <- unlist(lapply(strsplit(override, "-"), function(x) tail(x, 1))) 
     lowest_signals <- sapply(bio$Signal, function(i) min(as.numeric(unlist(strsplit(as.character(i), "|", fixed = TRUE)))))
@@ -511,6 +511,7 @@ setSpatialStandards <- function(input){
 
 #' Load distances matrix
 #' 
+#' @param input A matrix of distances, to be loaded rather than a file.
 #' @param spatial A list of spatial objects in the study area.
 #' 
 #' @return a list containing:
@@ -521,24 +522,35 @@ setSpatialStandards <- function(input){
 #' 
 #' @keywords internal 
 #' 
-loadDistances <- function(spatial) {
+loadDistances <- function(input, spatial) {
   # Check for distances
   invalid.dist <- TRUE
-  appendTo("Debug", "Creating 'dist.mat' if a distances.csv file is present.")
-  if (file.exists("distances.csv")) {
-    appendTo(c("Screen", "Report"), "M: A distances.csv file is present, activating speed calculations.")
-    dist.mat <- read.csv("distances.csv", row.names = 1)
-    if (ncol(dist.mat) == 1)
-      warning("Only one column was identified in 'distances.csv'. If this seems wrong, please make sure that the values are separated using commas.", immediate. = TRUE, call. = FALSE)
+  if (missing(input))
+    appendTo("Debug", "Creating 'dist.mat' if a distances.csv file is present.")
+
+  if (missing(input)) {
+    if (file.exists("distances.csv")) {
+      appendTo(c("Screen", "Report"), "M: A distances.csv file is present, activating speed calculations.")
+      dist.mat <- read.csv("distances.csv", row.names = 1)
+      if (ncol(dist.mat) == 1)
+        warning("Only one column was identified in 'distances.csv'. If this seems wrong, please make sure that the values are separated using commas.", immediate. = TRUE, call. = FALSE)
+    } else {
+      dist.mat <- NULL
+    }
+  } else {
+    dist.mat <- as.matrix(input)
+  }
+
+  if (!is.null(dist.mat)) {
     rownames(dist.mat) <- gsub(" ", "", rownames(dist.mat))
     colnames(dist.mat) <- gsub(" ", "", colnames(dist.mat))
     invalid.dist <- FALSE
     if (nrow(dist.mat) != ncol(dist.mat)){
-      appendTo(c("Screen", "Report", "Warning"), "The distance matrix appears to be missing data (ncol != nrow). Deactivating speed calculation to avoid function failure.")
+      appendTo(c("Screen", "Report", "Warning"), "The distance matrix appears to be missing data (ncol != nrow). Deactivating speed calculations to avoid function failure.")
       invalid.dist <- TRUE
     }
     if (!invalid.dist && any(link <- is.na(match(rownames(dist.mat), colnames(dist.mat))))) {
-      appendTo(c("Screen", "Report", "Warning"), "The column and row names in the distance matrix do not match each other. Deactivating speed calculation to avoid function failure.")
+      appendTo(c("Screen", "Report", "Warning"), "The column and row names in the distance matrix do not match each other. Deactivating speed calculations to avoid function failure.")
       message(paste0("   Row names missing in the columns: '", paste(rownames(dist.mat)[link], collapse = "', '"), "'."))
       if (any(link <- is.na(match(colnames(dist.mat), rownames(dist.mat))))) 
         message(paste0("   Column names missing in the rows: '", paste(colnames(dist.mat)[link], collapse = "', '"), "'."))
@@ -552,13 +564,13 @@ loadDistances <- function(spatial) {
       rownames(dist.mat)[nrow(dist.mat)] <- "unspecified"      
     }
     if (!invalid.dist && sum(nrow(spatial$stations), nrow(spatial$release.sites)) != nrow(dist.mat)) {
-      appendTo(c("Screen", "Report", "Warning"), "The number of spatial points does not match the number of rows in the distance matrix. Deactivating speed calculation to avoid function failure.")
+      appendTo(c("Screen", "Report", "Warning"), "The number of spatial points does not match the number of rows in the distance matrix. Deactivating speed calculations to avoid function failure.")
       message("   Number of stations and release sites listed: ", sum(nrow(spatial$stations), nrow(spatial$release.sites)))
       message("   Number of rows/columns in the distance matrix: ", nrow(dist.mat))
       invalid.dist <- TRUE
     }
     if (!invalid.dist && (any(!matchl(spatial$stations$Standard.name, colnames(dist.mat))) | any(!matchl(spatial$release.sites$Standard.name, colnames(dist.mat))))) {
-      appendTo(c("Screen", "Report", "Warning"), "Some stations and/or release sites are not present in the distance matrix. Deactivating speed calculation to avoid function failure.")
+      appendTo(c("Screen", "Report", "Warning"), "Some stations and/or release sites are not present in the distance matrix. Deactivating speed calculations to avoid function failure.")
       missing.releases <- spatial$release.sites$Standard.name[!matchl(spatial$release.sites$Standard.name, colnames(dist.mat))]
       missing.stations <- spatial$stations$Standard.name[!matchl(spatial$stations$Standard.name, colnames(dist.mat))]
       if (length(missing.releases) > 0)
@@ -576,24 +588,37 @@ loadDistances <- function(spatial) {
 
 #' Load deployments file and Check the structure
 #' 
-#' @param file an input file with spatial data.
+#' @param input an input data frame or file with deployment data.
+#' @inheritParams explore
 #' 
 #' @return A data frame with the deployments information
 #' 
 #' @keywords internal
 #' 
-loadDeployments <- function(file, tz){
+loadDeployments <- function(input, tz){
+
   appendTo("debug","Running loadDeployments.")
-  if (file.exists(file))
-    input <- as.data.frame(data.table::fread(file))
-  else {
-    emergencyBreak()
-    stop("Could not find a '", file, "' file in the working directory.\n", call. = FALSE)
+  
+  if (is.character(input))
+    preloaded <- FALSE
+  else
+    preloaded <- TRUE
+
+  if (!preloaded) {
+    if (file.exists(input))
+      input <- as.data.frame(data.table::fread(input))
+    else {
+      emergencyBreak()
+      stop("Could not find a '", input, "' file in the working directory.\n", call. = FALSE)
+    }
   }
+
   if (!is.na(link <- match("Station.Name", colnames(input))))
     colnames(input)[link] <- "Station.name"
+
   if (any(link <- duplicated(colnames(input))))
-    stop("The following columns are duplicated in the file '", file, "': '", paste(unique(colnames(input)[link]), sep = "', '"), "'.", call. = FALSE)
+    stop("The following columns are duplicated in the deployments: '", paste(unique(colnames(input)[link]), sep = "', '"), "'.", call. = FALSE)
+  
   default.cols <- c("Receiver", "Station.name", "Start", "Stop")
   link <- match(default.cols, colnames(input))
   if (any(is.na(link))) {
@@ -611,11 +636,11 @@ loadDeployments <- function(file, tz){
   }
   if (any(!grepl("^[1-2][0-9][0-9][0-9]-[0-1][0-9]-[0-3][0-9][ |T|t][0-2][0-9]:[0-5][0-9]", input$Start))) {
     emergencyBreak()
-    stop("Not all values in the 'Start' column appear to be in a 'yyyy-mm-dd hh:mm' format (seconds are optional). Please double-check the ", file, " file.\n", call. = FALSE)
+    stop("Not all values in the 'Start' column appear to be in a 'yyyy-mm-dd hh:mm' format (seconds are optional). Please double-check the deployments.\n", call. = FALSE)
   }
   if (any(!grepl("^[1-2][0-9][0-9][0-9]-[0-1][0-9]-[0-3][0-9][ |T|t][0-2][0-9]:[0-5][0-9]", input$Stop))) {
     emergencyBreak()
-    stop("Not all values in the 'Stop' column appear to be in a 'yyyy-mm-dd hh:mm' format (seconds are optional). Please double-check the ", file, " file.\n", call. = FALSE)
+    stop("Not all values in the 'Stop' column appear to be in a 'yyyy-mm-dd hh:mm' format (seconds are optional). Please double-check the deployments.\n", call. = FALSE)
   }
 
   timestamp_formats  <- c("%Y-%m-%d %H:%M:%OS", "%Y-%m-%dT%H:%M:%OS",
@@ -624,12 +649,12 @@ loadDeployments <- function(file, tz){
 
   if (inherits(try(input$Start <- as.POSIXct(input$Start, tz = tz, tryFormats = timestamp_formats), silent = TRUE),"try-error")){
     emergencyBreak()
-    stop("Could not recognise the data in the 'Start' column as POSIX-compatible timestamps. Please double-check the ", file," file.\n", call. = FALSE)
+    stop("Could not recognise the data in the 'Start' column as POSIX-compatible timestamps. Please double-check the deployments.\n", call. = FALSE)
   }
 
   if (inherits(try(input$Stop <- as.POSIXct(input$Stop, tz = tz, tryFormats = timestamp_formats), silent = TRUE),"try-error")){
     emergencyBreak()
-    stop("Could not recognise the data in the 'Stop' column as POSIX-compatible timestamps. Please double-check the ", file," file.\n", call. = FALSE)
+    stop("Could not recognise the data in the 'Stop' column as POSIX-compatible timestamps. Please double-check the deployments.\n", call. = FALSE)
   }
 
   input$Receiver <- as.character(input$Receiver)
@@ -658,39 +683,43 @@ loadDeployments <- function(file, tz){
 #' 
 #' @export
 #' 
-loadSpatial <- function(file = "spatial.csv"){
+loadSpatial <- function(input = "spatial.csv"){
   appendTo("debug", "Running loadSpatial.")
-  if (file.exists(file))
-    input <- as.data.frame(data.table::fread(file))
-  else {
-    emergencyBreak()
-    stop("Could not find a '", file, "' file in the working directory.\n", call. = FALSE)
+
+  if (is.character(input)) {
+    if (file.exists(input))
+      input <- as.data.frame(data.table::fread(input))
+    else {
+      emergencyBreak()
+      stop("Could not find a '", input, "' file in the working directory.\n", call. = FALSE)
+    }
   }
+
   # Check duplicated columns
   if (any(link <- duplicated(colnames(input))))
-    stop("The following columns are duplicated in the file 'spatial.csv': '", paste(unique(colnames(input)[link]), sep = "', '"), "'.", call. = FALSE)
+    stop("The following columns are duplicated in the spatial input: '", paste(unique(colnames(input)[link]), sep = "', '"), "'.", call. = FALSE)
   # Check wrong capitals in Station.name
   if (!is.na(link <- match("Station.Name", colnames(input))))
     colnames(input)[link] <- "Station.name"
   # Check missing Station.name
   if (!any(grepl("Station.name", colnames(input)))) {
     emergencyBreak()
-    stop("The ", file, " file must contain a 'Station.name' column.\n", call. = FALSE)
+    stop("The spatial input must contain a 'Station.name' column.\n", call. = FALSE)
   } else {
     # Check all station names are unique
     if (any(link <- table(input$Station.name) > 1)) {
       emergencyBreak()
-      stop("The 'Station.name' column in the ", file, " file must not have duplicated values.\nStations appearing more than once: ", paste(names(table(input$Station.name))[link], collapse = ", "), "\n", call. = FALSE)
+      stop("The 'Station.name' column in the spatial input must not have duplicated values.\nStations appearing more than once: ", paste(names(table(input$Station.name))[link], collapse = ", "), "\n", call. = FALSE)
     }
   }
   # Check missing Array column
   if (!any(grepl("Array", colnames(input)))) {
     emergencyBreak()
-    stop("The ", file, " file must contain an 'Array' column.\n", call. = FALSE)
+    stop("The spatial input must contain an 'Array' column.\n", call. = FALSE)
   }
   # check missing data in the arrays
   if (any(is.na(input$Array)))
-    stop("Some rows do not contain 'Array' information in the ",file, " file. Please double-check the input files.")
+    stop("Some rows do not contain 'Array' information in the spatial input. Please double-check the input files.")
   # check spaces in the array names
   if (any(grepl(" ", input$Array))) {
     appendTo("Screen", "M: Replacing spaces in array names to prevent function failure.")
@@ -698,13 +727,13 @@ loadSpatial <- function(file = "spatial.csv"){
   }
   # check missing Type column
   if (!any(grepl("Type", colnames(input)))) {
-    appendTo(c("Screen", "Report"), paste0("M: No 'Type' column found in the ", file, " file. Assigning all rows as hydrophones."))
+    appendTo(c("Screen", "Report"), paste0("M: No 'Type' column found in the spatial input. Assigning all rows as hydrophones."))
     input$Type <- "Hydrophone"
   } else {
     # check strange data in the Type column
     if (any(is.na(match(unique(input$Type), c("Hydrophone", "Release"))))){
       emergencyBreak()
-      stop("Could not recognise the data in the 'Type' column as only one of 'Hydrophone' or 'Release'. Please double-check the ", file," file.\n", call. = FALSE)
+      stop("Could not recognise the data in the 'Type' column as only one of 'Hydrophone' or 'Release'. Please double-check the spatial input.\n", call. = FALSE)
     }
   }
   # check release arrays exist
@@ -713,7 +742,7 @@ loadSpatial <- function(file = "spatial.csv"){
   if (any(link <- is.na(match(release.arrays, hydro.arrays)))) {
     emergencyBreak()
     stop("Not all the expected first arrays of the release sites exist.\nUnknown expected first arrays: '", paste0(release.arrays[link], collapse = "', '"), "'.
-In the spatial.csv file, the expected first arrays of the release sites should match the arrays where hydrophone stations where deployed.\n", call. = FALSE)
+In the spatial input, the expected first arrays of the release sites should match the arrays where hydrophone stations where deployed.\n", call. = FALSE)
   }
   input <- setSpatialStandards(input = input) # Create Standard.name for each station  
   return(input)
@@ -721,36 +750,49 @@ In the spatial.csv file, the expected first arrays of the release sites should m
 
 #' Load Biometrics file
 #' 
-#' @param file an input file with biometric data.
+#' @param input an input file or data frame with biometric data.
 #' @inheritParams explore
 #' 
 #' @keywords internal
 #' 
 #' @return A data frame with the biometrics information
 #' 
-loadBio <- function(file, tz){
+loadBio <- function(input, tz){
   appendTo("debug", "Running loadBio.")
-  if (missing(file))
-    stop("'file' is missing.")
+
+  if (missing(input))
+    stop("'input' is missing.")
   if (missing(tz))
     stop("'tz' is missing.")
-  if (file.exists(file))
-    bio <- as.data.frame(data.table::fread(file), stringsAsFactors = FALSE)
-  else {
-    emergencyBreak()
-    stop("Could not find a '", file, "' file in the working directory.\n", call. = FALSE)
-  }  
-  if (any(link <- duplicated(colnames(bio))))
-    stop("The following columns are duplicated in the file 'biometrics.csv': '", paste(unique(colnames(bio)[link]), sep = "', '"), "'.\n", call. = FALSE)
+
+  if (is.character(input))
+    preloaded <- FALSE
+  else
+    preloaded <- TRUE
+
+  if (!preloaded) {
+    if (file.exists(input))
+      bio <- as.data.frame(data.table::fread(input), stringsAsFactors = FALSE)
+    else {
+      emergencyBreak()
+      stop("Could not find a '", input, "' file in the working directory.\n", call. = FALSE)
+    }  
+  } else {
+    bio <- input
+  }
+
+  if (any(link <- duplicated(colnames(bio)))) 
+    stop("The following columns are duplicated in the biometrics:", 
+      paste(unique(colnames(bio)[link]), sep = "', '"), "'.\n", call. = FALSE)
 
   if (!any(grepl("Release.date", colnames(bio)))) {
     emergencyBreak()
-    stop("The biometrics.csv file must contain an 'Release.date' column.\n", call. = FALSE)
+    stop("The biometrics must contain an 'Release.date' column.\n", call. = FALSE)
   }
 
   if (any(!grepl("^[1-2][0-9][0-9][0-9]-[0-1][0-9]-[0-3][0-9][ |T|t][0-2][0-9]:[0-5][0-9]", bio$Release.date))) {
     emergencyBreak()
-    stop("Not all values in the 'Release.date' column appear to be in a 'yyyy-mm-dd hh:mm' format (seconds are optional). Please double-check the biometrics.csv file.\n", call. = FALSE)
+    stop("Not all values in the 'Release.date' column appear to be in a 'yyyy-mm-dd hh:mm' format (seconds are optional). Please double-check the biometrics.\n", call. = FALSE)
   }
 
   timestamp_formats  <- c("%Y-%m-%d %H:%M:%OS", "%Y-%m-%dT%H:%M:%OS",
@@ -759,17 +801,17 @@ loadBio <- function(file, tz){
 
   if (inherits(try(bio$Release.date <- as.POSIXct(bio$Release.date, tz = tz, tryFormats = timestamp_formats), silent = TRUE),"try-error")){
     emergencyBreak()
-    stop("Could not recognise the data in the 'Release.date' column as POSIX-compatible timestamps. Please double-check the biometrics.csv file.\n", call. = FALSE)
+    stop("Could not recognise the data in the 'Release.date' column as POSIX-compatible timestamps. Please double-check the biometrics.\n", call. = FALSE)
   }
 
   if (!any(grepl("Signal", colnames(bio)))){
     emergencyBreak()
-    stop("The biometrics.csv file must contain an 'Signal' column.\n", call. = FALSE)
+    stop("The biometrics must contain an 'Signal' column.\n", call. = FALSE)
   }
 
   if (any(is.na(bio$Signal))) {
     emergencyBreak()
-    stop("Some fish have no 'Signal' information. Please double-check the biometrics.csv file.\n", call. = FALSE)
+    stop("Some fish have no 'Signal' information. Please double-check the biometrics.\n", call. = FALSE)
   }
 
   if (any(grepl("|", bio$Signal, fixed = TRUE))) {
@@ -781,29 +823,29 @@ loadBio <- function(file, tz){
 
   if (expect_integer & !inherits(bio$Signal, "integer")) {
     emergencyBreak()
-    stop("Could not recognise the data in the 'Signal' column as integers. Please double-check the biometrics.csv file.\n", call. = FALSE)
+    stop("Could not recognise the data in the 'Signal' column as integers. Please double-check the biometrics.\n", call. = FALSE)
   } else {
     signal_check <- suppressWarnings(as.numeric(unlist(strsplit(as.character(bio$Signal), "|", fixed = TRUE))))
     if (any(is.na(signal_check))) {
-      stop("Could not recognise the data in the 'Signal' column as integers. Please double-check the biometrics.csv file.\n", call. = FALSE)
+      stop("Could not recognise the data in the 'Signal' column as integers. Please double-check the biometrics.\n", call. = FALSE)
     }
   }
 
   if (expect_integer & any(link <- table(bio$Signal) > 1)) {
     emergencyBreak()
-    stop(ifelse(sum(link) > 1, "Signals ", "Signal "), paste(names(table(bio$Signal))[link], collapse = ", "), ifelse(sum(link) > 1," are ", " is "), "duplicated in the biometrics.csv file.\n", call. = FALSE)
+    stop(ifelse(sum(link) > 1, "Signals ", "Signal "), paste(names(table(bio$Signal))[link], collapse = ", "), ifelse(sum(link) > 1," are ", " is "), "duplicated in the biometrics.\n", call. = FALSE)
   } else {
     if (any(link <- table(signal_check) > 1)) {
       emergencyBreak()
-      stop(ifelse(sum(link) > 1, "Signals ", "Signal "), paste(names(table(signal_check))[link], collapse = ", "), ifelse(sum(link) > 1," are ", " is "), "duplicated in the biometrics.csv file.\n", call. = FALSE)      
+      stop(ifelse(sum(link) > 1, "Signals ", "Signal "), paste(names(table(signal_check))[link], collapse = ", "), ifelse(sum(link) > 1," are ", " is "), "duplicated in the biometrics.\n", call. = FALSE)
     }
   }
 
   if (!expect_integer & !any(grepl("Sensor.unit", colnames(bio))))
-    appendTo(c("Screen", "Warning"), "Tags with multiple sensors are listed in the biometrics.csv file, but a 'Sensor.unit' column could not be found. Skipping sensor unit assignment.")
+    appendTo(c("Screen", "Warning"), "Tags with multiple sensors are listed in the biometrics, but a 'Sensor.unit' column could not be found. Skipping sensor unit assignment.")
 
   if (!any(grepl("Release.site", colnames(bio)))) {
-    appendTo("Screen", "M: No Release site has been indicated in the biometrics.csv file. Creating a 'Release.site' column to avoid function failure. Filling with 'unspecified'.")
+    appendTo("Screen", "M: No Release site has been indicated in the biometrics. Creating a 'Release.site' column to avoid function failure. Filling with 'unspecified'.")
     bio$Release.site <- "unspecified"
   } else {
     bio$Release.site <-  gsub(" ", "", bio$Release.site)
@@ -816,7 +858,8 @@ loadBio <- function(file, tz){
     }
   }
   if (!any(grepl("Group", colnames(bio)))) {
-    appendTo("Screen", "M: No 'Group' column found in the biometrics.csv file. Assigning all fish to group 'All'.")
+    appendTo("Screen", "M: No 'Group' column found in ", 
+      ifelse(preloaded, "bio", "the biometrics.csv file"), ". Assigning all fish to group 'All'.")
     bio$Group <- "All"
   } else {
     bio$Group <- factor(bio$Group)
@@ -994,6 +1037,9 @@ compileDetections <- function(path = "detections", start.time = NULL, stop.time 
   output <- convertTimes(input = output, start.time = start.time, 
     stop.time = stop.time, tz = tz)
 
+  # Compile transmitters
+  output$Transmitter <- as.factor(paste(output$CodeSpace, output$Signal, sep = "-"))
+
   return(output)
 }
 
@@ -1165,7 +1211,6 @@ convertTimes <- function(input, start.time, stop.time, tz) {
     appendTo(c("Screen","Report"), paste0("M: Discarding detection data posterior to ",stop.time," per user command (", onr - nrow(input), " detections discarded)."))
   }
   input$Receiver <- droplevels(input$Receiver)
-  input$Transmitter <- as.factor(paste(input$CodeSpace, input$Signal, sep = "-"))
   return(input)
 }
 
@@ -1215,7 +1260,7 @@ splitDetections <- function(detections, bio, exclude.tags = NULL, silent = FALSE
   appendTo("debug", "Debug: Creating 'trimmed.list'.")
 
   # Find signal matches, including for double-signal tags
-  tag.list <- stripCodeSpaces(names(my.list))
+  tag.list <- extractSignals(names(my.list))
   signal_list <- lapply(strsplit(as.character(bio$Signal), "|", fixed = TRUE), as.numeric)
   aux <- lapply(1:length(signal_list), function(i) {
     output <- rep(NA_integer_, length(tag.list))
@@ -1262,7 +1307,7 @@ splitDetections <- function(detections, bio, exclude.tags = NULL, silent = FALSE
   
   # include sensor units for single signal tags, if relevant
   if (any(grepl("Sensor.unit", colnames(bio)))) {
-    link <- match(stripCodeSpaces(names(trimmed.list)), bio$Signal)
+    link <- match(extractSignals(names(trimmed.list)), bio$Signal)
     aux <- names(trimmed.list)
     trimmed.list <- lapply(1:length(link), function(i) {
       output <- trimmed.list[[i]]
