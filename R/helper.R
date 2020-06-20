@@ -72,20 +72,23 @@ dataToList <- function(source){
   return(as.list(e))
 }
 
-
-#' Remove Code Spaces from transmitter names
+#' @title Remove Code Spaces from transmitter names
 #' 
 #' @param input A vector of transmitter names
 #' 
-#' @examples
-#' # create dummy string
-#' x <- c("R64K-1234", "A69-1303-12")
-#' 
-#' # run stripCodeSpaces
-#' stripCodeSpaces(x)
-#' 
 #' @return A vector of transmitter signals
+#'
+#' @name stripCodeSpaces-deprecated
+#' @usage stripCodeSpaces(input)
+#' @seealso \code{\link{actel-deprecated}}
+#' @keywords internal
+NULL
+
+#' @rdname stripCodeSpaces-deprecated
 #' 
+#' @section \code{stripCodeSpaces}:
+#' For \code{stripCodeSpaces}, use \code{\link{extractSignals}}.
+#'
 #' @export
 #' 
 stripCodeSpaces <- function(input) {
@@ -120,8 +123,8 @@ extractSignals <- function(input) {
 #' # create dummy string
 #' x <- c("R64K-1234", "A69-1303-12")
 #' 
-#' # run stripCodeSpaces
-#' stripCodeSpaces(x)
+#' # run extractCodeSpaces
+#' extractCodeSpaces(x)
 #' 
 #' @return A vector of transmitter signals
 #' 
@@ -1175,7 +1178,7 @@ will artificially add water space around the shape file.", call. = FALSE)
 #' It is highly recommended to read the vignette regarding distances matrix before running this function.
 #' You can find it by running \code{vignette('a-2_distances_matrix', 'actel')} or \code{browseVignettes('actel')}
 #' 
-#' @param file The path to the file containing the spatial information.
+#' @param input Either a data frame with spatial data or the path to the file containing the spatial information.
 #' 
 #' @examples
 #' # This function requires a file with spatial information
@@ -1191,11 +1194,13 @@ will artificially add water space around the shape file.", call. = FALSE)
 #' 
 #' @export
 #' 
-emptyMatrix <- function(file = "spatial.csv"){
-  if(!file.exists(file))
-    stop("Could not find a 'spatial.csv' file in the current working directory.\n", call. = FALSE)
+emptyMatrix <- function(input = "spatial.csv"){
+  if (is.character(input)) {
+    if(!file.exists(input))
+      stop("Could not find file '", input, "'.\n", call. = FALSE)
+  }
 
-  input <- loadSpatial(file = file)
+  input <- loadSpatial(input = input)
 
   output <- matrix(nrow = nrow(input), ncol = nrow(input))
   colnames(output) <- rownames(output) <- input$Standard.name

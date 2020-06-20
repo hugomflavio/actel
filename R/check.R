@@ -33,14 +33,14 @@ NULL
 #' 
 #' @return updated parameters
 #' 
-checkArguments <- function(dp, tz, minimum.detections, max.interval, speed.method, speed.warning, 
-  speed.error, start.time, stop.time, report, auto.open, save.detections, jump.warning, jump.error,
+checkArguments <- function(dp, tz, minimum.detections, max.interval, speed.method = c("last to first", "last to last"),
+  speed.warning, speed.error, start.time, stop.time, report, auto.open, save.detections, jump.warning, jump.error,
   inactive.warning, inactive.error, exclude.tags, override, print.releases) {
 
   no.dp.args <- c("tz", "start.time", "stop.time", "save.detections", "exclude.tags")
-  link <- c(!is.null(tz), !is.null(start.time), !is.null(stop.time), save.detections, !is.null(exclude.tags))
+  link <- c(!is.null(tz), !is.null(start.time), !is.null(stop.time), !(is.logical(save.detections) && !save.detections), !is.null(exclude.tags))
 
-  if (any(link))
+  if (!is.null(dp) & any(link))
     warning("Argument", ifelse(sum(link) > 1, "s '", " '"), paste(no.dp.args[link], collapse = "', '"),
       ifelse(sum(link) > 1, "' were ", "' was "), "set but a datapack was provided. Disregarding set arguments.", 
       immediate. = TRUE, call. = FALSE)
@@ -59,6 +59,10 @@ checkArguments <- function(dp, tz, minimum.detections, max.interval, speed.metho
   
   if (max.interval <= 0)
     stop("'max.interval' must be positive.\n", call. = FALSE)
+
+  if (!is.character(speed.method))
+    stop("'speed.method' should be one of 'last to first' or 'last to last'.\n", call. = FALSE)
+  speed.method <- match.arg(speed.method)
 
   if (!is.null(speed.warning) && !is.numeric(speed.warning))
     stop("'speed.warning' must be numeric.\n", call. = FALSE)
@@ -149,7 +153,7 @@ checkArguments <- function(dp, tz, minimum.detections, max.interval, speed.metho
       stop("Some tag signals listed in 'override' ('", paste0(override[link], collapse = "', '"), "') are not listed in the biometrics data.\n", call. = FALSE)
   }
 
-  return(list(speed.warning = speed.warning, speed.error = speed.error, 
+  return(list(speed.method = speed.method, speed.warning = speed.warning, speed.error = speed.error, 
     inactive.warning = inactive.warning, inactive.error = inactive.error))
 }
 

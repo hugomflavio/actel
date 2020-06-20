@@ -8,7 +8,7 @@ spatial <- loadSpatial()
 file.remove("spatial.csv")
 
 write.csv(example.biometrics, "biometrics.csv", row.names = FALSE)
-bio <- loadBio(file = "biometrics.csv", tz = "Europe/Copenhagen")
+bio <- loadBio(input = "biometrics.csv", tz = "Europe/Copenhagen")
 file.remove("biometrics.csv")
 
 dot <- loadDot(string = paste(unique(spatial$Array), collapse = "--"), spatial = spatial, disregard.parallels = TRUE)

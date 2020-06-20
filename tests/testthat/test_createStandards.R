@@ -16,7 +16,7 @@ spatial <- loadSpatial()
 file.remove("spatial.csv")
 
 write.csv(example.deployments, "deployments.csv", row.names = FALSE)
-dep <- loadDeployments(file = "deployments.csv", tz = "Europe/Copenhagen")
+dep <- loadDeployments(input = "deployments.csv", tz = "Europe/Copenhagen")
 dep <- createUniqueSerials(input = dep)
 file.remove("deployments.csv")
 
@@ -28,7 +28,7 @@ test_that("createStandards is working as expected", {
 })
 
 write.csv(example.deployments, "deployments.csv", row.names = FALSE)
-dep <- loadDeployments(file = "deployments.csv", tz = "Europe/Copenhagen")
+dep <- loadDeployments(input = "deployments.csv", tz = "Europe/Copenhagen")
 dep$Start[2] <- dep$Start[2] + 3600 * 24 * 30
 dep <- createUniqueSerials(input = dep)
 file.remove("deployments.csv")

@@ -200,7 +200,7 @@ preloadDetections <- function(input, tz) {
 
 	if (!inherits(input$Timestamp, "POSIXct")) {
 		message("M: Converting detection timestamps to POSIX objects"); flush.console()
-		input$Timestamp <- fasttime::fastPOSIXct(input$Timestamp, tz = UTC)
+		input$Timestamp <- fasttime::fastPOSIXct(input$Timestamp, tz = "UTC")
 	}
 
 	attributes(input$Timestamp)$tzone <- tz

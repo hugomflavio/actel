@@ -23,7 +23,7 @@
 loadStudyData <- function(tz, override = NULL, start.time, stop.time, save.detections = FALSE,
   sections = NULL, exclude.tags, disregard.parallels = TRUE, discard.orphans = FALSE) {
   appendTo(c("Screen", "Report"), "M: Importing data. This process may take a while.")
-  bio <- loadBio(file = "biometrics.csv", tz = tz)
+  bio <- loadBio(input = "biometrics.csv", tz = tz)
   appendTo(c("Screen", "Report"), paste0("M: Number of target tags: ", nrow(bio), "."))
   
   # Check that all the overridden fish are part of the study
@@ -33,9 +33,9 @@ loadStudyData <- function(tz, override = NULL, start.time, stop.time, save.detec
     if (any(link <- is.na(match(override_signals, lowest_signals))))
       stop("Some tag signals listed in 'override' ('", paste0(override[link], collapse = "', '"), "') are not listed in the biometrics file.\n", call. = FALSE)
   }
-  deployments <- loadDeployments(file = "deployments.csv", tz = tz)
+  deployments <- loadDeployments(input = "deployments.csv", tz = tz)
   checkDeploymentTimes(input = deployments) # check that receivers are not deployed before being retrieved
-  spatial <- loadSpatial(file = "spatial.csv")
+  spatial <- loadSpatial(input = "spatial.csv")
   deployments <- checkDeploymentStations(input = deployments, spatial = spatial) # match Station.name in the deployments to Station.name in spatial, and vice-versa
   deployments <- createUniqueSerials(input = deployments) # Prepare serial numbers to overwrite the serials in detections
 
@@ -599,12 +599,7 @@ loadDeployments <- function(input, tz){
 
   appendTo("debug","Running loadDeployments.")
   
-  if (is.character(input))
-    preloaded <- FALSE
-  else
-    preloaded <- TRUE
-
-  if (!preloaded) {
+  if (is.character(input)) {
     if (file.exists(input))
       input <- as.data.frame(data.table::fread(input))
     else {
@@ -626,13 +621,13 @@ loadDeployments <- function(input, tz){
       ifelse(sum(is.na(link)) > 1, "(s) '", " '"),
       paste(default.cols[is.na(link)], collapse = "', '"), 
       ifelse(sum(is.na(link)) > 1, "' are", "' is"),
-      " missing in the ", file, " file."))
+      " missing in the deployments."))
     emergencyBreak()
     stop(paste0("Column", 
       ifelse(sum(is.na(link)) > 1, "(s) '", " '"),
       paste(default.cols[is.na(link)], collapse = "', '"), 
       ifelse(sum(is.na(link)) > 1, "' are", "' is"),
-      " missing in the ", file, " file."), call. = FALSE)
+      " missing in the deployments."), call. = FALSE)
   }
   if (any(!grepl("^[1-2][0-9][0-9][0-9]-[0-1][0-9]-[0-3][0-9][ |T|t][0-2][0-9]:[0-5][0-9]", input$Start))) {
     emergencyBreak()
@@ -668,7 +663,7 @@ loadDeployments <- function(input, tz){
 #' Loads a spatial file prepared for actel and appends the Standard.name column. Additionally,
 #' performs a series of quality checks on the contents of the target file.
 #' 
-#' @param file an input file with spatial data in the actel format.
+#' @param input Either a data frame or the name of an input file with spatial data in the actel format.
 #' 
 #' @examples
 #' # This function requires the presence of a file with spatial information
@@ -677,7 +672,7 @@ loadDeployments <- function(input, tz){
 #' aux <- system.file(package = "actel")[1]
 #' 
 #' # run loadSpatial on the temporary spatial.csv file
-#' loadSpatial(file = paste0(aux, '/example_spatial.csv'))
+#' loadSpatial(input = paste0(aux, '/example_spatial.csv'))
 #' 
 #' @return A data frame with the spatial information present in 'spatial.csv' and the Standard.name column.
 #' 
@@ -782,7 +777,7 @@ loadBio <- function(input, tz){
   }
 
   if (any(link <- duplicated(colnames(bio)))) 
-    stop("The following columns are duplicated in the biometrics:", 
+    stop("The following columns are duplicated in the biometrics: '", 
       paste(unique(colnames(bio)[link]), sep = "', '"), "'.\n", call. = FALSE)
 
   if (!any(grepl("Release.date", colnames(bio)))) {
@@ -858,8 +853,7 @@ loadBio <- function(input, tz){
     }
   }
   if (!any(grepl("Group", colnames(bio)))) {
-    appendTo("Screen", "M: No 'Group' column found in ", 
-      ifelse(preloaded, "bio", "the biometrics.csv file"), ". Assigning all fish to group 'All'.")
+    appendTo("Screen", paste0("M: No 'Group' column found in the biometrics. Assigning all fish to group 'All'."))
     bio$Group <- "All"
   } else {
     bio$Group <- factor(bio$Group)

@@ -9,6 +9,8 @@
 #'  analysis is over? Defaults to TRUE. NOTE: If report = TRUE and auto.open = TRUE,
 #'  the web browser will automatically be launched to open the report once the 
 #'  function terminates.
+#' @param datapack A data bundle pre-compiled through the function \code{\link{preload}}.
+#'  May be used to run actel analyses based on R objects, rather than input files.
 #' @param discard.first A threshold amount of time (in hours) that must pass after
 #'  release for the respective detections to be valid. Set to 0 to discard only
 #'  the release-to-first-detection calculations.
@@ -138,8 +140,6 @@ explore <- function(tz = NULL, datapack = NULL, max.interval = 60, minimum.detec
     checkToken(token = attributes(datapack)$actel.token, 
       timestamp = attributes(datapack)$timestamp)
 
-  speed.method <- match.arg(speed.method)
-
   aux <- checkArguments(dp = datapack,
     tz = tz, 
     minimum.detections = minimum.detections, 
@@ -160,6 +160,7 @@ explore <- function(tz = NULL, datapack = NULL, max.interval = 60, minimum.detec
     override = override,
     print.releases = print.releases)
 
+  speed.method <- aux$speed.method
   speed.warning <- aux$speed.warning
   speed.error <- aux$speed.error
   inactive.warning <- aux$inactive.warning

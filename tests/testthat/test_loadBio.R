@@ -5,11 +5,12 @@ setwd(tempdir())
 
 test_that("loadBio stops if arguments or file are missing", {
 	# Missing arguments
-	expect_error(loadBio(), "'file' is missing.", fixed = TRUE)
-	expect_error(loadBio(file = "test"), "'tz' is missing.", fixed = TRUE)
+	expect_error(loadBio(), "'input' is missing.", fixed = TRUE)
+	expect_error(loadBio(input = "test"), "'tz' is missing.", fixed = TRUE)
 
 	# Missing file
-	expect_error(loadBio("biometrics.csv", tz = "Europe/Copenhagen"))
+	expect_error(loadBio("biometrics.csv", tz = "Europe/Copenhagen"),
+		"Could not find a 'biometrics.csv' file in the working directory.", fixed = TRUE)
 })
 
 test_that("loadBio stops if there are duplicated columns", {
@@ -18,7 +19,7 @@ test_that("loadBio stops if there are duplicated columns", {
 	colnames(bio)[2:3] <- "Group"
 	write.csv(bio, "biometrics.csv", row.names = FALSE)
 	expect_error(loadBio("biometrics.csv", tz = "Europe/Copenhagen"), 
-		"The following columns are duplicated in the file 'biometrics.csv': 'Group'.", fixed = TRUE)	
+		"The following columns are duplicated in the biometrics: 'Group'.", fixed = TRUE)	
 	file.remove("biometrics.csv")
 })
 
@@ -28,26 +29,26 @@ test_that("loadBio fails if needed columns are missing", {
 	colnames(bio)[1] <- "test"
 	write.csv(bio, "biometrics.csv", row.names = FALSE)
 	expect_error(loadBio("biometrics.csv", tz = "Europe/Copenhagen"), 
-		"The biometrics.csv file must contain an 'Release.date' column.", fixed = TRUE)
+		"The biometrics must contain an 'Release.date' column.", fixed = TRUE)
 
 	# Missing Signal column
 	bio <- example.biometrics
 	colnames(bio)[4] <- "test"
 	write.csv(bio, "biometrics.csv", row.names = FALSE)
 	expect_error(loadBio("biometrics.csv", tz = "Europe/Copenhagen"), 
-		"The biometrics.csv file must contain an 'Signal' column.", fixed = TRUE)
+		"The biometrics must contain an 'Signal' column.", fixed = TRUE)
 
 	# No release sites
 	bio <- example.biometrics
 	write.csv(bio[, -2], "biometrics.csv", row.names = FALSE)
 	expect_message(loadBio("biometrics.csv", tz = "Europe/Copenhagen"), 
-		"M: No Release site has been indicated in the biometrics.csv file. Creating a 'Release.site' column to avoid function failure. Filling with 'unspecified'.", fixed = TRUE)
+		"M: No Release site has been indicated in the biometrics. Creating a 'Release.site' column to avoid function failure. Filling with 'unspecified'.", fixed = TRUE)
 
 	# no group column
 	bio <- example.biometrics
 	write.csv(bio[, -5], "biometrics.csv", row.names = FALSE)
 	expect_message(loadBio("biometrics.csv", tz = "Europe/Copenhagen"), 
-		"M: No 'Group' column found in the biometrics.csv file. Assigning all fish to group 'All'.", fixed = TRUE)
+		"M: No 'Group' column found in the biometrics. Assigning all fish to group 'All'.", fixed = TRUE)
 	file.remove("biometrics.csv")
 })
 
@@ -56,9 +57,9 @@ test_that("loadBio stops if column content is unexpected", {
 	bio <- example.biometrics
 	bio$Release.date <- as.character(bio$Release.date)
 	bio$Release.date[1] <- "test"
-	write.csv(bio, "biometrics.csv", row.names = FALSE)
-	expect_error(loadBio("biometrics.csv", tz = "Europe/Copenhagen"), 
-		"Not all values in the 'Release.date' column appear to be in a 'yyyy-mm-dd hh:mm' format (seconds are optional). Please double-check the biometrics.csv file.", fixed = TRUE)
+	write.csv(bio, "biometrics", row.names = FALSE)
+	expect_error(loadBio("biometrics", tz = "Europe/Copenhagen"), 
+		"Not all values in the 'Release.date' column appear to be in a 'yyyy-mm-dd hh:mm' format (seconds are optional). Please double-check the biometrics.", fixed = TRUE)
 
 	# Badly coded release date
 	bio <- example.biometrics
@@ -66,35 +67,35 @@ test_that("loadBio stops if column content is unexpected", {
 	bio$Release.date[1] <- "2999-19-39 29:59"
 	write.csv(bio, "biometrics.csv", row.names = FALSE)
 	expect_error(loadBio("biometrics.csv", tz = "Europe/Copenhagen"), 
-		"Could not recognise the data in the 'Release.date' column as POSIX-compatible timestamps. Please double-check the biometrics.csv file.", fixed = TRUE)
+		"Could not recognise the data in the 'Release.date' column as POSIX-compatible timestamps. Please double-check the biometrics.", fixed = TRUE)
 
 	# Badly formatted signal
 	bio <- example.biometrics
 	bio$Signal[1] <- "test"
 	write.csv(bio, "biometrics.csv", row.names = FALSE)
 	expect_error(loadBio("biometrics.csv", tz = "Europe/Copenhagen"), 
-		"Could not recognise the data in the 'Signal' column as integers. Please double-check the biometrics.csv file.", fixed = TRUE)
+		"Could not recognise the data in the 'Signal' column as integers. Please double-check the biometrics.", fixed = TRUE)
 
 	# Missing signal data
 	bio <- example.biometrics
 	bio$Signal[1] <- NA
 	write.csv(bio, "biometrics.csv", row.names = FALSE)
 	expect_error(loadBio("biometrics.csv", tz = "Europe/Copenhagen"), 
-		"Some fish have no 'Signal' information. Please double-check the biometrics.csv file.", fixed = TRUE)
+		"Some fish have no 'Signal' information. Please double-check the biometrics.", fixed = TRUE)
 
 	# one duplicated signal
 	bio <- example.biometrics
 	bio$Signal[1:2] <- 1234
 	write.csv(bio, "biometrics.csv", row.names = FALSE)
 	expect_error(loadBio("biometrics.csv", tz = "Europe/Copenhagen"), 
-		"Signal 1234 is duplicated in the biometrics.csv file.", fixed = TRUE)
+		"Signal 1234 is duplicated in the biometrics.", fixed = TRUE)
 
 	# multiple duplicated signal
 	bio <- example.biometrics
 	bio$Signal[1:4] <- c(1234, 1234, 5678, 5678)
 	write.csv(bio, "biometrics.csv", row.names = FALSE)
 	expect_error(loadBio("biometrics.csv", tz = "Europe/Copenhagen"), 
-		"Signals 1234, 5678 are duplicated in the biometrics.csv file.", fixed = TRUE)
+		"Signals 1234, 5678 are duplicated in the biometrics.", fixed = TRUE)
 
 	# some fish missing release site information	
 	bio <- example.biometrics
@@ -159,21 +160,21 @@ test_that("loadBio can handle multi-sensor tags.", {
 	write.csv(xbio, "biometrics.csv", row.names = FALSE)
 	expect_message(
 		expect_warning(bio <- loadBio("biometrics.csv", tz = "Europe/Copenhagen"),
-			"Tags with multiple sensors are listed in the biometrics.csv file, but a 'Sensor.unit' column could not be found. Skipping sensor unit assignment.", fixed = TRUE),
+			"Tags with multiple sensors are listed in the biometrics, but a 'Sensor.unit' column could not be found. Skipping sensor unit assignment.", fixed = TRUE),
 		"M: Multi-sensor tags detected. These tags will be referred to by their lowest signal value.", fixed = TRUE)
 
 	xbio$Signal[1] <- "test|4454"
 	write.csv(xbio, "biometrics.csv", row.names = FALSE)
 	expect_message(
 		expect_error(bio <- loadBio("biometrics.csv", tz = "Europe/Copenhagen"),
-			"Could not recognise the data in the 'Signal' column as integers. Please double-check the biometrics.csv file.", fixed = TRUE),
+			"Could not recognise the data in the 'Signal' column as integers. Please double-check the biometrics.", fixed = TRUE),
 		"M: Multi-sensor tags detected. These tags will be referred to by their lowest signal value.", fixed = TRUE)
 
 	xbio$Signal[1] <- "4455|4456"
 	write.csv(xbio, "biometrics.csv", row.names = FALSE)
 	expect_message(
 		expect_error(bio <- loadBio("biometrics.csv", tz = "Europe/Copenhagen"),
-			"Signal 4456 is duplicated in the biometrics.csv file.", fixed = TRUE),
+			"Signal 4456 is duplicated in the biometrics.", fixed = TRUE),
 		"M: Multi-sensor tags detected. These tags will be referred to by their lowest signal value.", fixed = TRUE)
 	
 	xbio$Signal[1] <- "4453|4454"
