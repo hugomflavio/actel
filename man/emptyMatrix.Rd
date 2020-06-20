@@ -4,10 +4,10 @@
 \alias{emptyMatrix}
 \title{Create a Template Distances Matrix}
 \usage{
-emptyMatrix(file = "spatial.csv")
+emptyMatrix(input = "spatial.csv")
 }
 \arguments{
-\item{file}{The path to the file containing the spatial information.}
+\item{input}{Either a data frame with spatial data or the path to the file containing the spatial information.}
 }
 \value{
 An empty matrix with the rows and columns required to

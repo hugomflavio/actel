@@ -8,12 +8,16 @@ Fixes:
   * Prevent crash if all detections for a given stray tag were removed during detection quality checks.
   * Prevent migration crash if all movement events are rendered invalid before section movements are created.
 
+Changes
+  * `stripCodeSpaces()` has been replaced with `extractSignals()`.
+
 Enhancements:
-  * the shapefiles of the study areas can now be water or land polygons. Use the new argument "time" in loadShape() to switch from land shapefiles (the default) to water shapefiles.
+  * the shapefiles of the study areas can now be water or land polygons. Use the new argument "time" in `loadShape()` to switch from land shapefiles (the default) to water shapefiles.
   * Paint groups consistently in circular plots.
   * Improved handling of long array lists in individual detection plots.
   * Display event number on inactiveness checks.
   * New argument `discard.first` allows the user to discard detections that happen before a given amount of time has passed after release.
+  * New function `extractCodeSpaces()` has been implemented.
   
 ## actel 1.0.0 (CRAN)
 

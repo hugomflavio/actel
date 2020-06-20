@@ -34,6 +34,7 @@ Imports:
     scales,
     stats,
     stringr,
+    stringi,
     grDevices,
     utils
 Suggests: 
