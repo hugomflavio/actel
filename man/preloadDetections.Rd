@@ -4,13 +4,21 @@
 \alias{preloadDetections}
 \title{Run quality checks on preloaded detections}
 \usage{
-preloadDetections(input, tz)
+preloadDetections(input, tz, start.time = NULL, stop.time = NULL)
 }
 \arguments{
 \item{input}{The detection data frame}
 
 \item{tz}{The time zone of the study area. Must match one of the values
 present in \code{\link[base]{timezones}}.}
+
+\item{start.time}{Detection data prior to the timestamp set in
+\code{start.time} (in YYYY-MM-DD HH:MM:SS format) is not considered during
+the analysis.}
+
+\item{stop.time}{Detection data posterior to the timestamp set in
+\code{stop.time} (in YYYY-MM-DD HH:MM:SS format) is not considered during
+the analysis.}
 }
 \value{
 A data frame with all the detections

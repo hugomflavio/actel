@@ -12,6 +12,8 @@ preload(
   dot,
   distances,
   tz,
+  start.time = NULL,
+  stop.time = NULL,
   sections = NULL,
   exclude.tags = NULL,
   disregard.parallels = FALSE,
@@ -33,6 +35,14 @@ preload(
 
 \item{tz}{The time zone of the study area. Must match one of the values
 present in \code{\link[base]{timezones}}.}
+
+\item{start.time}{Detection data prior to the timestamp set in
+\code{start.time} (in YYYY-MM-DD HH:MM:SS format) is not considered during
+the analysis.}
+
+\item{stop.time}{Detection data posterior to the timestamp set in
+\code{stop.time} (in YYYY-MM-DD HH:MM:SS format) is not considered during
+the analysis.}
 
 \item{sections}{The sections in which the study area is divided. Must be
 coincident with the names given to the arrays. See the vignettes for more
