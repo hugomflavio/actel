@@ -51,8 +51,9 @@
 #'  \item \code{tz}: The time zone of the study area
 #' }
 #' 
-preload <- function(biometrics, spatial, deployments, detections, dot, distances, tz, 
-	sections = NULL, exclude.tags = NULL, disregard.parallels = FALSE, discard.orphans = FALSE) {
+preload <- function(biometrics, spatial, deployments, detections, dot, distances, tz,
+  start.time = NULL, stop.time = NULL, sections = NULL, exclude.tags = NULL, 
+  disregard.parallels = FALSE, discard.orphans = FALSE) {
 
   if (is.na(match(tz, OlsonNames())))
     stop("'tz' could not be recognized as a timezone. Check available timezones with OlsonNames()\n", call. = FALSE)
@@ -181,7 +182,7 @@ preload <- function(biometrics, spatial, deployments, detections, dot, distances
 #' 
 #' @keywords internal
 #' 
-preloadDetections <- function(input, tz) {
+preloadDetections <- function(input, tz, start.time = NULL, stop.time = NULL) {
 	mandatory.cols <- c("Timestamp", "Receiver", "CodeSpace", "Signal")
 
 	if (any(link <- is.na(match(mandatory.cols, colnames(input))))) {
@@ -241,6 +242,19 @@ preloadDetections <- function(input, tz) {
 	}
 
 	attributes(input$Timestamp)$tzone <- tz
+
+  input <- input[order(input$Timestamp), ]
+
+  if (!is.null(start.time)){
+    onr <- nrow(input)
+    input <- input[Timestamp >= as.POSIXct(start.time, tz = tz)]
+    appendTo(c("Screen"), paste0("M: Discarding detection data previous to ",start.time," per user command (", onr - nrow(input), " detections discarded)."))
+  }
+  if (!is.null(stop.time)){
+    onr <- nrow(input)
+    input <- input[Timestamp <= as.POSIXct(stop.time, tz = tz), ]
+    appendTo(c("Screen"), paste0("M: Discarding detection data posterior to ",stop.time," per user command (", onr - nrow(input), " detections discarded)."))
+  }
 
 	if (any(grepl("^Valid$", colnames(input)))) {
 	  if (!is.logical(input$Valid)) {
