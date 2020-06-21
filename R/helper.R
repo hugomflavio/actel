@@ -397,7 +397,7 @@ appendTo <- function(recipient, line, fish) {
         append = file.exists(paste(tempdir(), "temp_comments.txt", sep = "/")))
     }
   }
-  write(line, 
+  write(paste(format(Sys.time(), "%H:%M:%S.:"), line), 
     file = paste(tempdir(), "actel_debug_file.txt", sep = "/"), 
     append = file.exists(paste(tempdir(), "actel_debug_file.txt", sep = "/")))
 }
