@@ -76,7 +76,7 @@ preload <- function(biometrics, spatial, deployments, detections, dot, distances
   deployments <- createUniqueSerials(input = deployments) # Prepare serial numbers to overwrite the serials in detections
 
 
-  detections <- preloadDetections(input = detections, tz = tz)
+  detections <- preloadDetections(input = detections, tz = tz, start.time = start.time, stop.time = stop.time)
   detections <- checkDupDetections(input = detections)
   detections <- createStandards(detections = detections, spatial = spatial, deployments = deployments, discard.orphans = discard.orphans) # get standardized station and receiver names, check for receivers with no detections
   message("M: Data time range: ", as.character(head(detections$Timestamp, 1)), " to ", as.character(tail(detections$Timestamp, 1)), " (", tz, ").")
@@ -247,12 +247,12 @@ preloadDetections <- function(input, tz, start.time = NULL, stop.time = NULL) {
 
   if (!is.null(start.time)){
     onr <- nrow(input)
-    input <- input[Timestamp >= as.POSIXct(start.time, tz = tz)]
+    input <- input[input$Timestamp >= as.POSIXct(start.time, tz = tz), ]
     appendTo(c("Screen"), paste0("M: Discarding detection data previous to ",start.time," per user command (", onr - nrow(input), " detections discarded)."))
   }
   if (!is.null(stop.time)){
     onr <- nrow(input)
-    input <- input[Timestamp <= as.POSIXct(stop.time, tz = tz), ]
+    input <- input[input$Timestamp <= as.POSIXct(stop.time, tz = tz), ]
     appendTo(c("Screen"), paste0("M: Discarding detection data posterior to ",stop.time," per user command (", onr - nrow(input), " detections discarded)."))
   }
 
