@@ -26,8 +26,9 @@ NULL
 
 #' Check argument quality
 #' 
-#' @param dp Logical: Was a datapack loaded in the arguments?
+#' @param dp A preloaded datapack (or NULL if no data was preloaded).
 #' @inheritParams explore
+#' @inheritParams migration
 #' 
 #' @keywords internal
 #' 
@@ -35,10 +36,13 @@ NULL
 #' 
 checkArguments <- function(dp, tz, minimum.detections, max.interval, speed.method = c("last to first", "last to last"),
   speed.warning, speed.error, start.time, stop.time, report, auto.open, save.detections, jump.warning, jump.error,
-  inactive.warning, inactive.error, exclude.tags, override, print.releases) {
+  inactive.warning, inactive.error, exclude.tags, override, print.releases, if.last.skip.section = NULL, 
+  replicates = NULL, sections = NULL, section.minimum = NULL) {
 
-  no.dp.args <- c("tz", "start.time", "stop.time", "save.detections", "exclude.tags")
-  link <- c(!is.null(tz), !is.null(start.time), !is.null(stop.time), !(is.logical(save.detections) && !save.detections), !is.null(exclude.tags))
+  no.dp.args <- c("tz", "start.time", "stop.time", "save.detections", "exclude.tags", "sections")
+  link <- c(!is.null(tz), !is.null(start.time), !is.null(stop.time), 
+    !(is.logical(save.detections) && !save.detections), !is.null(exclude.tags),
+   !is.null(sections))
 
   if (!is.null(dp) & any(link))
     warning("Argument", ifelse(sum(link) > 1, "s '", " '"), paste(no.dp.args[link], collapse = "', '"),
@@ -152,6 +156,23 @@ checkArguments <- function(dp, tz, minimum.detections, max.interval, speed.metho
     if (any(link <- is.na(match(override_signals, lowest_signals))))
       stop("Some tag signals listed in 'override' ('", paste0(override[link], collapse = "', '"), "') are not listed in the biometrics data.\n", call. = FALSE)
   }
+
+  # NON-explore checks
+
+  if (!is.null(if.last.skip.section) && !is.logical(if.last.skip.section))
+    stop("'if.last.skip.section' must be logical.\n", call. = FALSE)
+
+  if (!is.null(replicates) && !is.list(replicates))
+    stop("'replicates' must be a list.\n", call. = FALSE)
+
+  if (!is.null(replicates) && length(names(replicates)) != length(replicates))
+    stop("All list elements within 'replicates' must be named (i.e. list(Array = 'St.1') rather than list('St.1')).\n", call. = FALSE)
+
+  if (is.null(dp) && !is.null(sections))
+      checkSectionsUnique(sections = sections)
+
+  if (!is.null(section.minimum) && !is.numeric(section.minimum))
+    stop("'section.minimum' must be numeric.\n", call. = FALSE)
 
   return(list(speed.method = speed.method, speed.warning = speed.warning, speed.error = speed.error, 
     inactive.warning = inactive.warning, inactive.error = inactive.error))

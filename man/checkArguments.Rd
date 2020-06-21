@@ -23,11 +23,15 @@ checkArguments(
   inactive.error,
   exclude.tags,
   override,
-  print.releases
+  print.releases,
+  if.last.skip.section = NULL,
+  replicates = NULL,
+  sections = NULL,
+  section.minimum = NULL
 )
 }
 \arguments{
-\item{dp}{Logical: Was a datapack loaded in the arguments?}
+\item{dp}{A preloaded datapack (or NULL if no data was preloaded).}
 
 \item{tz}{The time zone of the study area. Must match one of the values
 present in \code{\link[base]{timezones}}.}
@@ -103,6 +107,17 @@ define which movement events are valid and invalid.}
 
 \item{print.releases}{Logical: Should the release sites be printed in the
 study area diagrams?}
+
+\item{if.last.skip.section}{Logical: Should a fish detected at the last array
+of a given section be considered to have disappeared in the next section?}
+
+\item{replicates}{A list containing, for each array to which intra-array
+efficiency is to be calculated: The standard names of the stations to be
+used as a replicate. See the vignettes for more details.}
+
+\item{sections}{The sections in which the study area is divided. Must be
+coincident with the names given to the arrays. See the vignettes for more
+details.}
 }
 \value{
 updated parameters

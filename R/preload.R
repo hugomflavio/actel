@@ -15,7 +15,41 @@
 #' 
 #' @export
 #' 
-#' @return ...
+#' @examples
+#' # This function requires a series of pre-created R objects.
+#' # We can create them by loading the example files from actel:
+#' aux <- system.file(package = "actel")[1]
+#' 
+#' bio <- read.csv(paste0(aux, "/example_biometrics.csv"))
+#' deployments <- read.csv(paste0(aux, "/example_deployments.csv"))
+#' spatial <- read.csv(paste0(aux, "/example_spatial.csv"))
+#' detections <- read.csv(paste0(aux, "/example_detections.csv"))
+#' 
+#' dot <- "River0--River1--River2--River3--River4--River5--River6--Fjord1--Fjord2--Sea1"
+#' 
+#' # Now that we have the R objects created, we can run preload:
+#' 
+#' x <- preload(biometrics = bio, deployments = deployments, spatial = spatial, 
+#'  detections = detections, dot = dot, tz = "Europe/Copenhagen")
+#' 
+#'  
+#' @return A dataset that can be used as an input for actel's main analyses.
+#' This dataset contains:
+#' \itemize{
+#'  \item \code{bio}: The biometric data
+#'  \item \code{sections}: The sections of the study area, if set using the argument sections (required to run residency and migration analyses)
+#'  \item \code{deployments}: The deployment data
+#'  \item \code{spatial}: The spatial data, split in stations and release sites.
+#'  \item \code{dot}: A table of array connections.
+#'  \item \code{arrays}: A list with the details of each array
+#'  \item \code{dotmat}: A matrix of distances between arrays (in number of arrays).
+#'  \item \code{dist.mat}: The distances matrix.
+#'  \item \code{invalid.dist}: Logical: Is the input distances matrix valid for this dataset?
+#'  \item \code{detections.list}: A processed list of detections for each tag.
+#'  \item \code{paths}: A list of the possible paths between each pair of arrays.
+#'  \item \code{disregard.parallels}: Logical: Should parallel arrays invalidate efficiency peers? (required to run residency and migration analyses)
+#'  \item \code{tz}: The time zone of the study area
+#' }
 #' 
 preload <- function(biometrics, spatial, deployments, detections, dot, distances, tz, 
 	sections = NULL, exclude.tags = NULL, disregard.parallels = FALSE, discard.orphans = FALSE) {
@@ -26,7 +60,10 @@ preload <- function(biometrics, spatial, deployments, detections, dot, distances
   if (!is.null(exclude.tags) && any(!grepl("-", exclude.tags, fixed = TRUE)))
     stop("Not all contents in 'exclude.tags' could be recognized as tags (i.e. 'codespace-signal'). Valid examples: 'R64K-1234', A69-1303-1234'\n", call. = FALSE)
 
-  bio <- loadBio(input = bio, tz = tz)
+  if (!is.null(sections))
+    checkSectionsUnique(sections = sections)
+
+  bio <- loadBio(input = biometrics, tz = tz)
 
   message("M: Number of target tags: ", nrow(bio), ".")
   

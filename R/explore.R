@@ -130,6 +130,7 @@ explore <- function(tz = NULL, datapack = NULL, max.interval = 60, minimum.detec
   deleteHelpers()
 
   if (!is.null(options("actel.debug")[[1]]) && options("actel.debug")[[1]]) { # nocov start
+    on.exit(message("Debug: Progress log available at ", paste0(tempdir(), "/actel_debug_file.txt")))
     on.exit(message("Debug: Saving carbon copy to ", paste0(tempdir(), "/actel.debug.RData")))
     on.exit(save(list = ls(), file = paste0(tempdir(), "/actel.debug.RData")), add = TRUE)
     message("!!!--- Debug mode has been activated ---!!!")
@@ -140,24 +141,12 @@ explore <- function(tz = NULL, datapack = NULL, max.interval = 60, minimum.detec
     checkToken(token = attributes(datapack)$actel.token, 
       timestamp = attributes(datapack)$timestamp)
 
-  aux <- checkArguments(dp = datapack,
-    tz = tz, 
-    minimum.detections = minimum.detections, 
-    max.interval = max.interval,
-    speed.method = speed.method,
-    speed.warning = speed.warning,
-    speed.error = speed.error,
-    start.time = start.time,
-    stop.time = stop.time,
-    report = report,
-    auto.open = auto.open,
-    save.detections = save.detections,
-    jump.warning = jump.warning,
-    jump.error = jump.error,
-    inactive.warning = inactive.warning,
-    inactive.error = inactive.error,
-    exclude.tags = exclude.tags,
-    override = override,
+  aux <- checkArguments(dp = datapack, tz = tz, minimum.detections = minimum.detections, 
+    max.interval = max.interval, speed.method = speed.method, speed.warning = speed.warning,
+    speed.error = speed.error, start.time = start.time, stop.time = stop.time,
+    report = report, auto.open = auto.open, save.detections = save.detections,
+    jump.warning = jump.warning, jump.error = jump.error, inactive.warning = inactive.warning,
+    inactive.error = inactive.error, exclude.tags = exclude.tags, override = override,
     print.releases = print.releases)
 
   speed.method <- aux$speed.method
@@ -179,27 +168,27 @@ explore <- function(tz = NULL, datapack = NULL, max.interval = 60, minimum.detec
 
 # Store function call
   the.function.call <- paste0("explore(tz = ", ifelse(is.null(tz), "NULL", paste0("'", tz, "'")),
-      ", datapack = ", ifelse(is.null(datapack), "NULL", deparse(substitute(datapack))),
-      ", max.interval = ", max.interval,
-      ", minimum.detections = ", minimum.detections,
-      ", start.time = ", ifelse(is.null(start.time), "NULL", paste0("'", start.time, "'")),
-      ", stop.time = ", ifelse(is.null(stop.time), "NULL", paste0("'", stop.time, "'")),
-      ", speed.method = ", paste0("c('", speed.method, "')"),
-      ", speed.warning = ", ifelse(is.null(speed.warning), "NULL", speed.warning), 
-      ", speed.error = ", ifelse(is.null(speed.error), "NULL", speed.error), 
-      ", jump.warning = ", jump.warning,
-      ", jump.error = ", jump.error,
-      ", inactive.warning = ", ifelse(is.null(inactive.warning), "NULL", inactive.warning),
-      ", inactive.error = ", ifelse(is.null(inactive.error), "NULL", inactive.error), 
-      ", exclude.tags = ", ifelse(is.null(exclude.tags), "NULL", paste0("c('", paste(exclude.tags, collapse = "', '"), "')")), 
-      ", override = ", ifelse(is.null(override), "NULL", paste0("c('", paste(override, collapse = "', '"), "')")),
-      ", report = ", ifelse(report, "TRUE", "FALSE"), 
-      ", discard.orphans = ", ifelse(discard.orphans, "TRUE", "FALSE"), 
-      ", auto.open = ", ifelse(auto.open, "TRUE", "FALSE"), 
-      ", save.detections = ", ifelse(save.detections, "TRUE", "FALSE"),       
-      ", GUI = '", GUI, "'",
-      ", print.releases = ", ifelse(print.releases, "TRUE", "FALSE"), 
-      ")")
+    ", datapack = ", ifelse(is.null(datapack), "NULL", deparse(substitute(datapack))),
+    ", max.interval = ", max.interval,
+    ", minimum.detections = ", minimum.detections,
+    ", start.time = ", ifelse(is.null(start.time), "NULL", paste0("'", start.time, "'")),
+    ", stop.time = ", ifelse(is.null(stop.time), "NULL", paste0("'", stop.time, "'")),
+    ", speed.method = ", paste0("c('", speed.method, "')"),
+    ", speed.warning = ", ifelse(is.null(speed.warning), "NULL", speed.warning), 
+    ", speed.error = ", ifelse(is.null(speed.error), "NULL", speed.error), 
+    ", jump.warning = ", jump.warning,
+    ", jump.error = ", jump.error,
+    ", inactive.warning = ", ifelse(is.null(inactive.warning), "NULL", inactive.warning),
+    ", inactive.error = ", ifelse(is.null(inactive.error), "NULL", inactive.error), 
+    ", exclude.tags = ", ifelse(is.null(exclude.tags), "NULL", paste0("c('", paste(exclude.tags, collapse = "', '"), "')")), 
+    ", override = ", ifelse(is.null(override), "NULL", paste0("c('", paste(override, collapse = "', '"), "')")),
+    ", report = ", ifelse(report, "TRUE", "FALSE"), 
+    ", discard.orphans = ", ifelse(discard.orphans, "TRUE", "FALSE"), 
+    ", auto.open = ", ifelse(auto.open, "TRUE", "FALSE"), 
+    ", save.detections = ", ifelse(save.detections, "TRUE", "FALSE"),       
+    ", GUI = '", GUI, "'",
+    ", print.releases = ", ifelse(print.releases, "TRUE", "FALSE"), 
+    ")")
 # --------------------
 
 # Final arrangements before beginning
@@ -211,27 +200,27 @@ explore <- function(tz = NULL, datapack = NULL, max.interval = 60, minimum.detec
 # -----------------------------------
 
 # Load, structure and check the inputs
-if (missing(datapack)) {
-  study.data <- loadStudyData(tz = tz, override = override, save.detections = save.detections,
-                              start.time = start.time, stop.time = stop.time, discard.orphans = discard.orphans,
-                              sections = NULL, exclude.tags = exclude.tags)
-} else {
-  appendTo(c("Screen", "Report"), paste0("M: Running analysis on preloaded data (compiled on ", attributes(datapack)$timestamp, ")."))
-  study.data <- datapack
-  tz <- study.data$tz
-  disregard.parallels <- study.data$disregard.parallels
-}
+  if (missing(datapack)) {
+    study.data <- loadStudyData(tz = tz, override = override, save.detections = save.detections,
+                                start.time = start.time, stop.time = stop.time, discard.orphans = discard.orphans,
+                                sections = NULL, exclude.tags = exclude.tags)
+  } else {
+    appendTo(c("Screen", "Report"), paste0("M: Running analysis on preloaded data (compiled on ", attributes(datapack)$timestamp, ")."))
+    study.data <- datapack
+    tz <- study.data$tz
+    disregard.parallels <- study.data$disregard.parallels
+  }
 
-bio <- study.data$bio
-sections <- study.data$sections
-deployments <- study.data$deployments
-spatial <- study.data$spatial
-dot <- study.data$dot
-arrays <- study.data$arrays
-dotmat <- study.data$dotmat
-dist.mat <- study.data$dist.mat
-invalid.dist <- study.data$invalid.dist
-detections.list <- study.data$detections.list
+  bio <- study.data$bio
+  sections <- study.data$sections
+  deployments <- study.data$deployments
+  spatial <- study.data$spatial
+  dot <- study.data$dot
+  arrays <- study.data$arrays
+  dotmat <- study.data$dotmat
+  dist.mat <- study.data$dist.mat
+  invalid.dist <- study.data$invalid.dist
+  detections.list <- study.data$detections.list
 # -------------------------------------
   
 # Process the data
