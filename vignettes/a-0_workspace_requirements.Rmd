@@ -21,6 +21,7 @@ knitr::opts_chunk$set(
 1. [**Preparing your data**](a-0_workspace_requirements.html)
     1. [Structuring the study area](a-1_study_area.html)
     1. [Creating a distances matrix](a-2_distances_matrix.html)
+    1. [The preload() function](a-3_preload.html)
 1. [explore()](b-0_explore.html)
     1. [Processes behind explore()](b-1_explore_processes.html)
     1. [Inspecting the explore() results](b-2_explore_results.html)
@@ -41,6 +42,14 @@ knitr::opts_chunk$set(
 Actel requires that you organise your input files in a specific fashion. Critically, you should have a file named **biometrics.csv**, one named **spatial.csv**, and one named **deployments.csv** (we will look into the file contents in detail soon). Finally, you also need a **detections directory**, containing all your detection files in *.csv*  format. 
 
 To create a blank workspace ready to be used, run `createWorkspace()`, and a template will be generated automatically in an "actel_workspace" directory. If you would like to, you can change the name of the target directory by using the argument `dir`. Remember to delete the example rows before including your data!
+
+***
+
+Note for advanced R users:
+  : You can now run actel analyses using R objects as an input, rather than input files. 
+  : Read more about it [in this dedicated page.](a-3_preload.html)
+
+***
 
 ## Biometrics file
 

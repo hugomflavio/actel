@@ -21,6 +21,7 @@ knitr::opts_chunk$set(
 1. [Preparing your data](a-0_workspace_requirements.html)
     1. [Structuring the study area](a-1_study_area.html)
     1. [__Creating a distances matrix__](a-2_distances_matrix.html)
+    1. [The preload() function](a-3_preload.html)
 1. [explore()](b-0_explore.html)
     1. [Processes behind explore()](b-1_explore_processes.html)
     1. [Inspecting the explore() results](b-2_explore_results.html)

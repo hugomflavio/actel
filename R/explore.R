@@ -9,6 +9,8 @@
 #'  analysis is over? Defaults to TRUE. NOTE: If report = TRUE and auto.open = TRUE,
 #'  the web browser will automatically be launched to open the report once the 
 #'  function terminates.
+#' @param datapack A data bundle pre-compiled through the function \code{\link{preload}}.
+#'  May be used to run actel analyses based on R objects, rather than input files.
 #' @param discard.first A threshold amount of time (in hours) that must pass after
 #'  release for the respective detections to be valid. Set to 0 to discard only
 #'  the release-to-first-detection calculations.
@@ -119,100 +121,42 @@
 #' 
 #' @export
 #' 
-explore <- function(tz, max.interval = 60, minimum.detections = 2, start.time = NULL, stop.time = NULL, 
+explore <- function(tz = NULL, datapack = NULL, max.interval = 60, minimum.detections = 2, start.time = NULL, stop.time = NULL, 
   speed.method = c("last to first", "last to last"), speed.warning = NULL, speed.error = NULL, 
   jump.warning = 2, jump.error = 3, inactive.warning = NULL, inactive.error = NULL, 
   exclude.tags = NULL, override = NULL, report = FALSE, auto.open = TRUE, discard.orphans = FALSE, discard.first = NULL,
   save.detections = FALSE, GUI = c("needed", "always", "never"), print.releases = TRUE) {
 
+  deleteHelpers()
+
   if (!is.null(options("actel.debug")[[1]]) && options("actel.debug")[[1]]) { # nocov start
+    on.exit(message("Debug: Progress log available at ", paste0(tempdir(), "/actel_debug_file.txt")))
     on.exit(message("Debug: Saving carbon copy to ", paste0(tempdir(), "/actel.debug.RData")))
     on.exit(save(list = ls(), file = paste0(tempdir(), "/actel.debug.RData")), add = TRUE)
     message("!!!--- Debug mode has been activated ---!!!")
   } # nocov end
 
 # check arguments quality
-  if (is.null(tz) || is.na(match(tz, OlsonNames())))
-    stop("'tz' could not be recognized as a timezone. Check available timezones with OlsonNames()\n", call. = FALSE)
-  if (!is.numeric(minimum.detections))
-    stop("'minimum.detections' must be numeric.\n", call. = FALSE)
-  if (minimum.detections <= 0)
-    stop("'minimum.detections' must be positive.\n", call. = FALSE)
-  if (!is.numeric(max.interval))
-    stop("'max.interval' must be numeric.\n", call. = FALSE)
-  if (max.interval <= 0)
-    stop("'max.interval' must be positive.\n", call. = FALSE)
+  if (!is.null(datapack))
+    checkToken(token = attributes(datapack)$actel.token, 
+      timestamp = attributes(datapack)$timestamp)
 
-  if (!is.character(speed.method))
-    stop("'speed.method' should be one of 'last to first' or 'last to last'.\n", call. = FALSE)
-  speed.method <- match.arg(speed.method)
+  aux <- checkArguments(dp = datapack, tz = tz, minimum.detections = minimum.detections, 
+    max.interval = max.interval, speed.method = speed.method, speed.warning = speed.warning,
+    speed.error = speed.error, start.time = start.time, stop.time = stop.time,
+    report = report, auto.open = auto.open, save.detections = save.detections,
+    jump.warning = jump.warning, jump.error = jump.error, inactive.warning = inactive.warning,
+    inactive.error = inactive.error, exclude.tags = exclude.tags, override = override,
+    print.releases = print.releases)
 
-  if (!is.null(speed.warning) && !is.numeric(speed.warning))
-    stop("'speed.warning' must be numeric.\n", call. = FALSE)
-  if (!is.null(speed.warning) && speed.warning <= 0)
-    stop("'speed.warning' must be positive.\n", call. = FALSE) 
-
-  if (!is.null(speed.error) && !is.numeric(speed.error))
-    stop("'speed.error' must be numeric.\n", call. = FALSE)    
-  if (!is.null(speed.error) && speed.error <= 0)
-    stop("'speed.error' must be positive.\n", call. = FALSE)
-
-  if (!is.null(speed.error) & is.null(speed.warning))
-    speed.warning <- speed.error
-  if (!is.null(speed.error) && speed.error < speed.warning)
-    stop("'speed.error' must not be lower than 'speed.warning'.\n", call. = FALSE)
-  if (!is.null(speed.warning) & is.null(speed.error))
-    speed.error <- Inf
-  
-  if (!is.null(start.time) && !grepl("^[1-2][0-9][0-9][0-9]-[0-1][0-9]-[0-3][0-9] [0-2][0-9]:[0-5][0-9]:[0-5][0-9]", start.time))
-    stop("'start.time' must be in 'yyyy-mm-dd hh:mm:ss' format.\n", call. = FALSE)
-  if (!is.null(stop.time) && !grepl("^[1-2][0-9][0-9][0-9]-[0-1][0-9]-[0-3][0-9] [0-2][0-9]:[0-5][0-9]:[0-5][0-9]", stop.time))
-    stop("'stop.time' must be in 'yyyy-mm-dd hh:mm:ss' format.\n", call. = FALSE)
-  
-  if (!is.logical(report))
-    stop("'report' must be logical.\n", call. = FALSE)
-  if (!is.logical(auto.open))
-    stop("'auto.open' must be logical.\n", call. = FALSE)
-  if (!is.logical(save.detections))
-    stop("'save.detections' must be logical.\n", call. = FALSE)
-
-  if (!is.numeric(jump.warning))
-    stop("'jump.warning' must be numeric.\n", call. = FALSE)
-  if (jump.warning < 1)
-    stop("'jump.warning' must not be lower than 1.\n", call. = FALSE)
-  if (!is.numeric(jump.error))
-    stop("'jump.error' must be numeric.\n", call. = FALSE)
-  if (jump.error < 1)
-    stop("'jump.error' must not be lower than 1.\n", call. = FALSE)
-  if (jump.error < jump.warning)
-    stop("'jump.error' must not be lower than 'jump.warning'.\n", call. = FALSE)
-
-  if (!is.null(inactive.warning) && !is.numeric(inactive.warning))
-    stop("'inactive.warning' must be numeric.\n", call. = FALSE)    
-  if (!is.null(inactive.warning) && inactive.warning <= 0)
-    stop("'inactive.warning' must be positive.\n", call. = FALSE)
-
-  if (!is.null(inactive.error) && !is.numeric(inactive.error))
-    stop("'inactive.error' must be numeric.\n", call. = FALSE)    
-  if (!is.null(inactive.error) && inactive.error <= 0)
-    stop("'inactive.error' must be positive.\n", call. = FALSE)
-
-  if (!is.null(inactive.error) & is.null(inactive.warning))
-    inactive.warning <- inactive.error
-  if (!is.null(inactive.error) && inactive.error < inactive.warning)
-    stop("'inactive.error' must not be lower than 'inactive.warning'.\n", call. = FALSE)
-  if (!is.null(inactive.warning) & is.null(inactive.error))
-    inactive.error <- Inf
-  
-  if (!is.null(exclude.tags) && any(!grepl("-", exclude.tags, fixed = TRUE)))
-    stop("Not all contents in 'exclude.tags' could be recognized as tags (i.e. 'codespace-signal'). Valid examples: 'R64K-1234', A69-1303-1234'\n", call. = FALSE)
-  if (!is.null(override) && any(!grepl("-", override, fixed = TRUE)))
-    stop("Not all contents in 'override' could be recognized as tags (i.e. 'codespace-signal'). Valid examples: 'R64K-1234', A69-1303-1234'\n", call. = FALSE)
+  speed.method <- aux$speed.method
+  speed.warning <- aux$speed.warning
+  speed.error <- aux$speed.error
+  inactive.warning <- aux$inactive.warning
+  inactive.error <- aux$inactive.error  
+  rm(aux)
 
   GUI <- checkGUI(GUI)
-
-  if (!is.logical(print.releases))
-    stop("'print.releases' must be logical.\n", call. = FALSE)
 # ------------------------
 
 # Prepare clean-up before function ends
@@ -223,27 +167,28 @@ explore <- function(tz, max.interval = 60, minimum.detections = 2, start.time = 
 # --------------------------------------
 
 # Store function call
-  the.function.call <- paste0("explore(tz = ", ifelse(is.null(tz), "NULL", paste0("'", tz, "'")), 
-      ", max.interval = ", max.interval,
-      ", minimum.detections = ", minimum.detections,
-      ", start.time = ", ifelse(is.null(start.time), "NULL", paste0("'", start.time, "'")),
-      ", stop.time = ", ifelse(is.null(stop.time), "NULL", paste0("'", stop.time, "'")),
-      ", speed.method = ", paste0("c('", speed.method, "')"),
-      ", speed.warning = ", ifelse(is.null(speed.warning), "NULL", speed.warning), 
-      ", speed.error = ", ifelse(is.null(speed.error), "NULL", speed.error), 
-      ", jump.warning = ", jump.warning,
-      ", jump.error = ", jump.error,
-      ", inactive.warning = ", ifelse(is.null(inactive.warning), "NULL", inactive.warning),
-      ", inactive.error = ", ifelse(is.null(inactive.error), "NULL", inactive.error), 
-      ", exclude.tags = ", ifelse(is.null(exclude.tags), "NULL", paste0("c('", paste(exclude.tags, collapse = "', '"), "')")), 
-      ", override = ", ifelse(is.null(override), "NULL", paste0("c('", paste(override, collapse = "', '"), "')")),
-      ", report = ", ifelse(report, "TRUE", "FALSE"), 
-      ", discard.orphans = ", ifelse(discard.orphans, "TRUE", "FALSE"), 
-      ", auto.open = ", ifelse(auto.open, "TRUE", "FALSE"), 
-      ", save.detections = ", ifelse(save.detections, "TRUE", "FALSE"),       
-      ", GUI = '", GUI, "'",
-      ", print.releases = ", ifelse(print.releases, "TRUE", "FALSE"), 
-      ")")
+  the.function.call <- paste0("explore(tz = ", ifelse(is.null(tz), "NULL", paste0("'", tz, "'")),
+    ", datapack = ", ifelse(is.null(datapack), "NULL", deparse(substitute(datapack))),
+    ", max.interval = ", max.interval,
+    ", minimum.detections = ", minimum.detections,
+    ", start.time = ", ifelse(is.null(start.time), "NULL", paste0("'", start.time, "'")),
+    ", stop.time = ", ifelse(is.null(stop.time), "NULL", paste0("'", stop.time, "'")),
+    ", speed.method = ", paste0("c('", speed.method, "')"),
+    ", speed.warning = ", ifelse(is.null(speed.warning), "NULL", speed.warning), 
+    ", speed.error = ", ifelse(is.null(speed.error), "NULL", speed.error), 
+    ", jump.warning = ", jump.warning,
+    ", jump.error = ", jump.error,
+    ", inactive.warning = ", ifelse(is.null(inactive.warning), "NULL", inactive.warning),
+    ", inactive.error = ", ifelse(is.null(inactive.error), "NULL", inactive.error), 
+    ", exclude.tags = ", ifelse(is.null(exclude.tags), "NULL", paste0("c('", paste(exclude.tags, collapse = "', '"), "')")), 
+    ", override = ", ifelse(is.null(override), "NULL", paste0("c('", paste(override, collapse = "', '"), "')")),
+    ", report = ", ifelse(report, "TRUE", "FALSE"), 
+    ", discard.orphans = ", ifelse(discard.orphans, "TRUE", "FALSE"), 
+    ", auto.open = ", ifelse(auto.open, "TRUE", "FALSE"), 
+    ", save.detections = ", ifelse(save.detections, "TRUE", "FALSE"),       
+    ", GUI = '", GUI, "'",
+    ", print.releases = ", ifelse(print.releases, "TRUE", "FALSE"), 
+    ")")
 # --------------------
 
 # Final arrangements before beginning
@@ -255,19 +200,27 @@ explore <- function(tz, max.interval = 60, minimum.detections = 2, start.time = 
 # -----------------------------------
 
 # Load, structure and check the inputs
-study.data <- loadStudyData(tz = tz, override = override, save.detections = save.detections,
-                            start.time = start.time, stop.time = stop.time, discard.orphans = discard.orphans,
-                            sections = NULL, exclude.tags = exclude.tags)
-bio <- study.data$bio
-sections <- study.data$sections
-deployments <- study.data$deployments
-spatial <- study.data$spatial
-dot <- study.data$dot
-arrays <- study.data$arrays
-dotmat <- study.data$dotmat
-dist.mat <- study.data$dist.mat
-invalid.dist <- study.data$invalid.dist
-detections.list <- study.data$detections.list
+  if (is.null(datapack)) {
+    study.data <- loadStudyData(tz = tz, override = override, save.detections = save.detections,
+                                start.time = start.time, stop.time = stop.time, discard.orphans = discard.orphans,
+                                sections = NULL, exclude.tags = exclude.tags)
+  } else {
+    appendTo(c("Screen", "Report"), paste0("M: Running analysis on preloaded data (compiled on ", attributes(datapack)$timestamp, ")."))
+    study.data <- datapack
+    tz <- study.data$tz
+    disregard.parallels <- study.data$disregard.parallels
+  }
+
+  bio <- study.data$bio
+  sections <- study.data$sections
+  deployments <- study.data$deployments
+  spatial <- study.data$spatial
+  dot <- study.data$dot
+  arrays <- study.data$arrays
+  dotmat <- study.data$dotmat
+  dist.mat <- study.data$dist.mat
+  invalid.dist <- study.data$invalid.dist
+  detections.list <- study.data$detections.list
 # -------------------------------------
   
 # Process the data

@@ -4,9 +4,11 @@
 \alias{loadDistances}
 \title{Load distances matrix}
 \usage{
-loadDistances(spatial)
+loadDistances(input, spatial)
 }
 \arguments{
+\item{input}{A matrix of distances, to be loaded rather than a file.}
+
 \item{spatial}{A list of spatial objects in the study area.}
 }
 \value{

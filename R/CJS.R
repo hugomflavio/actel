@@ -572,7 +572,7 @@ efficiencyMatrix <- function(movements, arrays, paths, dotmat) {
   appendTo("debug", "Starting efficiencyMatrix.")
   max.ef <- as.data.frame(matrix(ncol = length(arrays) + 1, nrow = length(movements)))
   colnames(max.ef) <- c("Release", names(arrays))
-  rownames(max.ef) <- stripCodeSpaces(names(movements))
+  rownames(max.ef) <- extractSignals(names(movements))
   max.ef[is.na(max.ef)] = 0
   max.ef$Release = 1
   min.ef <- max.ef
@@ -590,8 +590,8 @@ efficiencyMatrix <- function(movements, arrays, paths, dotmat) {
         if (!is.null(aux))
           max.aux[match(aux, names(max.aux))] <- 1
       }
-      max.ef[stripCodeSpaces(fish), ] <<- max.aux
-      min.ef[stripCodeSpaces(fish), ] <<- min.aux
+      max.ef[extractSignals(fish), ] <<- max.aux
+      min.ef[extractSignals(fish), ] <<- min.aux
     }
   })
   return(list(maxmat = max.ef, minmat = min.ef))

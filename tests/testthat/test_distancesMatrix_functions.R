@@ -191,12 +191,11 @@ tests.home <- getwd()
 setwd(tempdir())
 
 test_that("emptyMatrix stops if the required file are not present.", {
-	expect_error(emptyMatrix(), "Could not find a 'spatial.csv' file in the current working directory.", fixed = TRUE)
+	expect_error(emptyMatrix(), "Could not find file 'spatial.csv'.", fixed = TRUE)
 })
 
-test_that("emptyMatrix creates a distances.csv file with the correct structure", {
-	write.csv(example.spatial, "spatial.csv", row.names = FALSE)
-	dist.mat <<- emptyMatrix()
+test_that("emptyMatrix creates a distances matrix with the correct structure", {
+	dist.mat <<- emptyMatrix(paste0(system.file(package = "actel")[1], "/example_spatial.csv"))
 	expect_equal(ncol(dist.mat), nrow(dist.mat))
 	expect_true(sum(is.na(dist.mat)) == (ncol(dist.mat) ^ 2) - ncol(dist.mat))
 })

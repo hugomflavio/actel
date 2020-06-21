@@ -13,7 +13,7 @@ detections <- loadDetections(start.time = NULL, stop.time = NULL, tz = "Europe/C
 unlink("detections", recursive = TRUE)
 
 write.csv(example.biometrics, "biometrics.csv", row.names = FALSE)
-bio <- loadBio(file = "biometrics.csv", tz = "Europe/Copenhagen")
+bio <- loadBio(input = "biometrics.csv", tz = "Europe/Copenhagen")
 file.remove("biometrics.csv")
 
 test_that("splitDetections' output is as expected", {
@@ -34,7 +34,7 @@ test_that("splitDetections excludes tags as requested.", {
 
 test_that("splitDetections stops the analysis if no detections match the target tags", {
 	write.csv(example.biometrics[1, ], "biometrics.csv", row.names = FALSE)
-	bio <- loadBio(file = "biometrics.csv", tz = "Europe/Copenhagen")
+	bio <- loadBio(input = "biometrics.csv", tz = "Europe/Copenhagen")
 	file.remove("biometrics.csv")
 	expect_error(splitDetections(detections = detections, bio = bio),
 		"No detections were found in the input data which matched the target signals.", fixed = TRUE)

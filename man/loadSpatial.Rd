@@ -4,10 +4,10 @@
 \alias{loadSpatial}
 \title{Load Spatial File}
 \usage{
-loadSpatial(file = "spatial.csv")
+loadSpatial(input = "spatial.csv")
 }
 \arguments{
-\item{file}{an input file with spatial data in the actel format.}
+\item{input}{Either a data frame or the name of an input file with spatial data in the actel format.}
 }
 \value{
 A data frame with the spatial information present in 'spatial.csv' and the Standard.name column.
@@ -23,6 +23,6 @@ performs a series of quality checks on the contents of the target file.
 aux <- system.file(package = "actel")[1]
 
 # run loadSpatial on the temporary spatial.csv file
-loadSpatial(file = paste0(aux, '/example_spatial.csv'))
+loadSpatial(input = paste0(aux, '/example_spatial.csv'))
 
 }

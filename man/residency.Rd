@@ -5,8 +5,9 @@
 \title{Residency Analysis}
 \usage{
 residency(
-  tz,
-  sections,
+  tz = NULL,
+  sections = NULL,
+  datapack = NULL,
   max.interval = 60,
   minimum.detections = 2,
   start.time = NULL,
@@ -38,6 +39,9 @@ present in \code{\link[base]{timezones}}.}
 \item{sections}{The sections in which the study area is divided. Must be
 coincident with the names given to the arrays. See the vignettes for more
 details.}
+
+\item{datapack}{A data bundle pre-compiled through the function \code{\link{preload}}.
+May be used to run actel analyses based on R objects, rather than input files.}
 
 \item{max.interval}{The number of minutes that must pass between detections
 for a new event to be created. Defaults to 60.}

@@ -4,10 +4,10 @@
 \alias{loadBio}
 \title{Load Biometrics file}
 \usage{
-loadBio(file, tz)
+loadBio(input, tz)
 }
 \arguments{
-\item{file}{an input file with biometric data.}
+\item{input}{an input file or data frame with biometric data.}
 
 \item{tz}{The time zone of the study area. Must match one of the values
 present in \code{\link[base]{timezones}}.}

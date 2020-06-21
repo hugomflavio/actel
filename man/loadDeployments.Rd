@@ -4,10 +4,13 @@
 \alias{loadDeployments}
 \title{Load deployments file and Check the structure}
 \usage{
-loadDeployments(file, tz)
+loadDeployments(input, tz)
 }
 \arguments{
-\item{file}{an input file with spatial data.}
+\item{input}{an input data frame or file with deployment data.}
+
+\item{tz}{The time zone of the study area. Must match one of the values
+present in \code{\link[base]{timezones}}.}
 }
 \value{
 A data frame with the deployments information
