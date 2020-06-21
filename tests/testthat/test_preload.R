@@ -164,11 +164,11 @@ test_that("Data conversion warnings and errors kick in", {
 	"The 'Signal' column in the detections is not of type integer. Attempting to convert.", fixed = TRUE)
 
 
-	expect_warning(x <- preload(biometrics = bio, deployments = deployments, spatial = spatial, detections = d, 
+	expect_warning(x <- preload(biometrics = bio, deployments = deployments, spatial = spatial, detections = detections, 
 			dot = dot, distances = example.distances, tz = "Europe/Copenhagen"),
 	"The 'Receiver' column in the detections is not of type integer. Attempting to convert.", fixed = TRUE)
 
-	expect_warning(x <- preload(biometrics = bio, deployments = deployments, spatial = spatial, detections = d, 
+	expect_warning(x <- preload(biometrics = bio, deployments = deployments, spatial = spatial, detections = detections, 
 			dot = dot, distances = example.distances, tz = "Europe/Copenhagen"),
 	"Attempting to convert the 'Receiver' to integer failed. Attempting to extract only the serial numbers.", fixed = TRUE)
 
