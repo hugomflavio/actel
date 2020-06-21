@@ -18,6 +18,7 @@ Enhancements:
   * Display event number on inactiveness checks.
   * New argument `discard.first` allows the user to discard detections that happen before a given amount of time has passed after release.
   * New function `extractCodeSpaces()` has been implemented.
+  * New `preload()` function allows advanced users to run actel without requiring input files. See more in the new dedicated vignette.
   
 ## actel 1.0.0 (CRAN)
 
