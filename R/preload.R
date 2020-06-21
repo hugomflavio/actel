@@ -86,12 +86,11 @@ preload <- function(biometrics, spatial, deployments, detections, dot, distances
     n <- length(unique(spatial$Array[spatial$Type == "Hydrophone"]))
     if (n > 1) {
       fakedot <- paste(unique(spatial$Array[spatial$Type == "Hydrophone"]), collapse = "--")
-      recipient <- loadDot(string = fakedot, spatial = spatial, sections = sections, disregard.parallels = disregard.parallels)
     } else {
       aux <- unique(spatial$Array[spatial$Type == "Hydrophone"])
       fakedot <- paste(aux, "--", aux)
-      recipient <- loadDot(string = fakedot, spatial = spatial, sections = sections, disregard.parallels = disregard.parallels)
     }
+    recipient <- loadDot(string = fakedot, spatial = spatial, sections = sections, disregard.parallels = disregard.parallels)
   } else {
   	if (!is.character(dot))
   		stop("'dot' was set but could not recognised as a string. Please prepare a dot string and include it in the dot argument.\nYou can use readDot to check the quality of your dot string.", call. = FALSE)
@@ -191,8 +190,11 @@ preloadDetections <- function(input, tz, start.time = NULL, stop.time = NULL) {
 		else
 			also.say <- ""
 
-		stop("The following mandatory columns are missing in the detections:", paste(mandatory.cols[link], collapse = ", "), also.say, call. = FALSE)
+		stop("The following mandatory columns are missing in the detections: ", paste(mandatory.cols[link], collapse = ", "), also.say, call. = FALSE)
 	}
+
+  if (any(link <- apply(input[, mandatory.cols], 2, function(i) any(is.na(i)))))
+    stop("There is missing data in the following mandatory columns of the detections: ", paste0(mandatory.cols[link], collapse = ", "), call. = FALSE)
 
 	if (!is.integer(input$Signal)) {
 		warning("The 'Signal' column in the detections is not of type integer. Attempting to convert.", immediate. = TRUE, call. = FALSE)
@@ -232,13 +234,15 @@ preloadDetections <- function(input, tz, start.time = NULL, stop.time = NULL) {
 
 	if (!is.numeric(input$Sensor.Value)) {
 		warning("The 'Sensor.Value' column in the detections is not of type numeric. Attempting to convert.", immediate. = TRUE, call. = FALSE)
-		input$Signal <- tryCatch(as.numeric(input$Signal), 
+		input$Sensor.Value <- tryCatch(as.numeric(input$Sensor.Value), 
 			warning = function(w) stop("Attempting to convert the 'Sensor.Value' to numeric failed. Aborting.", call. = FALSE))
 	}
 
 	if (!inherits(input$Timestamp, "POSIXct")) {
 		message("M: Converting detection timestamps to POSIX objects"); flush.console()
 		input$Timestamp <- fasttime::fastPOSIXct(input$Timestamp, tz = "UTC")
+    if (any(is.na(input$Timestamp)))
+      stop("Converting the timestamps failed. Aborting.", call. = FALSE)   
 	}
 
 	attributes(input$Timestamp)$tzone <- tz

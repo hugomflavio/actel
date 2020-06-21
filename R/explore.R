@@ -137,7 +137,7 @@ explore <- function(tz = NULL, datapack = NULL, max.interval = 60, minimum.detec
   } # nocov end
 
 # check arguments quality
-  if (!missing(datapack))
+  if (!is.null(datapack))
     checkToken(token = attributes(datapack)$actel.token, 
       timestamp = attributes(datapack)$timestamp)
 
@@ -200,7 +200,7 @@ explore <- function(tz = NULL, datapack = NULL, max.interval = 60, minimum.detec
 # -----------------------------------
 
 # Load, structure and check the inputs
-  if (missing(datapack)) {
+  if (is.null(datapack)) {
     study.data <- loadStudyData(tz = tz, override = override, save.detections = save.detections,
                                 start.time = start.time, stop.time = stop.time, discard.orphans = discard.orphans,
                                 sections = NULL, exclude.tags = exclude.tags)

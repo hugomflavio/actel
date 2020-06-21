@@ -136,7 +136,7 @@ migration <- function(tz = NULL, sections = NULL, datapack = NULL, success.array
   } # nocov end
   
 # check arguments quality
-  if (!missing(datapack)) {
+  if (!is.null(datapack)) {
     checkToken(token = attributes(datapack)$actel.token, 
       timestamp = attributes(datapack)$timestamp)
   }
@@ -206,7 +206,7 @@ migration <- function(tz = NULL, sections = NULL, datapack = NULL, success.array
 # -----------------------------------
 
 # Load, structure and check the inputs
-  if (missing(datapack)) {
+  if (is.null(datapack)) {
     study.data <- loadStudyData(tz = tz, override = override, save.detections = save.detections,
                                 start.time = start.time, stop.time = stop.time, discard.orphans = discard.orphans,
                                 sections = sections, exclude.tags = exclude.tags, disregard.parallels = disregard.parallels)
