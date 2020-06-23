@@ -51,7 +51,7 @@ Here are some examples:
 
 **Detection graphics**
 
-<img src="vignettes/R64K-4521.png" alt="drawing" width="420"/> <img src="vignettes/R64K-4526.png" alt="drawing" width="420"/>
+<img src="vignettes/R64K-4521.png" alt="drawing" width="400"/> <img src="vignettes/R64K-4526.png" alt="drawing" width="400"/>
 
 **Times of arrival and summary information**
 
