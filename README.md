@@ -6,6 +6,7 @@ Jump to [**installation instructions**](#installing-actel)
 [![Travis Build Status](https://travis-ci.com/hugomflavio/actel.svg?branch=master)](https://travis-ci.org/hugomflavio/actel)
 [![CRAN\_Status\_Badge](https://www.r-pkg.org/badges/version/actel)](https://cran.r-project.org/package=actel)
 [![CRAN RStudio mirror downloads](https://cranlogs.r-pkg.org/badges/actel)](https://cran.r-project.org/package=actel)
+
 [![codecov](https://codecov.io/github/hugomflavio/actel/branch/master/graphs/badge.svg)](https://codecov.io/github/hugomflavio/actel)<sup> of non-interactive code*</sup>
 
 Read the [latest news here!](https://github.com/hugomflavio/actel/blob/master/NEWS.md#news)
@@ -50,7 +51,7 @@ Here are some examples:
 
 **Detection graphics**
 
-<img src="vignettes/R64K-4521.png" alt="drawing" width="430"/> <img src="vignettes/R64K-4526.png" alt="drawing" width="430"/>
+<img src="vignettes/R64K-4521.png" alt="drawing" width="420"/> <img src="vignettes/R64K-4526.png" alt="drawing" width="420"/>
 
 **Times of arrival and summary information**
 
