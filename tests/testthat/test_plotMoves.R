@@ -3,7 +3,7 @@ skip_on_cran()
 test_that("plotMoves' failsafes kick in when needed", {
 	expect_error(plotMoves("a"), "Could not recognise the input as an actel results object.", fixed = TRUE)
 	expect_error(plotMoves(list("a")), "Could not recognise the input as an actel results object.", fixed = TRUE)
-	expect_error(plotMoves(example.results, tag = "a"), 
+	expect_error(plotMoves(example.results, tag = "a"),
 		"Could not find tag 'a' in the input.", fixed = TRUE)
 })
 

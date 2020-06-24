@@ -15,9 +15,9 @@ test_that("residency stops when any argument does not make sense", {
 test_that("residency results contains all the expected elements.", {
 	output <- suppressWarnings(residency(tz = 'Europe/Copenhagen', sections = c("River", "Fjord", "Sea"), report = FALSE, GUI = "never"))
 
-	expect_false(any(is.na(match(names(output), c('array.times', 'arrays', 'daily.positions', 'daily.ratios', 'deployments', 
+	expect_false(any(is.na(match(names(output), c('array.times', 'arrays', 'daily.positions', 'daily.ratios', 'deployments',
 		'detections', 'dist.mat', 'efficiency', 'global.ratios', 'intra.array.CJS', 'intra.array.matrices',
-		'last.seen', 'movements', 'residency.list', 'rsp.info', 'section.movements', 'section.times', 
+		'last.seen', 'movements', 'residency.list', 'rsp.info', 'section.movements', 'section.times',
 		'spatial', 'status.df', 'valid.detections', 'valid.movements')))))
 
 	# all the contents of each object have been tested in their respective function tests, appart from rsp.info and last.seen
@@ -35,19 +35,19 @@ test_that("residency results contains all the expected elements.", {
 
 test_that("residency is able to run speed and inactiveness checks.", {
 	skip_on_cran()
-	output <- suppressWarnings(residency(sections = c("River", "Fjord", "Sea"), tz = 'Europe/Copenhagen', 
+	output <- suppressWarnings(residency(sections = c("River", "Fjord", "Sea"), tz = 'Europe/Copenhagen',
 		report = FALSE, GUI = "never", speed.warning = 1000000, inactive.warning = 1000000, replicates = list(Sea1 = c("St.16", "St.17"))))
-	expect_false(any(is.na(match(names(output), c('array.times', 'arrays', 'daily.positions', 'daily.ratios', 
-		'deployments', 'detections', 'dist.mat', 'efficiency', 'global.ratios', 'intra.array.CJS', 
-		'intra.array.matrices','last.seen', 'movements', 'residency.list', 'rsp.info', 'section.movements', 
+	expect_false(any(is.na(match(names(output), c('array.times', 'arrays', 'daily.positions', 'daily.ratios',
+		'deployments', 'detections', 'dist.mat', 'efficiency', 'global.ratios', 'intra.array.CJS',
+		'intra.array.matrices','last.seen', 'movements', 'residency.list', 'rsp.info', 'section.movements',
 		'section.times', 'spatial', 'status.df', 'valid.detections', 'valid.movements')))))
 	file.remove("distances.csv")
-	expect_warning(output <- residency(sections = c("River", "Fjord", "Sea"), tz = 'Europe/Copenhagen', report = TRUE, 
+	expect_warning(output <- residency(sections = c("River", "Fjord", "Sea"), tz = 'Europe/Copenhagen', report = TRUE,
 			GUI = "never", speed.error = 1000000, inactive.error = 1000000),
 		"Running inactiveness checks without a distance matrix. Performance may be limited.", fixed = TRUE)
-	expect_false(any(is.na(match(names(output), c('array.times', 'arrays', 'daily.positions', 'daily.ratios', 
+	expect_false(any(is.na(match(names(output), c('array.times', 'arrays', 'daily.positions', 'daily.ratios',
 		'deployments', 'detections', 'efficiency', 'global.ratios', 'intra.array.CJS', 'intra.array.matrices',
-		'last.seen', 'movements', 'residency.list', 'rsp.info', 'section.movements', 'section.times', 
+		'last.seen', 'movements', 'residency.list', 'rsp.info', 'section.movements', 'section.times',
 		'spatial', 'status.df', 'valid.detections', 'valid.movements')))))
 })
 
@@ -82,7 +82,7 @@ test_that("residency can handle multiple expected first arrays", {
 	xspatial <- example.spatial
 	xspatial$Array[18] <- "River1|River2"
 	write.csv(xspatial, "spatial.csv", row.names = FALSE)
-	expect_message(suppressWarnings(output <- residency(sections = c("River", "Fjord", "Sea"), 
+	expect_message(suppressWarnings(output <- residency(sections = c("River", "Fjord", "Sea"),
 		tz = 'Europe/Copenhagen', report = TRUE, GUI = "never")),
 		"Multiple possible first arrays detected for release site 'RS1'.", fixed = TRUE)
 	write.csv(example.spatial, "spatial.csv", row.names = FALSE)

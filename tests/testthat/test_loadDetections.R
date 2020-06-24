@@ -30,7 +30,7 @@ aux[[2]] <- data.frame(
 	Data = rep(NA_real_, nrow(aux[[2]])),
 	`Signal to Noise Ratio` = rep(NA_real_, nrow(aux[[2]])))
 colnames(aux[[2]])[2] <- "TBR Serial Number"
- 
+
 # Force Thelma New structure
 transmitter_aux <- strsplit(as.character(aux[[3]]$Transmitter), "-", fixed = TRUE)
 receiver_aux <- strsplit(as.character(aux[[3]]$Receiver), "-", fixed = TRUE)

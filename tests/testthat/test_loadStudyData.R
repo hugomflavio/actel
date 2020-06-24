@@ -7,7 +7,7 @@ exampleWorkspace("exampleWorkspace")
 setwd("exampleWorkspace")
 
 test_that("loadStudyData contains all the required elements", {
-	expect_warning(output <- loadStudyData(tz = "Europe/Copenhagen", override = NULL, start.time = NULL, stop.time = NULL, 
+	expect_warning(output <- loadStudyData(tz = "Europe/Copenhagen", override = NULL, start.time = NULL, stop.time = NULL,
 	  sections = NULL, exclude.tags = NULL, disregard.parallels = TRUE),
 		"No detections were found for receiver(s) 132907.", fixed = TRUE)
 	file.remove("detections/actel.detections.RData")
@@ -15,7 +15,7 @@ test_that("loadStudyData contains all the required elements", {
 })
 
 test_that("loadStudyData stops if override contains unknown data.", {
-	expect_error(loadStudyData(tz = "Europe/Copenhagen", override = "test", start.time = NULL, stop.time = NULL, 
+	expect_error(loadStudyData(tz = "Europe/Copenhagen", override = "test", start.time = NULL, stop.time = NULL,
 	  sections = NULL, exclude.tags = NULL, disregard.parallels = TRUE),
 		"Some tag signals listed in 'override' ('test') are not listed in the biometrics file.", fixed = TRUE)
 })
@@ -24,7 +24,7 @@ test_that("loadStudyData recognizes both 'study.dot' and 'study.txt' files.", {
 	sink("spatial.dot")
 		cat("River0--River1--River2--River3--River4--River5--River6--Fjord1--Fjord2--Sea1\n")
 	sink()
-	expect_message(suppressWarnings(loadStudyData(tz = "Europe/Copenhagen", override = NULL, start.time = NULL, stop.time = NULL, 
+	expect_message(suppressWarnings(loadStudyData(tz = "Europe/Copenhagen", override = NULL, start.time = NULL, stop.time = NULL,
 	  sections = NULL, exclude.tags = NULL, disregard.parallels = TRUE)),
 		"M: A 'spatial.dot' file was detected, activating multi-branch analysis.", fixed = TRUE)
 	file.remove("detections/actel.detections.RData")
@@ -33,7 +33,7 @@ test_that("loadStudyData recognizes both 'study.dot' and 'study.txt' files.", {
 	sink("spatial.txt")
 		cat("River0--River1--River2--River3--River4--River5--River6--Fjord1--Fjord2--Sea1\n")
 	sink()
-	expect_message(suppressWarnings(loadStudyData(tz = "Europe/Copenhagen", override = NULL, start.time = NULL, stop.time = NULL, 
+	expect_message(suppressWarnings(loadStudyData(tz = "Europe/Copenhagen", override = NULL, start.time = NULL, stop.time = NULL,
 	  sections = NULL, exclude.tags = NULL, disregard.parallels = TRUE)),
 		"M: A 'spatial.txt' file was detected, activating multi-branch analysis.", fixed = TRUE)
 	file.remove("detections/actel.detections.RData")
@@ -42,11 +42,11 @@ test_that("loadStudyData recognizes both 'study.dot' and 'study.txt' files.", {
 test_that("loadStudyData can handle detections in unknown receivers", {
 	aux <- read.csv("spatial.csv")
 	write.csv(aux[-3, ], "spatial.csv", row.names = FALSE)
-	expect_warning(loadStudyData(tz = "Europe/Copenhagen", override = NULL, start.time = NULL, stop.time = NULL, 
+	expect_warning(loadStudyData(tz = "Europe/Copenhagen", override = NULL, start.time = NULL, stop.time = NULL,
 			  sections = NULL, exclude.tags = NULL, disregard.parallels = TRUE),
 		"Detections from receivers 132918 are present in the data, but these receivers are not part of the study's stations. Double-check potential errors.", fixed = TRUE)
 	file.remove("detections/actel.detections.RData")
-	expect_warning(output <- loadStudyData(tz = "Europe/Copenhagen", override = NULL, start.time = NULL, stop.time = NULL, 
+	expect_warning(output <- loadStudyData(tz = "Europe/Copenhagen", override = NULL, start.time = NULL, stop.time = NULL,
 			  sections = NULL, exclude.tags = NULL, disregard.parallels = TRUE),
 		"Fish R64K-4451 was detected in one or more receivers that are not listed in the study area (receiver(s): 132918)!", fixed = TRUE)
 	file.remove("detections/actel.detections.RData")

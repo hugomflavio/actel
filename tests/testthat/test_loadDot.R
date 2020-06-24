@@ -8,10 +8,10 @@ test_that("loadDot stops if arguments or file are missing", {
 })
 
 test_that("loadDot stops if file is badly formatted or missing", {
-	expect_error(loadDot(input = "test"), 
+	expect_error(loadDot(input = "test"),
 		"The contents of the 'test' file could not be recognised by the readDot function.", fixed = TRUE)
 	write.table("abcd\n", "spatial.dot")
-	expect_error(loadDot(input = "spatial.dot"), 
+	expect_error(loadDot(input = "spatial.dot"),
 		"The contents of the 'spatial.dot' file could not be recognised by the readDot function.", fixed = TRUE)
 	file.remove("spatial.dot")
 })
@@ -44,7 +44,7 @@ test_that("loadDot output is as expected for simple single channel study areas",
 
 	expect_equal(names(output), c("dot", "arrays", "dotmat", "paths"))
 	
-	expect_equal(names(output$arrays), c('River0', 'River1', 'River2', 'River3', 
+	expect_equal(names(output$arrays), c('River0', 'River1', 'River2', 'River3',
 		'River4', 'River5', 'River6', 'Fjord1', 'Fjord2', 'Sea1'))
 	
 	dot <- read.csv(text = c('"A","to","B"
@@ -60,7 +60,7 @@ test_that("loadDot output is as expected for simple single channel study areas",
 '), stringsAsFactors = FALSE)
 	expect_equal(output$dot, dot)
 	
-	dotmat <- read.csv(text = 
+	dotmat <- read.csv(text =
 c('"","River0","River1","River2","River3","River4","River5","River6","Fjord1","Fjord2","Sea1"
 "River0",0,1,2,3,4,5,6,7,8,9
 "River1",1,0,1,2,3,4,5,6,7,8
@@ -75,20 +75,20 @@ c('"","River0","River1","River2","River3","River4","River5","River6","Fjord1","F
 '), stringsAsFactors = FALSE, row.names = 1)
 	expect_equal(output$dotmat, as.matrix(dotmat))
 
-	pathnames <- c('River0_to_River2', 'River0_to_River3', 'River0_to_River4', 'River0_to_River5', 
-		'River0_to_River6', 'River0_to_Fjord1', 'River0_to_Fjord2', 'River0_to_Sea1', 'River1_to_River3', 
-		'River1_to_River4', 'River1_to_River5', 'River1_to_River6', 'River1_to_Fjord1', 'River1_to_Fjord2', 
-		'River1_to_Sea1', 'River2_to_River0', 'River2_to_River4', 'River2_to_River5', 'River2_to_River6', 
-		'River2_to_Fjord1', 'River2_to_Fjord2', 'River2_to_Sea1', 'River3_to_River1', 'River3_to_River5', 
-		'River3_to_River0', 'River3_to_River6', 'River3_to_Fjord1', 'River3_to_Fjord2', 'River3_to_Sea1', 
-		'River4_to_River2', 'River4_to_River6', 'River4_to_River1', 'River4_to_Fjord1', 'River4_to_River0', 
-		'River4_to_Fjord2', 'River4_to_Sea1', 'River5_to_River3', 'River5_to_Fjord1', 'River5_to_River2', 
-		'River5_to_Fjord2', 'River5_to_River1', 'River5_to_Sea1', 'River5_to_River0', 'River6_to_River4', 
-		'River6_to_Fjord2', 'River6_to_River3', 'River6_to_Sea1', 'River6_to_River2', 'River6_to_River1', 
-		'River6_to_River0', 'Fjord1_to_River5', 'Fjord1_to_Sea1', 'Fjord1_to_River4', 'Fjord1_to_River3', 
-		'Fjord1_to_River2', 'Fjord1_to_River1', 'Fjord1_to_River0', 'Fjord2_to_River6', 'Fjord2_to_River5', 
-		'Fjord2_to_River4', 'Fjord2_to_River3', 'Fjord2_to_River2', 'Fjord2_to_River1', 'Fjord2_to_River0', 
-		'Sea1_to_Fjord1', 'Sea1_to_River6', 'Sea1_to_River5', 'Sea1_to_River4', 'Sea1_to_River3', 
+	pathnames <- c('River0_to_River2', 'River0_to_River3', 'River0_to_River4', 'River0_to_River5',
+		'River0_to_River6', 'River0_to_Fjord1', 'River0_to_Fjord2', 'River0_to_Sea1', 'River1_to_River3',
+		'River1_to_River4', 'River1_to_River5', 'River1_to_River6', 'River1_to_Fjord1', 'River1_to_Fjord2',
+		'River1_to_Sea1', 'River2_to_River0', 'River2_to_River4', 'River2_to_River5', 'River2_to_River6',
+		'River2_to_Fjord1', 'River2_to_Fjord2', 'River2_to_Sea1', 'River3_to_River1', 'River3_to_River5',
+		'River3_to_River0', 'River3_to_River6', 'River3_to_Fjord1', 'River3_to_Fjord2', 'River3_to_Sea1',
+		'River4_to_River2', 'River4_to_River6', 'River4_to_River1', 'River4_to_Fjord1', 'River4_to_River0',
+		'River4_to_Fjord2', 'River4_to_Sea1', 'River5_to_River3', 'River5_to_Fjord1', 'River5_to_River2',
+		'River5_to_Fjord2', 'River5_to_River1', 'River5_to_Sea1', 'River5_to_River0', 'River6_to_River4',
+		'River6_to_Fjord2', 'River6_to_River3', 'River6_to_Sea1', 'River6_to_River2', 'River6_to_River1',
+		'River6_to_River0', 'Fjord1_to_River5', 'Fjord1_to_Sea1', 'Fjord1_to_River4', 'Fjord1_to_River3',
+		'Fjord1_to_River2', 'Fjord1_to_River1', 'Fjord1_to_River0', 'Fjord2_to_River6', 'Fjord2_to_River5',
+		'Fjord2_to_River4', 'Fjord2_to_River3', 'Fjord2_to_River2', 'Fjord2_to_River1', 'Fjord2_to_River0',
+		'Sea1_to_Fjord1', 'Sea1_to_River6', 'Sea1_to_River5', 'Sea1_to_River4', 'Sea1_to_River3',
 		'Sea1_to_River2', 'Sea1_to_River1', 'Sea1_to_River0')
 	expect_equal(names(output$paths), pathnames)
 	# sample 2 contents
@@ -106,7 +106,7 @@ test_that("loadDot output is as expected for single channel study areas with a b
 
 	expect_equal(names(output), c("dot", "arrays", "dotmat", "paths"))
 	
-	expect_equal(names(output$arrays), c('River0', 'River1', 'River2', 'River3', 
+	expect_equal(names(output$arrays), c('River0', 'River1', 'River2', 'River3',
 		'River4', 'River5', 'River6', 'Fjord1', 'Fjord2', 'Sea1'))
 	
 	dot <- read.csv(text = c('"A","to","B"
@@ -122,7 +122,7 @@ test_that("loadDot output is as expected for single channel study areas with a b
 '), stringsAsFactors = FALSE)
 	expect_equal(output$dot, dot)
 	
-	dotmat <- read.csv(text = 
+	dotmat <- read.csv(text =
 c('"","River0","River1","River2","River3","River4","River5","River6","Fjord1","Fjord2","Sea1"
 "River0",0,1,2,3,4,5,6,7,8,9
 "River1",1,0,1,2,3,4,5,6,7,8
@@ -137,15 +137,15 @@ c('"","River0","River1","River2","River3","River4","River5","River6","Fjord1","F
 '), stringsAsFactors = FALSE, row.names = 1)
 	expect_equal(output$dotmat, as.matrix(dotmat))
 
-	pathnames <- c('River0_to_River2', 'River0_to_River3', 'River0_to_River4', 'River0_to_River5', 
-		'River0_to_River6', 'River0_to_Fjord1', 'River0_to_Fjord2', 'River0_to_Sea1', 'River1_to_River3', 
-		'River1_to_River4', 'River1_to_River5', 'River1_to_River6', 'River1_to_Fjord1', 'River1_to_Fjord2', 
-		'River1_to_Sea1', 'River2_to_River0', 'River2_to_River4', 'River2_to_River5', 'River2_to_River6', 
-		'River2_to_Fjord1', 'River2_to_Fjord2', 'River2_to_Sea1', 'River3_to_River1', 'River3_to_River5', 
-		'River3_to_River0', 'River3_to_River6', 'River3_to_Fjord1', 'River3_to_Fjord2', 'River3_to_Sea1', 
-		'River4_to_River2', 'River4_to_River6', 'River4_to_River1', 'River4_to_Fjord1', 'River4_to_River0', 
-		'River4_to_Fjord2', 'River4_to_Sea1', 'River5_to_River3', 'River5_to_Fjord1', 'River5_to_River2', 
-		'River5_to_Fjord2', 'River5_to_River1', 'River5_to_Sea1', 'River5_to_River0', 'River6_to_Fjord2', 
+	pathnames <- c('River0_to_River2', 'River0_to_River3', 'River0_to_River4', 'River0_to_River5',
+		'River0_to_River6', 'River0_to_Fjord1', 'River0_to_Fjord2', 'River0_to_Sea1', 'River1_to_River3',
+		'River1_to_River4', 'River1_to_River5', 'River1_to_River6', 'River1_to_Fjord1', 'River1_to_Fjord2',
+		'River1_to_Sea1', 'River2_to_River0', 'River2_to_River4', 'River2_to_River5', 'River2_to_River6',
+		'River2_to_Fjord1', 'River2_to_Fjord2', 'River2_to_Sea1', 'River3_to_River1', 'River3_to_River5',
+		'River3_to_River0', 'River3_to_River6', 'River3_to_Fjord1', 'River3_to_Fjord2', 'River3_to_Sea1',
+		'River4_to_River2', 'River4_to_River6', 'River4_to_River1', 'River4_to_Fjord1', 'River4_to_River0',
+		'River4_to_Fjord2', 'River4_to_Sea1', 'River5_to_River3', 'River5_to_Fjord1', 'River5_to_River2',
+		'River5_to_Fjord2', 'River5_to_River1', 'River5_to_Sea1', 'River5_to_River0', 'River6_to_Fjord2',
 		'River6_to_Sea1', 'Fjord1_to_Sea1', 'Fjord2_to_River6', 'Sea1_to_Fjord1', 'Sea1_to_River6')
 	expect_equal(names(output$paths), pathnames)
 	# sample 2 contents
@@ -165,7 +165,7 @@ test_that("loadDot output is as expected for simple multi channel study areas", 
 
 	expect_equal(names(output), c("dot", "arrays", "dotmat", "paths"))
 	
-	expect_equal(names(output$arrays), c('River0', 'River1', 'River2', 'River4', 
+	expect_equal(names(output$arrays), c('River0', 'River1', 'River2', 'River4',
 		'River5', 'River6', 'Fjord1', 'Fjord2', 'Sea1', 'River3'))
 	
 	dot <- read.csv(text = c('"A","to","B"
@@ -184,7 +184,7 @@ test_that("loadDot output is as expected for simple multi channel study areas", 
 '), stringsAsFactors = FALSE)
 	expect_equal(output$dot, dot)
 	
-	dotmat <- read.csv(text = 
+	dotmat <- read.csv(text =
 c('"","River0","River1","River2","River4","River5","River6","Fjord1","Fjord2","River3","Sea1"
 "River0",0,1,2,3,4,5,6,7,2,8
 "River1",1,0,1,2,3,4,5,6,1,7
@@ -199,19 +199,19 @@ c('"","River0","River1","River2","River4","River5","River6","Fjord1","Fjord2","R
 '), stringsAsFactors = FALSE, row.names = 1)
 	expect_equal(output$dotmat, as.matrix(dotmat))
 
-	pathnames <- c('River0_to_River2', 'River0_to_River3', 'River0_to_River4', 'River0_to_River5', 
-		'River0_to_River6', 'River0_to_Fjord1', 'River0_to_Fjord2', 'River0_to_Sea1', 'River1_to_River4', 
-		'River1_to_River5', 'River1_to_River6', 'River1_to_Fjord1', 'River1_to_Fjord2', 'River1_to_Sea1', 
-		'River2_to_River0', 'River2_to_River5', 'River2_to_River6', 'River2_to_Fjord1', 'River2_to_Fjord2', 
-		'River2_to_Sea1', 'River4_to_River1', 'River4_to_River6', 'River4_to_River0', 'River4_to_Fjord1', 
-		'River4_to_Fjord2', 'River4_to_Sea1', 'River5_to_River2', 'River5_to_River3', 'River5_to_Fjord1', 
-		'River5_to_River1', 'River5_to_Fjord2', 'River5_to_River0', 'River5_to_Sea1', 'River6_to_River4', 
-		'River6_to_Fjord2', 'River6_to_River2', 'River6_to_River3', 'River6_to_Sea1', 'River6_to_River1', 
-		'River6_to_River0', 'Fjord1_to_River5', 'Fjord1_to_Sea1', 'Fjord1_to_River4', 'Fjord1_to_River2', 
-		'Fjord1_to_River3', 'Fjord1_to_River1', 'Fjord1_to_River0', 'Fjord2_to_River6', 'Fjord2_to_River5', 
-		'Fjord2_to_River4', 'Fjord2_to_River2', 'Fjord2_to_River3', 'Fjord2_to_River1', 'Fjord2_to_River0', 
-		'Sea1_to_Fjord1', 'Sea1_to_River6', 'Sea1_to_River5', 'Sea1_to_River4', 'Sea1_to_River2', 
-		'Sea1_to_River3', 'Sea1_to_River1', 'Sea1_to_River0', 'River3_to_River0', 'River3_to_River5', 
+	pathnames <- c('River0_to_River2', 'River0_to_River3', 'River0_to_River4', 'River0_to_River5',
+		'River0_to_River6', 'River0_to_Fjord1', 'River0_to_Fjord2', 'River0_to_Sea1', 'River1_to_River4',
+		'River1_to_River5', 'River1_to_River6', 'River1_to_Fjord1', 'River1_to_Fjord2', 'River1_to_Sea1',
+		'River2_to_River0', 'River2_to_River5', 'River2_to_River6', 'River2_to_Fjord1', 'River2_to_Fjord2',
+		'River2_to_Sea1', 'River4_to_River1', 'River4_to_River6', 'River4_to_River0', 'River4_to_Fjord1',
+		'River4_to_Fjord2', 'River4_to_Sea1', 'River5_to_River2', 'River5_to_River3', 'River5_to_Fjord1',
+		'River5_to_River1', 'River5_to_Fjord2', 'River5_to_River0', 'River5_to_Sea1', 'River6_to_River4',
+		'River6_to_Fjord2', 'River6_to_River2', 'River6_to_River3', 'River6_to_Sea1', 'River6_to_River1',
+		'River6_to_River0', 'Fjord1_to_River5', 'Fjord1_to_Sea1', 'Fjord1_to_River4', 'Fjord1_to_River2',
+		'Fjord1_to_River3', 'Fjord1_to_River1', 'Fjord1_to_River0', 'Fjord2_to_River6', 'Fjord2_to_River5',
+		'Fjord2_to_River4', 'Fjord2_to_River2', 'Fjord2_to_River3', 'Fjord2_to_River1', 'Fjord2_to_River0',
+		'Sea1_to_Fjord1', 'Sea1_to_River6', 'Sea1_to_River5', 'Sea1_to_River4', 'Sea1_to_River2',
+		'Sea1_to_River3', 'Sea1_to_River1', 'Sea1_to_River0', 'River3_to_River0', 'River3_to_River5',
 		'River3_to_River6', 'River3_to_Fjord1', 'River3_to_Fjord2', 'River3_to_Sea1')
 	expect_equal(names(output$paths), pathnames)
 	# sample 2 contents
@@ -232,7 +232,7 @@ test_that("loadDot output is as expected for multi channel study areas with barr
 
 	expect_equal(names(output), c("dot", "arrays", "dotmat", "paths"))
 	
-	expect_equal(names(output$arrays), c('River0', 'River1', 'River2', 'River4', 
+	expect_equal(names(output$arrays), c('River0', 'River1', 'River2', 'River4',
 		'River5', 'River6', 'Fjord1', 'Fjord2', 'Sea1', 'River3'))
 	
 	dot <- read.csv(text = c('"A","to","B"
@@ -251,7 +251,7 @@ test_that("loadDot output is as expected for multi channel study areas with barr
 '), stringsAsFactors = FALSE)
 	expect_equal(output$dot, dot)
 	
-	dotmat <- read.csv(text = 
+	dotmat <- read.csv(text =
 c('"","River0","River1","River2","River4","River5","River6","Fjord1","Fjord2","River3","Sea1"
 "River0",0,1,2,3,4,5,6,7,2,8
 "River1",1,0,1,2,3,4,5,6,1,7
@@ -266,19 +266,19 @@ c('"","River0","River1","River2","River4","River5","River6","Fjord1","Fjord2","R
 '), stringsAsFactors = FALSE, row.names = 1)
 	expect_equal(output$dotmat, as.matrix(dotmat))
 
-	pathnames <- c('River0_to_River2', 'River0_to_River3', 'River0_to_River4', 'River0_to_River5', 
-		'River0_to_River6', 'River0_to_Fjord1', 'River0_to_Fjord2', 'River0_to_Sea1', 'River1_to_River4', 
-		'River1_to_River5', 'River1_to_River6', 'River1_to_Fjord1', 'River1_to_Fjord2', 'River1_to_Sea1', 
-		'River2_to_River0', 'River2_to_River5', 'River2_to_River6', 'River2_to_Fjord1', 'River2_to_Fjord2', 
-		'River2_to_Sea1', 'River4_to_River1', 'River4_to_River3', 'River4_to_River6', 'River4_to_River0', 
-		'River4_to_Fjord1', 'River4_to_Fjord2', 'River4_to_Sea1', 'River5_to_River2', 'River5_to_Fjord1', 
-		'River5_to_River1', 'River5_to_River3', 'River5_to_Fjord2', 'River5_to_River0', 'River5_to_Sea1', 
-		'River6_to_River4', 'River6_to_Fjord2', 'River6_to_River2', 'River6_to_Sea1', 'River6_to_River1', 
-		'River6_to_River3', 'River6_to_River0', 'Fjord1_to_River5', 'Fjord1_to_Sea1', 'Fjord1_to_River4', 
-		'Fjord1_to_River2', 'Fjord1_to_River1', 'Fjord1_to_River3', 'Fjord1_to_River0', 'Fjord2_to_River6', 
-		'Fjord2_to_River5', 'Fjord2_to_River4', 'Fjord2_to_River2', 'Fjord2_to_River1', 'Fjord2_to_River3', 
-		'Fjord2_to_River0', 'Sea1_to_Fjord1', 'Sea1_to_River6', 'Sea1_to_River5', 'Sea1_to_River4', 
-		'Sea1_to_River2', 'Sea1_to_River1', 'Sea1_to_River3', 'Sea1_to_River0', 'River3_to_River0', 
+	pathnames <- c('River0_to_River2', 'River0_to_River3', 'River0_to_River4', 'River0_to_River5',
+		'River0_to_River6', 'River0_to_Fjord1', 'River0_to_Fjord2', 'River0_to_Sea1', 'River1_to_River4',
+		'River1_to_River5', 'River1_to_River6', 'River1_to_Fjord1', 'River1_to_Fjord2', 'River1_to_Sea1',
+		'River2_to_River0', 'River2_to_River5', 'River2_to_River6', 'River2_to_Fjord1', 'River2_to_Fjord2',
+		'River2_to_Sea1', 'River4_to_River1', 'River4_to_River3', 'River4_to_River6', 'River4_to_River0',
+		'River4_to_Fjord1', 'River4_to_Fjord2', 'River4_to_Sea1', 'River5_to_River2', 'River5_to_Fjord1',
+		'River5_to_River1', 'River5_to_River3', 'River5_to_Fjord2', 'River5_to_River0', 'River5_to_Sea1',
+		'River6_to_River4', 'River6_to_Fjord2', 'River6_to_River2', 'River6_to_Sea1', 'River6_to_River1',
+		'River6_to_River3', 'River6_to_River0', 'Fjord1_to_River5', 'Fjord1_to_Sea1', 'Fjord1_to_River4',
+		'Fjord1_to_River2', 'Fjord1_to_River1', 'Fjord1_to_River3', 'Fjord1_to_River0', 'Fjord2_to_River6',
+		'Fjord2_to_River5', 'Fjord2_to_River4', 'Fjord2_to_River2', 'Fjord2_to_River1', 'Fjord2_to_River3',
+		'Fjord2_to_River0', 'Sea1_to_Fjord1', 'Sea1_to_River6', 'Sea1_to_River5', 'Sea1_to_River4',
+		'Sea1_to_River2', 'Sea1_to_River1', 'Sea1_to_River3', 'Sea1_to_River0', 'River3_to_River0',
 		'River3_to_River5', 'River3_to_River6', 'River3_to_Fjord1', 'River3_to_Fjord2', 'River3_to_Sea1')
 	expect_equal(names(output$paths), pathnames)
 	# sample 2 contents
@@ -291,7 +291,7 @@ test_that("loadDot correctly identifies edge arrays", {
 	sink("spatial.txt")
 	cat("River0--River1--River2--River3--River4--River5--River6--Fjord1--Fjord2--Sea1\n")
 	sink()
-	output <- loadDot(input = "spatial.txt", spatial = example.spatial, 
+	output <- loadDot(input = "spatial.txt", spatial = example.spatial,
 		sections = c("River", "Fjord", "Sea"), disregard.parallels = TRUE)	
 	file.remove("spatial.txt")
 
@@ -308,13 +308,13 @@ test_that("loadDot handles parallel arrays properly", {
 	cat("River1--River3--River4\n")
 	cat("River2--River3--River2\n")
 	sink()
-	output <- loadDot(input = "spatial.txt", spatial = example.spatial, 
+	output <- loadDot(input = "spatial.txt", spatial = example.spatial,
 		sections = c("River", "Fjord", "Sea"), disregard.parallels = TRUE)	
 	file.remove("spatial.txt")
 
 	expect_equal(names(output), c("dot", "arrays", "dotmat", "paths"))
 	
-	expect_equal(names(output$arrays), c('River0', 'River1', 'River2', 'River4', 
+	expect_equal(names(output$arrays), c('River0', 'River1', 'River2', 'River4',
 		'River5', 'River6', 'Fjord1', 'Fjord2', 'Sea1', 'River3'))
 
 	# check parallels

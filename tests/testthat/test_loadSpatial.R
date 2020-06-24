@@ -4,7 +4,7 @@ tests.home <- getwd()
 setwd(tempdir())
 
 test_that("loadSpatial stops if file is missing", {
-	expect_error(loadSpatial(input = "test"), 
+	expect_error(loadSpatial(input = "test"),
 		"Could not find a 'test' file in the working directory.", fixed = TRUE)
 })
 

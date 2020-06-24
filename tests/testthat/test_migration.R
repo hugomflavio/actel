@@ -12,7 +12,7 @@ test_that("migration stops when any argument does not make sense", {
 			"Array 'Sea1' was not assigned to any section. Stopping to prevent function failure.\nPlease either...\n   1) Rename these arrays to match a section,\n   2) Rename a section to match these arrays, or\n   3) Include a new section in the analysis.\n... and restart the analysis.", fixed = TRUE),
 	"No detections were found for receiver(s) 132907.", fixed = TRUE)
 	
-	expect_warning(migration(sections = c("River", "Fjord", "Sea", "test"), tz = "Europe/Copenhagen", GUI = "never", report = FALSE), 
+	expect_warning(migration(sections = c("River", "Fjord", "Sea", "test"), tz = "Europe/Copenhagen", GUI = "never", report = FALSE),
 		"No arrays were found that match section(s) test. There could be a typing mistake! Section(s) test will be removed.", fixed = TRUE)
 	
 	expect_warning(
@@ -57,12 +57,12 @@ test_that("migration stops when any argument does not make sense", {
 })
 
 test_that("migration results contains all the expected elements.", {
-	output <<- suppressWarnings(migration(tz = 'Europe/Copenhagen', sections = c("River", "Fjord", "Sea"), 
+	output <<- suppressWarnings(migration(tz = 'Europe/Copenhagen', sections = c("River", "Fjord", "Sea"),
 		report = FALSE, GUI = "never", print.releases = FALSE))
 		
 	expect_false(any(is.na(match(names(output), c('arrays', 'deployments', 'detections', 'dist.mat',
-		'group.overview', 'intra.array.CJS', 'intra.array.matrices','matrices', 'movements', 'overall.CJS', 
-		'release.overview', 'rsp.info', 'section.movements', 'section.overview', 'spatial', 'status.df', 
+		'group.overview', 'intra.array.CJS', 'intra.array.matrices','matrices', 'movements', 'overall.CJS',
+		'release.overview', 'rsp.info', 'section.movements', 'section.overview', 'spatial', 'status.df',
 		'times', 'valid.detections', 'valid.movements')))))
 
 	# all the contents of each object have been tested in their respective function tests, appart from rsp.info, release.overview and group.overview
@@ -89,7 +89,7 @@ test_that("migration results contains all the expected elements.", {
 "estimated",NA,NA,28,28,28,26,26,26,24,19,NA
 "difference",NA,NA,0,0,0,0,0,0,0,0,NA
 ', row.names = 1)
-  expect_equal(output$release.overview[[2]], check) 
+  expect_equal(output$release.overview[[2]], check)
 
 	expect_equal(names(output$group.overview), c("A", "B"))
   check <- read.csv(text = '"","Release","River0","River1","River2","River3","River4","River5","River6","Fjord1","Fjord2","Sea1"
@@ -110,7 +110,7 @@ test_that("migration results contains all the expected elements.", {
 "estimated",NA,NA,28,28,28,26,26,26,24,19,NA
 "difference",NA,NA,0,0,0,0,0,0,0,0,NA
 ', row.names = 1)
-  expect_equal(output$group.overview[[2]], check) 
+  expect_equal(output$group.overview[[2]], check)
 })
 # 4
 # y
@@ -140,17 +140,17 @@ rm(output)
 
 test_that("migration is able to run speed and inactiveness checks.", {
 	skip_on_cran()
-	output <- suppressWarnings(migration(sections = c("River", "Fjord", "Sea"), tz = 'Europe/Copenhagen', report = TRUE, 
+	output <- suppressWarnings(migration(sections = c("River", "Fjord", "Sea"), tz = 'Europe/Copenhagen', report = TRUE,
 		GUI = "never", speed.warning = 1000000, inactive.warning = 1000000, replicates = list(Sea1 = c("St.16", "St.17"))))
 		
-	expect_false(any(is.na(match(names(output), c('arrays', 'deployments', 'detections', 'dist.mat', 'group.overview', 
-		'intra.array.CJS', 'intra.array.matrices','matrices', 'movements', 'overall.CJS', 'release.overview', 
-		'rsp.info', 'section.movements', 'section.overview', 'spatial', 'status.df', 'times', 'valid.detections', 
+	expect_false(any(is.na(match(names(output), c('arrays', 'deployments', 'detections', 'dist.mat', 'group.overview',
+		'intra.array.CJS', 'intra.array.matrices','matrices', 'movements', 'overall.CJS', 'release.overview',
+		'rsp.info', 'section.movements', 'section.overview', 'spatial', 'status.df', 'times', 'valid.detections',
 		'valid.movements')))))
 	
 	file.remove("distances.csv")
 	
-	expect_warning(output <- migration(sections = c("River", "Fjord", "Sea"), tz = 'Europe/Copenhagen', report = TRUE, 
+	expect_warning(output <- migration(sections = c("River", "Fjord", "Sea"), tz = 'Europe/Copenhagen', report = TRUE,
 			GUI = "never", speed.error = 1000000, inactive.error = 1000000),
 		"Running inactiveness checks without a distance matrix. Performance may be limited.", fixed = TRUE)
 	
@@ -167,7 +167,7 @@ test_that("migration can handle multiple expected first arrays", {
 	xspatial <- example.spatial
 	xspatial$Array[18] <- "River1|River2"
 	write.csv(xspatial, "spatial.csv", row.names = FALSE)
-	expect_message(suppressWarnings(output <- migration(sections = c("River", "Fjord", "Sea"), 
+	expect_message(suppressWarnings(output <- migration(sections = c("River", "Fjord", "Sea"),
 		tz = 'Europe/Copenhagen', report = TRUE, success.arrays = "Sea1", GUI = "never")),
 		"Multiple possible first arrays detected for release site 'RS1'.", fixed = TRUE)
 })

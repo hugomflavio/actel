@@ -8,7 +8,7 @@ write.csv(example.distances, "distances.csv")
 
 sections <- c("River", "Fjord", "Sea")
 
-study.data <- suppressWarnings(loadStudyData(tz = "Europe/Copenhagen", start.time = NULL, 
+study.data <- suppressWarnings(loadStudyData(tz = "Europe/Copenhagen", start.time = NULL,
 	stop.time = NULL, sections = sections, exclude.tags = NULL))
 detections.list <- study.data$detections.list
 bio <- study.data$bio
@@ -20,7 +20,7 @@ dotmat <- study.data$dotmat
 paths <- study.data$paths
 
 moves <- groupMovements(detections.list = detections.list, bio = bio, spatial = spatial,
-    speed.method = "last to first", max.interval = 60, tz = "Europe/Copenhagen", 
+    speed.method = "last to first", max.interval = 60, tz = "Europe/Copenhagen",
     dist.mat = dist.mat, invalid.dist = invalid.dist)
 
 aux <- names(moves)
@@ -46,11 +46,11 @@ secmoves <- lapply(seq_along(vm), function(i) {
 })
 names(secmoves) <- names(vm)
 
-timetable <- assembleTimetable(secmoves = secmoves, valid.moves = vm, all.moves = xmoves, sections = sections, 
-  arrays = arrays, dist.mat = dist.mat, invalid.dist = invalid.dist, speed.method = "last to first", 
+timetable <- assembleTimetable(secmoves = secmoves, valid.moves = vm, all.moves = xmoves, sections = sections,
+  arrays = arrays, dist.mat = dist.mat, invalid.dist = invalid.dist, speed.method = "last to first",
   if.last.skip.section = TRUE, success.arrays = "Sea1", bio = bio, tz = "Europe/Copenhagen")
 
-status.df <- assembleOutput(timetable = timetable, bio = bio, spatial = spatial, 
+status.df <- assembleOutput(timetable = timetable, bio = bio, spatial = spatial,
   sections = sections, dist.mat = dist.mat, invalid.dist = invalid.dist, tz = "Europe/Copenhagen")
 
 
@@ -66,7 +66,7 @@ test_that("assembleMatrices works as expected", {
 		# cat("aux_assembleMatrixes <- list()\n")
 		# capture <- lapply(1:2, function(i) {
 		# 	lapply(1:2, function(j) {
-		# 		cat(paste0("aux_assembleMatrixes$", names(output)[i], "$", names(output[[i]])[j], 
+		# 		cat(paste0("aux_assembleMatrixes$", names(output)[i], "$", names(output[[i]])[j],
 		# 			"<- read.csv(text = ',", paste(colnames(output[[i]][[j]]), collapse = ","), "\n", paste(paste0(rownames(output[[i]][[j]]), ",",
 		# 			apply(output[[i]][[j]], 1, function(k) paste(k, collapse = ","))), collapse = "\n"),
 		# 			"', row.names = 1)\n"))
@@ -97,7 +97,7 @@ test_that("breakMatricesByArray works as expected.", {
 		# cat("aux_breakMatricesByArray <- list()\n")
 		# capture <- lapply(1:2, function(i) {
 		# 	lapply(1:2, function(j) {
-		# 		cat(paste0("aux_breakMatricesByArray$", names(output)[i], "$", names(output[[i]])[j], 
+		# 		cat(paste0("aux_breakMatricesByArray$", names(output)[i], "$", names(output[[i]])[j],
 		# 			"<- read.csv(text = ',", paste(colnames(output[[i]][[j]]), collapse = ","), "\n", paste(paste0(rownames(output[[i]][[j]]), ",",
 		# 			apply(output[[i]][[j]], 1, function(k) paste(k, collapse = ","))), collapse = "\n"),
 		# 			"', row.names = 1)\n"))
@@ -142,42 +142,42 @@ test_that("simpleCJS works as expected.", {
 
 	xm <- m.by.array[[1]][[1]]
 	xm[1:5, 1] <- 0
-	expect_error(simpleCJS(xm), 
+	expect_error(simpleCJS(xm),
 		"The first column of the input should only contain 1's (i.e. release point).", fixed = TRUE)
 
-	expect_error(simpleCJS(m.by.array[[1]][[1]], estimate = 1, fixed.efficiency = 1), 
+	expect_error(simpleCJS(m.by.array[[1]][[1]], estimate = 1, fixed.efficiency = 1),
 		"Please choose only one of 'estimate' or 'fixed.efficiency'.", fixed = TRUE)
 
-	expect_error(simpleCJS(m.by.array[[1]][[1]], estimate = 1:5), 
+	expect_error(simpleCJS(m.by.array[[1]][[1]], estimate = 1:5),
 		"Please use only one value for estimate.", fixed = TRUE)
 	
-	expect_error(simpleCJS(m.by.array[[1]][[1]], estimate = 2), 
+	expect_error(simpleCJS(m.by.array[[1]][[1]], estimate = 2),
 		"'estimate' must be between 0 and 1.", fixed = TRUE)
 	
 
-	expect_error(simpleCJS(m.by.array[[1]][[1]], fixed.efficiency = 1), 
+	expect_error(simpleCJS(m.by.array[[1]][[1]], fixed.efficiency = 1),
 		"Fixed efficiency was set but its length is not the same as the number of columns in the input.", fixed = TRUE)
 
-	expect_error(simpleCJS(m.by.array[[1]][[1]], fixed.efficiency = 1:3), 
+	expect_error(simpleCJS(m.by.array[[1]][[1]], fixed.efficiency = 1:3),
 		"Fixed efficiency estimates must be between 0 and 1.", fixed = TRUE)
 	
-	expect_message(simpleCJS(m.by.array[[1]][[1]], fixed.efficiency = c(1,1,1), silent = FALSE), 
+	expect_message(simpleCJS(m.by.array[[1]][[1]], fixed.efficiency = c(1,1,1), silent = FALSE),
 		"M: Running CJS with fixed efficiency estimates.", fixed = TRUE)
 
 
 	xm <- m.by.array[[1]][[1]]
 	xm[, 3] <- 0
-	expect_warning(simpleCJS(xm, silent = FALSE), 
+	expect_warning(simpleCJS(xm, silent = FALSE),
 		"Array 'River1' had 0% efficiency. Skipping survival estimation.", fixed = TRUE)
 
 	xm <- m.by.array[[1]][[1]]
 	xm[, 2] <- 0
-	expect_warning(simpleCJS(xm, silent = FALSE), 
+	expect_warning(simpleCJS(xm, silent = FALSE),
 		"No fish were detected at array 'River1'. Skipping survival estimation.", fixed = TRUE)
 
 	xm <- m.by.array[[1]][[1]]
 	xm[1:20, 2] <- 0
-	expect_warning(simpleCJS(xm, fixed.efficiency = c(1, 1, 1), silent = FALSE), 
+	expect_warning(simpleCJS(xm, fixed.efficiency = c(1, 1, 1), silent = FALSE),
 		"The fixed efficiency caused a too low estimate at iteration 2. Forcing higher estimate.", fixed = TRUE)
 
 	xm <- m.by.array[[1]][[1]]
@@ -226,19 +226,19 @@ test_that("combineCJS works as expected.", {
 	expect_error(combineCJS(fixed.efficiency = 2),
 		"Fixed efficiency estimates must be between 0 and 1.", fixed = TRUE)
 
-	expect_error(combineCJS(list(A = 1)), 
+	expect_error(combineCJS(list(A = 1)),
 		"Input appears to contain a list with only one element.", fixed = TRUE)
 
-	expect_error(combineCJS("test"), 
+	expect_error(combineCJS("test"),
 		"Only one object provided but it is not a list.", fixed = TRUE)
 
-	expect_error(combineCJS(list(A = "a", B = "b")), 
+	expect_error(combineCJS(list(A = "a", B = "b")),
 		"Not all objects provided are matrices or data frames. Please use either one list of matrices/data frames or multiple matrices/data frames.", fixed = TRUE)
 
 	xm <- m.by.array[[1]]
 	colnames(xm[[1]])[3] <- "test"
 
-	expect_error(combineCJS(xm), 
+	expect_error(combineCJS(xm),
 		"The last array is not the same in all input matrices.", fixed = TRUE)
 
 	expect_error(combineCJS(m.by.array[[1]], fixed.efficiency = c(1, 1)),

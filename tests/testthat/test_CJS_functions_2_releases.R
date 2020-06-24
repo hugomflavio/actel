@@ -20,7 +20,7 @@ write.csv(xspatial, "spatial.csv")
 
 sections <- c("River", "Fjord", "Sea")
 
-study.data <- suppressWarnings(loadStudyData(tz = "Europe/Copenhagen", start.time = NULL, 
+study.data <- suppressWarnings(loadStudyData(tz = "Europe/Copenhagen", start.time = NULL,
 	stop.time = NULL, sections = sections, exclude.tags = NULL))
 detections.list <- study.data$detections.list
 bio <- study.data$bio
@@ -32,7 +32,7 @@ dotmat <- study.data$dotmat
 paths <- study.data$paths
 
 moves <- groupMovements(detections.list = detections.list, bio = bio, spatial = spatial,
-    speed.method = "last to first", max.interval = 60, tz = "Europe/Copenhagen", 
+    speed.method = "last to first", max.interval = 60, tz = "Europe/Copenhagen",
     dist.mat = dist.mat, invalid.dist = invalid.dist)
 
 aux <- names(moves)
@@ -61,11 +61,11 @@ secmoves <- lapply(seq_along(vm), function(i) {
 })
 names(secmoves) <- names(vm)
 
-timetable <- assembleTimetable(secmoves = secmoves, valid.moves = vm, all.moves = xmoves, sections = sections, 
-  arrays = arrays, dist.mat = dist.mat, invalid.dist = invalid.dist, speed.method = "last to first", 
+timetable <- assembleTimetable(secmoves = secmoves, valid.moves = vm, all.moves = xmoves, sections = sections,
+  arrays = arrays, dist.mat = dist.mat, invalid.dist = invalid.dist, speed.method = "last to first",
   if.last.skip.section = TRUE, success.arrays = "Sea1", bio = bio, tz = "Europe/Copenhagen")
 
-status.df <- assembleOutput(timetable = timetable, bio = bio, spatial = spatial, 
+status.df <- assembleOutput(timetable = timetable, bio = bio, spatial = spatial,
   sections = sections, dist.mat = dist.mat, invalid.dist = invalid.dist, tz = "Europe/Copenhagen")
 
 the.matrices <- assembleMatrices(spatial = spatial, movements = vm, status.df = status.df,
@@ -159,7 +159,7 @@ write.csv(xspatial, "spatial.csv")
 
 sections <- c("River", "Fjord", "Sea")
 
-study.data <- suppressWarnings(loadStudyData(tz = "Europe/Copenhagen", start.time = NULL, 
+study.data <- suppressWarnings(loadStudyData(tz = "Europe/Copenhagen", start.time = NULL,
   stop.time = NULL, sections = sections, exclude.tags = NULL))
 detections.list <- study.data$detections.list
 bio <- study.data$bio
@@ -171,7 +171,7 @@ dotmat <- study.data$dotmat
 paths <- study.data$paths
 
 moves <- groupMovements(detections.list = detections.list, bio = bio, spatial = spatial,
-    speed.method = "last to first", max.interval = 60, tz = "Europe/Copenhagen", 
+    speed.method = "last to first", max.interval = 60, tz = "Europe/Copenhagen",
     dist.mat = dist.mat, invalid.dist = invalid.dist)
 
 aux <- names(moves)
@@ -200,11 +200,11 @@ secmoves <- lapply(seq_along(vm), function(i) {
 })
 names(secmoves) <- names(vm)
 
-timetable <- assembleTimetable(secmoves = secmoves, valid.moves = vm, all.moves = xmoves, sections = sections, 
-  arrays = arrays, dist.mat = dist.mat, invalid.dist = invalid.dist, speed.method = "last to first", 
+timetable <- assembleTimetable(secmoves = secmoves, valid.moves = vm, all.moves = xmoves, sections = sections,
+  arrays = arrays, dist.mat = dist.mat, invalid.dist = invalid.dist, speed.method = "last to first",
   if.last.skip.section = TRUE, success.arrays = "Sea1", bio = bio, tz = "Europe/Copenhagen")
 
-status.df <- assembleOutput(timetable = timetable, bio = bio, spatial = spatial, 
+status.df <- assembleOutput(timetable = timetable, bio = bio, spatial = spatial,
   sections = sections, dist.mat = dist.mat, invalid.dist = invalid.dist, tz = "Europe/Copenhagen")
 
 the.matrices <- assembleMatrices(spatial = spatial, movements = vm, status.df = status.df,

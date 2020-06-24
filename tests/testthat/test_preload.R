@@ -31,7 +31,7 @@ Additionally, data must to be compiled during the current R session.", fixed = T
 })
 
 test_that("explore with preload yields the same results as with traditional loading", {
-	d <- preload(biometrics = bio, deployments = deployments, spatial = spatial, detections = detections, 
+	d <- preload(biometrics = bio, deployments = deployments, spatial = spatial, detections = detections,
 		dot = dot, tz = "Europe/Copenhagen")
 
 	results <- explore(datapack = d)
@@ -61,7 +61,7 @@ test_that("migration and residency don't start if datapack is incompatible", {
 })
 
 test_that("migration and residency with preload yield the same results as with traditional loading", {
-	d2 <- preload(biometrics = bio, deployments = deployments, spatial = spatial, detections = detections, 
+	d2 <- preload(biometrics = bio, deployments = deployments, spatial = spatial, detections = detections,
 		tz = "Europe/Copenhagen", sections = c("River", "Fjord", "Sea"))
 
 	results <- migration(datapack = d2)
@@ -95,22 +95,22 @@ test_that("tz and exclude.tags stops are working", {
 })
 
 test_that("dot stop is working", {
-	expect_error(preload(biometrics = bio, deployments = deployments, spatial = spatial, 
+	expect_error(preload(biometrics = bio, deployments = deployments, spatial = spatial,
 		detections = detections, tz = "Europe/Copenhagen", dot = 1),
 	"'dot' was set but could not recognised as a string. Please prepare a dot string and include it in the dot argument.
 You can use readDot to check the quality of your dot string.", fixed = TRUE)
 })
 
 test_that("start.time and stop.time are working fine in preload", {
-	expect_message(d <- preload(biometrics = bio, deployments = deployments, spatial = spatial, 
+	expect_message(d <- preload(biometrics = bio, deployments = deployments, spatial = spatial,
 		detections = detections, tz = "Europe/Copenhagen", start.time = "2018-05-01 00:00"),
 	"M: Discarding detection data previous to 2018-05-01 00:00 per user command (9866 detections discarded).", fixed = TRUE)
 
-	expect_message(d <- preload(biometrics = bio, deployments = deployments, spatial = spatial, 
+	expect_message(d <- preload(biometrics = bio, deployments = deployments, spatial = spatial,
 		detections = detections, tz = "Europe/Copenhagen", stop.time = "2018-05-08 00:00"),
 		"M: Discarding detection data posterior to 2018-05-08 00:00 per user command (544 detections discarded).", fixed = TRUE)
 
-	expect_message(d <- preload(biometrics = bio, deployments = deployments, spatial = spatial, 
+	expect_message(d <- preload(biometrics = bio, deployments = deployments, spatial = spatial,
 		detections = detections, tz = "Europe/Copenhagen", start.time = "2018-05-01 00:00",
 		stop.time = "2018-05-08 00:00"),
 		"M: Data time range: 2018-05-01 00:04:30 to 2018-05-07 23:59:47 (Europe/Copenhagen).", fixed = TRUE)
@@ -119,7 +119,7 @@ test_that("start.time and stop.time are working fine in preload", {
 write.csv(example.distances, "distances.csv")
 
 test_that("distances are correctly handled with preload", {
-	d <- preload(biometrics = bio, deployments = deployments, spatial = spatial, detections = detections, 
+	d <- preload(biometrics = bio, deployments = deployments, spatial = spatial, detections = detections,
 		dot = dot, distances = example.distances, tz = "Europe/Copenhagen")
 
 	results <- explore(datapack = d)
@@ -141,72 +141,72 @@ test_that("distances are correctly handled with preload", {
 
 test_that("preload stops if mandatory columns are missing or have NAs", {
 	x <- detections[, -1]
-	expect_error(preload(biometrics = bio, deployments = deployments, spatial = spatial, detections = x, 
+	expect_error(preload(biometrics = bio, deployments = deployments, spatial = spatial, detections = x,
 			dot = dot, distances = example.distances, tz = "Europe/Copenhagen"),
 	"The following mandatory columns are missing in the detections: Timestamp", fixed = TRUE)
 
 	x <- detections[, -match("Signal", colnames(detections))]
-	expect_error(preload(biometrics = bio, deployments = deployments, spatial = spatial, detections = x, 
+	expect_error(preload(biometrics = bio, deployments = deployments, spatial = spatial, detections = x,
 			dot = dot, distances = example.distances, tz = "Europe/Copenhagen"),
 	"The following mandatory columns are missing in the detections: Signal
 The functions extractSignals and extractCodeSpaces can be used to break transmitter codes apart.", fixed = TRUE)
 
 	x <- detections
 	x[1, 1] <- NA
-	expect_error(preload(biometrics = bio, deployments = deployments, spatial = spatial, detections = x, 
+	expect_error(preload(biometrics = bio, deployments = deployments, spatial = spatial, detections = x,
 			dot = dot, distances = example.distances, tz = "Europe/Copenhagen"),
 	"There is missing data in the following mandatory columns of the detections: Timestamp", fixed = TRUE)
 })
 
 test_that("Data conversion warnings and errors kick in", {
-	expect_warning(x <- preload(biometrics = bio, deployments = deployments, spatial = spatial, detections = detections, 
+	expect_warning(x <- preload(biometrics = bio, deployments = deployments, spatial = spatial, detections = detections,
 			dot = dot, distances = example.distances, tz = "Europe/Copenhagen"),
 	"The 'Signal' column in the detections is not of type integer. Attempting to convert.", fixed = TRUE)
 
 
-	expect_warning(x <- preload(biometrics = bio, deployments = deployments, spatial = spatial, detections = detections, 
+	expect_warning(x <- preload(biometrics = bio, deployments = deployments, spatial = spatial, detections = detections,
 			dot = dot, distances = example.distances, tz = "Europe/Copenhagen"),
 	"The 'Receiver' column in the detections is not of type integer. Attempting to convert.", fixed = TRUE)
 
-	expect_warning(x <- preload(biometrics = bio, deployments = deployments, spatial = spatial, detections = detections, 
+	expect_warning(x <- preload(biometrics = bio, deployments = deployments, spatial = spatial, detections = detections,
 			dot = dot, distances = example.distances, tz = "Europe/Copenhagen"),
 	"Attempting to convert the 'Receiver' to integer failed. Attempting to extract only the serial numbers.", fixed = TRUE)
 
 	d <- detections
 	d$Receiver <- "a"
-	expect_error(x <- preload(biometrics = bio, deployments = deployments, spatial = spatial, detections = d, 
+	expect_error(x <- preload(biometrics = bio, deployments = deployments, spatial = spatial, detections = d,
 			dot = dot, distances = example.distances, tz = "Europe/Copenhagen"),
 	"Extracting the serial numbers failed. Aborting.", fixed = TRUE)
 
 
 	d <- detections
 	d$Sensor.Value <- "1"
-	expect_warning(x <- preload(biometrics = bio, deployments = deployments, spatial = spatial, detections = d, 
+	expect_warning(x <- preload(biometrics = bio, deployments = deployments, spatial = spatial, detections = d,
 			dot = dot, distances = example.distances, tz = "Europe/Copenhagen"),
 	"The 'Sensor.Value' column in the detections is not of type numeric. Attempting to convert.", fixed = TRUE)
 
 	d <- detections
 	d$Sensor.value <- "b"
-	expect_error(x <- preload(biometrics = bio, deployments = deployments, spatial = spatial, detections = d, 
+	expect_error(x <- preload(biometrics = bio, deployments = deployments, spatial = spatial, detections = d,
 			dot = dot, distances = example.distances, tz = "Europe/Copenhagen"),
 	"Attempting to convert the 'Sensor.Value' to numeric failed. Aborting.", fixed = TRUE)
 
 
 	d <- detections
 	d$Timestamp <- as.character(d$Timestamp)
-	expect_message(x <- suppressWarnings(preload(biometrics = bio, deployments = deployments, spatial = spatial, detections = d, 
+	expect_message(x <- suppressWarnings(preload(biometrics = bio, deployments = deployments, spatial = spatial, detections = d,
 			dot = dot, distances = example.distances, tz = "Europe/Copenhagen")),
 	"Converting detection timestamps to POSIX objects", fixed = TRUE)
 
 	d <- detections
 	d$Timestamp <- "b"
-	expect_error(x <- preload(biometrics = bio, deployments = deployments, spatial = spatial, detections = d, 
+	expect_error(x <- preload(biometrics = bio, deployments = deployments, spatial = spatial, detections = d,
 			dot = dot, distances = example.distances, tz = "Europe/Copenhagen"),
 	"Converting the timestamps failed. Aborting.", fixed = TRUE)
 
 	d <- detections
 	d$Valid <- "b"
-	expect_warning(x <- preload(biometrics = bio, deployments = deployments, spatial = spatial, detections = d, 
+	expect_warning(x <- preload(biometrics = bio, deployments = deployments, spatial = spatial, detections = d,
 			dot = dot, distances = example.distances, tz = "Europe/Copenhagen"),
 	"The detections have a column named 'Valid' but its content is not logical. Resetting to Valid = TRUE.", fixed = TRUE)
 })

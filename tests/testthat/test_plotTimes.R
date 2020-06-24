@@ -49,7 +49,7 @@ test_that("plotTimes fail-safes kick in when needed", {
 	expect_error(plotTimes(times = times, col = "blue"),
 		"'col' must be of the same length as 'times'.", fixed = TRUE)
 
-	xtimes <- list(a = times[[1]], b = times[[1]], c = times[[1]], d = times[[1]], e = times[[1]], 
+	xtimes <- list(a = times[[1]], b = times[[1]], c = times[[1]], d = times[[1]], e = times[[1]],
 		f = times[[1]], g = times[[1]], h = times[[1]], i = times[[1]])
 
 	expect_error(plotTimes(times = xtimes),
@@ -57,14 +57,14 @@ test_that("plotTimes fail-safes kick in when needed", {
 })
 
 test_that("plotTimes returns no errors on actual data, plus saves files", {
-	tryCatch(plotTimes(times = times, night = c("20:00", "06:00"), title = "This is a test!"), 
+	tryCatch(plotTimes(times = times, night = c("20:00", "06:00"), title = "This is a test!"),
 		warning = function(w) stop("A warning was issued where it should not have been."))
 
-	tryCatch(plotTimes(times = times, night = c("20:00", "06:00"), title = "This is a test!"), 
+	tryCatch(plotTimes(times = times, night = c("20:00", "06:00"), title = "This is a test!"),
 		warning = function(w) stop("A warning was issued where it should not have been."))
 
 	xtimes <- list(a = times[[1]], b = times[[2]], c = times[[1]])
-	tryCatch(plotTimes(times = xtimes, night = c(20, 6), title = "This is a test!"), 
+	tryCatch(plotTimes(times = xtimes, night = c(20, 6), title = "This is a test!"),
 		warning = function(w) stop("A warning was issued where it should not have been."))
 
 	expect_message(plotTimes(times = times, file = "test_plotTimes_output"),

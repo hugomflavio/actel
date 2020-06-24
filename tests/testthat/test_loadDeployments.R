@@ -4,7 +4,7 @@ tests.home <- getwd()
 setwd(tempdir())
 
 test_that("loadDeployments stops if file is missing", {
-	expect_error(loadDeployments(input = "test"), 
+	expect_error(loadDeployments(input = "test"),
 		"Could not find a 'test' file in the working directory.", fixed = TRUE)
 })
 
@@ -82,7 +82,7 @@ test_that("checkDeployments kicks in if deployment periods overlap", {
   		"Station 'Station 1' is listed in the spatial file but no receivers were ever deployed there.", fixed = TRUE),
   "Station 'test' is listed in the deployments but is not part of the study's stations. Discarding deployments at unknown stations.", fixed = TRUE)
 	file.remove("deployments.csv")
-	file.remove("spatial.csv")  
+	file.remove("spatial.csv")
 })
 
 test_that("loadDeployments output is exactly as expected", {

@@ -6,7 +6,7 @@ exampleWorkspace("exampleWorkspace")
 setwd("exampleWorkspace")
 write.csv(example.distances, "distances.csv")
 
-study.data <- suppressWarnings(loadStudyData(tz = "Europe/Copenhagen", start.time = NULL, 
+study.data <- suppressWarnings(loadStudyData(tz = "Europe/Copenhagen", start.time = NULL,
 	stop.time = NULL, sections = NULL, exclude.tags = NULL))
 # n
 detections.list <- study.data$detections.list
@@ -16,7 +16,7 @@ dist.mat <- study.data$dist.mat
 invalid.dist <- study.data$invalid.dist
 
 output <- groupMovements(detections.list = detections.list[1:2], bio = bio, spatial = spatial,
-    speed.method = "last to first", max.interval = 60, tz = "Europe/Copenhagen", 
+    speed.method = "last to first", max.interval = 60, tz = "Europe/Copenhagen",
     dist.mat = dist.mat, invalid.dist = invalid.dist)
 
 test_that("groupMovements assigns correct names to objects", {
@@ -48,7 +48,7 @@ test_that("groupMovements assigns arrays correctly", {
 
 test_that("groupMovements only uses dist.mat if it is valid", {
 	aux <- groupMovements(detections.list = detections.list[1:2], bio = bio, spatial = spatial,
-    speed.method = "last to first", max.interval = 60, tz = "Europe/Copenhagen", 
+    speed.method = "last to first", max.interval = 60, tz = "Europe/Copenhagen",
     dist.mat = dist.mat, invalid.dist = TRUE)
 	expect_equal(names(aux), c("R64K-4451", "R64K-4453"))
 	expect_equal(colnames(aux[[1]]), c('Array', 'Detections', 'First.station', 'Last.station', 'First.time', 'Last.time', 'Time.travelling', 'Time.in.array', 'Valid'))
@@ -61,7 +61,7 @@ test_that("groupMovements can handle unknown detections", {
 	levels(d[[1]]$Standard.name) <- c(levels(d[[1]]$Standard.name), "Ukn.")
 	d[[1]]$Standard.name[1] <- "Ukn."
 	expect_warning(aux <- groupMovements(detections.list = d, bio = bio, spatial = spatial,
-	  	speed.method = "last to first", max.interval = 60, tz = "Europe/Copenhagen", 
+	  	speed.method = "last to first", max.interval = 60, tz = "Europe/Copenhagen",
 	  	dist.mat = dist.mat, invalid.dist = invalid.dist),
 		"Movement events at 'Unknown' locations have been rendered invalid.", fixed = TRUE)
 	expect_equal(names(aux), c("R64K-4451", "R64K-4453"))
@@ -76,16 +76,16 @@ test_that("groupMovements can handle unknown detections", {
 
 test_that("Switching speed.method leads to different speed results.", {
 	aux <- groupMovements(detections.list = detections.list[1:2], bio = bio, spatial = spatial,
-	    speed.method = "last to last", max.interval = 60, tz = "Europe/Copenhagen", 
+	    speed.method = "last to last", max.interval = 60, tz = "Europe/Copenhagen",
 	    dist.mat = dist.mat, invalid.dist = invalid.dist)
 	expect_true(aux[[1]]$Average.speed.m.s[3] != moves[[1]]$Average.speed.m.s[3])
 })
 
 test_that("Movement events with one detection have '0:00' residency time.", {
 	d <- detections.list[1:2]
-	d[[1]] <- d[[1]][-c(2:12, 14:17), ] 
+	d[[1]] <- d[[1]][-c(2:12, 14:17), ]
 	aux <- groupMovements(detections.list = d, bio = bio, spatial = spatial,
-	    speed.method = "last to last", max.interval = 60, tz = "Europe/Copenhagen", 
+	    speed.method = "last to last", max.interval = 60, tz = "Europe/Copenhagen",
 	    dist.mat = dist.mat, invalid.dist = invalid.dist)
 	# First event
 	expect_equal(aux[[1]]$Detections[1], 1)

@@ -4,9 +4,9 @@ tests.home <- getwd()
 setwd(tempdir())
 
 test_that("readDot stops if argument or file is missing", {
-	expect_error(readDot(), 
+	expect_error(readDot(),
 		"No dot file or data were specified.", fixed = TRUE)
-	expect_error(readDot(input = "test"), 
+	expect_error(readDot(input = "test"),
 		"Could not find a 'test' file in the working directory.", fixed = TRUE)
 	dot <- read.csv(text = c("A,to,B
 A,--,B

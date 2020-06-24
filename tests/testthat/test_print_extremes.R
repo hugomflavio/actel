@@ -16,9 +16,9 @@ test_that("printProgression can handle over eight sections", {
 
 	dot <- readDot(string = paste(unique(example.results$spatial$stations$Array), collapse = " -- "))
 
-	tryCatch(printProgression(dot, sections, overall.CJS = example.results$overall.CJS, 
+	tryCatch(printProgression(dot, sections, overall.CJS = example.results$overall.CJS,
 		spatial = example.results$spatial, status.df = example.results$status.df, FALSE),
-		warning = function(w) stop ("Warning in printProgression:", w)) 
+		warning = function(w) stop ("Warning in printProgression:", w))
 
 	expect_true(file.exists(paste0(tempdir(), "/mb_efficiency.svg")))
 })
@@ -31,9 +31,9 @@ test_that("printProgression can handle only one array", {
 
 	dot <- readDot(string = "River1 -- River1")
 
-	tryCatch(printProgression(dot, sections, overall.CJS = example.results$overall.CJS, 
+	tryCatch(printProgression(dot, sections, overall.CJS = example.results$overall.CJS,
 		spatial = example.results$spatial, status.df = example.results$status.df, FALSE),
-		warning = function(w) stop ("Warning in printProgression:", w)) 
+		warning = function(w) stop ("Warning in printProgression:", w))
 
 	expect_true(file.exists(paste0(tempdir(), "/mb_efficiency.svg")))
 })
@@ -46,9 +46,9 @@ test_that("printProgression can handle two arrays", {
 
 	dot <- readDot(string = "River1 -- River2")
 
-	tryCatch(printProgression(dot, sections, overall.CJS = example.results$overall.CJS, 
+	tryCatch(printProgression(dot, sections, overall.CJS = example.results$overall.CJS,
 		spatial = example.results$spatial, status.df = example.results$status.df, FALSE),
-		warning = function(w) stop ("Warning in printProgression:", w)) 
+		warning = function(w) stop ("Warning in printProgression:", w))
 
 	expect_true(file.exists(paste0(tempdir(), "/mb_efficiency.svg")))
 })
@@ -65,7 +65,7 @@ test_that("printDot can handle over eight sections", {
 	dot <- readDot(string = paste(unique(example.results$spatial$stations$Array), collapse = " -- "))
 
 	tryCatch(printDot(dot, sections, spatial = example.results$spatial, FALSE),
-		warning = function(w) stop ("Warning in printDot:", w)) 
+		warning = function(w) stop ("Warning in printDot:", w))
 
 	expect_true(file.exists(paste0(tempdir(), "/mb_arrays.svg")))
 })
@@ -79,7 +79,7 @@ test_that("printDot can handle only one array", {
 	dot <- readDot(string = "River1 -- River1")
 
 	tryCatch(printDot(dot, sections, spatial = example.results$spatial, FALSE),
-		warning = function(w) stop ("Warning in printDot:", w)) 
+		warning = function(w) stop ("Warning in printDot:", w))
 
 	expect_true(file.exists(paste0(tempdir(), "/mb_arrays.svg")))
 })
@@ -93,7 +93,7 @@ test_that("printDot can handle two arrays", {
 	dot <- readDot(string = "River1 -- River2")
 
 	tryCatch(printDot(dot, sections, spatial = example.results$spatial, FALSE),
-		warning = function(w) stop ("Warning in printDot:", w)) 
+		warning = function(w) stop ("Warning in printDot:", w))
 
 	expect_true(file.exists(paste0(tempdir(), "/mb_arrays.svg")))
 })

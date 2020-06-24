@@ -6,7 +6,7 @@ exampleWorkspace("exampleWorkspace")
 setwd("exampleWorkspace")
 write.csv(example.distances, "distances.csv")
 
-study.data <- suppressWarnings(loadStudyData(tz = "Europe/Copenhagen", start.time = NULL, 
+study.data <- suppressWarnings(loadStudyData(tz = "Europe/Copenhagen", start.time = NULL,
 	stop.time = NULL, sections = NULL, exclude.tags = NULL))
 # n
 detections.list <- study.data$detections.list
@@ -16,22 +16,22 @@ dist.mat <- study.data$dist.mat
 invalid.dist <- study.data$invalid.dist
 
 moves <- groupMovements(detections.list = detections.list[1:2], bio = bio, spatial = spatial,
-    speed.method = "last to first", max.interval = 60, tz = "Europe/Copenhagen", 
+    speed.method = "last to first", max.interval = 60, tz = "Europe/Copenhagen",
     dist.mat = dist.mat, invalid.dist = invalid.dist)
 
 aux <- list(valid.movements = moves, spatial = spatial, rsp.info = list(bio = bio, analysis.type = "explore"))
 
 test_that("getTimes's failsafes kick in if necessary", {
   expect_error(getTimes("a"), "Could not recognise the input as an actel results object.", fixed = TRUE)
-  
+
   expect_error(getTimes(list("a")), "Could not recognise the input as an actel results object.", fixed = TRUE)
 
   expect_error(getTimes(aux, locations = "test"), "Array 'test' is not part of this study's arrays.", fixed = TRUE)
 
-  expect_error(getTimes(example.results, move.type = "section", locations = "test"), 
+  expect_error(getTimes(example.results, move.type = "section", locations = "test"),
     "Section 'test' is not part of this study's sections.", fixed = TRUE)
 
-  expect_error(getTimes(aux, move.type = "section", locations = "test"), 
+  expect_error(getTimes(aux, move.type = "section", locations = "test"),
     "Section times are not calculated for analyses of type 'explore'.", fixed = TRUE)
 })
 
@@ -77,7 +77,7 @@ test_that("getTimes operates correctly under all options.", {
   expect_equal(as.vector(table(times$Transmitter)), c(1, 1))
   expect_equal(times$River1[2], moves[[2]]$Last.time[1])
   expect_equal(times$Fjord1[2], moves[[2]]$Last.time[7])
- 	expect_false(any(is.na(times)))  
+ 	expect_false(any(is.na(times)))
 
   getTimes(input = aux, location = "River1")
 })

@@ -11,13 +11,13 @@ missing.packages <- sapply(aux, function(x) x == 1)
 if (any(missing.packages)) {
   test_that("loadShape, transitionLayer and distancesMatrix stop due to missing dependencies", {
   	expect_error(loadShape(),
-  		paste0("This function requires packages '", paste(c("raster", "gdistance", "sp", "tools", "rgdal")[missing.packages], collapse = "', '"), 
+  		paste0("This function requires packages '", paste(c("raster", "gdistance", "sp", "tools", "rgdal")[missing.packages], collapse = "', '"),
       	"' to operate. Please install ", ifelse(sum(missing.packages) > 1, "them", "it"), " before proceeding.\n"), fixed = TRUE)
   	expect_error(transitionLayer(),
-  		paste0("This function requires packages '", paste(c("raster", "gdistance", "sp", "tools", "rgdal")[missing.packages], collapse = "', '"), 
+  		paste0("This function requires packages '", paste(c("raster", "gdistance", "sp", "tools", "rgdal")[missing.packages], collapse = "', '"),
       	"' to operate. Please install ", ifelse(sum(missing.packages) > 1, "them", "it"), " before proceeding.\n"), fixed = TRUE)
   	expect_error(distancesMatrix(),
-  		paste0("This function requires packages '", paste(c("raster", "gdistance", "sp", "tools", "rgdal")[missing.packages], collapse = "', '"), 
+  		paste0("This function requires packages '", paste(c("raster", "gdistance", "sp", "tools", "rgdal")[missing.packages], collapse = "', '"),
       	"' to operate. Please install ", ifelse(sum(missing.packages) > 1, "them", "it"), " before proceeding.\n"), fixed = TRUE)
   })
 } else {
@@ -26,15 +26,15 @@ if (any(missing.packages)) {
 		setwd(tempdir())
 
 		test_that("loadShape complains if coord.y or coord.x are given and spatial.csv is not present", {
-			expect_warning(loadShape(path = tests.home, shape = "aux_transitionLayer.shp", 
+			expect_warning(loadShape(path = tests.home, shape = "aux_transitionLayer.shp",
 					size = 10, coord.x = "x.32632", coord.y = "y.32632"),
 			"Could not find a spatial.csv file in the current working directory. Skipping range check.", fixed = TRUE)
 
-			expect_warning(loadShape(path = tests.home, shape = "aux_transitionLayer.shp", 
+			expect_warning(loadShape(path = tests.home, shape = "aux_transitionLayer.shp",
 					size = 10, coord.x = "x.32632"),
 			"'coord.x' was set but 'coord.y' was not. Skipping range check.", fixed = TRUE)
 
-			expect_warning(loadShape(path = tests.home, shape = "aux_transitionLayer.shp", 
+			expect_warning(loadShape(path = tests.home, shape = "aux_transitionLayer.shp",
 					size = 10, coord.y = "x.32632"),
 			"'coord.y' was set but 'coord.x' was not. Skipping range check.", fixed = TRUE)
 		})
@@ -68,7 +68,7 @@ if (any(missing.packages)) {
 			expect_error(loadShape(path = tests.home, shape = "aux_transitionLayer.shp", size = 10, buffer = -1),
 			"'buffer' values cannot be negative.", fixed = TRUE)
 			
-			tryCatch(loadShape(path = tests.home, shape = "aux_transitionLayer.shp", size = 10, buffer = 100), 
+			tryCatch(loadShape(path = tests.home, shape = "aux_transitionLayer.shp", size = 10, buffer = 100),
 				warning = function(w) stop("A warning was issued where it should not have been."))
 			
 			tryCatch(base.raster <<- loadShape(path = tests.home, shape = "aux_transitionLayer.shp", size = 10, buffer = c(50, 100, 200, 250)),
@@ -101,8 +101,8 @@ if (any(missing.packages)) {
 		test_that("distancesMatrix produces a warning when there are viable passages between stations", {
 			expect_warning(dist.mat <- distancesMatrix(t.layer = t.layer,
 		  		coord.x = "x.32632", coord.y = "y.32632", actel = TRUE),
-			"At least one station is completely blocked off from the remaining stations by land. Filling 
-the respective fields with NA. If your fish was expected to travel around the areas present 
+			"At least one station is completely blocked off from the remaining stations by land. Filling
+the respective fields with NA. If your fish was expected to travel around the areas present
 in the shape file, consider applying a 'buffer' when calculating the transition layer. This
 will artificially add water space around the shape file.", fixed = TRUE)
 		})
@@ -117,15 +117,15 @@ will artificially add water space around the shape file.", fixed = TRUE)
 			expect_error(distancesMatrix(t.layer = "test"),
 				"Could not recognise 't.layer' as a TransitionLayer object. Make sure to compile it using the function transitionLayer.\n", fixed = TRUE)
 
-			expect_error(distancesMatrix(t.layer =  t.layer, 
+			expect_error(distancesMatrix(t.layer =  t.layer,
 		  		coord.x = "x.32632", coord.y = "y.32632", starters = "test.txt", actel = FALSE),
 				"'starters' must be a data frame.", fixed = TRUE)
 
-			expect_warning(distancesMatrix(t.layer =  t.layer, 
+			expect_warning(distancesMatrix(t.layer =  t.layer,
 		  		coord.x = "x.32632", coord.y = "y.32632", starters = "test", id.col = "test", actel = TRUE),
 			"starters' or 'targets' were set but will be ignored because 'actel' is set to TRUE. Set 'actel' to FALSE to use the 'starters' and 'targets' arguments.", fixed = TRUE)
 
-			expect_warning(distancesMatrix(t.layer =  t.layer, 
+			expect_warning(distancesMatrix(t.layer =  t.layer,
 		  		coord.x = "x.32632", coord.y = "y.32632", starters = "test", id.col = "test", actel = TRUE),
 			"id.col' was set but will be ignored because 'actel' is set to TRUE. Set 'actel' to FALSE to use the 'id.col' argument.", fixed = TRUE)
 		})
@@ -137,22 +137,22 @@ will artificially add water space around the shape file.", fixed = TRUE)
 		t.layer <- transitionLayer(base.raster)
 
 		test_that("distancesMatrix handles bad data correctly pt2", {
-			expect_warning(distancesMatrix(t.layer =  t.layer, 
+			expect_warning(distancesMatrix(t.layer =  t.layer,
 		  		coord.x = "x.32632", coord.y = "y.32632", starters = loadSpatial(), id.col = "Array", actel = FALSE),
 			"The 'Array' column in 'starters' contains duplicated values; skipping row naming.", fixed = TRUE)
 
-			expect_warning(distancesMatrix(t.layer =  t.layer, 
+			expect_warning(distancesMatrix(t.layer =  t.layer,
 		  		coord.x = "x.32632", coord.y = "y.32632", starters = loadSpatial(), id.col = "Array", actel = FALSE),
 			"The 'Array' column in 'targets' contains duplicated values; skipping column naming.", fixed = TRUE)
 
 			colnames(xspatial)[9] <- "test"
 			write.csv(xspatial, "spatial2.csv", row.names = FALSE)
 
-			expect_error(distancesMatrix(t.layer =  t.layer, 
+			expect_error(distancesMatrix(t.layer =  t.layer,
 		  		coord.x = "test", coord.y = "y.32632", starters = loadSpatial(), targets = loadSpatial("spatial2.csv"), actel = FALSE),
 			"Could not find a column 'test' in 'starters'.", fixed = TRUE)
 
-			expect_error(distancesMatrix(t.layer =  t.layer, 
+			expect_error(distancesMatrix(t.layer =  t.layer,
 		  		coord.x = "x.32632", coord.y = "test", starters = loadSpatial("spatial2.csv"), targets = loadSpatial(), actel = FALSE),
 			"Could not find a column 'test' in 'targets'.", fixed = TRUE)
 		})
@@ -173,7 +173,7 @@ will artificially add water space around the shape file.", fixed = TRUE)
 		xspatial$y.32632 <- c(6243912, 6242630, 6242387, 6241169)
 
 		test_that("loadShape expands the grid range if the spatial objects are outside the shape range.", {
-			expect_message(loadShape(path = tests.home, shape = "aux_transitionLayer.shp", size = 10, 
+			expect_message(loadShape(path = tests.home, shape = "aux_transitionLayer.shp", size = 10,
 					coord.x = "x.32632", coord.y = "y.32632", spatial = xspatial),
 			"Extending the shape ranges with open water to ensure the stations fit inside it.", fixed = TRUE)
 		})
