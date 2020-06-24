@@ -1,21 +1,21 @@
 #' Create a Default Workspace
 #'
-#' Produces template files and folders required to run the \code{\link{explore}}, 
+#' Produces template files and folders required to run the \code{\link{explore}},
 #' \code{\link{migration}} and \code{\link{residency}} functions.
-#' 
+#'
 #' @param dir The name of the target directory. Will be created if not present.
 #'
 #' @examples
 #' \donttest{
-#' # running createWorkspace deploys template 
+#' # running createWorkspace deploys template
 #' # files to a directory specified by the user
 #' createWorkspace(paste0(tempdir(), "/createWorkspace_example"))
 #' }
-#' 
+#'
 #' @return No return value, called for side effects
-#' 
+#'
 #' @export
-#' 
+#'
 createWorkspace <- function(dir) {
   if (missing(dir))
     stop("Please specify a target directory", call = FALSE)
@@ -26,21 +26,21 @@ createWorkspace <- function(dir) {
   spatial <- data.frame(
     Station.name = c("Example station1", "Example station2", "Example station3", "Example release1", "Example release2"),
     Latitude = c(8.411, 8.521, 8.402, 8.442, 8.442),
-    Longitude = c(40.411, 40.521, 40.402, 40.442, 40.442), 
-    Array = c("River1", "River1", "River2", "River1", "River2"), 
+    Longitude = c(40.411, 40.521, 40.402, 40.442, 40.442),
+    Array = c("River1", "River1", "River2", "River1", "River2"),
     Type = c("Hydrophone", "Hydrophone", "Hydrophone", "Release", "Release"))
 
   biometrics <- data.frame(
-    Release.date = c("2018-02-01 10:05:00", "2018-02-01 10:10:00", "2018-02-01 10:15:00"), 
-    Serial.nr = c("12340001", "12501034", "19340301"), 
-    Signal = c(1, 1034, 301), 
-    Length.mm = c(150, 160, 170), 
-    Weight.g = c(40, 60, 50), 
-    Group = c("Wild", "Hatchery", "Wild"), 
+    Release.date = c("2018-02-01 10:05:00", "2018-02-01 10:10:00", "2018-02-01 10:15:00"),
+    Serial.nr = c("12340001", "12501034", "19340301"),
+    Signal = c(1, 1034, 301),
+    Length.mm = c(150, 160, 170),
+    Weight.g = c(40, 60, 50),
+    Group = c("Wild", "Hatchery", "Wild"),
     Release.site = c("Example release1", "Example release1", "Example release2"))
 
   deployments <- data.frame(
-    Receiver = c("123001", "123002", "331"), 
+    Receiver = c("123001", "123002", "331"),
     Station.name = c("Example station1", "Example station2", "Example station3"),
     Start = c("2018-01-25 12:00:00", "2018-01-25 12:00:00", "2018-01-25 12:00:00"),
     Stop = c("2018-04-03 12:00:00", "2018-04-03 12:00:00", "2018-04-03 12:00:00"))
@@ -49,7 +49,7 @@ createWorkspace <- function(dir) {
   write.csv(biometrics, paste(dir, "biometrics.csv", sep ="/"), row.names = FALSE)
   write.csv(deployments, paste(dir, "deployments.csv", sep ="/"), row.names = FALSE)
 
-  if (!dir.exists(paste(dir, "detections", sep ="/"))) 
+  if (!dir.exists(paste(dir, "detections", sep ="/")))
     dir.create(paste(dir, "detections", sep ="/"))
   message(paste0("M: Workspace files created in folder '", dir,"'."))
 }
@@ -57,7 +57,7 @@ createWorkspace <- function(dir) {
 #' Deploy Example Data
 #'
 #' Creates a ready-to-run workspace with example data.
-#' 
+#'
 #' @inheritParams createWorkspace
 #'
 #' @examples
@@ -65,11 +65,11 @@ createWorkspace <- function(dir) {
 #' # deploy a minimal dataset to try actel!
 #' exampleWorkspace(paste0(tempdir(), "/exampleWorkspace"))
 #' }
-#' 
+#'
 #' @return No return value, called for side effects.
-#' 
+#'
 #' @export
-#' 
+#'
 exampleWorkspace <- function(dir) {
   if (missing(dir))
     stop("Please specify a target directory", call = FALSE)
@@ -80,7 +80,7 @@ exampleWorkspace <- function(dir) {
   write.csv(example.spatial, paste(dir, "spatial.csv", sep ="/"), row.names = FALSE)
   write.csv(example.biometrics, paste(dir, "biometrics.csv", sep ="/"), row.names = FALSE)
   write.csv(example.deployments, paste(dir, "deployments.csv", sep ="/"), row.names = FALSE)
-  if (!dir.exists(paste(dir, "detections", sep ="/"))) 
+  if (!dir.exists(paste(dir, "detections", sep ="/")))
     dir.create(paste(dir, "detections", sep ="/"))
   my.list <- split(example.detections, example.detections$Receiver)
   for (i in names(my.list)) {
@@ -109,9 +109,9 @@ Once finished, explore the html report and the object 'results' for the output."
 #'   \item{Type}{The type of spatial object (must be either Hydrophone or Release)}
 #' }
 #' @source Data collected by the authors.
-#' 
+#'
 #' @keywords internal
-#' 
+#'
 "example.spatial"
 
 #' Example biometric data
@@ -129,9 +129,9 @@ Once finished, explore the html report and the object 'results' for the output."
 #'   \item{Mass.g}{The mass of the tagged fish}
 #' }
 #' @source Data collected by the authors.
-#' 
+#'
 #' @keywords internal
-#' 
+#'
 "example.biometrics"
 
 #' Example detection data
@@ -146,9 +146,9 @@ Once finished, explore the html report and the object 'results' for the output."
 #'   \item{Station.Name}{The name given to the ALS}
 #' }
 #' @source Data collected by the authors.
-#' 
+#'
 #' @keywords internal
-#' 
+#'
 "example.detections"
 
 #' Example deployment data
@@ -163,9 +163,9 @@ Once finished, explore the html report and the object 'results' for the output."
 #'   \item{Stop}{The date and time of the retrieval}
 #' }
 #' @source Data collected by the authors.
-#' 
+#'
 #' @keywords internal
-#' 
+#'
 "example.deployments"
 
 #' Example distances matrix
@@ -174,9 +174,9 @@ Once finished, explore the html report and the object 'results' for the output."
 #'
 #' @format A 18 * 18 matrix
 #' @source Data collected by the authors.
-#' 
+#'
 #' @keywords internal
-#' 
+#'
 "example.distances"
 
 
@@ -186,7 +186,7 @@ Once finished, explore the html report and the object 'results' for the output."
 #'
 #' @format A list of outputs from migration()
 #' @source Data collected by the authors.
-#' 
+#'
 #' @keywords internal
-#' 
+#'
 "example.results"

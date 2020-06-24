@@ -1,9 +1,9 @@
 #' Load a dataset before running an analysis
-#' 
+#'
 #' This function allows the user to prepare a set of R objects to be run through
 #' an \code{\link{explore}}, \code{\link{migration}} or \code{\link{residency}}
 #' analysis.
-#' 
+#'
 #' @inheritParams explore
 #' @inheritParams migration
 #' @param biometrics A data frame containing biometric information.
@@ -12,27 +12,27 @@
 #' @param detections A data frame containing the detections.
 #' @param dot A DOT string of the array configuration.
 #' @param distances A distances matrix between arrays. See \code{\link{distancesMatrix}}.
-#' 
+#'
 #' @export
-#' 
+#'
 #' @examples
 #' # This function requires a series of pre-created R objects.
 #' # We can create them by loading the example files from actel:
 #' aux <- system.file(package = "actel")[1]
-#' 
+#'
 #' bio <- read.csv(paste0(aux, "/example_biometrics.csv"))
 #' deployments <- read.csv(paste0(aux, "/example_deployments.csv"))
 #' spatial <- read.csv(paste0(aux, "/example_spatial.csv"))
 #' detections <- read.csv(paste0(aux, "/example_detections.csv"))
-#' 
+#'
 #' dot <- "River0--River1--River2--River3--River4--River5--River6--Fjord1--Fjord2--Sea1"
-#' 
+#'
 #' # Now that we have the R objects created, we can run preload:
-#' 
-#' x <- preload(biometrics = bio, deployments = deployments, spatial = spatial, 
+#'
+#' x <- preload(biometrics = bio, deployments = deployments, spatial = spatial,
 #'  detections = detections, dot = dot, tz = "Europe/Copenhagen")
-#' 
-#'  
+#'
+#'
 #' @return A dataset that can be used as an input for actel's main analyses.
 #' This dataset contains:
 #' \itemize{
@@ -50,9 +50,9 @@
 #'  \item \code{disregard.parallels}: Logical: Should parallel arrays invalidate efficiency peers? (required to run residency and migration analyses)
 #'  \item \code{tz}: The time zone of the study area
 #' }
-#' 
+#'
 preload <- function(biometrics, spatial, deployments, detections, dot, distances, tz,
-  start.time = NULL, stop.time = NULL, sections = NULL, exclude.tags = NULL, 
+  start.time = NULL, stop.time = NULL, sections = NULL, exclude.tags = NULL,
   disregard.parallels = FALSE, discard.orphans = FALSE) {
 
   if (is.na(match(tz, OlsonNames())))
@@ -67,7 +67,7 @@ preload <- function(biometrics, spatial, deployments, detections, dot, distances
   bio <- loadBio(input = biometrics, tz = tz)
 
   message("M: Number of target tags: ", nrow(bio), ".")
-  
+
   deployments <- loadDeployments(input = deployments, tz = tz)
   checkDeploymentTimes(input = deployments) # check that receivers are not deployed before being retrieved
 
@@ -118,7 +118,7 @@ preload <- function(biometrics, spatial, deployments, detections, dot, distances
   link <- match(unlist(spatial$array.order), names(arrays))
   arrays <- arrays[link] # Reorder arrays by spatial order
   rm(link)
-  
+
   if (missing(distances)) {
   	dist.mat <- NA
   	invalid.dist <- TRUE
@@ -150,7 +150,7 @@ preload <- function(biometrics, spatial, deployments, detections, dot, distances
   appendTo(c("Screen", "Report"), "M: Data successfully imported!")
 
   output <- list(bio = bio, sections = sections, deployments = deployments, spatial = spatial, dot = dot,
-   arrays = arrays, dotmat = dotmat, dist.mat = dist.mat, invalid.dist = invalid.dist, 
+   arrays = arrays, dotmat = dotmat, dist.mat = dist.mat, invalid.dist = invalid.dist,
    detections.list = detections.list, paths = paths, disregard.parallels = disregard.parallels, tz = tz)
 
 	# create actel token
@@ -160,7 +160,7 @@ preload <- function(biometrics, spatial, deployments, detections, dot, distances
 	key <- data.frame(Token = actel.token, Timestamp = timestamp)
 
 	# save token
-	write.table(key, paste0(tempdir(), "/actel_token_list.csv"), sep = ",", 
+	write.table(key, paste0(tempdir(), "/actel_token_list.csv"), sep = ",",
 		append = file.exists(paste0(tempdir(), "/actel_token_list.csv")),
 		col.names = !file.exists(paste0(tempdir(), "/actel_token_list.csv")),
 		row.names = FALSE)
@@ -176,11 +176,11 @@ preload <- function(biometrics, spatial, deployments, detections, dot, distances
 #'
 #' @param input The detection data frame
 #' @inheritParams explore
-#' 
+#'
 #' @return A data frame with all the detections
-#' 
+#'
 #' @keywords internal
-#' 
+#'
 preloadDetections <- function(input, tz, start.time = NULL, stop.time = NULL) {
 	mandatory.cols <- c("Timestamp", "Receiver", "CodeSpace", "Signal")
 
@@ -198,19 +198,19 @@ preloadDetections <- function(input, tz, start.time = NULL, stop.time = NULL) {
 
 	if (!is.integer(input$Signal)) {
 		warning("The 'Signal' column in the detections is not of type integer. Attempting to convert.", immediate. = TRUE, call. = FALSE)
-		input$Signal <- tryCatch(as.integer(input$Signal), 
+		input$Signal <- tryCatch(as.integer(input$Signal),
 			warning = function(w) stop("Attempting to convert the 'Signal' to integer failed. Aborting.", call. = FALSE))
 	}
 
 	if (!is.integer(input$Receiver)) {
 		warning("The 'Receiver' column in the detections is not of type integer. Attempting to convert.", immediate. = TRUE, call. = FALSE)
-		aux <- tryCatch(as.integer(input$Receiver), 
+		aux <- tryCatch(as.integer(input$Receiver),
 			warning = function(w) {
 				warning("Attempting to convert the 'Receiver' to integer failed. Attempting to extract only the serial numbers.", immediate. = TRUE, call. = FALSE)
 				return(NULL) })
 		if (is.null(aux)) {
 			input$Receiver <- extractSignals(input$Receiver) # this works for extracting only the receiver numbers too
-			aux <- tryCatch(as.integer(input$Receiver), 
+			aux <- tryCatch(as.integer(input$Receiver),
 				warning = function(w) stop("Extracting the serial numbers failed. Aborting.", call. = FALSE))
 		}
 		input$Receiver <- aux
@@ -234,7 +234,7 @@ preloadDetections <- function(input, tz, start.time = NULL, stop.time = NULL) {
 
 	if (!is.numeric(input$Sensor.Value)) {
 		warning("The 'Sensor.Value' column in the detections is not of type numeric. Attempting to convert.", immediate. = TRUE, call. = FALSE)
-		input$Sensor.Value <- tryCatch(as.numeric(input$Sensor.Value), 
+		input$Sensor.Value <- tryCatch(as.numeric(input$Sensor.Value),
 			warning = function(w) stop("Attempting to convert the 'Sensor.Value' to numeric failed. Aborting.", call. = FALSE))
 	}
 
@@ -242,7 +242,7 @@ preloadDetections <- function(input, tz, start.time = NULL, stop.time = NULL) {
 		message("M: Converting detection timestamps to POSIX objects"); flush.console()
 		input$Timestamp <- fasttime::fastPOSIXct(input$Timestamp, tz = "UTC")
     if (any(is.na(input$Timestamp)))
-      stop("Converting the timestamps failed. Aborting.", call. = FALSE)   
+      stop("Converting the timestamps failed. Aborting.", call. = FALSE)
 	}
 
 	attributes(input$Timestamp)$tzone <- tz

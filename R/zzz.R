@@ -13,5 +13,5 @@ utils::globalVariables(c("example.spatial", "example.biometrics", "example.detec
 if (FALSE)
   svglite::svglite()
 # This dummy line suppresses the R check note regarding unused dependencies.
-# While actel does not require svglite directly, it is a necessary 
+# While actel does not require svglite directly, it is a necessary
 # "suggested" package of ggplot2, and I want to ensure that it is installed.

@@ -1,35 +1,35 @@
 #' Plot detections for a single tag
-#' 
+#'
 #' The output of plotMoves is a ggplot object, which means you can then use it in combination
 #' with other ggplot functions, or even together with other packages such as patchwork.
-#' 
+#'
 #' @param input The results of an actel analysis (either explore, migration or residency).
 #' @param tag The transmitter to be plotted.
 #' @param title An optional title for the plot. If left empty, a default title will be added.
 #' @param xlab,ylab Optional axis names for the plot. If left empty, default axis names will be added.
 #' @param col An optional colour scheme for the detections. If left empty, default colours will be added.
-#' @param array.alias A named vector of format c("old_array_name" = "new_array_name") to replace 
+#' @param array.alias A named vector of format c("old_array_name" = "new_array_name") to replace
 #'  default array names with user defined ones.
 #' @param frame.warning Logical. By default, actel highlights manually changed or overridden tags in yellow
 #'  and red plot frames, respectively. Set to FALSE to deactivate this behaviour.
-#' 
+#'
 #' @return A ggplot object.
-#' 
+#'
 #' @examples
 #' # Using the example results that come with actel
 #' plotMoves(example.results, 'R64K-4451')
-#' 
+#'
 #' # Because plotMoves returns a ggplot object, you can store
 #' # it and edit it manually, e.g.:
 #' library(ggplot2)
 #' p <- plotMoves(example.results, 'R64K-4451')
 #' p <- p + xlab("changed the x axis label a posteriori")
 #' p
-#' 
+#'
 #' # You can also save the plot using ggsave!
-#' 
+#'
 #' @export
-#' 
+#'
 plotMoves <- function(input, tag, title, xlab, ylab, col, array.alias, frame.warning = TRUE) {
   # NOTE: The NULL variables below are actually column names used by ggplot.
   # This definition is just to prevent the package check from issuing a note due unknown variables.
@@ -94,7 +94,7 @@ plotMoves <- function(input, tag, title, xlab, ylab, col, array.alias, frame.war
 
   if (any(!detections$Valid))
     detections$Array[!detections$Valid] <- "Invalid"
-  
+
   # detection colours
   if (missing(col)) {
     if (length(levels(detections$Array)) <= 8) {
@@ -122,7 +122,7 @@ plotMoves <- function(input, tag, title, xlab, ylab, col, array.alias, frame.war
   } else {
     add.movements <- FALSE
   }
-  
+
   add.valid.movements <- FALSE
   if (!is.null(valid.movements)) {
     add.valid.movements <- TRUE
@@ -133,7 +133,7 @@ plotMoves <- function(input, tag, title, xlab, ylab, col, array.alias, frame.war
     simple.moves.line$Station <- factor(simple.moves.line$Station, levels = levels(detections$Standard.name))
     simple.moves.line$Timestamp <- as.POSIXct(simple.moves.line$Timestamp, tz = tz)
   }
-  
+
   # plot ranges
   first.time <- min(c(as.POSIXct(head(detections$Timestamp, 1), tz = tz), start.line))
   attributes(first.time)$tzone <- tz
@@ -156,7 +156,7 @@ plotMoves <- function(input, tag, title, xlab, ylab, col, array.alias, frame.war
     p <- p + ggplot2::theme(
       panel.background = ggplot2::element_rect(fill = "white"),
       panel.border = ggplot2::element_rect(fill = NA, colour = "#ef3b32" , size = 2),
-      panel.grid.major = ggplot2::element_line(size = 0.5, linetype = 'solid', colour = "#ffd8d6"), 
+      panel.grid.major = ggplot2::element_line(size = 0.5, linetype = 'solid', colour = "#ffd8d6"),
       panel.grid.minor = ggplot2::element_line(size = 0.25, linetype = 'solid', colour = "#ffd8d6"),
       legend.key = ggplot2::element_rect(fill = "white", colour = "white"),
       )
@@ -166,12 +166,12 @@ plotMoves <- function(input, tag, title, xlab, ylab, col, array.alias, frame.war
      p <- p + ggplot2::theme(
       panel.background = ggplot2::element_rect(fill = "white"),
       panel.border = ggplot2::element_rect(fill = NA, colour = "#ffd016" , size = 2),
-      panel.grid.major = ggplot2::element_line(size = 0.5, linetype = 'solid', colour = "#f2e4b8"), 
+      panel.grid.major = ggplot2::element_line(size = 0.5, linetype = 'solid', colour = "#f2e4b8"),
       panel.grid.minor = ggplot2::element_line(size = 0.25, linetype = 'solid', colour = "#f2e4b8"),
       legend.key = ggplot2::element_rect(fill = "white", colour = "white"),
       )
     default.cols <- FALSE
-  } 
+  }
   if (default.cols) {
     p <- p + ggplot2::theme_bw()
   }
@@ -207,11 +207,11 @@ plotMoves <- function(input, tag, title, xlab, ylab, col, array.alias, frame.war
 }
 
 #' Print circular graphics for time series.
-#' 
+#'
 #' Wraps functions adapted from the circular R package.
-#' 
+#'
 #' For more details about the original functions, visit the circular package homepage at \url{https://github.com/cran/circular}
-#' 
+#'
 #' @param times A list of of time vectors (each vector will be plotted as a series).
 #' @param night A vector of two times defining the start and stop of the night period (in HH:MM format).
 #' @param col A vector of colour names to paint each time series (colours will be added transparency).
@@ -221,25 +221,25 @@ plotMoves <- function(input, tag, title, xlab, ylab, col, array.alias, frame.war
 #' @param mean.range Logical: Should the SEM be displayed? (only relevant if mean.dash = TRUE)
 #' @param rings Logical: Should inner plot rings be displayed?
 #' @param file A file name to save the plot as an SVG. Leave NULL to plot on active graphics device.
-#' 
+#'
 #' @examples
 #' # The output of timesToCircular can be used as an input to plotTimes.
 #' x <- getTimes(example.results, location = "River1", n.events = "first", event.type = "arrival")
 #' times <- timesToCircular(x)
-#' 
+#'
 #' # plot times
 #' plotTimes(times)
-#' 
+#'
 #' # A night period can be added with 'night'
 #' plotTimes(times, night = c("20:00", "06:00"))
-#' 
+#'
 #' @return A circular plot
-#' 
+#'
 #' @export
-#' 
-plotTimes <- function(times, night = NULL, col = NULL, alpha = 0.8, title = "", mean.dash = TRUE, 
+#'
+plotTimes <- function(times, night = NULL, col = NULL, alpha = 0.8, title = "", mean.dash = TRUE,
   mean.range = TRUE, rings = TRUE, file = NULL){
-  
+
   if (!inherits(times, "list"))
     stop("'times' must be a list.", call. = FALSE)
 
@@ -288,28 +288,28 @@ plotTimes <- function(times, night = NULL, col = NULL, alpha = 0.8, title = "", 
     ylegend <- -0.97 + (0.1 * (length(times) - 2))
   else
     ylegend <- -0.97
-  
+
   prop <- roundDown(1 / max(unlist(lapply(times, function(x) table(roundUp(x, to = 1)) / sum(!is.na(x))))), to = 1)
-  
+
   if (!is.null(file)) {
     if (!grepl(".svg$", file))
       file <- paste0(file, ".svg")
     grDevices::svg(file, height = 5, width = 5, bg = "transparent")
   }
-  
+
   oldpar <- par(mar = c(1, 2, 2, 1))
   on.exit(par(oldpar), add = TRUE)
   copyOfCirclePlotRad(main = title, shrink = 1.05)
-  
+
   if (!is.null(night)) {
-    circularSection(from = night[1], 
-      to = night[2], units = "hours", template = "clock24", 
+    circularSection(from = night[1],
+      to = night[2], units = "hours", template = "clock24",
       limits = c(1, 0), fill = scales::alpha("grey", 0.3), border = "transparent")
   }
 
   params <- myRoseDiag(times, bins = 24, radii.scale = "linear",
     prop = prop, tcl.text = -0.1, tol = 0.05, col = colours, border = "black")
-  
+
   if (mean.dash) {
     roseMean(times, col = params$col, mean.length = c(0.07, -0.07), mean.lwd = 6,
       box.range = ifelse(mean.range, "std.error", "none"), fill = "white", border = "black",
@@ -318,7 +318,7 @@ plotTimes <- function(times, night = NULL, col = NULL, alpha = 0.8, title = "", 
   }
 
   if (rings) {
-    ringsRel(plot.params = params, border = "black", ring.text = TRUE, 
+    ringsRel(plot.params = params, border = "black", ring.text = TRUE,
       ring.text.pos = 0.07, rings.lty = "f5", ring.text.cex = 0.8)
   }
 
@@ -333,96 +333,96 @@ plotTimes <- function(times, night = NULL, col = NULL, alpha = 0.8, title = "", 
 }
 
 #' Calculate beta estimations for efficiency
-#' 
-#' advEfficiency estimates efficiency ranges by fitting a beta distribution 
-#' with parameters \eqn{\alpha} = number of detected tags and \eqn{\beta} = number of missed 
+#'
+#' advEfficiency estimates efficiency ranges by fitting a beta distribution
+#' with parameters \eqn{\alpha} = number of detected tags and \eqn{\beta} = number of missed
 #' tags. The desired quantiles (argument `q`) are then calculated from distribution.
 #' Plots are also drawn showing the distribution, the median point (dashed red line) and
 #' the range between the lowest and largest quantile requested (red shaded section).
-#' 
+#'
 #' Examples for inclusion in a paper:
-#' 
+#'
 #' \enumerate{
 #' \item If advEfficiency was run on an \code{overall.CJS} object (i.e. migration analysis):
-#' 
-#'   "Array efficiency was estimated by fitting a beta distribution 
-#'   (\eqn{\alpha} = number of tags detected subsequently and at the array, 
-#'   \eqn{\beta} = number of tags detected subsequently but not at the array) 
+#'
+#'   "Array efficiency was estimated by fitting a beta distribution
+#'   (\eqn{\alpha} = number of tags detected subsequently and at the array,
+#'   \eqn{\beta} = number of tags detected subsequently but not at the array)
 #'   and calculating the median estimated efficiency value using the R package actel \[citation\]."
-#' 
+#'
 #' \item If advEfficiency was run on an \code{efficiency} object (i.e. residency analysis):
-#' 
+#'
 #' - If you are using maximum efficiency estimates:
-#' 
+#'
 #'     "Array efficiency was estimated by fitting a beta distribution
 #'     (\eqn{\alpha} = number of events recorded by the array,
 #'     \eqn{\beta} = number of events known to have been missed by the array).
 #'     and calculating the median estimated efficiency value using the R package actel \[citation\]."
-#' 
+#'
 #' - If you are using minimum efficiency estimates:
-#' 
-#'     "Array efficiency was estimated by fitting a beta distribution 
-#'     (\eqn{\alpha} = number of events recorded by the array, 
+#'
+#'     "Array efficiency was estimated by fitting a beta distribution
+#'     (\eqn{\alpha} = number of events recorded by the array,
 #'     \eqn{\beta} = number of events both known to have been missed and potentially missed by the array).
 #'     and calculating the median estimated efficiency value using the R package actel \[citation\]."
-#' 
+#'
 #' \item If advEfficiency was run on an \code{intra.array.CJS} object:
-#' 
-#'   "Intra-array efficiency was estimated by comparing the tags detected at each of the 
+#'
+#'   "Intra-array efficiency was estimated by comparing the tags detected at each of the
 #'   two replicates. For each replicate, a beta distribution was fitted
-#'   (\eqn{\alpha} = number of tags detected at both replicates, \eqn{\beta} = number 
-#'   of tags detected at the opposite replicate but not at the one for which efficiency 
-#'   is being calculated) and the median estimated efficiency value was calculated. The overall 
+#'   (\eqn{\alpha} = number of tags detected at both replicates, \eqn{\beta} = number
+#'   of tags detected at the opposite replicate but not at the one for which efficiency
+#'   is being calculated) and the median estimated efficiency value was calculated. The overall
 #'   efficiency of the array was then estimated as 1-((1-R1)*(1-R2)), where R1 and R2 are
-#'   the median efficiency estimates for each replicate. These calculations were performed 
+#'   the median efficiency estimates for each replicate. These calculations were performed
 #'   using the R package actel \[citation\]."
 #' }
 #' Replace \[citation\] with the output of `citation('actel')`
-#' 
+#'
 #' @param x An efficiency object from actel (\code{overall.CJS}, \code{intra.array.CJS[[...]]} or \code{efficiency} objects)
 #' @param labels a vector of strings to substitute default plot labels
 #' @param q The quantile values to be calculated. Defaults to \code{c(0.025, 0.5, 0.975)} (i.e. median and 95% CI)
 #' @param force.grid A vector of format c(nrow, ncol) that allows the user to define the number of rows and columns to distribute the plots in.
 #' @param paired Logical: For efficiency derived from residency analyses, should min. and max. estimates for an array be displayed next to each other?
 #' @param title A title for the plot (feeds into title parameter of ggplot's labs function).
-#' 
+#'
 #' @examples
 #' # Example using the output of simpleCJS.
 #' x <- matrix(
-#' c(TRUE,  TRUE,  TRUE,  TRUE,  TRUE, 
-#'   TRUE, FALSE,  TRUE,  TRUE, FALSE, 
+#' c(TRUE,  TRUE,  TRUE,  TRUE,  TRUE,
+#'   TRUE, FALSE,  TRUE,  TRUE, FALSE,
 #'   TRUE,  TRUE, FALSE, FALSE, FALSE,
 #'   TRUE,  TRUE, FALSE,  TRUE,  TRUE,
-#'   TRUE,  TRUE,  TRUE, FALSE, FALSE), 
+#'   TRUE,  TRUE,  TRUE, FALSE, FALSE),
 #' ncol = 5, byrow = TRUE)
 #' colnames(x) <- c("Release", "A1", "A2", "A3", "A4")
 #' cjs.results <- simpleCJS(x)
-#' 
+#'
 #' # These cjs results can be used in advEfficiency
 #' advEfficiency(cjs.results)
-#' 
+#'
 #' # Example using the output of dualArrayCJS.
 #' x <- matrix(
-#' c( TRUE,  TRUE, 
-#'    TRUE, FALSE, 
+#' c( TRUE,  TRUE,
+#'    TRUE, FALSE,
 #'    TRUE,  TRUE,
 #'   FALSE,  TRUE,
-#'   FALSE,  TRUE), 
+#'   FALSE,  TRUE),
 #' ncol = 2, byrow = TRUE)
 #' colnames(x) <- c("A1.1", "A1.2")
 #' cjs.results <- dualArrayCJS(x)
-#' 
+#'
 #' # These cjs results can be used in advEfficiency
 #' advEfficiency(cjs.results)
-#' 
+#'
 #' # advEfficiency can also be run with the output from the main analyses.
 #' # the example.results dataset is the output of a migration analysis
 #' advEfficiency(example.results$overall.CJS)
-#' 
+#'
 #' @return A data frame with the required quantile values and a plot of the efficiency distributions.
-#' 
+#'
 #' @export
-#' 
+#'
 advEfficiency <- function(x, labels = NULL, q = c(0.025, 0.5, 0.975), force.grid = NULL, paired = TRUE, title = "") {
 
   if (!inherits(x, "list") & !inherits(x, "data.frame") & !inherits(x, "matrix"))
@@ -464,7 +464,7 @@ advEfficiency <- function(x, labels = NULL, q = c(0.025, 0.5, 0.975), force.grid
     if (ncol(input) != length(labels))
       stop("Wrong number of panel names")
     colnames(input) <- labels
-  } 
+  }
 
   beta.data <- lapply(1:ncol(input), function(i){
     alpha <- input[1, i]
@@ -524,8 +524,8 @@ advEfficiency <- function(x, labels = NULL, q = c(0.025, 0.5, 0.975), force.grid
   # prepare CI intervals and median
   aux <- lapply(names(beta.data)[link], function(i) {
     return(data.frame(
-      min = beta.data[[i]]$qci[1], 
-      qm = beta.data[[i]]$qm, 
+      min = beta.data[[i]]$qci[1],
+      qm = beta.data[[i]]$qm,
       max = beta.data[[i]]$qci[2]))
   })
   names(aux) <- names(beta.data)[link]

@@ -1,19 +1,19 @@
 #' Group movements
 #'
 #' Crawls trough the detections of each fish and groups them based on ALS arrays and time requirements.
-#' 
+#'
 #' @param detections.list A list of the detections split by each target tag, created by splitDetections.
 #' @param dist.mat A matrix of the distances between the deployed ALS.
 #' @param invalid.dist Whether or not the distance matrix supplied is valid for the study area.
 #' @inheritParams explore
 #' @inheritParams splitDetections
 #' @inheritParams loadDetections
-#' 
+#'
 #' @return A list containing the movement events for each fish.
-#' 
+#'
 #' @keywords internal
-#' 
-groupMovements <- function(detections.list, bio, spatial, speed.method, max.interval, 
+#'
+groupMovements <- function(detections.list, bio, spatial, speed.method, max.interval,
   tz, dist.mat, invalid.dist) {
   appendTo("debug", "Running groupMovements.")
   trigger.unknown <- FALSE
@@ -32,27 +32,27 @@ groupMovements <- function(detections.list, bio, spatial, speed.method, max.inte
       if (nrow(x) > 0) {
         if (invalid.dist) {
           recipient <- data.frame(
-            Array = NA_character_, 
-            Detections = NA_integer_, 
-            First.station = NA_character_, 
-            Last.station = NA_character_, 
-            First.time = as.POSIXct(NA_character_, tz = tz, format = "%y-%m-%d %H:%M:%S"), 
-            Last.time = as.POSIXct(NA_character_, tz = tz, format = "%y-%m-%d %H:%M:%S"), 
-            Time.travelling = NA_character_, 
-            Time.in.array = NA_character_, 
+            Array = NA_character_,
+            Detections = NA_integer_,
+            First.station = NA_character_,
+            Last.station = NA_character_,
+            First.time = as.POSIXct(NA_character_, tz = tz, format = "%y-%m-%d %H:%M:%S"),
+            Last.time = as.POSIXct(NA_character_, tz = tz, format = "%y-%m-%d %H:%M:%S"),
+            Time.travelling = NA_character_,
+            Time.in.array = NA_character_,
             Valid = NA,
             stringsAsFactors = FALSE
             )
         } else {
           recipient <- data.frame(
-            Array = NA_character_, 
-            Detections = NA_integer_, 
-            First.station = NA_character_, 
-            Last.station = NA_character_, 
-            First.time = as.POSIXct(NA_character_, tz = tz, format = "%y-%m-%d %H:%M:%S"), 
-            Last.time = as.POSIXct(NA_character_, tz = tz, format = "%y-%m-%d %H:%M:%S"), 
-            Time.travelling = NA_character_, 
-            Time.in.array = NA_character_, 
+            Array = NA_character_,
+            Detections = NA_integer_,
+            First.station = NA_character_,
+            Last.station = NA_character_,
+            First.time = as.POSIXct(NA_character_, tz = tz, format = "%y-%m-%d %H:%M:%S"),
+            Last.time = as.POSIXct(NA_character_, tz = tz, format = "%y-%m-%d %H:%M:%S"),
+            Time.travelling = NA_character_,
+            Time.in.array = NA_character_,
             Average.speed.m.s = NA_real_,
             Valid = NA,
             stringsAsFactors = FALSE
@@ -76,7 +76,7 @@ groupMovements <- function(detections.list, bio, spatial, speed.method, max.inte
           recipient[z, "Last.time"] <<- x$Timestamp[stop]
           z <<- z + 1
           counter <<- counter + stop - start + 1
-          if (i == tail(names(detections.list), 1)) 
+          if (i == tail(names(detections.list), 1))
             counter <<- sum(unlist(lapply(detections.list, nrow)))
           if (interactive())
             setTxtProgressBar(pb, counter)
@@ -89,13 +89,13 @@ groupMovements <- function(detections.list, bio, spatial, speed.method, max.inte
           recipient$Valid[recipient$Array == "Unknown"] <- FALSE
           trigger.unknown <<- TRUE
         }
-        
+
         recipient <- data.table::as.data.table(recipient)
         recipient <- movementTimes(movements = recipient, type = "array")
         if (!invalid.dist)
-          recipient <- movementSpeeds(movements = recipient, 
+          recipient <- movementSpeeds(movements = recipient,
             speed.method = speed.method, dist.mat = dist.mat)
-        
+
         attributes(recipient)$p.type <- "Auto"
       } else {
         recipient <- NULL
@@ -103,7 +103,7 @@ groupMovements <- function(detections.list, bio, spatial, speed.method, max.inte
       return(recipient)
     })
     names(movements) <- names(detections.list)
-    
+
     # remove potentially empty movement sets
     movements <- movements[sapply(movements, function(x) !is.null(x))]
 
@@ -119,17 +119,17 @@ groupMovements <- function(detections.list, bio, spatial, speed.method, max.inte
 }
 
 #' Removes invalid events
-#' 
+#'
 #' Remove invalid movement events and recalculate times/speeds.
 #'
 #' @inheritParams explore
 #' @inheritParams groupMovements
 #' @param movements A list of movements for each target tag, created by groupMovements.
-#' 
+#'
 #' @return The movement data frame containing only valid events for the target fish.
-#' 
+#'
 #' @keywords internal
-#' 
+#'
 simplifyMovements <- function(movements, discard.first, fish, bio, speed.method, dist.mat, invalid.dist) {
   # NOTE: The NULL variables below are actually column names used by data.table.
   # This definition is just to prevent the package check from issuing a note due unknown variables.
@@ -147,7 +147,7 @@ simplifyMovements <- function(movements, discard.first, fish, bio, speed.method,
     } else {
       output <- aux
     }
-    
+
     return(output)
   } else {
     return(NULL)
@@ -156,17 +156,17 @@ simplifyMovements <- function(movements, discard.first, fish, bio, speed.method,
 
 
 #' Calculate time and speed
-#' 
+#'
 #' Triggers movementTimes and also calculates the speed between events.
 #'
 #' @inheritParams explore
 #' @inheritParams simplifyMovements
 #' @inheritParams groupMovements
-#' 
+#'
 #' @return The movement data frame with speed calculations for the target fish.
-#' 
+#'
 #' @keywords internal
-#' 
+#'
 movementSpeeds <- function(movements, speed.method, dist.mat) {
   appendTo("debug", "Running movementSpeeds.")
   movements$Average.speed.m.s[1] <- NA
@@ -190,17 +190,17 @@ movementSpeeds <- function(movements, speed.method, dist.mat) {
 }
 
 #' Calculate movement times
-#' 
-#' Determines the duration of an event and the time from an event to the next. 
+#'
+#' Determines the duration of an event and the time from an event to the next.
 #'
 #' @inheritParams simplifyMovements
 #' @inheritParams movementSpeeds
 #' @param type The type of movements being analysed. One of "array" or "section".
-#' 
+#'
 #' @return The movement data frame with time calculations for the target fish.
-#' 
+#'
 #' @keywords internal
-#' 
+#'
 movementTimes <- function(movements, type = c("array", "section")){
   type = match.arg(type)
   time.in <- paste0("Time.in.", type)
@@ -215,7 +215,7 @@ movementTimes <- function(movements, type = c("array", "section")){
       a <- as.vector(difftime(x[1], x[2], units = "hours"))
       h <- a %/% 1
       m <- ((a %% 1) * 60) %/% 1
-      if (m < 10) 
+      if (m < 10)
         m <- paste0("0", m)
       return(paste(h, m, sep = ":"))
     })
@@ -229,7 +229,7 @@ movementTimes <- function(movements, type = c("array", "section")){
       a <- as.vector(difftime(x["Last.time"], x["First.time"], units = "hours"))
       h <- a %/% 1
       m <- ((a %% 1) * 60) %/% 1
-      if (m < 10) 
+      if (m < 10)
         m <- paste0("0", m)
       return(paste(h, m, sep = ":"))
   })
@@ -237,17 +237,17 @@ movementTimes <- function(movements, type = c("array", "section")){
 }
 
 #' Calculate time and speed since release.
-#' 
+#'
 #' @inheritParams simplifyMovements
 #' @inheritParams explore
 #' @inheritParams groupMovements
 #' @inheritParams movementSpeeds
 #' @param fish The tag ID of the fish currently being analysed
-#' 
+#'
 #' @return The movement data frame containing time and speed from release to first event.
-#' 
+#'
 #' @keywords internal
-#' 
+#'
 speedReleaseToFirst <- function(fish, bio, movements, dist.mat, speed.method, invalid.dist = FALSE){
   appendTo("debug", "Running speedReleaseToFirst.")
   the.row <- match(fish, bio$Transmitter)
@@ -257,7 +257,7 @@ speedReleaseToFirst <- function(fish, bio, movements, dist.mat, speed.method, in
     a <- as.vector(difftime(movements$First.time[1], origin.time, units = "hours"))
     h <- a%/%1
     m <- ((a%%1) * 60)%/%1
-    if (m < 10) 
+    if (m < 10)
       m <- paste0("0", m)
     movements$Time.travelling[1] <- paste(h, m, sep = ":")
     if (!invalid.dist & movements$Array[1] != "Unknown") {
@@ -277,20 +277,20 @@ speedReleaseToFirst <- function(fish, bio, movements, dist.mat, speed.method, in
     movements$Average.speed.m.s[1] <- NA
   }
   return(movements)
-} 
+}
 
 #' Compress array-movements into section-movements
-#' 
+#'
 #' @inheritParams simplifyMovements
 #' @inheritParams migration
-#' 
+#'
 #' @return A data frame containing the section movements for the target fish.
-#' 
+#'
 #' @keywords internal
-#' 
+#'
 sectionMovements <- function(movements, sections, invalid.dist) {
   Valid <- NULL
-  
+
   if (any(movements$Valid))
     vm <- movements[(Valid)]
   else
@@ -306,7 +306,7 @@ sectionMovements <- function(movements, sections, invalid.dist) {
   aux <- rle(event.index)
   last.events <- cumsum(aux$lengths)
   first.events <- c(1, last.events[-length(last.events)] + 1)
-  
+
   if (invalid.dist) {
     recipient <- data.frame(
       Section = aux$values,
@@ -347,17 +347,17 @@ sectionMovements <- function(movements, sections, invalid.dist) {
 }
 
 #' update array-movement validity based on the section-movements
-#' 
+#'
 #' @param arrmoves the array movements
 #' @param secmoves the section movements
-#' 
+#'
 #' @return A data frame with the array movements for the target fish, with an updated 'Valid' column.
-#' 
+#'
 #' @keywords internal
-#' 
+#'
 updateValidity <- function(arrmoves, secmoves) {
   Valid <- NULL
-  output <- lapply(names(arrmoves), 
+  output <- lapply(names(arrmoves),
     function(i) {
       if (!is.null(secmoves[[i]]) && any(!secmoves[[i]]$Valid)) {
         aux <- secmoves[[i]][(!Valid)]

@@ -1,71 +1,71 @@
 #' nearsq helper
-#' 
+#'
 #' Finds the largest x for which n %% x == 0
-#' 
+#'
 #' Obtained here: <https://stackoverflow.com/questions/32017327/calculate-the-optimal-grid-layout-dimensions-for-a-given-amount-of-plots-in-r>
-#' 
+#'
 #' @param n number of plots to fit.
-#' 
+#'
 #' @return An integer
-#' 
+#'
 #' @keywords internal
-#' 
+#'
 fact <- function(n) {
   k <- floor(sqrt(n))
   for (i in k:1) {
-    if (n %% i == 0) 
+    if (n %% i == 0)
       return(i)
   }
 }
 
 #' Find optimum plotting grid
-#' 
+#'
 #' Calculates the optimal distribution of plots in a square grid.
-#' 
+#'
 #' Obtained here: <https://stackoverflow.com/questions/32017327/calculate-the-optimal-grid-layout-dimensions-for-a-given-amount-of-plots-in-r>
-#' 
+#'
 #' @param n number of plots to fit.
-#' 
+#'
 #' @return a vector of the number of rows and number of columns needed to distribute the desired number of plots.
-#' 
+#'
 #' @keywords internal
-#' 
+#'
 nearsq <- function(n, tol = 5/3+0.001) {
   m <- ceiling(sqrt(n))^2
   for (i in n:m) {
     a <- fact(i)
     b <- i / a
-    if(b / a < tol) 
+    if(b / a < tol)
       return(c(a, b))
   }
 }
 
 #' Import RData in a list format
-#' 
+#'
 #' @param source A RData file.
-#' 
+#'
 #' @examples
 #' # Dummy example:
 #' # Create two objects:
 #' object_1 <- "This"
 #' object_2 <- "Worked!"
-#' 
+#'
 #' # Save them as an RData file in R's temporary directory
 #' save(object_1, object_2, file = paste0(tempdir(), "/dataToList_example.RData"))
-#' 
+#'
 #' # Remove the dummy objects as we don't need them any more
 #' rm(object_1, object_2)
-#' 
+#'
 #' # Load the RData file as a single object
 #' x <- dataToList(paste0(tempdir(), "/dataToList_example.RData"))
-#' 
+#'
 #' # inspect x
 #' x
-#' 
+#'
 #' @return A list containing the objects present in the source RData file.
-#' 
+#'
 #' @export
-#' 
+#'
 dataToList <- function(source){
   e <- new.env()
   load(source, envir = e)
@@ -73,9 +73,9 @@ dataToList <- function(source){
 }
 
 #' @title Remove Code Spaces from transmitter names
-#' 
+#'
 #' @param input A vector of transmitter names
-#' 
+#'
 #' @return A vector of transmitter signals
 #'
 #' @name stripCodeSpaces-deprecated
@@ -85,72 +85,72 @@ dataToList <- function(source){
 NULL
 
 #' @rdname stripCodeSpaces-deprecated
-#' 
+#'
 #' @section \code{stripCodeSpaces}:
 #' For \code{stripCodeSpaces}, use \code{\link{extractSignals}}.
 #'
 #' @export
-#' 
+#'
 stripCodeSpaces <- function(input) {
   .Deprecated("extractSignals")
   extractSignals(input)
 }
 
 #' Extract signals from transmitter names
-#' 
+#'
 #' @param input A vector of transmitter names
-#' 
+#'
 #' @examples
 #' # create dummy string
 #' x <- c("R64K-1234", "A69-1303-12")
-#' 
+#'
 #' # run extractSignals
 #' extractSignals(x)
-#' 
+#'
 #' @return A vector of transmitter signals
-#' 
+#'
 #' @export
-#' 
+#'
 extractSignals <- function(input) {
   unlist(lapply(input, function(x) tail(unlist(strsplit(x, "-")), 1)))
 }
 
 #' Extract Code Spaces from transmitter names
-#' 
+#'
 #' @param input A vector of transmitter names
-#' 
+#'
 #' @examples
 #' # create dummy string
 #' x <- c("R64K-1234", "A69-1303-12")
-#' 
+#'
 #' # run extractCodeSpaces
 #' extractCodeSpaces(x)
-#' 
+#'
 #' @return A vector of transmitter signals
-#' 
+#'
 #' @export
-#' 
+#'
 extractCodeSpaces <- function(input) {
   sapply(input, function(x) sub("-[0-9]*$", "", x))
 }
 
 
 #' Calculate the standard error of the mean for circular data
-#' 
+#'
 #' @param x input data
 #' @param na.rm Logical: Should missing values be removed?
 #' @param silent Logical: Should the number of NA's removed be displayed?
-#' 
+#'
 #' @return The standard error of the mean (numeric value).
-#' 
+#'
 #' @keywords internal
-#' 
+#'
 std.error.circular <- function(x, na.rm = TRUE, silent = FALSE){
  a <- length(x)
- if(na.rm) 
+ if(na.rm)
   x <- x[!is.na(x)]
  output <- circular::sd.circular(x) / sqrt(length(x))
- if (!silent && a != length(x)) 
+ if (!silent && a != length(x))
   message("M: Ommited ", a - length(x), " missing ", ifelse((a - length(x)) > 1, "values.", "value."))
  return(output)
 }
@@ -160,19 +160,19 @@ std.error.circular <- function(x, na.rm = TRUE, silent = FALSE){
 #'
 #' @param input Single string or a vector of strings containing hours:minutes or hours:minutes:seconds.
 #' @param unit the desired units of the output, one of "h" (hours), "m", (minutes) or "s" (seconds).
-#' 
+#'
 #' @return A number or vector of numbers corresponding to the decimal hour equivalent of the character input.
-#' 
+#'
 #' @keywords internal
-#' 
+#'
 decimalTime <- function(input, unit = c("h", "m", "s")) {
   unit <- match.arg(unit)
   .converter <- function(input, unit) {
     x = as.character(input)
     x = as.numeric(unlist(strsplit(x, ":")))
-    if (length(x) == 2) 
+    if (length(x) == 2)
       x = x[1] + x[2]/60
-    if (length(x) == 3) 
+    if (length(x) == 3)
       x = x[1] + x[2]/60 + x[3]/3600
     if (unit == "h")
       return(x)
@@ -181,13 +181,13 @@ decimalTime <- function(input, unit = c("h", "m", "s")) {
     if (unit == "s")
       return(x * 3600)
   }
-  if (missing(input)) 
+  if (missing(input))
     stop("Input appears to be empty.")
   if (length(input) == 1) {
     output <- .converter(input, unit = unit)
     names(output) <- input
   }
-  if (length(input) > 1) 
+  if (length(input) > 1)
     output <- sapply(input, function(i) .converter(i, unit = unit))
   return(output)
 }
@@ -197,11 +197,11 @@ decimalTime <- function(input, unit = c("h", "m", "s")) {
 #' @param x Single string or a vector of strings containing hours:minutes or hours:minutes:seconds.
 #' @param format the format of x, one of "h" (hours), "m", (minutes) or "s" (seconds).
 #' @param seconds Logical; If TRUE, output is returned in HH:MM:SS format.
-#' 
+#'
 #' @return a string or vector of strings corresponding to the character hour equivalent of the numeric input.
-#' 
+#'
 #' @keywords internal
-#' 
+#'
 minuteTime <- function(x, format = c("h", "m", "s"), seconds = TRUE) {
   format <- match.arg(format)
   .converter <- function(x) {
@@ -210,11 +210,11 @@ minuteTime <- function(x, format = c("h", "m", "s"), seconds = TRUE) {
         x <- abs(x)
         neg = TRUE
       } else neg = FALSE
-      if(format == "h") 
+      if(format == "h")
         x = x
-      if(format == "m") 
+      if(format == "m")
         x = x/60
-      if(format == "s") 
+      if(format == "s")
         x = x/3600
       m = x %% 1
       h = x - m
@@ -226,9 +226,9 @@ minuteTime <- function(x, format = c("h", "m", "s"), seconds = TRUE) {
       if (!seconds & s>30) m = m + 1
       if (m < 10) m <- paste0(0, m)
       if (s < 10) s <- paste0(0, s)
-      if (seconds) 
+      if (seconds)
         x <- paste(h, m, s, sep = ":")
-      else 
+      else
         x <- paste(h, m, sep = ":")
       if (neg) x <- paste0("-", x)
     }
@@ -244,14 +244,14 @@ minuteTime <- function(x, format = c("h", "m", "s"), seconds = TRUE) {
 #' Subset a character string counting from the right end
 #'
 #' Allows to quickly remove a given number of characters from the end of a string
-#' 
+#'
 #' @param input Character string to be trimmed.
 #' @param n Number of characters to be removed.
-#' 
+#'
 #' @return A trimmed string or vector of trimmed strings.
-#' 
+#'
 #' @keywords internal
-#' 
+#'
 substrRight <- function(input, n) {
   substr(input, nchar(input) - n + 1, nchar(input))
 }
@@ -259,14 +259,14 @@ substrRight <- function(input, n) {
 #' TRUE/FALSE wrapper for match
 #'
 #' Looks for matches of a list on a target, but returns TRUE/FALSE instead of the position where the match was found.
-#' 
+#'
 #' @param input vector of elements to be matched.
 #' @param match vector of elements where to look for the input.
-#' 
+#'
 #' @return A logical vector.
-#' 
+#'
 #' @keywords internal
-#' 
+#'
 matchl <- function(input, match) {
   !is.na(match(input, match))
 }
@@ -274,13 +274,13 @@ matchl <- function(input, match) {
 #' Consider NA's as FALSE
 #'
 #' Aimed to be used in a vector of TRUE/FALSE's, where NA's are present and should be considered as false.
-#' 
+#'
 #' @param input vector containing NA's.
-#' 
+#'
 #' @return A logical vector.
-#' 
+#'
 #' @keywords internal
-#' 
+#'
 na.as.false <- function(input) {
   input[is.na(input)] <- FALSE
   return(input)
@@ -289,25 +289,25 @@ na.as.false <- function(input) {
 #' Combine a list of vectors
 #'
 #' Intended to combine vectors where, for each position, only one of the vectors contains data (i.e. the remaining are NA's).
-#' 
+#'
 #' @param input a list of vectors with non-overlapping data.
-#' 
+#'
 #' @return A vectorized combination of the data in the different list vectors.
-#' 
+#'
 #' @keywords internal
-#' 
+#'
 combine <- function(input) {
-  if (!inherits(input, "list")) 
+  if (!inherits(input, "list"))
     stop("'combine' is only intended to combine a list of vectors to a single vector.")
   if (length(input) == 1) {
     output <- input[[1]]
   } else {
-    if (var(unlist(lapply(input, length))) != 0) 
+    if (var(unlist(lapply(input, length))) != 0)
       stop("All vectors to combine should have the same length.")
     output <- input[[1]]
     for (i in 2:length(input)) {
       to.replace <- !is.na(input[[i]])
-      if (any(!is.na(output)[to.replace])) 
+      if (any(!is.na(output)[to.replace]))
         stop("Trying to combine value to an already used position.")
       output[to.replace] <- input[[i]][to.replace]
     }
@@ -318,14 +318,14 @@ combine <- function(input) {
 #' Forcefully round a number up
 #'
 #' Forces the rounding of the input to the next higher rounded value.
-#' 
+#'
 #' @param input The value to be rounded.
 #' @param to The level of rounding to be applied (i.e. to=10 will round 14.2 to 20; to=1 will round i to 15).
-#' 
+#'
 #' @return A numeric value or string.
-#' 
+#'
 #' @keywords internal
-#' 
+#'
 roundUp <- function(input, to = 10) {
   if (inherits(input, "list"))
     lapply(input, function(input) to * (input %/% to + as.logical(input %% to)))
@@ -336,14 +336,14 @@ roundUp <- function(input, to = 10) {
 #' Forcefully round a number down
 #'
 #' Forces the rounding of the input to the next lower rounded value.
-#' 
+#'
 #' @param input The value to be rounded.
 #' @param to The level of rounding to be applied (i.e. to=10 will round 14.8 to 10; to=1 will round i to 14).
-#' 
+#'
 #' @return A numeric value or string.
-#' 
+#'
 #' @keywords internal
-#' 
+#'
 roundDown <- function(input, to = 10) {
   to * (input%/%to)
 }
@@ -352,15 +352,15 @@ roundDown <- function(input, to = 10) {
 #' Append to ...
 #'
 #' Appends a note/comment to the specified recipient, which in turn corresponds to a temporary helper file.
-#' 
+#'
 #' @param recipient 'Screen' displays the message on screen, 'Report' appends the message to 'temp_log.txt', 'Warning' appends the message to 'temp_warnings.txt', 'UD' appends the message to 'temp_UD.txt', 'Comment' appends the message to 'temp_comments.txt'. The same message may be appended to multiple recipients at once.
 #' @param line The text to be appended.
 #' @param fish the tag number to which the comment belongs. Only used when recipient = 'Comment'.
-#' 
+#'
 #' @return No return value, called for side effects.
-#' 
+#'
 #' @keywords internal
-#' 
+#'
 appendTo <- function(recipient, line, fish) {
   for (i in recipient) {
     if (i == "Screen") {
@@ -369,47 +369,47 @@ appendTo <- function(recipient, line, fish) {
       else
         message(line)
       flush.console()
-    } 
+    }
     if (i == "Report") {
       if (any(recipient == "Warning")) {
-        write(paste("Warning:", line), 
-          file = paste(tempdir(), "temp_log.txt", sep = "/"), 
+        write(paste("Warning:", line),
+          file = paste(tempdir(), "temp_log.txt", sep = "/"),
           append = file.exists(paste(tempdir(), "temp_log.txt", sep = "/")))
       } else {
-        write(line, 
-          file = paste(tempdir(), "temp_log.txt", sep = "/"), 
+        write(line,
+          file = paste(tempdir(), "temp_log.txt", sep = "/"),
           append = file.exists(paste(tempdir(), "temp_log.txt", sep = "/")))
       }
     }
     if (i == "Warning") {
-      write(paste("Warning:", line), 
-        file = paste(tempdir(), "temp_warnings.txt", sep = "/"), 
+      write(paste("Warning:", line),
+        file = paste(tempdir(), "temp_warnings.txt", sep = "/"),
         append = file.exists(paste(tempdir(), "temp_warnings.txt", sep = "/")))
     }
     if (i == "UD") {
-      write(line, 
-        file = paste(tempdir(), "temp_UD.txt", sep = "/"), 
+      write(line,
+        file = paste(tempdir(), "temp_UD.txt", sep = "/"),
         append = file.exists(paste(tempdir(), "temp_UD.txt", sep = "/")))
     }
     if (i == "Comment") {
-      write(paste(fish, line, sep = "\t"), 
-        file = paste(tempdir(), "temp_comments.txt", sep = "/"), 
+      write(paste(fish, line, sep = "\t"),
+        file = paste(tempdir(), "temp_comments.txt", sep = "/"),
         append = file.exists(paste(tempdir(), "temp_comments.txt", sep = "/")))
     }
   }
-  write(paste(format(Sys.time(), "%H:%M:%S.:"), line), 
-    file = paste(tempdir(), "actel_debug_file.txt", sep = "/"), 
+  write(paste(format(Sys.time(), "%H:%M:%S.:"), line),
+    file = paste(tempdir(), "actel_debug_file.txt", sep = "/"),
     append = file.exists(paste(tempdir(), "actel_debug_file.txt", sep = "/")))
 }
 
 #' Delete temporary files
-#' 
+#'
 #' At the end of the function actel or emergencyBreak, removes temporary files.
-#' 
+#'
 #' @return No return value, called for side effects.
-#' 
+#'
 #' @keywords internal
-#' 
+#'
 deleteHelpers <- function() {
   helper.list <- paste0(tempdir(), paste0("/temp_", c("log", "warnings", "UD", "comments"), ".txt"))
   link <- unlist(lapply(helper.list, file.exists))
@@ -419,33 +419,33 @@ deleteHelpers <- function() {
 }
 
 #' Standard procedure when aborting
-#' 
+#'
 #' Wraps up the report in R's temporary folder before the function end.
-#' 
+#'
 #' @return No return value, called for side effects.
-#' 
+#'
 #' @keywords internal
-#' 
+#'
 emergencyBreak <- function() {
   appendTo("Report", "\nA fatal exception occurred, stopping the process!\n\n-------------------")
   logname <- paste(gsub(":", ".", sub(" ", ".", as.character(Sys.time()))), "actel.log-STOP.txt", sep = ".")
-  if (file.exists(paste(tempdir(), "temp_UD.txt", sep = "/"))) 
+  if (file.exists(paste(tempdir(), "temp_UD.txt", sep = "/")))
     appendTo("Report", paste0("User interventions:\n-------------------\n", gsub("\r", "", readr::read_file(paste(tempdir(), "temp_UD.txt", sep = "/"))), "-------------------"))
   file.rename(paste(tempdir(), "temp_log.txt", sep = "/"), paste(tempdir(), logname, sep = "/"))
   deleteHelpers()
 }
 
 #' Write in comments
-#' 
+#'
 #' Checks if the user has invoked the comment command for a specific fish, and stores the comment.
-#' 
+#'
 #' @param line The text of the interaction in which the user may or may not request a comment.
 #' @param tag The tag number currently being analysed.
-#' 
+#'
 #' @return No return value, called for side effects.
-#' 
+#'
 #' @keywords internal
-#' 
+#'
 commentCheck <- function(line, tag) { # nocov start
   comment.check = TRUE
   while (comment.check) {
@@ -464,34 +464,34 @@ commentCheck <- function(line, tag) { # nocov start
 } # nocov end
 
 #' Extract timestamps from the analysis results.
-#' 
+#'
 #' @param input An actel results object generated by \code{\link{explore}}, \code{\link{migration}} or \code{\link{residency}}.
 #' @param locations The names of the arrays or sections to be included. If left NULL, information for all arrays/sections is extracted.
 #' @param move.type The type of events to record: one of "array" or "section".
 #' @param event.type The point to be recorded: one of "arrival" or "departure".
 #' @param n.events The number of events to record. if "one" and type is "arrival", the very first arrival is returned;
 #' if "one" and type is "departure", the very last departure is returned.
-#' 
+#'
 #' @examples
 #' # using the example results loaded with actel
 #' getTimes(example.results)
-#' 
+#'
 #' # You can specify which events to extract with 'event.type'
 #' getTimes(example.results, event.type = "arrival")
 #' # or
 #' getTimes(example.results, event.type = "departure")
-#' 
+#'
 #' # and also how many events per fish.
 #' getTimes(example.results, n.events = "first")
 #' # or
 #' getTimes(example.results, n.events = "all")
 #' # or
 #' getTimes(example.results, n.events = "last")
-#' 
+#'
 #' @return A data frame with the timestamps for each fish (rows) and array (columns)
-#' 
+#'
 #' @export
-#' 
+#'
 getTimes <- function(input, locations = NULL, move.type = c("array", "section"), event.type = c("arrival", "departure"), n.events = c("first", "all", "last")){
   if (!inherits(input, "list"))
     stop("Could not recognise the input as an actel results object.", call. = FALSE)
@@ -502,7 +502,7 @@ getTimes <- function(input, locations = NULL, move.type = c("array", "section"),
   move.type <- match.arg(move.type)
   event.type <- match.arg(event.type)
   n.events <- match.arg(n.events)
-  
+
   if (input$rsp.info$analysis.type == "explore" & move.type == "section")
     stop("Section times are not calculated for analyses of type 'explore'.", call. = FALSE)
 
@@ -515,12 +515,12 @@ getTimes <- function(input, locations = NULL, move.type = c("array", "section"),
 
   if (move.type == "array" & any(link <- is.na(match(locations, unique(spatial$stations$Array)))))
     stop(ifelse(sum(link) > 1, "Arrays '", "Array '"),
-      paste0(locations[link], collapse = "', '"), 
+      paste0(locations[link], collapse = "', '"),
       ifelse(sum(link) > 1, "' are", "' is"), " not part of this study's arrays.", call. = FALSE)
 
   if (move.type == "section" & any(link <- is.na(match(locations, names(spatial$array.order)))))
     stop(ifelse(sum(link) > 1, "Sections '", "Section '"),
-      paste0(locations[link], collapse = "', '"), 
+      paste0(locations[link], collapse = "', '"),
       ifelse(sum(link) > 1, "' are", "' is"), " not part of this study's sections.", call. = FALSE)
 
   if (event.type == "arrival")
@@ -606,17 +606,17 @@ getTimes <- function(input, locations = NULL, move.type = c("array", "section"),
 
 
 #' Convert a data frame with timestamps into a list of circular objects
-#' 
-#' @param x A data frame where the first column is an identifier, the second column 
-#'   is a grouping structure, and columns three and onwards are timestamps at different 
+#'
+#' @param x A data frame where the first column is an identifier, the second column
+#'   is a grouping structure, and columns three and onwards are timestamps at different
 #'   locations. Can be generated automatically by \code{\link{getTimes}}.
 #' @param by.group Logical: Should the times at each location be divided by the group column (second column of x)?
-#' 
+#'
 #' @examples
 #' # create dummy input data frame.
 #' # Note: the names of the columns are irrelevant.
-#' x <- data.frame(ID = c(1:5), 
-#'  Group = c("A", "A", "B", "B", "B"), 
+#' x <- data.frame(ID = c(1:5),
+#'  Group = c("A", "A", "B", "B", "B"),
 #'  A1 = as.POSIXct(
 #'    c("2019-01-03 11:21:12",
 #'      "2019-01-04 12:22:21",
@@ -630,17 +630,17 @@ getTimes <- function(input, locations = NULL, move.type = c("array", "section"),
 #'      "2019-01-11 19:24:32",
 #'      "2019-01-12 20:15:22")),
 #'  stringsAsFactors = TRUE)
-#' 
+#'
 #' # run timesToCircular
 #' timesToCircular(x)
-#' 
+#'
 #' # optionally, split results by group:
 #' timesToCircular(x, by.group = TRUE)
-#' 
+#'
 #' @return A list of circular objects for each data column and, optionally, for each group.
-#' 
+#'
 #' @export
-#' 
+#'
 timesToCircular <- function(x, by.group = FALSE) {
   if (is.null(dim(x)) | ncol(x) < 3 | !all(sapply(x[, 3:ncol(x)], function(i) any(class(i) == "POSIXt"))))
     stop("timesToCircular only works on data frames where the second column is a grouping structure and columns three and onwards are timestamps.", call. = FALSE)
@@ -669,29 +669,29 @@ timesToCircular <- function(x, by.group = FALSE) {
 }
 
 #' Load shapefile and convert to a raster object.
-#' 
+#'
 #' loadShape can also perform early quality checks on the shape file, to ensure it is compatible
 #' with the remaining study data. To activate these, set the names of the columns in the spatial.csv
 #' file that contain the x and y coordinates of the stations using coord.x and coord.y. By default,
 #' loadShape looks for a spatial.csv file in the current working directory, but this can be
 #' personalized using the spatial argument.
-#' 
+#'
 #' It is highly recommended to read the vignette regarding distances matrix before running this function.
 #' You can find it by running \code{vignette('a-2_distances_matrix', 'actel')} or \code{browseVignettes('actel')}
-#' 
+#'
 #' @param path The system path to the 'shape' file. Defaults to the current directory.
 #' @param shape A shape file containing land polygons of the study area.
 #' @param size The pixel size, in metres.
 #' @param spatial Either a character string specifying the path to a spatial.csv file or a spatial data frame.
 #'  This argument is not mandatory, but can be used to perform an early check of the shape file's compatibility
 #'  with the study stations and release sites.
-#' @param coord.x,coord.y The names of the columns containing the x and y positions of the stations 
+#' @param coord.x,coord.y The names of the columns containing the x and y positions of the stations
 #'  in the spatial.csv file. these coordinates MUST BE in the same coordinate system as the shape file.
-#' @param buffer Artificially expand the shape file edges. Can be a single value (applied to all edges) 
+#' @param buffer Artificially expand the shape file edges. Can be a single value (applied to all edges)
 #'  or four values (xmin, xmax, ymin, ymax). The unit of the buffer depends on the shape file's
 #'  coordinate system.
 #' @param type The type of shapefile being loaded. One of "land" or "water".
-#' 
+#'
 #' @examples
 #' \donttest{
 #' # check if R can run the distance functions
@@ -702,20 +702,20 @@ timesToCircular <- function(x, by.group = FALSE) {
 #'   length(suppressWarnings(packageDescription("tools"))),
 #'   length(suppressWarnings(packageDescription("rgdal"))))
 #' missing.packages <- sapply(aux, function(x) x == 1)
-#' 
+#'
 #' if (any(missing.packages)) {
-#'   message("Sorry, this function requires packages '", 
-#'     paste(c("raster", "gdistance", "sp", "tools", "rgdal")[missing.packages], collapse = "', '"), 
-#'     "' to operate. Please install ", ifelse(sum(missing.packages) > 1, "them", "it"), 
+#'   message("Sorry, this function requires packages '",
+#'     paste(c("raster", "gdistance", "sp", "tools", "rgdal")[missing.packages], collapse = "', '"),
+#'     "' to operate. Please install ", ifelse(sum(missing.packages) > 1, "them", "it"),
 #'     " before proceeding.")
 #' } else {
 #'   if (suppressWarnings(require("rgdal"))) {
 #'     # Fetch actel's example shapefile location
 #'     aux <- system.file(package = "actel")[1]
-#' 
+#'
 #'     # import the shape file
 #'     x <- loadShape(path = aux, shape = "example_shapefile.shp", size = 20)
-#' 
+#'
 #'     # have a look at the resulting raster,
 #'     # where the blank spaces are the land areas
 #'     raster::plot(x)
@@ -726,10 +726,10 @@ timesToCircular <- function(x, by.group = FALSE) {
 #' rm(aux, missing.packages)
 #' }
 #' @return A raster object.
-#' 
+#'
 #' @export
-#' 
-loadShape <- function(path = ".", shape, size, spatial = "spatial.csv", 
+#'
+loadShape <- function(path = ".", shape, size, spatial = "spatial.csv",
   coord.x = NULL, coord.y = NULL, buffer = NULL, type = c("land", "water")){
   # initial checks on package presence
   aux <- c(
@@ -740,10 +740,10 @@ loadShape <- function(path = ".", shape, size, spatial = "spatial.csv",
     length(suppressWarnings(packageDescription("rgdal"))))
   missing.packages <- sapply(aux, function(x) x == 1)
   if (any(missing.packages)) {
-    stop(paste0("This function requires packages '", paste(c("raster", "gdistance", "sp", "tools", "rgdal")[missing.packages], collapse = "', '"), 
+    stop(paste0("This function requires packages '", paste(c("raster", "gdistance", "sp", "tools", "rgdal")[missing.packages], collapse = "', '"),
       "' to operate. Please install ", ifelse(sum(missing.packages) > 1, "them", "it"), " before proceeding.\n"), call. = FALSE)
   }
-  
+
   type <- match.arg(type)
 
   if (!is.null(buffer) & length(buffer) != 4 & length(buffer) != 1)
@@ -757,7 +757,7 @@ loadShape <- function(path = ".", shape, size, spatial = "spatial.csv",
     warning("'coord.y' was set but 'coord.x' was not. Skipping range check.", call. = FALSE, immediate. = TRUE)
   if (!is.null(coord.x) & is.null(coord.y))
     warning("'coord.x' was set but 'coord.y' was not. Skipping range check.", call. = FALSE, immediate. = TRUE)
-  
+
   # check if spatial information is present
   if (!is.null(coord.x) & !is.null(coord.y)) {
     check.spatial <- TRUE
@@ -790,10 +790,10 @@ loadShape <- function(path = ".", shape, size, spatial = "spatial.csv",
   # remaining input quality checks
   if (path != "." & !file.exists(paste(path, shape, sep = "/")))
     stop(paste0("Could not find file '", paste(path, shape, sep = "/"), "'.\n"), call. = FALSE)
-  
+
   if (path == "." & !file.exists(shape))
     stop(paste0("Could not find file '", shape, "'.\n"), call. = FALSE)
-  
+
   # load shape file
   if (tools::file_ext(shape) == "shp") {
     shape <- sub(".shp", "", shape)
@@ -801,7 +801,7 @@ loadShape <- function(path = ".", shape, size, spatial = "spatial.csv",
   } else {
     stop("'shape' must be a .shp file.\n", call. = FALSE)
   }
-  
+
   # extend ranges with the buffer
   if (!is.null(buffer)) {
     if (length(buffer) == 1){
@@ -845,7 +845,7 @@ loadShape <- function(path = ".", shape, size, spatial = "spatial.csv",
 
   # ensure range allows for integer pixels
   issue.message.2 <- FALSE
-  
+
   fix.x <- ((shape@bbox[1, 2] - shape@bbox[1, 1]) %% size) / 2
   if (fix.x != 0) {
     issue.message.2 <- TRUE
@@ -867,7 +867,7 @@ loadShape <- function(path = ".", shape, size, spatial = "spatial.csv",
     message("M: New shape extent:")
     message(paste0(capture.output(print(shape@bbox)), collapse = "\n"), "\n")
   }
-  
+
   pixel.res <- (shape@bbox[,2] - shape@bbox[,1]) / size
   message(paste("M: Chosen pixel size:", size, "\nM: Resulting pixel dimensions:"))
   message(paste0(capture.output(print(pixel.res)), collapse = "\n"), "\n")
@@ -887,14 +887,14 @@ loadShape <- function(path = ".", shape, size, spatial = "spatial.csv",
     project.raster[project.raster == 1] <- NA
     project.raster[project.raster == 2] <- 1
   }
-  
+
   # check if stations are in water
   if (!is.null(spatial)) {
     sp_points <- sp::SpatialPoints(data.frame(
-          x = spatial[, coord.x], 
+          x = spatial[, coord.x],
           y = spatial[, coord.y]))
 
-    check <- raster::extract(x = project.raster, 
+    check <- raster::extract(x = project.raster,
       y = sp_points)
 
     if (any(is.na(check))) {
@@ -909,18 +909,18 @@ loadShape <- function(path = ".", shape, size, spatial = "spatial.csv",
 
 
 #' Calculate Transition Layer
-#' 
+#'
 #' Using a previously imported shape file that has been converted to a raster (see \code{\link{loadShape}}),
 #' Prepares a TransitionLayer object to be used in distance
 #' estimations (see \code{\link{distancesMatrix}}). Adapted from Grant Adams' script "distance to closest mpa".
-#' 
+#'
 #' It is highly recommended to read the vignette regarding distances matrix before running this function.
 #' You can find it by running \code{vignette('a-2_distances_matrix', 'actel')} or \code{browseVignettes('actel')}
-#' 
+#'
 #' @param x A water raster; for example the output of \code{\link{loadShape}}
-#' @param directions The number of directions considered for every movement situation during cost 
+#' @param directions The number of directions considered for every movement situation during cost
 #'  calculation. See the vignettes for more details.
-#' 
+#'
 #' @examples
 #' \donttest{
 #' # check if R can run the distance functions
@@ -931,26 +931,26 @@ loadShape <- function(path = ".", shape, size, spatial = "spatial.csv",
 #'   length(suppressWarnings(packageDescription("tools"))),
 #'   length(suppressWarnings(packageDescription("rgdal"))))
 #' missing.packages <- sapply(aux, function(x) x == 1)
-#' 
+#'
 #' if (any(missing.packages)) {
-#'   message("Sorry, this function requires packages '", 
-#'     paste(c("raster", "gdistance", "sp", "tools", "rgdal")[missing.packages], collapse = "', '"), 
-#'     "' to operate. Please install ", ifelse(sum(missing.packages) > 1, "them", "it"), 
+#'   message("Sorry, this function requires packages '",
+#'     paste(c("raster", "gdistance", "sp", "tools", "rgdal")[missing.packages], collapse = "', '"),
+#'     "' to operate. Please install ", ifelse(sum(missing.packages) > 1, "them", "it"),
 #'     " before proceeding.")
 #' } else {
 #'   if (suppressWarnings(require("rgdal"))) {
 #'     # Fetch actel's example shapefile location
 #'     aux <- system.file(package = "actel")[1]
-#' 
+#'
 #'     # import the shape file
 #'     x <- loadShape(path = aux, shape = "example_shapefile.shp", size = 20)
-#' 
+#'
 #'     # Build the transition layer
 #'     t.layer <- transitionLayer(x)
-#' 
+#'
 #'     # inspect the output
 #'     t.layer
-#' 
+#'
 #'   } else {
 #'     message("Sorry, it appears that rgdal is not being able to load.")
 #'   }
@@ -958,9 +958,9 @@ loadShape <- function(path = ".", shape, size, spatial = "spatial.csv",
 #' rm(aux, missing.packages)
 #' }
 #' @return A TransitionLayer object.
-#' 
+#'
 #' @export
-#' 
+#'
 transitionLayer <- function(x, directions = c(16, 8, 4)){
   # initial checks on package presence
   aux <- c(
@@ -971,10 +971,10 @@ transitionLayer <- function(x, directions = c(16, 8, 4)){
     length(suppressWarnings(packageDescription("rgdal"))))
   missing.packages <- sapply(aux, function(x) x == 1)
   if (any(missing.packages)) {
-    stop(paste0("This function requires packages '", paste(c("raster", "gdistance", "sp", "tools", "rgdal")[missing.packages], collapse = "', '"), 
+    stop(paste0("This function requires packages '", paste(c("raster", "gdistance", "sp", "tools", "rgdal")[missing.packages], collapse = "', '"),
       "' to operate. Please install ", ifelse(sum(missing.packages) > 1, "them", "it"), " before proceeding.\n"), call. = FALSE)
   }
-  
+
   # argument quality
   directions <- as.character(directions[1])
   directions <- match.arg(directions)
@@ -987,15 +987,15 @@ transitionLayer <- function(x, directions = c(16, 8, 4)){
 }
 
 #' Calculate Distances Matrix
-#' 
+#'
 #' Using a previously created transition layer (see \code{\link{transitionLayer}}), calculates the distances
 #' between spatial points. Adapted from Grant Adams' script "distance to closest mpa". if the argument 'actel'
 #' is set to TRUE (default), an actel-compatible matrix is generated, and the user will be asked if they would
 #' like to save the matrix as 'distances.csv' in the current directory.
-#' 
+#'
 #' It is highly recommended to read the vignette regarding distances matrix before running this function.
 #' You can find it by running \code{vignette('a-2_distances_matrix', 'actel')} or \code{browseVignettes('actel')}
-#' 
+#'
 #' @param t.layer A TransitionLayer object, generated by \code{\link{transitionLayer}}.
 #' @param starters A data frame with the points from which to start measuring the distance. Ignored if actel = TRUE (default), as the 'spatial.csv' is loaded as starters.
 #' @param targets A data frame with the points to which a way must be found. Ignored if actel = TRUE (default), as the 'spatial.csv' is loaded as targets.
@@ -1013,36 +1013,36 @@ transitionLayer <- function(x, directions = c(16, 8, 4)){
 #'   length(suppressWarnings(packageDescription("tools"))),
 #'   length(suppressWarnings(packageDescription("rgdal"))))
 #' missing.packages <- sapply(aux, function(x) x == 1)
-#' 
+#'
 #' if (any(missing.packages)) {
-#'   message("Sorry, this function requires packages '", 
-#'     paste(c("raster", "gdistance", "sp", "tools", "rgdal")[missing.packages], collapse = "', '"), 
-#'     "' to operate. Please install ", ifelse(sum(missing.packages) > 1, "them", "it"), 
+#'   message("Sorry, this function requires packages '",
+#'     paste(c("raster", "gdistance", "sp", "tools", "rgdal")[missing.packages], collapse = "', '"),
+#'     "' to operate. Please install ", ifelse(sum(missing.packages) > 1, "them", "it"),
 #'     " before proceeding.")
 #' } else {
 #'   if (suppressWarnings(require("rgdal"))) {
 #'     # move to a temporary directory
 #'     old.wd <- getwd()
 #'     setwd(tempdir())
-#' 
+#'
 #'     # Fetch location of actel's example files
 #'     aux <- system.file(package = "actel")[1]
-#' 
+#'
 #'     # create a temporary spatial.csv file
 #'     file.copy(paste0(aux, "/example_spatial.csv"), "spatial.csv")
-#' 
-#'     # import the shape file and use the spatial.csv 
+#'
+#'     # import the shape file and use the spatial.csv
 #'     # to check the extents.
-#'     x <- loadShape(path = aux, shape = "example_shapefile.shp", 
+#'     x <- loadShape(path = aux, shape = "example_shapefile.shp",
 #'       coord.x = "x", coord.y = "y", size = 20)
-#' 
+#'
 #'     # Build the transition layer
 #'     t.layer <- transitionLayer(x)
-#' 
+#'
 #'     # compile the distances matrix. Columns x and y in the spatial dataframe
 #'     # contain the coordinates of the stations and release sites.
 #'     distancesMatrix(t.layer, coord.x = 'x', coord.y = 'y')
-#' 
+#'
 #'     # return to original directory
 #'     setwd(old.wd)
 #'     rm(old.wd)
@@ -1052,12 +1052,12 @@ transitionLayer <- function(x, directions = c(16, 8, 4)){
 #' }
 #' rm(aux, missing.packages)
 #' }
-#' 
+#'
 #' @return A matrix with the distances between each pair of points.
-#' 
+#'
 #' @export
-#' 
-distancesMatrix <- function(t.layer, starters = NULL, targets = starters, 
+#'
+distancesMatrix <- function(t.layer, starters = NULL, targets = starters,
   coord.x = "x", coord.y = "y", id.col = NULL, actel = TRUE){
   aux <- c(
     length(suppressWarnings(packageDescription("raster"))),
@@ -1067,11 +1067,11 @@ distancesMatrix <- function(t.layer, starters = NULL, targets = starters,
     length(suppressWarnings(packageDescription("rgdal"))))
   missing.packages <- sapply(aux, function(x) x == 1)
   if (any(missing.packages)) {
-    stop(paste0("This function requires packages '", paste(c("raster", "gdistance", "sp", "tools", "rgdal")[missing.packages], collapse = "', '"), 
+    stop(paste0("This function requires packages '", paste(c("raster", "gdistance", "sp", "tools", "rgdal")[missing.packages], collapse = "', '"),
       "' to operate. Please install ", ifelse(sum(missing.packages) > 1, "them", "it"), " before proceeding.\n"), call. = FALSE)
   }
 
-  if (class(t.layer) != "TransitionLayer") 
+  if (class(t.layer) != "TransitionLayer")
     stop("Could not recognise 't.layer' as a TransitionLayer object. Make sure to compile it using the function transitionLayer.\n", call. = FALSE)
 
   if (!is.null(id.col) && length(id.col) > 1)
@@ -1110,7 +1110,7 @@ distancesMatrix <- function(t.layer, starters = NULL, targets = starters,
 
   if (!missing(id.col)) {
     if (!is.na(match(id.col, colnames(starters)))) {
-      outputRows <- starters[, id.col] 
+      outputRows <- starters[, id.col]
       if (any(duplicated(outputRows))) {
         warning("The '", id.col, "' column in 'starters' contains duplicated values; skipping row naming.", immediate. = TRUE, call. = FALSE)
         row.rename <- FALSE
@@ -1122,7 +1122,7 @@ distancesMatrix <- function(t.layer, starters = NULL, targets = starters,
       row.rename <- FALSE
     }
     if (!is.na(match(id.col, colnames(targets)))) {
-      outputCols <- targets[, id.col] 
+      outputCols <- targets[, id.col]
       if (any(duplicated(outputCols))) {
         warning("The '", id.col, "' column in 'targets' contains duplicated values; skipping column naming.", immediate. = TRUE, call. = FALSE)
         col.rename <- FALSE
@@ -1146,8 +1146,8 @@ distancesMatrix <- function(t.layer, starters = NULL, targets = starters,
   #### Calculate a matrix of distances to each object
   dist.mat <- data.frame(gdistance::costDistance(t.layer, starters, targets))
   if (any(dist.mat == Inf)) {
-    warning("At least one station is completely blocked off from the remaining stations by land. Filling 
-the respective fields with NA. If your fish was expected to travel around the areas present 
+    warning("At least one station is completely blocked off from the remaining stations by land. Filling
+the respective fields with NA. If your fish was expected to travel around the areas present
 in the shape file, consider applying a 'buffer' when calculating the transition layer. This
 will artificially add water space around the shape file.", call. = FALSE)
     dist.mat[dist.mat == Inf] <- NA
@@ -1171,29 +1171,29 @@ will artificially add water space around the shape file.", call. = FALSE)
 }
 
 #' Create a Template Distances Matrix
-#' 
+#'
 #' Creates an empty matrix based on the local 'spatial.csv' file and saves it to 'distances.csv' so the
 #' user can manually fill it.
-#' 
+#'
 #' It is highly recommended to read the vignette regarding distances matrix before running this function.
 #' You can find it by running \code{vignette('a-2_distances_matrix', 'actel')} or \code{browseVignettes('actel')}
-#' 
+#'
 #' @param input Either a data frame with spatial data or the path to the file containing the spatial information.
-#' 
+#'
 #' @examples
 #' # This function requires a file with spatial information
-#' 
+#'
 #' # Fetch location of actel's example files
 #' aux <- system.file(package = "actel")[1]
-#' 
+#'
 #' # run emptyMatrix on the temporary spatial.csv file
 #' emptyMatrix(paste0(aux, "/example_spatial.csv"))
-#' 
+#'
 #' @return An empty matrix with the rows and columns required to
 #'  operate with the target spatial file.
-#' 
+#'
 #' @export
-#' 
+#'
 emptyMatrix <- function(input = "spatial.csv"){
   if (is.character(input)) {
     if(!file.exists(input))
@@ -1212,14 +1212,14 @@ emptyMatrix <- function(input = "spatial.csv"){
 }
 
 #' Complete a Distances Matrix
-#' 
+#'
 #' Completes the bottom diagonal of a matrix with the same number of rows and columns.
-#' 
+#'
 #' It is highly recommended to read the vignette regarding distances matrix before running this function.
 #' You can find it by running \code{vignette('a-2_distances_matrix', 'actel')} or \code{browseVignettes('actel')}
-#' 
+#'
 #' @param x A distances matrix to be completed.
-#' 
+#'
 #' @examples
 #' # Create dummy matrix with upper diagonal filled.
 #' x <- matrix(
@@ -1228,19 +1228,19 @@ emptyMatrix <- function(input = "spatial.csv"){
 #'    NA, NA,  0,  1,  2, 3,
 #'    NA, NA, NA,  0,  1, 2,
 #'    NA, NA, NA, NA,  0, 1,
-#'    NA, NA, NA, NA, NA, 0), 
+#'    NA, NA, NA, NA, NA, 0),
 #'  ncol = 6, byrow = TRUE)
-#' 
+#'
 #' # inspect x
 #' x
-#' 
+#'
 #' # run completeMatrix
 #' completeMatrix(x)
-#' 
+#'
 #' @return A matrix of distances between pairs of points.
-#' 
+#'
 #' @export
-#' 
+#'
 completeMatrix <- function(x){
   if (!inherits(x, "matrix"))
     stop("The input must be a matrix", call. = FALSE)

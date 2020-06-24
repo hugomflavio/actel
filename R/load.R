@@ -1,8 +1,8 @@
 #' Load, structure and check the inputs
-#' 
+#'
 #' @inheritParams explore
 #' @inheritParams migration
-#' 
+#'
 #' @return A list containing:
 #' \itemize{
 #'  \item \code{bio}: A data frame corresponding to 'biometrics.csv'
@@ -17,18 +17,18 @@
 #'  \item \code{detections.list}: A list containing the detection data for each fish
 #'  \item \code{paths}: A list of the all array paths between each pair of arrays.
 #' }
-#' 
+#'
 #' @keywords internal
-#' 
+#'
 loadStudyData <- function(tz, override = NULL, start.time, stop.time, save.detections = FALSE,
   sections = NULL, exclude.tags, disregard.parallels = TRUE, discard.orphans = FALSE) {
   appendTo(c("Screen", "Report"), "M: Importing data. This process may take a while.")
   bio <- loadBio(input = "biometrics.csv", tz = tz)
   appendTo(c("Screen", "Report"), paste0("M: Number of target tags: ", nrow(bio), "."))
-  
+
   # Check that all the overridden fish are part of the study
   if (!is.null(override)) {
-    override_signals <- unlist(lapply(strsplit(override, "-"), function(x) tail(x, 1))) 
+    override_signals <- unlist(lapply(strsplit(override, "-"), function(x) tail(x, 1)))
     lowest_signals <- sapply(bio$Signal, function(i) min(as.numeric(unlist(strsplit(as.character(i), "|", fixed = TRUE)))))
     if (any(link <- is.na(match(override_signals, lowest_signals))))
       stop("Some tag signals listed in 'override' ('", paste0(override[link], collapse = "', '"), "') are not listed in the biometrics file.\n", call. = FALSE)
@@ -50,7 +50,7 @@ loadStudyData <- function(tz, override = NULL, start.time, stop.time, save.detec
     appendTo(c("Screen", "Report"), "M: A 'spatial.dot' file was detected, activating multi-branch analysis.")
     recipient <- loadDot(input = "spatial.dot", spatial = spatial, sections = sections, disregard.parallels = disregard.parallels)
     use.fakedot <- FALSE
-  } 
+  }
   if (use.fakedot & file.exists("spatial.txt")) {
     appendTo(c("Screen", "Report"), "M: A 'spatial.txt' file was detected, activating multi-branch analysis.")
     recipient <- loadDot(input = "spatial.txt", spatial = spatial, sections = sections, disregard.parallels = disregard.parallels)
@@ -88,7 +88,7 @@ loadStudyData <- function(tz, override = NULL, start.time, stop.time, save.detec
   link <- match(unlist(spatial$array.order), names(arrays))
   arrays <- arrays[link] # Reorder arrays by spatial order
   rm(link)
-  
+
   recipient <- loadDistances(spatial = spatial) # Load distances and check if they are valid
   dist.mat <- recipient$dist.mat
   invalid.dist <- recipient$invalid.dist
@@ -114,17 +114,17 @@ loadStudyData <- function(tz, override = NULL, start.time, stop.time, save.detec
   detections.list <- checkDetectionsBeforeRelease(input = detections.list, bio = bio, discard.orphans = discard.orphans)
   appendTo(c("Screen", "Report"), "M: Data successfully imported!")
   return(list(bio = bio, sections = sections, deployments = deployments, spatial = spatial, dot = dot,
-   arrays = arrays, dotmat = dotmat, dist.mat = dist.mat, invalid.dist = invalid.dist, 
+   arrays = arrays, dotmat = dotmat, dist.mat = dist.mat, invalid.dist = invalid.dist,
    detections.list = detections.list, paths = paths))
 }
 
 #' Load spatial.dot
-#' 
+#'
 #' @param input The name of a file containing dot connections.
 #' @param spatial A spatial data frame.
 #' @param string A string of dot connections.
 #' @inheritParams migration
-#' 
+#'
 #' @return A list containing:
 #' \itemize{
 #'  \item \code{dot}: A data frame containing the connections between arrays
@@ -132,14 +132,14 @@ loadStudyData <- function(tz, override = NULL, start.time, stop.time, save.detec
 #'  \item \code{dotmat}: A matrix of the distance (in number of arrays) between pairs of arrays
 #'  \item \code{paths}: A list of the all array paths between each pair of arrays.
 #' }
-#' 
+#'
 #' @keywords internal
-#' 
+#'
 loadDot <- function(string = NULL, input = NULL, spatial, sections = NULL, disregard.parallels) {
   if (is.null(string) & is.null(input))
     stop("No dot file or dot string were specified.")
   if (is.null(string)) {
-    tryCatch(dot <- readDot(input = input), 
+    tryCatch(dot <- readDot(input = input),
       error = function(e) {
         emergencyBreak()
         stop("The contents of the '", input, "' file could not be recognised by the readDot function.\n", call. = FALSE)
@@ -165,37 +165,37 @@ loadDot <- function(string = NULL, input = NULL, spatial, sections = NULL, disre
 }
 
 #' Read dot file or string
-#' 
+#'
 #' @inheritParams loadDot
-#' 
+#'
 #' @examples
 #' # create dummy dot string
 #' x1 <- c("A--B--C--D--E--F")
-#' 
+#'
 #' # run readDot
 #' readDot(string = x1)
-#' 
+#'
 #' # more complex strings are acceptable:
 #' x2 <- c(
 #' "A--B--C--D--E--F
 #' A--G--H--I--E
 #' H--C")
-#' 
+#'
 #' readDot(string = x2)
-#' 
+#'
 #' # Alternatively, connections can be read from a file
-#' 
+#'
 #' # let's create a dummy file in R's temporary directory:
-#' write("A--B--C--D--E--F\nA--G--H--I--E\nH--C\n", 
+#' write("A--B--C--D--E--F\nA--G--H--I--E\nH--C\n",
 #'  file = paste0(tempdir(), "/dummy_dot.txt"))
-#' 
+#'
 #' # now we can read it using readDot
 #' readDot(input = paste0(tempdir(), "/dummy_dot.txt"))
-#' 
+#'
 #' @return A data frame with the connections present in the input.
-#' 
+#'
 #' @export
-#' 
+#'
 readDot <- function (input = NULL, string = NULL) {
   if (is.null(string) & is.null(input))
     stop("No dot file or data were specified.")
@@ -213,18 +213,18 @@ readDot <- function (input = NULL, string = NULL) {
   paths <- gsub("\\[label=[^\\]]","", paths)
   nodes <- strsplit(paths,"[<-][->]")
   recipient <- data.frame(
-    A = character(), 
+    A = character(),
     to = character(),
-    B = character(), 
+    B = character(),
     stringsAsFactors = FALSE)
   for (i in 1:length(nodes)) {
     n <- length(nodes[[i]])
     escaped_nodes <- gsub(pattern = "([[:punct:]])", replacement = "\\\\\\1", nodes[[i]])
     type <- gsub(paste0(escaped_nodes, collapse = "|"), "", paths[[i]])
     aux <- data.frame(
-      A = nodes[[i]][1:(n - 1)], 
+      A = nodes[[i]][1:(n - 1)],
       to = sapply(seq(from = 1, to = nchar(type), by = 2), function(i) substr(type, i, i + 1)),
-      B = nodes[[i]][2:n], 
+      B = nodes[[i]][2:n],
       stringsAsFactors = FALSE)
     recipient <- rbind(recipient, aux)
   }
@@ -232,13 +232,13 @@ readDot <- function (input = NULL, string = NULL) {
 }
 
 #' Create numerical distances between dot elements
-#' 
+#'
 #' @param input a dot data frame
-#' 
+#'
 #' @return A matrix of the distance (in number of arrays) between pairs of arrays
-#' 
+#'
 #' @keywords internal
-#' 
+#'
 dotMatrix <- function(input) {
   nodes <- unique(unlist(input[, c(1, 3)]))
   graph <- matrix(0, length(nodes), length(nodes), dimnames = list(nodes, nodes))
@@ -274,20 +274,20 @@ dotMatrix <- function(input) {
     }
   }
   graph[graph == 0] <- NA
-  for(i in 1:nrow(graph)) 
+  for(i in 1:nrow(graph))
     graph[i, i] <- 0
   return(graph)
 }
 
 #' Break the dot data frame into a list
-#' 
+#'
 #' @param input a dot data frame
 #' @inheritParams migration
-#' 
+#'
 #' @return  A list containing detailed information on the arrays
-#' 
+#'
 #' @keywords internal
-#' 
+#'
 dotList <- function(input, sections = NULL) {
   if (!is.null(sections)) {
     input$SectionA <- rep(NA_character_, nrow(input))
@@ -327,15 +327,15 @@ dotList <- function(input, sections = NULL) {
 }
 
 #' Find arrays valid for efficiency calculation
-#' 
+#'
 #' @param input A dot list
 #' @param dotmat A dot distance matrix
 #' @inheritParams migration
-#' 
+#'
 #' @return A list of the all array paths between each pair of arrays.
-#' 
+#'
 #' @keywords internal
-#' 
+#'
 dotPaths <- function(input, dotmat, disregard.parallels) {
   recipient <- findPeers(input = input, dotmat = dotmat, type = "before", disregard.parallels = disregard.parallels)
   recipient <- findDirectChains(input = recipient, dotmat = dotmat,  type = "before")
@@ -345,14 +345,14 @@ dotPaths <- function(input, dotmat, disregard.parallels) {
 }
 
 #' Find efficiency peers for each array
-#' 
+#'
 #' @param input An array list
 #' @param type The type of peers to be found ("before" or "after")
-#' 
+#'
 #' @return The array list with efficiency peers.
-#' 
+#'
 #' @keywords internal
-#' 
+#'
 findPeers <- function(input, dotmat, type = c("before", "after"), disregard.parallels) {
   type <- match.arg(type)
   opposite <- ifelse(type == "before", "after", "before")
@@ -379,7 +379,7 @@ findPeers <- function(input, dotmat, type = c("before", "after"), disregard.para
               # as this is a distance 1 case, verify that only array A leads to the parallels.
               if (all(!is.na(match(leading.to.parallels, a)))) {
                 peers <- c(peers, b)
-                new.check <- c(new.check, input[[b]][[type]])              
+                new.check <- c(new.check, input[[b]][[type]])
               }
             }
           }
@@ -399,7 +399,7 @@ findPeers <- function(input, dotmat, type = c("before", "after"), disregard.para
             # as this is a distance >1 case, verify that all arrays leading to the parallels are contained in the peers
             if (all(!is.na(match(leading.to.parallels, peers)))) {
               peers <- c(peers, b)
-              new.check <- c(new.check, input[[b]][[type]])              
+              new.check <- c(new.check, input[[b]][[type]])
             }
           }
         }
@@ -412,14 +412,14 @@ findPeers <- function(input, dotmat, type = c("before", "after"), disregard.para
 }
 
 #' Find all arrays linked to an array in a given direction
-#' 
+#'
 #' @param input An array list
 #' @param type The direction in which to expand the chain ("before" or "after")
-#' 
+#'
 #' @return The array list with all linked arrays.
-#' 
+#'
 #' @keywords internal
-#' 
+#'
 findDirectChains <- function(input, dotmat, type = c("before", "after")) {
   type <- match.arg(type)
   for(a in names(input)) {
@@ -444,13 +444,13 @@ findDirectChains <- function(input, dotmat, type = c("before", "after")) {
 }
 
 #' Find the shortest paths between arrays
-#' 
+#'
 #' @param input An array list
-#' 
+#'
 #' @return The array list with all paths between arrays with distance > 1.
-#' 
+#'
 #' @keywords internal
-#' 
+#'
 findShortestChains <- function(input) {
   # List to store the paths
   the.paths <- list()
@@ -475,7 +475,7 @@ findShortestChains <- function(input) {
             if (is.null(the.paths[[paste0(A, "_to_", i)]]))
               to.add <- i
             else
-              to.add <- paste(the.paths[[paste0(A, "_to_", i)]], i, sep = " -> ")                      
+              to.add <- paste(the.paths[[paste0(A, "_to_", i)]], i, sep = " -> ")
             if (is.null(the.paths[[paste0(A,"_to_",found)]]))
               the.paths[[paste0(A,"_to_",found)]] <<- to.add
             else
@@ -491,15 +491,15 @@ findShortestChains <- function(input) {
 }
 
 #' Create Standard Names for spatial elements
-#' 
-#' Includes standard names and also reprints 'spatial.csv' 
-#' 
+#'
+#' Includes standard names and also reprints 'spatial.csv'
+#'
 #' @param input A data frame with spatial information.
-#'  
+#'
 #' @return A data frame with the same information as the input plus a Standard.name column.
-#' 
+#'
 #' @keywords internal
-#' 
+#'
 setSpatialStandards <- function(input){
   appendTo("debug","Running setSpatialStandards")
   input$Standard.name <- as.character(input$Station.name)
@@ -510,18 +510,18 @@ setSpatialStandards <- function(input){
 }
 
 #' Load distances matrix
-#' 
+#'
 #' @param input A matrix of distances, to be loaded rather than a file.
 #' @param spatial A list of spatial objects in the study area.
-#' 
+#'
 #' @return a list containing:
 #' \itemize{
 #'  \item \code{dist.mat}: A matrix of the distances (in metres) between stations (if a 'distances.csv' is present)
 #'  \item \code{invalid.dist}: Logical: Is the distances matrix valid?
 #' }
-#' 
-#' @keywords internal 
-#' 
+#'
+#' @keywords internal
+#'
 loadDistances <- function(input, spatial) {
   # Check for distances
   invalid.dist <- TRUE
@@ -552,7 +552,7 @@ loadDistances <- function(input, spatial) {
     if (!invalid.dist && any(link <- is.na(match(rownames(dist.mat), colnames(dist.mat))))) {
       appendTo(c("Screen", "Report", "Warning"), "The column and row names in the distance matrix do not match each other. Deactivating speed calculations to avoid function failure.")
       message(paste0("   Row names missing in the columns: '", paste(rownames(dist.mat)[link], collapse = "', '"), "'."))
-      if (any(link <- is.na(match(colnames(dist.mat), rownames(dist.mat))))) 
+      if (any(link <- is.na(match(colnames(dist.mat), rownames(dist.mat)))))
         message(paste0("   Column names missing in the rows: '", paste(colnames(dist.mat)[link], collapse = "', '"), "'."))
       invalid.dist <- TRUE
     }
@@ -560,8 +560,8 @@ loadDistances <- function(input, spatial) {
     if (any(grepl("^unspecified$", spatial$release.sites$Standard.name))) {
       dist.mat[nrow(dist.mat) + 1, ] <- NA
       dist.mat[, ncol(dist.mat) + 1] <- NA
-      colnames(dist.mat)[ncol(dist.mat)] <- "unspecified"      
-      rownames(dist.mat)[nrow(dist.mat)] <- "unspecified"      
+      colnames(dist.mat)[ncol(dist.mat)] <- "unspecified"
+      rownames(dist.mat)[nrow(dist.mat)] <- "unspecified"
     }
     if (!invalid.dist && sum(nrow(spatial$stations), nrow(spatial$release.sites)) != nrow(dist.mat)) {
       appendTo(c("Screen", "Report", "Warning"), "The number of spatial points does not match the number of rows in the distance matrix. Deactivating speed calculations to avoid function failure.")
@@ -578,27 +578,27 @@ loadDistances <- function(input, spatial) {
       if (length(missing.stations) > 0)
         message(paste0("   Stations missing: '", paste(missing.stations, collapse = "', '")))
       invalid.dist <- TRUE
-    }    
+    }
   } else {
     dist.mat <- NA
   }
-  return(list(dist.mat = dist.mat, invalid.dist = invalid.dist))  
+  return(list(dist.mat = dist.mat, invalid.dist = invalid.dist))
 }
 
 
 #' Load deployments file and Check the structure
-#' 
+#'
 #' @param input an input data frame or file with deployment data.
 #' @inheritParams explore
-#' 
+#'
 #' @return A data frame with the deployments information
-#' 
+#'
 #' @keywords internal
-#' 
+#'
 loadDeployments <- function(input, tz){
 
   appendTo("debug","Running loadDeployments.")
-  
+
   if (is.character(input)) {
     if (file.exists(input))
       input <- as.data.frame(data.table::fread(input))
@@ -613,19 +613,19 @@ loadDeployments <- function(input, tz){
 
   if (any(link <- duplicated(colnames(input))))
     stop("The following columns are duplicated in the deployments: '", paste(unique(colnames(input)[link]), sep = "', '"), "'.", call. = FALSE)
-  
+
   default.cols <- c("Receiver", "Station.name", "Start", "Stop")
   link <- match(default.cols, colnames(input))
   if (any(is.na(link))) {
-    appendTo("Report", paste0("Error: Column", 
+    appendTo("Report", paste0("Error: Column",
       ifelse(sum(is.na(link)) > 1, "(s) '", " '"),
-      paste(default.cols[is.na(link)], collapse = "', '"), 
+      paste(default.cols[is.na(link)], collapse = "', '"),
       ifelse(sum(is.na(link)) > 1, "' are", "' is"),
       " missing in the deployments."))
     emergencyBreak()
-    stop(paste0("Column", 
+    stop(paste0("Column",
       ifelse(sum(is.na(link)) > 1, "(s) '", " '"),
-      paste(default.cols[is.na(link)], collapse = "', '"), 
+      paste(default.cols[is.na(link)], collapse = "', '"),
       ifelse(sum(is.na(link)) > 1, "' are", "' is"),
       " missing in the deployments."), call. = FALSE)
   }
@@ -659,25 +659,25 @@ loadDeployments <- function(input, tz){
 }
 
 #' Load Spatial File
-#' 
+#'
 #' Loads a spatial file prepared for actel and appends the Standard.name column. Additionally,
 #' performs a series of quality checks on the contents of the target file.
-#' 
+#'
 #' @param input Either a data frame or the name of an input file with spatial data in the actel format.
-#' 
+#'
 #' @examples
 #' # This function requires the presence of a file with spatial information
-#' 
+#'
 #' # Fetch location of actel's example files
 #' aux <- system.file(package = "actel")[1]
-#' 
+#'
 #' # run loadSpatial on the temporary spatial.csv file
 #' loadSpatial(input = paste0(aux, '/example_spatial.csv'))
-#' 
+#'
 #' @return A data frame with the spatial information present in 'spatial.csv' and the Standard.name column.
-#' 
+#'
 #' @export
-#' 
+#'
 loadSpatial <- function(input = "spatial.csv"){
   appendTo("debug", "Running loadSpatial.")
 
@@ -739,19 +739,19 @@ loadSpatial <- function(input = "spatial.csv"){
     stop("Not all the expected first arrays of the release sites exist.\nUnknown expected first arrays: '", paste0(release.arrays[link], collapse = "', '"), "'.
 In the spatial input, the expected first arrays of the release sites should match the arrays where hydrophone stations where deployed.\n", call. = FALSE)
   }
-  input <- setSpatialStandards(input = input) # Create Standard.name for each station  
+  input <- setSpatialStandards(input = input) # Create Standard.name for each station
   return(input)
 }
 
 #' Load Biometrics file
-#' 
+#'
 #' @param input an input file or data frame with biometric data.
 #' @inheritParams explore
-#' 
+#'
 #' @keywords internal
-#' 
+#'
 #' @return A data frame with the biometrics information
-#' 
+#'
 loadBio <- function(input, tz){
   appendTo("debug", "Running loadBio.")
 
@@ -771,13 +771,13 @@ loadBio <- function(input, tz){
     else {
       emergencyBreak()
       stop("Could not find a '", input, "' file in the working directory.\n", call. = FALSE)
-    }  
+    }
   } else {
     bio <- input
   }
 
-  if (any(link <- duplicated(colnames(bio)))) 
-    stop("The following columns are duplicated in the biometrics: '", 
+  if (any(link <- duplicated(colnames(bio))))
+    stop("The following columns are duplicated in the biometrics: '",
       paste(unique(colnames(bio)[link]), sep = "', '"), "'.\n", call. = FALSE)
 
   if (!any(grepl("Release.date", colnames(bio)))) {
@@ -865,9 +865,9 @@ loadBio <- function(input, tz){
     }
     if (any(link <- sapply(levels(bio$Group), function(i) length(grep(i, levels(bio$Group)))) > 1)) {
       appendTo(c("Screen", "Report", "Warning"), paste0(
-        ifelse(sum(link) == 1, "Group '", "Groups '"), 
-        paste(levels(bio$Group)[link], collapse = "', '"), 
-        ifelse(sum(link) == 1, "' is", "' are"), 
+        ifelse(sum(link) == 1, "Group '", "Groups '"),
+        paste(levels(bio$Group)[link], collapse = "', '"),
+        ifelse(sum(link) == 1, "' is", "' are"),
         " contained within other groups. To avoid function failure, a number will be appended to ",
         ifelse(sum(link) == 1, "this group.", "these groups.")))
       levels(bio$Group)[link] <- paste(levels(bio$Group)[link], 1:sum(link), sep = "_")
@@ -884,25 +884,25 @@ loadBio <- function(input, tz){
 #' Load ALS detections
 #'
 #' If there are previously compiled detections present, offers the chance to reuse. Otherwise triggers combineDetections.
-#' 
+#'
 #' @inheritParams explore
-#' 
+#'
 #' @return A data frame with all the detections
-#' 
+#'
 #' @keywords internal
-#' 
+#'
 loadDetections <- function(start.time = NULL, stop.time = NULL, tz, force = FALSE, save.detections = FALSE) {
   # NOTE: The variable actel.detections is loaded from a RData file, if present. To avoid package check
   #   notes, the variable name is created before any use.
   actel.detections <- NULL
-    
+
   recompile <- TRUE
   detection.paths <- c(file.exists("actel.detections.RData"), file.exists("detections/actel.detections.RData"))
-  
+
   if (any(detection.paths)) {
-    if (all(detection.paths)) 
+    if (all(detection.paths))
       appendTo(c("Screen", "Warning", "Report"), "Previously compiled detections were found both in the current directory and in a 'detections' folder.\n   Loading ONLY the compiled detections present in the 'detections' folder.")
-    if(detection.paths[2]) 
+    if(detection.paths[2])
       load("detections/actel.detections.RData")
     else
       load("actel.detections.RData")
@@ -920,13 +920,13 @@ loadDetections <- function(start.time = NULL, stop.time = NULL, tz, force = FALS
       detections <- convertTimes(input = detections, start.time = start.time, stop.time = stop.time, tz = tz)
       recompile <- FALSE
     } else {  # nocov start
-      appendTo("Screen", "M: Reprocessing the detections.") 
+      appendTo("Screen", "M: Reprocessing the detections.")
     } # nocov end
     rm(actel.detections)
   }
 
   if (recompile)
-    detections <- compileDetections(path = "detections", start.time = start.time, 
+    detections <- compileDetections(path = "detections", start.time = start.time,
       stop.time = stop.time, tz = tz, save.detections = save.detections)
 
   detections$Valid <- TRUE
@@ -938,16 +938,16 @@ loadDetections <- function(start.time = NULL, stop.time = NULL, tz, force = FALS
 #' Combine ALS detections
 #'
 #' Finds the detections' files and processes them.
-#' 
+#'
 #' @inheritParams explore
 #' @param path the path(s) to the detection files
-#' 
+#'
 #' @import data.table
-#' 
+#'
 #' @return A data frame with all the detections
-#' 
+#'
 #' @keywords internal
-#' 
+#'
 compileDetections <- function(path = "detections", start.time = NULL, stop.time = NULL, tz, save.detections = FALSE) {
   appendTo("Screen", "M: Compiling detections...")
   # Find the detection files
@@ -990,7 +990,7 @@ compileDetections <- function(path = "detections", start.time = NULL, stop.time 
         unknown.file <- FALSE
       }
       if (unknown.file) {
-        appendTo(c("Screen", "Report", "Warning"), 
+        appendTo(c("Screen", "Report", "Warning"),
           paste0("File '", i, "' does not match to any of the supported hydrophone file formats!\n   If your file corresponds to a hydrophone log and actel did not recognize it, please get in contact through www.github.com/hugomflavio/actel/issues/new"))
         return(NULL)
       }
@@ -1009,7 +1009,7 @@ compileDetections <- function(path = "detections", start.time = NULL, stop.time 
     }
   }
 
-  if (all(sapply(data.files, is.null))) 
+  if (all(sapply(data.files, is.null)))
     stop("No valid detection files were found.\n", call. = FALSE)
 
   # Bind the detection files
@@ -1023,12 +1023,12 @@ compileDetections <- function(path = "detections", start.time = NULL, stop.time 
   # save detections in UTC
   actel.detections <- list(detections = output, timestamp = Sys.time())
   if (save.detections) {
-    save(actel.detections, file = ifelse(file_test("-d", path), 
+    save(actel.detections, file = ifelse(file_test("-d", path),
       paste0(path, "/actel.detections.RData"), "actel.detections.RData"))
   }
-  
+
   # Convert time-zones
-  output <- convertTimes(input = output, start.time = start.time, 
+  output <- convertTimes(input = output, start.time = start.time,
     stop.time = stop.time, tz = tz)
 
   # Compile transmitters
@@ -1038,13 +1038,13 @@ compileDetections <- function(path = "detections", start.time = NULL, stop.time 
 }
 
 #' Standard detections file created for actel
-#' 
+#'
 #' @param input the detections data frame.
 #'
 #' @return A data frame of standardized detections from the input file.
 #'
 #' @keywords internal
-#' 
+#'
 processStandardFile <- function(input) {
   appendTo("debug", "Running processStandardFile.")
   input <- as.data.frame(input)
@@ -1059,15 +1059,15 @@ processStandardFile <- function(input) {
 }
 
 #' Thelma old export files
-#' 
+#'
 #' Processes Thelma ALS files.
-#' 
+#'
 #' @param input the detections data frame.
 #'
 #' @return A data frame of standardized detections from the input file.
 #'
 #' @keywords internal
-#' 
+#'
 processThelmaOldFile <- function(input) {
   appendTo("debug", "Running processThelmaOldFile.")
   input <- as.data.frame(input)
@@ -1082,15 +1082,15 @@ processThelmaOldFile <- function(input) {
 }
 
 #' Thelma new export files
-#' 
+#'
 #' Processes Thelma ALS files.
-#' 
+#'
 #' @param input the detections data frame.
 #'
 #' @return A data frame of standardized detections from the input file.
 #'
 #' @keywords internal
-#' 
+#'
 processThelmaNewFile <- function(input) {
   appendTo("debug", "Running processThelmaNewFile.")
   input <- as.data.frame(input)
@@ -1105,15 +1105,15 @@ processThelmaNewFile <- function(input) {
 }
 
 #' Vemco files
-#' 
+#'
 #' Processes Vemco ALS files
-#' 
+#'
 #' @param input the detections data frame.
 #'
 #' @return A data frame of standardized detections from the input file.
 #'
 #' @keywords internal
-#' 
+#'
 processVemcoFile <- function(input) {
   appendTo("Debug", "Running processVemcoFile.")
   appendTo("Debug", "Processing data inside the file...")
@@ -1125,7 +1125,7 @@ processVemcoFile <- function(input) {
   colnames(input)[grep("^Date.and.Time", colnames(input))] <- c("Timestamp")
   colnames(input) <- gsub(" ", ".", colnames(input))
   if (any(grepl("^Sensor.Value$", colnames(input)))) {
-    input <- input[, c("Timestamp", "Receiver", "CodeSpace", "Signal", "Sensor.Value", "Sensor.Unit")]  
+    input <- input[, c("Timestamp", "Receiver", "CodeSpace", "Signal", "Sensor.Value", "Sensor.Unit")]
   } else {
     input <- input[, c("Timestamp", "Receiver", "CodeSpace", "Signal")]
     input$Sensor.Value <- rep(NA_real_, nrow(input))
@@ -1136,38 +1136,38 @@ processVemcoFile <- function(input) {
 }
 
 #' Convert code spaces
-#' 
+#'
 #' Unifies CodeSpace names, to avoid having different names depending on ALS vendor.
-#' 
+#'
 #' @param input A data frame of standardized detections.
 #'
 #' @return A data frame with standardized code spaces.
 #'
 #' @keywords internal
-#' 
+#'
 convertCodes <- function(input) {
   appendTo("debug", "Running convertCodes.")
-  vemco <- c("A69-1008", 
-             "A69-1206", 
-             "A69-1105", 
+  vemco <- c("A69-1008",
+             "A69-1206",
+             "A69-1105",
              "A69-1303")
-             # "A69-1601", 
-             # "A69-1602", 
-             # "A69-9001", 
-             # "A69-9002", 
-             # "A69-9004", 
-             # "A69-9005", 
+             # "A69-1601",
+             # "A69-1602",
+             # "A69-9001",
+             # "A69-9002",
+             # "A69-9004",
+             # "A69-9005",
              # "A69-9006")
-  replace <- c("R256", 
-               "R94K", 
-               "S256", 
-               "R64K") 
-               # "A69-1601", 
-               # "A69-1602", 
-               # "A69-9001", 
-               # "A69-9002", 
-               # "A69-9004", 
-               # "A69-9005", 
+  replace <- c("R256",
+               "R94K",
+               "S256",
+               "R64K")
+               # "A69-1601",
+               # "A69-1602",
+               # "A69-9001",
+               # "A69-9002",
+               # "A69-9004",
+               # "A69-9005",
                # "A69-9006")
   for (i in seq_len(length(replace))) {
     levels(input$CodeSpace)[levels(input$CodeSpace) == vemco[i]] <- replace[i]
@@ -1176,16 +1176,16 @@ convertCodes <- function(input) {
 }
 
 #' Convert Times
-#' 
+#'
 #' Converts the ALS timestamps (UTC) to the designated study area time zone. Can also trim the data by time.
-#' 
+#'
 #' @inheritParams convertCodes
 #' @inheritParams explore
 #'
 #' @return A data frame with corrected timestamps.
 #'
 #' @keywords internal
-#' 
+#'
 convertTimes <- function(input, start.time, stop.time, tz) {
   # NOTE: The NULL variables below are actually column names used by data.table.
   # This definition is just to prevent the package check from issuing a note due unknown variables.
@@ -1211,13 +1211,13 @@ convertTimes <- function(input, start.time, stop.time, tz) {
 ### END OF loadDetections HELPERS
 
 #' Include the deployment in the serial number of the receive
-#' 
+#'
 #' @param input A data frame with the deployments
-#' 
+#'
 #' @return A list of deployments, with unique serial numbers per deployment.
-#' 
+#'
 #' @keywords internal
-#' 
+#'
 createUniqueSerials <- function(input) {
   output <- split(input, input$Receiver)
   for (i in 1:length(output)) {
@@ -1231,23 +1231,23 @@ createUniqueSerials <- function(input) {
 #' Split detections by tag
 #'
 #' Splits the detections' table by tags and selects only detections from target tags
-#' 
+#'
 #' @inheritParams explore
 #' @inheritParams loadDetections
 #' @param bio A table with the tags and biometrics of the studied fish.
 #' @param detections A data frame with all the detections. Supplied by loadDetections.
 #' @param silent logical: if TRUE, suppress messages.
-#' 
+#'
 #' @return A list of detections for each tag.
-#' 
+#'
 #' @keywords internal
-#' 
+#'
 splitDetections <- function(detections, bio, exclude.tags = NULL, silent = FALSE) {
   appendTo("debug", "Running splitDetections.")
   detections$Transmitter <- droplevels(detections$Transmitter) # failsafe in case all detections for a transmitter were previously excluded
   my.list <- split(detections, detections$Transmitter)
   my.list <- excludeTags(input = my.list, exclude.tags = exclude.tags)
-  
+
   checkNoDetections(input = my.list, bio = bio)
   checkDupSignals(input = my.list, bio = bio)
 
@@ -1271,7 +1271,7 @@ splitDetections <- function(detections, bio, exclude.tags = NULL, silent = FALSE
       if (any(grepl("Sensor.unit", colnames(bio)))) {
         sensor_units <- unlist(strsplit(bio$Sensor.unit[as.numeric(i)], "|", fixed = TRUE))
         if (length(sensor_units) != length(unordered_indexes)) {
-          appendTo(c("Screen", "Warning", "Report"), 
+          appendTo(c("Screen", "Warning", "Report"),
             paste0("The number of sensor units provided does not match the number of signals emitted ('",
               bio$Sensor.unit[as.numeric(i)], "' ",
               ifelse(length(sensor_units) > length(unordered_indexes), ">", "<"), " '",
@@ -1298,7 +1298,7 @@ splitDetections <- function(detections, bio, exclude.tags = NULL, silent = FALSE
 
   # extract target detections
   trimmed.list <- my.list[na.exclude(link)]
-  
+
   # include sensor units for single signal tags, if relevant
   if (any(grepl("Sensor.unit", colnames(bio)))) {
     link <- match(extractSignals(names(trimmed.list)), bio$Signal)
@@ -1307,7 +1307,7 @@ splitDetections <- function(detections, bio, exclude.tags = NULL, silent = FALSE
       output <- trimmed.list[[i]]
       if (!is.na(link[i])) {
         if (grepl("|", bio$Sensor.unit[link[i]], fixed = TRUE)) {
-          appendTo(c("Screen", "Warning", "Report"), 
+          appendTo(c("Screen", "Warning", "Report"),
             paste0("The tag with signal ", bio$Signal[link[i]],
               " appears to have more than one sensor unit ('", bio$Sensor.unit[link[i]],
               "'). Could there be an error in the input data?"))
@@ -1334,25 +1334,25 @@ splitDetections <- function(detections, bio, exclude.tags = NULL, silent = FALSE
 #'
 #' @param input list of detections for the tags to be excluded.
 #' @param restart logical: if TRUE, remove file 'temp_strays.csv' from the working directory.
-#' 
+#'
 #' @return No return value, called for side effects.
-#' 
+#'
 #' @keywords internal
-#' 
+#'
 collectStrays <- function(input, restart = FALSE){
   appendTo("debug", "Running collectStrays.")
   if (restart && file.exists(paste0(tempdir(), "/temp_strays.csv"))) {
     file.remove(paste0(tempdir(), "/temp_strays.csv"))
   }
   if (length(input) > 0) {
-    recipient <- data.frame(Transmitter = names(input), 
-      N.detections = unlist(lapply(input,nrow)), 
+    recipient <- data.frame(Transmitter = names(input),
+      N.detections = unlist(lapply(input,nrow)),
       First.detection = unlist(lapply(input, function(x) as.character(head(x$Timestamp,1)))),
       Last.detection = unlist(lapply(input, function(x) as.character(tail(x$Timestamp,1)))),
       Receivers = unlist(lapply(input, function(x) paste(unique(x$Receiver), collapse = ", ")))
       )
-    write.table(recipient, file = paste0(tempdir(), "/temp_strays.csv"), sep = ",", 
-      append = file.exists(paste0(tempdir(), "/temp_strays.csv")), row.names = FALSE, 
+    write.table(recipient, file = paste0(tempdir(), "/temp_strays.csv"), sep = ",",
+      append = file.exists(paste0(tempdir(), "/temp_strays.csv")), row.names = FALSE,
       col.names = !file.exists(paste0(tempdir(), "/temp_strays.csv")))
   }
 }
@@ -1360,7 +1360,7 @@ collectStrays <- function(input, restart = FALSE){
 #' Store summary information on the stray tags detected in a permanent file.
 #'
 #' @return No return value, called for side effects.
-#' 
+#'
 #' @keywords internal
 #'
 storeStrays <- function(){
@@ -1388,10 +1388,10 @@ storeStrays <- function(){
 }
 
 #' Standardize serial numbers, stations and arrays in the detections
-#' 
+#'
 #' Matches the ALS serial number to the deployments to rename the serial number.
 #' The corresponding deployment is then used to update the Standard Station name and the array based in the spatial object.
-#' 
+#'
 #' @param detections a data frame of detections
 #' @param spatial A list of spatial objects in the study area
 #' @param deployments a list of deployments
@@ -1399,7 +1399,7 @@ storeStrays <- function(){
 #' @return A data frame with standardized station names.
 #'
 #' @keywords internal
-#' 
+#'
 createStandards <- function(detections, spatial, deployments, discard.orphans = FALSE) {
   detections$Receiver <- as.character(detections$Receiver)
   detections$Standard.name <- NA_character_
@@ -1412,7 +1412,7 @@ createStandards <- function(detections, spatial, deployments, discard.orphans = 
     } else {
       for (j in 1:nrow(deployments[[i]])) {
         # find target rows in detections
-        deployment.link <- detections$Timestamp[receiver.link] >= deployments[[i]]$Start[j] & 
+        deployment.link <- detections$Timestamp[receiver.link] >= deployments[[i]]$Start[j] &
           detections$Timestamp[receiver.link] < deployments[[i]]$Stop[j]
         # rename receiver
         detections$Receiver[receiver.link][deployment.link] <- deployments[[i]]$Receiver[j]
@@ -1437,9 +1437,9 @@ createStandards <- function(detections, spatial, deployments, discard.orphans = 
             } else { # nocov end
               decision <- "b"
             }
-            if (decision == "a" | decision == "A" | decision == "b" | decision == "B" | decision == "c" | decision == "C") 
-              check <- FALSE 
-            else 
+            if (decision == "a" | decision == "A" | decision == "b" | decision == "B" | decision == "c" | decision == "C")
+              check <- FALSE
+            else
               message("Option not recognized, please try again."); flush.console()
             appendTo("UD", decision)
           }
@@ -1457,7 +1457,7 @@ createStandards <- function(detections, spatial, deployments, discard.orphans = 
           rows.to.remove <- detections[receiver.link, which = TRUE][the.error]
           detections <- detections[-rows.to.remove]
         }
-      } 
+      }
     }
   }
   appendTo(c("Screen", "Report"), paste0("M: Number of ALS: ", length(deployments), " (of which ", length(empty.receivers), " had no detections)"))
@@ -1471,22 +1471,22 @@ createStandards <- function(detections, spatial, deployments, discard.orphans = 
 }
 
 #' Process spatial elements
-#' 
+#'
 #' Creates a list containing multiple spatial elements required throughout the analyses
-#' 
+#'
 #' @param file an input file with spatial data.
 #' @param first.array Either NULL or the top level array in the study area.
 #' @inheritParams splitDetections
 #' @inheritParams explore
-#' 
+#'
 #' @return A list containing:
 #' \itemize{
 #'  \item \code{spatial}: The stations, release sites and array order.
 #'  \item \code{sections}: A vector of the section names.
 #' }
-#' 
+#'
 #' @keywords internal
-#' 
+#'
 transformSpatial <- function(spatial, bio, arrays, dotmat, sections = NULL, first.array = NULL) {
   appendTo("debug", "Running transformSpatial.")
   # Break the stations away
@@ -1504,9 +1504,9 @@ transformSpatial <- function(spatial, bio, arrays, dotmat, sections = NULL, firs
         emergencyBreak()
         stop("There is more than one top level array in the study area. Please specify release site(s) in the 'spatial.csv' file and in the 'biometrics.csv' file.\n", call. = FALSE)
       }
-      release.sites <- data.frame(Station.name = "unspecified", 
-                                  Longitude = NA_real_, 
-                                  Latitude = NA_real_, 
+      release.sites <- data.frame(Station.name = "unspecified",
+                                  Longitude = NA_real_,
+                                  Latitude = NA_real_,
                                   Array = first.array,
                                   Standard.name = "unspecified",
                                   n = nrow(bio),
@@ -1518,7 +1518,7 @@ transformSpatial <- function(spatial, bio, arrays, dotmat, sections = NULL, firs
       if (any(link <- is.na(match(B, A)))) {
         appendTo(c("Report", "Warning"), "There is a mismatch between the release sites reported and the release locations for the fish.")
         emergencyBreak()
-        stop("The following release sites were listed in the biometrics.csv file but are not part of the release sites listed in the spatial.csv file: ", 
+        stop("The following release sites were listed in the biometrics.csv file but are not part of the release sites listed in the spatial.csv file: ",
           paste(sort(B[link]), collapse = ", "), "\nPlease include the missing release sites in the spatial.csv file.", call. = FALSE)
       } else {
         from.row <- spatial$Type == "Release"
@@ -1553,9 +1553,9 @@ transformSpatial <- function(spatial, bio, arrays, dotmat, sections = NULL, firs
       emergencyBreak()
       stop("There is more than one top level array in the study area. Please specify release site(s) in the spatial.csv file and in the biometrics.csv file.\n", call. = FALSE)
     }
-    release.sites <- data.frame(Station.name = unique(bio$Release.site), 
+    release.sites <- data.frame(Station.name = unique(bio$Release.site),
                                 Longitude = NA_real_,
-                                Latitude = NA_real_, 
+                                Latitude = NA_real_,
                                 Array = rep(first.array, length(unique(bio$Release.site))),
                                 Standard.name = unique(bio$Release.site),
                                 stringsAsFactors = FALSE)
@@ -1589,10 +1589,10 @@ transformSpatial <- function(spatial, bio, arrays, dotmat, sections = NULL, firs
     if (any(link <- is.na(match(stations$Array, unlist(array.order))))) {
       the.arrays <- unique(stations$Array[link])
       emergencyBreak()
-      stop(paste0("Array", 
-          ifelse(length(the.arrays) == 1, " '", "(s) '"), 
+      stop(paste0("Array",
+          ifelse(length(the.arrays) == 1, " '", "(s) '"),
           paste(the.arrays, collapse = "', '"),
-          ifelse(length(the.arrays) == 1, "' was", "' were"), 
+          ifelse(length(the.arrays) == 1, "' was", "' were"),
           " not assigned to any section. Stopping to prevent function failure.\nPlease either...\n   1) Rename these arrays to match a section,\n   2) Rename a section to match these arrays, or\n   3) Include a new section in the analysis.\n... and restart the analysis.\n"),
       call. = FALSE)
     }
@@ -1604,8 +1604,8 @@ transformSpatial <- function(spatial, bio, arrays, dotmat, sections = NULL, firs
   if (!is.ordered(match(first.release.arrays, unlist(array.order))))
     release.sites <- release.sites[order(match(first.release.arrays, unlist(array.order))),]
   # join everything
-  output <- list(stations = stations, 
-                 release.sites = release.sites, 
+  output <- list(stations = stations,
+                 release.sites = release.sites,
                  array.order = array.order)
   return(list(spatial = output, sections = sections))
 }
@@ -1617,11 +1617,11 @@ transformSpatial <- function(spatial, bio, arrays, dotmat, sections = NULL, firs
 #' @inheritParams splitDetections
 #'
 #' @return A list of detections for each tag that does not contain the excluded tags.
-#' 
+#'
 #' @keywords internal
-#' 
+#'
 excludeTags <- function(input, exclude.tags, silent){
-  appendTo("debug", "Running excludeTags.")  
+  appendTo("debug", "Running excludeTags.")
   if (length(exclude.tags) != 0) {
     link <- match(exclude.tags, names(input))
     logical_link <- !is.na(link)
