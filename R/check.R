@@ -37,12 +37,13 @@ NULL
 checkArguments <- function(dp, tz, minimum.detections, max.interval, speed.method = c("last to first", "last to last"),
   speed.warning, speed.error, start.time, stop.time, report, auto.open, save.detections, jump.warning, jump.error,
   inactive.warning, inactive.error, exclude.tags, override, print.releases, if.last.skip.section = NULL,
-  replicates = NULL, sections = NULL, section.minimum = NULL) {
+  replicates = NULL, section.minimum = NULL) {
 
-  no.dp.args <- c("tz", "start.time", "stop.time", "save.detections", "exclude.tags", "sections")
-  link <- c(!is.null(tz), !is.null(start.time), !is.null(stop.time),
-    !(is.logical(save.detections) && !save.detections), !is.null(exclude.tags),
-   !is.null(sections))
+  no.dp.args <- c("tz", "start.time", "stop.time", "save.detections", "exclude.tags")
+  link <- c(!is.null(tz), 
+            !is.null(start.time), 
+            !is.null(stop.time),
+            !(is.logical(save.detections) && !save.detections), !is.null(exclude.tags))
 
   if (!is.null(dp) & any(link))
     warning("Argument", ifelse(sum(link) > 1, "s '", " '"), paste(no.dp.args[link], collapse = "', '"),
@@ -158,7 +159,6 @@ checkArguments <- function(dp, tz, minimum.detections, max.interval, speed.metho
   }
 
   # NON-explore checks
-
   if (!is.null(if.last.skip.section) && !is.logical(if.last.skip.section))
     stop("'if.last.skip.section' must be logical.\n", call. = FALSE)
 
@@ -167,9 +167,6 @@ checkArguments <- function(dp, tz, minimum.detections, max.interval, speed.metho
 
   if (!is.null(replicates) && length(names(replicates)) != length(replicates))
     stop("All list elements within 'replicates' must be named (i.e. list(Array = 'St.1') rather than list('St.1')).\n", call. = FALSE)
-
-  if (is.null(dp) && !is.null(sections))
-      checkSectionsUnique(sections = sections)
 
   if (!is.null(section.minimum) && !is.numeric(section.minimum))
     stop("'section.minimum' must be numeric.\n", call. = FALSE)
@@ -197,26 +194,6 @@ checkToken <- function(token, timestamp) {
     stop("The datapack's token is invalid or missing. Please the function preload() to compile the input data.\nAdditionally, data must to be compiled during the current R session.", call. = FALSE)
 }
 
-
-#' Check that section names are not duplicated and that sections are not contained
-#' within other section names (e.g. section "N" and section "NW").
-#'
-#' @inheritParams migration
-#'
-#' @return No return value, called for side effects.
-#'
-#' @keywords internal
-#'
-checkSectionsUnique <- function(sections) {
-  if (any(table(sections) > 1))
-    stop("Some section names are duplicated. Please include each section only once in the 'sections' argument.\n", call. = FALSE)
-  if (any(link <- sapply(sections, function(i) length(grep(i, sections))) > 1))
-    stop(paste0(
-      ifelse(sum(link) == 1, "Section '", "Sections '"),
-      paste(sections[link], collapse = "', '"),
-      ifelse(sum(link) == 1, "' is", "' are"),
-      " contained within other section names. Sections must be unique and independent.\n       Please rename your sections and arrays so that section names are not contained within each other.\n"), call. = FALSE)
-}
 
 #' Handler for table interaction events
 #'
@@ -645,7 +622,8 @@ checkSMovesN <- function(secmoves, fish, section.minimum, GUI) {
 #'
 #' @keywords internal
 #'
-checkLinearity <- function(secmoves, fish, sections, arrays, GUI) {
+checkLinearity <- function(secmoves, fish, spatial, arrays, GUI) {
+  sections <- names(spatial$array.order)
   back.check <- match(secmoves$Section, sections)
   turn.check <- rev(match(sections, rev(secmoves$Section))) # captures the last event of each section. Note, the values count from the END of the events
   if (is.unsorted(back.check)) {

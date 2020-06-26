@@ -26,9 +26,11 @@ gg_colour_hue <- function(n) {
 #'
 #' @keywords internal
 #'
-printProgression <- function(dot, sections, overall.CJS, spatial, status.df, print.releases) {
+printProgression <- function(dot, overall.CJS, spatial, status.df, print.releases) {
   cbPalette <- c("#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7", "#999999")
   names(cbPalette) <- c("Orange", "Blue", "Green", "Yellow", "Darkblue", "Darkorange", "Pink", "Grey")
+
+  sections <- names(spatial$array.order)
 
   # Prepare node data frame
   diagram_nodes <- data.frame(
@@ -36,18 +38,23 @@ printProgression <- function(dot, sections, overall.CJS, spatial, status.df, pri
   original.label = unique(unlist(dot[, c(1, 3)])),
   label = unique(unlist(dot[, c(1, 3)])),
   stringsAsFactors = FALSE)
-  if (length(sections) <= length(cbPalette)) {
+
+  if (length(sections) > 1) {
+    if (length(sections) <= length(cbPalette))
+      to.fill <- cbPalette
+    else
+      to.fill <- gg_colour_hue(length(sections))
+
     diagram_nodes$fillcolor <- rep(NA_character_, nrow(diagram_nodes))
+    
     for (i in 1:length(sections)) {
-       diagram_nodes$fillcolor[grepl(sections[i], diagram_nodes$label)] <- cbPalette[i]
+      arrays <- spatial$array.order[[i]]
+      diagram_nodes$fillcolor[matchl(diagram_nodes$label, arrays)] <- to.fill[i]
     }
   } else {
-    diagram_nodes$fillcolor <- rep(NA_character_, nrow(diagram_nodes))
-    new.fill <- gg_colour_hue(length(sections))
-    for (i in 1:length(sections)) {
-       diagram_nodes$fillcolor[grepl(sections[i], diagram_nodes$label)] <- new.fill[i]
-    }
+    diagram_nodes$fillcolor <- rep("#56B4E9", nrow(diagram_nodes))
   }
+
   for (i in 1:nrow(diagram_nodes)) {
     link <- grep(diagram_nodes$label[i], names(overall.CJS$absolutes))
     diagram_nodes$label[i] <- paste0(diagram_nodes$label[i],
@@ -172,7 +179,7 @@ printProgression <- function(dot, sections, overall.CJS, spatial, status.df, pri
 #'
 #' @keywords internal
 #'
-printDot <- function(dot, sections = NULL, spatial, print.releases) {
+printDot <- function(dot, spatial, print.releases) {
 # requires:
 # DiagrammeR
 # DiagrammeRsvg
@@ -180,24 +187,24 @@ printDot <- function(dot, sections = NULL, spatial, print.releases) {
   cbPalette <- c("#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7", "#999999")
   names(cbPalette) <- c("Orange", "Blue", "Green", "Yellow", "Darkblue", "Darkorange", "Pink", "Grey")
 
+  sections <- names(spatial$array.order)
   # Prepare node data frame
   diagram_nodes <- data.frame(
     id = 1:length(unique(unlist(dot[, c(1, 3)]))),
     label = unique(unlist(dot[, c(1, 3)])),
     stringsAsFactors = FALSE)
 
-  if (!is.null(sections)) {
-    if (length(sections) <= length(cbPalette)) {
-      diagram_nodes$fillcolor <- rep(NA_character_, nrow(diagram_nodes))
-      for (i in 1:length(sections)) {
-         diagram_nodes$fillcolor[grepl(sections[i], diagram_nodes$label)] <- cbPalette[i]
-      }
-    } else {
-      diagram_nodes$fillcolor <- rep(NA_character_, nrow(diagram_nodes))
-      new.fill <- gg_colour_hue(length(sections))
-      for (i in 1:length(sections)) {
-         diagram_nodes$fillcolor[grepl(sections[i], diagram_nodes$label)] <- new.fill[i]
-      }
+  if (length(sections) > 1) {
+    if (length(sections) <= length(cbPalette))
+      to.fill <- cbPalette
+    else
+      to.fill <- gg_colour_hue(length(sections))
+
+    diagram_nodes$fillcolor <- rep(NA_character_, nrow(diagram_nodes))
+    
+    for (i in 1:length(sections)) {
+      arrays <- spatial$array.order[[i]]
+      diagram_nodes$fillcolor[matchl(diagram_nodes$label, arrays)] <- to.fill[i]
     }
   } else {
     diagram_nodes$fillcolor <- rep("#56B4E9", nrow(diagram_nodes))
