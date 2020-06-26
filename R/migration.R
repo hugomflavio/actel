@@ -221,9 +221,6 @@ by which sections are presented", immediate. = TRUE, call. = FALSE)
                                 section.order = section.order, exclude.tags = exclude.tags, disregard.parallels = disregard.parallels)
   } else {
     appendTo(c("Screen", "Report"), paste0("M: Running analysis on preloaded data (compiled on ", attributes(datapack)$timestamp, ")."))
-    if (is.null(datapack$sections))
-      stop("The preloaded data contains no sections, but these are mandatory for the migration analysis. Recompile the data using the argument 'sections' during preload.", call. = FALSE)
-
     study.data <- datapack
     tz <- study.data$tz
     disregard.parallels <- study.data$disregard.parallels

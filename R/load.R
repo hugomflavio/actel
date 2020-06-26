@@ -730,7 +730,7 @@ loadSpatial <- function(input = "spatial.csv", section.order = NULL){
   if (any(grepl("^Invalid$", input$Array)))
     stop("The term 'Invalid' is reserved for internal calculations. Do not name any arrays as 'Invalid'.", call. = FALSE)
   # check array name length
-  if (any(nchar(input$Array) > 6))
+  if (any(nchar(as.character(input$Array)) > 6))
     appendTo(c("Screen", "Report", "Warning"), "Long array names detected. To improve graphic rendering, consider keeping array names under six characters.", immediate. = TRUE, call. = FALSE)
   
   # check missing Type column
@@ -779,7 +779,7 @@ loadSpatial <- function(input = "spatial.csv", section.order = NULL){
       }
       input$Section <- factor(input$Section, levels = section.order)
     }
-    if (any(nchar(input$Section) > 6))
+    if (any(nchar(as.character(input$Section)) > 6))
       appendTo(c("Screen", "Report", "Warning"), "Long section names detected. To improve graphic rendering, consider keeping section names under six characters.", immediate. = TRUE, call. = FALSE)
     } else {
     if (!is.null(section.order))
@@ -931,9 +931,9 @@ loadBio <- function(input, tz){
       levels(bio$Group) <- gsub("\\.", "_", levels(bio$Group))
     }
   }
-  if (any(nchar(bio$Group) > 6))
+  if (any(nchar(as.character(bio$Group)) > 6))
     appendTo(c("Screen", "Report", "Warning"), "Long group names detected. To improve graphic rendering, consider keeping group names under six characters.", immediate. = TRUE, call. = FALSE)
-  
+
   bio <- bio[order(bio$Signal),]
   return(bio)
 }

@@ -28,7 +28,7 @@
 #' # matches the time zone of the study area and that the
 #' # sections match your array names. The line below works
 #' # for the example data.
-#' results <- residency(tz = "Europe/Copenhagen", sections = c("River", "Fjord", "Sea"))
+#' results <- residency(tz = "Europe/Copenhagen")
 #'
 #' # to obtain an HTML report, run the analysis with report = TRUE
 #'
@@ -103,7 +103,7 @@
 #'
 #' @export
 #'
-residency <- function(tz = NULL, sections = NULL, datapack = NULL, max.interval = 60, minimum.detections = 2,
+residency <- function(tz = NULL, sections, section.order = NULL, datapack = NULL, max.interval = 60, minimum.detections = 2,
   start.time = NULL, stop.time = NULL, speed.method = c("last to first", "last to last"),
   speed.warning = NULL, speed.error = NULL, jump.warning = 2, jump.error = 3,
   inactive.warning = NULL, inactive.error = NULL, exclude.tags = NULL, override = NULL,
@@ -111,12 +111,22 @@ residency <- function(tz = NULL, sections = NULL, datapack = NULL, max.interval 
   save.detections = FALSE, section.minimum = 2,
   replicates = NULL, GUI = c("needed", "always", "never"), print.releases = TRUE) {
 
+  if (!missing(sections))
+    warning(
+"Argument 'sections' has been deprecated and will be ignored. Please list the
+sections to which each of the arrays belong in a new 'Section' column in the
+spatial input. You can now use the argument 'section.order' to define the order
+by which sections are presented", immediate. = TRUE, call. = FALSE)
+
+  deleteHelpers()
+
   if (!is.null(options("actel.debug")[[1]]) && options("actel.debug")[[1]]) { # nocov start
-    on.exit(message("Debug: Progress log available at ", paste0(tempdir(), "/actel_debug_file.txt")))
-    on.exit(message("Debug: Saving carbon copy to ", paste0(tempdir(), "/actel.debug.RData")))
+    on.exit(message("Debug: Progress log available at ", gsub("\\\\", "/", paste0(tempdir(), "/actel_debug_file.txt"))))
+    on.exit(message("Debug: Saving carbon copy to ", gsub("\\\\", "/", paste0(tempdir(), "/actel.debug.RData"))), add = TRUE)
     on.exit(save(list = ls(), file = paste0(tempdir(), "/actel.debug.RData")), add = TRUE)
     message("!!!--- Debug mode has been activated ---!!!")
   } # nocov end
+
 
 # check arguments quality
   if (!is.null(datapack))
@@ -129,8 +139,7 @@ residency <- function(tz = NULL, sections = NULL, datapack = NULL, max.interval 
     report = report, auto.open = auto.open, save.detections = save.detections,
     jump.warning = jump.warning, jump.error = jump.error, inactive.warning = inactive.warning,
     inactive.error = inactive.error, exclude.tags = exclude.tags, override = override,
-    print.releases = print.releases, replicates = replicates, sections = sections,
-    section.minimum = section.minimum)
+    print.releases = print.releases, replicates = replicates, section.minimum = section.minimum)
 
   speed.method <- aux$speed.method
   speed.warning <- aux$speed.warning
@@ -151,7 +160,7 @@ residency <- function(tz = NULL, sections = NULL, datapack = NULL, max.interval 
 
 # Store function call
   the.function.call <- paste0("residency(tz = ", ifelse(is.null(tz), "NULL", paste0("'", tz, "'")),
-    ", sections = ", paste0("c('", paste(sections, collapse = "', '"), "')"),
+    ", section.order = ", ifelse(is.null(section.order), "NULL", paste0("c('", paste(section.order, collapse = "', '"), "')")),
     ", datapack = ", ifelse(is.null(datapack), "NULL", deparse(substitute(datapack))),
     ", max.interval = ", max.interval,
     ", minimum.detections = ", minimum.detections,
@@ -175,6 +184,8 @@ residency <- function(tz = NULL, sections = NULL, datapack = NULL, max.interval 
     ", GUI = '", GUI, "'",
     ", print.releases = ", ifelse(print.releases, "TRUE", "FALSE"),
     ")")
+
+  appendTo("debug", the.function.call)
 # --------------------
 
 # Final arrangements before beginning
@@ -189,12 +200,9 @@ residency <- function(tz = NULL, sections = NULL, datapack = NULL, max.interval 
   if (is.null(datapack)) {
     study.data <- loadStudyData(tz = tz, override = override, save.detections = save.detections,
                                 start.time = start.time, stop.time = stop.time, discard.orphans = discard.orphans,
-                                sections = sections, exclude.tags = exclude.tags)
+                                section.order = section.order, exclude.tags = exclude.tags)
   } else {
     appendTo(c("Screen", "Report"), paste0("M: Running analysis on preloaded data (compiled on ", attributes(datapack)$timestamp, ")."))
-    if (is.null(datapack$sections))
-      stop("The preloaded data contains no sections, but these are mandatory for the migration analysis. Recompile the data using the argument 'sections' during preload.", call. = FALSE)
-
     study.data <- datapack
     tz <- study.data$tz
     disregard.parallels <- study.data$disregard.parallels
@@ -211,6 +219,9 @@ residency <- function(tz = NULL, sections = NULL, datapack = NULL, max.interval 
   dist.mat <- study.data$dist.mat
   invalid.dist <- study.data$invalid.dist
   detections.list <- study.data$detections.list
+
+  if (all(!grepl("^Section$", colnames(spatial$stations))))
+    stop("To run residency(), please include assign arrays to their sections using the 'Section' column in the spatial input.", call. = FALSE)
 # -------------------------------------
 
 # Final quality checks
@@ -315,7 +326,7 @@ residency <- function(tz = NULL, sections = NULL, datapack = NULL, max.interval 
   section.movements <- lapply(seq_along(movements), function(i) {
     fish <- names(movements)[i]
     appendTo("debug", paste0("debug: Compiling section movements for fish ", fish,"."))
-    aux <- sectionMovements(movements = movements[[i]], sections = sections, invalid.dist = invalid.dist)
+    aux <- sectionMovements(movements = movements[[i]], spatial = spatial, invalid.dist = invalid.dist)
     output <- checkSMovesN(secmoves = aux, fish = fish, section.minimum = section.minimum, GUI = GUI)
     return(output)
   })
@@ -337,7 +348,7 @@ residency <- function(tz = NULL, sections = NULL, datapack = NULL, max.interval 
   section.movements <- lapply(seq_along(valid.movements), function(i) {
     fish <- names(valid.movements)[i]
     appendTo("debug", paste0("debug: Compiling valid section movements for fish ", fish,"."))
-    output <- sectionMovements(movements = valid.movements[[i]], sections = sections, invalid.dist = invalid.dist)
+    output <- sectionMovements(movements = valid.movements[[i]], spatial = spatial, invalid.dist = invalid.dist)
     return(output)
   })
   names(section.movements) <- names(valid.movements)
@@ -345,10 +356,9 @@ residency <- function(tz = NULL, sections = NULL, datapack = NULL, max.interval 
   # Grab summary information
   appendTo(c("Screen", "Report"), "M: Compiling residency objects.")
 
-  res.df <- assembleResidency(secmoves = section.movements, movements = movements, sections = sections)
+  res.df <- assembleResidency(secmoves = section.movements, movements = movements, spatial = spatial)
 
-  status.df <- res_assembleOutput(res.df = res.df, bio = bio, spatial = spatial,
-                                  sections = sections, tz = tz)
+  status.df <- res_assembleOutput(res.df = res.df, bio = bio, spatial = spatial, tz = tz)
 
   last.seen <- as.data.frame.matrix(with(status.df, table(Group, Status)))
 
@@ -464,9 +474,9 @@ residency <- function(tz = NULL, sections = NULL, datapack = NULL, max.interval 
   if (report) {
     appendTo(c("Screen", "Report"), "M: Producing the report.")
     biometric.fragment <- printBiometrics(bio = bio)
-    printDot(dot = dot, sections = sections, spatial = spatial, print.releases = print.releases)
+    printDot(dot = dot, spatial = spatial, print.releases = print.releases)
     printSectionTimes(section.times = section.times, bio = bio, detections = valid.detections)
-    printGlobalRatios(global.ratios = global.ratios, daily.ratios = daily.ratios, sections = sections)
+    printGlobalRatios(global.ratios = global.ratios, daily.ratios = daily.ratios, spatial = spatial)
     individual.detection.plots <- printIndividuals(detections.list = detections, bio = bio,
         tz = tz, spatial = spatial, movements = movements, valid.movements = valid.movements)
     array.circular.plots <- printCircular(times = timesToCircular(array.times), bio = bio, suffix = "_array")
@@ -476,9 +486,9 @@ residency <- function(tz = NULL, sections = NULL, datapack = NULL, max.interval 
     dayrange <- range(as.Date(global.ratios[[1]]$Date))
     dayrange[1] <- dayrange[1] - 1
     dayrange[2] <- dayrange[2] + 1
-    individual.residency.plots <- printIndividualResidency(ratios = daily.ratios, dayrange = dayrange, sections = sections)
+    individual.residency.plots <- printIndividualResidency(ratios = daily.ratios, dayrange = dayrange, spatial = spatial)
     efficiency.fragment <- printEfficiency(efficiency = efficiency, intra.CJS = intra.array.CJS, type = "residency")
-    printLastSection(input = last.seen, sections = sections)
+    printLastSection(input = last.seen, spatial = spatial)
     if (nrow(last.seen) > 3)
       last.seen.graph.size <- "width=90%" else last.seen.graph.size <- "height=4in"
     if (any(sapply(valid.detections, function(x) any(!is.na(x$Sensor.Value))))) {
@@ -921,11 +931,13 @@ sink()
 #'
 #' @keywords internal
 #'
-assembleResidency <- function(secmoves, movements, sections) {
+assembleResidency <- function(secmoves, movements, spatial) {
   Last.array <- NULL
   Last.time <- NULL
   Valid <- NULL
   Section <- NULL
+
+  sections <- names(spatial$array.order)
 
   recipient <- vector()
   for (i in seq_along(sections)) {
@@ -1022,9 +1034,11 @@ assembleResidency <- function(secmoves, movements, sections) {
 #'
 #' @keywords internal
 #'
-res_assembleOutput <- function(res.df, bio, spatial, sections, tz) {
+res_assembleOutput <- function(res.df, bio, spatial, tz) {
   appendTo("debug", "Merging 'bio' and 'res.df'.")
   status.df <- merge(bio, res.df, by = "Transmitter", all = TRUE)
+
+  sections <- names(spatial$array.order)
 
   appendTo("debug", "Completing entries for fish that were never detected.")
   status.df$Status[is.na(status.df$Status)] <- "Disap. at Release"
