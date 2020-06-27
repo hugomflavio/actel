@@ -81,13 +81,12 @@ x <- preload(biometrics = biometrics, spatial = spatial, deployments = deploymen
 
 ## migration/residency-compatible datapacks
 
-If your final goal is to run a `migration()` or `residency()` analysis, you must include also the argument `sections` in the `preload()` call. e.g:
+If your final goal is to run a `migration()` or `residency()` analysis, remember to have a 'Section' column in your spatial input.
 
 
 ```r
 x <- preload(biometrics = biometrics, spatial = spatial, deployments = deployments, 
-	detections = detections, distances = distances, dot = dot, tz = "Europe/Copenhagen",
-	sections = c("River", "Fjord", "Sea"))
+	detections = detections, distances = distances, dot = dot, tz = "Europe/Copenhagen")
 ```
 
 You can then run residency and migration simply sourcing the datapack!

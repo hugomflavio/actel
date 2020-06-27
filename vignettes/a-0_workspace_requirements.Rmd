@@ -121,7 +121,8 @@ spatial <- data.frame(
   Station.name = c("River East", "River West", "Estuary", "Site A", "Site B"),
   Latitude = c(8.411, 8.521, 8.402, 8.442, 8.442),
   Longitude = c(40.411, 40.521, 40.402, 40.442, 40.442),
-  Array = c("River1", "River1", "River2", "River1", "River2"),
+  Section = c("River", "River", "River", "", ""),
+  Array = c("A1", "A1", "A3", "A1", "A2"),
   Type = c("Hydrophone", "Hydrophone", "Hydrophone", "Release", "Release"))
 
 knitr::kable(spatial)
@@ -137,9 +138,9 @@ Array
     The array to which the station belongs. 
   : If you are listing a release site: 
     The first array(s) that the fish is expected to cross after being released.
-  : Note:
-      - If you are only going to run an `explore()` analysis, you can name your arrays freely. 
-      - If you are going to run `migration()` or `residency()`, the names of arrays from a given study section must differ only in number. I.e. arrays **must** have this format: *section#*.
+
+Section
+  : The study area section to which the hydrophone station belongs. Leave empty for the release sites.
 
 Type
   : The nature of the item you are listing. You **must** choose between "Hydrophone" or "Release".
