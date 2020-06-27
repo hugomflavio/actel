@@ -35,7 +35,7 @@ readDot(string = x2)
 # Alternatively, connections can be read from a file
 
 # let's create a dummy file in R's temporary directory:
-write("A--B--C--D--E--F\nA--G--H--I--E\nH--C\n", 
+write("A--B--C--D--E--F\nA--G--H--I--E\nH--C\n",
  file = paste0(tempdir(), "/dummy_dot.txt"))
 
 # now we can read it using readDot

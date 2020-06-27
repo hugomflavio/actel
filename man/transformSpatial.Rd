@@ -4,14 +4,7 @@
 \alias{transformSpatial}
 \title{Process spatial elements}
 \usage{
-transformSpatial(
-  spatial,
-  bio,
-  arrays,
-  dotmat,
-  sections = NULL,
-  first.array = NULL
-)
+transformSpatial(spatial, bio, arrays, dotmat, first.array = NULL)
 }
 \arguments{
 \item{bio}{A table with the tags and biometrics of the studied fish.}
@@ -21,11 +14,7 @@ transformSpatial(
 \item{file}{an input file with spatial data.}
 }
 \value{
-A list containing:
-\itemize{
-\item \code{spatial}: The stations, release sites and array order.
-\item \code{sections}: A vector of the section names.
-}
+The stations, release sites and array order.
 }
 \description{
 Creates a list containing multiple spatial elements required throughout the analyses

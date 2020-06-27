@@ -27,7 +27,7 @@ x <- matrix(
    NA, NA,  0,  1,  2, 3,
    NA, NA, NA,  0,  1, 2,
    NA, NA, NA, NA,  0, 1,
-   NA, NA, NA, NA, NA, 0), 
+   NA, NA, NA, NA, NA, 0),
  ncol = 6, byrow = TRUE)
 
 # inspect x

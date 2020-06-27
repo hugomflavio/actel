@@ -26,8 +26,8 @@ checkArguments(
   print.releases,
   if.last.skip.section = NULL,
   replicates = NULL,
-  sections = NULL,
-  section.minimum = NULL
+  section.minimum = NULL,
+  section.order = NULL
 )
 }
 \arguments{
@@ -115,9 +115,8 @@ of a given section be considered to have disappeared in the next section?}
 efficiency is to be calculated: The standard names of the stations to be
 used as a replicate. See the vignettes for more details.}
 
-\item{sections}{The sections in which the study area is divided. Must be
-coincident with the names given to the arrays. See the vignettes for more
-details.}
+\item{section.order}{A vector containing the order by which sections should
+be aligned in the results.}
 }
 \value{
 updated parameters

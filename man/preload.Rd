@@ -14,7 +14,7 @@ preload(
   tz,
   start.time = NULL,
   stop.time = NULL,
-  sections = NULL,
+  section.order = NULL,
   exclude.tags = NULL,
   disregard.parallels = FALSE,
   discard.orphans = FALSE
@@ -44,9 +44,8 @@ the analysis.}
 \code{stop.time} (in YYYY-MM-DD HH:MM:SS format) is not considered during
 the analysis.}
 
-\item{sections}{The sections in which the study area is divided. Must be
-coincident with the names given to the arrays. See the vignettes for more
-details.}
+\item{section.order}{A vector containing the order by which sections should
+be aligned in the results.}
 
 \item{exclude.tags}{A vector of tags that should be excluded from the
 detection data before any analyses are performed. Intended to be used if
@@ -98,8 +97,8 @@ dot <- "River0--River1--River2--River3--River4--River5--River6--Fjord1--Fjord2--
 
 # Now that we have the R objects created, we can run preload:
 
-x <- preload(biometrics = bio, deployments = deployments, spatial = spatial, 
+x <- preload(biometrics = bio, deployments = deployments, spatial = spatial,
  detections = detections, dot = dot, tz = "Europe/Copenhagen")
 
- 
+
 }

@@ -8,7 +8,7 @@ assembleTimetable(
   secmoves,
   valid.moves,
   all.moves,
-  sections,
+  spatial,
   arrays,
   bio,
   tz,
@@ -25,10 +25,6 @@ assembleTimetable(
 \item{valid.moves}{the valid array movements}
 
 \item{all.moves}{all array movements}
-
-\item{sections}{The sections in which the study area is divided. Must be
-coincident with the names given to the arrays. See the vignettes for more
-details.}
 
 \item{arrays}{A list containing information for each array.}
 

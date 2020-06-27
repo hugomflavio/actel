@@ -4,12 +4,10 @@
 \alias{assembleSectionOverview}
 \title{Create section.overview}
 \usage{
-assembleSectionOverview(status.df, sections)
+assembleSectionOverview(status.df, spatial)
 }
 \arguments{
-\item{sections}{The sections in which the study area is divided. Must be
-coincident with the names given to the arrays. See the vignettes for more
-details.}
+\item{spatial}{The spatial data list.}
 }
 \value{
 A data frame containing the survival per group of fish present in the biometrics.

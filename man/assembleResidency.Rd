@@ -4,14 +4,10 @@
 \alias{assembleResidency}
 \title{Collect summary information for the residency analysis}
 \usage{
-assembleResidency(secmoves, movements, sections)
+assembleResidency(secmoves, movements, spatial)
 }
 \arguments{
 \item{movements}{the array-movements (Valid and invalid)}
-
-\item{sections}{The sections in which the study area is divided. Must be
-coincident with the names given to the arrays. See the vignettes for more
-details.}
 }
 \value{
 A data frame with the compiled residency values

@@ -4,14 +4,10 @@
 \alias{printDot}
 \title{Print DOT diagram}
 \usage{
-printDot(dot, sections = NULL, spatial, print.releases)
+printDot(dot, spatial, print.releases)
 }
 \arguments{
 \item{dot}{a dot data frame}
-
-\item{sections}{The sections in which the study area is divided. Must be
-coincident with the names given to the arrays. See the vignettes for more
-details.}
 
 \item{print.releases}{Logical: Should the release sites be printed in the
 study area diagrams?}

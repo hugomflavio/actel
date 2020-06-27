@@ -158,7 +158,7 @@ exampleWorkspace("exampleWorkspace")
 # Move your R session into the example workspace
 setwd("exampleWorkspace")
 
-# run the explore analysis. Ensure the tz argument 
+# run the explore analysis. Ensure the tz argument
 # matches the time zone of the study area. For the
 # example dataset, tz = "Europe/Copenhagen"
 results <- explore(tz = "Europe/Copenhagen")

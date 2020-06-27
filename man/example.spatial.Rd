@@ -7,13 +7,15 @@
 \format{
 A data frame with 18 rows and 6 variables:
 \describe{
-\item{Station.name}{The name of the ALS or release site}
-\item{Latitude}{The latitude of the ALS or release site in WGS84}
-\item{Longitude}{The longitude of the ALS or release site in WGS84}
-\item{x}{The x coordinate of the ALS or release site in EPSG 32632}
-\item{y}{The y coordinate of the ALS or release site in EPSG 32632}
-\item{Array}{The Array to which the ALS belongs, or the first ALS array downstream of the release site.}
-\item{Type}{The type of spatial object (must be either Hydrophone or Release)}
+\item{Station.name}{The name of the hydrophone station or release site}
+\item{Latitude}{The latitude of the hydrophone station or release site in WGS84}
+\item{Longitude}{The longitude of the hydrophone station or release site in WGS84}
+\item{x}{The x coordinate of the hydrophone station or release site in EPSG 32632}
+\item{y}{The y coordinate of the hydrophone station or release site in EPSG 32632}
+\item{Array}{If documenting a hydrophone station, the array to which the station belongs.
+If documenting a release site, the first array(s) where the fish is expected to be detected.}
+\item{Section}{The Section to which the hydrophone station belongs (irrelevant for the release sites).}
+\item{Type}{The type of spatial object (must be either 'Hydrophone' or 'Release')}
 }
 }
 \source{
@@ -23,6 +25,6 @@ Data collected by the authors.
 example.spatial
 }
 \description{
-A dataset containing the positions of the deployed ALS and release site.
+A dataset containing the positions of the deployed hydrophone stations and release sites.
 }
 \keyword{internal}

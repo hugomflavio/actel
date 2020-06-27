@@ -36,9 +36,9 @@ aux <- c(
 missing.packages <- sapply(aux, function(x) x == 1)
 
 if (any(missing.packages)) {
-  message("Sorry, this function requires packages '", 
-    paste(c("raster", "gdistance", "sp", "tools", "rgdal")[missing.packages], collapse = "', '"), 
-    "' to operate. Please install ", ifelse(sum(missing.packages) > 1, "them", "it"), 
+  message("Sorry, this function requires packages '",
+    paste(c("raster", "gdistance", "sp", "tools", "rgdal")[missing.packages], collapse = "', '"),
+    "' to operate. Please install ", ifelse(sum(missing.packages) > 1, "them", "it"),
     " before proceeding.")
 } else {
   if (suppressWarnings(require("rgdal"))) {

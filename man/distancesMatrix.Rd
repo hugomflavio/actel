@@ -52,9 +52,9 @@ aux <- c(
 missing.packages <- sapply(aux, function(x) x == 1)
 
 if (any(missing.packages)) {
-  message("Sorry, this function requires packages '", 
-    paste(c("raster", "gdistance", "sp", "tools", "rgdal")[missing.packages], collapse = "', '"), 
-    "' to operate. Please install ", ifelse(sum(missing.packages) > 1, "them", "it"), 
+  message("Sorry, this function requires packages '",
+    paste(c("raster", "gdistance", "sp", "tools", "rgdal")[missing.packages], collapse = "', '"),
+    "' to operate. Please install ", ifelse(sum(missing.packages) > 1, "them", "it"),
     " before proceeding.")
 } else {
   if (suppressWarnings(require("rgdal"))) {
@@ -68,9 +68,9 @@ if (any(missing.packages)) {
     # create a temporary spatial.csv file
     file.copy(paste0(aux, "/example_spatial.csv"), "spatial.csv")
 
-    # import the shape file and use the spatial.csv 
+    # import the shape file and use the spatial.csv
     # to check the extents.
-    x <- loadShape(path = aux, shape = "example_shapefile.shp", 
+    x <- loadShape(path = aux, shape = "example_shapefile.shp",
       coord.x = "x", coord.y = "y", size = 20)
 
     # Build the transition layer
