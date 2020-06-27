@@ -37,10 +37,11 @@ NULL
 checkArguments <- function(dp, tz, minimum.detections, max.interval, speed.method = c("last to first", "last to last"),
   speed.warning, speed.error, start.time, stop.time, report, auto.open, save.detections, jump.warning, jump.error,
   inactive.warning, inactive.error, exclude.tags, override, print.releases, if.last.skip.section = NULL,
-  replicates = NULL, section.minimum = NULL) {
+  replicates = NULL, section.minimum = NULL, section.order = NULL) {
 
-  no.dp.args <- c("tz", "start.time", "stop.time", "save.detections", "exclude.tags")
+  no.dp.args <- c("tz", "section.order", "start.time", "stop.time", "save.detections", "exclude.tags")
   link <- c(!is.null(tz), 
+            !is.null(section.order),
             !is.null(start.time), 
             !is.null(stop.time),
             !(is.logical(save.detections) && !save.detections), !is.null(exclude.tags))

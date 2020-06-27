@@ -203,7 +203,7 @@ explore <- function(tz = NULL, datapack = NULL, max.interval = 60, minimum.detec
   if (is.null(datapack)) {
     study.data <- loadStudyData(tz = tz, override = override, save.detections = save.detections,
                                 start.time = start.time, stop.time = stop.time, discard.orphans = discard.orphans,
-                                sections = NULL, exclude.tags = exclude.tags)
+                                section.order = NULL, exclude.tags = exclude.tags)
   } else {
     appendTo(c("Screen", "Report"), paste0("M: Running analysis on preloaded data (compiled on ", attributes(datapack)$timestamp, ")."))
     study.data <- datapack
@@ -380,7 +380,7 @@ explore <- function(tz = NULL, datapack = NULL, max.interval = 60, minimum.detec
   if (report) {
     appendTo(c("Screen", "Report"), "M: Producing the report.")
     biometric.fragment <- printBiometrics(bio = bio)
-    printDot(dot = dot, sections = NULL, spatial = spatial, print.releases = print.releases)
+    printDot(dot = dot, spatial = spatial, print.releases = print.releases)
     individual.plots <- printIndividuals(detections.list = detections, spatial = spatial,
       tz = tz, movements = movements, valid.movements = valid.movements, bio = bio)
     circular.plots <- printCircular(times = timesToCircular(times), bio = bio)

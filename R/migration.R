@@ -155,7 +155,7 @@ by which sections are presented", immediate. = TRUE, call. = FALSE)
     jump.warning = jump.warning, jump.error = jump.error, inactive.warning = inactive.warning,
     inactive.error = inactive.error, exclude.tags = exclude.tags, override = override,
     print.releases = print.releases, if.last.skip.section = if.last.skip.section,
-    replicates = replicates)
+    replicates = replicates, section.order = section.order)
 
   speed.method <- aux$speed.method
   speed.warning <- aux$speed.warning
@@ -238,7 +238,7 @@ by which sections are presented", immediate. = TRUE, call. = FALSE)
   detections.list <- study.data$detections.list
 
   if (all(!grepl("^Section$", colnames(spatial$stations))))
-    stop("To run migration(), please include assign arrays to their sections using the 'Section' column in the spatial input.", call. = FALSE)
+    stop("To run migration(), please assign the arrays to their sections using a 'Section' column in the spatial input.", call. = FALSE)
 # -------------------------------------
 
 # Final quality checks

@@ -88,12 +88,12 @@ preload <- function(biometrics, spatial, deployments, detections, dot, distances
       aux <- unique(spatial$Array[spatial$Type == "Hydrophone"])
       fakedot <- paste(aux, "--", aux)
     }
-    recipient <- loadDot(string = fakedot, spatial = spatial, spatial = spatial, disregard.parallels = disregard.parallels)
+    recipient <- loadDot(string = fakedot, spatial = spatial, disregard.parallels = disregard.parallels)
   } else {
   	if (!is.character(dot))
   		stop("'dot' was set but could not recognised as a string. Please prepare a dot string and include it in the dot argument.\nYou can use readDot to check the quality of your dot string.", call. = FALSE)
   	else
-  		recipient <- loadDot(string = dot, spatial = spatial, spatial = spatial, disregard.parallels = disregard.parallels)
+  		recipient <- loadDot(string = dot, spatial = spatial, disregard.parallels = disregard.parallels)
   }
   dot <- recipient$dot
   arrays <- recipient$arrays
@@ -109,9 +109,8 @@ preload <- function(biometrics, spatial, deployments, detections, dot, distances
     first.array <- names(arrays)[unlist(lapply(arrays, function(a) is.null(a$before)))]
   else
     first.array <- NULL
-  recipient <- transformSpatial(spatial = spatial, bio = bio, arrays = arrays, dotmat = dotmat, first.array = first.array) # Finish structuring the spatial file
-  spatial <- recipient$spatial
-  sections <- recipient$sections
+  spatial <- transformSpatial(spatial = spatial, bio = bio, arrays = arrays, dotmat = dotmat, first.array = first.array) # Finish structuring the spatial file
+
   detections$Array <- factor(detections$Array, levels = unlist(spatial$array.order)) # Fix array levels
   link <- match(unlist(spatial$array.order), names(arrays))
   arrays <- arrays[link] # Reorder arrays by spatial order
