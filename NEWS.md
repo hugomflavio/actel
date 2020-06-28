@@ -10,8 +10,8 @@ Fixes:
 
 Changes
   * `stripCodeSpaces()` has been replaced with `extractSignals()`.
-  * **sections are now set up using a 'Section' column in the spatial.csv file**. The 'sections' argument has been deprecated. **See the updated vignettes for details**.
-  * **arrays can now be named freely** (short names are still recommended).
+  * **Sections are now set up using a 'Section' column in the spatial.csv file**. The 'sections' argument has been deprecated. See the updated vignettes for details.
+  * **Arrays can now be named freely** (short names are still recommended).
 
 Enhancements:
   * the shapefiles of the study areas can now be water or land polygons. Use the new argument "time" in `loadShape()` to switch from land shapefiles (the default) to water shapefiles.
