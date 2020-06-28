@@ -775,7 +775,7 @@ loadSpatial <- function(input = "spatial.csv", section.order = NULL){
         stop("Not all sections are listed in 'section.order'. Sections missing: ", paste(sections[link], collapse = ", "), call. = FALSE)
 
       if (any(link <- is.na(match(section.order, sections)))) {
-        appendTo(c("Screen", "Report", "Warning"), "Not all values listed in 'section.order' correspond to sections. Discarding the following values: ", paste(section.order[link], collapse = ", "))
+        appendTo(c("Screen", "Report", "Warning"), paste0("Not all values listed in 'section.order' correspond to sections. Discarding the following values: ", paste(section.order[link], collapse = ", ")))
         section.order <- section.order[!link]
       }
       input$Section <- factor(input$Section, levels = section.order)
