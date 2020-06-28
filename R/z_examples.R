@@ -27,7 +27,8 @@ createWorkspace <- function(dir) {
     Station.name = c("Example station1", "Example station2", "Example station3", "Example release1", "Example release2"),
     Latitude = c(8.411, 8.521, 8.402, 8.442, 8.442),
     Longitude = c(40.411, 40.521, 40.402, 40.442, 40.442),
-    Array = c("River1", "River1", "River2", "River1", "River2"),
+    Array = c("A1", "A1", "A2", "A1", "A2"),
+    Section = c("River", "River", "River", "", ""),
     Type = c("Hydrophone", "Hydrophone", "Hydrophone", "Release", "Release"))
 
   biometrics <- data.frame(
