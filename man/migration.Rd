@@ -39,6 +39,8 @@ migration(
 \item{tz}{The time zone of the study area. Must match one of the values
 present in \code{\link[base]{timezones}}.}
 
+\item{sections}{DEPRECATED - list the sections in the spatial input instead.}
+
 \item{section.order}{A vector containing the order by which sections should
 be aligned in the results.}
 
@@ -146,8 +148,6 @@ prompted to open that file and examine it. Defaults to "needed".}
 
 \item{print.releases}{Logical: Should the release sites be printed in the
 study area diagrams?}
-
-\item{section}{DEPRECATED - list the sections in the spatial input instead.}
 }
 \value{
 A list containing:

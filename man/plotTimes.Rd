@@ -46,7 +46,7 @@ For more details about the original functions, visit the circular package homepa
 }
 \examples{
 # The output of timesToCircular can be used as an input to plotTimes.
-x <- getTimes(example.results, location = "River1", n.events = "first", event.type = "arrival")
+x <- getTimes(example.results, location = "A1", n.events = "first", event.type = "arrival")
 times <- timesToCircular(x)
 
 # plot times

@@ -7,7 +7,7 @@
 #' odd. Multiple options allow you to tweak the analysis to fit your study
 #' perfectly.
 #'
-#' @param section DEPRECATED - list the sections in the spatial input instead.
+#' @param sections DEPRECATED - list the sections in the spatial input instead.
 #' @param section.order A vector containing the order by which sections should 
 #' be aligned in the results.
 #' @param success.arrays The arrays that mark the end of the study area. If a

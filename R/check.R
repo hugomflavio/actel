@@ -160,6 +160,9 @@ checkArguments <- function(dp, tz, minimum.detections, max.interval, speed.metho
   }
 
   # NON-explore checks
+  if (!is.null(section.order) && any(table(section.order) > 1))
+    stop("Some section names are duplicated in the 'section.order' argument. Please include each section only once.\n", call. = FALSE)
+
   if (!is.null(if.last.skip.section) && !is.logical(if.last.skip.section))
     stop("'if.last.skip.section' must be logical.\n", call. = FALSE)
 

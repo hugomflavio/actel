@@ -93,7 +93,7 @@ deployments <- read.csv(paste0(aux, "/example_deployments.csv"))
 spatial <- read.csv(paste0(aux, "/example_spatial.csv"))
 detections <- read.csv(paste0(aux, "/example_detections.csv"))
 
-dot <- "River0--River1--River2--River3--River4--River5--River6--Fjord1--Fjord2--Sea1"
+dot <- "A0--A1--A2--A3--A4--A5--A6--A7--A8--A9"
 
 # Now that we have the R objects created, we can run preload:
 

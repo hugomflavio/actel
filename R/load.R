@@ -157,7 +157,10 @@ loadDot <- function(string = NULL, input = NULL, spatial, disregard.parallels) {
     if (file.exists("spatial.dot"))
       stop(paste0("Not all the arrays listed in the spatial.csv file are present in the spatial.dot.\nMissing arrays: ", paste(unique.arrays[link], collapse = ", "), "\n"), call. = FALSE)
     else
-      stop("Something went wrong when compiling the dot file. Try restarting R and trying again. If the problem persists, contact the developer.\n", call. = FALSE)
+      stop(
+"Something went wrong when compiling the dot file:
+ - If you are using preload(), double-check that the array names in the dot string match the array names in the spatial input.
+ - If you are using input files, try restarting R and trying again. If the problem persists, contact the developer.\n", call. = FALSE)
   }
   arrays <- dotList(input = dot, spatial = spatial)
   arrays <- dotPaths(input = arrays, dotmat = mat, disregard.parallels = disregard.parallels)
@@ -296,8 +299,8 @@ dotList <- function(input, spatial) {
     input$SectionB <- rep(NA_character_, nrow(input))
     for (section in sections) {
       aux <- spatial$Array[spatial$Section == section]
-      input$SectionA[match(aux, input$A)] <- section
-      input$SectionB[match(aux, input$B)] <- section
+      input$SectionA[matchl(input$A, aux)] <- section
+      input$SectionB[matchl(input$B, aux)] <- section
     }
     input$Edge <- with(input, SectionA != SectionB)
   }
@@ -530,7 +533,7 @@ loadDistances <- function(input = "distances.csv", spatial) {
   invalid.dist <- TRUE
   if (is.character(input)) {
     if (file.exists(input)) {
-      appendTo(c("Screen", "Report"), "M: File '", input, "' found, activating speed calculations.")
+      appendTo(c("Screen", "Report"), paste0("M: File '", input, "' found, activating speed calculations."))
       dist.mat <- read.csv(input, row.names = 1)
       if (ncol(dist.mat) == 1)
         warning("Only one column was identified in '", input, "'. If this seems wrong, please make sure that the values are separated using commas.", immediate. = TRUE, call. = FALSE)
@@ -745,7 +748,7 @@ loadSpatial <- function(input = "spatial.csv", section.order = NULL){
   if (any(grepl("^Section$", colnames(input)))) {
     # check missing data in the arrays
     if (any(is.na(input$Section[input$Type == "Hydrophone"]) | input$Section[input$Type == "Hydrophone"] == ""))
-      stop("Some rows do not contain 'Section' information in the spatial input. Please double-check the input files.")
+      stop("Some rows do not contain 'Section' information in the spatial input. Please double-check the input files.", call. = FALSE)
     # check spaces in the array names
     if (any(grepl(" ", input$Section))) {
       appendTo("Screen", "M: Replacing spaces in section names to prevent function failure.")
@@ -1110,8 +1113,8 @@ processStandardFile <- function(input) {
     Receiver = input$Receiver,
     CodeSpace = input$CodeSpace,
     Signal = input$Signal,
-    Sensor.Value = input$Sensor.Value,
-    Sensor.Unit = input$Sensor.Unit)
+    Sensor.Value = ifelse(any(colnames(input) == "Sensor.Value"), input$Sensor.Value, NA_real_),
+    Sensor.Unit  = ifelse(any(colnames(input) ==  "Sensor.Unit"), input$Sensor.Unit, NA_character_))
   return(output)
 }
 
@@ -1173,12 +1176,12 @@ processThelmaNewFile <- function(input) {
 #'
 processVemcoFile <- function(input) {
   appendTo("Debug", "Running processVemcoFile.")
-  appendTo("Debug", "Processing data inside the file...")
+
   transmitter_aux <- strsplit(input$Transmitter, "-", fixed = TRUE)
   input[, "CodeSpace"] <- unlist(lapply(transmitter_aux, function(x) paste(x[1:2], collapse = "-"))) # Rejoin code space
   input[, "Signal"] <- unlist(lapply(transmitter_aux, function(x) x[3])) # extract only signal
   input[, "Receiver"] <- sapply(input$Receiver, function(x) tail(unlist(strsplit(x, "-")), 1)) # extract only the serial
-  appendTo("Debug", "Done!")
+
   colnames(input)[grep("^Date.and.Time", colnames(input))] <- c("Timestamp")
   colnames(input) <- gsub(" ", ".", colnames(input))
   if (any(grepl("^Sensor.Value$", colnames(input)))) {

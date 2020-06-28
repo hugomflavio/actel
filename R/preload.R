@@ -25,7 +25,7 @@
 #' spatial <- read.csv(paste0(aux, "/example_spatial.csv"))
 #' detections <- read.csv(paste0(aux, "/example_detections.csv"))
 #'
-#' dot <- "River0--River1--River2--River3--River4--River5--River6--Fjord1--Fjord2--Sea1"
+#' dot <- "A0--A1--A2--A3--A4--A5--A6--A7--A8--A9"
 #'
 #' # Now that we have the R objects created, we can run preload:
 #'
@@ -60,6 +60,9 @@ preload <- function(biometrics, spatial, deployments, detections, dot, distances
 
   if (!is.null(exclude.tags) && any(!grepl("-", exclude.tags, fixed = TRUE)))
     stop("Not all contents in 'exclude.tags' could be recognized as tags (i.e. 'codespace-signal'). Valid examples: 'R64K-1234', A69-1303-1234'\n", call. = FALSE)
+
+  if (!is.null(section.order) && any(table(section.order) > 1))
+    stop("Some section names are duplicated in the 'section.order' argument. Please include each section only once.\n", call. = FALSE)
 
   bio <- loadBio(input = biometrics, tz = tz)
 

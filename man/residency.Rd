@@ -37,6 +37,8 @@ residency(
 \item{tz}{The time zone of the study area. Must match one of the values
 present in \code{\link[base]{timezones}}.}
 
+\item{sections}{DEPRECATED - list the sections in the spatial input instead.}
+
 \item{section.order}{A vector containing the order by which sections should
 be aligned in the results.}
 

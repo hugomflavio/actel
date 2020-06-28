@@ -162,7 +162,7 @@ extractSignals <- function(input) {
 #' @export
 #'
 extractCodeSpaces <- function(input) {
-  sapply(input, function(x) sub("-[0-9]*$", "", x))
+  unname(sapply(input, function(x) sub("-[0-9]*$", "", x)))
 }
 
 
