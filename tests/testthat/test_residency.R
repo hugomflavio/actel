@@ -6,7 +6,7 @@ setwd("exampleWorkspace")
 write.csv(example.distances, "distances.csv")
 
 test_that("residency stops when any argument does not make sense", {
-# skip_on_cran()
+skip_on_cran()
 	expect_error(residency(tz = 'Europe/Copenhagen', report = TRUE, GUI = "never", section.minimum = "a"),
 		"'section.minimum' must be numeric", fixed = TRUE)
 })
@@ -37,7 +37,7 @@ test_that("residency results contains all the expected elements.", {
 # n
 
 test_that("residency is able to run speed and inactiveness checks.", {
-# skip_on_cran()
+skip_on_cran()
 	output <- suppressWarnings(residency(tz = 'Europe/Copenhagen',
 		report = FALSE, GUI = "never", speed.warning = 1000000, inactive.warning = 1000000, replicates = list(A9 = c("St.16", "St.17"))))
 	expect_false(any(is.na(match(names(output), c('array.times', 'arrays', 'daily.positions', 'daily.ratios',
@@ -60,7 +60,7 @@ test_that("residency is able to run speed and inactiveness checks.", {
 # n
 
 test_that("residency can handle multiple release sites.", {
-# skip_on_cran()
+skip_on_cran()
 	xbio <- example.biometrics
 	xbio$Release.site <- as.character(xbio$Release.site)
 	xbio$Release.site[c(1:15)] <- "RS2"
@@ -90,7 +90,7 @@ write.csv(example.spatial, "spatial.csv", row.names = FALSE)
 write(1, file = "actel_residency_report.html")
 
 test_that("residency can handle multiple expected first arrays", {
-# skip_on_cran()
+skip_on_cran()
 	xspatial <- example.spatial
 	xspatial$Array[18] <- "A1|A2"
 	write.csv(xspatial, "spatial.csv", row.names = FALSE)
@@ -105,7 +105,7 @@ test_that("residency can handle multiple expected first arrays", {
 write.csv(example.spatial, "spatial.csv", row.names = FALSE)
 
 test_that("residency can handle multi-sensor data", {
-# skip_on_cran()
+skip_on_cran()
 	xdet <- example.detections
 	xdet$Sensor.Value <- 1
 	xdet$Sensor.Unit <- "A"
