@@ -40,71 +40,68 @@ test_that("transformSpatial handles release site mismatches properly and deliver
 	xbio <- bio
 	xbio$Release.site <- "unspecified"
 
-	expect_warning(output <- transformSpatial(spatial = spatial, bio = xbio, arrays = dot$arrays, first.array = "River1"),
+	expect_warning(output <- transformSpatial(spatial = spatial, bio = xbio, arrays = dot$arrays, first.array = "A1"),
 		"At least one release site has been indicated in the spatial.csv file, but no release sites were specified in the biometrics file.\n         Discarding release site information and assuming all fish were released at the top level array to avoid function failure.\n         Please double-check your data.", fixed = TRUE)
 
-	expect_equal(as.character(output$spatial$release.sites$Station.name), "unspecified")
+	expect_equal(as.character(output$release.sites$Station.name), "unspecified")
 
-	expect_equal(as.character(output$spatial$release.sites$Array), "River1")
+	expect_equal(as.character(output$release.sites$Array), "A1")
 
-	xspatial <- spatial[-18, -7]
-	xspatial$Array <- factor(xspatial$Array, levels = levels(output$spatial$stations$Array))
-	expect_equal(output$spatial$stations, xspatial)
+	xspatial <- spatial[-18, -match("Type", colnames(spatial))]
+	xspatial$Array <- factor(xspatial$Array, levels = levels(output$stations$Array))
+	expect_equal(output$stations, xspatial)
 
 	
 	xspatial <- spatial[-18, ]
-	expect_warning(output <- transformSpatial(spatial = xspatial, bio = bio, arrays = dot$arrays, first.array = "River1"),
+	expect_warning(output <- transformSpatial(spatial = xspatial, bio = bio, arrays = dot$arrays, first.array = "A1"),
 	"Release sites were not specified in the spatial.csv file. Attempting to assume all released fish start at the top level array.", fixed = TRUE)
-	expect_equal(as.character(output$spatial$release.sites$Station.name), "RS1")
-	expect_equal(as.character(output$spatial$release.sites$Array), "River1")
+	expect_equal(as.character(output$release.sites$Station.name), "RS1")
+	expect_equal(as.character(output$release.sites$Array), "A1")
 	
 	# check counting of fish released per site
-	expect_equal(output$spatial$release.sites$n.A, 30)
-	expect_equal(output$spatial$release.sites$n.B, 30)
+	expect_equal(output$release.sites$n.A, 30)
+	expect_equal(output$release.sites$n.B, 30)
 })
 
 test_that("transformSpatial handles sections properly", {
-	output <- transformSpatial(spatial = spatial, bio = bio, arrays = dot$arrays, sections = NULL)
-	expect_equal(names(output$spatial$array.order), "all")
-	expect_equal(output$spatial$array.order$all, c('River0', 'River1', 'River2', 'River3', 'River4', 'River5', 'River6', 'Fjord1', 'Fjord2', 'Sea1'))
+	xspatial <- spatial
+	xspatial$Section <- as.character(xspatial$Section)
+	xspatial$Section[1:(nrow(xspatial) - 1)] <- "all"
+	xspatial$Section <- as.factor(xspatial$Section)
+	output <- transformSpatial(spatial = xspatial, bio = bio, arrays = dot$arrays)
+	expect_equal(names(output$array.order), "all")
+	expect_equal(output$array.order$all, c('A0', 'A1', 'A2', 'A3', 'A4', 'A5', 'A6', 'A7', 'A8', 'A9'))
 	expect_equal(output$sections, NULL)
 
-	output <- transformSpatial(spatial = spatial, bio = bio, arrays = dot$arrays, sections = c("River", "Fjord", "Sea"))
-	expect_equal(names(output$spatial$array.order), c("River", "Fjord", "Sea"))
-	expect_equal(output$spatial$array.order$River, c('River0', 'River1', 'River2', 'River3', 'River4', 'River5', 'River6'))
-	expect_equal(output$spatial$array.order$Fjord, c('Fjord1', 'Fjord2'))
-	expect_equal(output$spatial$array.order$Sea, c('Sea1'))
-	expect_equal(output$sections, c("River", "Fjord", "Sea"))
-
-	expect_warning(transformSpatial(spatial = spatial, bio = bio, arrays = dot$arrays, sections = c("River", "Fjord", "Sea", "test")),
-		"No arrays were found that match section(s) test. There could be a typing mistake! Section(s) test will be removed.", fixed = TRUE)
-
-	expect_error(suppressWarnings(transformSpatial(spatial = spatial, bio = bio, arrays = dot$arrays, sections = c("River", "Fjord"))),
-		"Array 'Sea1' was not assigned to any section. Stopping to prevent function failure.\nPlease either...\n   1) Rename these arrays to match a section,\n   2) Rename a section to match these arrays, or\n   3) Include a new section in the analysis.\n... and restart the analysis.", fixed = TRUE)
+	output <- transformSpatial(spatial = spatial, bio = bio, arrays = dot$arrays)
+	expect_equal(names(output$array.order), c("River", "Fjord", "Sea"))
+	expect_equal(output$array.order$River, c('A0', 'A1', 'A2', 'A3', 'A4', 'A5', 'A6'))
+	expect_equal(output$array.order$Fjord, c('A7', 'A8'))
+	expect_equal(output$array.order$Sea, c('A9'))
 })
 # y
 
 test_that("transformSpatial handles multiple expected first arrays correctly", {
 	xspatial <- spatial
-	xspatial$Array[18] <- "River1|River2"
-	expect_message(output <- transformSpatial(spatial = xspatial, bio = bio, dotmat = dot$dotmat, arrays = dot$arrays, sections = NULL),
+	xspatial$Array[18] <- "A1|A2"
+	expect_message(output <- transformSpatial(spatial = xspatial, bio = bio, dotmat = dot$dotmat, arrays = dot$arrays),
 		"M: Multiple possible first arrays detected for release site 'RS1'.", fixed = TRUE)
 
-	xspatial$Array[18] <- "River1|Sea1"
-	expect_warning(output <- transformSpatial(spatial = xspatial, bio = bio, dotmat = dot$dotmat, arrays = dot$arrays, sections = NULL),
-		"Release site RS1 has multiple possible first arrays (River1, Sea1), but not all of these arrays appear to be directly connected with each other. Could there be a mistake in the input?", fixed = TRUE)
+	xspatial$Array[18] <- "A1|A9"
+	expect_warning(output <- transformSpatial(spatial = xspatial, bio = bio, dotmat = dot$dotmat, arrays = dot$arrays),
+		"Release site RS1 has multiple possible first arrays (A1, A9), but not all of these arrays appear to be directly connected with each other. Could there be a mistake in the input?", fixed = TRUE)
 
-	xspatial$Array[18] <- "River1|River2"
+	xspatial$Array[18] <- "A1|A2"
 	xspatial[19:25, ] <- xspatial[18, ]
 	
-	xspatial$Array[25] <- "River1|Sea1"
+	xspatial$Array[25] <- "A1|A9"
 
 	xspatial$Standard.name[19:25] <- paste0("RS", 2:8)
 	xspatial$Station.name[19:25] <- paste0("RS", 2:8)
 
 	expect_message(
-		expect_warning(output <- transformSpatial(spatial = xspatial, bio = bio, dotmat = dot$dotmat, arrays = dot$arrays, sections = NULL),
-			"Release site RS8 has multiple possible first arrays (River1, Sea1), but not all of these arrays appear to be directly connected with each other. Could there be a mistake in the input?", fixed = TRUE),
+		expect_warning(output <- transformSpatial(spatial = xspatial, bio = bio, dotmat = dot$dotmat, arrays = dot$arrays),
+			"Release site RS8 has multiple possible first arrays (A1, A9), but not all of these arrays appear to be directly connected with each other. Could there be a mistake in the input?", fixed = TRUE),
 		"Multiple possible first arrays detected for more than five release sites.", fixed = TRUE)
 })
 

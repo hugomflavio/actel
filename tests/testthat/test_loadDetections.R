@@ -18,33 +18,43 @@ test_that("loadDetections stops if detections folder is empty", {
 aux <- split(example.detections, example.detections$Receiver)
 
 # Force Thelma Old structure
-transmitter_aux <- strsplit(as.character(aux[[2]]$Transmitter), "-", fixed = TRUE)
 receiver_aux <- strsplit(as.character(aux[[2]]$Receiver), "-", fixed = TRUE)
 aux[[2]] <- data.frame(
-	`Date and Time UTC` = aux[[2]]$Date.and.Time.UTC,
-	`TBR Serial Number` = sapply(receiver_aux, function(x) x[2]),
+	`Date and Time UTC` = aux[[2]]$Timestamp,
+	`TBR Serial Number` = aux[[2]]$Receiver,
 	`Unix Timestamp UTC` = rep(NA_real_, nrow(aux[[2]])),
 	Millisecond = rep(NA_real_, nrow(aux[[2]])),
 	CodeType = rep("R64K", nrow(aux[[2]])),
-	Id = sapply(transmitter_aux, function(x) x[3]),
+	Id = aux[[2]]$Signal,
 	Data = rep(NA_real_, nrow(aux[[2]])),
 	`Signal to Noise Ratio` = rep(NA_real_, nrow(aux[[2]])))
 colnames(aux[[2]])[2] <- "TBR Serial Number"
 
 # Force Thelma New structure
-transmitter_aux <- strsplit(as.character(aux[[3]]$Transmitter), "-", fixed = TRUE)
-receiver_aux <- strsplit(as.character(aux[[3]]$Receiver), "-", fixed = TRUE)
 aux[[3]] <- data.frame(
-Date.and.Time..UTC. = aux[[3]]$Date.and.Time.UTC,
+Date.and.Time..UTC. = aux[[3]]$Timestamp,
 Unix.Timestamp..UTC. = rep(NA_real_, nrow(aux[[3]])),
-ID = sapply(transmitter_aux, function(x) x[3]),
+ID = aux[[3]]$Signal,
 Data = rep(NA_real_, nrow(aux[[3]])),
 Protocol = rep("R64K-69kHz", nrow(aux[[3]])),
 SNR = rep(NA_real_, nrow(aux[[3]])),
-Receiver = sapply(receiver_aux, function(x) x[2]))
+Receiver = aux[[3]]$Receiver)
 
+# Force Vemco Structure
+aux[[4]] <- data.frame(
+Date.and.Time..UTC. = aux[[4]]$Timestamp,
+Receiver = paste0("VR2W-", aux[[4]]$Receiver),
+Transmitter = paste0("A69-1303-", aux[[4]]$Signal),
+Sensor.Value = rep(NA_real_, nrow(aux[[4]])),
+Sensor.Unit = rep(NA_character_, nrow(aux[[4]])))
 
-for (i in names(aux)[1:3]) {
+# Force Vemco Structure without sensors
+aux[[5]] <- data.frame(
+Date.and.Time..UTC. = aux[[5]]$Timestamp,
+Receiver = paste0("VR2W-", aux[[5]]$Receiver),
+Transmitter = paste0("A69-1303-", aux[[5]]$Signal))
+
+for (i in names(aux)[1:5]) {
   write.csv(aux[[i]], paste0("detections/", i, ".csv"), row.names = FALSE)
 }
 
@@ -53,7 +63,7 @@ test_that("loadDetections output is as expected", {
 	expect_equal(attributes(output$Timestamp)$tz, "Europe/Copenhagen")
 	expect_equal(colnames(output), c("Timestamp", "Receiver", "CodeSpace", "Signal", 'Sensor.Value', 'Sensor.Unit', "Transmitter", "Valid"))
 	expect_equal(factor(paste(output$CodeSpace, output$Signal, sep = "-")), output$Transmitter)
-	expect_equal(nrow(output), 1369)
+	expect_equal(nrow(output), 2639)
 
 	unlink("detections", recursive = TRUE)
 	write.csv(aux[[1]], "detections.csv", row.names = FALSE)
@@ -75,7 +85,7 @@ for (i in names(aux)[1:3]) {
 test_that("loadDetections can handle the presence of a detections folder and detections file", {
 	output <- loadDetections(start.time = NULL, stop.time = NULL, tz = "Europe/Copenhagen", force = FALSE)
 
-	file.copy("detections/VR2W-132908.csv", "detections.csv")
+	file.copy("detections/132908.csv", "detections.csv")
 	expect_warning(output <- loadDetections(start.time = NULL, stop.time = NULL, tz = "Europe/Copenhagen", force = FALSE),
 		"Both a 'detections' folder and a 'detections.csv' file are present in the current directory.\n   Loading ONLY the files present in the 'detections' folder.", fixed = TRUE)
 	expect_equal(nrow(output), 1369)
@@ -179,6 +189,7 @@ test_that("checkDetectionsBeforeRelease kicks in if needed.", {
 
   expect_equal(length(output), length(detections.list) - 1)
 })
+# y
 # b
 # b
 

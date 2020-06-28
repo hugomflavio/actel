@@ -7,8 +7,7 @@ exampleWorkspace("exampleWorkspace")
 setwd("exampleWorkspace")
 write.csv(example.distances, "distances.csv")
 study.data <- suppressWarnings(loadStudyData(tz = "Europe/Copenhagen", start.time = NULL,
-	stop.time = NULL, sections = c("River", "Fjord", "Sea"), exclude.tags = NULL))
-# n
+	stop.time = NULL, exclude.tags = NULL))
 detections.list <- study.data$detections.list
 bio <- study.data$bio
 spatial <- study.data$spatial
@@ -32,22 +31,21 @@ moves <- lapply(names(moves), function(fish) {
 names(moves) <- aux
 rm(aux)
 
-moves[[1]]$Array[10] <- "River1"
+moves[[1]]$Array[10] <- "A1"
 moves[[1]]$Valid[18] <- FALSE
 attributes(moves[[1]])$p.type <- "Manual"
 
 secmoves <- lapply(seq_along(moves), function(i) {
   fish <- names(moves)[i]
   appendTo("debug", paste0("debug: Compiling valid section movements for fish ", fish,"."))
-  output <- sectionMovements(movements = moves[[i]], sections = sections, invalid.dist = invalid.dist)
+  output <- sectionMovements(movements = moves[[i]], spatial = spatial, invalid.dist = invalid.dist)
   return(output)
 })
 names(secmoves) <- names(moves)
 
-
 test_that("assembleResidency output is as expected", {
 
-  res.df <<- assembleResidency(secmoves = secmoves, movements = moves, sections = sections)
+  res.df <<- assembleResidency(secmoves = secmoves, movements = moves, spatial = spatial)
 
 	expect_equal(colnames(res.df), c('Times.entered.River', 'Average.entry.River', 'Average.time.River',
 		'Average.departure.River', 'Total.time.River', 'Times.entered.Fjord', 'Average.entry.Fjord',
@@ -77,7 +75,7 @@ test_that("assembleResidency output is as expected", {
   expect_equal(res.df$Average.departure.Sea, c(NA_character_, "22:23"))
   expect_equal(as.numeric(res.df$Total.time.Sea), c(NA_real_, 0.55))
   expect_equal(attributes(res.df$Total.time.Sea)$units, "mins")
-  expect_equal(res.df$Very.last.array, c("Fjord2", "Sea1"))
+  expect_equal(res.df$Very.last.array, c("A8", "A9"))
   expect_equal(res.df$Very.last.time, c("2018-05-06 02:48:43", "2018-05-02 22:22:52"))
   expect_equal(res.df$Status, c("Disap. in Fjord", "Disap. in Sea"))
   expect_equal(res.df$Valid.detections, c(538, 231))
@@ -89,8 +87,7 @@ test_that("assembleResidency output is as expected", {
 })
 
 test_that("res_assembleOutput works as expected.", {
-  status.df <<- res_assembleOutput(res.df = res.df, bio = bio, spatial = spatial,
-                                  sections = sections, tz = "Europe/Copenhagen")
+  status.df <<- res_assembleOutput(res.df = res.df, bio = bio, spatial = spatial, tz = "Europe/Copenhagen")
 
   expect_equal(colnames(status.df), c('Transmitter', 'Release.date', 'Release.site', 'Serial.nr',
   	'Signal', 'Group', 'Total.Length.mm', 'Mass.g', 'Times.entered.River', 'Average.entry.River',
@@ -170,11 +167,11 @@ test_that("res_efficiency works as expected, and can include intra array estimat
   load(paste0(tests.home, "/aux_res_efficiency.RData"))
   expect_equal(efficiency, aux_res_efficiency)
 
-  tryCatch(x <- getDualMatrices(replicates = list(Sea1 = c("St.16")), CJS = efficiency, spatial = spatial, detections.list = detections.list),
+  tryCatch(x <- getDualMatrices(replicates = list(A9 = c("St.16")), CJS = efficiency, spatial = spatial, detections.list = detections.list),
     warning = function(w) stop("A warning was issued where it should not have been."))
 
-  expect_warning(intra.array.matrices <- getDualMatrices(replicates = list(Fjord1 = c("St.10", "St.11")), CJS = efficiency, spatial = spatial, detections.list = detections.list),
-    "An inter-array efficiency has already been calculated for array Fjord1", fixed = TRUE)
+  expect_warning(intra.array.matrices <- getDualMatrices(replicates = list(A7 = c("St.10", "St.11")), CJS = efficiency, spatial = spatial, detections.list = detections.list),
+    "An inter-array efficiency has already been calculated for array A7", fixed = TRUE)
 
   output <- includeIntraArrayEstimates(m = intra.array.matrices, efficiency = efficiency, CJS = NULL)
   ### ONLY RUN THIS TO RESET REFERENCE
@@ -191,44 +188,44 @@ test_that("res_efficiency works as expected, and can include intra array estimat
 test_that("advEfficiency can plot efficiency results", {
   output <- round(advEfficiency(efficiency), 7)
   check <- read.csv(text = '"","2.5%","50%","97.5%"
-"River1.min", 1.0000000, 1.0, 1.0000000
-"River1.max", 1.0000000, 1.0, 1.0000000
-"River2.min", 0.0942993, 0.5, 0.9057007
-"River2.max", 0.0942993, 0.5, 0.9057007
-"River3.min", 0.0942993, 0.5, 0.9057007
-"River3.max", 0.0942993, 0.5, 0.9057007
-"River4.min", 0.0942993, 0.5, 0.9057007
-"River4.max", 0.0942993, 0.5, 0.9057007
-"River5.min", 0.0942993, 0.5, 0.9057007
-"River5.max", 0.0942993, 0.5, 0.9057007
-"River6.min", 0.0942993, 0.5, 0.9057007
-"River6.max", 0.0942993, 0.5, 0.9057007
-"Fjord1.min", 1.0000000, 1.0, 1.0000000
-"Fjord1.max", 1.0000000, 1.0, 1.0000000
-"Fjord2.min", 1.0000000, 1.0, 1.0000000
-"Fjord2.max", 1.0000000, 1.0, 1.0000000
+"A1.min", 1.0000000, 1.0, 1.0000000
+"A1.max", 1.0000000, 1.0, 1.0000000
+"A2.min", 0.0942993, 0.5, 0.9057007
+"A2.max", 0.0942993, 0.5, 0.9057007
+"A3.min", 0.0942993, 0.5, 0.9057007
+"A3.max", 0.0942993, 0.5, 0.9057007
+"A4.min", 0.0942993, 0.5, 0.9057007
+"A4.max", 0.0942993, 0.5, 0.9057007
+"A5.min", 0.0942993, 0.5, 0.9057007
+"A5.max", 0.0942993, 0.5, 0.9057007
+"A6.min", 0.0942993, 0.5, 0.9057007
+"A6.max", 0.0942993, 0.5, 0.9057007
+"A7.min", 1.0000000, 1.0, 1.0000000
+"A7.max", 1.0000000, 1.0, 1.0000000
+"A8.min", 1.0000000, 1.0, 1.0000000
+"A8.max", 1.0000000, 1.0, 1.0000000
 ', row.names = 1)
   colnames(check) <- c("2.5%","50%","97.5%")
   expect_equal(output, check)
 
   output <- round(advEfficiency(efficiency, paired = FALSE), 7)
   check <- read.csv(text = '"","2.5%","50%","97.5%"
-"River1.max", 1.0000000, 1.0, 1.0000000
-"River2.max", 0.0942993, 0.5, 0.9057007
-"River3.max", 0.0942993, 0.5, 0.9057007
-"River4.max", 0.0942993, 0.5, 0.9057007
-"River5.max", 0.0942993, 0.5, 0.9057007
-"River6.max", 0.0942993, 0.5, 0.9057007
-"Fjord1.max", 1.0000000, 1.0, 1.0000000
-"Fjord2.max", 1.0000000, 1.0, 1.0000000
-"River1.min", 1.0000000, 1.0, 1.0000000
-"River2.min", 0.0942993, 0.5, 0.9057007
-"River3.min", 0.0942993, 0.5, 0.9057007
-"River4.min", 0.0942993, 0.5, 0.9057007
-"River5.min", 0.0942993, 0.5, 0.9057007
-"River6.min", 0.0942993, 0.5, 0.9057007
-"Fjord1.min", 1.0000000, 1.0, 1.0000000
-"Fjord2.min", 1.0000000, 1.0, 1.0000000
+"A1.max", 1.0000000, 1.0, 1.0000000
+"A2.max", 0.0942993, 0.5, 0.9057007
+"A3.max", 0.0942993, 0.5, 0.9057007
+"A4.max", 0.0942993, 0.5, 0.9057007
+"A5.max", 0.0942993, 0.5, 0.9057007
+"A6.max", 0.0942993, 0.5, 0.9057007
+"A7.max", 1.0000000, 1.0, 1.0000000
+"A8.max", 1.0000000, 1.0, 1.0000000
+"A1.min", 1.0000000, 1.0, 1.0000000
+"A2.min", 0.0942993, 0.5, 0.9057007
+"A3.min", 0.0942993, 0.5, 0.9057007
+"A4.min", 0.0942993, 0.5, 0.9057007
+"A5.min", 0.0942993, 0.5, 0.9057007
+"A6.min", 0.0942993, 0.5, 0.9057007
+"A7.min", 1.0000000, 1.0, 1.0000000
+"A8.min", 1.0000000, 1.0, 1.0000000
 ', row.names = 1)
   colnames(check) <- c("2.5%","50%","97.5%")
   expect_equal(output, check)
@@ -236,27 +233,27 @@ test_that("advEfficiency can plot efficiency results", {
 
 test_that("firstArrayFailure is able to deal with multile first expected arrays", {
   xdot <- loadDot(string =
-"River0 -- River1 -- River0
-River1 -- River2 -- River3 -- River6 -- Fjord1 -- Sea1
-River0 -- River4 -- River5 -- River6 -- Fjord2 -- Sea1
-River5 -- River3 -- River5
-Fjord1 -- Fjord2 -- Fjord1
-", spatial = spatial, disregard.parallels = TRUE, sections = c("River", "Fjord", "Sea"))
+"A0 -- A1 -- A0
+A1 -- A2 -- A3 -- A6 -- A7 -- A9
+A0 -- A4 -- A5 -- A6 -- A8 -- A9
+A5 -- A3 -- A5
+A7 -- A8 -- A7
+", spatial = spatial, disregard.parallels = TRUE)
 
   xspatial <- spatial
-  xspatial$release.sites$Array <- "River0|River1"
+  xspatial$release.sites$Array <- "A0|A1"
 
-  first.array <- firstArrayFailure(fish = "R64K-4451", bio = bio, spatial = xspatial, first.array = "River5", paths = xdot$paths, dotmat = xdot$dotmat)
-  expect_equal(first.array,  c(known1 = "River0", known2 = "River4"))
+  first.array <- firstArrayFailure(fish = "R64K-4451", bio = bio, spatial = xspatial, first.array = "A5", paths = xdot$paths, dotmat = xdot$dotmat)
+  expect_equal(first.array,  c(known1 = "A0", known2 = "A4"))
 
-  first.array <- firstArrayFailure(fish = "R64K-4451", bio = bio, spatial = xspatial, first.array = "River6", paths = xdot$paths, dotmat = xdot$dotmat)
-  expect_equal(first.array,  c(unsure1 = "River0", unsure2 = "River1", unsure3 = "River4", unsure4 = "River5", unsure5 = "River2", unsure6 = "River3"))
+  first.array <- firstArrayFailure(fish = "R64K-4451", bio = bio, spatial = xspatial, first.array = "A6", paths = xdot$paths, dotmat = xdot$dotmat)
+  expect_equal(first.array,  c(unsure1 = "A0", unsure2 = "A1", unsure3 = "A4", unsure4 = "A5", unsure5 = "A2", unsure6 = "A3"))
 
-  first.array <- firstArrayFailure(fish = "R64K-4451", bio = bio, spatial = xspatial, first.array = "Fjord1", paths = xdot$paths, dotmat = xdot$dotmat)
-  expect_equal(first.array,  c(known = "River6", unsure1 = "River0", unsure2 = "River1", unsure3 = "River4", unsure4 = "River5", unsure5 = "River2", unsure6 = "River3"))
+  first.array <- firstArrayFailure(fish = "R64K-4451", bio = bio, spatial = xspatial, first.array = "A7", paths = xdot$paths, dotmat = xdot$dotmat)
+  expect_equal(first.array,  c(known = "A6", unsure1 = "A0", unsure2 = "A1", unsure3 = "A4", unsure4 = "A5", unsure5 = "A2", unsure6 = "A3"))
 
-  first.array <- firstArrayFailure(fish = "R64K-4451", bio = bio, spatial = xspatial, first.array = "Sea1", paths = xdot$paths, dotmat = xdot$dotmat)
-  expect_equal(first.array,  c(known = "River6", unsure1 = "River0", unsure2 = "River1", unsure3 = "River4", unsure4 = "River5", unsure5 = "Fjord1", unsure6 = "Fjord2", unsure7 = "River2", unsure8 = "River3"))
+  first.array <- firstArrayFailure(fish = "R64K-4451", bio = bio, spatial = xspatial, first.array = "A9", paths = xdot$paths, dotmat = xdot$dotmat)
+  expect_equal(first.array,  c(known = "A6", unsure1 = "A0", unsure2 = "A1", unsure3 = "A4", unsure4 = "A5", unsure5 = "A7", unsure6 = "A8", unsure7 = "A2", unsure8 = "A3"))
 })
 
 setwd("..")

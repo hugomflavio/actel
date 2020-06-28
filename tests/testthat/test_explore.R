@@ -145,6 +145,12 @@ test_that("explore stops when any argument does not make sense", {
 	expect_error(explore(tz = "Europe/Copenhagen", GUI = "never", print.releases = "a"),
 		"'print.releases' must be logical.", fixed = TRUE)
 })
+# n
+# n
+# n
+# n
+# n
+# n
 
 test_that("explore results contains all the expected elements.", {
 	output <- suppressWarnings(explore(tz = 'Europe/Copenhagen', report = FALSE, GUI = "never"))
@@ -155,6 +161,9 @@ test_that("explore results contains all the expected elements.", {
 	expect_equal(output$rsp.info$analysis.type, "explore")
 	expect_equal(output$rsp.info$bio[,1:ncol(example.biometrics)], example.biometrics)
 })
+# n
+# n
+# n
 
 test_that("explore is able to run speed and inactiveness checks.", {
 	output <- suppressWarnings(explore(tz = 'Europe/Copenhagen', report = FALSE, GUI = "never", speed.error = 1000000, inactive.error = 1000000))
@@ -165,12 +174,19 @@ test_that("explore is able to run speed and inactiveness checks.", {
 	expect_false(any(is.na(match(names(output), c('detections', 'valid.detections', 'spatial', 'deployments', 'arrays',
     'movements', 'valid.movements', 'times', 'rsp.info')))))
 })
+# n
+# n
+# n
+# n
+# n
+# n
+# n
 
 test_that("explore can handle multi-sensor data", {
 	xdet <- example.detections
 	xdet$Sensor.Value <- 1
 	xdet$Sensor.Unit <- "A"
-	xdet$Sensor.Unit[xdet$Transmitter == "A69-1303-4454"] <- "B"
+	xdet$Sensor.Unit[xdet$Signal == 4454] <- "B"
 	my.list <- split(xdet, xdet$Receiver)
   for (i in names(my.list)) {
     write.csv(my.list[[i]], paste0("detections/", i, ".csv"), row.names = FALSE)
@@ -181,6 +197,10 @@ test_that("explore can handle multi-sensor data", {
 	write.csv(xbio, "biometrics.csv", row.names = FALSE)
 	output <- suppressWarnings(explore(tz = 'Europe/Copenhagen', GUI = "never"))
 })
+# n
+# n
+# n
+# n
 
 write.csv(example.distances, "distances.csv")
 
@@ -197,6 +217,9 @@ test_that("the discard.first argument is working properly", {
 	expect_true(is.na(output$valid.movements[[1]]$Time.travelling[1]))
 	expect_true(is.na(output$valid.movements[[1]]$Average.speed.m.s[1]))
 })
+# n
+# n
+# n
 
 setwd("..")
 unlink("exampleWorkspace", recursive = TRUE)

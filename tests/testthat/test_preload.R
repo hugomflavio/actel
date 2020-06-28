@@ -10,9 +10,6 @@ bio <- read.csv("biometrics.csv")
 deployments <- read.csv("deployments.csv")
 spatial <- read.csv("spatial.csv")
 detections <- example.detections
-colnames(detections)[1] <- "Timestamp"
-detections$CodeSpace <- extractCodeSpaces(detections$Transmitter)
-detections$Signal <- extractSignals(detections$Transmitter)
 detections$ExtraCol <- NA
 dot <- paste(unique(spatial$Array[spatial$Type == "Hydrophone"]), collapse = "--")
 
@@ -49,23 +46,29 @@ test_that("explore with preload yields the same results as with traditional load
 
 	expect_equal(results$spatial, results2$spatial)
 })
+# n
+# n
+# n
+# n
 
 test_that("migration and residency don't start if datapack is incompatible", {
-	d <- preload(biometrics = bio, deployments = deployments, spatial = spatial, detections = detections, tz = "Europe/Copenhagen")
+	xspatial <- spatial[, -match("Section", colnames(spatial))]
+	expect_warning(d <- preload(biometrics = bio, deployments = deployments, spatial = xspatial, detections = detections, tz = "Europe/Copenhagen"),
+		"The spatial input does not contain a 'Section' column. This input is only valid for explore() analyses.", fixed = TRUE)
 
 	expect_error(results <- migration(datapack = d),
-		"The preloaded data contains no sections, but these are mandatory for the migration analysis. Recompile the data using the argument 'sections' during preload.", fixed = TRUE)
+		"To run migration(), please assign the arrays to their sections using a 'Section' column in the spatial input.", fixed = TRUE)
 
 	expect_error(results <- residency(datapack = d),
-		"The preloaded data contains no sections, but these are mandatory for the migration analysis. Recompile the data using the argument 'sections' during preload.", fixed = TRUE)
+		"To run residency(), please assign the arrays to their sections using a 'Section' column in the spatial input.", fixed = TRUE)
 })
 
 test_that("migration and residency with preload yield the same results as with traditional loading", {
 	d2 <- preload(biometrics = bio, deployments = deployments, spatial = spatial, detections = detections,
-		tz = "Europe/Copenhagen", sections = c("River", "Fjord", "Sea"))
+		tz = "Europe/Copenhagen")
 
 	results <- migration(datapack = d2)
-	results2 <- migration(tz = "Europe/Copenhagen", sections = c("River", "Fjord", "Sea"))
+	results2 <- migration(tz = "Europe/Copenhagen")
 
 	expect_equal(extractSignals(names(results$valid.movements)), extractSignals(names(results2$valid.movements)))
 	expect_equal(results$status.df[, -1], results2$status.df[, -1])
@@ -76,7 +79,7 @@ test_that("migration and residency with preload yield the same results as with t
 
 
 	results <- residency(datapack = d2)
-	results2 <- residency(tz = "Europe/Copenhagen", sections = c("River", "Fjord", "Sea"))
+	results2 <- residency(tz = "Europe/Copenhagen")
 
 	for (i in 1:length(results$valid.movements)) {
 		expect_equal(results$movements[[i]], results2$movements[[i]])
@@ -86,6 +89,20 @@ test_that("migration and residency with preload yield the same results as with t
 	expect_equal(results$arrays, results2$arrays)
 	expect_equal(results$status.df[, -1], results2$status.df[, -1])
 })
+# n
+# n
+# n
+# n
+# n
+# n
+# n
+# n
+# n
+# n
+# n
+# n
+# n
+# n
 
 test_that("tz and exclude.tags stops are working", {
 	expect_error(preload(tz = "test"), "'tz' could not be recognized as a timezone. Check available timezones with OlsonNames()", fixed = TRUE)
@@ -137,7 +154,10 @@ test_that("distances are correctly handled with preload", {
 
 	expect_equal(results$spatial, results2$spatial)
 })
-
+# n
+# n
+# n
+# n
 
 test_that("preload stops if mandatory columns are missing or have NAs", {
 	x <- detections[, -1]
@@ -168,7 +188,9 @@ test_that("Data conversion warnings and errors kick in", {
 			dot = dot, distances = example.distances, tz = "Europe/Copenhagen"),
 	"The 'Receiver' column in the detections is not of type integer. Attempting to convert.", fixed = TRUE)
 
-	expect_warning(x <- preload(biometrics = bio, deployments = deployments, spatial = spatial, detections = detections,
+	d <- detections
+	d$Receiver <- paste0("a-", d$Receiver)
+	expect_warning(x <- preload(biometrics = bio, deployments = deployments, spatial = spatial, detections = d,
 			dot = dot, distances = example.distances, tz = "Europe/Copenhagen"),
 	"Attempting to convert the 'Receiver' to integer failed. Attempting to extract only the serial numbers.", fixed = TRUE)
 
@@ -177,7 +199,6 @@ test_that("Data conversion warnings and errors kick in", {
 	expect_error(x <- preload(biometrics = bio, deployments = deployments, spatial = spatial, detections = d,
 			dot = dot, distances = example.distances, tz = "Europe/Copenhagen"),
 	"Extracting the serial numbers failed. Aborting.", fixed = TRUE)
-
 
 	d <- detections
 	d$Sensor.Value <- "1"
@@ -190,7 +211,6 @@ test_that("Data conversion warnings and errors kick in", {
 	expect_error(x <- preload(biometrics = bio, deployments = deployments, spatial = spatial, detections = d,
 			dot = dot, distances = example.distances, tz = "Europe/Copenhagen"),
 	"Attempting to convert the 'Sensor.Value' to numeric failed. Aborting.", fixed = TRUE)
-
 
 	d <- detections
 	d$Timestamp <- as.character(d$Timestamp)

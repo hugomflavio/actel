@@ -145,7 +145,7 @@ will artificially add water space around the shape file.", fixed = TRUE)
 		  		coord.x = "x.32632", coord.y = "y.32632", starters = loadSpatial(), id.col = "Array", actel = FALSE),
 			"The 'Array' column in 'targets' contains duplicated values; skipping column naming.", fixed = TRUE)
 
-			colnames(xspatial)[9] <- "test"
+			colnames(xspatial)[ncol(xspatial)] <- "test"
 			write.csv(xspatial, "spatial2.csv", row.names = FALSE)
 
 			expect_error(distancesMatrix(t.layer =  t.layer,
@@ -183,6 +183,10 @@ will artificially add water space around the shape file.", fixed = TRUE)
 		rm(list = ls())
 	}
 }
+# n
+# n
+# n
+# n
 
 # ------------------------
 # Manual functions
@@ -219,6 +223,5 @@ test_that("completeMatrix works as expected", {
 	}
 })
 
-file.remove("spatial.csv")
 setwd(tests.home)
 rm(list = ls())

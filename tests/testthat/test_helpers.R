@@ -16,9 +16,18 @@ test_that("dataToList is working", {
 	file.remove("temp.RData")
 })
 
-test_that("stripCodeSpaces is working", {
-	expect_equal(stripCodeSpaces(input = "A-B-123"), "123")
-	expect_equal(stripCodeSpaces(input = "ABV-023"), "023")	
+test_that("extractSignals is working", {
+	expect_equal(extractSignals(input = "A-B-123"), "123")
+	expect_equal(extractSignals(input = "ABV-023"), "023")	
+})
+
+test_that("extractCodeSpaces is working", {
+	expect_equal(extractCodeSpaces(input = "A-B-123"), "A-B")
+	expect_equal(extractCodeSpaces(input = "ABV-023"), "ABV")	
+})
+
+test_that("stationName is working", {
+	expect_equal(stationName(example.results, 2:3), c("Station 1", "Station 2"))
 })
 
 test_that("std.error.circular computes circular std. errors and not regular ones", {

@@ -1,5 +1,5 @@
 aux_assembleMatrixes <- list()
-aux_assembleMatrixes$maxmat$A.RS1<- read.csv(text = ',Release,River0,River1,River2,River3,River4,River5,River6,Fjord1,Fjord2,Sea1
+aux_assembleMatrixes$maxmat$A.RS1<- read.csv(text = ',Release,A0,A1,A2,A3,A4,A5,A6,A7,A8,A9
 4451,1,0,1,1,1,1,1,1,1,1,0
 4453,1,0,1,1,1,1,1,1,1,1,1
 4454,1,0,1,1,1,1,1,1,1,1,1
@@ -30,7 +30,7 @@ aux_assembleMatrixes$maxmat$A.RS1<- read.csv(text = ',Release,River0,River1,Rive
 4478,1,0,0,0,0,0,0,0,0,0,0
 4452,1,0,0,0,0,0,0,0,0,0,0
 4464,1,0,0,0,0,0,0,0,0,0,0', row.names = 1)
-aux_assembleMatrixes$maxmat$B.RS1<- read.csv(text = ',Release,River0,River1,River2,River3,River4,River5,River6,Fjord1,Fjord2,Sea1
+aux_assembleMatrixes$maxmat$B.RS1<- read.csv(text = ',Release,A0,A1,A2,A3,A4,A5,A6,A7,A8,A9
 4502,1,0,1,1,1,1,1,1,1,1,1
 4503,1,0,1,1,1,1,1,1,1,1,1
 4505,1,0,1,1,1,1,1,1,1,0,0
@@ -61,7 +61,7 @@ aux_assembleMatrixes$maxmat$B.RS1<- read.csv(text = ',Release,River0,River1,Rive
 4549,1,0,1,1,1,1,1,1,1,1,0
 4527,1,0,0,0,0,0,0,0,0,0,0
 4520,1,0,0,0,0,0,0,0,0,0,0', row.names = 1)
-aux_assembleMatrixes$minmat$A.RS1<- read.csv(text = ',Release,River0,River1,River2,River3,River4,River5,River6,Fjord1,Fjord2,Sea1
+aux_assembleMatrixes$minmat$A.RS1<- read.csv(text = ',Release,A0,A1,A2,A3,A4,A5,A6,A7,A8,A9
 4451,1,0,1,1,1,1,1,1,1,1,0
 4453,1,0,1,1,1,1,1,1,1,1,1
 4454,1,0,1,1,1,1,1,1,1,1,1
@@ -92,7 +92,7 @@ aux_assembleMatrixes$minmat$A.RS1<- read.csv(text = ',Release,River0,River1,Rive
 4478,1,0,0,0,0,0,0,0,0,0,0
 4452,1,0,0,0,0,0,0,0,0,0,0
 4464,1,0,0,0,0,0,0,0,0,0,0', row.names = 1)
-aux_assembleMatrixes$minmat$B.RS1<- read.csv(text = ',Release,River0,River1,River2,River3,River4,River5,River6,Fjord1,Fjord2,Sea1
+aux_assembleMatrixes$minmat$B.RS1<- read.csv(text = ',Release,A0,A1,A2,A3,A4,A5,A6,A7,A8,A9
 4502,1,0,1,1,1,1,1,1,1,1,1
 4503,1,0,1,1,1,1,1,1,1,1,1
 4505,1,0,1,1,1,1,1,1,1,0,0

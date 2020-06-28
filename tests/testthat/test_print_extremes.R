@@ -12,12 +12,15 @@ test_that("printProgression can handle over eight sections", {
 	if (file.exists(paste0(tempdir(), "/mb_efficiency.svg")))
 		file.remove(paste0(tempdir(), "/mb_efficiency.svg"))
 
-	sections <- c("River0", "River1", "River2", "River3", "River4", "River5", "River6", "Fjord1", "Fjord2", "Sea")
+	xspatial <- example.spatial
+	xspatial$Section <- as.character(xspatial$Section)
+	xspatial$Section[1:(nrow(xspatial) - 1)] <- xspatial$Array[1:(nrow(xspatial) - 1)]
+	xspatial$Section <- as.factor(xspatial$Section)
 
 	dot <- readDot(string = paste(unique(example.results$spatial$stations$Array), collapse = " -- "))
 
-	tryCatch(printProgression(dot, sections, overall.CJS = example.results$overall.CJS,
-		spatial = example.results$spatial, status.df = example.results$status.df, FALSE),
+	tryCatch(printProgression(dot, overall.CJS = example.results$overall.CJS,
+		spatial = xspatial, status.df = example.results$status.df, FALSE),
 		warning = function(w) stop ("Warning in printProgression:", w))
 
 	expect_true(file.exists(paste0(tempdir(), "/mb_efficiency.svg")))
@@ -27,12 +30,15 @@ test_that("printProgression can handle only one array", {
 	if (file.exists(paste0(tempdir(), "/mb_efficiency.svg")))
 		file.remove(paste0(tempdir(), "/mb_efficiency.svg"))
 
-	sections <- c("River")
+	xspatial <- example.spatial
+	xspatial$Section <- as.character(xspatial$Section)
+	xspatial$Section[1:(nrow(xspatial) - 1)] <- "River"
+	xspatial$Section <- as.factor(xspatial$Section)
 
 	dot <- readDot(string = "River1 -- River1")
 
-	tryCatch(printProgression(dot, sections, overall.CJS = example.results$overall.CJS,
-		spatial = example.results$spatial, status.df = example.results$status.df, FALSE),
+	tryCatch(printProgression(dot, overall.CJS = example.results$overall.CJS,
+		spatial = xspatial, status.df = example.results$status.df, FALSE),
 		warning = function(w) stop ("Warning in printProgression:", w))
 
 	expect_true(file.exists(paste0(tempdir(), "/mb_efficiency.svg")))
@@ -42,12 +48,15 @@ test_that("printProgression can handle two arrays", {
 	if (file.exists(paste0(tempdir(), "/mb_efficiency.svg")))
 		file.remove(paste0(tempdir(), "/mb_efficiency.svg"))
 
-	sections <- c("River")
+	xspatial <- example.spatial
+	xspatial$Section <- as.character(xspatial$Section)
+	xspatial$Section[1:(nrow(xspatial) - 1)] <- "River"
+	xspatial$Section <- as.factor(xspatial$Section)
 
 	dot <- readDot(string = "River1 -- River2")
 
-	tryCatch(printProgression(dot, sections, overall.CJS = example.results$overall.CJS,
-		spatial = example.results$spatial, status.df = example.results$status.df, FALSE),
+	tryCatch(printProgression(dot, overall.CJS = example.results$overall.CJS,
+		spatial = xspatial, status.df = example.results$status.df, FALSE),
 		warning = function(w) stop ("Warning in printProgression:", w))
 
 	expect_true(file.exists(paste0(tempdir(), "/mb_efficiency.svg")))
@@ -60,11 +69,14 @@ test_that("printDot can handle over eight sections", {
 	if (file.exists(paste0(tempdir(), "/mb_arrays.svg")))
 		file.remove(paste0(tempdir(), "/mb_arrays.svg"))
 
-	sections <- c("River0", "River1", "River2", "River3", "River4", "River5", "River6", "Fjord1", "Fjord2", "Sea")
+	xspatial <- example.spatial
+	xspatial$Section <- as.character(xspatial$Section)
+	xspatial$Section[1:(nrow(xspatial) - 1)] <- xspatial$Array[1:(nrow(xspatial) - 1)]
+	xspatial$Section <- as.factor(xspatial$Section)
 
 	dot <- readDot(string = paste(unique(example.results$spatial$stations$Array), collapse = " -- "))
 
-	tryCatch(printDot(dot, sections, spatial = example.results$spatial, FALSE),
+	tryCatch(printDot(dot, spatial = xspatial, FALSE),
 		warning = function(w) stop ("Warning in printDot:", w))
 
 	expect_true(file.exists(paste0(tempdir(), "/mb_arrays.svg")))
@@ -74,11 +86,15 @@ test_that("printDot can handle only one array", {
 	if (file.exists(paste0(tempdir(), "/mb_arrays.svg")))
 		file.remove(paste0(tempdir(), "/mb_arrays.svg"))
 
-	sections <- c("River")
+	xspatial <- example.spatial
+	xspatial$Section <- as.character(xspatial$Section)
+	xspatial$Section[1:(nrow(xspatial) - 1)] <- "River"
+	xspatial$Section <- as.factor(xspatial$Section)
+
 
 	dot <- readDot(string = "River1 -- River1")
 
-	tryCatch(printDot(dot, sections, spatial = example.results$spatial, FALSE),
+	tryCatch(printDot(dot, spatial = xspatial, FALSE),
 		warning = function(w) stop ("Warning in printDot:", w))
 
 	expect_true(file.exists(paste0(tempdir(), "/mb_arrays.svg")))
@@ -88,17 +104,19 @@ test_that("printDot can handle two arrays", {
 	if (file.exists(paste0(tempdir(), "/mb_arrays.svg")))
 		file.remove(paste0(tempdir(), "/mb_arrays.svg"))
 
-	sections <- c("River")
+	xspatial <- example.spatial
+	xspatial$Section <- as.character(xspatial$Section)
+	xspatial$Section[1:(nrow(xspatial) - 1)] <- "River"
+	xspatial$Section <- as.factor(xspatial$Section)
+
 
 	dot <- readDot(string = "River1 -- River2")
 
-	tryCatch(printDot(dot, sections, spatial = example.results$spatial, FALSE),
+	tryCatch(printDot(dot, spatial = xspatial, FALSE),
 		warning = function(w) stop ("Warning in printDot:", w))
 
 	expect_true(file.exists(paste0(tempdir(), "/mb_arrays.svg")))
 })
-
-
 
 ## printBiometrics
 
