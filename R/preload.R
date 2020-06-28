@@ -25,7 +25,7 @@
 #' spatial <- read.csv(paste0(aux, "/example_spatial.csv"))
 #' detections <- read.csv(paste0(aux, "/example_detections.csv"))
 #'
-#' dot <- "River0--River1--River2--River3--River4--River5--River6--Fjord1--Fjord2--Sea1"
+#' dot <- "A0--A1--A2--A3--A4--A5--A6--A7--A8--A9"
 #'
 #' # Now that we have the R objects created, we can run preload:
 #'
@@ -52,7 +52,7 @@
 #' }
 #'
 preload <- function(biometrics, spatial, deployments, detections, dot, distances, tz,
-  start.time = NULL, stop.time = NULL, sections = NULL, exclude.tags = NULL,
+  start.time = NULL, stop.time = NULL, section.order = NULL, exclude.tags = NULL,
   disregard.parallels = FALSE, discard.orphans = FALSE) {
 
   if (is.na(match(tz, OlsonNames())))
@@ -61,8 +61,8 @@ preload <- function(biometrics, spatial, deployments, detections, dot, distances
   if (!is.null(exclude.tags) && any(!grepl("-", exclude.tags, fixed = TRUE)))
     stop("Not all contents in 'exclude.tags' could be recognized as tags (i.e. 'codespace-signal'). Valid examples: 'R64K-1234', A69-1303-1234'\n", call. = FALSE)
 
-  if (!is.null(sections))
-    checkSectionsUnique(sections = sections)
+  if (!is.null(section.order) && any(table(section.order) > 1))
+    stop("Some section names are duplicated in the 'section.order' argument. Please include each section only once.\n", call. = FALSE)
 
   bio <- loadBio(input = biometrics, tz = tz)
 
@@ -71,7 +71,8 @@ preload <- function(biometrics, spatial, deployments, detections, dot, distances
   deployments <- loadDeployments(input = deployments, tz = tz)
   checkDeploymentTimes(input = deployments) # check that receivers are not deployed before being retrieved
 
-  spatial <- loadSpatial(input = spatial)
+  spatial <- loadSpatial(input = spatial, section.order = section.order)
+
   deployments <- checkDeploymentStations(input = deployments, spatial = spatial) # match Station.name in the deployments to Station.name in spatial, and vice-versa
   deployments <- createUniqueSerials(input = deployments) # Prepare serial numbers to overwrite the serials in detections
 
@@ -90,12 +91,12 @@ preload <- function(biometrics, spatial, deployments, detections, dot, distances
       aux <- unique(spatial$Array[spatial$Type == "Hydrophone"])
       fakedot <- paste(aux, "--", aux)
     }
-    recipient <- loadDot(string = fakedot, spatial = spatial, sections = sections, disregard.parallels = disregard.parallels)
+    recipient <- loadDot(string = fakedot, spatial = spatial, disregard.parallels = disregard.parallels)
   } else {
   	if (!is.character(dot))
   		stop("'dot' was set but could not recognised as a string. Please prepare a dot string and include it in the dot argument.\nYou can use readDot to check the quality of your dot string.", call. = FALSE)
   	else
-  		recipient <- loadDot(string = dot, spatial = spatial, sections = sections, disregard.parallels = disregard.parallels)
+  		recipient <- loadDot(string = dot, spatial = spatial, disregard.parallels = disregard.parallels)
   }
   dot <- recipient$dot
   arrays <- recipient$arrays
@@ -111,9 +112,8 @@ preload <- function(biometrics, spatial, deployments, detections, dot, distances
     first.array <- names(arrays)[unlist(lapply(arrays, function(a) is.null(a$before)))]
   else
     first.array <- NULL
-  recipient <- transformSpatial(spatial = spatial, bio = bio, sections = sections, arrays = arrays, dotmat = dotmat, first.array = first.array) # Finish structuring the spatial file
-  spatial <- recipient$spatial
-  sections <- recipient$sections
+  spatial <- transformSpatial(spatial = spatial, bio = bio, arrays = arrays, dotmat = dotmat, first.array = first.array) # Finish structuring the spatial file
+
   detections$Array <- factor(detections$Array, levels = unlist(spatial$array.order)) # Fix array levels
   link <- match(unlist(spatial$array.order), names(arrays))
   arrays <- arrays[link] # Reorder arrays by spatial order
@@ -149,7 +149,7 @@ preload <- function(biometrics, spatial, deployments, detections, dot, distances
   detections.list <- checkDetectionsBeforeRelease(input = detections.list, bio = bio, discard.orphans = discard.orphans)
   appendTo(c("Screen", "Report"), "M: Data successfully imported!")
 
-  output <- list(bio = bio, sections = sections, deployments = deployments, spatial = spatial, dot = dot,
+  output <- list(bio = bio, deployments = deployments, spatial = spatial, dot = dot,
    arrays = arrays, dotmat = dotmat, dist.mat = dist.mat, invalid.dist = invalid.dist,
    detections.list = detections.list, paths = paths, disregard.parallels = disregard.parallels, tz = tz)
 

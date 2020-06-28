@@ -4,12 +4,12 @@
 \alias{printLastSection}
 \title{Print a simple barplot with the number of fish last seen at each section}
 \usage{
-printLastSection(input, sections)
+printLastSection(input, spatial)
 }
 \arguments{
 \item{input}{a table with the last seen data}
 
-\item{sections}{the order of the sections}
+\item{spatial}{The spatial data list.}
 }
 \value{
 No return value, called to plot and save graphic.

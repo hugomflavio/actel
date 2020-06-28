@@ -7,7 +7,7 @@ setwd("exampleWorkspace")
 write.csv(example.distances, "distances.csv")
 
 study.data <- suppressWarnings(loadStudyData(tz = "Europe/Copenhagen", start.time = NULL,
-	stop.time = NULL, sections = NULL, exclude.tags = NULL))
+	stop.time = NULL, section.order = NULL, exclude.tags = NULL))
 detections.list <- study.data$detections.list
 bio <- study.data$bio
 spatial <- study.data$spatial
@@ -34,7 +34,7 @@ test_that("checkMinimumN reacts as expected", {
 	xmoves[[1]] <- xmoves[[1]][1, ]
 	xmoves[[1]]$Detections <- 1
   expect_warning(output <- checkMinimumN(movements = xmoves[[1]], fish = "test", minimum.detections = 2),
-  	"Fish test only has one movement event (River1) with 1 detections. Considered invalid.", fixed = TRUE)
+  	"Fish test only has one movement event (A1) with 1 detections. Considered invalid.", fixed = TRUE)
   expect_false(output$Valid)
   output <- checkMinimumN(movements = xmoves[[2]], fish = "test", minimum.detections = 2)
   expect_true(all(output$Valid))
@@ -42,10 +42,10 @@ test_that("checkMinimumN reacts as expected", {
 
 test_that("checkImpassables reacts as expected", {
  	xdotmat <- dotmat
- 	xdotmat["River1", "River2"] <- NA
+ 	xdotmat["A1", "A2"] <- NA
   expect_error(
   	expect_warning(output <- checkImpassables(movements = moves[[1]], fish = "test", dotmat = xdotmat, GUI = "never"),
-  		"Fish test made an impassable jump: It is not possible to go from array River1 to River2.", fixed = TRUE), 	
+  		"Fish test made an impassable jump: It is not possible to go from array A1 to A2.", fixed = TRUE), 	
 		"Preventing analysis from entering interactive mode in a non-interactive session.", fixed = TRUE)
 })
 # 1
@@ -55,37 +55,37 @@ test_that("checkImpassables reacts as expected", {
 test_that("checkJumpDistance reacts as expected", {
 	# jump from release to first event
 	xmoves <- moves[[1]]
-	xmoves$Array[1] <- "River3"
-	expect_warning(checkJumpDistance(movements = xmoves, release = "River1", fish = "test", dotmat = dotmat,
+	xmoves$Array[1] <- "A3"
+	expect_warning(checkJumpDistance(movements = xmoves, release = "A1", fish = "test", dotmat = dotmat,
 	                          jump.warning = 1, jump.error = Inf, GUI = "never"),
-	"Fish test jumped through 2 arrays from release to first valid event (Release -> River3).", fixed = TRUE)
+	"Fish test jumped through 2 arrays from release to first valid event (Release -> A3).", fixed = TRUE)
 
 	# jump from release because first event is invalid
 	xmoves <- moves[[1]]
 	xmoves$Valid[1] <- FALSE
-	expect_warning(checkJumpDistance(movements = xmoves, release = "River1", fish = "test", dotmat = dotmat,
+	expect_warning(checkJumpDistance(movements = xmoves, release = "A1", fish = "test", dotmat = dotmat,
 	                          jump.warning = 1, jump.error = Inf, GUI = "never"),
-	"Fish test jumped through 1 array from release to first valid event (Release -> River2).", fixed = TRUE)
+	"Fish test jumped through 1 array from release to first valid event (Release -> A2).", fixed = TRUE)
 
 	# jump from first to second event
 	xmoves <- moves[[1]]
-	xmoves$Array[2] <- "River3"
-	expect_warning(checkJumpDistance(movements = xmoves, release = "River1", fish = "test", dotmat = dotmat,
+	xmoves$Array[2] <- "A3"
+	expect_warning(checkJumpDistance(movements = xmoves, release = "A1", fish = "test", dotmat = dotmat,
 	                          jump.warning = 1, jump.error = Inf, GUI = "never"),
-	"Fish test jumped through 1 array in valid events 1 -> 2 (River1 -> River3)", fixed = TRUE)
+	"Fish test jumped through 1 array in valid events 1 -> 2 (A1 -> A3)", fixed = TRUE)
 	
 	# jump from first to third because second is invalid
 	xmoves <- moves[[1]]
 	xmoves$Array[2] <- "Unknown"
 	xmoves$Valid[2] <- FALSE
-	expect_warning(checkJumpDistance(movements = xmoves, release = "River1", fish = "test", dotmat = dotmat,
+	expect_warning(checkJumpDistance(movements = xmoves, release = "A1", fish = "test", dotmat = dotmat,
 	                          jump.warning = 1, jump.error = Inf, GUI = "never"),
-	"Fish test jumped through 1 array in valid events 1 -> 2 (River1 -> River3)", fixed = TRUE)
+	"Fish test jumped through 1 array in valid events 1 -> 2 (A1 -> A3)", fixed = TRUE)
 
 	# Impassable jump exception
 	xdotmat <- dotmat
- 	xdotmat["River1", "River2"] <- NA
-	expect_error(checkJumpDistance(movements = moves[[1]], release = "River1", fish = "test", dotmat = xdotmat,
+ 	xdotmat["A1", "A2"] <- NA
+	expect_error(checkJumpDistance(movements = moves[[1]], release = "A1", fish = "test", dotmat = xdotmat,
 	                          jump.warning = 1, jump.error = Inf, GUI = "never"),
 	"There are unresolved impassable jumps in the movements.", fixed = TRUE)
 
@@ -99,13 +99,13 @@ test_that("checkSpeeds reacts as expected.", {
 	xmoves$Average.speed.m.s[1] <- 3
 	expect_warning(output <- checkSpeeds(movements = xmoves, fish = "test", valid.movements = xmoves,
     speed.warning = 3, speed.error = Inf, GUI = "never"),
-	"Fish test had an average speed of 3 m/s from release to first valid event (Release -> River1)", fixed = TRUE)
+	"Fish test had an average speed of 3 m/s from release to first valid event (Release -> A1)", fixed = TRUE)
 	expect_equal(output, xmoves)
 
 	# speed warning between movements
 	expect_warning(output <- checkSpeeds(movements = moves[[1]], fish = "test", valid.movements = moves[[1]],
     speed.warning = 2, speed.error = Inf, GUI = "never"),
-	"Fish test had an average speed of 2.12 m/s from valid event 4 to 5 (River4 -> River5)", fixed = TRUE)
+	"Fish test had an average speed of 2.12 m/s from valid event 4 to 5 (A4 -> A5)", fixed = TRUE)
 	expect_equal(output, moves[[1]])
 
 	# no warnings, runs smoothly
@@ -119,13 +119,13 @@ test_that("checkInactiveness reacts as expected.", {
   # With distances
   expect_warning(output <- checkInactiveness(movements = xmoves, fish = "test", detections.list = detections.list[[1]],
     inactive.warning = 1, inactive.error = Inf, dist.mat = dist.mat, invalid.dist = invalid.dist, GUI = "never"),
-  "Fish test was detected 292 times at stations less than 1.5 km apart in array 'Fjord1' (St.9, St.10, St.11), over 2.57 days and then disappeared. Could it be inactive?", fixed = TRUE)
+  "Fish test was detected 292 times at stations less than 1.5 km apart in array 'A7' (St.9, St.10, St.11), over 2.57 days and then disappeared. Could it be inactive?", fixed = TRUE)
   expect_equal(output, xmoves)
 
   # Without distances
   expect_warning(output <- checkInactiveness(movements = xmoves, fish = "test", detections.list = detections.list[[1]],
     inactive.warning = 1, inactive.error = Inf, dist.mat = dist.mat, invalid.dist = TRUE, GUI = "never"),
-  "Fish test was detected 292 times at three or less stations of array 'Fjord1' (St.9, St.10, St.11) over 2.57 days and then disappeared. Could it be inactive?", fixed = TRUE)
+  "Fish test was detected 292 times at three or less stations of array 'A7' (St.9, St.10, St.11) over 2.57 days and then disappeared. Could it be inactive?", fixed = TRUE)
   expect_equal(output, xmoves)
 
   # no warnings
@@ -141,13 +141,13 @@ test_that("checkInactiveness reacts as expected.", {
 })
 
 test_that("checkUpstream reacts as expected.", {
-  tryCatch(x <- checkUpstream(movements = moves[[1]], fish = "test", release = "River1", arrays = arrays, GUI = "never"),
+  tryCatch(x <- checkUpstream(movements = moves[[1]], fish = "test", release = "A1", arrays = arrays, GUI = "never"),
     warning = function(w) stop("A warning was issued where it should not have been."))
-  expect_warning(checkUpstream(movements = moves[[1]], fish = "test", release = "River2", arrays = arrays, GUI = "never"),
-    "Fish test was detected in an array that is not after its release site! Opening relevant data for inspection.\nExpected first array: River2", fixed = TRUE)
+  expect_warning(checkUpstream(movements = moves[[1]], fish = "test", release = "A2", arrays = arrays, GUI = "never"),
+    "Fish test was detected in an array that is not after its release site! Opening relevant data for inspection.\nExpected first array: A2", fixed = TRUE)
   xmoves <- moves[[1]]
   xmoves$Valid <- FALSE
-  tryCatch(output <- checkUpstream(movements = xmoves, fish = "test", release = "River2", arrays = arrays, GUI = "never"),
+  tryCatch(output <- checkUpstream(movements = xmoves, fish = "test", release = "A2", arrays = arrays, GUI = "never"),
     warning = function(w) stop("A warning was issued where it should not have been."))
   expect_equal(output, xmoves)
 })

@@ -44,7 +44,7 @@ The migration() functions builds on the same principles as the explore() functio
 migration() has the same arguments as explore(), and includes a set of new arguments aimed to fine tune the migration-related metrics. Like with explore, you *do not need to start working with all arguments right away.* For simple study areas, defining the `tz` and `sections` arguments is enough to get you going!
 
 ```r
-migration(tz = "Europe/Copenhagen", sections = c("River", "Fjord", "Sea"))
+migration(tz = "Europe/Copenhagen")
 ```
 
 
@@ -53,7 +53,7 @@ migration(tz = "Europe/Copenhagen", sections = c("River", "Fjord", "Sea"))
 Study areas can differ considerably. The arguments within migration() allow you to capture that diversity!
 
 ```r
-migration(tz, sections, success.arrays = NULL, max.interval = 60, minimum.detections = 2, 
+migration(tz, section.order = NULL, success.arrays = NULL, max.interval = 60, minimum.detections = 2, 
   start.time = NULL, stop.time = NULL, speed.method = c("last to first", "first to first"), 
   speed.warning = NULL, speed.error = NULL, jump.warning = 2, jump.error = 3, 
   inactive.warning = NULL, inactive.error = NULL, exclude.tags = NULL, override = NULL, report = FALSE,
@@ -63,11 +63,11 @@ migration(tz, sections, success.arrays = NULL, max.interval = 60, minimum.detect
 
 Below are listed only new arguments that do not exist in [explore](b-0_explore.html#general-arguments). 
 
-### sections
+### section.order
 
-For the `migration()` analysis, the study area sections must be set in the order that you expect your fish will cross them. I.e. if you expect your fish to move from the river, to a fjord and ultimately to the sea (and you have receivers in all these ecosystems), then `sections = c("River", "Fjord", "Sea")`. 
+For the `migration()` analysis, the order of the study area sections must reflect the expected order in which your fish will cross them. If a `section.order` is not provided, actel will order the sections by their appearance in the spatial.csv file. However, if you want to alter this default order, you can specify a given order using this argument. E.g. if you expect your fish to move from the river, to a fjord and ultimately to the sea (and you have receivers in all these ecosystems), then `section.order = c("River", "Fjord", "Sea")`. 
 
-In the other hand, if you expect your fish to migrate upstream, then `sections = c("Sea", "Fjord", "River")`. To learn more about how to organise your study area in an actel-friendly way, have a look at [this manual page.](a-1_study_area.html)
+In the other hand, if you expect your fish to migrate upstream, then `section.order = c("Sea", "Fjord", "River")`. To learn more about how to organise your study area in an actel-friendly way, have a look at [this manual page.](a-1_study_area.html)
 
 
 ### success.arrays

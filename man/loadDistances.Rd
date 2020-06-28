@@ -4,7 +4,7 @@
 \alias{loadDistances}
 \title{Load distances matrix}
 \usage{
-loadDistances(input, spatial)
+loadDistances(input = "distances.csv", spatial)
 }
 \arguments{
 \item{input}{A matrix of distances, to be loaded rather than a file.}

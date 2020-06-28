@@ -18,7 +18,7 @@ Produces template files and folders required to run the \code{\link{explore}},
 }
 \examples{
 \donttest{
-# running createWorkspace deploys template 
+# running createWorkspace deploys template
 # files to a directory specified by the user
 createWorkspace(paste0(tempdir(), "/createWorkspace_example"))
 }

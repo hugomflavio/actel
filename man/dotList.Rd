@@ -4,14 +4,12 @@
 \alias{dotList}
 \title{Break the dot data frame into a list}
 \usage{
-dotList(input, sections = NULL)
+dotList(input, spatial)
 }
 \arguments{
 \item{input}{a dot data frame}
 
-\item{sections}{The sections in which the study area is divided. Must be
-coincident with the names given to the arrays. See the vignettes for more
-details.}
+\item{spatial}{The spatial data frame}
 }
 \value{
 A list containing detailed information on the arrays

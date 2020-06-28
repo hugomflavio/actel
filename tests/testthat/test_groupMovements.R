@@ -7,7 +7,7 @@ setwd("exampleWorkspace")
 write.csv(example.distances, "distances.csv")
 
 study.data <- suppressWarnings(loadStudyData(tz = "Europe/Copenhagen", start.time = NULL,
-	stop.time = NULL, sections = NULL, exclude.tags = NULL))
+	stop.time = NULL, exclude.tags = NULL))
 # n
 detections.list <- study.data$detections.list
 bio <- study.data$bio

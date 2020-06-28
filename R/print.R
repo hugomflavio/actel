@@ -26,9 +26,11 @@ gg_colour_hue <- function(n) {
 #'
 #' @keywords internal
 #'
-printProgression <- function(dot, sections, overall.CJS, spatial, status.df, print.releases) {
+printProgression <- function(dot, overall.CJS, spatial, status.df, print.releases) {
   cbPalette <- c("#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7", "#999999")
   names(cbPalette) <- c("Orange", "Blue", "Green", "Yellow", "Darkblue", "Darkorange", "Pink", "Grey")
+
+  sections <- names(spatial$array.order)
 
   # Prepare node data frame
   diagram_nodes <- data.frame(
@@ -36,18 +38,23 @@ printProgression <- function(dot, sections, overall.CJS, spatial, status.df, pri
   original.label = unique(unlist(dot[, c(1, 3)])),
   label = unique(unlist(dot[, c(1, 3)])),
   stringsAsFactors = FALSE)
-  if (length(sections) <= length(cbPalette)) {
+
+  if (length(sections) > 1) {
+    if (length(sections) <= length(cbPalette))
+      to.fill <- cbPalette
+    else
+      to.fill <- gg_colour_hue(length(sections))
+
     diagram_nodes$fillcolor <- rep(NA_character_, nrow(diagram_nodes))
+    
     for (i in 1:length(sections)) {
-       diagram_nodes$fillcolor[grepl(sections[i], diagram_nodes$label)] <- cbPalette[i]
+      arrays <- spatial$array.order[[i]]
+      diagram_nodes$fillcolor[matchl(diagram_nodes$label, arrays)] <- to.fill[i]
     }
   } else {
-    diagram_nodes$fillcolor <- rep(NA_character_, nrow(diagram_nodes))
-    new.fill <- gg_colour_hue(length(sections))
-    for (i in 1:length(sections)) {
-       diagram_nodes$fillcolor[grepl(sections[i], diagram_nodes$label)] <- new.fill[i]
-    }
+    diagram_nodes$fillcolor <- rep("#56B4E9", nrow(diagram_nodes))
   }
+
   for (i in 1:nrow(diagram_nodes)) {
     link <- grep(diagram_nodes$label[i], names(overall.CJS$absolutes))
     diagram_nodes$label[i] <- paste0(diagram_nodes$label[i],
@@ -172,7 +179,7 @@ printProgression <- function(dot, sections, overall.CJS, spatial, status.df, pri
 #'
 #' @keywords internal
 #'
-printDot <- function(dot, sections = NULL, spatial, print.releases) {
+printDot <- function(dot, spatial, print.releases) {
 # requires:
 # DiagrammeR
 # DiagrammeRsvg
@@ -180,24 +187,24 @@ printDot <- function(dot, sections = NULL, spatial, print.releases) {
   cbPalette <- c("#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7", "#999999")
   names(cbPalette) <- c("Orange", "Blue", "Green", "Yellow", "Darkblue", "Darkorange", "Pink", "Grey")
 
+  sections <- names(spatial$array.order)
   # Prepare node data frame
   diagram_nodes <- data.frame(
     id = 1:length(unique(unlist(dot[, c(1, 3)]))),
     label = unique(unlist(dot[, c(1, 3)])),
     stringsAsFactors = FALSE)
 
-  if (!is.null(sections)) {
-    if (length(sections) <= length(cbPalette)) {
-      diagram_nodes$fillcolor <- rep(NA_character_, nrow(diagram_nodes))
-      for (i in 1:length(sections)) {
-         diagram_nodes$fillcolor[grepl(sections[i], diagram_nodes$label)] <- cbPalette[i]
-      }
-    } else {
-      diagram_nodes$fillcolor <- rep(NA_character_, nrow(diagram_nodes))
-      new.fill <- gg_colour_hue(length(sections))
-      for (i in 1:length(sections)) {
-         diagram_nodes$fillcolor[grepl(sections[i], diagram_nodes$label)] <- new.fill[i]
-      }
+  if (length(sections) > 1) {
+    if (length(sections) <= length(cbPalette))
+      to.fill <- cbPalette
+    else
+      to.fill <- gg_colour_hue(length(sections))
+
+    diagram_nodes$fillcolor <- rep(NA_character_, nrow(diagram_nodes))
+    
+    for (i in 1:length(sections)) {
+      arrays <- spatial$array.order[[i]]
+      diagram_nodes$fillcolor[matchl(diagram_nodes$label, arrays)] <- to.fill[i]
     }
   } else {
     diagram_nodes$fillcolor <- rep("#56B4E9", nrow(diagram_nodes))
@@ -1266,12 +1273,14 @@ printSectionTimes <- function(section.times, bio, detections) {
 #'
 #' @keywords internal
 #'
-printGlobalRatios <- function(global.ratios, daily.ratios, sections) {
+printGlobalRatios <- function(global.ratios, daily.ratios, spatial) {
   Date <- NULL
   Location <- NULL
   n <- NULL
   cbPalette <- c("#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7", "#999999")
   names(cbPalette) <- c("Orange", "Blue", "Green", "Yellow", "Darkblue", "Darkorange", "Pink", "Grey")
+
+  sections <- names(spatial$array.order)
 
   unordered.unique.values <- sort(unique(unlist(lapply(daily.ratios, function(x) {
     aux <- which(grepl("^p", colnames(x)))
@@ -1312,12 +1321,13 @@ printGlobalRatios <- function(global.ratios, daily.ratios, sections) {
 #'
 #' @param ratios the daily ratios
 #' @param dayrange the overall first and last detection dates
-#'
+#' @inheritParams sectionMovements
+#' 
 #' @return A string of file locations in rmd syntax, to be included in printRmd
 #'
 #' @keywords internal
 #'
-printIndividualResidency <- function(ratios, dayrange, sections) {
+printIndividualResidency <- function(ratios, dayrange, spatial) {
   Date <- NULL
   Location <- NULL
   n <- NULL
@@ -1325,6 +1335,8 @@ printIndividualResidency <- function(ratios, dayrange, sections) {
   names(cbPalette) <- c("Orange", "Blue", "Green", "Yellow", "Darkblue", "Darkorange", "Pink", "Grey")
   counter <- 0
   individual.plots <- NULL
+
+  sections <- names(spatial$array.order)
 
   unordered.unique.values <- sort(unique(unlist(lapply(ratios, function(x) {
     aux <- which(grepl("^p", colnames(x)))
@@ -1383,13 +1395,13 @@ printIndividualResidency <- function(ratios, dayrange, sections) {
 #' Print a simple barplot with the number of fish last seen at each section
 #'
 #' @param input a table with the last seen data
-#' @param sections the order of the sections
+#' @inheritParams sectionMovements
 #'
 #' @return No return value, called to plot and save graphic.
 #'
 #' @keywords internal
 #'
-printLastSection <- function(input, sections) {
+printLastSection <- function(input, spatial) {
   Section <- NULL
   n <- NULL
   cbPalette <- c("#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7", "#999999")
@@ -1397,7 +1409,8 @@ printLastSection <- function(input, sections) {
   input$Group <- rownames(input)
   plotdata <- suppressMessages(reshape2::melt(input))
   colnames(plotdata) <- c("Group", "Section", "n")
-  plotdata$Section <- factor(gsub("Disap. in |Disap. at ", "", plotdata$Section), levels = c(sections, "Release"))
+  plotdata$Section <- factor(gsub("Disap. in |Disap. at ", "", plotdata$Section), 
+                             levels = c(names(spatial$array.order), "Release"))
   p <- ggplot2::ggplot(plotdata, ggplot2::aes(x = Section, y = n))
   p <- p + ggplot2::geom_bar(stat = "identity", fill = cbPalette[[2]], colour = "transparent")
   p <- p + ggplot2::facet_grid(. ~ Group)

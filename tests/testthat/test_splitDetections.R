@@ -22,7 +22,6 @@ test_that("splitDetections' output is as expected", {
 	expect_true(any(grepl("Transmitter", colnames(output$bio))))
 	expect_equal(length(output$detections), sum(!is.na(output$bio$Transmitter)))
 })
-# n
 
 test_that("splitDetections excludes tags as requested.", {
 	expect_message(output <- splitDetections(detections = detections, bio = bio, exclude.tags = "R64K-4451"),
@@ -55,7 +54,7 @@ test_that("splitDetections can handle multi-sensor tags", {
 	xbio$Signal[1] <- "4453|4454"
 	tryCatch(output <- splitDetections(detections = detections, bio = xbio), warning = function(w) stop("A warning was produced where it should not have been.", call = FALSE))
 	expect_equal(output$bio$Transmitter[1], "R64K-4453")
-	expect_equal(unique(output$detections.list[[1]]$Signal), c("4454", "4453"))
+	expect_equal(unique(output$detections.list[[1]]$Signal), c(4454, 4453))
 	expect_equal(names(output$detections.list)[1], "R64K-4453")
 
 	xbio$Sensor.unit <- ""

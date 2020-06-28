@@ -22,8 +22,8 @@ Convert a data frame with timestamps into a list of circular objects
 \examples{
 # create dummy input data frame.
 # Note: the names of the columns are irrelevant.
-x <- data.frame(ID = c(1:5), 
- Group = c("A", "A", "B", "B", "B"), 
+x <- data.frame(ID = c(1:5),
+ Group = c("A", "A", "B", "B", "B"),
  A1 = as.POSIXct(
    c("2019-01-03 11:21:12",
      "2019-01-04 12:22:21",

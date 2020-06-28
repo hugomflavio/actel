@@ -6,10 +6,8 @@ exampleWorkspace("exampleWorkspace")
 setwd("exampleWorkspace")
 write.csv(example.distances, "distances.csv")
 
-sections <- c("River", "Fjord", "Sea")
-
 study.data <- suppressWarnings(loadStudyData(tz = "Europe/Copenhagen", start.time = NULL,
-	stop.time = NULL, sections = sections, exclude.tags = NULL))
+	stop.time = NULL, section.order = c("River", "Fjord", "Sea"), exclude.tags = NULL))
 detections.list <- study.data$detections.list
 bio <- study.data$bio
 spatial <- study.data$spatial
@@ -41,17 +39,17 @@ vm[[1]] <- vm[[1]][-18, ]
 secmoves <- lapply(seq_along(vm), function(i) {
   fish <- names(vm)[i]
   appendTo("debug", paste0("debug: Compiling valid section movements for fish ", fish,"."))
-  output <- sectionMovements(movements = vm[[i]], sections = sections, invalid.dist = invalid.dist)
+  output <- sectionMovements(movements = vm[[i]], spatial = spatial, invalid.dist = invalid.dist)
   return(output)
 })
 names(secmoves) <- names(vm)
 
-timetable <- assembleTimetable(secmoves = secmoves, valid.moves = vm, all.moves = xmoves, sections = sections,
+timetable <- assembleTimetable(secmoves = secmoves, valid.moves = vm, all.moves = xmoves, spatial = spatial,
   arrays = arrays, dist.mat = dist.mat, invalid.dist = invalid.dist, speed.method = "last to first",
-  if.last.skip.section = TRUE, success.arrays = "Sea1", bio = bio, tz = "Europe/Copenhagen")
+  if.last.skip.section = TRUE, success.arrays = "A9", bio = bio, tz = "Europe/Copenhagen")
 
 status.df <- assembleOutput(timetable = timetable, bio = bio, spatial = spatial,
-  sections = sections, dist.mat = dist.mat, invalid.dist = invalid.dist, tz = "Europe/Copenhagen")
+  dist.mat = dist.mat, invalid.dist = invalid.dist, tz = "Europe/Copenhagen")
 
 
 test_that("assembleMatrices works as expected", {
@@ -88,7 +86,7 @@ test_that("assembleMatrices works as expected", {
 
 test_that("breakMatricesByArray works as expected.", {
   expect_warning(output <- breakMatricesByArray(m = the.matrices, arrays = arrays, type = "peers"),
-  	"No fish passed through array River0. Skipping efficiency estimations for this array.", fixed = TRUE)
+  	"No fish passed through array A0. Skipping efficiency estimations for this array.", fixed = TRUE)
 
   m.by.array <<- output
 
@@ -115,14 +113,14 @@ test_that("breakMatricesByArray works as expected.", {
 	})
 
   expect_warning(output <- breakMatricesByArray(m = the.matrices, arrays = arrays, type = "all"),
-  	"No fish passed through array River0. Skipping efficiency estimations for this array.", fixed = TRUE)
+  	"No fish passed through array A0. Skipping efficiency estimations for this array.", fixed = TRUE)
 
   xmatrices <- the.matrices
-  xmatrices[[1]][, "Sea1"] <- 0
-	xmatrices[[2]][, "Sea1"] <- 0
+  xmatrices[[1]][, "A9"] <- 0
+	xmatrices[[2]][, "A9"] <- 0
 
 	expect_warning(output <- breakMatricesByArray(m = xmatrices, arrays = arrays, type = "all"),
-  	"No fish passed through any of the efficiency peers of array Fjord2. Skipping efficiency estimations for this array.", fixed = TRUE)
+  	"No fish passed through any of the efficiency peers of array A8. Skipping efficiency estimations for this array.", fixed = TRUE)
 
   xarrays <- lapply(arrays, function(x) {
   	x$after.peers <- NULL
@@ -168,12 +166,12 @@ test_that("simpleCJS works as expected.", {
 	xm <- m.by.array[[1]][[1]]
 	xm[, 3] <- 0
 	expect_warning(simpleCJS(xm, silent = FALSE),
-		"Array 'River1' had 0% efficiency. Skipping survival estimation.", fixed = TRUE)
+		"Array 'A1' had 0% efficiency. Skipping survival estimation.", fixed = TRUE)
 
 	xm <- m.by.array[[1]][[1]]
 	xm[, 2] <- 0
 	expect_warning(simpleCJS(xm, silent = FALSE),
-		"No fish were detected at array 'River1'. Skipping survival estimation.", fixed = TRUE)
+		"No fish were detected at array 'A1'. Skipping survival estimation.", fixed = TRUE)
 
 	xm <- m.by.array[[1]][[1]]
 	xm[1:20, 2] <- 0
@@ -182,31 +180,31 @@ test_that("simpleCJS works as expected.", {
 
 	xm <- m.by.array[[1]][[1]]
 	output <- simpleCJS(xm, fixed.efficiency = c(1, 0.2, 1), silent = FALSE)
-	expect_equal(output$absolutes["estimated", "River1"], 30)
-	expect_equal(output$efficiency, c(FakeStart = 1.0, River1 = 0.2, AnyPeer = 1.0))
+	expect_equal(output$absolutes["estimated", "A1"], 30)
+	expect_equal(output$efficiency, c(FakeStart = 1.0, A1 = 0.2, AnyPeer = 1.0))
 
 	output <- simpleCJS(xm, estimate = 0, silent = FALSE)
 	expect_equal(output$absolutes["estimated", "AnyPeer"], 26)
-	expect_equal(output$efficiency, c(FakeStart = 1, River1 = 1, AnyPeer = 0))
+	expect_equal(output$efficiency, c(FakeStart = 1, A1 = 1, AnyPeer = 0))
 
 	output <- simpleCJS(xm, estimate = 0.2, silent = FALSE)
 	expect_equal(output$absolutes["estimated", "AnyPeer"], 26)
-	expect_equal(output$efficiency, c(FakeStart = 1.0, River1 = 1.0, AnyPeer = 0.2))
+	expect_equal(output$efficiency, c(FakeStart = 1.0, A1 = 1.0, AnyPeer = 0.2))
 	expect_equal(output$survival[2], 1)
 
 	output <- simpleCJS(m.by.array[[1]][[1]])
 	expect_equal(names(output), c("absolutes", "efficiency", "survival", "lambda"))
-	check <- read.csv(text = ',FakeStart,River1,AnyPeer
+	check <- read.csv(text = ',FakeStart,A1,AnyPeer
 "detected",30,26,26
 "here plus on peers",26,26,NA
 "not here but on peers",0,0,NA
 "known",30,26,26
 "estimated",30,26,NA', row.names = 1)
 	expect_equal(output$absolutes, as.matrix(check))
-	expect_equal(output$efficiency, c(FakeStart = 1, River1 = 1, AnyPeer = NA))
+	expect_equal(output$efficiency, c(FakeStart = 1, A1 = 1, AnyPeer = NA))
 
-	check <- as.matrix(read.csv(text = '"FakeStart -> River1  =",0.8666667
-"   River1 -> AnyPeer =",NA', header = FALSE, row.names = 1))
+	check <- as.matrix(read.csv(text = '"FakeStart -> A1      =",0.8666667
+"       A1 -> AnyPeer =",NA', header = FALSE, row.names = 1))
 	expect_equal(rownames(check), rownames(output$survival))
 	expect_true(check[1] - output$survival[1] < 0.000000034)
 	expect_true(is.na(output$survival[2]))
@@ -250,17 +248,17 @@ test_that("combineCJS works as expected.", {
 	output <- combineCJS(m.by.array[[1]])
 	
 	expect_equal(names(output), c("absolutes", "efficiency", "survival", "lambda"))
-	check <- read.csv(text = ',FakeStart,River1,AnyPeer
+	check <- read.csv(text = ',FakeStart,A1,AnyPeer
 "detected",60,54,54
 "here plus on peers",54,54,NA
 "not here but on peers",0,0,NA
 "known",60,54,54
 "estimated",60,54,NA', row.names = 1)
 	expect_equal(output$absolutes, as.matrix(check))
-	expect_equal(output$efficiency, c(FakeStart = 1, River1 = 1, AnyPeer = NA))
+	expect_equal(output$efficiency, c(FakeStart = 1, A1 = 1, AnyPeer = NA))
 
-	check <- as.matrix(read.csv(text = '"FakeStart -> River1  =",0.9
-"   River1 -> AnyPeer =",NA', header = FALSE, row.names = 1))
+	check <- as.matrix(read.csv(text = '"FakeStart -> A1      =",0.9
+"       A1 -> AnyPeer =",NA', header = FALSE, row.names = 1))
 	colnames(check) <- ""
 	expect_equal(check, output$survival)
 })
@@ -283,7 +281,7 @@ test_that("assembleArrayCJS works as expected.",{
 
   output <- assembleArrayCJS(mat = the.matrices, CJS = CJS.list, arrays = arrays, releases = release_nodes)
 
-	check <- read.csv(text = ',River0,River1,River2,River3,River4,River5,River6,Fjord1,Fjord2,Sea1
+	check <- read.csv(text = ',A0,A1,A2,A3,A4,A5,A6,A7,A8,A9
 "detected",0,54,54,52,52,52,52,49,44,34
 "here plus on peers",NA,54,54,50,52,52,50,43,34,NA
 "not here but on peers",NA,0,0,2,0,0,0,1,0,NA
@@ -292,7 +290,7 @@ test_that("assembleArrayCJS works as expected.",{
 
 	expect_equal(output$absolutes, check)
 
-	check <- c(River0 = NA, River1 = 1, River2 = 1, River3 = 0.96154, River4 = 1, River5 = 1, River6 = 1, Fjord1 = 0.97727, Fjord2 = 1, Sea1 = NA)
+	check <- c(A0 = NA, A1 = 1, A2 = 1, A3 = 0.96154, A4 = 1, A5 = 1, A6 = 1, A7 = 0.97727, A8 = 1, A9 = NA)
 	expect_equal(round(output$efficiency, 5), check)
 
 	overall.CJS <<- output
@@ -302,30 +300,30 @@ test_that("advEfficiency can plot overall.CJS results", {
 	expect_message(output <- round(advEfficiency(x = overall.CJS), 7),
 		"M: Some arrays were estimated to have either 0% or 100% efficiency, skipping plotting for those arrays.", fixed = TRUE)
 	check <- read.csv(text = '"","2.5%","50%","97.5%"
-"River1", 1.0000000, 1.0000000, 1.0000000
-"River2", 1.0000000, 1.0000000, 1.0000000
-"River3", 0.8955251, 0.9673092, 0.9952150
-"River4", 1.0000000, 1.0000000, 1.0000000
-"River5", 1.0000000, 1.0000000, 1.0000000
-"River6", 1.0000000, 1.0000000, 1.0000000
-"Fjord1", 0.9177889, 0.9840095, 0.9994114
-"Fjord2", 1.0000000, 1.0000000, 1.0000000
+"A1", 1.0000000, 1.0000000, 1.0000000
+"A2", 1.0000000, 1.0000000, 1.0000000
+"A3", 0.8955251, 0.9673092, 0.9952150
+"A4", 1.0000000, 1.0000000, 1.0000000
+"A5", 1.0000000, 1.0000000, 1.0000000
+"A6", 1.0000000, 1.0000000, 1.0000000
+"A7", 0.9177889, 0.9840095, 0.9994114
+"A8", 1.0000000, 1.0000000, 1.0000000
 ', row.names = 1)
 	colnames(check) <- c("2.5%","50%","97.5%")
 	expect_equal(output, check)
 })
 
 test_that("getDualMatrices throws a warning if efficiency has already been calculated", {
-	expect_warning(getDualMatrices(replicates = list(Fjord1 = c("St.10", "St.11")), CJS = overall.CJS, spatial = spatial, detections.list = detections.list),
-		"An inter-array efficiency has already been calculated for array Fjord1", fixed = TRUE)
+	expect_warning(getDualMatrices(replicates = list(A7 = c("St.10", "St.11")), CJS = overall.CJS, spatial = spatial, detections.list = detections.list),
+		"An inter-array efficiency has already been calculated for array A7", fixed = TRUE)
 })
 # n
 
 test_that("dualMatrix stops if stations that do not belong to the array are used as replicates (tested through getDualMatrices)", {
-	expect_error(getDualMatrices(replicates = list(Sea1 = c("St.14", "St.15")), CJS = overall.CJS, spatial = spatial, detections.list = detections.list),
-		"In replicates: Station St.14 is not part of Sea1 (available stations: St.15, St.16, St.17).", fixed = TRUE)
-	expect_error(getDualMatrices(replicates = list(Sea1 = c("St.13", "St.14", "St.15")), CJS = overall.CJS, spatial = spatial, detections.list = detections.list),
-		"In replicates: Stations St.13, St.14 are not part of Sea1 (available stations: St.15, St.16, St.17).", fixed = TRUE)
+	expect_error(getDualMatrices(replicates = list(A9 = c("St.14", "St.15")), CJS = overall.CJS, spatial = spatial, detections.list = detections.list),
+		"In replicates: Station St.14 is not part of A9 (available stations: St.15, St.16, St.17).", fixed = TRUE)
+	expect_error(getDualMatrices(replicates = list(A9 = c("St.13", "St.14", "St.15")), CJS = overall.CJS, spatial = spatial, detections.list = detections.list),
+		"In replicates: Stations St.13, St.14 are not part of A9 (available stations: St.15, St.16, St.17).", fixed = TRUE)
 })
 
 test_that("includeIntraArrayEstimates throws errors if expected conditions are not met", {
@@ -334,7 +332,7 @@ test_that("includeIntraArrayEstimates throws errors if expected conditions are n
 })
 
 test_that("replicate functions work as expected.", {
-  intra.array.matrices <<- getDualMatrices(replicates = list(Sea1 = c("St.16", "St.17")), CJS = overall.CJS, spatial = spatial, detections.list = detections.list)
+  intra.array.matrices <<- getDualMatrices(replicates = list(A9 = c("St.16", "St.17")), CJS = overall.CJS, spatial = spatial, detections.list = detections.list)
 
   check <- read.csv(text = '"","R1","R2"
 "R64K-4451",TRUE,TRUE
@@ -393,12 +391,12 @@ test_that("replicate functions work as expected.", {
 "R64K-4549",FALSE,FALSE
 ', row.names = 1)
 	expect_equal(intra.array.matrices[[1]], check)
-	expect_equal(names(intra.array.matrices), "Sea1")
+	expect_equal(names(intra.array.matrices), "A9")
 
   recipient <- includeIntraArrayEstimates(m = intra.array.matrices, CJS = overall.CJS)
 	expect_equal(names(recipient), c("CJS", "intra.CJS"))
 
-	check <- read.csv(text = ',River0,River1,River2,River3,River4,River5,River6,Fjord1,Fjord2,Sea1
+	check <- read.csv(text = ',A0,A1,A2,A3,A4,A5,A6,A7,A8,A9
 "detected",0,54,54,52,52,52,52,49,44,34
 "here plus on peers",NA,54,54,50,52,52,50,43,34,NA
 "not here but on peers",NA,0,0,2,0,0,0,1,0,NA
@@ -406,27 +404,26 @@ test_that("replicate functions work as expected.", {
 "estimated",NA,54,54,54,52,52,52,50,44,35', row.names = 1)	
 	expect_equal(recipient$CJS$absolutes, check)
 
-	check <- c(River0 = NA, River1 = 1, River2 = 1, River3 = 0.96154, River4 = 1, River5 = 1, River6 = 1, Fjord1 = 0.97727, Fjord2 = 1, Sea1 = 0.96774)
+	check <- c(A0 = NA, A1 = 1, A2 = 1, A3 = 0.96154, A4 = 1, A5 = 1, A6 = 1, A7 = 0.97727, A8 = 1, A9 = 0.96774)
 	expect_equal(round(recipient$CJS$efficiency, 5), check)
 
-	expect_equal(names(recipient$intra.CJS), "Sea1")
+	expect_equal(names(recipient$intra.CJS), "A9")
 
-	expect_equal(names(recipient$intra.CJS$Sea1), c("absolutes", "single.efficiency", "combined.efficiency"))
+	expect_equal(names(recipient$intra.CJS$A9), c("absolutes", "single.efficiency", "combined.efficiency"))
 
 	check <- as.matrix(read.csv(text = '"detected at R1: ",28
 "detected at R2: ",31
 "detected at both: ",24', header = FALSE, row.names = 1))
 	colnames(check) <- ""
-	expect_equal(recipient$intra.CJS$Sea1$absolutes, check)
+	expect_equal(recipient$intra.CJS$A9$absolutes, check)
 
-	expect_equal(round(recipient$intra.CJS$Sea1$single.efficiency, 5), c(R1 = 0.77419, R2 = 0.85714))
+	expect_equal(round(recipient$intra.CJS$A9$single.efficiency, 5), c(R1 = 0.77419, R2 = 0.85714))
 
-	expect_equal(round(recipient$intra.CJS$Sea1$combined.efficiency, 5), 0.96774)
+	expect_equal(round(recipient$intra.CJS$A9$combined.efficiency, 5), 0.96774)
 
 	overall.CJS <<- recipient[[1]]
 	intra.array.CJS <<- recipient[[2]]
 })
-# y
 
 test_that("advEfficiency can plot intra.array.CJS results", {
 	expect_message(output <- round(advEfficiency(intra.array.CJS[[1]]), 7),
@@ -465,14 +462,14 @@ test_that("split CJS functions work as expected.", {
   xefficiency <- overall.CJS$efficiency
   xefficiency[4] <- NA
   output <- mbSplitCJS(mat = m.by.array, fixed.efficiency = xefficiency)
-  expect_equal(round(output$A.RS1$River3$efficiency, 7), c(FakeStart = 1, River3 = 0.9615385, AnyPeer = NA))
+  expect_equal(round(output$A.RS1$A3$efficiency, 7), c(FakeStart = 1, A3 = 0.9615385, AnyPeer = NA))
 
   aux <- aux[names(the.matrices)]
   split.CJS <- assembleSplitCJS(mat = the.matrices, CJS = aux, arrays = arrays, releases = release_nodes, intra.CJS = intra.array.CJS)
 
   expect_equal(names(split.CJS), c("A.RS1", "B.RS1"))
 
-  check <- read.csv(text = '"","River0","River1","River2","River3","River4","River5","River6","Fjord1","Fjord2","Sea1"
+  check <- read.csv(text = '"","A0","A1","A2","A3","A4","A5","A6","A7","A8","A9"
 "detected",0,26,26,25,26,26,26,26,25,19
 "here plus on peers",NA,26,26,25,26,26,26,25,19,NA
 "not here but on peers",NA,0,0,1,0,0,0,0,0,NA
@@ -482,7 +479,7 @@ test_that("split CJS functions work as expected.", {
 ', row.names = 1)
   expect_equal(split.CJS[[1]], check)
 
-  check <- read.csv(text = '"","River0","River1","River2","River3","River4","River5","River6","Fjord1","Fjord2","Sea1"
+  check <- read.csv(text = '"","A0","A1","A2","A3","A4","A5","A6","A7","A8","A9"
 "detected",0,28,28,27,26,26,26,23,19,15
 "here plus on peers",NA,28,28,25,26,26,24,18,15,NA
 "not here but on peers",NA,0,0,1,0,0,0,1,0,NA
@@ -504,13 +501,13 @@ test_that("group CJS functions work as expected.", {
   xefficiency <- overall.CJS$efficiency
   xefficiency[4] <- NA
   output <- mbGroupCJS(mat = m.by.array, status.df = status.df, fixed.efficiency = xefficiency)
-  expect_equal(round(output$A$River3$efficiency, 7), c(FakeStart = 1, River3 = 0.9615385, AnyPeer = NA))
+  expect_equal(round(output$A$A3$efficiency, 7), c(FakeStart = 1, A3 = 0.9615385, AnyPeer = NA))
 
   group.CJS <- assembleGroupCJS(mat = the.matrices, CJS = aux, arrays = arrays, releases = release_nodes, intra.CJS = intra.array.CJS)
 
   expect_equal(names(group.CJS), c("A", "B"))
 
-  check <- read.csv(text = '"","River0","River1","River2","River3","River4","River5","River6","Fjord1","Fjord2","Sea1"
+  check <- read.csv(text = '"","A0","A1","A2","A3","A4","A5","A6","A7","A8","A9"
 "detected",0,26,26,25,26,26,26,26,25,19
 "here plus on peers",NA,26,26,25,26,26,26,25,19,NA
 "not here but on peers",NA,0,0,1,0,0,0,0,0,NA
@@ -520,7 +517,7 @@ test_that("group CJS functions work as expected.", {
 ', row.names = 1)
   expect_equal(group.CJS[[1]], check)
 
-  check <- read.csv(text = '"","River0","River1","River2","River3","River4","River5","River6","Fjord1","Fjord2","Sea1"
+  check <- read.csv(text = '"","A0","A1","A2","A3","A4","A5","A6","A7","A8","A9"
 "detected",0,28,28,27,26,26,26,23,19,15
 "here plus on peers",NA,28,28,25,26,26,24,18,15,NA
 "not here but on peers",NA,0,0,1,0,0,0,1,0,NA

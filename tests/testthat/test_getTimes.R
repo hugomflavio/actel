@@ -7,7 +7,7 @@ setwd("exampleWorkspace")
 write.csv(example.distances, "distances.csv")
 
 study.data <- suppressWarnings(loadStudyData(tz = "Europe/Copenhagen", start.time = NULL,
-	stop.time = NULL, sections = NULL, exclude.tags = NULL))
+	stop.time = NULL, exclude.tags = NULL))
 # n
 detections.list <- study.data$detections.list
 bio <- study.data$bio
@@ -41,45 +41,45 @@ test_that("getTimes operates correctly under all options.", {
   expect_equal(colnames(times), as.vector(c("Transmitter", "Group", unlist(spatial$array.order)[-1])))
   expect_equal(sum(grepl("R64K-4451", times$Transmitter)), 10)
   expect_equal(as.vector(table(times$Transmitter)), c(10, 5))
-  expect_equal(times$River1[1], moves[[1]]$First.time[1])
+  expect_equal(times$A1[1], moves[[1]]$First.time[1])
   # try other section
-  expect_equal(times$Fjord1[2], moves[[1]]$First.time[8])
+  expect_equal(times$A7[2], moves[[1]]$First.time[8])
 
   times <- getTimes(input = aux, move.type = "array", event.type = "arrival", n.events = "first")
   expect_equal(colnames(times), as.vector(c("Transmitter", "Group", unlist(spatial$array.order)[-1])))
   expect_equal(sum(grepl("R64K-4451", times$Transmitter)), 1)
   expect_equal(as.vector(table(times$Transmitter)), c(1, 1))
-  expect_equal(times$River2[1], moves[[1]]$First.time[2])
+  expect_equal(times$A2[1], moves[[1]]$First.time[2])
   # try second tag
-  expect_equal(times$River6[2], moves[[2]]$First.time[6])
+  expect_equal(times$A6[2], moves[[2]]$First.time[6])
  	expect_false(any(is.na(times)))
 
   times <- getTimes(input = aux, move.type = "array", event.type = "arrival", n.events = "last")
   expect_equal(colnames(times), as.vector(c("Transmitter", "Group", unlist(spatial$array.order)[-1])))
   expect_equal(sum(grepl("R64K-4451", times$Transmitter)), 1)
   expect_equal(as.vector(table(times$Transmitter)), c(1, 1))
-  expect_equal(times$River2[1], moves[[1]]$First.time[2])
+  expect_equal(times$A2[1], moves[[1]]$First.time[2])
   # try second tag
-  expect_equal(times$River6[2], moves[[2]]$First.time[6])
+  expect_equal(times$A6[2], moves[[2]]$First.time[6])
  	expect_false(any(is.na(times)))
 
   times <- getTimes(input = aux, move.type = "array", event.type = "departure", n.events = "all")
   expect_equal(colnames(times), as.vector(c("Transmitter", "Group", unlist(spatial$array.order)[-1])))
   expect_equal(sum(grepl("R64K-4451", times$Transmitter)), 10)
   expect_equal(as.vector(table(times$Transmitter)), c(10, 5))
-  expect_equal(times$River1[1], moves[[1]]$Last.time[1])
+  expect_equal(times$A1[1], moves[[1]]$Last.time[1])
   # try second tag other section
-  expect_equal(times$Fjord1[13], moves[[2]]$Last.time[9])
+  expect_equal(times$A7[13], moves[[2]]$Last.time[9])
 
   times <- getTimes(input = aux, move.type = "array", event.type = "departure", n.events = "first")
   expect_equal(colnames(times), as.vector(c("Transmitter", "Group", unlist(spatial$array.order)[-1])))
   expect_equal(sum(grepl("R64K-4451", times$Transmitter)), 1)
   expect_equal(as.vector(table(times$Transmitter)), c(1, 1))
-  expect_equal(times$River1[2], moves[[2]]$Last.time[1])
-  expect_equal(times$Fjord1[2], moves[[2]]$Last.time[7])
+  expect_equal(times$A1[2], moves[[2]]$Last.time[1])
+  expect_equal(times$A7[2], moves[[2]]$Last.time[7])
  	expect_false(any(is.na(times)))
 
-  getTimes(input = aux, location = "River1")
+  getTimes(input = aux, location = "A1")
 })
 
 setwd("..")

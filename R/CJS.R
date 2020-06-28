@@ -165,9 +165,9 @@ breakMatricesByArray <- function(m, arrays, type = c("peers", "all"), verbose = 
     if ((type == "peers" & !is.null(arrays[[i]]$after.peers)) | (type == "all" & !is.null(arrays[[i]]$all.after))) {
       # grab only relevant arrays
       if (type == "peers")
-        a.regex <- paste(c(names(arrays)[i], arrays[[i]]$after.peers), collapse = "|")
+        a.regex <- paste0("^", c(names(arrays)[i], arrays[[i]]$after.peers), "$", collapse = "|")
       else
-        a.regex <- paste(c(names(arrays)[i], arrays[[i]]$all.after), collapse = "|")
+        a.regex <- paste0("^", c(names(arrays)[i], arrays[[i]]$all.after), "$", collapse = "|")
       aux  <- lapply(m, function(m) m[, which(grepl(a.regex, colnames(m)))])
       # Failsafe in case some fish are released at one of the peers
       keep <- unlist(lapply(m, function(m) any(grepl(names(arrays)[i], colnames(m)))))

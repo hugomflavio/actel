@@ -1,3 +1,34 @@
+#' Find original station name
+#' 
+#' @param input The results of an actel analysis (either explore, migration or residency).
+#' @param station The station standard name or number.
+#' 
+#' @examples
+#' stationName(example.results, 1)
+#' 
+#' # or
+#' 
+#' stationName(example.results, "St.2")
+#' 
+#' @return The original station name
+#' 
+#' @export
+#' 
+stationName <- function(input, station) {
+  if (!inherits(input, "list"))
+    stop("Could not recognise the input as an actel results object.", call. = FALSE)
+
+  if (is.null(input$valid.movements) | is.null(input$spatial) | is.null(input$rsp.info))
+    stop("Could not recognise the input as an actel results object.", call. = FALSE)
+
+  if (is.numeric(station))
+    station <- paste0("St.", station)
+
+  link <- match(station, input$spatial$stations$Standard.name)
+
+  return(input$spatial$stations$Station.name[link])
+}
+
 #' nearsq helper
 #'
 #' Finds the largest x for which n %% x == 0
@@ -131,7 +162,7 @@ extractSignals <- function(input) {
 #' @export
 #'
 extractCodeSpaces <- function(input) {
-  sapply(input, function(x) sub("-[0-9]*$", "", x))
+  unname(sapply(input, function(x) sub("-[0-9]*$", "", x)))
 }
 
 

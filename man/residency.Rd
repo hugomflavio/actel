@@ -6,7 +6,8 @@
 \usage{
 residency(
   tz = NULL,
-  sections = NULL,
+  sections,
+  section.order = NULL,
   datapack = NULL,
   max.interval = 60,
   minimum.detections = 2,
@@ -36,9 +37,10 @@ residency(
 \item{tz}{The time zone of the study area. Must match one of the values
 present in \code{\link[base]{timezones}}.}
 
-\item{sections}{The sections in which the study area is divided. Must be
-coincident with the names given to the arrays. See the vignettes for more
-details.}
+\item{sections}{DEPRECATED - list the sections in the spatial input instead.}
+
+\item{section.order}{A vector containing the order by which sections should
+be aligned in the results.}
 
 \item{datapack}{A data bundle pre-compiled through the function \code{\link{preload}}.
 May be used to run actel analyses based on R objects, rather than input files.}
@@ -221,11 +223,11 @@ exampleWorkspace("exampleWorkspace")
 # Move your R session into the example workspace
 setwd("exampleWorkspace")
 
-# run the residency analysis. Ensure the tz argument 
+# run the residency analysis. Ensure the tz argument
 # matches the time zone of the study area and that the
-# sections match your array names. The line below works 
+# sections match your array names. The line below works
 # for the example data.
-results <- residency(tz = "Europe/Copenhagen", sections = c("River", "Fjord", "Sea"))
+results <- residency(tz = "Europe/Copenhagen")
 
 # to obtain an HTML report, run the analysis with report = TRUE
 

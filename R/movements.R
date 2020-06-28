@@ -283,12 +283,13 @@ speedReleaseToFirst <- function(fish, bio, movements, dist.mat, speed.method, in
 #'
 #' @inheritParams simplifyMovements
 #' @inheritParams migration
+#' @param spatial The spatial data list.
 #'
 #' @return A data frame containing the section movements for the target fish.
 #'
 #' @keywords internal
 #'
-sectionMovements <- function(movements, sections, invalid.dist) {
+sectionMovements <- function(movements, spatial, invalid.dist) {
   Valid <- NULL
 
   if (any(movements$Valid))
@@ -296,9 +297,11 @@ sectionMovements <- function(movements, sections, invalid.dist) {
   else
     return(NULL)
 
-  aux <- lapply(seq_along(sections), function(i) {
+
+  aux <- lapply(seq_along(spatial$array.order), function(i) {
+    arrays <- spatial$array.order[[i]]
     x <- rep(NA_character_, nrow(vm))
-    x[grepl(sections[i], vm$Array)] <- sections[i]
+    x[matchl(vm$Array, arrays)] <- names(spatial$array.order)[i]
     return(x)
   })
 

@@ -7,10 +7,10 @@
 \format{
 A data frame with 14549 rows and 4 variables:
 \describe{
-\item{Date.and.Time.UTC}{The date and time of the detections}
+\item{Timestamp}{The date and time of the detections}
 \item{Receiver}{The ALS serial number}
-\item{Transmitter}{The detected tag code space and signal}
-\item{Station.Name}{The name given to the ALS}
+\item{CodeSpace}{The code space of the detected tag}
+\item{Signal}{The signal of the detected tag}
 }
 }
 \source{

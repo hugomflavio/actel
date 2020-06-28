@@ -4,21 +4,10 @@
 \alias{printProgression}
 \title{Print progression diagram}
 \usage{
-printProgression(
-  dot,
-  sections,
-  overall.CJS,
-  spatial,
-  status.df,
-  print.releases
-)
+printProgression(dot, overall.CJS, spatial, status.df, print.releases)
 }
 \arguments{
 \item{dot}{a dot data frame}
-
-\item{sections}{The sections in which the study area is divided. Must be
-coincident with the names given to the arrays. See the vignettes for more
-details.}
 
 \item{overall.CJS}{a single CJS with all the groups and release sites merged}
 

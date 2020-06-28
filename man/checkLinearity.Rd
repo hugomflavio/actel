@@ -4,16 +4,14 @@
 \alias{checkLinearity}
 \title{Check that the fish linearly moved along the sections}
 \usage{
-checkLinearity(secmoves, fish, sections, arrays, GUI)
+checkLinearity(secmoves, fish, spatial, arrays, GUI)
 }
 \arguments{
 \item{secmoves}{the section movements list}
 
 \item{fish}{The fish being analysed}
 
-\item{sections}{The sections in which the study area is divided. Must be
-coincident with the names given to the arrays. See the vignettes for more
-details.}
+\item{spatial}{The spatial data frame, as loaded by loadSpatial}
 
 \item{arrays}{a list containing information for each array}
 

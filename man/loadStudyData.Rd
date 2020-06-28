@@ -10,7 +10,7 @@ loadStudyData(
   start.time,
   stop.time,
   save.detections = FALSE,
-  sections = NULL,
+  section.order = NULL,
   exclude.tags,
   disregard.parallels = TRUE,
   discard.orphans = FALSE
@@ -34,9 +34,8 @@ the analysis.}
 \item{save.detections}{Logical: Should the processed detections be saved for
 future runs?}
 
-\item{sections}{The sections in which the study area is divided. Must be
-coincident with the names given to the arrays. See the vignettes for more
-details.}
+\item{section.order}{A vector containing the order by which sections should
+be aligned in the results.}
 
 \item{exclude.tags}{A vector of tags that should be excluded from the
 detection data before any analyses are performed. Intended to be used if

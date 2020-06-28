@@ -7,9 +7,9 @@
 #' odd. Multiple options allow you to tweak the analysis to fit your study
 #' perfectly.
 #'
-#' @param sections The sections in which the study area is divided. Must be
-#'  coincident with the names given to the arrays. See the vignettes for more
-#'  details.
+#' @param sections DEPRECATED - list the sections in the spatial input instead.
+#' @param section.order A vector containing the order by which sections should 
+#' be aligned in the results.
 #' @param success.arrays The arrays that mark the end of the study area. If a
 #'  fish crosses one of these arrays, it is considered to have successfully
 #'  migrated through the study area.
@@ -38,7 +38,7 @@
 #' # matches the time zone of the study area and that the
 #' # sections match your array names. The line below works
 #' # for the example data.
-#' results <- migration(tz = "Europe/Copenhagen", sections = c("River", "Fjord", "Sea"))
+#' results <- migration(tz = "Europe/Copenhagen")
 #'
 #' # to obtain an HTML report, run the analysis with report = TRUE
 #'
@@ -119,18 +119,25 @@
 #'
 #' @export
 #'
-migration <- function(tz = NULL, sections = NULL, datapack = NULL, success.arrays = NULL, max.interval = 60, minimum.detections = 2,
+migration <- function(tz = NULL, sections, section.order = NULL, datapack = NULL, success.arrays = NULL, max.interval = 60, minimum.detections = 2,
   start.time = NULL, stop.time = NULL, speed.method = c("last to first", "last to last"),
   speed.warning = NULL, speed.error = NULL, jump.warning = 2, jump.error = 3,
   inactive.warning = NULL, inactive.error = NULL, exclude.tags = NULL, override = NULL, report = FALSE, auto.open = TRUE,
   discard.orphans = FALSE, discard.first = NULL, save.detections = FALSE, if.last.skip.section = TRUE,
   replicates = NULL, disregard.parallels = TRUE, GUI = c("needed", "always", "never"), print.releases = TRUE) {
 
+  if (!missing(sections))
+    warning(
+"Argument 'sections' has been deprecated and will be ignored. Please list the
+sections to which each of the arrays belong in a new 'Section' column in the
+spatial input. You can now use the argument 'section.order' to define the order
+by which sections are presented", immediate. = TRUE, call. = FALSE)
+
   deleteHelpers()
 
   if (!is.null(options("actel.debug")[[1]]) && options("actel.debug")[[1]]) { # nocov start
-    on.exit(message("Debug: Progress log available at ", paste0(tempdir(), "/actel_debug_file.txt")))
-    on.exit(message("Debug: Saving carbon copy to ", paste0(tempdir(), "/actel.debug.RData")))
+    on.exit(message("Debug: Progress log available at ", gsub("\\\\", "/", paste0(tempdir(), "/actel_debug_file.txt"))))
+    on.exit(message("Debug: Saving carbon copy to ", gsub("\\\\", "/", paste0(tempdir(), "/actel.debug.RData"))), add = TRUE)
     on.exit(save(list = ls(), file = paste0(tempdir(), "/actel.debug.RData")), add = TRUE)
     message("!!!--- Debug mode has been activated ---!!!")
   } # nocov end
@@ -148,7 +155,7 @@ migration <- function(tz = NULL, sections = NULL, datapack = NULL, success.array
     jump.warning = jump.warning, jump.error = jump.error, inactive.warning = inactive.warning,
     inactive.error = inactive.error, exclude.tags = exclude.tags, override = override,
     print.releases = print.releases, if.last.skip.section = if.last.skip.section,
-    replicates = replicates, sections = sections)
+    replicates = replicates, section.order = section.order)
 
   speed.method <- aux$speed.method
   speed.warning <- aux$speed.warning
@@ -169,7 +176,7 @@ migration <- function(tz = NULL, sections = NULL, datapack = NULL, success.array
 
 # Store function call
   the.function.call <- paste0("migration(tz = ", ifelse(is.null(tz), "NULL", paste0("'", tz, "'")),
-    ", sections = ", paste0("c('", paste(sections, collapse = "', '"), "')"),
+    ", section.order = ", ifelse(is.null(section.order), "NULL", paste0("c('", paste(section.order, collapse = "', '"), "')")),
     ", datapack = ", ifelse(is.null(datapack), "NULL", deparse(substitute(datapack))),
     ", success.arrays = ", ifelse(is.null(success.arrays), "NULL", paste0("c('", paste(success.arrays, collapse = "', '"), "')")),
     ", max.interval = ", max.interval,
@@ -195,6 +202,8 @@ migration <- function(tz = NULL, sections = NULL, datapack = NULL, success.array
     ", GUI = '", GUI, "'",
     ", print.releases = ", ifelse(print.releases, "TRUE", "FALSE"),
     ")")
+
+  appendTo("debug", the.function.call)
 # --------------------
 
 # Final arrangements before beginning
@@ -209,19 +218,15 @@ migration <- function(tz = NULL, sections = NULL, datapack = NULL, success.array
   if (is.null(datapack)) {
     study.data <- loadStudyData(tz = tz, override = override, save.detections = save.detections,
                                 start.time = start.time, stop.time = stop.time, discard.orphans = discard.orphans,
-                                sections = sections, exclude.tags = exclude.tags, disregard.parallels = disregard.parallels)
+                                section.order = section.order, exclude.tags = exclude.tags, disregard.parallels = disregard.parallels)
   } else {
     appendTo(c("Screen", "Report"), paste0("M: Running analysis on preloaded data (compiled on ", attributes(datapack)$timestamp, ")."))
-    if (is.null(datapack$sections))
-      stop("The preloaded data contains no sections, but these are mandatory for the migration analysis. Recompile the data using the argument 'sections' during preload.", call. = FALSE)
-
     study.data <- datapack
     tz <- study.data$tz
     disregard.parallels <- study.data$disregard.parallels
   }
 
   bio <- study.data$bio
-  sections <- study.data$sections
   deployments <- study.data$deployments
   spatial <- study.data$spatial
   dot <- study.data$dot
@@ -231,6 +236,9 @@ migration <- function(tz = NULL, sections = NULL, datapack = NULL, success.array
   dist.mat <- study.data$dist.mat
   invalid.dist <- study.data$invalid.dist
   detections.list <- study.data$detections.list
+
+  if (all(!grepl("^Section$", colnames(spatial$stations))))
+    stop("To run migration(), please assign the arrays to their sections using a 'Section' column in the spatial input.", call. = FALSE)
 # -------------------------------------
 
 # Final quality checks
@@ -356,9 +364,9 @@ migration <- function(tz = NULL, sections = NULL, datapack = NULL, success.array
   section.movements <- lapply(seq_along(movements), function(i) {
     fish <- names(movements)[i]
     appendTo("debug", paste0("debug: Compiling section movements for fish ", fish,"."))
-    aux <- sectionMovements(movements = movements[[i]], sections = sections, invalid.dist = invalid.dist)
+    aux <- sectionMovements(movements = movements[[i]], spatial = spatial, invalid.dist = invalid.dist)
     if (!is.null(aux)) {
-      output <- checkLinearity(secmoves = aux, fish = fish, sections = sections, arrays = arrays, GUI = GUI)
+      output <- checkLinearity(secmoves = aux, fish = fish, spatial = spatial, arrays = arrays, GUI = GUI)
       return(output)
     } else {
       return(NULL)
@@ -382,25 +390,25 @@ migration <- function(tz = NULL, sections = NULL, datapack = NULL, success.array
   section.movements <- lapply(seq_along(valid.movements), function(i) {
     fish <- names(valid.movements)[i]
     appendTo("debug", paste0("debug: Compiling valid section movements for fish ", fish,"."))
-    output <- sectionMovements(movements = valid.movements[[i]], sections = sections, invalid.dist = invalid.dist)
+    output <- sectionMovements(movements = valid.movements[[i]], spatial = spatial, invalid.dist = invalid.dist)
     return(output)
   })
   names(section.movements) <- names(valid.movements)
 
   appendTo(c("Screen", "Report"), "M: Filling in the timetable.")
 
-  timetable <- assembleTimetable(secmoves = section.movements, valid.moves = valid.movements, all.moves = movements, sections = sections,
+  timetable <- assembleTimetable(secmoves = section.movements, valid.moves = valid.movements, all.moves = movements, spatial = spatial,
     arrays = arrays, bio = bio, tz = tz, dist.mat = dist.mat, invalid.dist = invalid.dist, speed.method = speed.method,
     if.last.skip.section = if.last.skip.section, success.arrays = success.arrays)
 
   appendTo(c("Screen", "Report"), "M: Timetable successfully filled. Fitting in the remaining variables.")
 
   status.df <- assembleOutput(timetable = timetable, bio = bio, spatial = spatial,
-    sections = sections, dist.mat = dist.mat, invalid.dist = invalid.dist, tz = tz)
+    dist.mat = dist.mat, invalid.dist = invalid.dist, tz = tz)
 
   appendTo(c("Screen", "Report"), "M: Getting summary information tables.")
 
-  section.overview <- assembleSectionOverview(status.df = status.df, sections = sections)
+  section.overview <- assembleSectionOverview(status.df = status.df, spatial = spatial)
 
   aux <- list(valid.movements = valid.movements, spatial = spatial, rsp.info = list(bio = bio, analysis.type = "migration"))
   times <- getTimes(input = aux, move.type = "array", event.type = "arrival", n.events = "first")
@@ -553,9 +561,9 @@ migration <- function(tz = NULL, sections = NULL, datapack = NULL, success.array
     printDotplots(status.df = status.df, invalid.dist = invalid.dist)
     printSurvivalGraphic(section.overview = section.overview)
     printLastArray(status.df = status.df)
-    printDot(dot = dot, sections = sections, spatial = spatial, print.releases = print.releases)
+    printDot(dot = dot, spatial = spatial, print.releases = print.releases)
     if (calculate.efficiency) {
-      printProgression(dot = dot,  sections = sections, overall.CJS = overall.CJS, spatial = spatial, status.df = status.df, print.releases = print.releases)
+      printProgression(dot = dot,  overall.CJS = overall.CJS, spatial = spatial, status.df = status.df, print.releases = print.releases)
       display.progression <- TRUE
       array.overview.fragment <- printArrayOverview(group.overview)
     } else {
@@ -985,7 +993,7 @@ sink()
 #'
 #' @keywords internal
 #'
-assembleTimetable <- function(secmoves, valid.moves, all.moves, sections, arrays, bio, tz,
+assembleTimetable <- function(secmoves, valid.moves, all.moves, spatial, arrays, bio, tz,
   dist.mat, invalid.dist, speed.method, if.last.skip.section, success.arrays) {
   appendTo("debug", "Running assembleTimetable.")
 
@@ -1035,6 +1043,8 @@ assembleTimetable <- function(secmoves, valid.moves, all.moves, sections, arrays
     names(secmoves) <- aux
     rm(aux)
   }
+
+  sections <- names(spatial$array.order)
 
   # Create the timetable
   recipient <- vector()
@@ -1233,16 +1243,19 @@ countBackMoves <- function(movements, arrays){
 #' @inheritParams simplifyMovements
 #' @inheritParams loadDetections
 #' @inheritParams groupMovements
+#' @inheritParams sectionMovements
 #'
 #' @return A data frame containing all the final data for each fish.
 #'
 #' @keywords internal
 #'
-assembleOutput <- function(timetable, bio, spatial, sections, dist.mat, invalid.dist, tz) {
+assembleOutput <- function(timetable, bio, spatial, dist.mat, invalid.dist, tz) {
   appendTo("debug", "Merging 'bio' and 'timetable'.")
   status.df <- merge(bio, timetable, by = "Transmitter", all = TRUE)
 
   appendTo("debug", "Completing entries for fish that were never detected.")
+  sections <- names(spatial$array.order)
+
   status.df$Status[is.na(status.df$Status)] <- paste("Disap. in", sections[1])
   status.df$Status <- factor(status.df$Status, levels = c(paste("Disap. in", sections), "Succeeded"))
   status.df$Very.last.array[is.na(status.df$Very.last.array)] <- "Release"
@@ -1275,16 +1288,20 @@ assembleOutput <- function(timetable, bio, spatial, sections, dist.mat, invalid.
 #' @inheritParams explore
 #' @inheritParams migration
 #' @inheritParams simplifyMovements
+#' @inheritParams sectionMovements
 #'
 #' @return A data frame containing the survival per group of fish present in the biometrics.
 #'
 #' @keywords internal
 #'
-assembleSectionOverview <- function(status.df, sections) {
+assembleSectionOverview <- function(status.df, spatial) {
   appendTo("debug", "Starting assembleSectionOverview.")
   section.overview <- as.data.frame.matrix(with(status.df, table(Group, Status)))
   section.overview$Total <- as.vector(with(status.df, table(Group)))
   colnames(section.overview) <- gsub(" ", ".", colnames(section.overview))
+
+  sections <- names(spatial$array.order)
+
   if (length(sections) >= 2) {
     to.col <- paste("Migrated.to", sections[2], sep = ".")
     from.col <- paste("Disap..in", sections[1], sep = ".")

@@ -31,7 +31,7 @@ test_that("loadSpatial stops if columns are missing or duplicated", {
 	write.csv(spatial, "spatial.csv", row.names = FALSE)
 	expect_error(loadSpatial(),
 		"The spatial input must contain an 'Array' column.", fixed = TRUE)
-	})
+})
 
 test_that("loadSpatial responds correctly if data is missing or badly formatted", {
 	spatial <- example.spatial
@@ -49,20 +49,25 @@ test_that("loadSpatial responds correctly if data is missing or badly formatted"
 	spatial <- example.spatial
 	spatial$Array[1] <- "River 0 a"
 	write.csv(spatial, "spatial.csv", row.names = FALSE)
-	expect_message(loadSpatial(),
-		"M: Replacing spaces in array names to prevent function failure.", fixed = TRUE)
-	
+	expect_warning(
+		expect_message(loadSpatial(),
+			"M: Replacing spaces in array names to prevent function failure.", fixed = TRUE),
+		"Long array names detected. To improve graphic rendering, consider keeping array names under six characters.", fixed = TRUE)
+
 	write.csv(spatial, "spatial.csv", row.names = FALSE)
 	expect_message(output <- loadSpatial(),
 		"M: Replacing spaces in array names to prevent function failure.", fixed = TRUE)
 	expect_equal(output$Array[1], "River_0_a")
 
-	write.csv(example.spatial[,-7], "spatial.csv", row.names = FALSE)
-	expect_message(loadSpatial(),
-		"M: No 'Type' column found in the spatial input. Assigning all rows as hydrophones.", fixed = TRUE)
-	write.csv(example.spatial[,-7], "spatial.csv", row.names = FALSE)
-	expect_message(loadSpatial(),
-		"M: No 'Type' column found in the spatial input. Assigning all rows as hydrophones.", fixed = TRUE)
+	write.csv(example.spatial[, -match("Type", colnames(example.spatial))], "spatial.csv", row.names = FALSE)
+	expect_error(
+		expect_message(loadSpatial(),
+			"M: No 'Type' column found in the spatial input. Assigning all rows as hydrophones.", fixed = TRUE),
+		"Some rows do not contain 'Section' information in the spatial input. Please double-check the input files.", fixed = TRUE)
+
+	write.csv(example.spatial[, -match("Section", colnames(example.spatial))], "spatial.csv", row.names = FALSE)
+	expect_warning(loadSpatial(),
+		"The spatial input does not contain a 'Section' column. This input is only valid for explore() analyses.", fixed = TRUE)
 
 	spatial <- example.spatial
 	spatial$Type[1] <- "test"
@@ -78,6 +83,58 @@ test_that("loadSpatial responds correctly if data is missing or badly formatted"
 		"Not all the expected first arrays of the release sites exist.
 Unknown expected first arrays: 'test'.
 In the spatial input, the expected first arrays of the release sites should match the arrays where hydrophone stations where deployed.", fixed = TRUE)
+
+	spatial <- example.spatial
+	spatial$Array[18] <- "Release"
+	write.csv(spatial, "spatial.csv", row.names = FALSE)
+	expect_error(loadSpatial(),
+		"The term 'Release' is reserved for internal calculations. Do not name any sections or arrays as 'Release'.", fixed = TRUE)
+
+	spatial <- example.spatial
+	spatial$Array[18] <- "Invalid"
+	write.csv(spatial, "spatial.csv", row.names = FALSE)
+	expect_error(loadSpatial(),
+		"The term 'Invalid' is reserved for internal calculations. Do not name any arrays as 'Invalid'.", fixed = TRUE)
+
+	spatial <- example.spatial
+	spatial$Section <- as.character(spatial$Section)
+	spatial$Section[17] <- "Release"
+	write.csv(spatial, "spatial.csv", row.names = FALSE)
+	expect_error(loadSpatial(),
+		"The term 'Release' is reserved for internal calculations. Do not name any sections or arrays as 'Release'.", fixed = TRUE)
+
+	spatial <- example.spatial
+	spatial$Section <- as.character(spatial$Section)
+	spatial$Section[3] <- "Ri ver"
+	write.csv(spatial, "spatial.csv", row.names = FALSE)
+	expect_message(loadSpatial(),
+		"Replacing spaces in section names to prevent function failure.", fixed = TRUE)
+
+	spatial <- example.spatial
+	spatial$Section <- as.character(spatial$Section)
+	spatial$Section[3] <- "Ri"
+	write.csv(spatial, "spatial.csv", row.names = FALSE)
+	expect_error(loadSpatial(),
+		"Section 'Ri' is contained within other section names. Sections must be unique and independent.
+       Please rename your sections so that section names are not contained within each other.", fixed = TRUE)
+
+	write.csv(example.spatial, "spatial.csv", row.names = FALSE)
+	expect_error(loadSpatial(section.order = c("Fjord" ,"Sea")),
+		"Not all sections are listed in 'section.order'. Sections missing: River", fixed = TRUE)
+
+	expect_warning(loadSpatial(section.order = c("Fjord" ,"Sea", "River", "Ri")),
+		"Not all values listed in 'section.order' correspond to sections. Discarding the following values: Ri", fixed = TRUE)
+
+	spatial <- example.spatial
+	spatial$Section <- as.character(spatial$Section)
+	spatial$Section[3] <- "Rivlongname"
+	write.csv(spatial, "spatial.csv", row.names = FALSE)
+	expect_warning(loadSpatial(),
+		"Long section names detected. To improve graphic rendering, consider keeping section names under six characters.", fixed = TRUE)
+
+	write.csv(example.spatial[, -match("Section", colnames(example.spatial))], "spatial.csv", row.names = FALSE)
+	expect_warning(loadSpatial(section.order = c("Fjord" ,"Sea")),
+		"'section.order' was set but input has no 'Section' column. Ignoring argument.", fixed = TRUE)
 })
 
 test_that("loadSpatial output is exactly as expected", {

@@ -4,7 +4,7 @@
 \alias{res_assembleOutput}
 \title{Create status.df}
 \usage{
-res_assembleOutput(res.df, bio, spatial, sections, tz)
+res_assembleOutput(res.df, bio, spatial, tz)
 }
 \arguments{
 \item{bio}{A table with the tags and biometrics of the studied fish.}
