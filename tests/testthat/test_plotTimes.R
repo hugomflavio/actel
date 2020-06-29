@@ -74,8 +74,8 @@ test_that("plotTimes returns no errors on actual data, plus saves files", {
 	expect_true(file.exists("test_plotTimes_output.svg"))
 	file.remove("test_plotTimes_output.svg")
 
-	expect_warning(plotTimes(times = times, file = "test_plotTimes_output.svg", cex = 2),
-		"When saving vectorial plots, it is recommended to refine the 'width' and 'height', rather than the 'cex'.", fixed = TRUE)
+	expect_message(plotTimes(times = times, file = "test_plotTimes_output.svg", cex = 2),
+		"M: When saving vectorial plots, it is recommended to refine the 'width' and 'height', rather than the 'cex'.", fixed = TRUE)
 })
 
 test_that("different extensions are working in plotTimes", {

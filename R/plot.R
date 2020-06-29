@@ -310,7 +310,7 @@ plotTimes <- function(times, night = NULL, col, alpha = 0.8, title = "", mean.da
   if (!missing(file)) {
     if (grepl(".svg$", file) | grepl(".pdf$", file)) {
       if (cex != 1)
-        message("When saving vectorial plots, it is recommended to refine the 'width' and 'height', rather than the 'cex'.")
+        message("M: When saving vectorial plots, it is recommended to refine the 'width' and 'height', rather than the 'cex'.")
       if (missing(height))
         height <- 5
       if (missing(width))
