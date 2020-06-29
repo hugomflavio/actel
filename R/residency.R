@@ -804,6 +804,7 @@ Note:
   : Manually **edited** fish are highlighted with **yellow** graphic borders.
   : Manually **overridden** fish are highlighted with **red** graphic borders.
   : The stations have been grouped by array, following the array order provided either in the spatial.csv file or in the spatial.txt file.
+  : You can replicate these graphics and edit them as needed using the `plotMoves()` function.
   : The data used in these graphics is stored in the `detections` and `movements` objects (and respective valid counterparts).
 
 <center>

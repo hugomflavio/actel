@@ -830,6 +830,7 @@ Note:
 
 Note:
   : Coloured lines on the outer circle indicate the mean value for each group and the respective ranges show the standard error of the mean. Each group\'s bars sum to 100%. The number of data points in each group is presented between brackets in the legend of each pannel.
+  : You can replicate these graphics and edit them as needed using the `plotTimes()` function.
   : The data used in these graphics is stored in the `times` object.
 
 <center>
@@ -850,7 +851,7 @@ Note:
 </center>
 
 
-### Individual plots
+### Individual detection plots
 
 Note:
   : The detections are coloured by array. The vertical black dashed line shows the time of release. The vertical grey dashed lines show the assigned moments of entry and exit for each study area section. The full dark-grey line shows the movement events considered valid, while the dashed dark-grey line shows the movement events considered invalid.
@@ -858,6 +859,7 @@ Note:
   : Manually **edited** fish are highlighted with **yellow** graphic borders.
   : Manually **overridden** fish are highlighted with **red** graphic borders.
   : The stations have been grouped by array, following the array order provided either in the spatial.csv file or in the spatial.txt file.
+  : You can replicate these graphics and edit them as needed using the `plotMoves()` function.
   : The data used in these graphics is stored in the `detections` and `movements` objects (and respective valid counterparts).
 
 <center>
@@ -967,7 +969,7 @@ img[src*="#diagram"] {
   <a href="#progression">Progression</a>
   <a href="#time-of-arrival-at-each-array">Arrival times</a>
   <a href="#dotplots">Dotplots</a>
-  <a href="#individual-plots">Individuals</a>',
+  <a href="#individual-detection-plots">Individual detections</a>',
   ifelse(is.null(sensor.fragment), '', '\n  <a href="#sensor-plots">Sensor data</a>'),'
   <a href="#full-log">Full log</a>
 </div>
