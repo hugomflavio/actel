@@ -304,7 +304,7 @@ plotTimes <- function(times, night = NULL, col, alpha = 0.8, title = "", mean.da
   } else {
     if (length(col) != length(times))
       stop("'col' must be of the same length as 'times' (", length(col), " != ", length(times), ").", call. = FALSE)
-      colours <- scales::alpha(colour = col, alpha = alpha)
+    colours <- scales::alpha(colour = col, alpha = alpha)
   }
 
   if (!missing(file)) {
@@ -346,12 +346,15 @@ plotTimes <- function(times, night = NULL, col, alpha = 0.8, title = "", mean.da
     }
   }
 
-  if (legend.pos == "auto" & length(times) >= 6)
-    legend.pos <- "bottom"
-  else
-    legend.pos <- "corner"
+  if (legend.pos == "auto") {
+    if (length(times) >= 6)
+      legend.pos <- "bottom"
+    else
+      legend.pos <- "corner"
+  }
 
   if (missing(ncol)) {
+    ncol <- 1
     if (legend.pos == "bottom") {
       if (length(times) > 2)
         ncol <- 2
@@ -359,8 +362,6 @@ plotTimes <- function(times, night = NULL, col, alpha = 0.8, title = "", mean.da
         ncol <- 3
       if (length(times) > 9)
         ncol <- 4
-    } else {
-      ncol <- 1
     }
   }
 
