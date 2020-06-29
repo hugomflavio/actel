@@ -285,7 +285,7 @@ plotTimes <- function(times, night = NULL, col, alpha = 0.8, title = "", mean.da
   if (!is.logical(rings))
     stop("'rings' must be either TRUE or FALSE.", call. = FALSE)
 
-  if (!is.null(file) && length(file) > 1)
+  if (!missing(file) && length(file) > 1)
     stop("Please provide only one 'file' name.", call. = FALSE)
 
   if (length(alpha) > 1)
@@ -326,7 +326,7 @@ plotTimes <- function(times, night = NULL, col, alpha = 0.8, title = "", mean.da
 
     unk.ext <- TRUE
     if (unk.ext && grepl(".svg$", file)) {
-      invisible(grDevices::svg(file, height = height, width = width, bg = bg))
+      grDevices::svg(file, height = height, width = width, bg = bg)
       unk.ext <- FALSE
     }
     if (unk.ext && grepl(".pdf$", file)) {
@@ -369,9 +369,9 @@ plotTimes <- function(times, night = NULL, col, alpha = 0.8, title = "", mean.da
       if (ncol > 1)
         warning("Plotting the legend in the corner but ncol > 1. This will likely lead to bad results.", immediate. = TRUE, call. = FALSE)
       if (roundUp(length(times)/ ncol, 1) > 2) {
-        if (grepl(".png$", file) | grepl(".tiff", file))
+        if (!missing(file) && (grepl(".png$", file) | grepl(".tiff", file)))
           ylegend <- -0.97 + (0.06 * (roundUp(length(times) / ncol, 1) - 2))
-        if (grepl(".svg$", file) | grepl(".pdf", file))
+        if (missing(file) || (grepl(".svg$", file) | grepl(".pdf", file)))
           ylegend <- -0.97 + (0.08 * (roundUp(length(times) / ncol, 1) - 2))
       } else {
         ylegend <- -0.97      
@@ -411,7 +411,10 @@ plotTimes <- function(times, night = NULL, col, alpha = 0.8, title = "", mean.da
 
   prop <- roundDown(1 / max(unlist(lapply(times, function(x) table(roundUp(x, to = 1)) / sum(!is.na(x))))), to = 1)
 
-  area.prop <- width/height
+  if (!missing(file))
+    area.prop <- width/height
+  else
+    area.prop <- 1
 
   if (legend.pos == "corner")
     b <- 1
