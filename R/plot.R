@@ -220,7 +220,23 @@ plotMoves <- function(input, tag, title, xlab, ylab, col, array.alias, frame.war
 #' @param mean.dash Logical: Should the mean value be displayed on the plot's edge?
 #' @param mean.range Logical: Should the SEM be displayed? (only relevant if mean.dash = TRUE)
 #' @param rings Logical: Should inner plot rings be displayed?
-#' @param file A file name to save the plot as an SVG. Leave NULL to plot on active graphics device.
+#' @param file A file name to save the plot to. Leave NULL to plot on active graphics device. Available file extensions: .svg, .pdf, .png and .tiff.
+#' @param height,width The height and width of the output file. Use inches for .pdf and .svg files or pixels for .png and .tiff files.
+#' @param bg The colour of the plot background. Defaults to "transparent".
+#' @param ncol The number of columns in which to set the legend items. By default, actel decides the number
+#'  of columns based on the number of data series to be plotted.
+#' @param legend.pos Where should the legend be drawn? By default, actel decides whether to plot the legend
+#'  in the corner of the plot at the bottom the plot depending on the number of data series to plot.
+#'  Possible values: 'auto', 'corner', 'bottom'.
+#' @param ylegend Adjustment to the vertical positioning of the legend. Only relevant if the legend is being drawn
+#'  in the corner of the plot.
+#' @param xlegend Adjustment to the horizontal positioning of the legend.
+#' @param xjust How the legend is to be justified when the legend is drawn at the bottom a the plot. 
+#'  One of 'auto' (i.e. let actel decide the best adjustment), 'left', 'centre', or 'right'.
+#' @param cex A numerical vector giving the amount by which plotting characters and symbols should be scaled 
+#'  relative to the default. When saving the plot in a vectorial form, it is recommended to change the height
+#'  and width arguments rather than the cex.
+#' @param expand Parameter that controls the size of the plotted circle. Defaults to 0.95. Larger values expand the circle, while smaller values shrink the circle.
 #'
 #' @examples
 #' # The output of timesToCircular can be used as an input to plotTimes.
@@ -237,8 +253,13 @@ plotMoves <- function(input, tag, title, xlab, ylab, col, array.alias, frame.war
 #'
 #' @export
 #'
-plotTimes <- function(times, night = NULL, col = NULL, alpha = 0.8, title = "", mean.dash = TRUE,
-  mean.range = TRUE, rings = TRUE, file = NULL){
+plotTimes <- function(times, night = NULL, col, alpha = 0.8, title = "", mean.dash = TRUE,
+  mean.range = TRUE, rings = TRUE, file, width, height, bg = "transparent", ncol, 
+  legend.pos = c("auto", "corner", "bottom"), ylegend, xlegend, xjust = c("auto", "centre", "left", "right"), 
+  expand = 0.95, cex = 1){
+
+  legend.pos <- match.arg(legend.pos)
+  xjust <- match.arg(xjust)
 
   if (!inherits(times, "list"))
     stop("'times' must be a list.", call. = FALSE)
@@ -273,33 +294,139 @@ plotTimes <- function(times, night = NULL, col = NULL, alpha = 0.8, title = "", 
   if (!is.numeric(alpha) || (alpha < 0 | alpha > 1))
     stop("'alpha' must be numeric (between 0 and 1).", call. = FALSE)
 
-  if (is.null(col)) {
-    if (length(times) > 8)
-      stop("To plot this many time series simultaneously, colours must be specified using 'col'.", call. = FALSE)
-    cbPalette <- c("#56B4E9", "#c0ff3e", "#E69F00", "#F0E442", "#0072B2", "#D55E00", "#CC79A7", "#999999")
-    colours <- scales::alpha(colour = cbPalette[c(1:length(times))], alpha = alpha)
+  if (missing(col)) {
+    if (length(times) > 8) {
+      aux <- gg_colour_hue(length(times))
+    } else {
+      aux <- c("#56B4E9", "#c0ff3e", "#E69F00", "#F0E442", "#0072B2", "#D55E00", "#CC79A7", "#999999")[1:length(times)]
+    }
+    colours <- scales::alpha(colour = aux, alpha = alpha)
   } else {
     if (length(col) != length(times))
-      stop("'col' must be of the same length as 'times'.", call. = FALSE)
+      stop("'col' must be of the same length as 'times' (", length(col), " != ", length(times), ").", call. = FALSE)
       colours <- scales::alpha(colour = col, alpha = alpha)
   }
 
-  if (length(times) > 2)
-    ylegend <- -0.97 + (0.1 * (length(times) - 2))
+  if (!missing(file)) {
+    if (grepl(".svg$", file) | grepl(".pdf$", file)) {
+      if (cex != 1)
+        message("When saving vectorial plots, it is recommended to refine the 'width' and 'height', rather than the 'cex'.")
+      if (missing(height))
+        height <- 5
+      if (missing(width))
+        width <- 5
+    }
+
+    if (grepl(".png$", file) | grepl(".tiff$", file)) {
+      if (missing(height))
+        height <- 500
+      if (missing(width))
+        width <- 500
+    }
+
+    unk.ext <- TRUE
+    if (unk.ext && grepl(".svg$", file)) {
+      invisible(grDevices::svg(file, height = height, width = width, bg = bg))
+      unk.ext <- FALSE
+    }
+    if (unk.ext && grepl(".pdf$", file)) {
+      grDevices::pdf(file, height = height, width = width, bg = bg)
+      unk.ext <- FALSE
+    }
+    if (unk.ext && grepl(".png$", file)) {
+      grDevices::png(file, height = height, width = width,  bg = bg)
+      unk.ext <- FALSE
+    }
+    if (unk.ext && grepl(".tiff$", file)) {
+      grDevices::tiff(file, height = height, width = width, bg = bg)
+      unk.ext <- FALSE
+    }
+    if (unk.ext) {
+      stop("Could not recognise 'file' extension (recognised extensions: .svg, .pdf, .png, .tiff).", call. = FALSE)
+    }
+  }
+
+  if (legend.pos == "auto" & length(times) >= 6)
+    legend.pos <- "bottom"
   else
-    ylegend <- -0.97
+    legend.pos <- "corner"
+
+  if (missing(ncol)) {
+    if (legend.pos == "bottom") {
+      if (length(times) > 2)
+        ncol <- 2
+      if (length(times) > 6)
+        ncol <- 3
+      if (length(times) > 9)
+        ncol <- 4
+    } else {
+      ncol <- 1
+    }
+  }
+
+  if (legend.pos == "corner") {
+    if (missing(ylegend)) {
+      if (ncol > 1)
+        warning("Plotting the legend in the corner but ncol > 1. This will likely lead to bad results.", immediate. = TRUE, call. = FALSE)
+      if (roundUp(length(times)/ ncol, 1) > 2) {
+        if (grepl(".png$", file) | grepl(".tiff", file))
+          ylegend <- -0.97 + (0.06 * (roundUp(length(times) / ncol, 1) - 2))
+        if (grepl(".svg$", file) | grepl(".pdf", file))
+          ylegend <- -0.97 + (0.08 * (roundUp(length(times) / ncol, 1) - 2))
+      } else {
+        ylegend <- -0.97      
+      }
+    }
+    if (xjust != "auto")
+      warning("'xjust' was set but legend is being plotted in the corner. Ignoring 'xjust'.", immediate. = TRUE, call. = FALSE)  
+    xjust <- "left"
+  } else {
+    if (missing(ylegend))
+      ylegend <- -1.15
+    if (xjust == "auto") {
+      if (ncol > 1)
+        xjust <- "centre"
+      else
+        xjust <- "left"
+    }
+  }
+
+  if (xjust == "left") {
+    xjust <- 0
+    if (missing(xlegend))
+      xlegend <- -1.3
+  }
+
+  if (xjust == "centre") {
+    xjust <- 0.5
+    if (missing(xlegend))
+      xlegend <- 0
+  }
+  
+  if (xjust == "right") {
+    xjust <- 1
+    if (missing(xlegend))
+      xlegend <- 1.3
+  }
 
   prop <- roundDown(1 / max(unlist(lapply(times, function(x) table(roundUp(x, to = 1)) / sum(!is.na(x))))), to = 1)
 
-  if (!is.null(file)) {
-    if (!grepl(".svg$", file))
-      file <- paste0(file, ".svg")
-    grDevices::svg(file, height = 5, width = 5, bg = "transparent")
-  }
+  area.prop <- width/height
 
-  oldpar <- par(mar = c(1, 2, 2, 1))
-  on.exit(par(oldpar), add = TRUE)
-  copyOfCirclePlotRad(main = title, shrink = 1.05)
+  if (legend.pos == "corner")
+    b <- 1
+  else
+    b <- (roundUp(length(times) / ncol, 1))
+
+  vertical.mar <- b + 2
+  horizontal.mar <- vertical.mar * area.prop
+  oldpar <- par(mar = c(b, horizontal.mar / 2, 2, horizontal.mar / 2), cex = cex, xpd = TRUE) # bottom, left, top, right
+
+  # resetting the par is only necessary if no file was specified, 
+  # and thus dev.off() was not called at the end of the function.
+  on.exit(if (missing(file)) par(oldpar), add = TRUE)
+
+  copyOfCirclePlotRad(main = title, shrink = 1 - (expand - 1), xlab = "", ylab = "")
 
   if (!is.null(night)) {
     circularSection(from = night[1],
@@ -322,11 +449,11 @@ plotTimes <- function(times, night = NULL, col = NULL, alpha = 0.8, title = "", 
       ring.text.pos = 0.07, rings.lty = "f5", ring.text.cex = 0.8)
   }
 
-  legend(x = -1.2, y = ylegend,
+  legend(x = xlegend, y = ylegend, xjust = xjust,
     legend = paste(names(times), " (", unlist(lapply(times, function(x) sum(!is.na(x)))), ")", sep =""),
-    fill = params$col, bty = "n", x.intersp = 0.3, cex = 0.8)
+    fill = params$col, bty = "n", x.intersp = 0.3, cex = 0.8, ncol = ncol)
 
-  if(!is.null(file)) {
+  if(!missing(file)) {
     grDevices::dev.off()
     message("M: Plot saved to ", file)
   }
