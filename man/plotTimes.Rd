@@ -7,13 +7,23 @@
 plotTimes(
   times,
   night = NULL,
-  col = NULL,
+  col,
   alpha = 0.8,
   title = "",
   mean.dash = TRUE,
   mean.range = TRUE,
   rings = TRUE,
-  file = NULL
+  file,
+  width,
+  height,
+  bg = "transparent",
+  ncol,
+  legend.pos = c("auto", "corner", "bottom"),
+  ylegend,
+  xlegend,
+  xjust = c("auto", "centre", "left", "right"),
+  expand = 0.95,
+  cex = 1
 )
 }
 \arguments{
@@ -33,7 +43,32 @@ plotTimes(
 
 \item{rings}{Logical: Should inner plot rings be displayed?}
 
-\item{file}{A file name to save the plot as an SVG. Leave NULL to plot on active graphics device.}
+\item{file}{A file name to save the plot to. Leave NULL to plot on active graphics device. Available file extensions: .svg, .pdf, .png and .tiff.}
+
+\item{height, width}{The height and width of the output file. Use inches for .pdf and .svg files or pixels for .png and .tiff files.}
+
+\item{bg}{The colour of the plot background. Defaults to "transparent".}
+
+\item{ncol}{The number of columns in which to set the legend items. By default, actel decides the number
+of columns based on the number of data series to be plotted.}
+
+\item{legend.pos}{Where should the legend be drawn? By default, actel decides whether to plot the legend
+in the corner of the plot at the bottom the plot depending on the number of data series to plot.
+Possible values: 'auto', 'corner', 'bottom'.}
+
+\item{ylegend}{Adjustment to the vertical positioning of the legend. Only relevant if the legend is being drawn
+in the corner of the plot.}
+
+\item{xlegend}{Adjustment to the horizontal positioning of the legend.}
+
+\item{xjust}{How the legend is to be justified when the legend is drawn at the bottom a the plot.
+One of 'auto' (i.e. let actel decide the best adjustment), 'left', 'centre', or 'right'.}
+
+\item{expand}{Parameter that controls the size of the plotted circle. Defaults to 0.95. Larger values expand the circle, while smaller values shrink the circle.}
+
+\item{cex}{A numerical vector giving the amount by which plotting characters and symbols should be scaled
+relative to the default. When saving the plot in a vectorial form, it is recommended to change the height
+and width arguments rather than the cex.}
 }
 \value{
 A circular plot
