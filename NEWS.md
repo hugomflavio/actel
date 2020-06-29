@@ -7,6 +7,7 @@ Find out the main highlights of each update.
 Fixes:
   * Prevent crash if all detections for a given stray tag were removed during detection quality checks.
   * Prevent migration crash if all movement events are rendered invalid before section movements are created.
+  * Prevent crash related with circular plotting when running an analysis on more than eight fish groups.
 
 Changes
   * `stripCodeSpaces()` has been replaced with `extractSignals()`.
@@ -21,7 +22,8 @@ Enhancements:
   * New argument `discard.first` allows the user to discard detections that happen before a given amount of time has passed after release.
   * New function `extractCodeSpaces()` has been implemented.
   * New `preload()` function allows advanced users to run actel without requiring input files. See more in the new dedicated vignette.
-  * New argument `section.order` allows the user to speficy the order by which the sections should be listed.
+  * New argument `section.order` allows the user to specify the order by which the sections should be listed.
+  * `plotTimes()` has been expanded with new arguments and better compatibility for multiple groups.
   
 ## actel 1.0.0 (CRAN)
 

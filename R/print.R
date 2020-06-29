@@ -805,8 +805,19 @@ printIndividuals <- function(detections.list, bio, status.df = NULL, tz,
 printCircular <- function(times, bio, suffix = NULL){
   cbPalette <- c("#56B4E9", "#c0ff3e", "#E69F00", "#F0E442", "#0072B2", "#D55E00", "#CC79A7", "#999999")
   circular.plots <- ""
-  colours <- paste0(cbPalette[c(1:length(unique(bio$Group)))], 80)
+
+  if (length(unique(bio$Group)) < 8)
+    colours <- paste0(cbPalette[c(1:length(unique(bio$Group)))], 80)
+  else
+    colours <- paste0(gg_colour_hue(length(unique(bio$Group))), 80)
+
   names(colours) <- sort(unique(bio$Group))
+
+  if (length(unique(bio$Group)) >= 6)
+    legend.pos <- "bottom"
+  else
+    legend.pos <- "corner"
+
   for (i in 1:length(times)) {
     if (length(unique(bio$Group)) > 1) {
       link <- match(names(times[[i]]), bio$Transmitter)
@@ -819,23 +830,59 @@ printCircular <- function(times, bio, suffix = NULL){
       names(trim.times) <- unique(bio$Group)
       ylegend <- -0.97
     }
+   
     colours.to.use <- colours[names(trim.times)]
+   
+    if (legend.pos == "bottom") {
+      ylegend <- -1.15
+      xlegend <- 0
+      xjust <- 0.5
+      if (length(colours.to.use) > 2)
+        ncol <- 2
+      if (length(colours.to.use) > 6)
+        ncol <- 3
+      if (length(colours.to.use) > 9 & !any(nchar(names(colours.to.use)) > 9))
+        ncol <- 4
+    } else {
+      ylegend <- -0.97 + (0.08 * (length(colours.to.use) - 2))
+      xlegend <- -1.3
+      xjust <- 0
+      ncol <- 1
+    }
+
     prop <- roundDown(1 / max(unlist(lapply(trim.times, function(x) table(roundUp(x, to = 1)) / sum(!is.na(x))))), to = 1)
-    {grDevices::svg(paste0(tempdir(), "/times_", names(times)[i], suffix, ".svg"), height = 5, width = 5, bg = "transparent")
-    par(mar = c(1, 2, 2, 1))
-    copyOfCirclePlotRad(main = names(times)[i], shrink = 1.05)
+
+    if (legend.pos == "corner")
+      b <- 1
+    else
+      b <- (roundUp(length(colours.to.use) / ncol, 1))
+
+    vertical.mar <- b + 2
+   
+    {grDevices::svg(paste0(tempdir(), "/times_", names(times)[i], suffix, ".svg"), 
+                    height = 5, width = 5, bg = "transparent")
+    
+    par(mar = c(b, (b + 2) / 2, 2, (b + 2) / 2), xpd = TRUE) # bottom, left, top, right
+
+    copyOfCirclePlotRad(main = names(times)[i], shrink = 1.05, xlab = "", ylab = "")
+
     params <- myRoseDiag(trim.times, bins = 24, radii.scale = "linear",
       prop = prop, tcl.text = -0.1, tol = 0.05, col = colours.to.use, border = "black")
+
     roseMean(trim.times, col = params$col, mean.length = c(0.07, -0.07), mean.lwd = 6,
       box.range = "std.error", fill = "white", border = "black",
       box.size = c(1.015, 0.985), edge.length = c(0.025, -0.025),
       edge.lwd = 2)
+
     ringsRel(plot.params = params, border = "black", ring.text = TRUE,
       ring.text.pos = 0.07, rings.lty = "f5", ring.text.cex = 0.8)
-      legend(x = -1.2, y = ylegend,
+
+    legend(x = xlegend, y = ylegend, xjust = xjust, ncol = ncol,
       legend = paste(names(trim.times), " (", unlist(lapply(trim.times, function(x) sum(!is.na(x)))), ")", sep =""),
       fill = params$col, bty = "n", x.intersp = 0.3, cex = 0.8)
+
     grDevices::dev.off()}
+
     if (i %% 2 == 0)
       circular.plots <- paste0(circular.plots, "![](times_", names(times)[i], suffix, ".svg){ width=50% }\n")
     else
