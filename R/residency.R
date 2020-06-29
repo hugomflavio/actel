@@ -719,7 +719,7 @@ Note:
 
 Note:
   : Coloured lines on the outer circle indicate the mean value for each group and the respective ranges show the standard error of the mean. Each group\'s bars sum to 100%. The number of data points in each group is presented between brackets in the legend of each pannel.
-  : These graphics have been saved in vectorial format (svg) in the "Results" folder, so you may edit them as needed.
+  : You can replicate these graphics and edit them as needed using the `plotTimes()` function.
   : The data used in these graphics is stored in the `array.times` object.
 
 <center>
@@ -741,7 +741,7 @@ Note:
 
 Note:
   : Coloured lines on the outer circle indicate the mean value for each group and the respective ranges show the standard error of the mean. Each group\'s bars sum to 100%. The number of data points in each group is presented between brackets in the legend of each pannel.
-  : These graphics have been saved in vectorial format (svg) in the "Results" folder, so you may edit them as needed.
+  : You can replicate these graphics and edit them as needed using the `plotTimes()` function.
   : The data used in these graphics is stored in the `section.times$arrival` object.
 
 <center>
@@ -761,7 +761,7 @@ Note:
 
 Note:
   : Coloured lines on the outer circle indicate the mean value for each group and the respective ranges show the standard error of the mean. Each group\'s bars sum to 100%. The number of data points in each group is presented between brackets in the legend of each pannel.
-  : These graphics have been saved in vectorial format (svg) in the "Results" folder, so you may edit them as needed.
+  : You can replicate these graphics and edit them as needed using the `plotTimes()` function.
   : The data used in these graphics is stored in the `section.times$departure` object.
 
 <center>
@@ -771,7 +771,6 @@ Note:
 ### Section progression
 
 Note:
-  : These graphics have been saved in vectorial format (svg) in the "Results" folder, so you may edit them as needed.
   : The data used in these graphics is stored in the `global.ratios` and `daily.positions` objects.
 
 #### Absolutes
