@@ -82,7 +82,7 @@ As a rule of thumb, if two stations' ranges are likely to overlap, you should co
 
 The sections divide your study area in big blocks, for which you would like specific metrics to be calculated (e.g. residency time, survival, etc.). In the example above, there are three sections: River, Fjord and Sea. The sections must be filled in in the 'Section' column of the _spatial.csv_ file.
 
-When running a `migration()` analysis, the order of the sections is relevant and represents the order in which you expect your fish will move. By default, actel will order the sections by the order in which they appear in the spatial.csv file. However, you can force a specific order using the `section.order` argument. For example, if you expect your fish to move from the river to a fjord and ultimately to the sea (and you have receiver  arrays in all these sections), then `section.order = c("River", "Fjord", "Sea")`. In the other hand, if you expect your fish to migrate upstream, then `section.order = c("Sea", "Fjord", "River")`.
+When running a `migration()` analysis, the order of the sections is relevant and represents the order in which you expect your fish will move. By default, actel will order the sections by the order in which they appear in the spatial.csv file. However, you can force a specific order using the `section.order` argument. For example, if you expect your fish to move from the river to a fjord and ultimately to the sea (and you have receiver arrays in all these sections), then `section.order = c("River", "Fjord", "Sea")`. In the other hand, if you expect your fish to migrate upstream, then `section.order = c("Sea", "Fjord", "River")`.
 
 For the residency analysis, the order of the sections is not relevant, except for plotting and column order purposes. Like above, actel can sort out the order by itself, or you can specify a specific order using the `section.order` argument.
 
@@ -113,7 +113,7 @@ The first thing you will want to do is give individual names to your stations:
 <img src="spatialcsv_a2.svg" alt="drawing" width="400"/>
 </center>
 
-Then, you need to decide how these stations should be organized into arrays. In this case, lets say each station is its own array:
+Then, you need to decide how these stations should be organized into arrays. In this case, let's say each station is its own array:
 
 <center>
 <img src="spatialcsv_a3.svg" alt="drawing" width="400"/>

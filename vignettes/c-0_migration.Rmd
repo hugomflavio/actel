@@ -41,7 +41,7 @@ knitr::opts_chunk$set(
 
 The migration() functions builds on the same principles as the explore() function and, in addition, computes metrics under the assumption that the fish will move in a predictable direction.
 
-migration() has the same arguments as explore(), and includes a set of new arguments aimed to fine tune the migration-related metrics. Like with explore, you *do not need to start working with all arguments right away.* For simple study areas, defining the `tz` and `sections` arguments is enough to get you going!
+migration() has the same arguments as explore(), and includes a set of new arguments aimed to fine tune the migration-related metrics. Like with explore, you *do not need to start working with all arguments right away.* For simple study areas, defining the `tz` is enough to get you going!
 
 ```r
 migration(tz = "Europe/Copenhagen")
@@ -58,7 +58,8 @@ migration(tz, section.order = NULL, success.arrays = NULL, max.interval = 60, mi
   speed.warning = NULL, speed.error = NULL, jump.warning = 2, jump.error = 3, 
   inactive.warning = NULL, inactive.error = NULL, exclude.tags = NULL, override = NULL, report = FALSE,
   auto.open = TRUE, discard.orphans = FALSE, save.detections = FALSE, if.last.skip.section = TRUE, 
-  replicates = NULL, disregard.parallels = TRUE, GUI = c("needed", "always", "never"))
+  replicates = NULL, disregard.parallels = TRUE, GUI = c("needed", "always", "never"),
+  plot.detections.by = c("stations", "arrays"))
 ```
 
 Below are listed only new arguments that do not exist in [explore](b-0_explore.html#general-arguments). 

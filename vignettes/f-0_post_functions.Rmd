@@ -186,7 +186,7 @@ You can expand on the example above to plot different groups too. Once you have 
 
 ## Drawing personalised detection plots
 
-Detection plots provide a lot of information. However, the default plots printed in the reports may be to small to analyse, or perhaps you would like to edit them to use in a presentation or paper. `plotMoves` is the function you are looking for.
+Detection plots provide a lot of information. However, the default plots printed in the reports may be to small to analyse, or perhaps you would like to edit them to use in a presentation or paper. `plotMoves()` is the function you are looking for.
 
 
 ```r
