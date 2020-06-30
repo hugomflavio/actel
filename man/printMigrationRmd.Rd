@@ -18,7 +18,8 @@ printMigrationRmd(
   spatial,
   deployments,
   valid.detections,
-  detections
+  detections,
+  plot.detections.by
 )
 }
 \arguments{

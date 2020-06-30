@@ -26,7 +26,8 @@ explore(
   discard.first = NULL,
   save.detections = FALSE,
   GUI = c("needed", "always", "never"),
-  print.releases = TRUE
+  print.releases = TRUE,
+  plot.detections.by = c("stations", "arrays")
 )
 }
 \arguments{
@@ -123,6 +124,9 @@ prompted to open that file and examine it. Defaults to "needed".}
 
 \item{print.releases}{Logical: Should the release sites be printed in the
 study area diagrams?}
+
+\item{plot.detections.by}{The type of y axis desired for the individual
+detection plots. One of "stations" (default) or "arrays".}
 }
 \value{
 A list containing:

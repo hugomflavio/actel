@@ -6,30 +6,27 @@
 \usage{
 printIndividuals(
   detections.list,
-  bio,
-  status.df = NULL,
-  tz,
   movements,
-  valid.movements = NULL,
-  extension = "png",
-  spatial
+  valid.movements,
+  spatial,
+  status.df = NULL,
+  rsp.info,
+  type = c("stations", "arrays"),
+  extension = "png"
 )
 }
 \arguments{
 \item{detections.list}{A list of the detections split by each target tag, created by splitDetections.}
 
-\item{bio}{A table with the tags and biometrics of the studied fish.}
+\item{movements}{A list of movements for each target tag, created by groupMovements.}
+
+\item{spatial}{The spatial data frame.}
 
 \item{status.df}{The main results table.}
 
-\item{tz}{The time zone of the study area. Must match one of the values
-present in \code{\link[base]{timezones}}.}
-
-\item{movements}{A list of movements for each target tag, created by groupMovements.}
+\item{type}{The type of y axis desired. One of "stations" (default) or "arrays".}
 
 \item{extension}{the format of the generated graphics}
-
-\item{spatial}{The spatial data frame.}
 }
 \value{
 A string of file locations in rmd syntax, to be included in printRmd

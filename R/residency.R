@@ -103,13 +103,35 @@
 #'
 #' @export
 #'
-residency <- function(tz = NULL, sections, section.order = NULL, datapack = NULL, max.interval = 60, minimum.detections = 2,
-  start.time = NULL, stop.time = NULL, speed.method = c("last to first", "last to last"),
-  speed.warning = NULL, speed.error = NULL, jump.warning = 2, jump.error = 3,
-  inactive.warning = NULL, inactive.error = NULL, exclude.tags = NULL, override = NULL,
-  report = FALSE, auto.open = TRUE, discard.orphans = FALSE, discard.first = NULL,
-  save.detections = FALSE, section.minimum = 2,
-  replicates = NULL, GUI = c("needed", "always", "never"), print.releases = TRUE) {
+residency <- function(
+  tz = NULL,
+  sections,
+  section.order = NULL,
+  datapack = NULL,
+  max.interval = 60,
+  minimum.detections = 2,
+  start.time = NULL,
+  stop.time = NULL,
+  speed.method = c("last to first", "last to last"),
+  speed.warning = NULL,
+  speed.error = NULL,
+  jump.warning = 2,
+  jump.error = 3,
+  inactive.warning = NULL,
+  inactive.error = NULL,
+  exclude.tags = NULL,
+  override = NULL,
+  report = FALSE,
+  auto.open = TRUE,
+  discard.orphans = FALSE,
+  discard.first = NULL,
+  save.detections = FALSE,
+  section.minimum = 2,
+  replicates = NULL,
+  GUI = c("needed", "always", "never"),
+  print.releases = TRUE,
+  plot.detections.by = c("stations", "arrays")) 
+{
 
   if (!missing(sections))
     warning(
@@ -131,22 +153,38 @@ by which sections are presented", immediate. = TRUE, call. = FALSE)
 # check arguments quality
   if (!is.null(datapack))
     checkToken(token = attributes(datapack)$actel.token,
-      timestamp = attributes(datapack)$timestamp)
+               timestamp = attributes(datapack)$timestamp)
 
-  aux <- checkArguments(dp = datapack, tz = tz, minimum.detections = minimum.detections,
-    max.interval = max.interval, speed.method = speed.method, speed.warning = speed.warning,
-    speed.error = speed.error, start.time = start.time, stop.time = stop.time,
-    report = report, auto.open = auto.open, save.detections = save.detections,
-    jump.warning = jump.warning, jump.error = jump.error, inactive.warning = inactive.warning,
-    inactive.error = inactive.error, exclude.tags = exclude.tags, override = override,
-    print.releases = print.releases, replicates = replicates, section.minimum = section.minimum,
-    section.order = section.order)
+  aux <- checkArguments(dp = datapack,
+                        tz = tz,
+                        minimum.detections = minimum.detections,
+                        max.interval = max.interval,
+                        speed.method = speed.method,
+                        speed.warning = speed.warning,
+                        speed.error = speed.error,
+                        start.time = start.time,
+                        stop.time = stop.time,
+                        report = report,
+                        auto.open = auto.open,
+                        save.detections = save.detections,
+                        jump.warning = jump.warning,
+                        jump.error = jump.error,
+                        inactive.warning = inactive.warning,
+                        inactive.error = inactive.error,
+                        exclude.tags = exclude.tags,
+                        override = override,
+                        print.releases = print.releases,
+                        replicates = replicates,
+                        section.minimum = section.minimum,
+                        section.order = section.order,
+                        plot.detections.by = plot.detections.by)
 
   speed.method <- aux$speed.method
   speed.warning <- aux$speed.warning
   speed.error <- aux$speed.error
   inactive.warning <- aux$inactive.warning
   inactive.error <- aux$inactive.error
+  plot.detections.by <- aux$plot.detections.by
   rm(aux)
 
   GUI <- checkGUI(GUI)
@@ -184,6 +222,7 @@ by which sections are presented", immediate. = TRUE, call. = FALSE)
     ", inactive.error = ", ifelse(is.null(inactive.error), "NULL", inactive.error),
     ", GUI = '", GUI, "'",
     ", print.releases = ", ifelse(print.releases, "TRUE", "FALSE"),
+    ", plot.detections.by = ", plot.detections.by,
     ")")
 
   appendTo("debug", the.function.call)
@@ -474,24 +513,60 @@ by which sections are presented", immediate. = TRUE, call. = FALSE)
 # Print graphics
   if (report) {
     appendTo(c("Screen", "Report"), "M: Producing the report.")
+    
     biometric.fragment <- printBiometrics(bio = bio)
-    printDot(dot = dot, spatial = spatial, print.releases = print.releases)
-    printSectionTimes(section.times = section.times, bio = bio, detections = valid.detections)
-    printGlobalRatios(global.ratios = global.ratios, daily.ratios = daily.ratios, spatial = spatial)
-    individual.detection.plots <- printIndividuals(detections.list = detections, bio = bio,
-        tz = tz, spatial = spatial, movements = movements, valid.movements = valid.movements)
-    array.circular.plots <- printCircular(times = timesToCircular(array.times), bio = bio, suffix = "_array")
-    section.arrival.circular.plots <- printCircular(times = timesToCircular(section.times$arrival), bio = bio, suffix = "_array")
-    section.departure.circular.plots <- printCircular(times = timesToCircular(section.times$departure), bio = bio, suffix = "_array")
+    
+    printDot(dot = dot,
+             spatial = spatial,
+             print.releases = print.releases)
+
+    printSectionTimes(section.times = section.times,
+                      bio = bio,
+                      detections = valid.detections)
+
+    printGlobalRatios(global.ratios = global.ratios,
+                      daily.ratios = daily.ratios,
+                      spatial = spatial)
+
+    individual.detection.plots <- printIndividuals(detections.list = detections,
+                                                   movements = movements,
+                                                   valid.movements = valid.movements,
+                                                   spatial = spatial,
+                                                   status.df = status.df,
+                                                   rsp.info = rsp.info,
+                                                   type = plot.detections.by)
+
+    array.circular.plots <- printCircular(times = timesToCircular(array.times),
+                                          bio = bio,
+                                          suffix = "_array")
+
+    section.arrival.circular.plots <- printCircular(times = timesToCircular(section.times$arrival),
+                                                    bio = bio, 
+                                                    suffix = "_section_arrival")
+
+    section.departure.circular.plots <- printCircular(times = timesToCircular(section.times$departure), 
+                                                      bio = bio, 
+                                                      suffix = "_section_departure")
+
     appendTo(c("Screen", "Report"), "M: Drawing individual residency graphics.")
+    
     dayrange <- range(as.Date(global.ratios[[1]]$Date))
     dayrange[1] <- dayrange[1] - 1
     dayrange[2] <- dayrange[2] + 1
-    individual.residency.plots <- printIndividualResidency(ratios = daily.ratios, dayrange = dayrange, spatial = spatial)
-    efficiency.fragment <- printEfficiency(efficiency = efficiency, intra.CJS = intra.array.CJS, type = "residency")
-    printLastSection(input = last.seen, spatial = spatial)
+    individual.residency.plots <- printIndividualResidency(ratios = daily.ratios,
+                                                           dayrange = dayrange,
+                                                           spatial = spatial)
+
+    efficiency.fragment <- printEfficiency(efficiency = efficiency,
+                                           intra.CJS = intra.array.CJS,
+                                           type = "residency")
+
+    printLastSection(input = last.seen,
+                     spatial = spatial)
+
     if (nrow(last.seen) > 3)
       last.seen.graph.size <- "width=90%" else last.seen.graph.size <- "height=4in"
+
     if (any(sapply(valid.detections, function(x) any(!is.na(x$Sensor.Value))))) {
       appendTo(c("Screen", "Report"), "M: Printing sensor values for tags with sensor data.")
       sensor.plots <- printSensorData(detections = valid.detections)
@@ -544,11 +619,13 @@ by which sections are presented", immediate. = TRUE, call. = FALSE)
                       detections = detections,
                       valid.detections = valid.detections,
                       last.seen = last.seen,
-                      last.seen.graph.size = last.seen.graph.size)
+                      last.seen.graph.size = last.seen.graph.size,
+                      plot.detections.by = plot.detections.by)
 
     appendTo("debug", "debug: Converting report to html")
     rmarkdown::render(input = paste0(tempdir(), "/actel_residency_report.Rmd"),
-      output_dir = tempdir(), quiet = TRUE)
+                      output_dir = tempdir(), 
+                      quiet = TRUE)
 
     appendTo("debug", "debug: Moving report")
     file.copy(paste0(tempdir(), "/actel_residency_report.html"), reportname)
@@ -574,16 +651,50 @@ by which sections are presented", immediate. = TRUE, call. = FALSE)
 
   appendTo("Screen", "M: Process finished successfully.")
 
-  if (invalid.dist)
-    return(list(detections = detections, valid.detections = valid.detections, spatial = spatial, deployments = deployments, arrays = arrays,
-      movements = movements, valid.movements = valid.movements, section.movements = section.movements,
-      status.df = status.df, efficiency = efficiency, intra.array.matrices = intra.array.matrices, intra.array.CJS = intra.array.CJS, array.times = array.times, section.times = section.times,
-      residency.list = residency.list, daily.ratios = daily.ratios, daily.positions = daily.positions, global.ratios = global.ratios, last.seen = last.seen, rsp.info = rsp.info))
-  else
-    return(list(detections = detections, valid.detections = valid.detections, spatial = spatial, deployments = deployments, arrays = arrays,
-      movements = movements, valid.movements = valid.movements, section.movements = section.movements,
-      status.df = status.df, efficiency = efficiency, intra.array.matrices = intra.array.matrices, intra.array.CJS = intra.array.CJS, array.times = array.times, section.times = section.times,
-      residency.list = residency.list, daily.ratios = daily.ratios, daily.positions = daily.positions, global.ratios = global.ratios, last.seen = last.seen, rsp.info = rsp.info, dist.mat = dist.mat))
+  if (invalid.dist) {
+    return(list(detections = detections,
+                valid.detections = valid.detections,
+                spatial = spatial,
+                deployments = deployments,
+                arrays = arrays,
+                movements = movements,
+                valid.movements = valid.movements,
+                section.movements = section.movements,
+                status.df = status.df,
+                efficiency = efficiency,
+                intra.array.matrices = intra.array.matrices,
+                intra.array.CJS = intra.array.CJS,
+                array.times = array.times,
+                section.times = section.times,
+                residency.list = residency.list,
+                daily.ratios = daily.ratios,
+                daily.positions = daily.positions,
+                global.ratios = global.ratios,
+                last.seen = last.seen,
+                rsp.info = rsp.info))
+  } else {
+    return(list(detections = detections,
+                valid.detections = valid.detections,
+                spatial = spatial,
+                deployments = deployments,
+                arrays = arrays,
+                movements = movements,
+                valid.movements = valid.movements,
+                section.movements = section.movements,
+                status.df = status.df,
+                efficiency = efficiency,
+                intra.array.matrices = intra.array.matrices,
+                intra.array.CJS = intra.array.CJS,
+                array.times = array.times,
+                section.times = section.times,
+                residency.list = residency.list,
+                daily.ratios = daily.ratios,
+                daily.positions = daily.positions,
+                global.ratios = global.ratios,
+                last.seen = last.seen,
+                rsp.info = rsp.info,
+                dist.mat = dist.mat))
+  }
 }
 
 #' Print Rmd report
@@ -597,10 +708,24 @@ by which sections are presented", immediate. = TRUE, call. = FALSE)
 #'
 #' @keywords internal
 #'
-printResidencyRmd <- function(override.fragment, biometric.fragment, efficiency.fragment,
-  individual.detection.plots, individual.residency.plots, array.circular.plots,
-  section.arrival.circular.plots, section.departure.circular.plots, sensor.plots, spatial,
-  deployments, detections, valid.detections, last.seen, last.seen.graph.size){
+printResidencyRmd <- function(
+  override.fragment,
+  biometric.fragment,
+  efficiency.fragment,
+  individual.detection.plots,
+  individual.residency.plots,
+  array.circular.plots,
+  section.arrival.circular.plots,
+  section.departure.circular.plots,
+  sensor.plots,
+  spatial,
+  deployments,
+  detections,
+  valid.detections,
+  last.seen,
+  last.seen.graph.size,
+  plot.detections.by)
+{
   if (any(grepl("Unknown", spatial$stations$Standard.name))) {
     unknown.fragment <- paste0('<span style="color:red"> Number of relevant unknown receivers: **', sum(grepl("Unknown", spatial$stations$Standard.name)), '**</span>\n')
   } else {
@@ -798,12 +923,13 @@ Note:
 
 ### Individual detection plots
 
-Note:
-  : The detections are coloured by array. The vertical black dashed line shows the time of release. The vertical grey dashed lines show the assigned moments of entry and exit for each study area section. The full dark-grey line shows the movement events considered valid, while the dashed dark-grey line shows the movement events considered invalid.
-  : The movement event lines move straight between the first and last station of each event (i.e. in-between detections will not be individually linked by the line).
-  : Manually **edited** fish are highlighted with **yellow** graphic borders.
+Note:  
+  : You can choose to plot detections by station or by array using the `plot.detections.by` argument.
+  : The detections are coloured by ', ifelse(plot.detections.by == "stations", 'array', 'section'), '. The vertical black dashed line shows the release time. The full dark-grey line shows the movement events considered valid, while the dashed dark-grey line shows the movement events considered invalid.
+', ifelse(plot.detections.by == "stations", '  : The movement event lines move straight between the first and last station of each event (i.e. in-between detections will not be individually linked by the line).\n', ''),
+'  : Manually **edited** fish are highlighted with **yellow** graphic borders.
   : Manually **overridden** fish are highlighted with **red** graphic borders.
-  : The stations have been grouped by array, following the array order provided either in the spatial.csv file or in the spatial.txt file.
+  : The ', ifelse(plot.detections.by == "stations", 'stations', 'arrays'), ' have been aligned by ', ifelse(plot.detections.by == "stations", 'array', 'section'), ', following the order provided ', ifelse(plot.detections.by == "stations", '', 'either '), 'in the spatial input', ifelse(plot.detections.by == "stations", '.', ' or the `section.order` argument.'), '
   : You can replicate these graphics and edit them as needed using the `plotMoves()` function.
   : The data used in these graphics is stored in the `detections` and `movements` objects (and respective valid counterparts).
 

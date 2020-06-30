@@ -604,14 +604,15 @@ knitr::kable(intra.array.CJS[[',i ,']]$absolutes)
 #' @inheritParams groupMovements
 #' @inheritParams simplifyMovements
 #' @inheritParams assembleMatrices
+#' @inheritParams plotMoves
 #' @param extension the format of the generated graphics
 #'
 #' @return A string of file locations in rmd syntax, to be included in printRmd
 #'
 #' @keywords internal
 #'
-printIndividuals <- function(detections.list, bio, status.df = NULL, tz,
-  movements, valid.movements = NULL, extension = "png", spatial) {
+printIndividuals <- function(detections.list, movements, valid.movements, spatial, 
+  status.df = NULL, rsp.info, type = c("stations", "arrays"), extension = "png") {
   # NOTE: The NULL variables below are actually column names used by ggplot.
   # This definition is just to prevent the package check from issuing a note due unknown variables.
   Timestamp <- NULL
@@ -619,17 +620,14 @@ printIndividuals <- function(detections.list, bio, status.df = NULL, tz,
   Array <- NULL
   Station <- NULL
 
-  cbPalette <- c("#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7", "#999999")
-  names(cbPalette) <- c("Orange", "Blue", "Green", "Yellow", "Darkblue", "Darkorange", "Pink", "Grey")
+  input <- list(detections = detections.list,
+                movements = movements,
+                valid.movements = valid.movements,
+                spatial = spatial,
+                status.df = status.df,
+                rsp.info = rsp.info)
 
   appendTo(c("Screen", "Report"), "M: Drawing individual detection graphics.")
-
-  # Y axis order
-  link <- match(spatial$stations$Array, c(unlist(spatial$array.order), "Unknown"))
-  names(link) <- 1:length(link)
-  link <- sort(link)
-  link <- as.numeric(names(link))
-  y.order <- spatial$stations$Standard.name[link]
 
   if (interactive())
     pb <- txtProgressBar(min = 0, max = length(detections.list), style = 3, width = 60) # nocov
@@ -638,124 +636,29 @@ printIndividuals <- function(detections.list, bio, status.df = NULL, tz,
 
   capture <- lapply(names(detections.list), function(fish) {
     counter <<- counter + 1
-    PlotData <- detections.list[[fish]]
-    PlotData$Standard.name <- factor(PlotData$Standard.name, levels = y.order)
 
-    if (any(levels(PlotData$Array) == "Unknown"))
-      levels(PlotData$Array)[levels(PlotData$Array) == "Unknown"] = "Invalid"
-    else
-      levels(PlotData$Array) <- c(levels(PlotData$Array), "Invalid")
-    if (any(!PlotData$Valid))
-      PlotData$Array[!PlotData$Valid] <- "Invalid"
+    p <- plotMoves(input = input, tag = fish, type = type)
 
-    if (!is.null(movements[[fish]])) {
-      add.movements <- TRUE
-      all.moves.line <- data.frame(
-        Station = as.vector(t(movements[[fish]][, c("First.station", "Last.station")])),
-        Timestamp = as.vector(t(movements[[fish]][, c("First.time", "Last.time")]))
-      )
-      all.moves.line$Station <- factor(all.moves.line$Station, levels = levels(PlotData$Standard.name))
-      all.moves.line$Timestamp <- as.POSIXct(all.moves.line$Timestamp, tz = tz)
-    } else {
-      add.movements <- FALSE
-    }
-
-    add.valid.movements <- FALSE
-    if (!is.null(valid.movements[[fish]])) {
-      add.valid.movements <- TRUE
-      simple.moves.line <- data.frame(
-        Station = as.vector(t(valid.movements[[fish]][, c("First.station", "Last.station")])),
-        Timestamp = as.vector(t(valid.movements[[fish]][, c("First.time", "Last.time")]))
-        )
-      simple.moves.line$Station <- factor(simple.moves.line$Station, levels = levels(PlotData$Standard.name))
-      simple.moves.line$Timestamp <- as.POSIXct(simple.moves.line$Timestamp, tz = tz)
-    }
-
-    colnames(PlotData)[1] <- "Timestamp"
-
-    the.row <- which(bio$Transmitter == fish)
-    start.line <- as.POSIXct(bio$Release.date[the.row], tz = tz)
-    first.time <- min(c(as.POSIXct(head(PlotData$Timestamp, 1), tz = tz), start.line))
-    attributes(first.time)$tzone <- tz
-    last.time <- as.POSIXct(tail(PlotData$Timestamp, 1), tz = tz)
-
-    if (!is.null(status.df)) {
-      status.row <- which(status.df$Transmitter == fish)
-      relevant.line <- status.df[status.row, (grepl("First.arrived", colnames(status.df)) | grepl("Last.left", colnames(status.df)))]
-    }
-
-    appendTo("debug", paste0("Debug: Printing detection graphic for fish ", fish, "."))
-    # Start plot
-    p <- ggplot2::ggplot(PlotData, ggplot2::aes(x = Timestamp, y = Standard.name, colour = Array))
-    # Choose background
-    default.cols <- TRUE
-    if (add.movements && attributes(movements[[fish]])$p.type == "Overridden") { # nocov start
-      p <- p + ggplot2::theme(
-        panel.background = ggplot2::element_rect(fill = "white"),
-        panel.border = ggplot2::element_rect(fill = NA, colour = "#ef3b32" , size = 2),
-        panel.grid.major = ggplot2::element_line(size = 0.5, linetype = 'solid', colour = "#ffd8d6"),
-        panel.grid.minor = ggplot2::element_line(size = 0.25, linetype = 'solid', colour = "#ffd8d6"),
-        legend.key = ggplot2::element_rect(fill = "white", colour = "white"),
-        )
-      default.cols <- FALSE
-    }
-    if (add.movements && attributes(movements[[fish]])$p.type == "Manual") {
-       p <- p + ggplot2::theme(
-        panel.background = ggplot2::element_rect(fill = "white"),
-        panel.border = ggplot2::element_rect(fill = NA, colour = "#ffd016" , size = 2),
-        panel.grid.major = ggplot2::element_line(size = 0.5, linetype = 'solid', colour = "#f2e4b8"),
-        panel.grid.minor = ggplot2::element_line(size = 0.25, linetype = 'solid', colour = "#f2e4b8"),
-        legend.key = ggplot2::element_rect(fill = "white", colour = "white"),
-        )
-      default.cols <- FALSE
-    } # nocov end
-    if (default.cols) {
-      p <- p + ggplot2::theme_bw()
-    }
-    # Plot starting line
-    p <- p + ggplot2::geom_vline(xintercept = start.line, linetype = "dashed")
-    # Plot entry/exit lines
-    if (!is.null(status.df)) {
-      for (l in 1:length(relevant.line)) {
-        if (!is.na(relevant.line[l])) {
-          p <- p + ggplot2::geom_vline(xintercept = as.POSIXct(relevant.line[[l]], tz = tz), linetype = "dashed", color = "grey")
-        }
-      }
-      rm(l, relevant.line)
-    }
-    # Plot movements
-    if (add.movements)
-      p <- p + ggplot2::geom_path(data = all.moves.line, ggplot2::aes(x = Timestamp, y = Station, group = 1), col = "grey40", linetype = "dashed")
-    if (add.valid.movements)
-      p <- p + ggplot2::geom_path(data = simple.moves.line, ggplot2::aes(x = Timestamp, y = Station, group = 1), col = "grey40")
-    # Trim graphic
-    p <- p + ggplot2::xlim(first.time, last.time)
-    # Paint
-    if (length(levels(PlotData$Array)) <= 8) {
-      the.colours <- as.vector(cbPalette)[c(1:(length(levels(PlotData$Array)) - 1), 8)]
-    } else {
-      the.colours <- c(gg_colour_hue(length(levels(PlotData$Array)) - 1), "#999999")
-    }
-    p <- p + ggplot2::scale_color_manual(values = the.colours, drop = FALSE)
-    # Plot points
-    p <- p + ggplot2::geom_point()
-    # Fixate Y axis
-    p <- p + ggplot2::scale_y_discrete(drop = FALSE)
-    # Caption and title
-    p <- p + ggplot2::guides(colour = ggplot2::guide_legend(reverse = TRUE))
-    if (!is.null(status.df))
-      p <- p + ggplot2::labs(title = paste0(fish, " (", status.df[status.df$Transmitter == fish, "Status"], ")"), x = paste("tz:", tz), y = "Station Standard Name")
-    else
-      p <- p + ggplot2::labs(title = paste0(fish, " (", nrow(PlotData), " detections)"), x = paste("tz:", tz), y = "Station Standard Name")
     # decide height
-    if (length(levels(PlotData$Standard.name)) <= 30)
+    if (type == "stations")
+      to.check <- levels(detections.list[[fish]]$Standard.name)
+    else
+      to.check <- levels(detections.list[[fish]]$Array)
+
+    if (length(to.check) <= 29)
       the.height <- 4
     else
-      the.height <- 4 + (length(levels(PlotData$Standard.name)) - 30) * 0.1
+      the.height <- 4 + ((to.check - 30) * 0.1)
+
     # default width:
     the.width <- 5
-    # Adjustments depending on number of arrays
-    if (length(levels(PlotData$Array)) > 14 & length(levels(PlotData$Array)) <= 29) {
+    # Adjustments depending on number of legend valudes
+    if (type == "stations")
+      to.check <- levels(detections.list[[fish]]$Array)
+    else
+      to.check <- unlist(spatial$array.order)
+
+    if (length(to.check) > 14 & length(to.check) <= 29) {
       if (counter %% 2 == 0) {
         p <- p + ggplot2::guides(colour = ggplot2::guide_legend(ncol = 2))
         the.width <- 6
@@ -764,7 +667,7 @@ printIndividuals <- function(detections.list, bio, status.df = NULL, tz,
         the.width <- 4
       }
     }
-    if (length(levels(PlotData$Array)) > 29) {
+    if (length(to.check) >= 29) {
       if (counter %% 2 == 0) {
         p <- p + ggplot2::guides(colour = ggplot2::guide_legend(ncol = 3))
         the.width <- 7.5
@@ -775,7 +678,7 @@ printIndividuals <- function(detections.list, bio, status.df = NULL, tz,
     }
     # Save
     ggplot2::ggsave(paste0(tempdir(), "/", fish, ".", extension), width = the.width, height = the.height)  # better to save in png to avoid point overlapping issues
-    rm(PlotData, start.line, last.time, first.time)
+
     if (counter %% 2 == 0) {
       individual.plots <<- paste0(individual.plots, "![](", tempdir(), "/", fish, ".", extension, "){ width=", the.width * 10, "% }\n")
     } else {

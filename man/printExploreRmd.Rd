@@ -13,7 +13,8 @@ printExploreRmd(
   spatial,
   deployments,
   detections,
-  valid.detections
+  valid.detections,
+  plot.detections.by
 )
 }
 \arguments{

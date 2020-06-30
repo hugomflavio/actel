@@ -35,9 +35,9 @@ plotMoves <- function(input, tag, type = c("stations", "arrays"), title, xlab, y
   # NOTE: The NULL variables below are actually column names used by ggplot.
   # This definition is just to prevent the package check from issuing a note due unknown variables.
   Timestamp <- NULL
-  Standard.name <- NULL
-  Array <- NULL
   Station <- NULL
+  plot.y <- NULL
+  Colour <- NULL
 
   type <- match.arg(type)
 
@@ -83,16 +83,16 @@ plotMoves <- function(input, tag, type = c("stations", "arrays"), title, xlab, y
     y.order <- spatial$stations$Standard.name[link]
   } else {
     if (any(detections$Array == "Unknown"))
-      levels(detections$Array) <- c(unlist(spatial$array.order), "Unknown")
+      y.order <- c(unlist(spatial$array.order), "Unknown")
     else
-      levels(detections$Array) <- unlist(spatial$array.order)
+      y.order <- unlist(spatial$array.order)
   }
 
   # y values
   if (type == "stations")
     detections$plot.y <- factor(detections$Standard.name, levels = y.order)    
   else
-    detections$plot.y <- detections$Array
+    detections$plot.y <- factor(detections$Array, levels = y.order)
 
   # Expand array levels (for type == stations only)
   if (type == "stations") {
