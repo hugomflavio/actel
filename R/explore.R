@@ -49,7 +49,9 @@
 #'  period for it to be considered true detections and not random noise.
 #'  Defaults to 2.
 #' @param override A vector of tags for which the user intends to manually
-#' define which movement events are valid and invalid.
+#'  define which movement events are valid and invalid.
+#' @param plot.detections.by The type of y axis desired for the individual
+#'  detection plots. One of "stations" (default) or "arrays".
 #' @param print.releases Logical: Should the release sites be printed in the
 #'  study area diagrams?
 #' @param report Logical. Should an HTML report be created at the end of the
@@ -121,11 +123,31 @@
 #'
 #' @export
 #'
-explore <- function(tz = NULL, datapack = NULL, max.interval = 60, minimum.detections = 2, start.time = NULL, stop.time = NULL,
-  speed.method = c("last to first", "last to last"), speed.warning = NULL, speed.error = NULL,
-  jump.warning = 2, jump.error = 3, inactive.warning = NULL, inactive.error = NULL,
-  exclude.tags = NULL, override = NULL, report = FALSE, auto.open = TRUE, discard.orphans = FALSE, discard.first = NULL,
-  save.detections = FALSE, GUI = c("needed", "always", "never"), print.releases = TRUE) {
+explore <- function(
+  tz = NULL,
+  datapack = NULL,
+  max.interval = 60,
+  minimum.detections = 2,
+  start.time = NULL,
+  stop.time = NULL,
+  speed.method = c("last to first", "last to last"),
+  speed.warning = NULL,
+  speed.error = NULL,
+  jump.warning = 2,
+  jump.error = 3,
+  inactive.warning = NULL,
+  inactive.error = NULL,
+  exclude.tags = NULL,
+  override = NULL,
+  report = FALSE,
+  auto.open = TRUE,
+  discard.orphans = FALSE,
+  discard.first = NULL,
+  save.detections = FALSE,
+  GUI = c("needed", "always", "never"),
+  print.releases = TRUE,
+  plot.detections.by = c("stations", "arrays")) 
+{
 
   deleteHelpers()
 
@@ -139,21 +161,35 @@ explore <- function(tz = NULL, datapack = NULL, max.interval = 60, minimum.detec
 # check arguments quality
   if (!is.null(datapack))
     checkToken(token = attributes(datapack)$actel.token,
-      timestamp = attributes(datapack)$timestamp)
+               timestamp = attributes(datapack)$timestamp)
 
-  aux <- checkArguments(dp = datapack, tz = tz, minimum.detections = minimum.detections,
-    max.interval = max.interval, speed.method = speed.method, speed.warning = speed.warning,
-    speed.error = speed.error, start.time = start.time, stop.time = stop.time,
-    report = report, auto.open = auto.open, save.detections = save.detections,
-    jump.warning = jump.warning, jump.error = jump.error, inactive.warning = inactive.warning,
-    inactive.error = inactive.error, exclude.tags = exclude.tags, override = override,
-    print.releases = print.releases)
-
+  aux <- checkArguments(dp = datapack,
+                        tz = tz,
+                        minimum.detections = minimum.detections,
+                        max.interval = max.interval,
+                        speed.method = speed.method,
+                        speed.warning = speed.warning,
+                        speed.error = speed.error,
+                        start.time = start.time,
+                        stop.time = stop.time,
+                        report = report,
+                        auto.open = auto.open,
+                        save.detections = save.detections,
+                        jump.warning = jump.warning,
+                        jump.error = jump.error,
+                        inactive.warning = inactive.warning,
+                        inactive.error = inactive.error,
+                        exclude.tags = exclude.tags,
+                        override = override,
+                        print.releases = print.releases,
+                        plot.detections.by = plot.detections.by)
+  
   speed.method <- aux$speed.method
   speed.warning <- aux$speed.warning
   speed.error <- aux$speed.error
   inactive.warning <- aux$inactive.warning
   inactive.error <- aux$inactive.error
+  plot.detections.by <- aux$plot.detections.by
   rm(aux)
 
   GUI <- checkGUI(GUI)
@@ -188,6 +224,7 @@ explore <- function(tz = NULL, datapack = NULL, max.interval = 60, minimum.detec
     ", save.detections = ", ifelse(save.detections, "TRUE", "FALSE"),
     ", GUI = '", GUI, "'",
     ", print.releases = ", ifelse(print.releases, "TRUE", "FALSE"),
+    ", plot.detections.by = ", plot.detections.by,
     ")")
 # --------------------
 
@@ -379,11 +416,23 @@ explore <- function(tz = NULL, datapack = NULL, max.interval = 60, minimum.detec
 # Print graphics
   if (report) {
     appendTo(c("Screen", "Report"), "M: Producing the report.")
+
     biometric.fragment <- printBiometrics(bio = bio)
-    printDot(dot = dot, spatial = spatial, print.releases = print.releases)
-    individual.plots <- printIndividuals(detections.list = detections, spatial = spatial,
-      tz = tz, movements = movements, valid.movements = valid.movements, bio = bio)
-    circular.plots <- printCircular(times = timesToCircular(times), bio = bio)
+
+    printDot(dot = dot, 
+             spatial = spatial, 
+             print.releases = print.releases)
+
+    individual.plots <- printIndividuals(detections.list = detections, 
+                                         movements = movements,
+                                         valid.movements = valid.movements,
+                                         spatial = spatial,
+                                         rsp.info = rsp.info,
+                                         type = plot.detections.by)
+
+    circular.plots <- printCircular(times = timesToCircular(times), 
+                                    bio = bio)
+
     if (any(sapply(valid.detections, function(x) any(!is.na(x$Sensor.Value))))) {
       appendTo(c("Screen", "Report"), "M: Printing sensor values for tags with sensor data.")
       sensor.plots <- printSensorData(detections = valid.detections)
@@ -430,7 +479,8 @@ explore <- function(tz = NULL, datapack = NULL, max.interval = 60, minimum.detec
                     spatial = spatial,
                     deployments = deployments,
                     detections = detections,
-                    valid.detections = valid.detections)
+                    valid.detections = valid.detections,
+                    plot.detections.by = plot.detections.by)
 
     appendTo("debug", "debug: Converting report to html")
     rmarkdown::render(input = paste0(tempdir(), "/actel_explore_report.Rmd"),
@@ -488,7 +538,7 @@ explore <- function(tz = NULL, datapack = NULL, max.interval = 60, minimum.detec
 #' @keywords internal
 #'
 printExploreRmd <- function(override.fragment, biometric.fragment, individual.plots,
-  circular.plots, sensor.plots, spatial, deployments, detections, valid.detections){
+  circular.plots, sensor.plots, spatial, deployments, detections, valid.detections, plot.detections.by){
  if (any(grepl("Ukn.", spatial$stations$Standard.name))) {
     unknown.fragment <- paste0('<span style="color:red"> Number of relevant unknown receivers: **', sum(grepl("Ukn.", spatial$stations$Standard.name)), '**</span>\n')
   } else {
@@ -602,10 +652,11 @@ Note:
 ### Individual detection plots
 
 Note:
-  : The detections are coloured by array. The full dark-grey line shows the movement events considered valid, while the dashed dark-grey line shows the movement events considered invalid.
-  : The movement event lines move straight between the first and last station of each event (i.e. in-between detections will not be individually linked by the line).
-  : Manually **edited** fish are highlighted with **yellow** graphic borders.
-  : The stations have been grouped by array, following the array order provided either in the spatial.csv file or in the spatial.txt file.
+  : You can choose to plot detections by station or by array using the `plot.detections.by` argument.
+  : The detections are coloured by ', ifelse(plot.detections.by == "stations", 'array', 'section'), '. The vertical black dashed line shows the release time. The full dark-grey line shows the movement events considered valid, while the dashed dark-grey line shows the movement events considered invalid.
+', ifelse(plot.detections.by == "stations", '  : The movement event lines move straight between the first and last station of each event (i.e. in-between detections will not be individually linked by the line).\n', ''),
+'  : Manually **edited** fish are highlighted with **yellow** graphic borders.
+  : The ', ifelse(plot.detections.by == "stations", 'stations', 'arrays'), ' have been aligned by ', ifelse(plot.detections.by == "stations", 'array', 'section'), ', following the order provided ', ifelse(plot.detections.by == "stations", '', 'either '), 'in the spatial input', ifelse(plot.detections.by == "stations", '.', ' or the `section.order` argument.'), '
   : You can replicate these graphics and edit them as needed using the `plotMoves()` function.
   : The data used in these graphics is stored in the `detections` and `movements` objects (and respective valid counterparts).
 

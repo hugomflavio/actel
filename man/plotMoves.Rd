@@ -7,6 +7,7 @@
 plotMoves(
   input,
   tag,
+  type = c("stations", "arrays"),
   title,
   xlab,
   ylab,
@@ -19,6 +20,8 @@ plotMoves(
 \item{input}{The results of an actel analysis (either explore, migration or residency).}
 
 \item{tag}{The transmitter to be plotted.}
+
+\item{type}{The type of y axis desired. One of "stations" (default) or "arrays".}
 
 \item{title}{An optional title for the plot. If left empty, a default title will be added.}
 

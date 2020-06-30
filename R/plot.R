@@ -5,6 +5,7 @@
 #'
 #' @param input The results of an actel analysis (either explore, migration or residency).
 #' @param tag The transmitter to be plotted.
+#' @param type The type of y axis desired. One of "stations" (default) or "arrays".
 #' @param title An optional title for the plot. If left empty, a default title will be added.
 #' @param xlab,ylab Optional axis names for the plot. If left empty, default axis names will be added.
 #' @param col An optional colour scheme for the detections. If left empty, default colours will be added.
@@ -30,13 +31,15 @@
 #'
 #' @export
 #'
-plotMoves <- function(input, tag, title, xlab, ylab, col, array.alias, frame.warning = TRUE) {
+plotMoves <- function(input, tag, type = c("stations", "arrays"), title, xlab, ylab, col, array.alias, frame.warning = TRUE) {
   # NOTE: The NULL variables below are actually column names used by ggplot.
   # This definition is just to prevent the package check from issuing a note due unknown variables.
   Timestamp <- NULL
-  Standard.name <- NULL
-  Array <- NULL
   Station <- NULL
+  plot.y <- NULL
+  Colour <- NULL
+
+  type <- match.arg(type)
 
   cbPalette <- c("#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7", "#999999")
   names(cbPalette) <- c("Orange", "Blue", "Green", "Yellow", "Darkblue", "Darkorange", "Pink", "Grey")
@@ -72,40 +75,74 @@ plotMoves <- function(input, tag, title, xlab, ylab, col, array.alias, frame.war
 
   # Y axis order
   spatial <- input$spatial
-  link <- match(spatial$stations$Array, c(unlist(spatial$array.order), "Unknown"))
-  names(link) <- 1:length(link)
-  link <- sort(link)
-  link <- as.numeric(names(link))
-  y.order <- spatial$stations$Standard.name[link]
-  detections$Standard.name <- factor(detections$Standard.name, levels = y.order)
-
-  # array levels
-  if (any(levels(detections$Array) == "Unknown"))
-    levels(detections$Array)[levels(detections$Array) == "Unknown"] = "Invalid"
-  else
-    levels(detections$Array) <- c(levels(detections$Array), "Invalid")
-
-  if (!missing(array.alias)) {
-    link <- match(names(array.alias), levels(detections$Array))
-    if (any(is.na(link)))
-      warning("Could not find ", ifelse(sum(is.na(link) == 1), "array ", "arrays "), names(array.alias)[is.na(link)], " in the study's arrays.", call. = FALSE, immediate. = TRUE)
-    levels(detections$Array)[link[!is.na(link)]] <- array.alias[!is.na(link)]
+  if (type == "stations") {
+    link <- match(spatial$stations$Array, c(unlist(spatial$array.order), "Unknown"))
+    names(link) <- 1:length(link)
+    link <- sort(link)
+    link <- as.numeric(names(link))
+    y.order <- spatial$stations$Standard.name[link]
+  } else {
+    if (any(detections$Array == "Unknown"))
+      y.order <- c(unlist(spatial$array.order), "Unknown")
+    else
+      y.order <- unlist(spatial$array.order)
   }
 
-  if (any(!detections$Valid))
-    detections$Array[!detections$Valid] <- "Invalid"
+  # y values
+  if (type == "stations")
+    detections$plot.y <- factor(detections$Standard.name, levels = y.order)    
+  else
+    detections$plot.y <- factor(detections$Array, levels = y.order)
 
-  # detection colours
-  if (missing(col)) {
-    if (length(levels(detections$Array)) <= 8) {
-      col <- as.vector(cbPalette)[c(1:(length(levels(detections$Array)) - 1), 8)]
+  # Expand array levels (for type == stations only)
+  if (type == "stations") {
+    if (any(levels(detections$Array) == "Unknown"))
+      levels(detections$Array)[levels(detections$Array) == "Unknown"] = "Invalid"
+    else
+      levels(detections$Array) <- c(levels(detections$Array), "Invalid")
+  }
+
+  # renaming arrays if relevant
+  if (!missing(array.alias)) {
+    if (type == "stations") {
+      link <- match(names(array.alias), levels(detections$Array))
+      if (any(is.na(link)))
+        warning("Could not find ", ifelse(sum(is.na(link) == 1), "array ", "arrays "), names(array.alias)[is.na(link)], " in the study's arrays.", call. = FALSE, immediate. = TRUE)
+      levels(detections$Array)[link[!is.na(link)]] <- array.alias[!is.na(link)]
     } else {
-      col <- c(gg_colour_hue(length(levels(detections$Array)) - 1), "#999999")
+      warning("array.alias can only be used when type = 'stations'. Ignoring array.alias.", immediate. = TRUE, call. = FALSE)
+    }
+  }
+
+  # detection colour column
+  if (type == "stations") {
+    detections$Colour <- detections$Array
+  } else {
+    aux <- lapply(seq_along(spatial$array.order), function(i) {
+      x <- match(detections$plot.y, spatial$array.order[[i]])
+      x[!is.na(x)] <- names(spatial$array.order)[i]
+      return(x)
+    })
+    aux <- combine(aux)
+    aux[is.na(aux)] <- "Invalid"
+    detections$Colour <- factor(aux, levels = c(names(spatial$array.order), "Invalid"))
+  }
+
+  # Rename colour for invalid data
+  if (any(!detections$Valid))
+    detections$Colour[!detections$Valid] <- "Invalid"
+
+  # choose colours
+  if (missing(col)) {
+    if (length(levels(detections$Colour)) <= 8) {
+      col <- as.vector(cbPalette)[c(1:(length(levels(detections$Colour)) - 1), 8)]
+    } else {
+      col <- c(gg_colour_hue(length(levels(detections$Colour)) - 1), "#999999")
     }
   } else {
-    if (length(col) != (length(levels(detections$Array)) - 1)) {
-      warning("Not enough colours supplied in 'col' (", length(col)," supplied and ", (length(levels(detections$Array)) - 1), " needed). Reusing colours.", immediate. = TRUE, call. = FALSE)
-      col <- rep(col, length.out = (length(levels(detections$Array)) - 1))
+    if (length(col) != (length(levels(detections$Colour)) - 1)) {
+      warning("Not enough colours supplied in 'col' (", length(col)," supplied and ", (length(levels(detections$Colour)) - 1), " needed). Reusing colours.", immediate. = TRUE, call. = FALSE)
+      col <- rep(col, length.out = (length(levels(detections$Colour)) - 1))
     }
     col <- c(col, "#999999")
   }
@@ -113,11 +150,16 @@ plotMoves <- function(input, tag, title, xlab, ylab, col, array.alias, frame.war
   # movements lines
   if (!is.null(movements)) {
     add.movements <- TRUE
-    all.moves.line <- data.frame(
-      Station = as.vector(t(movements[, c("First.station", "Last.station")])),
-      Timestamp = as.vector(t(movements[, c("First.time", "Last.time")]))
-    )
-    all.moves.line$Station <- factor(all.moves.line$Station, levels = levels(detections$Standard.name))
+    if (type == "stations") {
+      all.moves.line <- data.frame(
+        plot.y = as.vector(t(movements[, c("First.station", "Last.station")])),
+        Timestamp = as.vector(t(movements[, c("First.time", "Last.time")])))
+    } else {
+      all.moves.line <- data.frame(
+        plot.y = rep(movements$Array, each = 2),
+        Timestamp = as.vector(t(movements[, c("First.time", "Last.time")])))
+    }
+    all.moves.line$plot.y <- factor(all.moves.line$plot.y, levels = levels(detections$plot.y))
     all.moves.line$Timestamp <- as.POSIXct(all.moves.line$Timestamp, tz = tz)
   } else {
     add.movements <- FALSE
@@ -126,11 +168,16 @@ plotMoves <- function(input, tag, title, xlab, ylab, col, array.alias, frame.war
   add.valid.movements <- FALSE
   if (!is.null(valid.movements)) {
     add.valid.movements <- TRUE
-    simple.moves.line <- data.frame(
-      Station = as.vector(t(valid.movements[, c("First.station", "Last.station")])),
-      Timestamp = as.vector(t(valid.movements[, c("First.time", "Last.time")]))
-      )
-    simple.moves.line$Station <- factor(simple.moves.line$Station, levels = levels(detections$Standard.name))
+    if (type == "stations") {
+      simple.moves.line <- data.frame(
+        plot.y = as.vector(t(valid.movements[, c("First.station", "Last.station")])),
+        Timestamp = as.vector(t(valid.movements[, c("First.time", "Last.time")])))
+    } else {
+      simple.moves.line <- data.frame(
+        plot.y = rep(valid.movements$Array, each = 2),
+        Timestamp = as.vector(t(valid.movements[, c("First.time", "Last.time")])))
+    }
+    simple.moves.line$plot.y <- factor(simple.moves.line$plot.y, levels = levels(detections$plot.y))
     simple.moves.line$Timestamp <- as.POSIXct(simple.moves.line$Timestamp, tz = tz)
   }
 
@@ -142,13 +189,13 @@ plotMoves <- function(input, tag, title, xlab, ylab, col, array.alias, frame.war
   # plot title
   if (missing(title)) {
     if (like.migration)
-      title <- paste0(tag, " (", status.df[status.df$Transmitter == tag, "Status"], ")")
+      title <- paste0(tag, " (", status.df[status.df$Transmitter == tag & !is.na(status.df$Transmitter), "Status"], ")")
     else
       title <- paste0(tag, " (", nrow(detections), " detections)")
   }
 
   # Start plot
-  p <- ggplot2::ggplot(detections, ggplot2::aes(x = Timestamp, y = Standard.name, colour = Array))
+  p <- ggplot2::ggplot(detections, ggplot2::aes(x = Timestamp, y = plot.y, colour = Colour))
 
   # Choose background
   default.cols <- TRUE
@@ -188,9 +235,9 @@ plotMoves <- function(input, tag, title, xlab, ylab, col, array.alias, frame.war
   }
   # Plot movements
   if (add.movements)
-    p <- p + ggplot2::geom_path(data = all.moves.line, ggplot2::aes(x = Timestamp, y = Station, group = 1), col = "grey40", linetype = "dashed")
+    p <- p + ggplot2::geom_path(data = all.moves.line, ggplot2::aes(x = Timestamp, group = 1), col = "grey40", linetype = "dashed")
   if (add.valid.movements)
-    p <- p + ggplot2::geom_path(data = simple.moves.line, ggplot2::aes(x = Timestamp, y = Station, group = 1), col = "grey40")
+    p <- p + ggplot2::geom_path(data = simple.moves.line, ggplot2::aes(x = Timestamp, group = 1), col = "grey40")
   # Trim graphic
   p <- p + ggplot2::xlim(first.time, last.time)
   # Paint

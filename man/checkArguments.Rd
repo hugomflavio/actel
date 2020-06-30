@@ -24,6 +24,7 @@ checkArguments(
   exclude.tags,
   override,
   print.releases,
+  plot.detections.by = c("stations", "arrays"),
   if.last.skip.section = NULL,
   replicates = NULL,
   section.minimum = NULL,
@@ -107,6 +108,9 @@ define which movement events are valid and invalid.}
 
 \item{print.releases}{Logical: Should the release sites be printed in the
 study area diagrams?}
+
+\item{plot.detections.by}{The type of y axis desired for the individual
+detection plots. One of "stations" (default) or "arrays".}
 
 \item{if.last.skip.section}{Logical: Should a fish detected at the last array
 of a given section be considered to have disappeared in the next section?}

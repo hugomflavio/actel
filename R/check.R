@@ -36,8 +36,8 @@ NULL
 #'
 checkArguments <- function(dp, tz, minimum.detections, max.interval, speed.method = c("last to first", "last to last"),
   speed.warning, speed.error, start.time, stop.time, report, auto.open, save.detections, jump.warning, jump.error,
-  inactive.warning, inactive.error, exclude.tags, override, print.releases, if.last.skip.section = NULL,
-  replicates = NULL, section.minimum = NULL, section.order = NULL) {
+  inactive.warning, inactive.error, exclude.tags, override, print.releases, plot.detections.by = c("stations", "arrays"),
+  if.last.skip.section = NULL, replicates = NULL, section.minimum = NULL, section.order = NULL) {
 
   no.dp.args <- c("tz", "section.order", "start.time", "stop.time", "save.detections", "exclude.tags")
   link <- c(!is.null(tz), 
@@ -151,6 +151,10 @@ checkArguments <- function(dp, tz, minimum.detections, max.interval, speed.metho
   if (!is.logical(print.releases))
     stop("'print.releases' must be logical.\n", call. = FALSE)
 
+  if (!is.character(plot.detections.by))
+    stop("'plot.detections.by' should be one of 'stations' or 'arrays'")
+  plot.detections.by <- match.arg(plot.detections.by)
+
   # Check that all the overridden fish are part of the study
   if (!is.null(dp) && !is.null(override)) {
     override_signals <- unlist(lapply(strsplit(override, "-"), function(x) tail(x, 1)))
@@ -175,8 +179,12 @@ checkArguments <- function(dp, tz, minimum.detections, max.interval, speed.metho
   if (!is.null(section.minimum) && !is.numeric(section.minimum))
     stop("'section.minimum' must be numeric.\n", call. = FALSE)
 
-  return(list(speed.method = speed.method, speed.warning = speed.warning, speed.error = speed.error,
-    inactive.warning = inactive.warning, inactive.error = inactive.error))
+  return(list(speed.method = speed.method,
+              speed.warning = speed.warning,
+              speed.error = speed.error,
+              inactive.warning = inactive.warning,
+              inactive.error = inactive.error,
+              plot.detections.by = plot.detections.by))
 }
 
 

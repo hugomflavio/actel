@@ -15,7 +15,7 @@ Changes
   * **Arrays can now be named freely** (short names are still recommended).
 
 Enhancements:
-  * the shapefiles of the study areas can now be water or land polygons. Use the new argument "time" in `loadShape()` to switch from land shapefiles (the default) to water shapefiles.
+  * The shapefiles of the study areas can now be water or land polygons. Use the new argument "time" in `loadShape()` to switch from land shapefiles (the default) to water shapefiles.
   * Paint groups consistently in circular plots.
   * Improved handling of long array lists in individual detection plots.
   * Display event number on inactiveness checks.
@@ -24,6 +24,7 @@ Enhancements:
   * New `preload()` function allows advanced users to run actel without requiring input files. See more in the new dedicated vignette.
   * New argument `section.order` allows the user to specify the order by which the sections should be listed.
   * `plotTimes()` has been expanded with new arguments and better compatibility for multiple groups.
+  * New argument `plot.detections.by` allows the user to plot the detections by array, rather than by section. Applied both to the analyses and to `plotMoves()`.
   
 ## actel 1.0.0 (CRAN)
 

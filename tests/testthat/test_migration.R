@@ -124,7 +124,7 @@ rm(output)
 
 test_that("migration is able to run speed and inactiveness checks.", {
 	skip_on_cran()
-	output <- suppressWarnings(migration(tz = 'Europe/Copenhagen', report = TRUE,
+	output <- suppressWarnings(migration(tz = 'Europe/Copenhagen', report = TRUE, plot.detections.by = "arrays",
 		GUI = "never", speed.warning = 1000000, inactive.warning = 1000000, replicates = list(A9 = c("St.16", "St.17"))))
 		
 	expect_false(any(is.na(match(names(output), c('arrays', 'deployments', 'detections', 'dist.mat', 'group.overview',
