@@ -271,9 +271,9 @@ tableInteraction <- function(moves, fish, trigger, GUI, force = FALSE) { # nocov
       message(paste0(capture.output(print(to.display, topn = nrow(to.display))), collapse = "\n"))
       if (nrow(moves) >= 100)
         message("\nM: Long table detected, repeating warning(s) that triggered the interaction:\n-----\n", trigger, "\n-----")
-      if (nrow(moves) < 100 & nrow(moves) >= 30)
+      if (nrow(moves) < 100 & nrow(moves) >= 10)
         message("\nM: Please find the exception which triggered this interaction at the top of the table.")
-        message("")
+      message("")
       if (force) {
         output <- invalidateEvents(movements = moves, fish = fish)
       } else {
