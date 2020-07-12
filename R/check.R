@@ -221,7 +221,7 @@ tableInteraction <- function(moves, fish, trigger, GUI, force = FALSE) { # nocov
   if (GUI == "never")
     popup <- FALSE
   if (GUI == "needed") {
-    if (nrow(moves) > min(800, (getOption("max.print") - 2)))
+    if ((nrow(moves) * ncol(moves)) > min((800 * ncol(moves)), (getOption("max.print") - 2)))
       popup <- TRUE
     else
       popup <- FALSE
@@ -238,7 +238,7 @@ tableInteraction <- function(moves, fish, trigger, GUI, force = FALSE) { # nocov
       appendTo("Screen", "M: Comment successfully stored, returning to the previous interaction.")
     }
   } else {
-    if (nrow(moves) > min(800, (getOption("max.print") - 2))) {
+    if ((nrow(moves) * ncol(moves)) > min((800 * ncol(moves)), (getOption("max.print") - 2))) {
       message("The movements table for fish '", fish, "' is too large to display on the console and GUI is set to 'never'.\nTemporarily saving the table to '", paste0(tempdir(), '/actel_inspect_movements.csv'), "'. Please inspect this file and decide if any events should be considered invalid.\nPlease use the 'Event' column as a reference for the event number.")
       to.print <- cbind(data.frame(Event = 1:nrow(moves)), moves)
       write.csv(to.print, paste0(tempdir(), "/actel_inspect_movements.csv"), row.names = FALSE)
