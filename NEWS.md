@@ -8,6 +8,7 @@ Fixes:
   * Prevent crash if all detections for a given stray tag were removed during detection quality checks.
   * Prevent migration crash if all movement events are rendered invalid before section movements are created.
   * Prevent crash related with circular plotting when running an analysis on more than eight fish groups.
+  * Prevent bug in older R versions where actel did not display all table rows, for long tables displayed in the console.
 
 Changes
   * `stripCodeSpaces()` has been replaced with `extractSignals()`.
