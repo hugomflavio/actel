@@ -1080,6 +1080,9 @@ compileDetections <- function(path = "detections", start.time = NULL, stop.time 
   # Convert codespaces
   output <- convertCodes(input = output)
 
+  # Compile transmitters
+  output$Transmitter <- as.factor(paste(output$CodeSpace, output$Signal, sep = "-"))
+
   # save detections in UTC
   actel.detections <- list(detections = output, timestamp = Sys.time())
   if (save.detections) {
@@ -1090,9 +1093,6 @@ compileDetections <- function(path = "detections", start.time = NULL, stop.time 
   # Convert time-zones
   output <- convertTimes(input = output, start.time = start.time,
     stop.time = stop.time, tz = tz)
-
-  # Compile transmitters
-  output$Transmitter <- as.factor(paste(output$CodeSpace, output$Signal, sep = "-"))
 
   return(output)
 }
