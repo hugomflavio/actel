@@ -277,7 +277,7 @@ tableInteraction <- function(moves, fish, trigger, GUI, force = FALSE) { # nocov
         }
       }
     } else {
-      message("Opening movements list for inspection:\n")
+      message("Opening movements list from fish ", fish, " for inspection:\n")
       if (colnames(moves)[1] == "Section")
         to.display <- moves[, -c(5, 7)]
       else
