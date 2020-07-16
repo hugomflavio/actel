@@ -16,6 +16,7 @@ Changes
   * **Arrays can now be named freely** (short names are still recommended).
   * Perform quality checks on the 'replicates' argument earlier in the analyses.
   * User decisions no longer have default options.
+  * Users must now list **only** the tag signals in the 'override' argument.
 
 Enhancements:
   * The shapefiles of the study areas can now be water or land polygons. Use the new argument "time" in `loadShape()` to switch from land shapefiles (the default) to water shapefiles.

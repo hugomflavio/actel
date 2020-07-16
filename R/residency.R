@@ -210,7 +210,7 @@ by which sections are presented", immediate. = TRUE, call. = FALSE)
     ", jump.error = ", jump.error,
     ", inactive.warning = ", ifelse(is.null(inactive.warning), "NULL", inactive.warning),
     ", exclude.tags = ", ifelse(is.null(exclude.tags), "NULL", paste0("c('", paste(exclude.tags, collapse = "', '"), "')")),
-    ", override = ", ifelse(is.null(override), "NULL", paste0("c('", paste(override, collapse = "', '"), "')")),
+    ", override = ", ifelse(is.null(override), "NULL", paste0("c(", paste(override, collapse = ", "), ")")),
     ", report = ", ifelse(report, "TRUE", "FALSE"),
     ", auto.open = ", ifelse(auto.open, "TRUE", "FALSE"),
     ", discard.orphans = ", ifelse(discard.orphans, "TRUE", "FALSE"),
@@ -220,7 +220,7 @@ by which sections are presented", immediate. = TRUE, call. = FALSE)
     ", inactive.error = ", ifelse(is.null(inactive.error), "NULL", inactive.error),
     ", GUI = '", GUI, "'",
     ", print.releases = ", ifelse(print.releases, "TRUE", "FALSE"),
-    ", plot.detections.by = ", plot.detections.by,
+    ", plot.detections.by = '", plot.detections.by, "'",
     ")")
 
   appendTo("debug", the.function.call)
@@ -338,7 +338,7 @@ by which sections are presented", immediate. = TRUE, call. = FALSE)
 
   movement.names <- names(movements)
 
-  if (any(link <- !override %in% movement.names)) {
+  if (any(link <- !override %in% extractSignals(movement.names))) {
     appendTo(c("Screen", "Warning", "Report"), paste0("Override has been triggered for fish ", paste(override[link], collapse = ", "), " but ",
       ifelse(sum(link) == 1, "this", "these"), " fish ", ifelse(sum(link) == 1, "was", "were")," not detected."))
     override <- override[!link]
@@ -348,7 +348,7 @@ by which sections are presented", immediate. = TRUE, call. = FALSE)
     fish <- names(movements)[i]
     appendTo("debug", paste0("debug: Checking movement quality for fish ", fish,"."))
 
-    if (is.na(match(fish, override))) {
+    if (is.na(match(extractSignals(fish), override))) {
       release <- as.character(bio$Release.site[na.as.false(bio$Transmitter == fish)])
       release <- unlist(strsplit(with(spatial, release.sites[release.sites$Standard.name == release, "Array"]), "|", fixed = TRUE))
 

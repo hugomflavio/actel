@@ -156,10 +156,9 @@ checkArguments <- function(dp, tz, minimum.detections, max.interval, speed.metho
 
   # Check that all the overridden fish are part of the study
   if (!is.null(dp) && !is.null(override)) {
-    override_signals <- unlist(lapply(strsplit(override, "-"), function(x) tail(x, 1)))
     lowest_signals <- sapply(dp$bio$Signal, function(i) min(as.numeric(unlist(strsplit(as.character(i), "|", fixed = TRUE)))))
-    if (any(link <- is.na(match(override_signals, lowest_signals))))
-      stop("Some tag signals listed in 'override' ('", paste0(override[link], collapse = "', '"), "') are not listed in the biometrics data.\n", call. = FALSE)
+    if (any(link <- is.na(match(override, lowest_signals))))
+      stopAndReport("Some tag signals listed in 'override' ('", paste0(override[link], collapse = "', '"), "') are not listed in the biometrics data.")
   }
 
   # NON-explore checks

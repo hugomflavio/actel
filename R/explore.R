@@ -48,7 +48,7 @@
 #'  minimum number of times a tag must have been recorded during the study
 #'  period for it to be considered true detections and not random noise.
 #'  Defaults to 2.
-#' @param override A vector of tags for which the user intends to manually
+#' @param override A vector of signals for which the user intends to manually
 #'  define which movement events are valid and invalid.
 #' @param plot.detections.by The type of y axis desired for the individual
 #'  detection plots. One of "stations" (default) or "arrays".
@@ -216,14 +216,14 @@ explore <- function(
     ", inactive.warning = ", ifelse(is.null(inactive.warning), "NULL", inactive.warning),
     ", inactive.error = ", ifelse(is.null(inactive.error), "NULL", inactive.error),
     ", exclude.tags = ", ifelse(is.null(exclude.tags), "NULL", paste0("c('", paste(exclude.tags, collapse = "', '"), "')")),
-    ", override = ", ifelse(is.null(override), "NULL", paste0("c('", paste(override, collapse = "', '"), "')")),
+    ", override = ", ifelse(is.null(override), "NULL", paste0("c(", paste(override, collapse = ", "), ")")),
     ", report = ", ifelse(report, "TRUE", "FALSE"),
     ", discard.orphans = ", ifelse(discard.orphans, "TRUE", "FALSE"),
     ", auto.open = ", ifelse(auto.open, "TRUE", "FALSE"),
     ", save.detections = ", ifelse(save.detections, "TRUE", "FALSE"),
     ", GUI = '", GUI, "'",
     ", print.releases = ", ifelse(print.releases, "TRUE", "FALSE"),
-    ", plot.detections.by = ", plot.detections.by,
+    ", plot.detections.by = '", plot.detections.by, "'",
     ")")
 
   appendTo("debug", the.function.call)
@@ -315,9 +315,9 @@ explore <- function(
 
   movement.names <- names(movements)
 
-  if (any(link <- !override %in% movement.names)) {
+  if (any(link <- !override %in% extractSignals(movement.names))) {
     appendTo(c("Screen", "Warning", "Report"), paste0("Override has been triggered for fish ", paste(override[link], collapse = ", "), " but ",
-      ifelse(sum(link) == 1, "this", "these"), " fish ", ifelse(sum(link) == 1, "was", "were")," not detected."))
+      ifelse(sum(link) == 1, "this signal was", "these signals were"), " not detected."))
     override <- override[!link]
   }
 
@@ -325,7 +325,7 @@ explore <- function(
     fish <- names(movements)[i]
     appendTo("debug", paste0("debug: Checking movement quality for fish ", fish,"."))
 
-    if (is.na(match(fish, override))) {
+    if (is.na(match(extractSignals(fish), override))) {
       release <- as.character(bio$Release.site[na.as.false(bio$Transmitter == fish)])
       release <- unlist(strsplit(with(spatial, release.sites[release.sites$Standard.name == release, "Array"]), "|", fixed = TRUE))
 
