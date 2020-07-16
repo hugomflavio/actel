@@ -277,14 +277,30 @@ by which sections are presented", immediate. = TRUE, call. = FALSE)
   dist.mat <- study.data$dist.mat
   invalid.dist <- study.data$invalid.dist
   detections.list <- study.data$detections.list
-
-  if (all(!grepl("^Section$", colnames(spatial$stations))))
-    stop("To run migration(), please assign the arrays to their sections using a 'Section' column in the spatial input.", call. = FALSE)
 # -------------------------------------
 
 # Final quality checks
+  # Verify the existance of sections
+  if (all(!grepl("^Section$", colnames(spatial$stations))))
+    stop("To run migration(), please assign the arrays to their sections using a 'Section' column in the spatial input.", call. = FALSE)
+
+  # Verify that replicate information is valid
   if (!is.null(replicates) && any(is.na(match(names(replicates), names(arrays)))))
     stop("Some of the array names listed in the 'replicates' argument do not match the study's arrays.\n", call. = FALSE)
+
+  capture <- lapply(names(replicates), function(i) {
+    x <- replicates[[i]]
+    all.stations <- spatial$stations$Standard.name[spatial$stations$Array == i]
+    if (any(link <- !x %in% all.stations)) {
+      stop(paste0("In replicates: Station", 
+                  ifelse(sum(link) > 1, "s ", " "), 
+                  paste(x[link], collapse = ", "), 
+                  ifelse(sum(link) > 1, " are", " is"), 
+                  " not part of ", i, " (available stations: ", 
+                  paste(all.stations, collapse = ", "), ")."), 
+           call. = FALSE)
+    }
+  })
 
   if (any(!sapply(arrays, function(x) is.null(x$parallel)))) {
     if (disregard.parallels)
