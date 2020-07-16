@@ -523,6 +523,8 @@ explore <- function(
 
   appendTo("Screen", "M: Process finished successfully.")
 
+  finished.unexpectedly <- FALSE
+
   if (invalid.dist) {
     return(list(detections = detections, valid.detections = valid.detections, spatial = spatial, deployments = deployments, arrays = arrays,
       movements = movements, valid.movements = valid.movements, times = times, rsp.info = rsp.info))
