@@ -1,3 +1,48 @@
+#' Wrap frequantly used code to handle user input
+#' 
+#' @param question The question to be asked
+#' @param choices The accepted inputs. Leave empty for any input
+#' @param tag the tag code (for comments only)
+#' @param hash A string to attach to the decision in the UD. Ignored if input already has a hashstring
+#' 
+#' @keywords internal
+#' 
+userInput <- function(question, choices, tag, hash) {
+  try.again <- TRUE
+  
+  while (try.again) {
+    decision <- readline(question)
+    aux <- strsplit(as.character(decision), "[ ]*#")[[1]]
+    output <- tolower(aux[1])
+    
+    if (!missing(choices) && is.na(match(output, choices))) {
+      appendTo("Screen", paste0("Option not recognized, please choose one of: '", paste0(choices, collapse = "', '"), "'."))
+      output <- NULL
+    }
+    
+    if (!is.null(output)) {
+      if (output == "comment") {
+        if (missing(tag)) {
+          warning("A comment was requested but that option is not available here. Please try again.", immediate. = TRUE, call. = FALSE)
+        } else {
+          appendTo("UD", paste("comment # on", tag))
+          appendTo(c("UD", "Comment"), readline(paste0("New comment on fish ", tag, ": ")), tag)
+          appendTo("Screen", "M: Comment successfully stored, returning to the previous interaction.")
+        }
+      } else {
+        try.again <- FALSE
+      }
+    }
+  }
+  
+  if (length(aux) == 1 & !missing(hash))
+    appendTo("UD", paste(decision, hash))
+  else
+    appendTo("UD", paste(decision))
+
+  return(output)
+}
+
 #' Find original station name
 #' 
 #' @param input The results of an actel analysis (either explore, migration or residency).
@@ -465,34 +510,6 @@ emergencyBreak <- function() {
   file.rename(paste(tempdir(), "temp_log.txt", sep = "/"), paste(tempdir(), logname, sep = "/"))
   deleteHelpers()
 }
-
-#' Write in comments
-#'
-#' Checks if the user has invoked the comment command for a specific fish, and stores the comment.
-#'
-#' @param line The text of the interaction in which the user may or may not request a comment.
-#' @param tag The tag number currently being analysed.
-#'
-#' @return No return value, called for side effects.
-#'
-#' @keywords internal
-#'
-commentCheck <- function(line, tag) { # nocov start
-  comment.check = TRUE
-  while (comment.check) {
-    decision <- readline(line)
-    if (any(matchl(decision, c("Comment", "comment")))) {
-      appendTo(c("UD"), "Comment")
-      {
-        appendTo(c("UD", "Comment"), readline(paste0("New comment on fish ", tag, ": ")), tag)
-      }
-      appendTo("Screen", "M: Comment successfully stored, returning to the previous interaction.")
-    } else {
-      comment.check = FALSE
-    }
-  }
-  return(decision)
-} # nocov end
 
 #' Extract timestamps from the analysis results.
 #'

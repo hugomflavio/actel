@@ -231,12 +231,8 @@ tableInteraction <- function(moves, fish, trigger, GUI, force = FALSE) { # nocov
 
   if (popup) {
     output <- graphicalInvalidate(moves = moves, fish = fish, trigger = trigger)
-    decision <- readline(paste0("Would you like to leave a comment for fish ", fish, "?(y/N) "))
-    appendTo(c("UD"), decision)
-    if (decision == "y" | decision == "Y") {
-      appendTo(c("UD", "Comment"), readline(paste0("New comment on fish ", fish, ": " )), fish)
-      appendTo("Screen", "M: Comment successfully stored, returning to the previous interaction.")
-    }
+    decision <- userInput(paste0("Would you like to leave a comment for fish ", fish, "?(comment/n) "), 
+                          choices = c("comment", "n"), hash = paste0("# comment ", fish, "?"))
   } else {
     # check if table can be printed on console
     if (colnames(moves)[1] == "Section")
@@ -259,9 +255,11 @@ tableInteraction <- function(moves, fish, trigger, GUI, force = FALSE) { # nocov
       if (force) {
         output <- invalidateEvents(movements = moves, fish = fish)
       } else {
-        decision <- commentCheck(line = "Would you like to render any movement event invalid?(y/N/comment) ", tag = fish)
-        appendTo("UD", decision)
-        if (decision == "y" | decision == "Y") {
+        decision <- userInput("Would you like to render any movement event invalid?(y/n/comment) ",
+                              choices = c("y", "n", "comment"), 
+                              tag = fish, 
+                              hash = paste0("# invalidate moves in ", fish, "?"))
+        if (decision == "y") {
           output <- invalidateEvents(movements = moves, fish = fish)
         } else {
           output <- moves
@@ -291,9 +289,11 @@ tableInteraction <- function(moves, fish, trigger, GUI, force = FALSE) { # nocov
       if (force) {
         output <- invalidateEvents(movements = moves, fish = fish)
       } else {
-        decision <- commentCheck(line = "Would you like to render any movement event invalid?(y/N/comment) ", tag = fish)
-        appendTo("UD", decision)
-        if (decision == "y" | decision == "Y") {
+        decision <- userInput("Would you like to render any movement event invalid?(y/n/comment) ",
+                              choices = c("y", "n", "comment"), 
+                              tag = fish, 
+                              hash = paste0("# invalidate moves in ", fish, "?"))
+        if (decision == "y") {
           output <- invalidateEvents(movements = moves, fish = fish)
         } else {
           output <- moves
@@ -380,30 +380,18 @@ checkDupDetections <- function(input) {
     appendTo("Screen", "Possible options:\n   a) Stop and double-check the data\n   b) Remove duplicated detections\n   c) Continue without changes")
     message("")
     if (interactive()) { # nocov start
-      unknown.input = TRUE
-      while (unknown.input) {
-        decision <- readline("Decision:(a/b/c) ")
-        if (decision == "a" | decision == "A") {
-          unknown.input = FALSE
-          appendTo("UD", decision)
-          emergencyBreak()
-          stop("Function stopped by user command.", call. = FALSE)
-        }
-        if (decision == "b" | decision == "B") {
-          appendTo("UD", decision)
-          unknown.input = FALSE
-          appendTo(c("Screen", "Report"), "M: Removing duplicated detections from the analysis per user command.")
-          output <- input[!dups, ]
-        }
-        if (decision == "c" | decision == "C") {
-          appendTo("UD", decision)
-          unknown.input = FALSE
-          appendTo(c("Screen", "Report"), "M: Continuing analysis with duplicated detections per user command.")
-          output <- input
-        }
-        if (unknown.input) {
-          appendTo("Screen", "Option not recognized, please input either 'a', 'b', 'c' or 'comment'.")
-        }
+      decision <- userInput("Decision:(a/b/c) ", choices = letters[1:3], hash = "# dup. detections")
+      if (decision == "a") {
+        emergencyBreak()
+        stop("Function stopped by user command.", call. = FALSE)
+      }
+      if (decision == "b") {
+        appendTo(c("Screen", "Report"), "M: Removing duplicated detections from the analysis per user command.")
+        output <- input[!dups, ]
+      }
+      if (decision == "c") {
+        appendTo(c("Screen", "Report"), "M: Continuing analysis with duplicated detections per user command.")
+        output <- input
       }
     } else { # nocov end
       appendTo("Report", "M: Not running in interactive mode, deleting duplicated detections by default.")
@@ -683,21 +671,14 @@ checkReport <- function(report){
       appendTo(c("Screen", "Report", "Warning"), "'report' can only be activated if pandoc is installed. You can find how to install pandoc at: https://pandoc.org/installing.html\n   You can also check if pandoc is available to R by running rmarkdown::pandoc_available()")
       message("Would you like to:\n\n  a) Continue with 'report' set to FALSE\n  b) Stop the analysis and install pandoc.\n")
       if (interactive()) { # nocov start
-        check <- TRUE
-        while (check) {
-          decision <- readline("Decision:(a/b) ")
-          appendTo("UD", decision)
-          if (decision == "a" | decision == "A") {
-            appendTo(c("Screen", "Report", "Warning"), "Deactivating 'report' to prevent function failure.")
-            report <- FALSE
-            check <- FALSE
-          }
-          if (decision == "b" | decision == "B") {
-            emergencyBreak()
-            stop("Analysis stopped per user command.\n", call. = FALSE)
-          }
-          if (check)
-            appendTo("Screen", "Option not recognised; please input either 'a' or 'b'.\n")
+        decision <- userInput("Decision:(a/b) ", choices = letters[1:2], hash = "# pandoc warning")
+        if (decision == "a") {
+          appendTo(c("Screen", "Report", "Warning"), "Deactivating 'report' to prevent function failure.")
+          report <- FALSE
+        }
+        if (decision == "b") {
+          emergencyBreak()
+          stop("Analysis stopped per user command.\n", call. = FALSE)
         }
       } else { # nocov end
         report <- FALSE
@@ -912,23 +893,16 @@ checkTagsInUnknownReceivers <- function(detections.list, deployments, spatial) {
         appendTo(c("Screen", "Report", "Warning"), paste0("Fish ", i, " was detected in one or more receivers that are not listed in the study area (receiver(s): ", paste(unknown.receivers, collapse = ", "), ")!"))
         message("Possible options:\n   a) Stop and double-check the data (recommended)\n   b) Temporarily include the receiver(s) to the stations list")
         if (interactive()) { # nocov start
-          check <- TRUE
-          while (check) {
-            decision <- commentCheck(line = "Which option should be followed?(a/b/comment) ", tag = i)
-            if (decision == "a" | decision == "A" | decision == "b" | decision == "B")
-              check <- FALSE
-            else
-              message("Option not recognized, please try again.")
-            appendTo("UD", decision)
-          }
+          decision <- userInput("Which option should be followed?(a/b/comment) ", options = c("a", "b", "comment"),
+                                tag = i, hash = "# unknown receivers")
         } else { # nocov end
           decision <- "b"
         }
-        if (decision == "a" | decision == "A") {
+        if (decision == "a") {
           emergencyBreak() # nocov
           stop("Stopping analysis per user command.\n", call. = FALSE) # nocov
         }
-        if (decision == "b" | decision == "B") {
+        if (decision == "b") {
           recipient <- includeUnknownReceiver(spatial = spatial, deployments = deployments, unknown.receivers = unknown.receivers)
           spatial <- recipient[[1]]
           deployments <- recipient[[2]]
@@ -1003,26 +977,21 @@ checkDetectionsBeforeRelease <- function(input, bio, discard.orphans = FALSE){
           appendTo("Screen", paste0("  Number of detections before release: ", sum(to.remove)))
           message("\nPossible options:\n   a) Stop and double-check the data (recommended)\n   b) Discard orphan detections in this instance.\n   c) Discard orphan detections for all instances.\n")
           if (interactive()) { # nocov start
-            unknown.input = TRUE
-            while (unknown.input) {
-              decision <- commentCheck(line = "Decision:(a/b/c/comment) ", tag = bio$Transmitter[i])
-              if (decision == "a" | decision == "A") {
-                unknown.input = FALSE
-                emergencyBreak()
-                stop("Function stopped by user command.", call. = FALSE)
-              }
-              if (decision == "b" | decision == "B")
-                unknown.input = FALSE
-              if (decision == "c" | decision == "C") {
-                unknown.input = FALSE
-                discard.orphans = TRUE
-              }
-              if (unknown.input)
-                message("Option not recognised, please input either 'a' or 'b'.")
+            decision <- userInput("Decision:(a/b/c/comment) ", 
+                                  options = c("a", "b", "c", "comment"),
+                                  tag = bio$Transmitter[i], 
+                                  hash = paste("# detections before release for fish", bio$Transmitter[i]))
+            
+            if (decision == "a") {
+              emergencyBreak()
+              stop("Function stopped by user command.", call. = FALSE)
             }
-            appendTo("UD", decision)
+            
+            if (decision == "c")
+              discard.orphans = TRUE
           } # nocov end
         }
+        
         if (all(to.remove)) {
           appendTo(c("Screen", "Report"), paste0("ALL detections from Fish ", names(input)[link[i]], " were removed per user command."))
           remove.tag <- c(remove.tag, link[i])
@@ -1108,7 +1077,7 @@ invalidateEvents <- function(movements, fish) { # nocov start
     appendTo("Screen", "Note: You can select event ranges by separating them with a ':' and/or multiple events at once by separating them with a space or a comma.")
     check <- TRUE
     while (check) {
-      the.string <- commentCheck(line = "Events to be rendered invalid: ", tag = fish)
+      the.string <- userInput("Events to be rendered invalid: ", tag = fish)
       the.inputs <- unlist(strsplit(the.string, "\ |,"))
       the.rows <- the.inputs[grepl("^[0-9]*$", the.inputs)]
       n.rows <- length(the.rows)
@@ -1128,11 +1097,10 @@ invalidateEvents <- function(movements, fish) { # nocov start
         the.ranges <- NULL
       }
       the.rows <- sort(unique(c(the.rows, the.ranges)))
-      appendTo("UD", the.string)
       if (is.null(the.rows)) {
-        decision <- readline("The input could not be recognised as row numbers, would you like to abort invalidation the process?(y/N) ")
-        appendTo("UD", decision)
-        if (decision == "y" | decision == "Y") {
+        decision <- userInput("The input could not be recognised as row numbers, would you like to abort invalidation the process?(y/n/comment) ",
+                              choices = c("y", "n", "comment"), tag = fish, hash = "# abort invalidation process?")
+        if (decision == "y") {
           appendTo("Screen", "Aborting.")
           check <- FALSE
         } else {
@@ -1141,23 +1109,30 @@ invalidateEvents <- function(movements, fish) { # nocov start
       } else {
         if (sum(n.rows, n.ranges) < length(the.inputs))
           appendTo("Screen", "Part of the input could not be recognised as a row number.")
+
         if (all(the.rows > 0 & the.rows <= nrow(movements))) {
+          
           if (length(the.rows) <= 10)
-            decision <- readline(paste0("Confirm: Would you like to render event(s) ", paste(the.rows, collapse = ", "), " invalid?(y/N) "))
+            decision <- userInput(paste0("Confirm: Would you like to render event(s) ", paste(the.rows, collapse = ", "), " invalid?(y/n/comment) "),
+                                  choices = c("y", "n", "comment"), tag = fish, hash = "# confirm?")
           else
-            decision <- readline(paste0("Confirm: Would you like to render ", length(the.rows), " events invalid?(y/N) "))
-          appendTo("UD", decision)
-          if (decision == "y" | decision == "Y") {
+            decision <- userInput(paste0("Confirm: Would you like to render ", length(the.rows), " events invalid?(y/n/comment) "),
+                                  choices = c("y", "n", "comment"), tag = fish, hash = "# confirm?")
+          
+          if (decision == "y") {
             movements$Valid[the.rows] <- FALSE
             attributes(movements)$p.type <- "Manual"
+            
             if (any(movements$Valid)) {
               if (length(the.rows) <= 10)
                 appendTo(c("Screen", "Report"), paste0("M: Movement event(s) ", paste(the.rows, collapse = ", "), " from fish ", fish," were rendered invalid per user command."))
               else
                 appendTo(c("Screen", "Report"), paste0("M: ", length(the.rows), " movement event(s) from fish ", fish," were rendered invalid per user command."))
-              decision <- readline("Would you like to render any more movements invalid?(y/N) ")
-              appendTo("UD", decision)
-              if (decision == "y" | decision == "Y") {
+              
+              decision <- userInput("Would you like to render any more movements invalid?(y/n/comment) ",
+                                    choices = c("y", "n", "comment"), tag = fish, hash = "# invalidate more?")
+              
+              if (decision == "y") {
                 if (colnames(movements)[1] == "Section")
                   to.display <- movements[, -c(5, 7)]
                 else
@@ -1165,10 +1140,11 @@ invalidateEvents <- function(movements, fish) { # nocov start
                 check <- TRUE
                 appendTo("Screen", paste0("M: Updated movement table of fish ", fish, ":"))
                 message(paste0(capture.output(print(to.display, topn = nrow(to.display))), collapse = "\n"))
-                appendTo("Screen", "Note: You can select multiple events at once by separating them with a space.")
+                appendTo("Screen", "Note: You can select event ranges by separating them with a ':' and/or multiple events at once by separating them with a space or a comma.")
               } else {
                 check <- FALSE
               }
+
             } else {
               appendTo(c("Screen", "Report"), paste0("M: ALL movement events from fish ", fish," were rendered invalid per user command."))
               check <- FALSE

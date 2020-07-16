@@ -37,12 +37,13 @@ getDualMatrices <- function(replicates, CJS = NULL, spatial, detections.list) {
         already.calculated <- !is.na(CJS$efficiency[names(replicates)[i]])
       if (already.calculated) {
         appendTo(c("Screen", "Warning", "Report"), paste0("An inter-array efficiency has already been calculated for array ", names(replicates)[i],"."))
-        if (interactive()) {
-          decision <- readline("Do you want to replace this with an intra-array efficiency estimate?(y/N) ") # nocov
-        } else {
+        if (interactive()) { # nocov start
+          decision <- userInput("Do you want to replace this with an intra-array efficiency estimate?(y/n) ",
+                                options = c("y", "n"), hash = "# replace efficiency?")
+        } else { # nocov end
           decision <- "y"
         }
-        if (decision == "y" | decision == "Y") {
+        if (decision == "y") {
           appendTo("Report", paste0("Replacing efficiency estimation."))
           continue <- TRUE
         } else { # nocov start

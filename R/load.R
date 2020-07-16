@@ -970,10 +970,9 @@ loadDetections <- function(start.time = NULL, stop.time = NULL, tz, force = FALS
       decision <- "Y"
     } else { # nocov start
       appendTo("Screen", paste0("M: The detections have been processed on ", actel.detections$timestamp, ".\n   If the input detection files were not changed, it is safe to use these again."))
-      decision <- readline("   Reuse processed detections?(Y/n) ")
+      decision <- userInput("   Reuse processed detections?(y/n) ", options = c("y", "n"), hash = "# reuse detections?")
     } # nocov end
-    appendTo("UD", decision)
-    if (decision != "N" & decision != "n"){
+    if (decision != "n"){
       appendTo(c("Screen","Report"), paste0("M: Using detections previously compiled on ", actel.detections$timestamp, "..."))
       detections <- actel.detections$detections
       attributes(detections$Timestamp)$tzone <- "UTC"
@@ -1438,7 +1437,8 @@ storeStrays <- function(){
       }
     }
     if (interactive())
-      decision <- readline(paste0("Stray tags were detected in your study area. Would you like to save a summary to ", newname, "?(y/N) "))
+      decision <- userInput(paste0("Stray tags were detected in your study area. Would you like to save a summary to ", newname, "?(y/n) "),
+                            options = c("y", "n"), hash = "# save strays?")
     else
       decision <- "y"
     appendTo("UD", decision)
@@ -1490,28 +1490,26 @@ createStandards <- function(detections, spatial, deployments, discard.orphans = 
           message(paste0(capture.output(print(detections[receiver.link][the.error, -c(6, 7)])), collapse = "\n"))
           message("")
           message("Possible options:\n   a) Stop and double-check the data (recommended)\n   b) Discard orphan detections in this instance.\n   c) Discard orphan detections for all instances.")
-          check <- TRUE
-          while (check) {
-            if (interactive()) { # nocov start
-              decision <- readline("Which option should be followed?(a/b/c) ")
-            } else { # nocov end
-              decision <- "b"
-            }
-            if (decision == "a" | decision == "A" | decision == "b" | decision == "B" | decision == "c" | decision == "C")
-              check <- FALSE
-            else
-              message("Option not recognized, please try again."); flush.console()
-            appendTo("UD", decision)
+          
+          if (interactive()) { # nocov start
+            decision <- userInput("Which option should be followed?(a/b/c) ", 
+                                  options = letters[1:3], 
+                                  hash = paste("# orphan detections for receiver", names(deployments)[i]))
+          } else { # nocov end
+            decision <- "b"
           }
-          if (decision == "a" | decision == "A") { # nocov start
+
+          if (decision == "a") { # nocov start
             emergencyBreak()
             stop("Stopping analysis per user command.\n", call. = FALSE)
           } else { # nocov end
             rows.to.remove <- detections[receiver.link, which = TRUE][the.error]
             detections <- detections[-rows.to.remove]
           }
-          if (decision == "c" | decision == "C")
+
+          if (decision == "c")
             discard.orphans <- TRUE
+
         } else {
           appendTo(c("Screen", "Report"), paste0("Error: ", sum(the.error), " detections for receiver ", names(deployments)[i], " do not fall within deployment periods. Discarding orphan detections."))
           rows.to.remove <- detections[receiver.link, which = TRUE][the.error]

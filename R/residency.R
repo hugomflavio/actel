@@ -503,13 +503,13 @@ by which sections are presented", immediate. = TRUE, call. = FALSE)
   }
 
   if (interactive()) { # nocov start
-    decision <- readline(paste0("Would you like to save a copy of the results to ", resultsname, "?(y/N) "))
-    appendTo("UD", decision)
+    decision <- userInput(paste0("Would you like to save a copy of the results to ", resultsname, "?(y/n) "), 
+                          choices = c("y", "n"), hash = "# save results?")
   } else { # nocov end
     decision <- "n"
   }
 
-  if (decision == "y" | decision == "Y") {
+  if (decision == "y") {
     appendTo(c("Screen", "Report"), paste0("M: Saving results as '", resultsname, "'."))
     if (invalid.dist)
       save(detections, valid.detections, spatial, deployments, arrays, movements, valid.movements,
@@ -655,8 +655,8 @@ by which sections are presented", immediate. = TRUE, call. = FALSE)
   jobname <- paste0(gsub(" |:", ".", as.character(Sys.time())), ".actel.log.txt")
 
   if (interactive() & !report) { # nocov start
-    decision <- readline(paste0("Would you like to save a copy of the analysis log to ", jobname, "?(y/N) "))
-    appendTo("UD", decision)
+    decision <- userInput(paste0("Would you like to save a copy of the analysis log to ", jobname, "?(y/n) "), 
+                          choices = c("y", "n"), hash = "# save job log?")
   } else { # nocov end
     decision <- "n"
   }
