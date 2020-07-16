@@ -275,11 +275,13 @@ tableInteraction <- function(moves, fish, trigger, GUI, force = FALSE) { # nocov
         }
       }
     } else {
-      message("Opening movements list from fish ", fish, " for inspection:\n")
-      if (colnames(moves)[1] == "Section")
+      if (colnames(moves)[1] == "Section") {
+        message("Opening ", fish, "'s section movement events for inspection:\n")
         to.display <- moves[, -c(5, 7)]
-      else
+      } else {
+        message("Opening ", fish, "'s array movement events for inspection:\n")
         to.display <- moves
+      }
       message(paste0(capture.output(print(to.display, topn = nrow(to.display))), collapse = "\n"))
       if (nrow(moves) >= 100)
         message("\nM: Long table detected, repeating warning(s) that triggered the interaction:\n-----\n", trigger, "\n-----")

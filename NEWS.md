@@ -28,7 +28,8 @@ Enhancements:
   * New argument `section.order` allows the user to specify the order by which the sections should be listed.
   * `plotTimes()` has been expanded with new arguments and better compatibility for multiple groups.
   * New argument `plot.detections.by` allows the user to plot the detections by array, rather than by section. Applied both to the analyses and to `plotMoves()`.
-  * User decisions can now be followed by a inline comment (started with "#"). Additionally, actel automatically adds default comments to decisions so these are easier to read through in the job log.
+  * User decisions can now be followed by a in-line comment (started with "#"). Additionally, actel automatically adds default comments to decisions so these are easier to read through in the job log.
+  * Message that opens movement events now includes the respective tag and the type of movements displayed (section or array movements).
   
 ## actel 1.0.0 (CRAN)
 
