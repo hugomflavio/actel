@@ -1628,29 +1628,6 @@ transformSpatial <- function(spatial, bio, arrays, dotmat, first.array = NULL) {
     for (j in sections) {
       array.order[[j]] <- unique(spatial$Array[spatial$Type == "Hydrophone" & spatial$Section == j])
     }
-    # if (any(trigger <- unlist(lapply(array.order, length)) == 0)) {
-    #   appendTo(c("Screen", "Report", "Warning"), paste0("No arrays were found that match section(s) ", paste(names(array.order)[trigger], collapse = ", "), ". There could be a typing mistake! Section(s) ", paste(names(array.order)[trigger], collapse = ", "), " will be removed."))
-    #   array.order <- array.order[!trigger]
-    #   sections <- sections[!trigger]
-    #   if (interactive()) # nocov start
-    #     decision <- readline("All arrays must be assigned to a section. Attempt to continue the analysis?(y/N) ")
-    #   else # nocov end
-    #     decision <- "y"
-    #   if (decision != "y" & decision != "Y" ){ # nocov start
-    #     emergencyBreak()
-    #     stop("Stopping analysis per user command.\n", call. = FALSE)
-    #   } # nocov end
-    # }
-    # if (any(link <- is.na(match(stations$Array, unlist(array.order))))) {
-    #   the.arrays <- unique(stations$Array[link])
-    #   emergencyBreak()
-    #   stop(paste0("Array",
-    #       ifelse(length(the.arrays) == 1, " '", "(s) '"),
-    #       paste(the.arrays, collapse = "', '"),
-    #       ifelse(length(the.arrays) == 1, "' was", "' were"),
-    #       " not assigned to any section. Stopping to prevent function failure.\nPlease either...\n   1) Rename these arrays to match a section,\n   2) Rename a section to match these arrays, or\n   3) Include a new section in the analysis.\n... and restart the analysis.\n"),
-    #   call. = FALSE)
-    # }
   } else {
     array.order <- list(all = names(arrays))
   }
