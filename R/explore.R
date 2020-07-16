@@ -446,6 +446,10 @@ explore <- function(
 
 # wrap up the txt report
   appendTo("Report", "\n-------------------")
+
+  if (file.exists(paste(tempdir(), "temp_comments.txt", sep = "/")))
+    appendTo("Report", paste0("User comments:\n-------------------\n", gsub("\t", ": ", gsub("\r", "", readr::read_file(paste(tempdir(), "temp_comments.txt", sep = "/")))), "-------------------")) # nocov
+
   if (file.exists(paste(tempdir(), "temp_UD.txt", sep = "/")))
     appendTo("Report", paste0("User interventions:\n-------------------\n", gsub("\r", "", readr::read_file(paste(tempdir(), "temp_UD.txt", sep = "/"))), "-------------------")) # nocov
 
