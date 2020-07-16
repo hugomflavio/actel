@@ -1,3 +1,9 @@
+stopAndReport <- function(...) {
+  the.string <- paste0(...)
+  appendTo("Report", paste0("Error: ", the.string))
+  stop(the.string, call. = FALSE)
+}
+
 #' Wrap frequantly used code to handle user input
 #' 
 #' @param question The question to be asked
@@ -502,12 +508,26 @@ deleteHelpers <- function() {
 #'
 #' @keywords internal
 #'
-emergencyBreak <- function() {
-  appendTo("Report", "\nA fatal exception occurred, stopping the process!\n\n-------------------")
-  logname <- paste(gsub(":", ".", sub(" ", ".", as.character(Sys.time()))), "actel.log-STOP.txt", sep = ".")
+emergencyBreak <- function(the.function.call) {
+  appendTo("Report", "\nA fatal exception occurred, stopping the process!\nFound a bug? Report it here: https://github.com/hugomflavio/actel/issues\n\n-------------------")
+  logname <- paste(gsub(":", ".", sub(" ", ".", as.character(Sys.time()))), "actel.log-ERROR.txt", sep = ".")
+
+  if (file.exists(paste(tempdir(), "temp_comments.txt", sep = "/")))
+    appendTo("Report", paste0("User comments:\n-------------------\n", gsub("\t", ": ", gsub("\r", "", readr::read_file(paste(tempdir(), "temp_comments.txt", sep = "/")))), "-------------------")) # nocov
+
   if (file.exists(paste(tempdir(), "temp_UD.txt", sep = "/")))
-    appendTo("Report", paste0("User interventions:\n-------------------\n", gsub("\r", "", readr::read_file(paste(tempdir(), "temp_UD.txt", sep = "/"))), "-------------------"))
-  file.rename(paste(tempdir(), "temp_log.txt", sep = "/"), paste(tempdir(), logname, sep = "/"))
+    appendTo("Report", paste0("User interventions:\n-------------------\n", gsub("\r", "", readr::read_file(paste(tempdir(), "temp_UD.txt", sep = "/"))), "-------------------")) # nocov
+
+  appendTo("Report", paste0("Function call:\n-------------------\n", the.function.call, "\n-------------------"))
+
+  message("")
+  decision <- userInput(paste0("The analysis errored. Would you like to save a copy of the job log\n(including your comments and decisions) to ", logname, "?(y/n) "), choices = c("y", "n"))
+  
+  if (decision == "y")
+    file.copy(paste(tempdir(), "temp_log.txt", sep = "/"), logname)
+  else
+    file.rename(paste(tempdir(), "temp_log.txt", sep = "/"), paste(tempdir(), logname, sep = "/"))
+
   deleteHelpers()
 }
 

@@ -140,15 +140,20 @@ sections to which each of the arrays belong in a new 'Section' column in the
 spatial input. You can now use the argument 'section.order' to define the order
 by which sections are presented", immediate. = TRUE, call. = FALSE)
 
+# clean up any lost helpers
   deleteHelpers()
+  if (file.exists(paste0(tempdir(), "/actel_debug_file.txt")))
+    file.remove(paste0(tempdir(), "/actel_debug_file.txt"))
+# ------------------------
 
+# debug lines
   if (!is.null(options("actel.debug")[[1]]) && options("actel.debug")[[1]]) { # nocov start
     on.exit(message("Debug: Progress log available at ", gsub("\\\\", "/", paste0(tempdir(), "/actel_debug_file.txt"))))
     on.exit(message("Debug: Saving carbon copy to ", gsub("\\\\", "/", paste0(tempdir(), "/actel.debug.RData"))), add = TRUE)
     on.exit(save(list = ls(), file = paste0(tempdir(), "/actel.debug.RData")), add = TRUE)
     message("!!!--- Debug mode has been activated ---!!!")
   } # nocov end
-
+# ------------------------
 
 # check arguments quality
   if (!is.null(datapack))
@@ -190,13 +195,6 @@ by which sections are presented", immediate. = TRUE, call. = FALSE)
   GUI <- checkGUI(GUI)
 # ------------------------
 
-# Prepare clean-up before function ends
-  if (file.exists(paste0(tempdir(), "/actel_debug_file.txt")))
-    file.remove(paste0(tempdir(), "/actel_debug_file.txt"))
-  on.exit(deleteHelpers(), add = TRUE)
-  on.exit(tryCatch(sink(), warning = function(w) {hide <- NA}), add = TRUE)
-# --------------------------------------
-
 # Store function call
   the.function.call <- paste0("residency(tz = ", ifelse(is.null(tz), "NULL", paste0("'", tz, "'")),
     ", section.order = ", ifelse(is.null(section.order), "NULL", paste0("c('", paste(section.order, collapse = "', '"), "')")),
@@ -227,6 +225,14 @@ by which sections are presented", immediate. = TRUE, call. = FALSE)
 
   appendTo("debug", the.function.call)
 # --------------------
+
+# Prepare clean-up before function ends
+  finished.unexpectedly <- TRUE
+  on.exit({if (finished.unexpectedly) emergencyBreak2(the.function.call)}, add = TRUE)
+
+  on.exit(deleteHelpers(), add = TRUE)
+  on.exit(tryCatch(sink(), warning = function(w) {hide <- NA}), add = TRUE)
+# --------------------------------------
 
 # Final arrangements before beginning
   appendTo("Report", paste0("Actel R package report.\nVersion: ", utils::packageVersion("actel"), "\n"))
@@ -664,12 +670,15 @@ by which sections are presented", immediate. = TRUE, call. = FALSE)
   } else { # nocov end
     decision <- "n"
   }
-  if (decision == "y" | decision == "Y") { # nocov start
+
+  if (decision == "y") { # nocov start
     appendTo("Screen", paste0("M: Saving job log as '",jobname, "'."))
     file.copy(paste(tempdir(), "temp_log.txt", sep = "/"), jobname)
   } # nocov end
 
   appendTo("Screen", "M: Process finished successfully.")
+
+  finished.unexpectedly <- FALSE
 
   if (invalid.dist) {
     return(list(detections = detections,

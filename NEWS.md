@@ -31,6 +31,7 @@ Enhancements:
   * User decisions can now be followed by a in-line comment (started with "#"). Additionally, actel automatically adds default comments to decisions so these are easier to read through in the job log.
   * Message that opens movement events now includes the respective tag and the type of movements displayed (section or array movements).
   * Include user comments in the txt job logs.
+  * In case of error, the user can now save a copy of the log up to the point where the function crashed.
   
 ## actel 1.0.0 (CRAN)
 

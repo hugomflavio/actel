@@ -47,112 +47,111 @@ checkArguments <- function(dp, tz, minimum.detections, max.interval, speed.metho
             !(is.logical(save.detections) && !save.detections), !is.null(exclude.tags))
 
   if (!is.null(dp) & any(link))
-    warning("Argument", ifelse(sum(link) > 1, "s '", " '"), paste(no.dp.args[link], collapse = "', '"),
-      ifelse(sum(link) > 1, "' were ", "' was "), "set but a datapack was provided. Disregarding set arguments.",
-      immediate. = TRUE, call. = FALSE)
+    appendTo(c("Screen", "Warning", "Report"), paste0("Argument", ifelse(sum(link) > 1, "s '", " '"), paste(no.dp.args[link], collapse = "', '"),
+      ifelse(sum(link) > 1, "' were ", "' was "), "set but a datapack was provided. Disregarding set arguments."))
 
   if (is.null(dp) && is.na(match(tz, OlsonNames())))
-    stop("'tz' could not be recognized as a timezone. Check available timezones with OlsonNames()\n", call. = FALSE)
+    stopAndReport("'tz' could not be recognized as a timezone. Check available timezones with OlsonNames()")
 
   if (!is.numeric(minimum.detections))
-    stop("'minimum.detections' must be numeric.\n", call. = FALSE)
+    stopAndReport("'minimum.detections' must be numeric.")
 
   if (minimum.detections <= 0)
-    stop("'minimum.detections' must be positive.\n", call. = FALSE)
+    stopAndReport("'minimum.detections' must be positive.")
 
   if (!is.numeric(max.interval))
-    stop("'max.interval' must be numeric.\n", call. = FALSE)
+    stopAndReport("'max.interval' must be numeric.")
 
   if (max.interval <= 0)
-    stop("'max.interval' must be positive.\n", call. = FALSE)
+    stopAndReport("'max.interval' must be positive.")
 
   if (!is.character(speed.method))
-    stop("'speed.method' should be one of 'last to first' or 'last to last'.\n", call. = FALSE)
+    stopAndReport("'speed.method' should be one of 'last to first' or 'last to last'.")
   speed.method <- match.arg(speed.method)
 
   if (!is.null(speed.warning) && !is.numeric(speed.warning))
-    stop("'speed.warning' must be numeric.\n", call. = FALSE)
+    stopAndReport("'speed.warning' must be numeric.")
 
   if (!is.null(speed.warning) && speed.warning <= 0)
-    stop("'speed.warning' must be positive.\n", call. = FALSE)
+    stopAndReport("'speed.warning' must be positive.")
 
   if (!is.null(speed.error) && !is.numeric(speed.error))
-    stop("'speed.error' must be numeric.\n", call. = FALSE)
+    stopAndReport("'speed.error' must be numeric.")
 
   if (!is.null(speed.error) && speed.error <= 0)
-    stop("'speed.error' must be positive.\n", call. = FALSE)
+    stopAndReport("'speed.error' must be positive.")
 
   if (!is.null(speed.error) & is.null(speed.warning))
     speed.warning <- speed.error
 
   if (!is.null(speed.error) && speed.error < speed.warning)
-    stop("'speed.error' must not be lower than 'speed.warning'.\n", call. = FALSE)
+    stopAndReport("'speed.error' must not be lower than 'speed.warning'.")
 
   if (!is.null(speed.warning) & is.null(speed.error))
     speed.error <- Inf
 
   if (is.null(dp) && !is.null(start.time) && !grepl("^[1-2][0-9][0-9][0-9]-[0-1][0-9]-[0-3][0-9] [0-2][0-9]:[0-5][0-9]:[0-5][0-9]", start.time))
-    stop("'start.time' must be in 'yyyy-mm-dd hh:mm:ss' format.\n", call. = FALSE)
+    stopAndReport("'start.time' must be in 'yyyy-mm-dd hh:mm:ss' format.")
 
   if (is.null(dp) && !is.null(stop.time) && !grepl("^[1-2][0-9][0-9][0-9]-[0-1][0-9]-[0-3][0-9] [0-2][0-9]:[0-5][0-9]:[0-5][0-9]", stop.time))
-    stop("'stop.time' must be in 'yyyy-mm-dd hh:mm:ss' format.\n", call. = FALSE)
+    stopAndReport("'stop.time' must be in 'yyyy-mm-dd hh:mm:ss' format.")
 
   if (!is.logical(report))
-    stop("'report' must be logical.\n", call. = FALSE)
+    stopAndReport("'report' must be logical.")
 
   if (!is.logical(auto.open))
-    stop("'auto.open' must be logical.\n", call. = FALSE)
+    stopAndReport("'auto.open' must be logical.")
 
   if (is.null(dp) && !is.logical(save.detections))
-    stop("'save.detections' must be logical.\n", call. = FALSE)
+    stopAndReport("'save.detections' must be logical.")
 
   if (!is.numeric(jump.warning))
-    stop("'jump.warning' must be numeric.\n", call. = FALSE)
+    stopAndReport("'jump.warning' must be numeric.")
 
   if (jump.warning < 1)
-    stop("'jump.warning' must not be lower than 1.\n", call. = FALSE)
+    stopAndReport("'jump.warning' must not be lower than 1.")
 
   if (!is.numeric(jump.error))
-    stop("'jump.error' must be numeric.\n", call. = FALSE)
+    stopAndReport("'jump.error' must be numeric.")
 
   if (jump.error < 1)
-    stop("'jump.error' must not be lower than 1.\n", call. = FALSE)
+    stopAndReport("'jump.error' must not be lower than 1.")
 
   if (jump.error < jump.warning)
-    stop("'jump.error' must not be lower than 'jump.warning'.\n", call. = FALSE)
+    stopAndReport("'jump.error' must not be lower than 'jump.warning'.")
 
   if (!is.null(inactive.warning) && !is.numeric(inactive.warning))
-    stop("'inactive.warning' must be numeric.\n", call. = FALSE)
+    stopAndReport("'inactive.warning' must be numeric.")
 
   if (!is.null(inactive.warning) && inactive.warning <= 0)
-    stop("'inactive.warning' must be positive.\n", call. = FALSE)
+    stopAndReport("'inactive.warning' must be positive.")
 
   if (!is.null(inactive.error) && !is.numeric(inactive.error))
-    stop("'inactive.error' must be numeric.\n", call. = FALSE)
+    stopAndReport("'inactive.error' must be numeric.")
 
   if (!is.null(inactive.error) && inactive.error <= 0)
-    stop("'inactive.error' must be positive.\n", call. = FALSE)
+    stopAndReport("'inactive.error' must be positive.")
 
   if (!is.null(inactive.error) & is.null(inactive.warning))
     inactive.warning <- inactive.error
 
   if (!is.null(inactive.error) && inactive.error < inactive.warning)
-    stop("'inactive.error' must not be lower than 'inactive.warning'.\n", call. = FALSE)
+    stopAndReport("'inactive.error' must not be lower than 'inactive.warning'.")
 
   if (!is.null(inactive.warning) & is.null(inactive.error))
     inactive.error <- Inf
 
   if (is.null(dp) && !is.null(exclude.tags) && any(!grepl("-", exclude.tags, fixed = TRUE)))
-    stop("Not all contents in 'exclude.tags' could be recognized as tags (i.e. 'codespace-signal'). Valid examples: 'R64K-1234', A69-1303-1234'\n", call. = FALSE)
+    stopAndReport("Not all contents in 'exclude.tags' could be recognized as tags (i.e. 'codespace-signal'). Valid examples: 'R64K-1234', A69-1303-1234'")
 
-  if (!is.null(override) && any(!grepl("-", override, fixed = TRUE)))
-    stop("Not all contents in 'override' could be recognized as tags (i.e. 'codespace-signal'). Valid examples: 'R64K-1234', A69-1303-1234'\n", call. = FALSE)
+  if (!is.null(override) && !is.numeric(override))
+    stopAndReport("'override' must be numeric. Please include only the tag signals in the 'override' argument.")
 
   if (!is.logical(print.releases))
-    stop("'print.releases' must be logical.\n", call. = FALSE)
+    stopAndReport("'print.releases' must be logical.")
 
   if (!is.character(plot.detections.by))
-    stop("'plot.detections.by' should be one of 'stations' or 'arrays'")
+    stopAndReport("'plot.detections.by' should be one of 'stations' or 'arrays'")
   plot.detections.by <- match.arg(plot.detections.by)
 
   # Check that all the overridden fish are part of the study
@@ -165,19 +164,19 @@ checkArguments <- function(dp, tz, minimum.detections, max.interval, speed.metho
 
   # NON-explore checks
   if (!is.null(section.order) && any(table(section.order) > 1))
-    stop("Some section names are duplicated in the 'section.order' argument. Please include each section only once.\n", call. = FALSE)
+    stopAndReport("Some section names are duplicated in the 'section.order' argument. Please include each section only once.")
 
   if (!is.null(if.last.skip.section) && !is.logical(if.last.skip.section))
-    stop("'if.last.skip.section' must be logical.\n", call. = FALSE)
+    stopAndReport("'if.last.skip.section' must be logical.")
 
   if (!is.null(replicates) && !is.list(replicates))
-    stop("'replicates' must be a list.\n", call. = FALSE)
+    stopAndReport("'replicates' must be a list.")
 
   if (!is.null(replicates) && length(names(replicates)) != length(replicates))
-    stop("All list elements within 'replicates' must be named (i.e. list(Array = 'St.1') rather than list('St.1')).\n", call. = FALSE)
+    stopAndReport("All list elements within 'replicates' must be named (i.e. list(Array = 'St.1') rather than list('St.1')).")
 
   if (!is.null(section.minimum) && !is.numeric(section.minimum))
-    stop("'section.minimum' must be numeric.\n", call. = FALSE)
+    stopAndReport("'section.minimum' must be numeric.")
 
   return(list(speed.method = speed.method,
               speed.warning = speed.warning,
@@ -203,7 +202,7 @@ checkToken <- function(token, timestamp) {
   else
     x <- NULL
   if ((is.null(token) | is.null(timestamp) | is.null(x)) || !any(x$Token == token & x$Timestamp == timestamp))
-    stop("The datapack's token is invalid or missing. Please the function preload() to compile the input data.\nAdditionally, data must to be compiled during the current R session.", call. = FALSE)
+    stopAndReport("The datapack's token is invalid or missing. Please the function preload() to compile the input data.\nAdditionally, data must to be compiled during the current R session.")
 }
 
 
@@ -276,10 +275,10 @@ tableInteraction <- function(moves, fish, trigger, GUI, force = FALSE) { # nocov
       }
     } else {
       if (colnames(moves)[1] == "Section") {
-        message("Opening ", fish, "'s section movement events for inspection:\n")
+        appendTo("Screen", paste0("Opening ", fish, "'s section movement events for inspection:"))
         to.display <- moves[, -c(5, 7)]
       } else {
-        message("Opening ", fish, "'s array movement events for inspection:\n")
+        appendTo("Screen", paste0("Opening ", fish, "'s array movement events for inspection:"))
         to.display <- moves
       }
       message(paste0(capture.output(print(to.display, topn = nrow(to.display))), collapse = "\n"))
@@ -319,7 +318,7 @@ tableInteraction <- function(moves, fish, trigger, GUI, force = FALSE) { # nocov
 #'
 checkGUI <- function(GUI = c("needed", "always", "never")) {
   if (!is.character(GUI))
-    stop("'GUI' should be one of 'needed', 'always' or 'never'.\n", call. = FALSE)
+    stopAndReport("'GUI' should be one of 'needed', 'always' or 'never'.")
   GUI <- match.arg(GUI)
   if (GUI != "never") {
     aux <- c(
@@ -383,10 +382,8 @@ checkDupDetections <- function(input) {
     message("")
     if (interactive()) { # nocov start
       decision <- userInput("Decision:(a/b/c) ", choices = letters[1:3], hash = "# dup. detections")
-      if (decision == "a") {
-        emergencyBreak()
-        stop("Function stopped by user command.", call. = FALSE)
-      }
+      if (decision == "a")
+        stopAndReport("Function stopped by user command.")
       if (decision == "b") {
         appendTo(c("Screen", "Report"), "M: Removing duplicated detections from the analysis per user command.")
         output <- input[!dups, ]
@@ -602,7 +599,7 @@ checkImpassables <- function(movements, fish, dotmat, GUI){
           movements <- transferValidity(from = aux, to = movements)
           restart <- TRUE
         } else { # nocov end
-          stop("Preventing analysis from entering interactive mode in a non-interactive session.\n", call. = FALSE)
+          stop("Preventing analysis from entering interactive mode in a non-interactive session.\n")
         }
       }
     }
@@ -678,10 +675,9 @@ checkReport <- function(report){
           appendTo(c("Screen", "Report", "Warning"), "Deactivating 'report' to prevent function failure.")
           report <- FALSE
         }
-        if (decision == "b") {
-          emergencyBreak()
-          stop("Analysis stopped per user command.\n", call. = FALSE)
-        }
+        if (decision == "b")
+          stopAndReport("Analysis stopped per user command.")
+
       } else { # nocov end
         report <- FALSE
       }
@@ -762,10 +758,8 @@ checkJumpDistance <- function(movements, fish, release, dotmat, jump.warning, ju
       aux <- cbind(A, B)
       jumps <- apply(aux, 1, function(x) dotmat[x[1], x[2]])
       names(jumps) <- paste(A, "->", B)
-      if (any(is.na(jumps))) {
-        emergencyBreak()
-        stop("There are unresolved impassable jumps in the movements.\n")
-      }
+      if (any(is.na(jumps)))
+        stopAndReport("There are unresolved impassable jumps in the movements.")
       if (any(jumps > jump.warning)) {
         link <- which(jumps > jump.warning)
         for (i in 1:length(link)) {
@@ -813,8 +807,7 @@ checkDeploymentTimes <- function(input) {
         names(aux[[i]])[ncol(aux[[i]])] <- ""
         message(paste0(capture.output(aux[[i]])[-1], collapse = "\n"))
         message("")
-        emergencyBreak()
-        stop("Fatal exception found. Read lines above for more details.\n", call. = FALSE)
+        stopAndReport("Fatal exception found. Read lines above for more details.")
       }
     }
   }
@@ -840,11 +833,10 @@ checkDeploymentStations <- function(input, spatial) {
   }
   link <- match(aux$Station.name, unique(input$Station.name))
   if (any(is.na(link))) {
-    emergencyBreak()
-    stop(paste0(ifelse(sum(is.na(link)) > 1, "Stations '", "Station '"),
+    stopAndReport(paste0(ifelse(sum(is.na(link)) > 1, "Stations '", "Station '"),
       paste(aux$Station.name[is.na(link)], collapse = "', '"),
       ifelse(sum(is.na(link)) > 1, "' are", "' is"),
-      " listed in the spatial file but no receivers were ever deployed there.\n"), call. = FALSE)
+      " listed in the spatial file but no receivers were ever deployed there.\n"))
   }
   return(input)
 }
@@ -900,10 +892,8 @@ checkTagsInUnknownReceivers <- function(detections.list, deployments, spatial) {
         } else { # nocov end
           decision <- "b"
         }
-        if (decision == "a") {
-          emergencyBreak() # nocov
-          stop("Stopping analysis per user command.\n", call. = FALSE) # nocov
-        }
+        if (decision == "a")
+          stopAndReport("Stopping analysis per user command.") # nocov
         if (decision == "b") {
           recipient <- includeUnknownReceiver(spatial = spatial, deployments = deployments, unknown.receivers = unknown.receivers)
           spatial <- recipient[[1]]
@@ -984,10 +974,8 @@ checkDetectionsBeforeRelease <- function(input, bio, discard.orphans = FALSE){
                                   tag = bio$Transmitter[i], 
                                   hash = paste("# detections before release for fish", bio$Transmitter[i]))
             
-            if (decision == "a") {
-              emergencyBreak()
-              stop("Function stopped by user command.", call. = FALSE)
-            }
+            if (decision == "a")
+              stopAndReport("Function stopped by user command.")
             
             if (decision == "c")
               discard.orphans = TRUE
@@ -1024,11 +1012,8 @@ checkNoDetections <- function(input, bio){
   tag.list <- extractSignals(names(input))
   signal_check <- suppressWarnings(as.numeric(unlist(strsplit(as.character(bio$Signal), "|", fixed = TRUE))))
   link <- match(signal_check, tag.list)
-  if (all(is.na(link))) {
-    appendTo(c("Report"), "Error: No detections were found in the input data which matched the target signals.")
-    emergencyBreak()
-    stop("No detections were found in the input data which matched the target signals.\n", call. = FALSE)
-  }
+  if (all(is.na(link)))
+    stopAndReport("No detections were found in the input data which matched the target signals.\n")
 }
 
 #' Check if there are duplicated signals in the detected tags.
@@ -1047,7 +1032,6 @@ checkDupSignals <- function(input, bio){
   signal_check <- suppressWarnings(as.numeric(unlist(strsplit(as.character(bio$Signal), "|", fixed = TRUE))))
   failsafe <- match(tag.list, signal_check)
   if (any(table(failsafe) > 1)) {
-    appendTo(c("Report"), "Error: One or more signals match more than one tag in the detections! Showing relevant signals/tags.")
     t1 <- cbind(names(input), signal_check[failsafe])
     t2 <- t1[complete.cases(t1), ]
     t3 <- table(t2[, 1], t2[, 2])
@@ -1061,9 +1045,7 @@ checkDupSignals <- function(input, bio){
     for (i in seq_len(nrow(dupsig))) {
       rest.of.message <- paste0(rest.of.message, "\n   Signal ", dupsig$Signal[i], " was found on tags ", dupsig$Tags[i], ".")
     }
-    appendTo(c("Report"), rest.of.message)
-    emergencyBreak()
-    stop(paste0("One or more signals match more than one tag in the detections! Showing relevant signals/tags.", rest.of.message, "\n"), call. = FALSE)
+    stopAndReport("One or more signals match more than one tag in the detections! Showing relevant signals/tags.", rest.of.message)
   }
 }
 

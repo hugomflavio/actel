@@ -157,14 +157,20 @@ sections to which each of the arrays belong in a new 'Section' column in the
 spatial input. You can now use the argument 'section.order' to define the order
 by which sections are presented", immediate. = TRUE, call. = FALSE)
 
+# clean up any lost helpers
   deleteHelpers()
+  if (file.exists(paste0(tempdir(), "/actel_debug_file.txt")))
+    file.remove(paste0(tempdir(), "/actel_debug_file.txt"))
+# ------------------------
 
+# debug lines
   if (!is.null(options("actel.debug")[[1]]) && options("actel.debug")[[1]]) { # nocov start
     on.exit(message("Debug: Progress log available at ", gsub("\\\\", "/", paste0(tempdir(), "/actel_debug_file.txt"))))
     on.exit(message("Debug: Saving carbon copy to ", gsub("\\\\", "/", paste0(tempdir(), "/actel.debug.RData"))), add = TRUE)
     on.exit(save(list = ls(), file = paste0(tempdir(), "/actel.debug.RData")), add = TRUE)
     message("!!!--- Debug mode has been activated ---!!!")
   } # nocov end
+# ------------------------
 
 # check arguments quality
   if (!is.null(datapack)) {
@@ -207,13 +213,6 @@ by which sections are presented", immediate. = TRUE, call. = FALSE)
   GUI <- checkGUI(GUI)
 # ------------------------
 
-# Prepare clean-up before function ends
-  if (file.exists(paste0(tempdir(), "/actel_debug_file.txt")))
-    file.remove(paste0(tempdir(), "/actel_debug_file.txt"))
-  on.exit(deleteHelpers(), add = TRUE)
-  on.exit(tryCatch(sink(), warning = function(w) {hide <- NA}), add = TRUE)
-# --------------------------------------
-
 # Store function call
   the.function.call <- paste0("migration(tz = ", ifelse(is.null(tz), "NULL", paste0("'", tz, "'")),
     ", section.order = ", ifelse(is.null(section.order), "NULL", paste0("c('", paste(section.order, collapse = "', '"), "')")),
@@ -246,6 +245,14 @@ by which sections are presented", immediate. = TRUE, call. = FALSE)
 
   appendTo("debug", the.function.call)
 # --------------------
+
+# Prepare clean-up before function ends
+  finished.unexpectedly <- TRUE
+  on.exit({if (finished.unexpectedly) emergencyBreak(the.function.call)}, add = TRUE)
+
+  on.exit(deleteHelpers(), add = TRUE)
+  on.exit(tryCatch(sink(), warning = function(w) {hide <- NA}), add = TRUE)
+# --------------------------------------
 
 # Final arrangements before beginning
   appendTo("Report", paste0("Actel R package report.\nVersion: ", utils::packageVersion("actel"), "\n"))
@@ -282,23 +289,22 @@ by which sections are presented", immediate. = TRUE, call. = FALSE)
 # Final quality checks
   # Verify the existance of sections
   if (all(!grepl("^Section$", colnames(spatial$stations))))
-    stop("To run migration(), please assign the arrays to their sections using a 'Section' column in the spatial input.", call. = FALSE)
+    stopAndReport("To run migration(), please assign the arrays to their sections using a 'Section' column in the spatial input.")
 
   # Verify that replicate information is valid
   if (!is.null(replicates) && any(is.na(match(names(replicates), names(arrays)))))
-    stop("Some of the array names listed in the 'replicates' argument do not match the study's arrays.\n", call. = FALSE)
+    stopAndReport("Some of the array names listed in the 'replicates' argument do not match the study's arrays.")
 
   capture <- lapply(names(replicates), function(i) {
     x <- replicates[[i]]
     all.stations <- spatial$stations$Standard.name[spatial$stations$Array == i]
     if (any(link <- !x %in% all.stations)) {
-      stop(paste0("In replicates: Station", 
+      stopAndReport("In replicates: Station", 
                   ifelse(sum(link) > 1, "s ", " "), 
                   paste(x[link], collapse = ", "), 
                   ifelse(sum(link) > 1, " are", " is"), 
                   " not part of ", i, " (available stations: ", 
-                  paste(all.stations, collapse = ", "), ")."), 
-           call. = FALSE)
+                  paste(all.stations, collapse = ", "), ").")
     }
   })
 
@@ -317,9 +323,9 @@ by which sections are presented", immediate. = TRUE, call. = FALSE)
       appendTo(c("Screen", "Warning", "Report"), paste0("'success.arrays' was not defined. Assuming success if fish are last detected at arrays ", paste(success.arrays[-length(success.arrays)], collapse = ", "), " or ", tail(success.arrays, 1), "."))
   } else {
     if (any(link <- is.na(match(success.arrays, unlist(spatial$array.order))))) {
-      stop(ifelse(sum(link) > 1, "Arrays '", "Array '"), paste(success.arrays[link], collapse = "', '"),
+      stopAndReport(ifelse(sum(link) > 1, "Arrays '", "Array '"), paste(success.arrays[link], collapse = "', '"),
         ifelse(sum(link) > 1, "' are ", "' is "), "listed in the 'success.arrays' argument, but ",
-        ifelse(sum(link) > 1, "these arrays are", "this array is"), " not part of the study arrays.\n", call. = FALSE)
+      ifelse(sum(link) > 1, "these arrays are", "this array is"), " not part of the study arrays.")
     }
   }
 # -------------------------------------
@@ -743,6 +749,8 @@ by which sections are presented", immediate. = TRUE, call. = FALSE)
   } # nocov end
 
   appendTo("Screen", "M: Process finished successfully.")
+
+  finished.unexpectedly <- FALSE
 
   if (invalid.dist) {
     return(list(detections = detections,
