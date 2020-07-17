@@ -22,38 +22,44 @@ stopAndReport <- function(...) {
 #' @keywords internal
 #' 
 userInput <- function(question, choices, tag, hash) {
-  try.again <- TRUE
-  
-  while (try.again) {
-    decision <- readline(question)
-    aux <- strsplit(as.character(decision), "[ ]*#")[[1]]
-    output <- tolower(aux[1])
+  if (interactive()) {
+    try.again <- TRUE
     
-    if (!missing(choices) && is.na(match(output, choices))) {
-      appendTo("Screen", paste0("Option not recognized, please choose one of: '", paste0(choices, collapse = "', '"), "'."))
-      output <- NULL
-    }
-    
-    if (!is.null(output)) {
-      if (output == "comment") {
-        if (missing(tag)) {
-          warning("A comment was requested but that option is not available here. Please try again.", immediate. = TRUE, call. = FALSE)
+    while (try.again) {
+      decision <- readline(question)
+      aux <- strsplit(as.character(decision), "[ ]*#")[[1]]
+      output <- tolower(aux[1])
+      
+      if (!missing(choices) && is.na(match(output, choices))) {
+        appendTo("Screen", paste0("Option not recognized, please choose one of: '", paste0(choices, collapse = "', '"), "'."))
+        output <- NULL
+      }
+      
+      if (!is.null(output)) {
+        if (output == "comment") {
+          if (missing(tag)) {
+            warning("A comment was requested but that option is not available here. Please try again.", immediate. = TRUE, call. = FALSE)
+          } else {
+            appendTo("UD", paste("comment # on", tag))
+            appendTo(c("UD", "Comment"), readline(paste0("New comment on fish ", tag, ": ")), tag)
+            appendTo("Screen", "M: Comment successfully stored, returning to the previous interaction.")
+          }
         } else {
-          appendTo("UD", paste("comment # on", tag))
-          appendTo(c("UD", "Comment"), readline(paste0("New comment on fish ", tag, ": ")), tag)
-          appendTo("Screen", "M: Comment successfully stored, returning to the previous interaction.")
+          try.again <- FALSE
         }
-      } else {
-        try.again <- FALSE
       }
     }
+    
+    if (length(aux) == 1 & !missing(hash))
+      appendTo("UD", paste(decision, hash))
+    else
+      appendTo("UD", paste(decision))
+  } else {
+    if (any(choices == "n"))
+      output <- "n"
+    if (any(choices == "b"))
+      output <- "b"
   }
-  
-  if (length(aux) == 1 & !missing(hash))
-    appendTo("UD", paste(decision, hash))
-  else
-    appendTo("UD", paste(decision))
-
   return(output)
 }
 
@@ -1233,13 +1239,14 @@ will artificially add water space around the shape file.", call. = FALSE)
   if (col.rename)
     colnames(dist.mat) <- outputCols
   if (interactive () & actel) { # nocov start
-    decision <- readline("Would you like to save an actel-compatible distances matrix as 'distances.csv' in the current work directory?(y/N) ")
-    if (decision == "y" | decision == "Y") {
+    decision <- userInput("Would you like to save an actel-compatible distances matrix as 'distances.csv' in the current work directory?(y/n) ",
+                          choices = c("y", "n"))
+    if (decision == "y") {
       if (file.exists('distances.csv')) {
         warning("A file 'distances.csv' is already present in the current directory.", call. = FALSE, immediate. = TRUE)
-        decision <- readline("Continuing will overwrite this file. Would you like to continue?(y/N) ")
+        decision <- userInput("Continuing will overwrite this file. Would you like to continue?(y/n) ", choices = c("y", "n"))
       }
-      if (decision == "y" | decision == "Y")
+      if (decision == "y")
         write.csv(round(dist.mat, 0), "distances.csv", row.names = TRUE)
     }
   } # nocov end

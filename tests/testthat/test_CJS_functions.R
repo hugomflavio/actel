@@ -319,13 +319,6 @@ test_that("getDualMatrices throws a warning if efficiency has already been calcu
 })
 # n
 
-test_that("dualMatrix stops if stations that do not belong to the array are used as replicates (tested through getDualMatrices)", {
-	expect_error(getDualMatrices(replicates = list(A9 = c("St.14", "St.15")), CJS = overall.CJS, spatial = spatial, detections.list = detections.list),
-		"In replicates: Station St.14 is not part of A9 (available stations: St.15, St.16, St.17).", fixed = TRUE)
-	expect_error(getDualMatrices(replicates = list(A9 = c("St.13", "St.14", "St.15")), CJS = overall.CJS, spatial = spatial, detections.list = detections.list),
-		"In replicates: Stations St.13, St.14 are not part of A9 (available stations: St.15, St.16, St.17).", fixed = TRUE)
-})
-
 test_that("includeIntraArrayEstimates throws errors if expected conditions are not met", {
   expect_error(includeIntraArrayEstimates(m = NULL, CJS = overall.CJS, efficiency  = "test"),
   	"Use only one of 'efficiency' or 'CJS' at a time.", fixed = TRUE)

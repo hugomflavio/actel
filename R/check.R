@@ -379,21 +379,16 @@ checkDupDetections <- function(input) {
     message("")
     appendTo("Screen", "Possible options:\n   a) Stop and double-check the data\n   b) Remove duplicated detections\n   c) Continue without changes")
     message("")
-    if (interactive()) { # nocov start
-      decision <- userInput("Decision:(a/b/c) ", choices = letters[1:3], hash = "# dup. detections")
-      if (decision == "a")
-        stopAndReport("Function stopped by user command.")
-      if (decision == "b") {
-        appendTo(c("Screen", "Report"), "M: Removing duplicated detections from the analysis per user command.")
-        output <- input[!dups, ]
-      }
-      if (decision == "c") {
-        appendTo(c("Screen", "Report"), "M: Continuing analysis with duplicated detections per user command.")
-        output <- input
-      }
-    } else { # nocov end
-      appendTo("Report", "M: Not running in interactive mode, deleting duplicated detections by default.")
+    decision <- userInput("Decision:(a/b/c) ", choices = letters[1:3], hash = "# dup. detections")
+    if (decision == "a")
+      stopAndReport("Function stopped by user command.")
+    if (decision == "b") {
+      appendTo(c("Screen", "Report"), "M: Removing duplicated detections from the analysis per user command.")
       output <- input[!dups, ]
+    }
+    if (decision == "c") {
+      appendTo(c("Screen", "Report"), "M: Continuing analysis with duplicated detections per user command.")
+      output <- input
     }
   } else {
     output <- input
@@ -667,17 +662,12 @@ checkReport <- function(report){
     appendTo("Report", "M: 'report' option has been activated.")
     if (!rmarkdown::pandoc_available()) {
       appendTo(c("Screen", "Report", "Warning"), "'report' can only be activated if pandoc is installed. You can find how to install pandoc at: https://pandoc.org/installing.html\n   You can also check if pandoc is available to R by running rmarkdown::pandoc_available()")
-      message("Would you like to:\n\n  a) Continue with 'report' set to FALSE\n  b) Stop the analysis and install pandoc.\n")
-      if (interactive()) { # nocov start
-        decision <- userInput("Decision:(a/b) ", choices = letters[1:2], hash = "# pandoc warning")
-        if (decision == "a") {
-          appendTo(c("Screen", "Report", "Warning"), "Deactivating 'report' to prevent function failure.")
-          report <- FALSE
-        }
-        if (decision == "b")
-          stopAndReport("Analysis stopped per user command.")
-
-      } else { # nocov end
+      message("Would you like to:\n\n  a) Stop the analysis and install pandoc.\n  b) Continue with 'report' set to FALSE\n")
+      decision <- userInput("Decision:(a/b) ", choices = letters[1:2], hash = "# pandoc warning")
+      if (decision == "a")
+        stopAndReport("Analysis stopped per user command.")
+      if (decision == "b") {
+        appendTo(c("Screen", "Report", "Warning"), "Deactivating 'report' to prevent function failure.")
         report <- FALSE
       }
     }
@@ -885,12 +875,8 @@ checkTagsInUnknownReceivers <- function(detections.list, deployments, spatial) {
       if (length(unknown.receivers) > 0) {
         appendTo(c("Screen", "Report", "Warning"), paste0("Fish ", i, " was detected in one or more receivers that are not listed in the study area (receiver(s): ", paste(unknown.receivers, collapse = ", "), ")!"))
         message("Possible options:\n   a) Stop and double-check the data (recommended)\n   b) Temporarily include the receiver(s) to the stations list")
-        if (interactive()) { # nocov start
-          decision <- userInput("Which option should be followed?(a/b/comment) ", choices = c("a", "b", "comment"),
-                                tag = i, hash = "# unknown receivers")
-        } else { # nocov end
-          decision <- "b"
-        }
+        decision <- userInput("Which option should be followed?(a/b/comment) ", choices = c("a", "b", "comment"),
+                              tag = i, hash = "# unknown receivers")
         if (decision == "a")
           stopAndReport("Stopping analysis per user command.") # nocov
         if (decision == "b") {
@@ -967,18 +953,16 @@ checkDetectionsBeforeRelease <- function(input, bio, discard.orphans = FALSE){
           appendTo("Screen", paste0("  First detection time: ", input[[link[i]]]$Timestamp[1]))
           appendTo("Screen", paste0("  Number of detections before release: ", sum(to.remove)))
           message("\nPossible options:\n   a) Stop and double-check the data (recommended)\n   b) Discard orphan detections in this instance.\n   c) Discard orphan detections for all instances.\n")
-          if (interactive()) { # nocov start
-            decision <- userInput("Decision:(a/b/c/comment) ", 
-                                  choices = c("a", "b", "c", "comment"),
-                                  tag = bio$Transmitter[i], 
-                                  hash = paste("# detections before release for fish", bio$Transmitter[i]))
-            
-            if (decision == "a")
-              stopAndReport("Function stopped by user command.")
-            
-            if (decision == "c")
-              discard.orphans = TRUE
-          } # nocov end
+          decision <- userInput("Decision:(a/b/c/comment) ", 
+                                choices = c("a", "b", "c", "comment"),
+                                tag = bio$Transmitter[i], 
+                                hash = paste("# detections before release for fish", bio$Transmitter[i]))
+          
+          if (decision == "a")
+            stopAndReport("Function stopped by user command.")
+          
+          if (decision == "c")
+            discard.orphans = TRUE
         }
         
         if (all(to.remove)) {

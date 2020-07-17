@@ -103,13 +103,13 @@ test_that("explore stops when any argument does not make sense", {
 		"The user asked for tag 'ABC-DEF' to be excluded from the analysis, but this tag is not present in the detections.", fixed = TRUE)
 
 	expect_error(explore(tz = "Europe/Copenhagen", override = 1),
-		"Not all contents in 'override' could be recognized as tags (i.e. 'codespace-signal'). Valid examples: 'R64K-1234', A69-1303-1234'", fixed = TRUE)
+		"Some tag signals listed in 'override' (1) are not listed in the biometrics file.", fixed = TRUE)
 	
 	expect_error(explore(tz = "Europe/Copenhagen", override = "ABC-DEF", report = FALSE, GUI = "never"),
-		"Some tag signals listed in 'override' ('ABC-DEF') are not listed in the biometrics file.", fixed = TRUE)
+		"'override' must be numeric. Please include only the tag signals in the 'override' argument.", fixed = TRUE)
 	
-	expect_warning(explore(tz = "Europe/Copenhagen", override = "R64K-4450", report = FALSE, GUI = "never"),
-		"Override has been triggered for fish R64K-4450 but this fish was not detected.", fixed = TRUE)
+	expect_warning(explore(tz = "Europe/Copenhagen", override = 4450, report = FALSE, GUI = "never"),
+		"Override has been triggered for fish 4450 but this signal was not detected.", fixed = TRUE)
 	
 	expect_error(explore(tz = "Europe/Copenhagen", GUI = 1),
 		"'GUI' should be one of 'needed', 'always' or 'never'.", fixed = TRUE)
