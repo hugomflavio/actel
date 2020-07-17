@@ -30,7 +30,7 @@ loadStudyData <- function(tz, override = NULL, start.time, stop.time, save.detec
   if (!is.null(override)) {
     lowest_signals <- sapply(bio$Signal, function(i) min(as.numeric(unlist(strsplit(as.character(i), "|", fixed = TRUE)))))
     if (any(link <- is.na(match(override, lowest_signals))))
-      stopAndReport("Some tag signals listed in 'override' ('", paste0(override[link], collapse = "', '"), "') are not listed in the biometrics file.")
+      stopAndReport("Some tag signals listed in 'override' (", paste0(override[link], collapse = ", "), ") are not listed in the biometrics file.")
   }
   deployments <- loadDeployments(input = "deployments.csv", tz = tz)
   checkDeploymentTimes(input = deployments) # check that receivers are not deployed before being retrieved

@@ -158,7 +158,7 @@ checkArguments <- function(dp, tz, minimum.detections, max.interval, speed.metho
   if (!is.null(dp) && !is.null(override)) {
     lowest_signals <- sapply(dp$bio$Signal, function(i) min(as.numeric(unlist(strsplit(as.character(i), "|", fixed = TRUE)))))
     if (any(link <- is.na(match(override, lowest_signals))))
-      stopAndReport("Some tag signals listed in 'override' ('", paste0(override[link], collapse = "', '"), "') are not listed in the biometrics data.")
+      stopAndReport("Some tag signals listed in 'override' (", paste0(override[link], collapse = ", "), ") are not listed in the biometrics data.")
   }
 
   # NON-explore checks

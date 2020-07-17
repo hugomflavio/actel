@@ -521,7 +521,7 @@ emergencyBreak <- function(the.function.call) {
   appendTo("Report", paste0("Function call:\n-------------------\n", the.function.call, "\n-------------------"))
 
   message("")
-  decision <- userInput(paste0("The analysis errored. Would you like to save a copy of the job log\n(including your comments and decisions) to ", logname, "?(y/n) "), choices = c("y", "n"))
+  decision <- userInput(paste0("The analysis errored. Save job log (including comments and decisions) to ", logname, "?(y/n) "), choices = c("y", "n"))
   
   if (decision == "y")
     file.copy(paste(tempdir(), "temp_log.txt", sep = "/"), logname)
