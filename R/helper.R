@@ -22,7 +22,7 @@ stopAndReport <- function(...) {
 #' @keywords internal
 #' 
 userInput <- function(question, choices, tag, hash) {
-  if (interactive()) {
+  if (interactive()) { # nocov start
     try.again <- TRUE
     
     while (try.again) {
@@ -48,13 +48,15 @@ userInput <- function(question, choices, tag, hash) {
           try.again <- FALSE
         }
       }
-    }
+    } 
     
     if (length(aux) == 1 & !missing(hash))
       appendTo("UD", paste(decision, hash))
     else
       appendTo("UD", paste(decision))
-  } else {
+
+  } else { # nocov end
+
     if (any(choices == "n"))
       output <- "n"
     if (any(choices == "b"))
@@ -522,7 +524,7 @@ deleteHelpers <- function() {
 #'
 #' @keywords internal
 #'
-emergencyBreak <- function(the.function.call) {
+emergencyBreak <- function(the.function.call) { # nocov start
   appendTo("Report", "\nA fatal exception occurred, stopping the process!\nFound a bug? Report it here: https://github.com/hugomflavio/actel/issues\n\n-------------------")
   logname <- paste(gsub(":", ".", sub(" ", ".", as.character(Sys.time()))), "actel.log-ERROR.txt", sep = ".")
 
@@ -543,7 +545,7 @@ emergencyBreak <- function(the.function.call) {
     file.rename(paste(tempdir(), "temp_log.txt", sep = "/"), paste(tempdir(), logname, sep = "/"))
 
   deleteHelpers()
-}
+} # nocov end
 
 #' Extract timestamps from the analysis results.
 #'

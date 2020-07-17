@@ -1206,7 +1206,7 @@ graphicalInvalidate <- function(moves, fish, trigger) { # nocov start
 #'
 #' @keywords internal
 #'
-transferValidity <- function(from, to) {
+transferValidity <- function(from, to) { # nocov start
   Valid <- NULL
   if (any(!from$Valid)) {
     aux <- from[!(Valid)]
@@ -1215,4 +1215,4 @@ transferValidity <- function(from, to) {
     attributes(to)$p.type <- "Manual"
   }
   return(to)
-}
+} # nocov end
