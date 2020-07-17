@@ -41,9 +41,9 @@ knitr::opts_chunk$set(
 
 As you inspect your results, you may find out that you would rather change a specific outcome. For example, perhaps a detection was discarded that is actually relevant, or there are detections that clearly match a predator's behaviour rather than your fish and actel didn't pick that up.
 
-When this happens, it is time to take the lead and tell actel what you want to do, by triggering the manual processing mode. To do this, simply add the transmitters that you want to deal with manually in the `override` argument (e.g. `override = c("R64K-1234", "R64K-1405")`).
+When this happens, it is time to take the lead and tell actel what you want to do, by triggering the manual processing mode. To do this, simply add the signals that you want to deal with manually in the `override` argument (e.g. `override = c(1234, 1405)`).
 
-When you list tags in `override`, actel will bypass all of the normal checks and give you full control over movement validity. You will know this is happening when you see the following message:
+When you list signals in `override`, actel will bypass all of the normal checks and give you full control over movement validity. You will know this is happening when you see the following message:
 
 ```
 ----------------------------
@@ -52,7 +52,7 @@ Opening movements list for inspection.
 
 [...]
 
-Would you like to render any movement event invalid?(y/N/comment) 
+Would you like to render any movement event invalid?(y/n/comment) 
 ```
 
 You must then decide whether or not you want to invalidate any events and which events you would like to be invalidated. Once you have finished your edits, actel will automatically terminate manual mode and proceed with the analysis.
