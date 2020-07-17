@@ -1,15 +1,23 @@
+#' stop function but paste error to the report too
+#' 
+#' @param ... parts of the error string
+#' 
+#' @return No return value, called for side effects.
+#' 
+#' @keywords internal
+#' 
 stopAndReport <- function(...) {
   the.string <- paste0(...)
   appendTo("Report", paste0("Error: ", the.string))
   stop(the.string, call. = FALSE)
 }
 
-#' Wrap frequantly used code to handle user input
+#' Wrap frequently used code to handle user input
 #' 
 #' @param question The question to be asked
 #' @param choices The accepted inputs. Leave empty for any input
 #' @param tag the tag code (for comments only)
-#' @param hash A string to attach to the decision in the UD. Ignored if input already has a hashstring
+#' @param hash A string to attach to the decision in the UD. Ignored if input already has a hash string
 #' 
 #' @keywords internal
 #' 

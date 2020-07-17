@@ -940,7 +940,7 @@ loadDetections <- function(start.time = NULL, stop.time = NULL, tz, force = FALS
       decision <- "Y"
     } else { # nocov start
       appendTo("Screen", paste0("M: The detections have been processed on ", actel.detections$timestamp, ".\n   If the input detection files were not changed, it is safe to use these again."))
-      decision <- userInput("   Reuse processed detections?(y/n) ", options = c("y", "n"), hash = "# reuse detections?")
+      decision <- userInput("   Reuse processed detections?(y/n) ", choices = c("y", "n"), hash = "# reuse detections?")
     } # nocov end
     if (decision != "n"){
       appendTo(c("Screen","Report"), paste0("M: Using detections previously compiled on ", actel.detections$timestamp, "..."))
@@ -1408,7 +1408,7 @@ storeStrays <- function(){
     }
     if (interactive())
       decision <- userInput(paste0("Stray tags were detected in your study area. Would you like to save a summary to ", newname, "?(y/n) "),
-                            options = c("y", "n"), hash = "# save strays?")
+                            choices = c("y", "n"), hash = "# save strays?")
     else
       decision <- "y"
     appendTo("UD", decision)
@@ -1463,7 +1463,7 @@ createStandards <- function(detections, spatial, deployments, discard.orphans = 
           
           if (interactive()) { # nocov start
             decision <- userInput("Which option should be followed?(a/b/c) ", 
-                                  options = letters[1:3], 
+                                  choices = letters[1:3], 
                                   hash = paste("# orphan detections for receiver", names(deployments)[i]))
           } else { # nocov end
             decision <- "b"

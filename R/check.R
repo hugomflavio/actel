@@ -886,7 +886,7 @@ checkTagsInUnknownReceivers <- function(detections.list, deployments, spatial) {
         appendTo(c("Screen", "Report", "Warning"), paste0("Fish ", i, " was detected in one or more receivers that are not listed in the study area (receiver(s): ", paste(unknown.receivers, collapse = ", "), ")!"))
         message("Possible options:\n   a) Stop and double-check the data (recommended)\n   b) Temporarily include the receiver(s) to the stations list")
         if (interactive()) { # nocov start
-          decision <- userInput("Which option should be followed?(a/b/comment) ", options = c("a", "b", "comment"),
+          decision <- userInput("Which option should be followed?(a/b/comment) ", choices = c("a", "b", "comment"),
                                 tag = i, hash = "# unknown receivers")
         } else { # nocov end
           decision <- "b"
@@ -969,7 +969,7 @@ checkDetectionsBeforeRelease <- function(input, bio, discard.orphans = FALSE){
           message("\nPossible options:\n   a) Stop and double-check the data (recommended)\n   b) Discard orphan detections in this instance.\n   c) Discard orphan detections for all instances.\n")
           if (interactive()) { # nocov start
             decision <- userInput("Decision:(a/b/c/comment) ", 
-                                  options = c("a", "b", "c", "comment"),
+                                  choices = c("a", "b", "c", "comment"),
                                   tag = bio$Transmitter[i], 
                                   hash = paste("# detections before release for fish", bio$Transmitter[i]))
             
