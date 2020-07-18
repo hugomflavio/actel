@@ -37,12 +37,9 @@ getDualMatrices <- function(replicates, CJS = NULL, spatial, detections.list) {
         already.calculated <- !is.na(CJS$efficiency[names(replicates)[i]])
       if (already.calculated) {
         appendTo(c("Screen", "Warning", "Report"), paste0("An inter-array efficiency has already been calculated for array ", names(replicates)[i],"."))
-        if (interactive()) {
-          decision <- readline("Do you want to replace this with an intra-array efficiency estimate?(y/N) ") # nocov
-        } else {
-          decision <- "y"
-        }
-        if (decision == "y" | decision == "Y") {
+        decision <- userInput("Do you want to replace this with an intra-array efficiency estimate?(y/n) ",
+                                choices = c("y", "n"), hash = "# replace efficiency?")
+        if (!interactive() | decision == "y") {
           appendTo("Report", paste0("Replacing efficiency estimation."))
           continue <- TRUE
         } else { # nocov start
@@ -711,12 +708,6 @@ includeMissing <- function(x, status.df){
 dualMatrix <- function(array, replicates, spatial, detections.list){
   appendTo("debug", "Starting dualMatrix.")
   all.stations <- spatial$stations$Standard.name[spatial$stations$Array == array]
-  if (any(link <- !replicates %in% all.stations)) {
-    if (sum(link) > 1)
-      stop(paste0("In replicates: Stations ", paste(replicates[link], collapse = ", "), " are not part of ", array, " (available stations: ", paste(all.stations, collapse = ", "), ")."), call. = FALSE)
-    else
-      stop(paste0("In replicates: Station ", paste(replicates[link], collapse = ", "), " is not part of ", array, " (available stations: ", paste(all.stations, collapse = ", "), ")."), call. = FALSE)
-  }
   original <- all.stations[!all.stations %in% replicates]
   efficiency <- as.data.frame(matrix(ncol = 2, nrow = length(detections.list)))
   colnames(efficiency) <- c("original","replicates")

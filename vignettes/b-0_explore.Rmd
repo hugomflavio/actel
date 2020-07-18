@@ -222,7 +222,7 @@ If more than one tag causes trouble, you can list multiple tags to be excluded, 
 
 ### override
 
-Once you finish your analysis, you should go through the generated outputs and check for any strange behaviour. We will discuss this in more detail [later on](b-2_explore_results.html), but for now the important message is that, if you would like to **manually change the results for any set of tags**, you can list those tags in `override` to trigger full manual mode (e.g. `override = c("R64K-1234", "R64K-1405")`).
+Once you finish your analysis, you should go through the generated outputs and check for any strange behaviour. We will discuss this in more detail [later on](b-2_explore_results.html), but for now the important message is that, if you would like to **manually change the results for any set of tags**, you can list their respective signals in `override` to trigger full manual mode (e.g. `override = c(1234, 1405)`).
 
 When you list tags in `override`, actel will recognise them and enter full manual mode when it is their turn to be analysed. You will know this is happening when you see the following message:
 

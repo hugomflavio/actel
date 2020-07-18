@@ -103,7 +103,7 @@ detection data before any analyses are performed. Intended to be used if
 stray tags from a different code space but with the same signal as a target
 tag are detected in the study area.}
 
-\item{override}{A vector of tags for which the user intends to manually
+\item{override}{A vector of signals for which the user intends to manually
 define which movement events are valid and invalid.}
 
 \item{print.releases}{Logical: Should the release sites be printed in the

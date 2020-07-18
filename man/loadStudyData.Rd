@@ -20,7 +20,7 @@ loadStudyData(
 \item{tz}{The time zone of the study area. Must match one of the values
 present in \code{\link[base]{timezones}}.}
 
-\item{override}{A vector of tags for which the user intends to manually
+\item{override}{A vector of signals for which the user intends to manually
 define which movement events are valid and invalid.}
 
 \item{start.time}{Detection data prior to the timestamp set in

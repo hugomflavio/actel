@@ -140,15 +140,20 @@ sections to which each of the arrays belong in a new 'Section' column in the
 spatial input. You can now use the argument 'section.order' to define the order
 by which sections are presented", immediate. = TRUE, call. = FALSE)
 
+# clean up any lost helpers
   deleteHelpers()
+  if (file.exists(paste0(tempdir(), "/actel_debug_file.txt")))
+    file.remove(paste0(tempdir(), "/actel_debug_file.txt"))
+# ------------------------
 
+# debug lines
   if (!is.null(options("actel.debug")[[1]]) && options("actel.debug")[[1]]) { # nocov start
     on.exit(message("Debug: Progress log available at ", gsub("\\\\", "/", paste0(tempdir(), "/actel_debug_file.txt"))))
     on.exit(message("Debug: Saving carbon copy to ", gsub("\\\\", "/", paste0(tempdir(), "/actel.debug.RData"))), add = TRUE)
     on.exit(save(list = ls(), file = paste0(tempdir(), "/actel.debug.RData")), add = TRUE)
     message("!!!--- Debug mode has been activated ---!!!")
   } # nocov end
-
+# ------------------------
 
 # check arguments quality
   if (!is.null(datapack))
@@ -190,13 +195,6 @@ by which sections are presented", immediate. = TRUE, call. = FALSE)
   GUI <- checkGUI(GUI)
 # ------------------------
 
-# Prepare clean-up before function ends
-  if (file.exists(paste0(tempdir(), "/actel_debug_file.txt")))
-    file.remove(paste0(tempdir(), "/actel_debug_file.txt"))
-  on.exit(deleteHelpers(), add = TRUE)
-  on.exit(tryCatch(sink(), warning = function(w) {hide <- NA}), add = TRUE)
-# --------------------------------------
-
 # Store function call
   the.function.call <- paste0("residency(tz = ", ifelse(is.null(tz), "NULL", paste0("'", tz, "'")),
     ", section.order = ", ifelse(is.null(section.order), "NULL", paste0("c('", paste(section.order, collapse = "', '"), "')")),
@@ -212,7 +210,7 @@ by which sections are presented", immediate. = TRUE, call. = FALSE)
     ", jump.error = ", jump.error,
     ", inactive.warning = ", ifelse(is.null(inactive.warning), "NULL", inactive.warning),
     ", exclude.tags = ", ifelse(is.null(exclude.tags), "NULL", paste0("c('", paste(exclude.tags, collapse = "', '"), "')")),
-    ", override = ", ifelse(is.null(override), "NULL", paste0("c('", paste(override, collapse = "', '"), "')")),
+    ", override = ", ifelse(is.null(override), "NULL", paste0("c(", paste(override, collapse = ", "), ")")),
     ", report = ", ifelse(report, "TRUE", "FALSE"),
     ", auto.open = ", ifelse(auto.open, "TRUE", "FALSE"),
     ", discard.orphans = ", ifelse(discard.orphans, "TRUE", "FALSE"),
@@ -222,11 +220,19 @@ by which sections are presented", immediate. = TRUE, call. = FALSE)
     ", inactive.error = ", ifelse(is.null(inactive.error), "NULL", inactive.error),
     ", GUI = '", GUI, "'",
     ", print.releases = ", ifelse(print.releases, "TRUE", "FALSE"),
-    ", plot.detections.by = ", plot.detections.by,
+    ", plot.detections.by = '", plot.detections.by, "'",
     ")")
 
   appendTo("debug", the.function.call)
 # --------------------
+
+# Prepare clean-up before function ends
+  finished.unexpectedly <- TRUE
+  on.exit({if (interactive() & finished.unexpectedly) emergencyBreak(the.function.call)}, add = TRUE)
+
+  on.exit(deleteHelpers(), add = TRUE)
+  on.exit(tryCatch(sink(), warning = function(w) {hide <- NA}), add = TRUE)
+# --------------------------------------
 
 # Final arrangements before beginning
   appendTo("Report", paste0("Actel R package report.\nVersion: ", utils::packageVersion("actel"), "\n"))
@@ -259,14 +265,30 @@ by which sections are presented", immediate. = TRUE, call. = FALSE)
   dist.mat <- study.data$dist.mat
   invalid.dist <- study.data$invalid.dist
   detections.list <- study.data$detections.list
-
-  if (all(!grepl("^Section$", colnames(spatial$stations))))
-    stop("To run residency(), please assign the arrays to their sections using a 'Section' column in the spatial input.", call. = FALSE)
 # -------------------------------------
 
 # Final quality checks
+  # Verify the existance of sections
+  if (all(!grepl("^Section$", colnames(spatial$stations))))
+    stop("To run residency(), please assign the arrays to their sections using a 'Section' column in the spatial input.", call. = FALSE)
+
+  # Verify that replicate information is valid
   if (!is.null(replicates) && any(is.na(match(names(replicates), names(arrays)))))
     stop("Some of the array names listed in the 'replicates' argument do not match the study's arrays.\n", call. = FALSE)
+
+  capture <- lapply(names(replicates), function(i) {
+    x <- replicates[[i]]
+    all.stations <- spatial$stations$Standard.name[spatial$stations$Array == i]
+    if (any(link <- !x %in% all.stations)) {
+      stop(paste0("In replicates: Station", 
+                  ifelse(sum(link) > 1, "s ", " "), 
+                  paste(x[link], collapse = ", "), 
+                  ifelse(sum(link) > 1, " are", " is"), 
+                  " not part of ", i, " (available stations: ", 
+                  paste(all.stations, collapse = ", "), ")."), 
+           call. = FALSE)
+    }
+  })
 # -------------------------------------
 
 # Discard early detections, if required
@@ -316,7 +338,7 @@ by which sections are presented", immediate. = TRUE, call. = FALSE)
 
   movement.names <- names(movements)
 
-  if (any(link <- !override %in% movement.names)) {
+  if (any(link <- !override %in% extractSignals(movement.names))) {
     appendTo(c("Screen", "Warning", "Report"), paste0("Override has been triggered for fish ", paste(override[link], collapse = ", "), " but ",
       ifelse(sum(link) == 1, "this", "these"), " fish ", ifelse(sum(link) == 1, "was", "were")," not detected."))
     override <- override[!link]
@@ -326,7 +348,7 @@ by which sections are presented", immediate. = TRUE, call. = FALSE)
     fish <- names(movements)[i]
     appendTo("debug", paste0("debug: Checking movement quality for fish ", fish,"."))
 
-    if (is.na(match(fish, override))) {
+    if (is.na(match(extractSignals(fish), override))) {
       release <- as.character(bio$Release.site[na.as.false(bio$Transmitter == fish)])
       release <- unlist(strsplit(with(spatial, release.sites[release.sites$Standard.name == release, "Array"]), "|", fixed = TRUE))
 
@@ -487,13 +509,13 @@ by which sections are presented", immediate. = TRUE, call. = FALSE)
   }
 
   if (interactive()) { # nocov start
-    decision <- readline(paste0("Would you like to save a copy of the results to ", resultsname, "?(y/N) "))
-    appendTo("UD", decision)
+    decision <- userInput(paste0("Would you like to save a copy of the results to ", resultsname, "?(y/n) "), 
+                          choices = c("y", "n"), hash = "# save results?")
   } else { # nocov end
     decision <- "n"
   }
 
-  if (decision == "y" | decision == "Y") {
+  if (decision == "y") {
     appendTo(c("Screen", "Report"), paste0("M: Saving results as '", resultsname, "'."))
     if (invalid.dist)
       save(detections, valid.detections, spatial, deployments, arrays, movements, valid.movements,
@@ -580,6 +602,10 @@ by which sections are presented", immediate. = TRUE, call. = FALSE)
 
 # wrap up the txt report
   appendTo("Report", "\n-------------------")
+  
+  if (file.exists(paste(tempdir(), "temp_comments.txt", sep = "/")))
+    appendTo("Report", paste0("User comments:\n-------------------\n", gsub("\t", ": ", gsub("\r", "", readr::read_file(paste(tempdir(), "temp_comments.txt", sep = "/")))), "-------------------")) # nocov
+
   if (file.exists(paste(tempdir(), "temp_UD.txt", sep = "/")))
     appendTo("Report", paste0("User interventions:\n-------------------\n", gsub("\r", "", readr::read_file(paste(tempdir(), "temp_UD.txt", sep = "/"))), "-------------------")) # nocov
 
@@ -639,17 +665,20 @@ by which sections are presented", immediate. = TRUE, call. = FALSE)
   jobname <- paste0(gsub(" |:", ".", as.character(Sys.time())), ".actel.log.txt")
 
   if (interactive() & !report) { # nocov start
-    decision <- readline(paste0("Would you like to save a copy of the analysis log to ", jobname, "?(y/N) "))
-    appendTo("UD", decision)
+    decision <- userInput(paste0("Would you like to save a copy of the analysis log to ", jobname, "?(y/n) "), 
+                          choices = c("y", "n"), hash = "# save job log?")
   } else { # nocov end
     decision <- "n"
   }
-  if (decision == "y" | decision == "Y") { # nocov start
+
+  if (decision == "y") { # nocov start
     appendTo("Screen", paste0("M: Saving job log as '",jobname, "'."))
     file.copy(paste(tempdir(), "temp_log.txt", sep = "/"), jobname)
   } # nocov end
 
   appendTo("Screen", "M: Process finished successfully.")
+
+  finished.unexpectedly <- FALSE
 
   if (invalid.dist) {
     return(list(detections = detections,

@@ -8,11 +8,15 @@ Fixes:
   * Prevent crash if all detections for a given stray tag were removed during detection quality checks.
   * Prevent migration crash if all movement events are rendered invalid before section movements are created.
   * Prevent crash related with circular plotting when running an analysis on more than eight fish groups.
+  * Prevent bug in older R versions where actel did not display all table rows, for long tables displayed in the console.
 
 Changes
   * `stripCodeSpaces()` has been replaced with `extractSignals()`.
   * **Sections are now set up using a 'Section' column in the spatial.csv file**. The 'sections' argument has been deprecated. See the updated vignettes for details.
   * **Arrays can now be named freely** (short names are still recommended).
+  * Perform quality checks on the 'replicates' argument earlier in the analyses.
+  * User decisions no longer have default options.
+  * Users must now list **only** the tag signals in the 'override' argument.
 
 Enhancements:
   * The shapefiles of the study areas can now be water or land polygons. Use the new argument "time" in `loadShape()` to switch from land shapefiles (the default) to water shapefiles.
@@ -25,6 +29,10 @@ Enhancements:
   * New argument `section.order` allows the user to specify the order by which the sections should be listed.
   * `plotTimes()` has been expanded with new arguments and better compatibility for multiple groups.
   * New argument `plot.detections.by` allows the user to plot the detections by array, rather than by section. Applied both to the analyses and to `plotMoves()`.
+  * User decisions can now be followed by a in-line comment (started with "#"). Additionally, actel automatically adds default comments to decisions so these are easier to read through in the job log.
+  * Message that opens movement events now includes the respective tag and the type of movements displayed (section or array movements).
+  * Include user comments in the txt job logs.
+  * In case of error, the user can now save a copy of the log up to the point where the function crashed.
   
 ## actel 1.0.0 (CRAN)
 

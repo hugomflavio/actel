@@ -4,7 +4,7 @@
 \alias{emergencyBreak}
 \title{Standard procedure when aborting}
 \usage{
-emergencyBreak()
+emergencyBreak(the.function.call)
 }
 \value{
 No return value, called for side effects.
