@@ -179,7 +179,7 @@ movementSpeeds <- function(movements, speed.method, dist.mat) {
         }
         if (speed.method == "last to last"){
           a.sec <- as.vector(difftime(movements$Last.time[i], movements$Last.time[i - 1], units = "secs"))
-          my.dist <- dist.mat[movements$First.station[i], gsub(" ", ".", movements$First.station[i - 1])]
+          my.dist <- dist.mat[movements$Last.station[i], gsub(" ", ".", movements$Last.station[i - 1])]
         }
         movements$Average.speed.m.s[i] <<- round(my.dist/a.sec, 6)
         rm(a.sec, my.dist)

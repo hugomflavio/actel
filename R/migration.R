@@ -1164,7 +1164,7 @@ assembleTimetable <- function(secmoves, valid.moves, all.moves, spatial, arrays,
           }
           if (speed.method == "last to last"){
             a.sec <- as.vector(difftime(aux$Last.time[i], aux$Last.time[i - 1], units = "secs"))
-            my.dist <- dist.mat[aux$First.station[i], gsub(" ", ".", aux$First.station[i - 1])]
+            my.dist <- dist.mat[aux$Last.station[i], gsub(" ", ".", aux$Last.station[i - 1])]
           }
           aux$Speed.until[i] <<- round(my.dist/a.sec, 6)
           rm(a.sec, my.dist)

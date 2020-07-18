@@ -9,6 +9,7 @@ Fixes:
   * Prevent migration crash if all movement events are rendered invalid before section movements are created.
   * Prevent crash related with circular plotting when running an analysis on more than eight fish groups.
   * Prevent bug in older R versions where actel did not display all table rows, for long tables displayed in the console.
+  * **Fixed 'last to last' speed calculations**. A bug was found where this speed method was accidentally matching first stations for distance calculation, rather than last stations.
 
 Changes
   * `stripCodeSpaces()` has been replaced with `extractSignals()`.
