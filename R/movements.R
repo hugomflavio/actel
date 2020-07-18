@@ -327,6 +327,14 @@ sectionMovements <- function(movements, spatial, invalid.dist) {
       stringsAsFactors = FALSE
       )
   } else {
+    the.speeds <- unlist(lapply(seq_along(aux$values), function(i) {
+        if (last.events[i] == first.events[i]) {
+          return(NA_real_)
+        } else {
+          # cut the first event as it displays the speed from the previous section to this one
+          return(mean(vm$Average.speed.m.s[(first.events[i] + 1):last.events[i]], na.rm = TRUE))
+        }
+      }))
     recipient <- data.frame(
       Section = aux$values,
       Events = aux$lengths,
@@ -339,7 +347,7 @@ sectionMovements <- function(movements, spatial, invalid.dist) {
       Last.time = vm$Last.time[last.events],
       Time.travelling = c(vm$Time.travelling[1], rep(NA_character_, length(aux$values) - 1)),
       Time.in.section = rep(NA_character_, length(aux$values)),
-      Speed.in.section.m.s = unlist(lapply(seq_along(aux$values), function(i) mean(vm$Average.speed.m.s[first.events[i]:last.events[i]], na.rm = TRUE))),
+      Speed.in.section.m.s = the.speeds,
       Valid = rep(TRUE, length(aux$values)),
       stringsAsFactors = FALSE
       )
