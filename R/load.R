@@ -22,6 +22,15 @@
 #'
 loadStudyData <- function(tz, override = NULL, start.time, stop.time, save.detections = FALSE,
   section.order = NULL, exclude.tags, disregard.parallels = TRUE, discard.orphans = FALSE) {
+
+  loading.failed <- TRUE
+  # debug lines
+    if (!is.null(options("actel.debug")[[1]]) && options("actel.debug")[[1]]) { # nocov start
+      on.exit({if (loading.failed) message("Debug: Function failed during loading. Saving load environment to ", gsub("\\\\", "/", paste0(tempdir(), "/actel.load.debug.RData")))}, add = TRUE)
+      on.exit({if (loading.failed) save(list = ls(), file = paste0(tempdir(), "/actel.load.debug.RData"))}, add = TRUE)
+    } # nocov end
+  # ------------------------
+
   appendTo(c("Screen", "Report"), "M: Importing data. This process may take a while.")
   bio <- loadBio(input = "biometrics.csv", tz = tz)
   appendTo(c("Screen", "Report"), paste0("M: Number of target tags: ", nrow(bio), "."))
@@ -113,6 +122,9 @@ loadStudyData <- function(tz, override = NULL, start.time, stop.time, save.detec
 
   detections.list <- checkDetectionsBeforeRelease(input = detections.list, bio = bio, discard.orphans = discard.orphans)
   appendTo(c("Screen", "Report"), "M: Data successfully imported!")
+
+  loading.failed <- FALSE
+
   return(list(bio = bio, deployments = deployments, spatial = spatial, dot = dot,
    arrays = arrays, dotmat = dotmat, dist.mat = dist.mat, invalid.dist = invalid.dist,
    detections.list = detections.list, paths = paths))
