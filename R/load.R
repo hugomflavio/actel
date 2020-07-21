@@ -136,6 +136,7 @@ loadStudyData <- function(tz, override = NULL, start.time, stop.time, save.detec
 #' @keywords internal
 #'
 loadDot <- function(string = NULL, input = NULL, spatial, disregard.parallels) {
+  appendTo("debug", "Running loadDot.")
   if (is.null(string) & is.null(input))
     stopAndReport("No dot file or dot string were specified.")
   if (is.null(string)) {
@@ -241,6 +242,7 @@ readDot <- function (input = NULL, string = NULL) {
 #' @keywords internal
 #'
 dotMatrix <- function(input) {
+  appendTo("debug", "Running dotMatrix.")
   nodes <- unique(unlist(input[, c(1, 3)]))
   graph <- matrix(0, length(nodes), length(nodes), dimnames = list(nodes, nodes))
   if (any(input$to != "--" & input$to != "<-" & input$to != "->"))
@@ -290,6 +292,7 @@ dotMatrix <- function(input) {
 #' @keywords internal
 #'
 dotList <- function(input, spatial) {
+  appendTo("debug", "Running dotList.")
   if (any(grepl("^Section$", colnames(spatial)))) {
     sections <- levels(spatial$Section)
     input$SectionA <- rep(NA_character_, nrow(input))
@@ -340,6 +343,7 @@ dotList <- function(input, spatial) {
 #' @keywords internal
 #'
 dotPaths <- function(input, dotmat, disregard.parallels) {
+  appendTo("debug", "Running dotPaths.")
   recipient <- findPeers(input = input, dotmat = dotmat, type = "before", disregard.parallels = disregard.parallels)
   recipient <- findDirectChains(input = recipient, dotmat = dotmat,  type = "before")
   recipient <- findPeers(input = recipient, dotmat = dotmat,  type = "after", disregard.parallels = disregard.parallels)
@@ -504,7 +508,7 @@ findShortestChains <- function(input) {
 #' @keywords internal
 #'
 setSpatialStandards <- function(input){
-  appendTo("debug","Running setSpatialStandards")
+  appendTo("debug","Running setSpatialStandards.")
   input$Standard.name <- as.character(input$Station.name)
   input$Standard.name <- gsub(" ", "", input$Standard.name)
   link <- input$Type == "Hydrophone"
@@ -526,6 +530,7 @@ setSpatialStandards <- function(input){
 #' @keywords internal
 #'
 loadDistances <- function(input = "distances.csv", spatial) {
+  appendTo("debug", "Running loadDistances.")
   # Check for distances
   invalid.dist <- TRUE
   if (is.character(input)) {
@@ -926,6 +931,8 @@ loadDetections <- function(start.time = NULL, stop.time = NULL, tz, force = FALS
   #   notes, the variable name is created before any use.
   actel.detections <- NULL
 
+  appendTo("debug", "Running loadDetections.")
+
   recompile <- TRUE
   detection.paths <- c(file.exists("actel.detections.RData"), file.exists("detections/actel.detections.RData"))
 
@@ -1248,6 +1255,7 @@ convertTimes <- function(input, start.time, stop.time, tz) {
 #' @keywords internal
 #'
 createUniqueSerials <- function(input) {
+  appendTo("debug", "Running createUniqueSerials.")
   output <- split(input, input$Receiver)
   for (i in 1:length(output)) {
     if (nrow(output[[i]]) > 1) {
@@ -1431,6 +1439,7 @@ storeStrays <- function(){
 #' @keywords internal
 #'
 createStandards <- function(detections, spatial, deployments, discard.orphans = FALSE) {
+  appendTo("debug", "Running createStandards.")
   detections$Receiver <- as.character(detections$Receiver)
   detections$Standard.name <- NA_character_
   detections$Array <- NA_character_

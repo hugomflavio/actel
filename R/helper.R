@@ -22,6 +22,7 @@ stopAndReport <- function(...) {
 #' @keywords internal
 #' 
 userInput <- function(question, choices, tag, hash) {
+  appendTo("debug", "Running userInput.")
   if (interactive()) { # nocov start
     try.again <- TRUE
     
