@@ -1015,37 +1015,42 @@ compileDetections <- function(path = "detections", start.time = NULL, stop.time 
   data.files <- lapply(file.list, function(i) {
     appendTo("debug", paste0("Importing file '", i, "'."))
     aux <- data.table::fread(i, fill = TRUE, sep = ",", showProgress = FALSE)
-    if(nrow(aux) > 0){
-      unknown.file <- TRUE
-      if (unknown.file && (any(grepl("CodeSpace", colnames(aux))) & any(grepl("Signal", colnames(aux))))) {
-        appendTo("debug", paste0("File '", i, "' matches a Standard log."))
-        output <- processStandardFile(input = aux)
-        unknown.file <- FALSE
-      }
-      if (unknown.file && any(grepl("CodeType", colnames(aux)))) {
-        appendTo("debug", paste0("File '", i, "' matches a Thelma log."))
-        output <- processThelmaOldFile(input = aux)
-        unknown.file <- FALSE
-      }
-      if (unknown.file && any(grepl("Protocol", colnames(aux)))) {
-        appendTo("debug", paste0("File '", i, "' matches a Thelma log."))
-        output <- processThelmaNewFile(input = aux)
-        unknown.file <- FALSE
-      }
-      if (unknown.file && any(grepl("Transmitter", colnames(aux)))) {
-        appendTo("debug", paste0("File '", i, "' matches a Vemco log."))
-        output <- processVemcoFile(input = aux)
-        unknown.file <- FALSE
-      }
-      if (unknown.file) {
-        appendTo(c("Screen", "Report", "Warning"),
-          paste0("File '", i, "' does not match to any of the supported hydrophone file formats!\n   If your file corresponds to a hydrophone log and actel did not recognize it, please get in contact through www.github.com/hugomflavio/actel/issues/new"))
-        return(NULL)
-      }
-      return(output)
-    } else {
-      appendTo(c("Screen", "Report"), paste0("File '", i, "' is empty, skipping processing."))
+    if (ncol(aux) < 3) {
+      appendTo(c("Screen", "Warning", "Report"), paste0("File '", i, "' could not be recognized as a valid detections table (ncol < 3), skipping processing. Are you sure it is a comma separated file?"))
       return(NULL)
+    } else {
+      if(nrow(aux) == 0){
+        appendTo(c("Screen", "Report"), paste0("File '", i, "' is empty, skipping processing."))
+        return(NULL)
+      } else {
+        unknown.file <- TRUE
+        if (unknown.file && (any(grepl("CodeSpace", colnames(aux))) & any(grepl("Signal", colnames(aux))))) {
+          appendTo("debug", paste0("File '", i, "' matches a Standard log."))
+          output <- processStandardFile(input = aux)
+          unknown.file <- FALSE
+        }
+        if (unknown.file && any(grepl("CodeType", colnames(aux)))) {
+          appendTo("debug", paste0("File '", i, "' matches a Thelma log."))
+          output <- processThelmaOldFile(input = aux)
+          unknown.file <- FALSE
+        }
+        if (unknown.file && any(grepl("Protocol", colnames(aux)))) {
+          appendTo("debug", paste0("File '", i, "' matches a Thelma log."))
+          output <- processThelmaNewFile(input = aux)
+          unknown.file <- FALSE
+        }
+        if (unknown.file && any(grepl("Transmitter", colnames(aux)))) {
+          appendTo("debug", paste0("File '", i, "' matches a Vemco log."))
+          output <- processVemcoFile(input = aux)
+          unknown.file <- FALSE
+        }
+        if (unknown.file) {
+          appendTo(c("Screen", "Report", "Warning"),
+            paste0("File '", i, "' does not match to any of the supported hydrophone file formats!\n         If your file corresponds to a hydrophone log and actel did not recognize it, please get in contact through www.github.com/hugomflavio/actel/issues/new"))
+          return(NULL)
+        }
+        return(output)
+      }
     }
   })
   names(data.files) <- file.list

@@ -34,6 +34,7 @@ Enhancements:
   * Message that opens movement events now includes the respective tag and the type of movements displayed (section or array movements).
   * Include user comments in the txt job logs.
   * In case of error, the user can now save a copy of the log up to the point where the function crashed.
+  * Verify number of columns on all detection files.
   
 ## actel 1.0.0 (CRAN)
 

@@ -92,9 +92,15 @@ test_that("loadDetections can handle the presence of a detections folder and det
 })
 
 test_that("loadDetectons can handle random/empty files", {
-	write.csv("abc", "detections/bad_file.csv")
+	write.csv("abc", "detections/bad_file.csv", row.names = FALSE)
 	expect_warning(loadDetections(start.time = NULL, stop.time = NULL, tz = "Europe/Copenhagen", force = FALSE),
-		"File 'detections/bad_file.csv' does not match to any of the supported hydrophone file formats!\n   If your file corresponds to a hydrophone log and actel did not recognize it, please get in contact through www.github.com/hugomflavio/actel/issues/new", fixed = TRUE)
+		"File 'detections/bad_file.csv' could not be recognized as a valid detections table (ncol < 3), skipping processing. Are you sure it is a comma separated file?", fixed = TRUE)
+
+	sink("detections/bad_file.csv")
+	cat("'abc','def','ghi'\n1,2,3\n")
+	sink()
+	expect_warning(loadDetections(start.time = NULL, stop.time = NULL, tz = "Europe/Copenhagen", force = FALSE),
+		"File 'detections/bad_file.csv' does not match to any of the supported hydrophone file formats!\n         If your file corresponds to a hydrophone log and actel did not recognize it, please get in contact through www.github.com/hugomflavio/actel/issues/new", fixed = TRUE)
 
 	sink("detections/bad_file.csv")
 	cat("Date and Time (UTC),Receiver,Transmitter,Transmitter Name,Transmitter Serial,Sensor Value,Sensor Unit,Station Name,Latitude,Longitude\n")
@@ -180,7 +186,6 @@ test_that("checkDetectionsBeforeRelease kicks in if needed.", {
 
   expect_equal(length(output), length(detections.list) - 1)
 })
-# y
 # b
 # b
 
@@ -200,6 +205,8 @@ test_that("loadDetections can handle saved detections.", {
 
 	file.remove("actel.detections.RData")
 })
+# n
+# n
 
 setwd(tests.home)
 rm(list = ls())
