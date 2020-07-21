@@ -211,7 +211,7 @@ stripCodeSpaces <- function(input) {
 #' @export
 #'
 extractSignals <- function(input) {
-  unlist(lapply(input, function(x) tail(unlist(strsplit(x, "-")), 1)))
+  unlist(lapply(input, function(x) tail(unlist(strsplit(as.character(x), "-")), 1)))
 }
 
 #' Extract Code Spaces from transmitter names
@@ -230,7 +230,7 @@ extractSignals <- function(input) {
 #' @export
 #'
 extractCodeSpaces <- function(input) {
-  unname(sapply(input, function(x) sub("-[0-9]*$", "", x)))
+  unname(sapply(input, function(x) sub("-[0-9]*$", "", as.character(x))))
 }
 
 
