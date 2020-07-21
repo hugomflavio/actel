@@ -1026,6 +1026,10 @@ compileDetections <- function(path = "detections", start.time = NULL, stop.time 
         unknown.file <- TRUE
         if (unknown.file && (any(grepl("CodeSpace", colnames(aux))) & any(grepl("Signal", colnames(aux))))) {
           appendTo("debug", paste0("File '", i, "' matches a Standard log."))
+          if (!is.numeric(aux$Receiver))
+            stopAndReport("The file '", i, "' was recognized as a standard detections file, but the 'Receiver' column is not numeric.\nPlease include only the receiver serial numbers in the 'Receiver' column.")
+          if (!is.numeric(aux$Signal))
+            stopAndReport("The file '", i, "' was recognized as a standard detections file, but the 'Signal' column is not numeric.\nPlease include only the tag signals in the 'Signal' column.")
           output <- processStandardFile(input = aux)
           unknown.file <- FALSE
         }

@@ -35,6 +35,7 @@ Enhancements:
   * Include user comments in the txt job logs.
   * In case of error, the user can now save a copy of the log up to the point where the function crashed.
   * Verify number of columns on all detection files.
+  * Run quality checks on standard detection files.
   
 ## actel 1.0.0 (CRAN)
 
