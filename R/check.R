@@ -349,7 +349,7 @@ checkGUI <- function(GUI = c("needed", "always", "never")) {
        dll <- try(library.dynam("RGtk2", "RGtk2", sub("/RGtk2", "", find.package("RGtk2"))), silent = TRUE)
       }
       if (is.character(dll)) {
-       appendTo(c("Screen", "Warning", "Report"),
+       appendTo(c("Screen", "Warning"),
         paste0("GUI is set to '", GUI,
         "' but loading of RGtk2 dll failed. Please run e.g. gWidgets2::gtext() to trigger the installation of RGtk2's dll and then restart R.\n         Disabling GUI (i.e. GUI = 'never') for the current run."))
        GUI <- "never"
