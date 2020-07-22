@@ -4,7 +4,7 @@
 \alias{splitDetections}
 \title{Split detections by tag}
 \usage{
-splitDetections(detections, bio, exclude.tags = NULL, silent = FALSE)
+splitDetections(detections, bio, exclude.tags = NULL)
 }
 \arguments{
 \item{detections}{A data frame with all the detections. Supplied by loadDetections.}
@@ -15,8 +15,6 @@ splitDetections(detections, bio, exclude.tags = NULL, silent = FALSE)
 detection data before any analyses are performed. Intended to be used if
 stray tags from a different code space but with the same signal as a target
 tag are detected in the study area.}
-
-\item{silent}{logical: if TRUE, suppress messages.}
 }
 \value{
 A list of detections for each tag.

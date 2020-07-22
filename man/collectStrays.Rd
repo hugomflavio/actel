@@ -4,7 +4,7 @@
 \alias{collectStrays}
 \title{Collect summary information on the tags detected but that are not part of the study.}
 \usage{
-collectStrays(input, restart = FALSE)
+collectStrays(input)
 }
 \arguments{
 \item{input}{list of detections for the tags to be excluded.}

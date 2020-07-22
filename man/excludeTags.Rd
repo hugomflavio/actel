@@ -4,7 +4,7 @@
 \alias{excludeTags}
 \title{Collect summary information on the tags detected but that are not part of the study.}
 \usage{
-excludeTags(input, exclude.tags, silent)
+excludeTags(input, exclude.tags)
 }
 \arguments{
 \item{input}{list of detections}
@@ -13,8 +13,6 @@ excludeTags(input, exclude.tags, silent)
 detection data before any analyses are performed. Intended to be used if
 stray tags from a different code space but with the same signal as a target
 tag are detected in the study area.}
-
-\item{silent}{logical: if TRUE, suppress messages.}
 }
 \value{
 A list of detections for each tag that does not contain the excluded tags.
