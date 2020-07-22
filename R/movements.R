@@ -183,6 +183,8 @@ movementSpeeds <- function(movements, speed.method, dist.mat) {
         }
         movements$Average.speed.m.s[i] <<- round(my.dist/a.sec, 6)
         rm(a.sec, my.dist)
+      } else {
+        movements$Average.speed.m.s[i] <<- NA_real_
       }
     })
   }
