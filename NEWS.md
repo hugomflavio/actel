@@ -12,6 +12,7 @@ Fixes:
   * **Fixed 'last to last' speed calculations**. A bug was found where this speed method was accidentally matching first stations for distance calculation, rather than last stations.
   * Fix bug where valid.movements would retain the invalid speed values if the fish no longer moved between arrays.
   * Fix bug where the wrong tags would be stored in stray_tags.csv.
+  * Fig bug where stray tags from previous runs would leak into stray_tags.csv.
 
 Changes
   * `stripCodeSpaces()` has been replaced with `extractSignals()`.

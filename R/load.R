@@ -1294,14 +1294,17 @@ createUniqueSerials <- function(input) {
 #' @inheritParams loadDetections
 #' @param bio A table with the tags and biometrics of the studied fish.
 #' @param detections A data frame with all the detections. Supplied by loadDetections.
-#' @param silent logical: if TRUE, suppress messages.
 #'
 #' @return A list of detections for each tag.
 #'
 #' @keywords internal
 #'
-splitDetections <- function(detections, bio, exclude.tags = NULL, silent = FALSE) {
+splitDetections <- function(detections, bio, exclude.tags = NULL) {
   appendTo("debug", "Running splitDetections.")
+  
+  if (file.exists(paste0(tempdir(), "/temp_strays.csv")))
+    file.remove(paste0(tempdir(), "/temp_strays.csv"))
+
   detections$Transmitter <- droplevels(detections$Transmitter) # failsafe in case all detections for a transmitter were previously excluded
   my.list <- split(detections, detections$Transmitter)
   my.list <- excludeTags(input = my.list, exclude.tags = exclude.tags)
@@ -1396,11 +1399,8 @@ splitDetections <- function(detections, bio, exclude.tags = NULL, silent = FALSE
 #'
 #' @keywords internal
 #'
-collectStrays <- function(input, restart = FALSE){
+collectStrays <- function(input){
   appendTo("debug", "Running collectStrays.")
-  if (restart && file.exists(paste0(tempdir(), "/temp_strays.csv"))) {
-    file.remove(paste0(tempdir(), "/temp_strays.csv"))
-  }
   if (length(input) > 0) {
     recipient <- data.frame(Transmitter = names(input),
       N.detections = unlist(lapply(input,nrow)),
@@ -1434,13 +1434,12 @@ storeStrays <- function(){
         }
       }
     }
-    if (interactive())
-      decision <- userInput(paste0("Stray tags were detected in your study area. Would you like to save a summary to ", newname, "?(y/n) "),
-                            choices = c("y", "n"), hash = "# save strays?")
-    else
+    decision <- userInput(paste0("Stray tags were detected in your study area. Would you like to save a summary to ", newname, "?(y/n) "),
+                          choices = c("y", "n"), hash = "# save strays?")
+    if (!interactive())
       decision <- "y"
-    appendTo("UD", decision)
-    if (decision == "y" | decision == "Y")
+
+    if (decision == "y")
       file.copy(paste0(tempdir(), "/temp_strays.csv"), newname)
   }
 }
@@ -1647,7 +1646,7 @@ transformSpatial <- function(spatial, bio, arrays, dotmat, first.array = NULL) {
 #'
 #' @keywords internal
 #'
-excludeTags <- function(input, exclude.tags, silent){
+excludeTags <- function(input, exclude.tags){
   appendTo("debug", "Running excludeTags.")
   if (length(exclude.tags) != 0) {
     link <- match(exclude.tags, names(input))
@@ -1663,7 +1662,7 @@ excludeTags <- function(input, exclude.tags, silent){
     if (!all(!logical_link)) {
       link <- link[!is.na(link)]
       appendTo(c("Screen", "Report"), paste0("M: Excluding tag(s) ", paste(exclude.tags[logical_link], collapse = ", "), " from the analysis per used command (detections removed: ", paste(unlist(lapply(input[link], nrow)), collapse = ", "), ", respectively)."))
-      collectStrays(input = input[link], restart = TRUE)
+      collectStrays(input = input[link])
       return(input[-link])
     } else {
       return(input)
