@@ -214,6 +214,7 @@ by which sections are presented", immediate. = TRUE, call. = FALSE)
     ", report = ", ifelse(report, "TRUE", "FALSE"),
     ", auto.open = ", ifelse(auto.open, "TRUE", "FALSE"),
     ", discard.orphans = ", ifelse(discard.orphans, "TRUE", "FALSE"),
+    ", discard.first = ", ifelse(is.null(discard.first), "NULL", discard.first),
     ", save.detections = ", ifelse(save.detections, "TRUE", "FALSE"),
     ", section.minimum = ", section.minimum,
     ", replicates = ", ifelse(is.null(replicates),"NULL", paste0("list(", paste(sapply(1:length(replicates), function(i) paste0("'", names(replicates)[i], "' = c('", paste(replicates[[i]], collapse = "', '"), "')")), collapse = ", "), ")")),

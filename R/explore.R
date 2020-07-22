@@ -219,6 +219,7 @@ explore <- function(
     ", override = ", ifelse(is.null(override), "NULL", paste0("c(", paste(override, collapse = ", "), ")")),
     ", report = ", ifelse(report, "TRUE", "FALSE"),
     ", discard.orphans = ", ifelse(discard.orphans, "TRUE", "FALSE"),
+    ", discard.first = ", ifelse(is.null(discard.first), "NULL", discard.first),
     ", auto.open = ", ifelse(auto.open, "TRUE", "FALSE"),
     ", save.detections = ", ifelse(save.detections, "TRUE", "FALSE"),
     ", GUI = '", GUI, "'",
