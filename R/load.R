@@ -1312,14 +1312,14 @@ splitDetections <- function(detections, bio, exclude.tags = NULL, silent = FALSE
   appendTo("debug", "Debug: Creating 'trimmed.list'.")
 
   # Find signal matches, including for double-signal tags
-  tag.list <- extractSignals(names(my.list))
-  signal_list <- lapply(strsplit(as.character(bio$Signal), "|", fixed = TRUE), as.numeric)
-  aux <- lapply(1:length(signal_list), function(i) {
-    output <- rep(NA_integer_, length(tag.list))
-    output[tag.list %in% signal_list[[i]]] <- i
+  detected_signals <- extractSignals(names(my.list))
+  target_signals_list <- lapply(strsplit(as.character(bio$Signal), "|", fixed = TRUE), as.numeric)
+  aux <- lapply(1:length(target_signals_list), function(i) {
+    output <- rep(NA_integer_, length(detected_signals))
+    output[detected_signals %in% target_signals_list[[i]]] <- i
     return(output)
   })
-  signal_match <- combine(aux)
+  signal_match <- combine(aux) # detected_signals that are part of the target_signals_list
 
   # Combine tables for multi-signal tags and transfer sensor units
   if (any(table(signal_match) > 1)) {
@@ -1348,13 +1348,13 @@ splitDetections <- function(detections, bio, exclude.tags = NULL, silent = FALSE
   }
 
   # Transfer transmitter names to bio
-  lowest_signals <- sapply(bio$Signal, function(i) {
+  lowest_target_signals <- sapply(bio$Signal, function(i) {
     min(as.numeric(unlist(strsplit(as.character(i), "|", fixed = TRUE))))
   })
-  link <- match(lowest_signals, tag.list)
+  link <- match(lowest_target_signals, detected_signals) # locations of the lowest_target_signals in the detected_signals
   bio$Transmitter <- names(my.list)[link]
 
-  # extract target detections
+  # extract target detections (keep only lowest signals per tag, reuse link from above)
   trimmed.list <- my.list[na.exclude(link)]
 
   # include sensor units for single signal tags, if relevant
@@ -1378,10 +1378,9 @@ splitDetections <- function(detections, bio, exclude.tags = NULL, silent = FALSE
     names(trimmed.list) <- aux
   }
 
-  link <- match(tag.list, unlist(signal_list))
   # Collect stray summary
-  if (!silent && any(is.na(link))) {
-    collectStrays(input = my.list[-na.exclude(link)])
+  if (any(is.na(signal_match))) {
+    collectStrays(input = my.list[is.na(signal_match)])
   }
   storeStrays()
 
