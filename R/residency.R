@@ -265,7 +265,7 @@ by which sections are presented", immediate. = TRUE, call. = FALSE)
   dotmat <- study.data$dotmat
   paths <- study.data$paths
   dist.mat <- study.data$dist.mat
-  invalid.dist <- study.data$invalid.dist
+  attributes(dist.mat)$speed.method <- speed.method
   detections.list <- study.data$detections.list
 # -------------------------------------
 
@@ -301,13 +301,13 @@ by which sections are presented", immediate. = TRUE, call. = FALSE)
   appendTo(c("Screen", "Report"), "M: Creating movement records for the valid tags.")
   movements <- groupMovements(detections.list = detections.list, bio = bio, spatial = spatial,
     speed.method = speed.method, max.interval = max.interval, tz = tz,
-    dist.mat = dist.mat, invalid.dist = invalid.dist)
+    dist.mat = dist.mat)
 
   if (is.null(discard.first)) {
     aux <- names(movements)
     movements <- lapply(names(movements), function(fish) {
         speedReleaseToFirst(fish = fish, bio = bio, movements = movements[[fish]],
-                            dist.mat = dist.mat, invalid.dist = invalid.dist, speed.method = speed.method)
+                            dist.mat = dist.mat, speed.method = speed.method)
       })
     names(movements) <- aux
     rm(aux)
@@ -322,18 +322,17 @@ by which sections are presented", immediate. = TRUE, call. = FALSE)
   if (is.null(speed.warning)) {
     appendTo(c("Screen", "Report", "Warning"), "'speed.warning'/'speed.error' were not set, skipping speed checks.")
   } else {
-    if(invalid.dist) {
-      appendTo(c("Screen", "Report", "Warning"), "'speed.warning'/'speed.error' were set, but a valid distance matrix is not present. Aborting speed checks.")
-    } else {
+    if(attributes(dist.mat)$valid)
       do.checkSpeeds <- TRUE
-    }
+    else
+      appendTo(c("Screen", "Report", "Warning"), "'speed.warning'/'speed.error' were set, but a valid distance matrix is not present. Aborting speed checks.")
   }
 
   do.checkInactiveness <- FALSE
   if (is.null(inactive.warning)) {
     appendTo(c("Screen", "Report", "Warning"), "'inactive.warning'/'inactive.error' were not set, skipping inactivity checks.")
   } else {
-    if (invalid.dist)
+    if (!attributes(dist.mat)$valid)
       appendTo(c("Report", "Screen", "Warning"), "Running inactiveness checks without a distance matrix. Performance may be limited.")
     do.checkInactiveness <- TRUE
   }
@@ -363,7 +362,7 @@ by which sections are presented", immediate. = TRUE, call. = FALSE)
 
       if (do.checkSpeeds) {
         temp.valid.movements <- simplifyMovements(movements = output, fish = fish, bio = bio, discard.first = discard.first,
-          speed.method = speed.method, dist.mat = dist.mat, invalid.dist = invalid.dist)
+          speed.method = speed.method, dist.mat = dist.mat)
         output <- checkSpeeds(movements = output, fish = fish, valid.movements = temp.valid.movements,
           speed.warning = speed.warning, speed.error = speed.error, GUI = GUI)
         rm(temp.valid.movements)
@@ -372,7 +371,7 @@ by which sections are presented", immediate. = TRUE, call. = FALSE)
       if (do.checkInactiveness) {
         output <- checkInactiveness(movements = output, fish = fish, detections.list = detections.list[[fish]],
           inactive.warning = inactive.warning, inactive.error = inactive.error,
-          dist.mat = dist.mat, invalid.dist = invalid.dist, GUI = GUI)
+          dist.mat = dist.mat, GUI = GUI)
       }
     } else {
       output <- overrideValidityChecks(moves = movements[[i]], fish = names(movements)[i], GUI = GUI) # nocov
@@ -390,7 +389,7 @@ by which sections are presented", immediate. = TRUE, call. = FALSE)
   section.movements <- lapply(seq_along(movements), function(i) {
     fish <- names(movements)[i]
     appendTo("debug", paste0("debug: Compiling section movements for fish ", fish,"."))
-    aux <- sectionMovements(movements = movements[[i]], spatial = spatial, invalid.dist = invalid.dist)
+    aux <- sectionMovements(movements = movements[[i]], spatial = spatial, valid.dist = attributes(dist.mat)$valid)
     output <- checkSMovesN(secmoves = aux, fish = fish, section.minimum = section.minimum, GUI = GUI)
     return(output)
   })
@@ -404,7 +403,7 @@ by which sections are presented", immediate. = TRUE, call. = FALSE)
 
   valid.movements <- lapply(seq_along(movements), function(i){
     output <- simplifyMovements(movements = movements[[i]], fish = names(movements)[i], bio = bio, discard.first = discard.first,
-      speed.method = speed.method, dist.mat = dist.mat, invalid.dist = invalid.dist)
+      speed.method = speed.method, dist.mat = dist.mat)
   })
   names(valid.movements) <- names(movements)
   valid.movements <- valid.movements[!unlist(lapply(valid.movements, is.null))]
@@ -412,7 +411,7 @@ by which sections are presented", immediate. = TRUE, call. = FALSE)
   section.movements <- lapply(seq_along(valid.movements), function(i) {
     fish <- names(valid.movements)[i]
     appendTo("debug", paste0("debug: Compiling valid section movements for fish ", fish,"."))
-    output <- sectionMovements(movements = valid.movements[[i]], spatial = spatial, invalid.dist = invalid.dist)
+    output <- sectionMovements(movements = valid.movements[[i]], spatial = spatial, valid.dist = attributes(dist.mat)$valid)
     return(output)
   })
   names(section.movements) <- names(valid.movements)
@@ -519,14 +518,14 @@ by which sections are presented", immediate. = TRUE, call. = FALSE)
 
   if (decision == "y") {
     appendTo(c("Screen", "Report"), paste0("M: Saving results as '", resultsname, "'."))
-    if (invalid.dist)
-      save(detections, valid.detections, spatial, deployments, arrays, movements, valid.movements,
-        section.movements, status.df, last.seen, array.times, section.times, intra.array.matrices,
-        residency.list, daily.ratios, daily.positions, global.ratios, efficiency, intra.array.CJS, rsp.info, file = resultsname)
-    else
+    if (attributes(dist.mat)$valid)
       save(detections, valid.detections, spatial, deployments, arrays, movements, valid.movements,
         section.movements, status.df, last.seen, array.times, section.times, intra.array.matrices,
         residency.list, daily.ratios, daily.positions, global.ratios, efficiency, intra.array.CJS, rsp.info, dist.mat, file = resultsname)
+    else
+      save(detections, valid.detections, spatial, deployments, arrays, movements, valid.movements,
+        section.movements, status.df, last.seen, array.times, section.times, intra.array.matrices,
+        residency.list, daily.ratios, daily.positions, global.ratios, efficiency, intra.array.CJS, rsp.info, file = resultsname)
   } else {
     appendTo(c("Screen", "Report"), paste0("M: Skipping saving of the results."))
   }
@@ -682,28 +681,7 @@ by which sections are presented", immediate. = TRUE, call. = FALSE)
 
   finished.unexpectedly <- FALSE
 
-  if (invalid.dist) {
-    return(list(detections = detections,
-                valid.detections = valid.detections,
-                spatial = spatial,
-                deployments = deployments,
-                arrays = arrays,
-                movements = movements,
-                valid.movements = valid.movements,
-                section.movements = section.movements,
-                status.df = status.df,
-                efficiency = efficiency,
-                intra.array.matrices = intra.array.matrices,
-                intra.array.CJS = intra.array.CJS,
-                array.times = array.times,
-                section.times = section.times,
-                residency.list = residency.list,
-                daily.ratios = daily.ratios,
-                daily.positions = daily.positions,
-                global.ratios = global.ratios,
-                last.seen = last.seen,
-                rsp.info = rsp.info))
-  } else {
+  if (attributes(dist.mat)$valid) {
     return(list(detections = detections,
                 valid.detections = valid.detections,
                 spatial = spatial,
@@ -725,6 +703,27 @@ by which sections are presented", immediate. = TRUE, call. = FALSE)
                 last.seen = last.seen,
                 rsp.info = rsp.info,
                 dist.mat = dist.mat))
+  } else {
+    return(list(detections = detections,
+                valid.detections = valid.detections,
+                spatial = spatial,
+                deployments = deployments,
+                arrays = arrays,
+                movements = movements,
+                valid.movements = valid.movements,
+                section.movements = section.movements,
+                status.df = status.df,
+                efficiency = efficiency,
+                intra.array.matrices = intra.array.matrices,
+                intra.array.CJS = intra.array.CJS,
+                array.times = array.times,
+                section.times = section.times,
+                residency.list = residency.list,
+                daily.ratios = daily.ratios,
+                daily.positions = daily.positions,
+                global.ratios = global.ratios,
+                last.seen = last.seen,
+                rsp.info = rsp.info))
   }
 }
 

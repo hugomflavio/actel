@@ -284,6 +284,7 @@ by which sections are presented", immediate. = TRUE, call. = FALSE)
   dotmat <- study.data$dotmat
   paths <- study.data$paths
   dist.mat <- study.data$dist.mat
+  attributes(dist.mat)$speed.method <- speed.method
   detections.list <- study.data$detections.list
 # -------------------------------------
 

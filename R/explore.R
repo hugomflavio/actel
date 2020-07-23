@@ -267,6 +267,7 @@ explore <- function(
   arrays <- study.data$arrays
   dotmat <- study.data$dotmat
   dist.mat <- study.data$dist.mat
+  attributes(dist.mat)$speed.method <- speed.method
   detections.list <- study.data$detections.list
 # -------------------------------------
 
