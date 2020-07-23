@@ -4,17 +4,15 @@ on:
   push:
     branches:
       - master
-      - dev
   pull_request:
     branches:
       - master
-      - dev
 
 name: R-CMD-check--as-cran
 
 # Increment this version when we want to clear cache
 env:
-  cache-version: v1
+  cache-version: v2
 
 jobs:
   R-CMD-check:

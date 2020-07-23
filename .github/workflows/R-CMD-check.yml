@@ -1,14 +1,6 @@
 # addapted from ggplot2's repository
 
-on:
-  push:
-    branches:
-      - master
-      - dev
-  pull_request:
-    branches:
-      - master
-      - dev
+on: [push, pull_request]
 
 name: R-CMD-check
 
