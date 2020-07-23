@@ -13,7 +13,6 @@ assembleTimetable(
   bio,
   tz,
   dist.mat,
-  invalid.dist,
   speed.method,
   if.last.skip.section,
   success.arrays
@@ -34,8 +33,6 @@ assembleTimetable(
 present in \code{\link[base]{timezones}}.}
 
 \item{dist.mat}{A matrix of the distances between the deployed ALS.}
-
-\item{invalid.dist}{Whether or not the distance matrix supplied is valid for the study area.}
 
 \item{speed.method}{Can take two forms: 'last to first' or 'last to last'.
 If 'last to first' (default), the last detection on the previous array is matched

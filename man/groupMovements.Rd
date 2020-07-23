@@ -11,8 +11,7 @@ groupMovements(
   speed.method,
   max.interval,
   tz,
-  dist.mat,
-  invalid.dist
+  dist.mat
 )
 }
 \arguments{
@@ -33,8 +32,6 @@ for a new event to be created. Defaults to 60.}
 present in \code{\link[base]{timezones}}.}
 
 \item{dist.mat}{A matrix of the distances between the deployed ALS.}
-
-\item{invalid.dist}{Whether or not the distance matrix supplied is valid for the study area.}
 }
 \value{
 A list containing the movement events for each fish.

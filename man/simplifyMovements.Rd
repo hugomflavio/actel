@@ -4,15 +4,7 @@
 \alias{simplifyMovements}
 \title{Removes invalid events}
 \usage{
-simplifyMovements(
-  movements,
-  discard.first,
-  fish,
-  bio,
-  speed.method,
-  dist.mat,
-  invalid.dist
-)
+simplifyMovements(movements, discard.first, fish, bio, speed.method, dist.mat)
 }
 \arguments{
 \item{movements}{A list of movements for each target tag, created by groupMovements.}
@@ -30,8 +22,6 @@ If 'last to last', the last detection on ´the previous array is matched to the
 last detection on the target array to perform the calculations.}
 
 \item{dist.mat}{A matrix of the distances between the deployed ALS.}
-
-\item{invalid.dist}{Whether or not the distance matrix supplied is valid for the study area.}
 }
 \value{
 The movement data frame containing only valid events for the target fish.
