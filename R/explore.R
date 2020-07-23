@@ -253,6 +253,7 @@ explore <- function(
                                 section.order = NULL, exclude.tags = exclude.tags)
   } else {
     appendTo(c("Screen", "Report"), paste0("M: Running analysis on preloaded data (compiled on ", attributes(datapack)$timestamp, ")."))
+    appendTo("Report", paste0("Messages displayed during preload:\n-------------------\n", paste0(attributes(datapack)$loading_messages, collapse = "\n"), "\n-------------------"))
     study.data <- datapack
     tz <- study.data$tz
     disregard.parallels <- study.data$disregard.parallels

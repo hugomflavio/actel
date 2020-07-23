@@ -55,6 +55,8 @@ preload <- function(biometrics, spatial, deployments, detections, dot, distances
   start.time = NULL, stop.time = NULL, section.order = NULL, exclude.tags = NULL,
   disregard.parallels = FALSE, discard.orphans = FALSE) {
 
+  deleteHelpers()
+
   if (is.na(match(tz, OlsonNames())))
     stop("'tz' could not be recognized as a timezone. Check available timezones with OlsonNames()\n", call. = FALSE)
 
@@ -66,7 +68,7 @@ preload <- function(biometrics, spatial, deployments, detections, dot, distances
 
   bio <- loadBio(input = biometrics, tz = tz)
 
-  message("M: Number of target tags: ", nrow(bio), ".")
+  appendTo(c("Screen", "Report"), paste0("M: Number of target tags: ", nrow(bio), "."))
 
   deployments <- loadDeployments(input = deployments, tz = tz)
   checkDeploymentTimes(input = deployments) # check that receivers are not deployed before being retrieved
@@ -80,7 +82,7 @@ preload <- function(biometrics, spatial, deployments, detections, dot, distances
   detections <- preloadDetections(input = detections, tz = tz, start.time = start.time, stop.time = stop.time)
   detections <- checkDupDetections(input = detections)
   detections <- createStandards(detections = detections, spatial = spatial, deployments = deployments, discard.orphans = discard.orphans) # get standardized station and receiver names, check for receivers with no detections
-  message("M: Data time range: ", as.character(head(detections$Timestamp, 1)), " to ", as.character(tail(detections$Timestamp, 1)), " (", tz, ").")
+  appendTo(c("Screen", "Report"), paste0("M: Data time range: ", as.character(head(detections$Timestamp, 1)), " to ", as.character(tail(detections$Timestamp, 1)), " (", tz, ")."))
   checkUnknownReceivers(input = detections) # Check if there are detections from unknown detections
 
   if (missing(dot)) {
@@ -168,6 +170,10 @@ preload <- function(biometrics, spatial, deployments, detections, dot, distances
 	# stamp the output
 	attributes(output)$actel.token <- actel.token
 	attributes(output)$timestamp <- timestamp
+
+  # carbon copy report messages
+  attributes(output)$loading_messages <- readLines(paste0(tempdir(), "/temp_log.txt"))
+
 	return(output)
 }
 
@@ -197,16 +203,16 @@ preloadDetections <- function(input, tz, start.time = NULL, stop.time = NULL) {
     stop("There is missing data in the following mandatory columns of the detections: ", paste0(mandatory.cols[link], collapse = ", "), call. = FALSE)
 
 	if (!is.integer(input$Signal)) {
-		warning("The 'Signal' column in the detections is not of type integer. Attempting to convert.", immediate. = TRUE, call. = FALSE)
+		appendTo(c("Screen", "Warning", "Report"), "The 'Signal' column in the detections is not of type integer. Attempting to convert.")
 		input$Signal <- tryCatch(as.integer(input$Signal),
 			warning = function(w) stop("Attempting to convert the 'Signal' to integer failed. Aborting.", call. = FALSE))
 	}
 
 	if (!is.integer(input$Receiver)) {
-		warning("The 'Receiver' column in the detections is not of type integer. Attempting to convert.", immediate. = TRUE, call. = FALSE)
+		appendTo(c("Screen", "Warning", "Report"), "The 'Receiver' column in the detections is not of type integer. Attempting to convert.")
 		aux <- tryCatch(as.integer(input$Receiver),
 			warning = function(w) {
-				warning("Attempting to convert the 'Receiver' to integer failed. Attempting to extract only the serial numbers.", immediate. = TRUE, call. = FALSE)
+				appendTo(c("Screen", "Warning", "Report"), "Attempting to convert the 'Receiver' to integer failed. Attempting to extract only the serial numbers.")
 				return(NULL) })
 		if (is.null(aux)) {
 			input$Receiver <- extractSignals(input$Receiver) # this works for extracting only the receiver numbers too
@@ -223,23 +229,23 @@ preloadDetections <- function(input, tz, start.time = NULL, stop.time = NULL) {
 		colnames(input)[the.col] <- "Sensor.Value"
 	
 	if (!any(grepl("^Sensor.Value$", colnames(input)))) {
-		warning("Could not find a 'Sensor.Value' column in the detections. Filling one with NA.", immediate. = TRUE, call. = FALSE)
+		appendTo(c("Screen", "Warning", "Report"), "Could not find a 'Sensor.Value' column in the detections. Filling one with NA.")
 		input$Sensor.Value <- NA_real_
 	}
 
 	if (!any(grepl("^Sensor.Unit$", colnames(input)))) {
-		warning("Could not find a 'Sensor.Unit' column in the detections. Filling one with NA.", immediate. = TRUE, call. = FALSE)
+		appendTo(c("Screen", "Warning", "Report"), "Could not find a 'Sensor.Unit' column in the detections. Filling one with NA.")
 		input$Sensor.Unit <- NA_character_
 	}
 
 	if (!is.numeric(input$Sensor.Value)) {
-		warning("The 'Sensor.Value' column in the detections is not of type numeric. Attempting to convert.", immediate. = TRUE, call. = FALSE)
+		appendTo(c("Screen", "Warning", "Report"), "The 'Sensor.Value' column in the detections is not of type numeric. Attempting to convert.")
 		input$Sensor.Value <- tryCatch(as.numeric(input$Sensor.Value),
 			warning = function(w) stop("Attempting to convert the 'Sensor.Value' to numeric failed. Aborting.", call. = FALSE))
 	}
 
 	if (!inherits(input$Timestamp, "POSIXct")) {
-		message("M: Converting detection timestamps to POSIX objects"); flush.console()
+		appendTo(c("Screen", "Report"), "M: Converting detection timestamps to POSIX objects")
 		input$Timestamp <- fasttime::fastPOSIXct(input$Timestamp, tz = "UTC")
     if (any(is.na(input$Timestamp)))
       stop("Converting the timestamps failed. Aborting.", call. = FALSE)
@@ -252,17 +258,17 @@ preloadDetections <- function(input, tz, start.time = NULL, stop.time = NULL) {
   if (!is.null(start.time)){
     onr <- nrow(input)
     input <- input[input$Timestamp >= as.POSIXct(start.time, tz = tz), ]
-    appendTo(c("Screen"), paste0("M: Discarding detection data previous to ",start.time," per user command (", onr - nrow(input), " detections discarded)."))
+    appendTo(c("Screen", "Report"), paste0("M: Discarding detection data previous to ",start.time," per user command (", onr - nrow(input), " detections discarded)."))
   }
   if (!is.null(stop.time)){
     onr <- nrow(input)
     input <- input[input$Timestamp <= as.POSIXct(stop.time, tz = tz), ]
-    appendTo(c("Screen"), paste0("M: Discarding detection data posterior to ",stop.time," per user command (", onr - nrow(input), " detections discarded)."))
+    appendTo(c("Screen", "Report"), paste0("M: Discarding detection data posterior to ",stop.time," per user command (", onr - nrow(input), " detections discarded)."))
   }
 
 	if (any(grepl("^Valid$", colnames(input)))) {
 	  if (!is.logical(input$Valid)) {
-			warning("The detections have a column named 'Valid' but its content is not logical. Resetting to Valid = TRUE.", immediate. = TRUE, call. = FALSE)
+			appendTo(c("Screen", "Warning", "Report"), "The detections have a column named 'Valid' but its content is not logical. Resetting to Valid = TRUE.")
   		input$Valid <- TRUE
   	}
   } else {
