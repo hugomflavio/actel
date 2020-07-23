@@ -4,7 +4,6 @@
 #'
 #' @param detections.list A list of the detections split by each target tag, created by splitDetections.
 #' @param dist.mat A matrix of the distances between the deployed ALS.
-#' @param invalid.dist Whether or not the distance matrix supplied is valid for the study area.
 #' @inheritParams explore
 #' @inheritParams splitDetections
 #' @inheritParams loadDetections
@@ -13,8 +12,7 @@
 #'
 #' @keywords internal
 #'
-groupMovements <- function(detections.list, bio, spatial, speed.method, max.interval,
-  tz, dist.mat, invalid.dist) {
+groupMovements <- function(detections.list, bio, spatial, speed.method, max.interval, tz, dist.mat) {
   appendTo("debug", "Running groupMovements.")
   trigger.unknown <- FALSE
   round.points <- roundDown(seq(from = length(detections.list)/10, to = length(detections.list), length.out = 10), to = 1)
@@ -30,7 +28,7 @@ groupMovements <- function(detections.list, bio, spatial, speed.method, max.inte
 
       # only start if there are valid detections
       if (nrow(x) > 0) {
-        if (invalid.dist) {
+        if (attributes(dist.mat)$valid) {
           recipient <- data.frame(
             Array = NA_character_,
             Detections = NA_integer_,
@@ -40,6 +38,7 @@ groupMovements <- function(detections.list, bio, spatial, speed.method, max.inte
             Last.time = as.POSIXct(NA_character_, tz = tz, format = "%y-%m-%d %H:%M:%S"),
             Time.travelling = NA_character_,
             Time.in.array = NA_character_,
+            Average.speed.m.s = NA_real_,
             Valid = NA,
             stringsAsFactors = FALSE
             )
@@ -53,7 +52,6 @@ groupMovements <- function(detections.list, bio, spatial, speed.method, max.inte
             Last.time = as.POSIXct(NA_character_, tz = tz, format = "%y-%m-%d %H:%M:%S"),
             Time.travelling = NA_character_,
             Time.in.array = NA_character_,
-            Average.speed.m.s = NA_real_,
             Valid = NA,
             stringsAsFactors = FALSE
             )
@@ -92,7 +90,7 @@ groupMovements <- function(detections.list, bio, spatial, speed.method, max.inte
 
         recipient <- data.table::as.data.table(recipient)
         recipient <- movementTimes(movements = recipient, type = "array")
-        if (!invalid.dist)
+        if (attributes(dist.mat)$valid)
           recipient <- movementSpeeds(movements = recipient,
             speed.method = speed.method, dist.mat = dist.mat)
 
@@ -130,7 +128,7 @@ groupMovements <- function(detections.list, bio, spatial, speed.method, max.inte
 #'
 #' @keywords internal
 #'
-simplifyMovements <- function(movements, discard.first, fish, bio, speed.method, dist.mat, invalid.dist) {
+simplifyMovements <- function(movements, discard.first, fish, bio, speed.method, dist.mat) {
   # NOTE: The NULL variables below are actually column names used by data.table.
   # This definition is just to prevent the package check from issuing a note due unknown variables.
   Valid <- NULL
@@ -138,12 +136,12 @@ simplifyMovements <- function(movements, discard.first, fish, bio, speed.method,
   if (any(movements$Valid)) {
     simple.movements <- movements[(Valid), ]
     aux <- movementTimes(movements = simple.movements, type = "array")
-    if (!invalid.dist)
+    if (attributes(dist.mat)$valid)
         aux <- movementSpeeds(movements = aux, speed.method = speed.method, dist.mat = dist.mat)
 
     if (is.null(discard.first)) {
       output <- speedReleaseToFirst(fish = fish, bio = bio, movements = aux,
-        dist.mat = dist.mat, invalid.dist = invalid.dist, speed.method = speed.method)
+        dist.mat = dist.mat, speed.method = speed.method)
     } else {
       output <- aux
     }
@@ -250,7 +248,7 @@ movementTimes <- function(movements, type = c("array", "section")){
 #'
 #' @keywords internal
 #'
-speedReleaseToFirst <- function(fish, bio, movements, dist.mat, speed.method, invalid.dist = FALSE){
+speedReleaseToFirst <- function(fish, bio, movements, dist.mat, speed.method){
   appendTo("debug", "Running speedReleaseToFirst.")
   the.row <- match(fish, bio$Transmitter)
   origin.time <- bio[the.row, "Release.date"]
@@ -262,7 +260,7 @@ speedReleaseToFirst <- function(fish, bio, movements, dist.mat, speed.method, in
     if (m < 10)
       m <- paste0("0", m)
     movements$Time.travelling[1] <- paste(h, m, sep = ":")
-    if (!invalid.dist & movements$Array[1] != "Unknown") {
+    if (attributes(dist.mat)$valid & movements$Array[1] != "Unknown") {
       if (speed.method == "last to first") {
         a.sec <- as.vector(difftime(movements$First.time[1], origin.time, units = "secs"))
         my.dist <- dist.mat[movements$First.station[1], origin.place]
@@ -284,14 +282,14 @@ speedReleaseToFirst <- function(fish, bio, movements, dist.mat, speed.method, in
 #' Compress array-movements into section-movements
 #'
 #' @inheritParams simplifyMovements
-#' @inheritParams migration
 #' @param spatial The spatial data list.
+#' @param valid.dist Logical: Is a valid distances matrix being used?
 #'
 #' @return A data frame containing the section movements for the target fish.
 #'
 #' @keywords internal
 #'
-sectionMovements <- function(movements, spatial, invalid.dist) {
+sectionMovements <- function(movements, spatial, valid.dist) {
   Valid <- NULL
 
   if (any(movements$Valid))
@@ -312,23 +310,7 @@ sectionMovements <- function(movements, spatial, invalid.dist) {
   last.events <- cumsum(aux$lengths)
   first.events <- c(1, last.events[-length(last.events)] + 1)
 
-  if (invalid.dist) {
-    recipient <- data.frame(
-      Section = aux$values,
-      Events = aux$lengths,
-      Detections = unlist(lapply(seq_along(aux$values), function(i) sum(vm$Detections[first.events[i]:last.events[i]]))),
-      First.array = vm$Array[first.events],
-      First.station = vm$First.station[first.events],
-      Last.array = vm$Array[last.events],
-      Last.station = vm$Last.station[last.events],
-      First.time = vm$First.time[first.events],
-      Last.time = vm$Last.time[last.events],
-      Time.travelling = c(vm$Time.travelling[1], rep(NA_character_, length(aux$values) - 1)),
-      Time.in.section = rep(NA_character_, length(aux$values)),
-      Valid = rep(TRUE, length(aux$values)),
-      stringsAsFactors = FALSE
-      )
-  } else {
+  if (valid.dist) {
     the.speeds <- unlist(lapply(seq_along(aux$values), function(i) {
         if (last.events[i] == first.events[i]) {
           return(NA_real_)
@@ -350,6 +332,22 @@ sectionMovements <- function(movements, spatial, invalid.dist) {
       Time.travelling = c(vm$Time.travelling[1], rep(NA_character_, length(aux$values) - 1)),
       Time.in.section = rep(NA_character_, length(aux$values)),
       Speed.in.section.m.s = the.speeds,
+      Valid = rep(TRUE, length(aux$values)),
+      stringsAsFactors = FALSE
+      )
+  } else {
+    recipient <- data.frame(
+      Section = aux$values,
+      Events = aux$lengths,
+      Detections = unlist(lapply(seq_along(aux$values), function(i) sum(vm$Detections[first.events[i]:last.events[i]]))),
+      First.array = vm$Array[first.events],
+      First.station = vm$First.station[first.events],
+      Last.array = vm$Array[last.events],
+      Last.station = vm$Last.station[last.events],
+      First.time = vm$First.time[first.events],
+      Last.time = vm$Last.time[last.events],
+      Time.travelling = c(vm$Time.travelling[1], rep(NA_character_, length(aux$values) - 1)),
+      Time.in.section = rep(NA_character_, length(aux$values)),
       Valid = rep(TRUE, length(aux$values)),
       stringsAsFactors = FALSE
       )

@@ -11,7 +11,7 @@ test_that("loadStudyData contains all the required elements", {
 	  exclude.tags = NULL, disregard.parallels = TRUE),
 		"No detections were found for receiver(s) 132907.", fixed = TRUE)
 	file.remove("detections/actel.detections.RData")
-	expect_equal(names(output), c('bio', 'deployments', 'spatial', 'dot', 'arrays', 'dotmat', 'dist.mat', 'invalid.dist', 'detections.list', 'paths'))
+	expect_equal(names(output), c('bio', 'deployments', 'spatial', 'dot', 'arrays', 'dotmat', 'dist.mat', 'detections.list', 'paths'))
 })
 
 test_that("loadStudyData stops if override contains unknown data.", {

@@ -13,18 +13,15 @@ detections.list <- study.data$detections.list
 bio <- study.data$bio
 spatial <- study.data$spatial
 dist.mat <- study.data$dist.mat
-invalid.dist <- study.data$invalid.dist
 arrays <- study.data$arrays
 
 moves <- groupMovements(detections.list = detections.list[1:2], bio = bio, spatial = spatial,
-    speed.method = "last to first", max.interval = 60, tz = "Europe/Copenhagen",
-    dist.mat = dist.mat, invalid.dist = invalid.dist)
+    speed.method = "last to first", max.interval = 60, tz = "Europe/Copenhagen", dist.mat = dist.mat)
 
 aux <- names(moves)
 moves <- lapply(names(moves), function(fish) {
     speedReleaseToFirst(fish = fish, bio = bio, movements = moves[[fish]],
-                        dist.mat = dist.mat, invalid.dist = invalid.dist,
-                        speed.method = "last to first")
+                        dist.mat = dist.mat, speed.method = "last to first")
   })
 names(moves) <- aux
 rm(aux)
@@ -39,13 +36,13 @@ test_that("assembleTimetable correctly extracts fish information", {
   secmoves <- lapply(seq_along(vm), function(i) {
     fish <- names(vm)[i]
     appendTo("debug", paste0("debug: Compiling valid section movements for fish ", fish,"."))
-    output <- sectionMovements(movements = vm[[i]], spatial = spatial, invalid.dist = invalid.dist)
+    output <- sectionMovements(movements = vm[[i]], spatial = spatial, valid.dist = attributes(dist.mat)$valid)
     return(output)
   })
   names(secmoves) <- names(vm)
 
   output <- assembleTimetable(secmoves = secmoves, valid.moves = vm, all.moves = xmoves, spatial = spatial,
-    arrays = arrays, dist.mat = dist.mat, invalid.dist = invalid.dist, speed.method = "last to first",
+    arrays = arrays, dist.mat = dist.mat, speed.method = "last to first",
     if.last.skip.section = TRUE, success.arrays = "A9", bio = bio, tz = "Europe/Copenhagen")
   timetable <<- output
 
@@ -79,14 +76,12 @@ test_that("assembleTimetable correctly extracts fish information", {
 
 test_that("assembleTimetable correctly handles speed methods and invalid.dist", {
   moves.ff <- groupMovements(detections.list = detections.list[1:2], bio = bio, spatial = spatial,
-      speed.method = "last to last", max.interval = 60, tz = "Europe/Copenhagen",
-      dist.mat = dist.mat, invalid.dist = invalid.dist)
+      speed.method = "last to last", max.interval = 60, tz = "Europe/Copenhagen", dist.mat = dist.mat)
 
   aux <- names(moves.ff)
   xmoves <- lapply(names(moves.ff), function(fish) {
       speedReleaseToFirst(fish = fish, bio = bio, movements = moves.ff[[fish]],
-                          dist.mat = dist.mat, invalid.dist = invalid.dist,
-                          speed.method = "last to last")
+                          dist.mat = dist.mat, speed.method = "last to last")
     })
   names(xmoves) <- aux
   rm(aux)
@@ -100,13 +95,13 @@ test_that("assembleTimetable correctly handles speed methods and invalid.dist", 
   secmoves.ff <- lapply(seq_along(vm.ff), function(i) {
     fish <- names(vm.ff)[i]
     appendTo("debug", paste0("debug: Compiling valid section movements for fish ", fish,"."))
-    output <- sectionMovements(movements = vm.ff[[i]], spatial = spatial, invalid.dist = invalid.dist)
+    output <- sectionMovements(movements = vm.ff[[i]], spatial = spatial, valid.dist = attributes(dist.mat)$valid)
     return(output)
   })
   names(secmoves.ff) <- names(vm.ff)
 
   output <- assembleTimetable(secmoves = secmoves.ff, valid.moves = vm.ff, all.moves = xmoves.ff, spatial = spatial,
-    arrays = arrays, dist.mat = dist.mat, invalid.dist = invalid.dist, speed.method = "last to last",
+    arrays = arrays, dist.mat = dist.mat, speed.method = "last to last",
     if.last.skip.section = FALSE, success.arrays = "A9", bio = bio, tz = "Europe/Copenhagen")
   expect_equal(colnames(output), c('Times.entered.River', 'Average.time.until.River', 'Average.speed.to.River',
     'First.array.River', 'First.station.River', 'First.arrived.River', 'Average.time.in.River',
@@ -122,8 +117,10 @@ test_that("assembleTimetable correctly handles speed methods and invalid.dist", 
   expect_true(timetable$Average.speed.to.Sea[2] != output$Average.speed.to.Sea[2])
   expect_equal(output$Status, c("Disap. in Fjord", "Succeeded"))
 
+  xdist <- dist.mat
+  attributes(xdist)$valid <- FALSE
   output <- assembleTimetable(secmoves = secmoves.ff, valid.moves = vm.ff, all.moves = xmoves.ff, spatial = spatial,
-    arrays = arrays, dist.mat = dist.mat, invalid.dist = TRUE, speed.method = "last to last",
+    arrays = arrays, dist.mat = xdist, speed.method = "last to last",
     if.last.skip.section = FALSE, success.arrays = "A9", bio = bio, tz = "Europe/Copenhagen")
   expect_equal(colnames(output), c('Times.entered.River', 'Average.time.until.River',
     'First.array.River', 'First.station.River', 'First.arrived.River', 'Average.time.in.River',
@@ -146,20 +143,20 @@ test_that("assembleTimetable correctly handles speed methods and invalid.dist", 
   secmoves.ff <- lapply(seq_along(vm.ff), function(i) {
     fish <- names(vm.ff)[i]
     appendTo("debug", paste0("debug: Compiling valid section movements for fish ", fish,"."))
-    output <- sectionMovements(movements = vm.ff[[i]], spatial = spatial, invalid.dist = invalid.dist)
+    output <- sectionMovements(movements = vm.ff[[i]], spatial = spatial, valid.dist = attributes(dist.mat)$valid)
     return(output)
   })
   names(secmoves.ff) <- names(vm.ff)
 
   output <- assembleTimetable(secmoves = secmoves.ff, valid.moves = vm.ff, all.moves = xmoves.ff, spatial = spatial,
-    arrays = arrays, dist.mat = dist.mat, invalid.dist = invalid.dist, speed.method = "last to last",
+    arrays = arrays, dist.mat = dist.mat, speed.method = "last to last",
     if.last.skip.section = FALSE, success.arrays = "A9", bio = bio, tz = "Europe/Copenhagen")
   expect_equal(output$Backwards.movements, c(3))
   expect_equal(output$Max.cons.back.moves, c(2))
 
   xmoves.ff[[2]] <- xmoves.ff[[2]][1, ]
   output <- assembleTimetable(secmoves = secmoves.ff, valid.moves = vm.ff, all.moves = xmoves.ff, spatial = spatial,
-    arrays = arrays, dist.mat = dist.mat, invalid.dist = invalid.dist, speed.method = "last to last",
+    arrays = arrays, dist.mat = dist.mat, speed.method = "last to last",
     if.last.skip.section = FALSE, success.arrays = "A9", bio = bio, tz = "Europe/Copenhagen")
   expect_equal(output$Backwards.movements, c(3))
   expect_equal(output$Max.cons.back.moves, c(2))
@@ -167,7 +164,7 @@ test_that("assembleTimetable correctly handles speed methods and invalid.dist", 
 
 test_that("assembleOutput correctly combines the timetable and the biometrics", {
   output <- assembleOutput(timetable = timetable, bio = bio, spatial = spatial,
-    dist.mat = dist.mat, invalid.dist = invalid.dist, tz = "Europe/Copenhagen")
+    dist.mat = dist.mat, tz = "Europe/Copenhagen")
   expect_equal(colnames(output), c('Transmitter', 'Release.date', 'Release.site', 'Serial.nr', 'Signal',
     'Group', 'Total.Length.mm', 'Mass.g', 'Times.entered.River', 'Average.time.until.River',
     'Average.speed.to.River', 'First.array.River', 'First.station.River', 'First.arrived.River',
@@ -198,17 +195,17 @@ vm[[1]] <- vm[[1]][-18, ]
 secmoves <- lapply(seq_along(vm), function(i) {
   fish <- names(vm)[i]
   appendTo("debug", paste0("debug: Compiling valid section movements for fish ", fish,"."))
-  output <- sectionMovements(movements = vm[[i]], spatial = spatial, invalid.dist = invalid.dist)
+  output <- sectionMovements(movements = vm[[i]], spatial = spatial, valid.dist = attributes(dist.mat)$valid)
   return(output)
 })
 names(secmoves) <- names(vm)
 
 timetable <- assembleTimetable(secmoves = secmoves, valid.moves = vm, all.moves = xmoves, spatial = spatial,
-  arrays = arrays, dist.mat = dist.mat, invalid.dist = invalid.dist, speed.method = "last to first",
+  arrays = arrays, dist.mat = dist.mat, speed.method = "last to first",
   if.last.skip.section = TRUE, success.arrays = "A9", bio = bio, tz = "Europe/Copenhagen")
 
 status.df <- assembleOutput(timetable = timetable, bio = bio, spatial = spatial,
-  dist.mat = dist.mat, invalid.dist = invalid.dist, tz = "Europe/Copenhagen")
+  dist.mat = dist.mat, tz = "Europe/Copenhagen")
 
 test_that("assembleGroupOverview is working as expected", {
   output <- assembleSectionOverview(status.df = status.df, spatial = spatial)

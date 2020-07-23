@@ -44,7 +44,6 @@
 #'  \item \code{arrays}: A list with the details of each array
 #'  \item \code{dotmat}: A matrix of distances between arrays (in number of arrays).
 #'  \item \code{dist.mat}: The distances matrix.
-#'  \item \code{invalid.dist}: Logical: Is the input distances matrix valid for this dataset?
 #'  \item \code{detections.list}: A processed list of detections for each tag.
 #'  \item \code{paths}: A list of the possible paths between each pair of arrays.
 #'  \item \code{disregard.parallels}: Logical: Should parallel arrays invalidate efficiency peers? (required to run residency and migration analyses)
@@ -123,15 +122,10 @@ preload <- function(biometrics, spatial, deployments, detections, dot, distances
 
   if (missing(distances)) {
   	dist.mat <- NA
-  	invalid.dist <- TRUE
+    attributes(dist.mat)$valid <- FALSE
   } else {
-	  recipient <- loadDistances(input = distances, spatial = spatial) # Load distances and check if they are valid
-	  dist.mat <- recipient$dist.mat
-	  invalid.dist <- recipient$invalid.dist
-	  if (is.null(dist.mat) | is.null(invalid.dist))
-	    stop("Something went wrong when assigning recipient objects (loadDistances). If this error persists, contact the developer.\n", call. = FALSE) # nocov
-	  rm(recipient)
-	}
+	  dist.mat <- loadDistances(input = distances, spatial = spatial) # Load distances and check if they are valid
+  }
 
   recipient <- splitDetections(detections = detections, bio = bio, exclude.tags = exclude.tags) # Split the detections by tag, store full transmitter names in bio
   detections.list <- recipient$detections.list
@@ -152,8 +146,8 @@ preload <- function(biometrics, spatial, deployments, detections, dot, distances
   appendTo(c("Screen", "Report"), "M: Data successfully imported!")
 
   output <- list(bio = bio, deployments = deployments, spatial = spatial, dot = dot,
-   arrays = arrays, dotmat = dotmat, dist.mat = dist.mat, invalid.dist = invalid.dist,
-   detections.list = detections.list, paths = paths, disregard.parallels = disregard.parallels, tz = tz)
+   arrays = arrays, dotmat = dotmat, dist.mat = dist.mat, detections.list = detections.list, 
+   paths = paths, disregard.parallels = disregard.parallels, tz = tz)
 
 	# create actel token
 	actel.token <- stringi::stri_rand_strings(1, 10)

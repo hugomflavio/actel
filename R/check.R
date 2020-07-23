@@ -487,7 +487,7 @@ checkSpeeds <- function(movements, fish, valid.movements, speed.warning, speed.e
 #' @keywords internal
 #'
 checkInactiveness <- function(movements, fish, detections.list,
-  inactive.warning, inactive.error, invalid.dist, dist.mat, GUI) {
+  inactive.warning, inactive.error, dist.mat, GUI) {
   Valid <- NULL
   appendTo("debug", "Running checkInactiveness.")
   if (any(movements$Valid)) {
@@ -525,21 +525,8 @@ checkInactiveness <- function(movements, fish, detections.list,
       # find all stations
       the.stations <- as.character(sort(unique(the.detections$Standard.name)))
       trigger.error <- FALSE
-      if (invalid.dist) {
         # Trigger warning
-        if (length(the.stations) <= 3) {
-          n.detections <- sum(valid.moves$Detections[start_i:Stop])
-          appendTo(c("Report", "Warning", "Screen"),
-            the.warning <- paste0("Fish ", fish, " was detected ", n.detections,
-              " times at three or less stations of array '", tail(breaks$values, 1),
-              "' (", paste(the.stations, collapse = ", "), ") over ", days.spent,
-              " days and then disappeared. Could it be inactive?"))
-          the.warning <- paste("Warning:", the.warning)
-          continue <- FALSE
-        }
-        if (length(the.stations) <= 3 & days.spent >= inactive.error)
-          trigger.error <- TRUE # nocov
-      } else {
+      if (attributes(dist.mat)$valid) {
         aux <- dist.mat[the.stations, the.stations]
         if (all(aux <= 1500)) {
           n.detections <- sum(valid.moves$Detections[start_i:Stop])
@@ -552,6 +539,19 @@ checkInactiveness <- function(movements, fish, detections.list,
           continue <- FALSE
         }
         if (all(aux <= 1500) & days.spent >= inactive.error)
+          trigger.error <- TRUE # nocov
+      } else {
+        if (length(the.stations) <= 3) {
+          n.detections <- sum(valid.moves$Detections[start_i:Stop])
+          appendTo(c("Report", "Warning", "Screen"),
+            the.warning <- paste0("Fish ", fish, " was detected ", n.detections,
+              " times at three or less stations of array '", tail(breaks$values, 1),
+              "' (", paste(the.stations, collapse = ", "), ") over ", days.spent,
+              " days and then disappeared. Could it be inactive?"))
+          the.warning <- paste("Warning:", the.warning)
+          continue <- FALSE
+        }
+        if (length(the.stations) <= 3 & days.spent >= inactive.error)
           trigger.error <- TRUE # nocov
       }
       # Trigger user interaction
