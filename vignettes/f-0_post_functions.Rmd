@@ -35,7 +35,6 @@ knitr::opts_chunk$set(
     1. [Multi-way efficiency estimations](d-3_residency_efficiency.html)
 1. [Manual mode](e-0_manual_mode.html)
 1. [__Beyond the three main analyses__](f-0_post_functions.html)
-1. [Errors and messages](g-0_messages.html)
 
 ## Expanding on what actel can give you
 
@@ -216,6 +215,58 @@ p
 
 # Of course, you can also save your new plots using ggsave.
 ```
+
+## Extracting detailed array-level movement speeds
+
+If you have included a valid distances matrix in your analysis, then there is a lot of valuable information scattered throughout the fish movements. While this information is summarised at the section level in the `status.df` object (for `migration()` and `residency()` analyses), maybe you would like to have a look at the event-to-event values. To avoid having to go through each movement table individually, you can use the function `getSpeeds()`:
+
+```r
+# As usual, lets assume you saved the output of an actel analysis as 'results'.
+
+# Running getSpeeds on the results will return all the recorded speeds, for
+# every fish.
+getSpeeds(results)
+
+# However, you can trim this output by using the remaining arguments in getSpeeds().
+
+# For example, return only the speeds between neighbouring arrays by using:
+getSpeeds(results, direct.only = TRUE)
+
+# This will only return speeds when the respective movement did not imply
+# skipping an ALS array.
+
+# You can further trim these results by choosing only events in a specific direction:
+
+# To display only speeds in a forward direction (as specified by the study area structure)
+getSpeeds(results, direct.only = TRUE, type = "forward")
+
+# Or only in the backwards direction
+getSpeeds(results, direct.only = TRUE, type = "backward")
+
+# The default is "all"
+getSpeeds(results, direct.only = TRUE, type = "all")
+
+# A little side note on directions: 
+# If you stated in the spatial.txt file that "A -- B", then A is considered to 
+# come before B, and thus a movement from A to B is a forward movement.
+# Consequently a movement from B to A is considered a backwards movement.
+#
+# Note that movements between parallel arrays are not forward nor backward,
+# and the respective speeds will only be displayed if type = "all".
+
+# Finally, you can choose how many events per fish you want to see:
+getSpeeds(results, direct.only = TRUE, type = "all", n.events = "first") # default
+getSpeeds(results, direct.only = TRUE, type = "all", n.events = "all")
+getSpeeds(results, direct.only = TRUE, type = "all", n.events = "last")
+
+# The n.events controls how many instances of a specific movement event you would like to see.
+# If a fish moved twice from A to B, "first" will return only the first speed, "last" will
+# return only the last speed, and "all" will return both.
+# Note that moving from A to B is not the same as moving from B to A, and both will be treated
+# separately by getSpeeds.
+```
+
+Because speeds have many underlying variables (from where, to where, which fish, etc.), there is no pre-made plot function for speeds. However, the output of `getSpeeds()` is structured in a way that should make it easy for you to jump to ggplot2 and start drawing your plots, your way :)
 
 ## What would you like to see here?
 

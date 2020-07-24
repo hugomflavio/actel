@@ -14,19 +14,16 @@ spatial <- study.data$spatial
 dist.mat <- study.data$dist.mat
 dotmat <- study.data$dotmat
 paths <- study.data$paths
-invalid.dist <- study.data$invalid.dist
 arrays <- study.data$arrays
 sections <- study.data$sections
 
 moves <- groupMovements(detections.list = detections.list[1:2], bio = bio, spatial = spatial,
-    speed.method = "last to first", max.interval = 60, tz = "Europe/Copenhagen",
-    dist.mat = dist.mat, invalid.dist = invalid.dist)
+    speed.method = "last to first", max.interval = 60, tz = "Europe/Copenhagen", dist.mat = dist.mat)
 
 aux <- names(moves)
 moves <- lapply(names(moves), function(fish) {
     speedReleaseToFirst(fish = fish, bio = bio, movements = moves[[fish]],
-                        dist.mat = dist.mat, invalid.dist = invalid.dist,
-                        speed.method = "last to first")
+                        dist.mat = dist.mat, speed.method = "last to first")
   })
 names(moves) <- aux
 rm(aux)
@@ -38,7 +35,7 @@ attributes(moves[[1]])$p.type <- "Manual"
 secmoves <- lapply(seq_along(moves), function(i) {
   fish <- names(moves)[i]
   appendTo("debug", paste0("debug: Compiling valid section movements for fish ", fish,"."))
-  output <- sectionMovements(movements = moves[[i]], spatial = spatial, invalid.dist = invalid.dist)
+  output <- sectionMovements(movements = moves[[i]], spatial = spatial, valid.dist = attributes(dist.mat)$valid)
   return(output)
 })
 names(secmoves) <- names(moves)

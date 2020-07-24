@@ -355,13 +355,13 @@ printBiometrics <- function(bio) {
 #' Prints dotplots of multiple variables.
 #'
 #' @inheritParams simplifyMovements
-#' @inheritParams groupMovements
+#' @inheritParams sectionMovements
 #'
 #' @return No return value, called to plot and save graphic.
 #'
 #' @keywords internal
 #'
-printDotplots <- function(status.df, invalid.dist) {
+printDotplots <- function(status.df, valid.dist) {
   # NOTE: The NULL variables below are actually column names used by ggplot.
   # This definition is just to prevent the package check from issuing a note due unknown variables.
   value <- NULL
@@ -376,7 +376,7 @@ printDotplots <- function(status.df, invalid.dist) {
   colnames(t1)[match(names(link), colnames(t1))] <- paste0(names(link), "\n(", link, ")")
   colnames(t1)[grepl("Average.speed.to", colnames(t1))] <- paste0(colnames(t1)[grepl("Average.speed.to", colnames(t1))], "\n(m/s)")
   colnames(t1)[2] <- "Detections\n(n)"
-  if (!invalid.dist) {
+  if (valid.dist) {
     t2 <- t1[, !grepl("Average.time.until", colnames(t1))]
   } else {
     t2 <- t1[, !grepl("Average.speed.to", colnames(t1))]

@@ -13,7 +13,6 @@
 #'  \item \code{arrays}: A list containing detailed information on the arrays
 #'  \item \code{dotmat}: A matrix of the distance (in number of arrays) between pairs of arrays
 #'  \item \code{dist.mat}: A matrix of the distances (in metres) between stations (if a 'distances.csv' is present)
-#'  \item \code{invalid.dist}: Logical: Is the distances matrix valid?
 #'  \item \code{detections.list}: A list containing the detection data for each fish
 #'  \item \code{paths}: A list of the all array paths between each pair of arrays.
 #' }
@@ -98,12 +97,7 @@ loadStudyData <- function(tz, override = NULL, start.time, stop.time, save.detec
   arrays <- arrays[link] # Reorder arrays by spatial order
   rm(link)
 
-  recipient <- loadDistances(spatial = spatial) # Load distances and check if they are valid
-  dist.mat <- recipient$dist.mat
-  invalid.dist <- recipient$invalid.dist
-  if (is.null(dist.mat) | is.null(invalid.dist))
-    stopAndReport("Something went wrong when assigning recipient objects (loadDistances). If this error persists, contact the developer.") # nocov
-  rm(recipient)
+  dist.mat <- loadDistances(spatial = spatial) # Load distances and check if they are valid
 
   recipient <- splitDetections(detections = detections, bio = bio, exclude.tags = exclude.tags) # Split the detections by tag, store full transmitter names in bio
   detections.list <- recipient$detections.list
@@ -125,9 +119,15 @@ loadStudyData <- function(tz, override = NULL, start.time, stop.time, save.detec
 
   loading.failed <- FALSE
 
-  return(list(bio = bio, deployments = deployments, spatial = spatial, dot = dot,
-   arrays = arrays, dotmat = dotmat, dist.mat = dist.mat, invalid.dist = invalid.dist,
-   detections.list = detections.list, paths = paths))
+  return(list(bio = bio, 
+              deployments = deployments, 
+              spatial = spatial, 
+              dot = dot,
+              arrays = arrays, 
+              dotmat = dotmat, 
+              dist.mat = dist.mat,
+              detections.list = detections.list, 
+              paths = paths))
 }
 
 #' Load spatial.dot
@@ -533,11 +533,7 @@ setSpatialStandards <- function(input){
 #' @param input A matrix of distances, to be loaded rather than a file.
 #' @param spatial A list of spatial objects in the study area.
 #'
-#' @return a list containing:
-#' \itemize{
-#'  \item \code{dist.mat}: A matrix of the distances (in metres) between stations (if a 'distances.csv' is present)
-#'  \item \code{invalid.dist}: Logical: Is the distances matrix valid?
-#' }
+#' @return A matrix of the distances (in metres) between stations (if a 'distances.csv' is present)
 #'
 #' @keywords internal
 #'
@@ -599,7 +595,8 @@ loadDistances <- function(input = "distances.csv", spatial) {
   } else {
     dist.mat <- NA
   }
-  return(list(dist.mat = dist.mat, invalid.dist = invalid.dist))
+  attributes(dist.mat)$valid <- !invalid.dist
+  return(dist.mat)
 }
 
 

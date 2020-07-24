@@ -12,25 +12,22 @@ detections.list <- study.data$detections.list
 bio <- study.data$bio
 spatial <- study.data$spatial
 dist.mat <- study.data$dist.mat
-invalid.dist <- study.data$invalid.dist
 arrays <- study.data$arrays
 
 moves <- groupMovements(detections.list = detections.list[1:2], bio = bio, spatial = spatial,
-    speed.method = "last to first", max.interval = 60, tz = "Europe/Copenhagen",
-    dist.mat = dist.mat, invalid.dist = invalid.dist)
+    speed.method = "last to first", max.interval = 60, tz = "Europe/Copenhagen", dist.mat = dist.mat)
 
 aux <- names(moves)
 moves <- lapply(names(moves), function(fish) {
     speedReleaseToFirst(fish = fish, bio = bio, movements = moves[[fish]],
-                        dist.mat = dist.mat, invalid.dist = invalid.dist,
-                        speed.method = "last to first")
+                        dist.mat = dist.mat, speed.method = "last to first")
   })
 names(moves) <- aux
 rm(aux)
 
 
 test_that("sectionMovements correctly compresses array movements", {
-	output <- sectionMovements(movements = moves[[1]], spatial = spatial, invalid.dist = invalid.dist)
+	output <- sectionMovements(movements = moves[[1]], spatial = spatial, valid.dist = attributes(dist.mat)$valid)
 	expect_equal(colnames(output), c('Section', 'Events', 'Detections', 'First.array', 'First.station', 'Last.array', 'Last.station', 'First.time', 'Last.time', 'Time.travelling', 'Time.in.section', 'Speed.in.section.m.s', 'Valid'))
 	expect_equal(output$Section, c("River", "Fjord", "Sea"))
 	expect_equal(output$Events, c(6, 11, 1))
@@ -43,12 +40,12 @@ test_that("sectionMovements correctly compresses array movements", {
 	expect_equal(output$Time.travelling, moves[[1]]$Time.travelling[c(1, 7, 18)])
 	expect_equal(output$Time.in.section, c("26:06", "380:05", "0:04"))
 
-	output <- sectionMovements(movements = moves[[1]], spatial = spatial, invalid.dist = TRUE)
+	output <- sectionMovements(movements = moves[[1]], spatial = spatial, valid.dist = FALSE)
 	expect_equal(colnames(output), c('Section', 'Events', 'Detections', 'First.array', 'First.station', 'Last.array', 'Last.station', 'First.time', 'Last.time', 'Time.travelling', 'Time.in.section', 'Valid'))
 
 	xmoves <- moves[[1]]
 	xmoves$Array[4] <- "A9"
-	output <- sectionMovements(movements = xmoves, spatial = spatial, invalid.dist = TRUE)
+	output <- sectionMovements(movements = xmoves, spatial = spatial, valid.dist = FALSE)
 	expect_equal(output$Section, c("River", "Sea", "River", "Fjord", "Sea"))
 	expect_equal(output$Events, c(3, 1, 2, 11, 1))	
 })
@@ -60,21 +57,21 @@ test_that("sectionMovements returns NULL if all events are invalid", {
 })
 
 test_that("checkLinearity throws warning only if movements are not ordered", {
-	aux <- sectionMovements(movements = moves[[1]], spatial = spatial, invalid.dist = invalid.dist)
+	aux <- sectionMovements(movements = moves[[1]], spatial = spatial, valid.dist = attributes(dist.mat)$valid)
 
   tryCatch(checkLinearity(secmoves = aux, fish = "test", spatial = spatial, arrays = arrays, GUI = "never"),
     warning = function(w) stop("A warning was issued where it should not have been."))
 
   xspatial <- spatial
   xspatial$array.order <- spatial$array.order[3:1]
-  aux <- sectionMovements(movements = moves[[1]], spatial = xspatial, invalid.dist = invalid.dist)
+  aux <- sectionMovements(movements = moves[[1]], spatial = xspatial, valid.dist = attributes(dist.mat)$valid)
 
 	expect_warning(checkLinearity(secmoves = aux, fish = "test", spatial = xspatial, arrays = arrays, GUI = "never"),
 		"Inter-section backwards movements were detected for fish test and the last events are not ordered!", fixed = TRUE)
 
 	xmoves <- moves[[1]]
 	xmoves$Array[4] <- "A9"
-	aux <- sectionMovements(movements = xmoves, spatial = spatial, invalid.dist = TRUE)
+	aux <- sectionMovements(movements = xmoves, spatial = spatial, valid.dist = FALSE)
 	expect_warning(output <- checkLinearity(secmoves = aux, fish = "test", spatial = spatial, arrays = arrays, GUI = "never"),
 		"Inter-section backwards movements were detected for fish test.", fixed = TRUE)
 	expect_equal(output$Valid, c(TRUE, TRUE, TRUE, TRUE, TRUE))
@@ -85,7 +82,7 @@ test_that("checkLinearity throws warning only if movements are not ordered", {
 test_that("updateValidity correctly transfers invalid events.", {
 	xmoves <- moves[[1]]
 	xmoves$Array[4] <- "A9"
-	secmoves <- sectionMovements(movements = xmoves, spatial = spatial, invalid.dist = TRUE)
+	secmoves <- sectionMovements(movements = xmoves, spatial = spatial, valid.dist = FALSE)
 	secmoves$Valid[3:4] <- FALSE
 
 	expect_message(output <- updateValidity(arrmoves = list(test = xmoves), secmoves = list(test = secmoves)),
@@ -96,7 +93,7 @@ test_that("updateValidity correctly transfers invalid events.", {
 })
 
 test_that("checkSMovesN throws warning only if movements are not ordered", {
-	aux <- sectionMovements(movements = moves[[1]], spatial = spatial, invalid.dist = invalid.dist)
+	aux <- sectionMovements(movements = moves[[1]], spatial = spatial, valid.dist = attributes(dist.mat)$valid)
 
   tryCatch(checkSMovesN(secmoves = aux, fish = "test", section.minimum = 1, GUI = "never"),
     warning = function(w) stop("A warning was issued where it should not have been."))

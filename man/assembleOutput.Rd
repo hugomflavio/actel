@@ -4,7 +4,7 @@
 \alias{assembleOutput}
 \title{Create status.df}
 \usage{
-assembleOutput(timetable, bio, spatial, dist.mat, invalid.dist, tz)
+assembleOutput(timetable, bio, spatial, dist.mat, tz)
 }
 \arguments{
 \item{timetable}{A table of the entering and leaving points for each section per target tag, created by assembleTimetable.}
@@ -14,8 +14,6 @@ assembleOutput(timetable, bio, spatial, dist.mat, invalid.dist, tz)
 \item{spatial}{The spatial data list.}
 
 \item{dist.mat}{A matrix of the distances between the deployed ALS.}
-
-\item{invalid.dist}{Whether or not the distance matrix supplied is valid for the study area.}
 
 \item{tz}{The time zone of the study area. Must match one of the values
 present in \code{\link[base]{timezones}}.}

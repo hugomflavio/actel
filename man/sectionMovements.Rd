@@ -4,14 +4,14 @@
 \alias{sectionMovements}
 \title{Compress array-movements into section-movements}
 \usage{
-sectionMovements(movements, spatial, invalid.dist)
+sectionMovements(movements, spatial, valid.dist)
 }
 \arguments{
 \item{movements}{A list of movements for each target tag, created by groupMovements.}
 
 \item{spatial}{The spatial data list.}
 
-\item{invalid.dist}{Whether or not the distance matrix supplied is valid for the study area.}
+\item{valid.dist}{Logical: Is a valid distances matrix being used?}
 }
 \value{
 A data frame containing the section movements for the target fish.

@@ -35,7 +35,6 @@ knitr::opts_chunk$set(
     1. [Multi-way efficiency estimations](d-3_residency_efficiency.html)
 1. [Manual mode](e-0_manual_mode.html)
 1. [Beyond the three main analyses](f-0_post_functions.html)
-1. [Errors and messages](g-0_messages.html)
 
 ## The migration() function
 

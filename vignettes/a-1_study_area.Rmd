@@ -35,7 +35,6 @@ knitr::opts_chunk$set(
     1. [Multi-way efficiency estimations](d-3_residency_efficiency.html)
 1. [Manual mode](e-0_manual_mode.html)
 1. [Beyond the three main analyses](f-0_post_functions.html)
-1. [Errors and messages](g-0_messages.html)
 
 ## From the field to the computer
 
@@ -101,13 +100,7 @@ Now you know how to organise your study area in a way that actel will understand
 
 ### Single channel:
 
-Let's imagine the following study area, where the red dots represent receiver stations:
-
-<center>
-<img src="spatialcsv_a1.svg" alt="drawing" width="400"/>
-</center>
-
-The first thing you will want to do is give individual names to your stations:
+Let's imagine the following study area, where the red dots represent receiver stations. The first thing you will want to do is give individual names to your stations:
 
 <center>
 <img src="spatialcsv_a2.svg" alt="drawing" width="400"/>
@@ -142,7 +135,7 @@ Now onwards to the release sites. If you only have one release site at the top o
 <img src="spatialcsv_a5.svg" alt="drawing" width="400"/>
 </center>
 
-Then you are sure that the fish are expected to be first detected at array Up1:
+Then you are sure that the fish are expected to be first detected at array A:
 
 
 ```{r, echo=FALSE, results='asis'}

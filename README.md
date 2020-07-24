@@ -2,7 +2,7 @@ Jump to [**installation instructions**](#installing-actel)
 
 # actel<img src="vignettes/actel_logo.png" align="right" width="120" />
 
-[![R-CMD-check](https://github.com/hugomflavio/actel/workflows/R-CMD-check/badge.svg)](https://github.com/hugomflavio/actel/actions)
+[![R-CMD-check](https://github.com/hugomflavio/actel/workflows/R-CMD-check--as-cran/badge.svg)](https://github.com/hugomflavio/actel/actions)
 [![Travis Build Status](https://travis-ci.com/hugomflavio/actel.svg?branch=master)](https://travis-ci.org/hugomflavio/actel)
 [![CRAN\_Status\_Badge](https://www.r-pkg.org/badges/version/actel)](https://cran.r-project.org/package=actel)
 [![CRAN RStudio mirror downloads](https://cranlogs.r-pkg.org/badges/actel)](https://cran.r-project.org/package=actel)

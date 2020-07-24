@@ -62,6 +62,8 @@ test_that("migration and residency don't start if datapack is incompatible", {
 	expect_error(results <- residency(datapack = d),
 		"To run residency(), please assign the arrays to their sections using a 'Section' column in the spatial input.", fixed = TRUE)
 })
+# n
+# n
 
 test_that("migration and residency with preload yield the same results as with traditional loading", {
 	d2 <- preload(biometrics = bio, deployments = deployments, spatial = spatial, detections = detections,
@@ -89,18 +91,18 @@ test_that("migration and residency with preload yield the same results as with t
 	expect_equal(results$arrays, results2$arrays)
 	expect_equal(results$status.df[, -1], results2$status.df[, -1])
 })
+# n # migration1
 # n
 # n
 # n
+# n # migration2
 # n
 # n
 # n
+# n # residency1
 # n
 # n
-# n
-# n
-# n
-# n
+# n # residency2
 # n
 # n
 
@@ -230,7 +232,6 @@ test_that("Data conversion warnings and errors kick in", {
 			dot = dot, distances = example.distances, tz = "Europe/Copenhagen"),
 	"The detections have a column named 'Valid' but its content is not logical. Resetting to Valid = TRUE.", fixed = TRUE)
 })
-
 
 setwd("..")
 unlink("exampleWorkspace", recursive = TRUE)

@@ -24,20 +24,18 @@ detections.list <- study.data$detections.list
 bio <- study.data$bio
 spatial <- study.data$spatial
 dist.mat <- study.data$dist.mat
-invalid.dist <- study.data$invalid.dist
 arrays <- study.data$arrays
 dotmat <- study.data$dotmat
 paths <- study.data$paths
 
 moves <- groupMovements(detections.list = detections.list, bio = bio, spatial = spatial,
     speed.method = "last to first", max.interval = 60, tz = "Europe/Copenhagen",
-    dist.mat = dist.mat, invalid.dist = invalid.dist)
+    dist.mat = dist.mat)
 
 aux <- names(moves)
 moves <- lapply(names(moves), function(fish) {
     speedReleaseToFirst(fish = fish, bio = bio, movements = moves[[fish]],
-                        dist.mat = dist.mat, invalid.dist = invalid.dist,
-                        speed.method = "last to first")
+                        dist.mat = dist.mat, speed.method = "last to first")
   })
 names(moves) <- aux
 rm(aux)
@@ -54,17 +52,17 @@ vm <- vm[sapply(vm, nrow) != 0]
 secmoves <- lapply(seq_along(vm), function(i) {
   fish <- names(vm)[i]
   appendTo("debug", paste0("debug: Compiling valid section movements for fish ", fish,"."))
-  output <- sectionMovements(movements = vm[[i]], spatial = spatial, invalid.dist = invalid.dist)
+  output <- sectionMovements(movements = vm[[i]], spatial = spatial, valid.dist = attributes(dist.mat)$valid)
   return(output)
 })
 names(secmoves) <- names(vm)
 
 timetable <- assembleTimetable(secmoves = secmoves, valid.moves = vm, all.moves = xmoves, spatial = spatial,
-  arrays = arrays, dist.mat = dist.mat, invalid.dist = invalid.dist, speed.method = "last to first",
+  arrays = arrays, dist.mat = dist.mat, speed.method = "last to first",
   if.last.skip.section = TRUE, success.arrays = "A9", bio = bio, tz = "Europe/Copenhagen")
 
 status.df <- assembleOutput(timetable = timetable, bio = bio, spatial = spatial,
-  dist.mat = dist.mat, invalid.dist = invalid.dist, tz = "Europe/Copenhagen")
+  dist.mat = dist.mat, tz = "Europe/Copenhagen")
 
 the.matrices <- assembleMatrices(spatial = spatial, movements = vm, status.df = status.df,
     arrays = arrays, paths = paths, dotmat = dotmat)[[2]]
@@ -161,20 +159,18 @@ detections.list <- study.data$detections.list
 bio <- study.data$bio
 spatial <- study.data$spatial
 dist.mat <- study.data$dist.mat
-invalid.dist <- study.data$invalid.dist
 arrays <- study.data$arrays
 dotmat <- study.data$dotmat
 paths <- study.data$paths
 
 moves <- groupMovements(detections.list = detections.list, bio = bio, spatial = spatial,
     speed.method = "last to first", max.interval = 60, tz = "Europe/Copenhagen",
-    dist.mat = dist.mat, invalid.dist = invalid.dist)
+    dist.mat = dist.mat)
 
 aux <- names(moves)
 moves <- lapply(names(moves), function(fish) {
     speedReleaseToFirst(fish = fish, bio = bio, movements = moves[[fish]],
-                        dist.mat = dist.mat, invalid.dist = invalid.dist,
-                        speed.method = "last to first")
+                        dist.mat = dist.mat, speed.method = "last to first")
   })
 names(moves) <- aux
 rm(aux)
@@ -191,17 +187,17 @@ vm <- vm[sapply(vm, nrow) != 0]
 secmoves <- lapply(seq_along(vm), function(i) {
   fish <- names(vm)[i]
   appendTo("debug", paste0("debug: Compiling valid section movements for fish ", fish,"."))
-  output <- sectionMovements(movements = vm[[i]], spatial = spatial, invalid.dist = invalid.dist)
+  output <- sectionMovements(movements = vm[[i]], spatial = spatial, valid.dist = attributes(dist.mat)$valid)
   return(output)
 })
 names(secmoves) <- names(vm)
 
 timetable <- assembleTimetable(secmoves = secmoves, valid.moves = vm, all.moves = xmoves, spatial = spatial,
-  arrays = arrays, dist.mat = dist.mat, invalid.dist = invalid.dist, speed.method = "last to first",
+  arrays = arrays, dist.mat = dist.mat, speed.method = "last to first",
   if.last.skip.section = TRUE, success.arrays = "A9", bio = bio, tz = "Europe/Copenhagen")
 
 status.df <- assembleOutput(timetable = timetable, bio = bio, spatial = spatial,
-  dist.mat = dist.mat, invalid.dist = invalid.dist, tz = "Europe/Copenhagen")
+  dist.mat = dist.mat, tz = "Europe/Copenhagen")
 
 the.matrices <- assembleMatrices(spatial = spatial, movements = vm, status.df = status.df,
     arrays = arrays, paths = paths, dotmat = dotmat)[[2]]

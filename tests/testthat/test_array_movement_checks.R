@@ -12,19 +12,17 @@ detections.list <- study.data$detections.list
 bio <- study.data$bio
 spatial <- study.data$spatial
 dist.mat <- study.data$dist.mat
-invalid.dist <- study.data$invalid.dist
+
 dotmat <- study.data$dotmat
 arrays <- study.data$arrays
 
 moves <- groupMovements(detections.list = detections.list[1:2], bio = bio, spatial = spatial,
-    speed.method = "last to first", max.interval = 60, tz = "Europe/Copenhagen",
-    dist.mat = dist.mat, invalid.dist = invalid.dist)
+    speed.method = "last to first", max.interval = 60, tz = "Europe/Copenhagen", dist.mat = dist.mat)
 
 aux <- names(moves)
 moves <- lapply(names(moves), function(fish) {
     speedReleaseToFirst(fish = fish, bio = bio, movements = moves[[fish]],
-                        dist.mat = dist.mat, invalid.dist = invalid.dist,
-                        speed.method = "last to first")
+                        dist.mat = dist.mat, speed.method = "last to first")
   })
 names(moves) <- aux
 rm(aux)
@@ -118,25 +116,27 @@ test_that("checkInactiveness reacts as expected.", {
   xmoves <- moves[[1]][-c(17, 18), ]
   # With distances
   expect_warning(output <- checkInactiveness(movements = xmoves, fish = "test", detections.list = detections.list[[1]],
-    inactive.warning = 1, inactive.error = Inf, dist.mat = dist.mat, invalid.dist = invalid.dist, GUI = "never"),
+    inactive.warning = 1, inactive.error = Inf, dist.mat = dist.mat, GUI = "never"),
   "Fish test was detected 292 times at stations less than 1.5 km apart in array 'A7' (St.9, St.10, St.11), over 2.57 days and then disappeared. Could it be inactive?", fixed = TRUE)
   expect_equal(output, xmoves)
 
   # Without distances
+  xdist <- dist.mat
+  attributes(xdist)$valid <- FALSE
   expect_warning(output <- checkInactiveness(movements = xmoves, fish = "test", detections.list = detections.list[[1]],
-    inactive.warning = 1, inactive.error = Inf, dist.mat = dist.mat, invalid.dist = TRUE, GUI = "never"),
+    inactive.warning = 1, inactive.error = Inf, dist.mat = xdist, GUI = "never"),
   "Fish test was detected 292 times at three or less stations of array 'A7' (St.9, St.10, St.11) over 2.57 days and then disappeared. Could it be inactive?", fixed = TRUE)
   expect_equal(output, xmoves)
 
   # no warnings
   output <- checkInactiveness(movements = xmoves, fish = "test", detections.list = detections.list[[1]],
-    inactive.warning = Inf, inactive.error = Inf, dist.mat = dist.mat, invalid.dist = TRUE, GUI = "never")
+    inactive.warning = Inf, inactive.error = Inf, dist.mat = xdist, GUI = "never")
   expect_equal(output, xmoves)
 
   # internal code option for no shifts
   xmoves <- moves[[1]][-c(1:6, 17, 18), ]
   output <- checkInactiveness(movements = xmoves, fish = "test", detections.list = detections.list[[1]],
-    inactive.warning = Inf, inactive.error = Inf, dist.mat = dist.mat, invalid.dist = TRUE, GUI = "never")
+    inactive.warning = Inf, inactive.error = Inf, dist.mat = xdist, GUI = "never")
   expect_equal(output, xmoves)
 })
 
@@ -156,14 +156,14 @@ test_that("checkUpstream reacts as expected.", {
 test_that("simplifyMovements works as expected.", {
 	# no invalid events
   output <- simplifyMovements(movements = moves[[1]], fish = "R64K-4451", bio = bio, discard.first = NULL,
-    speed.method = "last to first", dist.mat = dist.mat, invalid.dist = invalid.dist)
+    speed.method = "last to first", dist.mat = dist.mat)
   expect_equal(output, moves[[1]])
   # invalid events
   xmoves <- moves[[1]]
   xmoves$Valid <- rep(c(TRUE, FALSE), 9)
   # With dist.mat
   output <- simplifyMovements(movements = xmoves, fish = "R64K-4451", bio = bio, discard.first = NULL,
-    speed.method = "last to first", dist.mat = dist.mat, invalid.dist = invalid.dist)
+    speed.method = "last to first", dist.mat = dist.mat)
   expect_equal(nrow(output), 9)
   expect_equal(output$Array, xmoves$Array[(1:9 * 2) - 1])
   expect_equal(output$Detections, xmoves$Detections[(1:9 * 2) - 1])
@@ -174,8 +174,10 @@ test_that("simplifyMovements works as expected.", {
   expect_false(all(A == B))
 
   # Without dist.mat
+  xdist <- dist.mat
+  attributes(xdist)$valid <- FALSE
   output <- simplifyMovements(movements = xmoves, fish = "R64K-4451", bio = bio, discard.first = NULL,
-    speed.method = "last to first", dist.mat = dist.mat, invalid.dist = TRUE)
+    speed.method = "last to first", dist.mat = xdist)
   expect_equal(nrow(output), 9)
   expect_equal(output$Array, xmoves$Array[(1:9 * 2) - 1])
   expect_equal(output$Detections, xmoves$Detections[(1:9 * 2) - 1])
@@ -185,7 +187,7 @@ test_that("simplifyMovements works as expected.", {
   xmoves <- moves[[1]]
   xmoves$Valid <- FALSE
   output <- simplifyMovements(movements = xmoves, fish = "R64K-4451", bio = bio, discard.first = NULL,
-    speed.method = "last to first", dist.mat = dist.mat, invalid.dist = invalid.dist)
+    speed.method = "last to first", dist.mat = xdist)
   expect_equal(output, NULL)
 })
 
@@ -193,7 +195,7 @@ test_that("validateDetections works as expected.", {
   xmoves <- moves[[1]]
   xmoves$Valid <- rep(c(TRUE, FALSE), 9)
   vm <- list("R64K-4451" = simplifyMovements(movements = xmoves, fish = "R64K-4451", bio = bio, discard.first = NULL,
-    speed.method = "last to first", dist.mat = dist.mat, invalid.dist = invalid.dist))
+    speed.method = "last to first", dist.mat = dist.mat))
   vd <- validateDetections(detections.list = detections.list, movements = vm)[[2]]
   expect_equal(sum(moves[[1]]$Detections), nrow(detections.list[[1]]))
   expect_equal(sum(vm[[1]]$Detections), nrow(vd[[1]]))

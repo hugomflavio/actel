@@ -71,7 +71,6 @@ This dataset contains:
 \item \code{arrays}: A list with the details of each array
 \item \code{dotmat}: A matrix of distances between arrays (in number of arrays).
 \item \code{dist.mat}: The distances matrix.
-\item \code{invalid.dist}: Logical: Is the input distances matrix valid for this dataset?
 \item \code{detections.list}: A processed list of detections for each tag.
 \item \code{paths}: A list of the possible paths between each pair of arrays.
 \item \code{disregard.parallels}: Logical: Should parallel arrays invalidate efficiency peers? (required to run residency and migration analyses)

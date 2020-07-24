@@ -10,7 +10,6 @@ checkInactiveness(
   detections.list,
   inactive.warning,
   inactive.error,
-  invalid.dist,
   dist.mat,
   GUI
 )
