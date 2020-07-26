@@ -615,7 +615,7 @@ loadDeployments <- function(input, tz){
 
   if (is.character(input)) {
     if (file.exists(input))
-      input <- suppressWarnigns(as.data.frame(data.table::fread(input, colClasses = c("Start" = "character", "Stop" = "character"))))
+      input <- suppressWarnings(as.data.frame(data.table::fread(input, colClasses = c("Start" = "character", "Stop" = "character"))))
     else
       stopAndReport("Could not find a '", input, "' file in the working directory.")
   }
