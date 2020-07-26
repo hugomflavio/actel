@@ -9,7 +9,7 @@ test_that("getSpeeds stops if input is not recognized", {
 })
 
 test_that("getSpeeds is extracting speeds.", {
-	x <- getSpeeds(example.results)
+	x <- getSpeeds(example.results, n.events = "all")
 	expect_equal(nrow(x), 452)
 	expect_equal(colnames(x), c("Fish", "Event", "From.array", "From.station", "To.array", "To.station", "Speed"))
 	expect_equal(x$Speed[1:7], example.results$valid.movements[[1]]$Average.speed.m.s[1:7])
@@ -17,7 +17,7 @@ test_that("getSpeeds is extracting speeds.", {
 })
 
 test_that("getSpeeds argument 'direct' is working.", {
-	x <- getSpeeds(example.results, direct = TRUE)
+	x <- getSpeeds(example.results, direct = TRUE, n.events = "all")
 	expect_equal(nrow(x), 449)
 	expect_true(
 		all(
@@ -27,11 +27,10 @@ test_that("getSpeeds argument 'direct' is working.", {
 				else
 					i[5] %in% example.results$arrays[[i[3]]]$neighbours
 				})))
-	})
 })
 
 test_that("getSpeeds argument 'type' is working", {
-	x <- getSpeeds(example.results, type = "forward")
+	x <- getSpeeds(example.results, n.events = "all", type = "forward")
 	expect_equal(nrow(x), 448)
 	expect_true(
 		all(
@@ -42,7 +41,7 @@ test_that("getSpeeds argument 'type' is working", {
 					i[5] %in% example.results$arrays[[i[3]]]$all.after
 				})))
 
-	x <- getSpeeds(example.results, type = "forward", direct = TRUE)
+	x <- getSpeeds(example.results, n.events = "all", type = "forward", direct = TRUE)
 	expect_equal(nrow(x), 445)
 	expect_true(
 		all(
@@ -53,7 +52,7 @@ test_that("getSpeeds argument 'type' is working", {
 					i[5] %in% example.results$arrays[[i[3]]]$after
 				})))
 
-	x <- getSpeeds(example.results, type = "backward")
+	x <- getSpeeds(example.results, n.events = "all", type = "backward")
 	expect_equal(nrow(x), 4)
 	expect_true(
 		all(
