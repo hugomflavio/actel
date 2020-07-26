@@ -615,7 +615,7 @@ loadDeployments <- function(input, tz){
 
   if (is.character(input)) {
     if (file.exists(input))
-      input <- as.data.frame(data.table::fread(input))
+      input <- suppressWarnigns(as.data.frame(data.table::fread(input, colClasses = c("Start" = "character", "Stop" = "character"))))
     else
       stopAndReport("Could not find a '", input, "' file in the working directory.")
   }
@@ -817,10 +817,10 @@ loadBio <- function(input, tz){
 
   if (!preloaded) {
     if (file.exists(input))
-      bio <- as.data.frame(data.table::fread(input), stringsAsFactors = FALSE)
-    else {
+      bio <- as.data.frame(suppressWarnings(data.table::fread(input, colClasses = c("Release.date" = "character"))),
+                           stringsAsFactors = FALSE)
+    else
       stopAndReport("Could not find a '", input, "' file in the working directory.")
-    }
   } else {
     bio <- input
   }
