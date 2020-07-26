@@ -230,7 +230,7 @@ getSpeeds(results)
 # However, you can trim this output by using the remaining arguments in getSpeeds().
 
 # For example, return only the speeds between neighbouring arrays by using:
-getSpeeds(results, direct.only = TRUE)
+getSpeeds(results, direct = TRUE)
 
 # This will only return speeds when the respective movement did not imply
 # skipping an ALS array.
@@ -238,13 +238,13 @@ getSpeeds(results, direct.only = TRUE)
 # You can further trim these results by choosing only events in a specific direction:
 
 # To display only speeds in a forward direction (as specified by the study area structure)
-getSpeeds(results, direct.only = TRUE, type = "forward")
+getSpeeds(results, direct = TRUE, type = "forward")
 
 # Or only in the backwards direction
-getSpeeds(results, direct.only = TRUE, type = "backward")
+getSpeeds(results, direct = TRUE, type = "backward")
 
 # The default is "all"
-getSpeeds(results, direct.only = TRUE, type = "all")
+getSpeeds(results, direct = TRUE, type = "all")
 
 # A little side note on directions: 
 # If you stated in the spatial.txt file that "A -- B", then A is considered to 
@@ -255,9 +255,9 @@ getSpeeds(results, direct.only = TRUE, type = "all")
 # and the respective speeds will only be displayed if type = "all".
 
 # Finally, you can choose how many events per fish you want to see:
-getSpeeds(results, direct.only = TRUE, type = "all", n.events = "first") # default
-getSpeeds(results, direct.only = TRUE, type = "all", n.events = "all")
-getSpeeds(results, direct.only = TRUE, type = "all", n.events = "last")
+getSpeeds(results, direct = TRUE, type = "all", n.events = "first") # default
+getSpeeds(results, direct = TRUE, type = "all", n.events = "all")
+getSpeeds(results, direct = TRUE, type = "all", n.events = "last")
 
 # The n.events controls how many instances of a specific movement event you would like to see.
 # If a fish moved twice from A to B, "first" will return only the first speed, "last" will

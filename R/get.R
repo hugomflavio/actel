@@ -1,7 +1,7 @@
-#' Extrat speeds from the analysis results
+#' Extract speeds from the analysis results.
 #' 
 #' @inheritParams getTimes
-#' @param only.direct only extract speeds between arrays that are directly connected
+#' @param direct Logical: Extract only speeds between arrays that are directly connected (i.e. neighbouring arrays)?
 #' @param type The type of movements to record. One of "all", "forward", or "backward". In the two last options,
 #'  only the forward or backwards (relatively to the study area structure) movement speeds are returned.
 #' 
@@ -27,7 +27,7 @@
 #'  \item Fish: The tag of the fish who performed the recorded speed
 #'  \item Event: The valid event where the speed was recorded
 #'  \item From.array: The array from which the fish left
-#'  \item From.station: The statino from which the fish left
+#'  \item From.station: The station from which the fish left
 #'  \item To.array: The array to which the fish arrived
 #'  \item To.station: The station to which the fish arrived
 #'  \item Speed: The speed recorded in the described movement
@@ -35,7 +35,7 @@
 #'
 #' @export
 #'
-getSpeeds <- function(input, type = c("all", "forward", "backward"), only.direct = FALSE, n.events = c("first", "all", "last")){
+getSpeeds <- function(input, type = c("all", "forward", "backward"), direct = FALSE, n.events = c("first", "all", "last")){
   if (!inherits(input, "list"))
     stop("Could not recognise the input as an actel results object.", call. = FALSE)
 
@@ -46,7 +46,7 @@ getSpeeds <- function(input, type = c("all", "forward", "backward"), only.direct
   	stop("These results do not contain a valid distances matrix.", call. = FALSE)
 
 	type <- match.arg(type)
-	n.events <- match.arg(type)
+	n.events <- match.arg(n.events)
 	speed.method <- attributes(input$dist.mat)$speed.method
 	to.station.col <- ifelse(speed.method == "last to first", "First.station", "Last.station")
 	
@@ -57,7 +57,7 @@ getSpeeds <- function(input, type = c("all", "forward", "backward"), only.direct
 		# find events with speeds
 		to.extract <- which(!is.na(aux$Average.speed.m.s))
 
-		if (only.direct) {
+		if (direct) {
 			if (to.extract[1] == 1) {
 				# check that first event is connected to release
 				the.release <- input$rsp.info$bio$Release.site[which(input$rsp.info$bio$Transmitter == fish)]

@@ -2,12 +2,12 @@
 % Please edit documentation in R/get.R
 \name{getSpeeds}
 \alias{getSpeeds}
-\title{Extrat speeds from the analysis results}
+\title{Extract speeds from the analysis results.}
 \usage{
 getSpeeds(
   input,
   type = c("all", "forward", "backward"),
-  only.direct = FALSE,
+  direct = FALSE,
   n.events = c("first", "all", "last")
 )
 }
@@ -17,7 +17,7 @@ getSpeeds(
 \item{type}{The type of movements to record. One of "all", "forward", or "backward". In the two last options,
 only the forward or backwards (relatively to the study area structure) movement speeds are returned.}
 
-\item{only.direct}{only extract speeds between arrays that are directly connected}
+\item{direct}{Logical: Extract only speeds between arrays that are directly connected (i.e. neighbouring arrays)?}
 
 \item{n.events}{The events to record. One of "first", "all", or "last".}
 }
@@ -27,14 +27,14 @@ A data frame with the following columns:
 \item Fish: The tag of the fish who performed the recorded speed
 \item Event: The valid event where the speed was recorded
 \item From.array: The array from which the fish left
-\item From.station: The statino from which the fish left
+\item From.station: The station from which the fish left
 \item To.array: The array to which the fish arrived
 \item To.station: The station to which the fish arrived
 \item Speed: The speed recorded in the described movement
 }
 }
 \description{
-Extrat speeds from the analysis results
+Extract speeds from the analysis results.
 }
 \examples{
 # using the example results loaded with actel
