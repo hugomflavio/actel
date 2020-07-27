@@ -1,4 +1,6 @@
 skip_on_cran()
+oldtz <- Sys.getenv('TZ', unset = NA)
+Sys.setenv(TZ = 'UTC')
 
 tests.home <- getwd()
 setwd(tempdir())
@@ -92,4 +94,9 @@ test_that("loadDeployments output is exactly as expected", {
 	file.remove("deployments.csv")
 })
 
+
 setwd(tests.home)
+
+if (is.na(oldtz)) Sys.unsetenv("TZ") else Sys.setenv(TZ = oldtz)
+
+rm(list = ls())

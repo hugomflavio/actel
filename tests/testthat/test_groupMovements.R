@@ -1,4 +1,6 @@
 skip_on_cran()
+oldtz <- Sys.getenv('TZ', unset = NA)
+Sys.setenv(TZ = 'UTC')
 
 tests.home <- getwd()
 setwd(tempdir())
@@ -129,4 +131,7 @@ test_that("movementTimes correctly handles events with one detection.", {
 setwd("..")
 unlink("exampleWorkspace", recursive = TRUE)
 setwd(tests.home)
+
+if (is.na(oldtz)) Sys.unsetenv("TZ") else Sys.setenv(TZ = oldtz)
+
 rm(list = ls())

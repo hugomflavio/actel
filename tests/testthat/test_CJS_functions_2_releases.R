@@ -1,4 +1,8 @@
 skip_on_cran()
+oldtz <- Sys.getenv('TZ', unset = NA)
+Sys.setenv(TZ = 'UTC')
+
+# Note: these are two independent blocks of tests, the second starts at line 142
 
 # ---- FORCE TWO RELEASE SITES
 
@@ -129,12 +133,17 @@ test_that("mbGroupCJS can deal with multiple release sites (one site per group)"
 setwd("..")
 unlink("exampleWorkspace", recursive = TRUE)
 setwd(tests.home)
+
+if (is.na(oldtz)) Sys.unsetenv("TZ") else Sys.setenv(TZ = oldtz)
+
 rm(list = ls())
 
 
-
-
 # ---- FORCE TWO RELEASE SITES WITH ONE GROUP!
+
+
+oldtz <- Sys.getenv('TZ', unset = NA)
+Sys.setenv(TZ = 'UTC')
 
 tests.home <- getwd()
 setwd(tempdir())
@@ -240,6 +249,9 @@ test_that("mbGroupCJS can deal with multiple release sites (two sites, single gr
 setwd("..")
 unlink("exampleWorkspace", recursive = TRUE)
 setwd(tests.home)
+
+if (is.na(oldtz)) Sys.unsetenv("TZ") else Sys.setenv(TZ = oldtz)
+
 rm(list = ls())
 
 
