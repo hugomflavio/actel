@@ -156,7 +156,7 @@ explore <- function(
 # ------------------------
 
 # debug lines
-  if (!is.null(options("actel.debug")[[1]]) && options("actel.debug")[[1]]) { # nocov start
+  if (getOption("actel.debug", default = FALSE)) { # nocov start
     on.exit(message("Debug: Progress log available at ", gsub("\\\\", "/", paste0(tempdir(), "/actel_debug_file.txt"))))
     on.exit(message("Debug: Saving carbon copy to ", gsub("\\\\", "/", paste0(tempdir(), "/actel.debug.RData"))), add = TRUE)
     on.exit(save(list = ls(), file = paste0(tempdir(), "/actel.debug.RData")), add = TRUE)

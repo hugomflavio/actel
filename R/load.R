@@ -24,7 +24,7 @@ loadStudyData <- function(tz, override = NULL, start.time, stop.time, save.detec
 
   loading.failed <- TRUE
   # debug lines
-    if (!is.null(options("actel.debug")[[1]]) && options("actel.debug")[[1]]) { # nocov start
+    if (getOption("actel.debug", default = FALSE)) { # nocov start
       on.exit({if (loading.failed) message("Debug: Function failed during loading. Saving load environment to ", gsub("\\\\", "/", paste0(tempdir(), "/actel.load.debug.RData")))}, add = TRUE)
       on.exit({if (loading.failed) save(list = ls(), file = paste0(tempdir(), "/actel.load.debug.RData"))}, add = TRUE)
     } # nocov end
