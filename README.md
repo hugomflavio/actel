@@ -80,7 +80,7 @@ actel is available on CRAN. To install the latest stable version, simply run:
 
 **Development version**
 
-If you would like to install the [latest updates](https://github.com/hugomflavio/actel/blob/master/NEWS.md#news) (which have not been integrated to CRAN yet), you can run the line below. Note that you need to have the packate `remotes` installed!
+If you would like to install the [latest updates](https://github.com/hugomflavio/actel/blob/master/NEWS.md#news) (which have not been integrated to CRAN yet), you can run the line below. Note that you need to have the package `remotes` installed!
 
     remotes::install_github("hugomflavio/actel", build_opts = c("--no-resave-data", "--no-manual"), build_vignettes = TRUE)
 

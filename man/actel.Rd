@@ -17,9 +17,8 @@ making it easy to compare results from different studies.
 To be able to work with actel, you must prepare your data in a specific
 format. To learn more about this, you need to have a look at the package
 vignettes, which can be found by running \code{browseVignettes('actel')}. If
-this function returns "No vignettes found", you can alternatively download
-the vignette pages directly through this link:
-\url{https://github.com/hugomflavio/actel/raw/master/actel_vignettes.zip}
+this function returns "No vignettes found", you can alternatively find
+the vignettes online: \url{https://cran.r-project.org/web/packages/actel/index.html}
 }
 
 \section{Example dataset}{
@@ -38,17 +37,13 @@ Once the example dataset is created, \code{\link{exampleWorkspace}} also provide
 you with example code to run an \code{\link{explore}} analysis.
 
 Note that you can also run the \code{\link{migration}} and \code{\link{residency}}
-analyses on the example dataset, by adding the argument
-\code{sections = c('River', 'Fjord', 'Sea')} to the command provided for the
-explore function.
+analyses on the example dataset, e.g.:
 
-E.g.:
-
-\code{results <- migration(tz = 'Europe/Copenhagen', sections = c('River', 'Fjord', 'Sea'), report = TRUE)}
+\code{results <- migration(tz = 'Europe/Copenhagen', report = TRUE)}
 
 or
 
-\code{results <- residency(tz = 'Europe/Copenhagen', sections = c('River', 'Fjord', 'Sea'), report = TRUE)}
+\code{results <- residency(tz = 'Europe/Copenhagen', report = TRUE)}
 
 Note: Running these lines with \code{report = TRUE} will open an analysis report on your web browser.
 }

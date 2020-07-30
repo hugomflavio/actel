@@ -521,11 +521,13 @@ by which sections are presented", immediate. = TRUE, call. = FALSE)
     if (attributes(dist.mat)$valid)
       save(detections, valid.detections, spatial, deployments, arrays, movements, valid.movements,
         section.movements, status.df, last.seen, array.times, section.times, intra.array.matrices,
-        residency.list, daily.ratios, daily.positions, global.ratios, efficiency, intra.array.CJS, rsp.info, dist.mat, file = resultsname)
+        residency.list, daily.ratios, daily.positions, global.ratios, efficiency, intra.array.CJS, 
+        rsp.info, dist.mat, file = resultsname)
     else
       save(detections, valid.detections, spatial, deployments, arrays, movements, valid.movements,
         section.movements, status.df, last.seen, array.times, section.times, intra.array.matrices,
-        residency.list, daily.ratios, daily.positions, global.ratios, efficiency, intra.array.CJS, rsp.info, file = resultsname)
+        residency.list, daily.ratios, daily.positions, global.ratios, efficiency, intra.array.CJS, 
+        rsp.info, file = resultsname)
   } else {
     appendTo(c("Screen", "Report"), paste0("M: Skipping saving of the results."))
   }
@@ -681,50 +683,31 @@ by which sections are presented", immediate. = TRUE, call. = FALSE)
 
   finished.unexpectedly <- FALSE
 
-  if (attributes(dist.mat)$valid) {
-    return(list(detections = detections,
-                valid.detections = valid.detections,
-                spatial = spatial,
-                deployments = deployments,
-                arrays = arrays,
-                movements = movements,
-                valid.movements = valid.movements,
-                section.movements = section.movements,
-                status.df = status.df,
-                efficiency = efficiency,
-                intra.array.matrices = intra.array.matrices,
-                intra.array.CJS = intra.array.CJS,
-                array.times = array.times,
-                section.times = section.times,
-                residency.list = residency.list,
-                daily.ratios = daily.ratios,
-                daily.positions = daily.positions,
-                global.ratios = global.ratios,
-                last.seen = last.seen,
-                rsp.info = rsp.info,
-                dist.mat = dist.mat))
-  } else {
-    return(list(detections = detections,
-                valid.detections = valid.detections,
-                spatial = spatial,
-                deployments = deployments,
-                arrays = arrays,
-                movements = movements,
-                valid.movements = valid.movements,
-                section.movements = section.movements,
-                status.df = status.df,
-                efficiency = efficiency,
-                intra.array.matrices = intra.array.matrices,
-                intra.array.CJS = intra.array.CJS,
-                array.times = array.times,
-                section.times = section.times,
-                residency.list = residency.list,
-                daily.ratios = daily.ratios,
-                daily.positions = daily.positions,
-                global.ratios = global.ratios,
-                last.seen = last.seen,
-                rsp.info = rsp.info))
-  }
+  output <- list(detections = detections,
+                 valid.detections = valid.detections,
+                 spatial = spatial,
+                 deployments = deployments,
+                 arrays = arrays,
+                 movements = movements,
+                 valid.movements = valid.movements,
+                 section.movements = section.movements,
+                 status.df = status.df,
+                 efficiency = efficiency,
+                 intra.array.matrices = intra.array.matrices,
+                 intra.array.CJS = intra.array.CJS,
+                 array.times = array.times,
+                 section.times = section.times,
+                 residency.list = residency.list,
+                 daily.ratios = daily.ratios,
+                 daily.positions = daily.positions,
+                 global.ratios = global.ratios,
+                 last.seen = last.seen,
+                 rsp.info = rsp.info)
+
+  if (attributes(dist.mat)$valid)
+    output$dist.mat <- dist.mat
+
+  return(output)
 }
 
 #' Print Rmd report

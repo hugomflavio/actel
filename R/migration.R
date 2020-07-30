@@ -604,11 +604,13 @@ by which sections are presented", immediate. = TRUE, call. = FALSE)
   if (decision == "y") { # nocov start
     appendTo(c("Screen", "Report"), paste0("M: Saving results as '", resultsname, "'."))
     if (attributes(dist.mat)$valid) {
-      save(detections, valid.detections, spatial, deployments, arrays, movements, valid.movements, section.movements, status.df,
-        section.overview, group.overview, release.overview, matrices, overall.CJS, intra.array.matrices, intra.array.CJS, times, rsp.info, dist.mat, file = resultsname)
+      save(detections, valid.detections, spatial, deployments, arrays, movements, valid.movements, 
+        section.movements, status.df, section.overview, group.overview, release.overview, matrices, 
+        overall.CJS, intra.array.matrices, intra.array.CJS, times, rsp.info, dist.mat, file = resultsname)
     } else {
-      save(detections, valid.detections, spatial, deployments, arrays, movements, valid.movements, section.movements, status.df,
-        section.overview, group.overview, release.overview, matrices, overall.CJS, intra.array.matrices, intra.array.CJS, times, rsp.info, file = resultsname)
+      save(detections, valid.detections, spatial, deployments, arrays, movements, valid.movements, 
+        section.movements, status.df, section.overview, group.overview, release.overview, matrices, 
+        overall.CJS, intra.array.matrices, intra.array.CJS, times, rsp.info, file = resultsname)
     }
   } else { # nocov end
     appendTo(c("Screen", "Report"), paste0("M: Skipping saving of the results."))
@@ -753,46 +755,29 @@ by which sections are presented", immediate. = TRUE, call. = FALSE)
 
   finished.unexpectedly <- FALSE
 
-  if (attributes(dist.mat)$valid) {
-    return(list(detections = detections,
-                valid.detections = valid.detections,
-                spatial = spatial,
-                deployments = deployments, 
-                arrays = arrays,
-                movements = movements,
-                valid.movements = valid.movements,
-                section.movements = section.movements, 
-                status.df = status.df,
-                section.overview = section.overview, 
-                group.overview = group.overview,
-                release.overview = release.overview, 
-                matrices = matrices,
-                overall.CJS = overall.CJS, 
-                intra.array.matrices = intra.array.matrices,
-                intra.array.CJS = intra.array.CJS, 
-                times = times,
-                rsp.info = rsp.info, 
-                dist.mat = dist.mat))
-  } else {
-    return(list(detections = detections,
-                valid.detections = valid.detections,
-                spatial = spatial,
-                deployments = deployments,
-                arrays = arrays,
-                movements = movements,
-                valid.movements = valid.movements,
-                section.movements = section.movements,
-                status.df = status.df,
-                section.overview = section.overview,
-                group.overview = group.overview,
-                release.overview = release.overview,
-                matrices = matrices,
-                overall.CJS = overall.CJS,
-                intra.array.matrices = intra.array.matrices,
-                intra.array.CJS = intra.array.CJS,
-                times = times,
-                rsp.info = rsp.info))
-  }
+  output <- list(detections = detections,
+                 valid.detections = valid.detections,
+                 spatial = spatial,
+                 deployments = deployments, 
+                 arrays = arrays,
+                 movements = movements,
+                 valid.movements = valid.movements,
+                 section.movements = section.movements, 
+                 status.df = status.df,
+                 section.overview = section.overview, 
+                 group.overview = group.overview,
+                 release.overview = release.overview, 
+                 matrices = matrices,
+                 overall.CJS = overall.CJS, 
+                 intra.array.matrices = intra.array.matrices,
+                 intra.array.CJS = intra.array.CJS, 
+                 times = times,
+                 rsp.info = rsp.info)
+
+  if (attributes(dist.mat)$valid)
+    output$dist.mat <- dist.mat
+
+  return(output)
 }
 
 #' Print Rmd report
