@@ -836,29 +836,3 @@ validateDetections <- function(detections.list, movements) {
   attributes(output.valid)$actel <- "valid.detections"
   return(list(detections = output.all, valid.detections = output.valid))
 }
-
-
-#' Discard early detections
-#'
-#' @param input The detections list
-#' @param bio The biometrics table
-#' @param trim The threshold time after elease, in hours
-#'
-#' @return the updated detections list
-#'
-#' @keywords internal
-#'
-discardFirst <- function(input, bio, trim) {
-  link <- match(names(input), bio$Transmitter)
-  count <- 0
-  output <- lapply(seq_along(input), function(i) {
-    output_i <- input[[i]]
-    output_i$Valid[output_i$Timestamp <= bio$Release.date[i] + (trim * 3600)] <- FALSE
-    count <<- count + (sum(!output_i$Valid))
-    appendTo("debug", paste0("M: ", sum(!output_i$Valid), " early detection(s) invalidated for tag ", names(input)[i], "."))
-    return(output_i)
-  })
-  names(output) <- names(input)
-  appendTo("Screen", paste0("M: ", count, " detection(s) were invalidated because they were recorded before the time set in 'discard.first' had passed."))
-  return(output)
-}
