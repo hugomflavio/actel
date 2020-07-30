@@ -38,7 +38,7 @@ knitr::opts_chunk$set(
 
 ## Note!
 
-The content on this page assumes that 1) You are familiar with handling R objects and 2) you are familiar with the the traditional input files for actel. If you do not know which inputs are necessary to run actel, you can find more information about them [in the first page of the manual](a-1_workspace_requirements.html).
+The content on this page assumes that 1) You are familiar with handling R objects and 2) you are familiar with the the traditional input files for actel. If you do not know which inputs are necessary to run actel, you can find more information about them [in the first page of the manual](a-0_workspace_requirements.html).
 
 ## The preload() function
 
