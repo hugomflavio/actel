@@ -106,6 +106,7 @@
 #'
 #' @return A list containing:
 #' \itemize{
+#'  \item \code{bio}: A copy of the biometrics input;
 #'  \item \code{detections}: A list containing all detections for each target fish;
 #'  \item \code{valid.detections}: A list containing the valid detections for each target fish;
 #'  \item \code{spatial}: A list containing the spatial information used during the analysis;
@@ -412,9 +413,11 @@ explore <- function(
   if (decision == "y") { # nocov start
     appendTo(c("Screen", "Report"), paste0("M: Saving results as '", resultsname, "'."))
     if (attributes(dist.mat)$valid)
-      save(detections, valid.detections, spatial, deployments, arrays, movements, valid.movements, times, rsp.info, dist.mat, file = resultsname)
+      save(bio, detections, valid.detections, spatial, deployments, arrays, 
+        movements, valid.movements, times, rsp.info, dist.mat, file = resultsname)
     else
-      save(detections, valid.detections, spatial, deployments, arrays, movements, valid.movements, times, rsp.info, file = resultsname)
+      save(bio, detections, valid.detections, spatial, deployments, arrays, 
+        movements, valid.movements, times, rsp.info, file = resultsname)
   } else {
     appendTo(c("Screen", "Report"), paste0("M: Skipping saving of the results."))
   } # nocov end
@@ -525,13 +528,21 @@ explore <- function(
 
   finished.unexpectedly <- FALSE
 
-  if (attributes(dist.mat)$valid) {
-    return(list(detections = detections, valid.detections = valid.detections, spatial = spatial, deployments = deployments, arrays = arrays,
-      movements = movements, valid.movements = valid.movements, times = times, rsp.info = rsp.info, dist.mat = dist.mat))
-  } else {
-    return(list(detections = detections, valid.detections = valid.detections, spatial = spatial, deployments = deployments, arrays = arrays,
-      movements = movements, valid.movements = valid.movements, times = times, rsp.info = rsp.info))
-  }
+  output <- list(bio = bio,
+                 detections = detections, 
+                 valid.detections = valid.detections, 
+                 spatial = spatial, 
+                 deployments = deployments, 
+                 arrays = arrays,
+                 movements = movements, 
+                 valid.movements = valid.movements, 
+                 times = times, 
+                 rsp.info = rsp.info)
+
+  if (attributes(dist.mat)$valid)
+    output$dist.mat <- dist.mat
+
+  return(output)
 }
 
 

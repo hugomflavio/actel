@@ -131,6 +131,7 @@ detection plots. One of "stations" (default) or "arrays".}
 \value{
 A list containing:
 \itemize{
+\item \code{bio}: A copy of the biometrics input;
 \item \code{detections}: A list containing all detections for each target fish;
 \item \code{valid.detections}: A list containing the valid detections for each target fish;
 \item \code{spatial}: A list containing the spatial information used during the analysis;
