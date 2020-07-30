@@ -13,7 +13,7 @@
 #' format. To learn more about this, you need to have a look at the package
 #' vignettes, which can be found by running \code{browseVignettes('actel')}. If
 #' this function returns "No vignettes found", you can alternatively find
-#' the vignettes online: \url{https://cran.r-project.org/web/packages/actel/index.html}
+#' the vignettes online: \url{https://CRAN.R-project.org/package=actel}
 #'
 #'
 #' # Example dataset
