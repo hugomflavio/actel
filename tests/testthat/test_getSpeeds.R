@@ -4,6 +4,9 @@ test_that("getSpeeds stops if input is not recognized", {
 	expect_error(getSpeeds("a"), "Could not recognise the input as an actel results object.", fixed = TRUE)
 	expect_error(getSpeeds(list(A = "a")), "Could not recognise the input as an actel results object.", fixed = TRUE)
 	xresults <- example.results
+	attributes(xresults$dist.mat)$valid <- NULL
+	expect_error(getSpeeds(xresults), "The input object was not compiled using actel 1.1.0 or higher. Please re-run the analysis with the current version of actel.", fixed = TRUE)
+	xresults <- example.results
 	xresults$dist.mat <- NULL
 	expect_error(getSpeeds(xresults), "These results do not contain a valid distances matrix.", fixed = TRUE)
 })
