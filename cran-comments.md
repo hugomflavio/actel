@@ -28,6 +28,13 @@ substituted by extractSignals()
 getTimes(), preload(), stationName(). All new exported functions 
 contain examples.
 
+* On some of the CRAN checks available at
+https://cloud.r-project.org/web/checks/check_results_actel.html
+a note is issued regarding svglite being an unused dependency. 
+While actel does not require svglite directly, it is a necessary 
+"suggested" package of ggplot2, and I want to ensure that it is 
+installed.
+
 ## Test environments
 
 * Windows Server 2019 (on GitHub), R 4.0.2 and devel

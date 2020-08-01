@@ -22,7 +22,6 @@ Imports:
     DiagrammeR,
     DiagrammeRsvg,
     fasttime,
-    fs,
     ggplot2,
     svglite,
     graphics,
