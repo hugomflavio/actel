@@ -4,9 +4,11 @@ on:
   push:
     branches:
       - master
+      - to_cran
   pull_request:
     branches:
       - master
+      - to_cran
 
 name: R-CMD-check--as-cran
 

@@ -2,7 +2,7 @@
 
 Find out the main highlights of each update.
 
-## Development
+## actel 1.1.0
 
 Fixes:
   * Prevent crash if all detections for a given stray tag were removed during detection quality checks.
@@ -41,7 +41,7 @@ Enhancements:
   * Run quality checks on standard detection files.
   * New `getSpeeds()` function allows the user to quickly extract all speed information from the analyses.
   
-## actel 1.0.0 (CRAN)
+## actel 1.0.0
 
 Fixes:
   * Sort deployment rows by start time. Avoids false triggering of redeployment-before-retrieval errors.

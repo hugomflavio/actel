@@ -42,6 +42,9 @@ getSpeeds <- function(input, type = c("all", "forward", "backward"), direct = FA
   if (is.null(input$valid.movements) | is.null(input$spatial) | is.null(input$rsp.info))
     stop("Could not recognise the input as an actel results object.", call. = FALSE)
 
+  if (!is.null(input$dist.mat) && is.null(attributes(input$dist.mat)$valid))
+  	stop("The input object was not compiled using actel 1.1.0 or higher. Please re-run the analysis with the current version of actel.", call. = FALSE)
+
   if (is.null(input$dist.mat) || !attributes(input$dist.mat)$valid)
   	stop("These results do not contain a valid distances matrix.", call. = FALSE)
 
