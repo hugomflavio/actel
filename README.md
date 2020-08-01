@@ -71,7 +71,7 @@ Here are some examples:
 
 ## Installing actel 
 
-**CRAN version: 1.0.0**
+**CRAN version: 1.1.0**
 
 actel is available on CRAN. To install the latest stable version, simply run:
 
