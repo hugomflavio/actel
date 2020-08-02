@@ -216,6 +216,12 @@ preloadDetections <- function(input, tz, start.time = NULL, stop.time = NULL) {
 		input$Receiver <- aux
 	}
 
+  if (!is.character(input$Timestamp))
+    input$Timestamp <- as.character(input$Timestamp)
+
+  if (!is.character(input$CodeSpace))
+    input$CodeSpace <- as.character(input$CodeSpace)
+
 	if (length(the.col <- grep("^[S|s]ensor.[U|u]nit$", colnames(input))) > 0)
 		colnames(input)[the.col] <- "Sensor.Unit"
 

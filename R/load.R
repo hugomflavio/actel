@@ -615,9 +615,12 @@ loadDeployments <- function(input, tz){
 
   if (is.character(input)) {
     if (file.exists(input))
-      input <- suppressWarnings(as.data.frame(data.table::fread(input, colClasses = c("Start" = "character", "Stop" = "character"))))
+      input <- suppressWarnings(as.data.frame(data.table::fread(input, colClasses = c("Start" = "character", "Stop" = "character")),
+               stringsAsFactors = FALSE))
     else
       stopAndReport("Could not find a '", input, "' file in the working directory.")
+  } else {
+    input <- as.data.frame(input, stringsAsFactors = FALSE)
   }
 
   if (!is.na(link <- match("Station.Name", colnames(input))))
@@ -685,10 +688,12 @@ loadSpatial <- function(input = "spatial.csv", section.order = NULL){
 
   if (is.character(input)) {
     if (file.exists(input))
-      input <- as.data.frame(data.table::fread(input))
+      input <- as.data.frame(data.table::fread(input), stringsAsFactors = FALSE)
     else {
       stopAndReport("Could not find a '", input, "' file in the working directory.")
     }
+  } else {
+    input <- as.data.frame(input, stringsAsFactors = FALSE)
   }
 
   # Check duplicated columns
@@ -822,7 +827,7 @@ loadBio <- function(input, tz){
     else
       stopAndReport("Could not find a '", input, "' file in the working directory.")
   } else {
-    bio <- input
+    bio <- as.data.frame(input, stringsAsFactors = FALSE)
   }
 
   if (any(link <- duplicated(colnames(bio))))
@@ -1101,7 +1106,7 @@ compileDetections <- function(path = "detections", start.time = NULL, stop.time 
 #'
 processStandardFile <- function(input) {
   appendTo("debug", "Running processStandardFile.")
-  input <- as.data.frame(input)
+  input <- as.data.frame(input, stringsAsFactors = FALSE)
   output <- data.table(
     Timestamp = fasttime::fastPOSIXct(sapply(as.character(input$Timestamp), function(x) gsub("Z", "", gsub("T", " ", x))), tz = "UTC"),
     Receiver = input$Receiver,
@@ -1124,7 +1129,7 @@ processStandardFile <- function(input) {
 #'
 processThelmaOldFile <- function(input) {
   appendTo("debug", "Running processThelmaOldFile.")
-  input <- as.data.frame(input)
+  input <- as.data.frame(input, stringsAsFactors = FALSE)
   output <- data.table(
     Timestamp = fasttime::fastPOSIXct(sapply(as.character(input[, grep("^Date.and.Time", colnames(input))]), function(x) gsub("Z", "", gsub("T", " ", x))), tz = "UTC"),
     Receiver = input$`TBR Serial Number`,
@@ -1147,7 +1152,7 @@ processThelmaOldFile <- function(input) {
 #'
 processThelmaNewFile <- function(input) {
   appendTo("debug", "Running processThelmaNewFile.")
-  input <- as.data.frame(input)
+  input <- as.data.frame(input, stringsAsFactors = FALSE)
   output <- data.table(
     Timestamp = fasttime::fastPOSIXct(sapply(as.character(input[, grep("^Date.and.Time", colnames(input))]), function(x) gsub("Z", "", gsub("T", " ", x))), tz = "UTC"),
     Receiver = input$Receiver,
