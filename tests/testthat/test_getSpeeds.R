@@ -16,7 +16,7 @@ test_that("getSpeeds is extracting speeds.", {
 	expect_equal(nrow(x), 452)
 	expect_equal(colnames(x), c("Fish", "Event", "From.array", "From.station", "To.array", "To.station", "Speed"))
 	expect_equal(x$Speed[1:7], example.results$valid.movements[[1]]$Average.speed.m.s[1:7])
-	expect_equal(unique(x$Fish), names(example.results$valid.movements))
+	expect_equal(as.character(unique(x$Fish)), as.character(names(example.results$valid.movements)))
 })
 
 test_that("getSpeeds argument 'direct' is working.", {
