@@ -620,7 +620,13 @@ loadDeployments <- function(input, tz){
     else
       stopAndReport("Could not find a '", input, "' file in the working directory.")
   } else {
-    input <- as.data.frame(input, stringsAsFactors = FALSE)
+    input <- as.data.frame(input)
+    to.convert <- which(sapply(input, class) == "factor")
+    if (length(to.convert) > 0) {
+      for(i in to.convert) {
+        input[, i] <- as.character(input[, i])
+      }
+    }
   }
 
   if (!is.na(link <- match("Station.Name", colnames(input))))
@@ -693,7 +699,13 @@ loadSpatial <- function(input = "spatial.csv", section.order = NULL){
       stopAndReport("Could not find a '", input, "' file in the working directory.")
     }
   } else {
-    input <- as.data.frame(input, stringsAsFactors = FALSE)
+    input <- as.data.frame(input)
+    to.convert <- which(sapply(input, class) == "factor")
+    if (length(to.convert) > 0) {
+      for(i in to.convert) {
+        input[, i] <- as.character(input[, i])
+      }
+    }
   }
 
   # Check duplicated columns
@@ -828,6 +840,12 @@ loadBio <- function(input, tz){
       stopAndReport("Could not find a '", input, "' file in the working directory.")
   } else {
     bio <- as.data.frame(input, stringsAsFactors = FALSE)
+    to.convert <- which(sapply(bio, class) == "factor")
+    if (length(to.convert) > 0) {
+      for(i in to.convert) {
+        bio[, i] <- as.character(bio[, i])
+      }
+    }
   }
 
   if (any(link <- duplicated(colnames(bio))))
