@@ -7,6 +7,8 @@ Find out the main highlights of each update.
 Fixes:
   * Prevent crash if data used as input for `preload()` contains factors.
   * Prevent crash during individual plot printing if number of stations is higher than 29.
+  * Prevent bad structuring of the legend in individual plots if `plot.detections.by = 'arrays'`.
+
 ## actel 1.1.0
 
 Fixes:

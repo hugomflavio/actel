@@ -656,7 +656,7 @@ printIndividuals <- function(detections.list, movements, valid.movements, spatia
     if (type == "stations")
       to.check <- levels(detections.list[[fish]]$Array)
     else
-      to.check <- unlist(spatial$array.order)
+      to.check <- names(spatial$array.order)
 
     if (length(to.check) > 14 & length(to.check) <= 29) {
       if (counter %% 2 == 0) {
