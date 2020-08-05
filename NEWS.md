@@ -2,6 +2,10 @@
 
 Find out the main highlights of each update.
 
+## Development
+
+Fixes:
+  * Prevent crash if data used as input for `preload()` contains factors.
 ## actel 1.1.0
 
 Fixes:
