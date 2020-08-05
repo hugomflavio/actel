@@ -648,7 +648,7 @@ printIndividuals <- function(detections.list, movements, valid.movements, spatia
     if (length(to.check) <= 29)
       the.height <- 4
     else
-      the.height <- 4 + ((to.check - 30) * 0.1)
+      the.height <- 4 + ((length(to.check) - 30) * 0.1)
 
     # default width:
     the.width <- 5
