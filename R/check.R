@@ -885,22 +885,35 @@ checkTagsInUnknownReceivers <- function(detections.list, deployments, spatial) {
       unknown.receivers <- unique(detections.list[[i]][is.na(match(A, B)), Receiver])
       if (length(unknown.receivers) > 0) {
         appendTo(c("Screen", "Report", "Warning"), paste0("Fish ", i, " was detected in one or more receivers that are not listed in the study area (receiver(s): ", paste(unknown.receivers, collapse = ", "), ")!"))
-        message("Possible options:\n   a) Stop and double-check the data (recommended)\n   b) Temporarily include the receiver(s) to the stations list")
-        decision <- userInput("Which option should be followed?(a/b/comment) ", choices = c("a", "b", "comment"),
+        message("Possible options:\n   a) Stop and double-check the data (recommended)\n   b) Temporarily include receiver(s) \n      (Unknown events will be considered invalid, but will show on detection plots)\n   c) Repeat option b for all unknown receivers\n   d) Discard unknown detections for this fish (not recommended)\n   e) Repeat option d for all fish (very much not recommended!)")
+        decision <- userInput("Which option should be followed?(a/b/comment) ", choices = c("a", "b", "c", "d", "e", "comment"),
                               tag = i, hash = "# unknown receivers")
         if (decision == "a")
           stopAndReport("Stopping analysis per user command.") # nocov
-        if (decision == "b") {
+
+        if (decision == "c") 
+          include.all.unknowns <- TRUE
+        
+        if (include.all.unknowns || decision == "b") {
           recipient <- includeUnknownReceiver(spatial = spatial, deployments = deployments, unknown.receivers = unknown.receivers)
           spatial <- recipient[[1]]
           deployments <- recipient[[2]]
+          link <- is.na(detections.list[[i]]$Standard.name)
+          levels(detections.list[[i]]$Standard.name) <- c(levels(detections.list[[i]]$Standard.name), "Ukn.")
+          detections.list[[i]]$Standard.name[link] <- "Ukn."
+          levels(detections.list[[i]]$Array) <- c(levels(detections.list[[i]]$Array), "Unknown")
+          detections.list[[i]]$Array[link] <- "Unknown"
         }
+        
+        if (decision == "e")
+          exclude.all.unknowns <- TRUE
+        
+        if (exclude.all.unknowns || decision == "d") {
+          detections.list[[i]] <- detections.list[[i]][!is.na(match(A, B)), ]
+        }
+
+        rm(decision)
       }
-      link <- is.na(detections.list[[i]]$Standard.name)
-      levels(detections.list[[i]]$Standard.name) <- c(levels(detections.list[[i]]$Standard.name), "Ukn.")
-      detections.list[[i]]$Standard.name[link] <- "Ukn."
-      levels(detections.list[[i]]$Array) <- c(levels(detections.list[[i]]$Array), "Unknown")
-      detections.list[[i]]$Array[link] <- "Unknown"
     }
   }
   return(list(spatial = spatial, deployments = deployments, detections.list = detections.list))

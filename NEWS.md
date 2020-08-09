@@ -12,6 +12,8 @@ Fixes:
 Enhancements:
   * Never show unknown events during movement table display.
   * Show how many invalid events were omitted in the message that opens movement events.
+  * Expand unknown receiver options to allow discarding unknown detections and repeating the same action for all occurrences.
+
 ## actel 1.1.0
 
 Fixes:
