@@ -9,6 +9,9 @@ Fixes:
   * Prevent crash during individual plot printing if number of stations is higher than 29.
   * Prevent bad structuring of the legend in individual plots if `plot.detections.by = 'arrays'`.
 
+Enhancements:
+  * Never show unknown events during movement table display.
+  * Show how many invalid events were omitted in the message that opens movement events.
 ## actel 1.1.0
 
 Fixes:
