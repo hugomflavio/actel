@@ -1241,13 +1241,13 @@ processVemcoFile <- function(input) {
     input$Sensor.Unit <- rep(NA_character_, nrow(input))
   }
   input$Timestamp <- fasttime::fastPOSIXct(as.character(input$Timestamp), tz = "UTC")
-  if (any(is.na(output$Timestamp)))
+  if (any(is.na(input$Timestamp)))
     stop("Importing timestamps failed", call. = FALSE)
-  if (any(is.na(output$Receiver)))
+  if (any(is.na(input$Receiver)))
     stop("Importing receivers failed", call. = FALSE)
-  if (any(is.na(output$Signal)))
+  if (any(is.na(input$Signal)))
     stop("Importing code space failed", call. = FALSE)
-  if (any(is.na(output$Receiver)))
+  if (any(is.na(input$Receiver)))
     stop("Importing signals failed", call. = FALSE)
   return(input)
 }
