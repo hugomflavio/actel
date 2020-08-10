@@ -1050,22 +1050,30 @@ compileDetections <- function(path = "detections", start.time = NULL, stop.time 
             stopAndReport("The file '", i, "' was recognized as a standard detections file, but the 'Receiver' column is not numeric.\nPlease include only the receiver serial numbers in the 'Receiver' column.")
           if (!is.numeric(aux$Signal))
             stopAndReport("The file '", i, "' was recognized as a standard detections file, but the 'Signal' column is not numeric.\nPlease include only the tag signals in the 'Signal' column.")
-          output <- processStandardFile(input = aux)
+          output <- tryCatch(processStandardFile(input = aux), error = function(e) {
+              stopAndReport("Something went wrong when processing file '", i, "'. If you are absolutely sure this file is ok, contact the developer.\nOriginal error:", sub("^Error:", "", e))
+            })
           unknown.file <- FALSE
         }
         if (unknown.file && any(grepl("CodeType", colnames(aux)))) {
           appendTo("debug", paste0("File '", i, "' matches a Thelma log."))
-          output <- processThelmaOldFile(input = aux)
+          output <- tryCatch(processThelmaOldFile(input = aux), error = function(e) {
+              stopAndReport("Something went wrong when processing file '", i, "'. If you are absolutely sure this file is ok, contact the developer.\nOriginal error:", sub("^Error:", "", e))
+            })
           unknown.file <- FALSE
         }
         if (unknown.file && any(grepl("Protocol", colnames(aux)))) {
           appendTo("debug", paste0("File '", i, "' matches a Thelma log."))
-          output <- processThelmaNewFile(input = aux)
+          output <- tryCatch(processThelmaNewFile(input = aux), error = function(e) {
+              stopAndReport("Something went wrong when processing file '", i, "'. If you are absolutely sure this file is ok, contact the developer.\nOriginal error:", sub("^Error:", "", e))
+            })
           unknown.file <- FALSE
         }
         if (unknown.file && any(grepl("Transmitter", colnames(aux)))) {
           appendTo("debug", paste0("File '", i, "' matches a Vemco log."))
-          output <- processVemcoFile(input = aux)
+          output <- tryCatch(processVemcoFile(input = aux), error = function(e) {
+              stopAndReport("Something went wrong when processing file '", i, "'. If you are absolutely sure this file is ok, contact the developer.\nOriginal error:", sub("^Error:", "", e))
+            })
           unknown.file <- FALSE
         }
         if (unknown.file) {
@@ -1132,6 +1140,14 @@ processStandardFile <- function(input) {
     Signal = input$Signal,
     Sensor.Value = ifelse(any(colnames(input) == "Sensor.Value"), input$Sensor.Value, NA_real_),
     Sensor.Unit  = ifelse(any(colnames(input) ==  "Sensor.Unit"), input$Sensor.Unit, NA_character_))
+  if (any(is.na(output$Timestamp)))
+    stop("Importing timestamps failed", call. = FALSE)
+  if (any(is.na(output$Receiver)))
+    stop("Importing receivers failed", call. = FALSE)
+  if (any(is.na(output$Signal)))
+    stop("Importing code space failed", call. = FALSE)
+  if (any(is.na(output$Receiver)))
+    stop("Importing signals failed", call. = FALSE)
   return(output)
 }
 
@@ -1155,6 +1171,14 @@ processThelmaOldFile <- function(input) {
     Signal = input$Id,
     Sensor.Value = input$Data,
     Sensor.Unit = rep(NA_character_, nrow(input)))
+  if (any(is.na(output$Timestamp)))
+    stop("Importing timestamps failed", call. = FALSE)
+  if (any(is.na(output$Receiver)))
+    stop("Importing receivers failed", call. = FALSE)
+  if (any(is.na(output$Signal)))
+    stop("Importing code space failed", call. = FALSE)
+  if (any(is.na(output$Receiver)))
+    stop("Importing signals failed", call. = FALSE)
   return(output)
 }
 
@@ -1178,6 +1202,14 @@ processThelmaNewFile <- function(input) {
     Signal = input$ID,
     Sensor.Value = input$Data,
     Sensor.Unit = rep(NA_character_, nrow(input)))
+  if (any(is.na(output$Timestamp)))
+    stop("Importing timestamps failed", call. = FALSE)
+  if (any(is.na(output$Receiver)))
+    stop("Importing receivers failed", call. = FALSE)
+  if (any(is.na(output$Signal)))
+    stop("Importing code space failed", call. = FALSE)
+  if (any(is.na(output$Receiver)))
+    stop("Importing signals failed", call. = FALSE)
   return(output)
 }
 
@@ -1209,6 +1241,14 @@ processVemcoFile <- function(input) {
     input$Sensor.Unit <- rep(NA_character_, nrow(input))
   }
   input$Timestamp <- fasttime::fastPOSIXct(as.character(input$Timestamp), tz = "UTC")
+  if (any(is.na(output$Timestamp)))
+    stop("Importing timestamps failed", call. = FALSE)
+  if (any(is.na(output$Receiver)))
+    stop("Importing receivers failed", call. = FALSE)
+  if (any(is.na(output$Signal)))
+    stop("Importing code space failed", call. = FALSE)
+  if (any(is.na(output$Receiver)))
+    stop("Importing signals failed", call. = FALSE)
   return(input)
 }
 

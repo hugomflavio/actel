@@ -1394,12 +1394,12 @@ dailyRatios <- function(res) {
       findSecondsPerSection(res = x, day = d, the.range = range(dayrange))
     })
     if (interactive())
-      setTxtProgressBar(pb, counter) # nocov start
+      setTxtProgressBar(pb, counter) # nocov
     names(days.list) <- round.POSIXt(dayrange, units = "days")
     dailyRatiosIndOut(input = days.list)
   })
   if (interactive())
-    close(pb) # nocov end
+    close(pb) # nocov
   return(output)
 }
 
