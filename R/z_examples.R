@@ -73,7 +73,7 @@ createWorkspace <- function(dir) {
 #'
 exampleWorkspace <- function(dir) {
   if (missing(dir))
-    stop("Please specify a target directory", call = FALSE)
+    stop("Please specify a target directory", call. = FALSE)
 
   if (!dir.exists(dir))
     dir.create(dir)
