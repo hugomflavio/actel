@@ -1044,7 +1044,7 @@ compileDetections <- function(path = "detections", start.time = NULL, stop.time 
         return(NULL)
       } else {
         unknown.file <- TRUE
-        if (unknown.file && (any(grepl("CodeSpace", colnames(aux))) & any(grepl("Signal", colnames(aux))))) {
+        if (unknown.file && all(!is.na(match(c("Timestamp", "CodeSpace", "Receiver", "Signal"), colnames(aux))))) {
           appendTo("debug", paste0("File '", i, "' matches a Standard log."))
           if (!is.numeric(aux$Receiver))
             stopAndReport("The file '", i, "' was recognized as a standard detections file, but the 'Receiver' column is not numeric.\nPlease include only the receiver serial numbers in the 'Receiver' column.")
@@ -1055,21 +1055,21 @@ compileDetections <- function(path = "detections", start.time = NULL, stop.time 
             })
           unknown.file <- FALSE
         }
-        if (unknown.file && any(grepl("CodeType", colnames(aux)))) {
+        if (unknown.file && all(!is.na(match(c("CodeType", "TBR Serial Number", "Id"), colnames(aux))))) {
           appendTo("debug", paste0("File '", i, "' matches a Thelma log."))
           output <- tryCatch(processThelmaOldFile(input = aux), error = function(e) {
               stopAndReport("Something went wrong when processing file '", i, "'. If you are absolutely sure this file is ok, contact the developer.\nOriginal error:", sub("^Error:", "", e))
             })
           unknown.file <- FALSE
         }
-        if (unknown.file && any(grepl("Protocol", colnames(aux)))) {
+        if (unknown.file && all(!is.na(match(c("Protocol", "Receiver", "ID"), colnames(aux))))) {
           appendTo("debug", paste0("File '", i, "' matches a Thelma log."))
           output <- tryCatch(processThelmaNewFile(input = aux), error = function(e) {
               stopAndReport("Something went wrong when processing file '", i, "'. If you are absolutely sure this file is ok, contact the developer.\nOriginal error:", sub("^Error:", "", e))
             })
           unknown.file <- FALSE
         }
-        if (unknown.file && any(grepl("Transmitter", colnames(aux)))) {
+        if (unknown.file && all(!is.na(match(c("Transmitter", "Receiver"), colnames(aux)))) & any(grepl("^Date.and.Time", colnames(aux)))) {
           appendTo("debug", paste0("File '", i, "' matches a Vemco log."))
           output <- tryCatch(processVemcoFile(input = aux), error = function(e) {
               stopAndReport("Something went wrong when processing file '", i, "'. If you are absolutely sure this file is ok, contact the developer.\nOriginal error:", sub("^Error:", "", e))
