@@ -10,6 +10,7 @@ Fixes:
   * Prevent bad structuring of the legend in individual plots if `plot.detections.by = 'arrays'`.
   * Prevent crash of CJS functions when running tags with multiple sensors.
   * Prevent CJS crash due to overlapping array names.
+  * Prevent crash if spatial has release sites, but biometrics don't in CJS calculations of migration.
 
 Enhancements:
   * Never show unknown events during movement table display.

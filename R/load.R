@@ -1619,8 +1619,11 @@ transformSpatial <- function(spatial, bio, arrays, dotmat, first.array = NULL) {
                                   Latitude = NA_real_,
                                   Array = first.array,
                                   Standard.name = "unspecified",
-                                  n = nrow(bio),
                                   stringsAsFactors = FALSE)
+      aux <- table(bio$Group)
+      for (i in 1:length(aux)) {
+        release.sites[, paste0("n.", names(aux)[i])] <- aux[i]
+      }
     } else {
       A <- spatial$Standard.name[spatial$Type == "Release"]
       B <- unique(bio$Release.site)
