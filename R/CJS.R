@@ -508,10 +508,10 @@ simpleCJS <- function(input, estimate = NULL, fixed.efficiency = NULL, silent = 
 mbSplitCJS <- function(mat, fixed.efficiency = NULL) {
   appendTo("debug", "Running mbSplitCJS.")
   recipient <- lapply(mat, function(m) {
-    if (is.na(fixed.efficiency[grepl(colnames(m[[1]])[2], names(fixed.efficiency))]))
+    if (is.na(fixed.efficiency[grepl(paste0("^", colnames(m[[1]])[2], "$"), names(fixed.efficiency))]))
       array.efficiency <- NULL
     else
-      array.efficiency <- c(1, fixed.efficiency[grepl(colnames(m[[1]])[2], names(fixed.efficiency))], 1)
+      array.efficiency <- c(1, fixed.efficiency[grepl(paste0("^", colnames(m[[1]])[2], "$"), names(fixed.efficiency))], 1)
     return(lapply(m, function(mm) simpleCJS(mm, fixed.efficiency = array.efficiency, silent = TRUE)))
   })
   groups <- unique(unlist(lapply(recipient, names)))
@@ -545,10 +545,10 @@ mbGroupCJS <- function(mat, status.df, fixed.efficiency = NULL) {
   output <- list()
   for (i in 1:length(unique(status.df$Group))) {
     output[[i]] <- lapply(mat, function(m_i) {
-      if (is.na(fixed.efficiency[grepl(colnames(m_i[[1]])[2], names(fixed.efficiency))]))
+      if (is.na(fixed.efficiency[grepl(paste0("^", colnames(m_i[[1]])[2], "$"), names(fixed.efficiency))]))
         array.efficiency <- NULL
       else
-        array.efficiency <- c(1, fixed.efficiency[grepl(colnames(m_i[[1]])[2], names(fixed.efficiency))], 1)
+        array.efficiency <- c(1, fixed.efficiency[grepl(paste0("^", colnames(m_i[[1]])[2], "$"), names(fixed.efficiency))], 1)
       link <- grepl(paste0("^", unique(status.df$Group)[i]), names(m_i))
       if (any(link)) {
         if(sum(link) == 1)

@@ -9,6 +9,7 @@ Fixes:
   * Prevent crash during individual plot printing if number of stations is higher than 29.
   * Prevent bad structuring of the legend in individual plots if `plot.detections.by = 'arrays'`.
   * Prevent crash of CJS functions when running tags with multiple sensors.
+  * Prevent CJS crash due to overlapping array names.
 
 Enhancements:
   * Never show unknown events during movement table display.
