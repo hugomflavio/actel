@@ -697,16 +697,18 @@ blameArrays <- function(from, to, paths) {
 #'
 includeMissing <- function(x, status.df){
   appendTo("debug", "Running includeMissing.")
-  include <- as.character(status.df[
+  aux <- as.character(status.df[
     -match(rownames(x),
       sapply(as.character(status.df$Signal),
         function(i) min(as.numeric(unlist(strsplit(i, "|", fixed = TRUE)))))
       ), "Signal"])
-  x[include, ] = 0
-  x[include, 1] = 1
+  include <- as.character(sapply(aux, function(i) {
+    min(as.numeric(unlist(strsplit(i, "|", fixed = TRUE))))
+  }))
+  x[include, ] <- 0
+  x[include, 1] <- 1
   return(x)
 }
-
 
 #' Compile detection matrix for last array
 #'
