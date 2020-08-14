@@ -3,7 +3,7 @@ skip_on_cran()
 test_that("plotMoves failsafes kick in", {
 	expect_error(plotMoves("a"), "Could not recognise the input as an actel results object.", fixed = TRUE)
 	expect_error(plotMoves(list("a")), "Could not recognise the input as an actel results object.", fixed = TRUE)
-	expect_error(plotMoves(example.results, array.alias = c("a" = "b")), "Could not find array 'a' in the study's arrays.", fixed = TRUE)
+	expect_warning(plotMoves(example.results, array.alias = c("a" = "b")), "Could not find array 'a' in the study's arrays.", fixed = TRUE)
 	expect_error(plotMoves(example.results, tags = "a"), "There are no valid movements for tag(s) 'a'.", fixed = TRUE)
 })
 
