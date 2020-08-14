@@ -485,11 +485,11 @@ appendTo <- function(recipient, line, fish) {
         file = paste(tempdir(), "temp_warnings.txt", sep = "/"),
         append = file.exists(paste(tempdir(), "temp_warnings.txt", sep = "/")))
     }
-    if (i == "UD") {
+    if (i == "UD") { # nocov start
       write(line,
         file = paste(tempdir(), "temp_UD.txt", sep = "/"),
         append = file.exists(paste(tempdir(), "temp_UD.txt", sep = "/")))
-    }
+    } # nocov end
     if (i == "Comment") {
       write(paste(fish, line, sep = "\t"),
         file = paste(tempdir(), "temp_comments.txt", sep = "/"),

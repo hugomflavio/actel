@@ -282,7 +282,7 @@ plotMoves <- function(input, tags, title, xlab, ylab, col, array.alias, show.rel
   if (!missing(array.alias)) {
     link <- match(names(array.alias), names(input$arrays))
     if (any(is.na(link)))
-      warning("Could not find ", ifelse(sum(is.na(link) == 1), "array ", "arrays "), names(array.alias)[is.na(link)], " in the study's arrays.", call. = FALSE, immediate. = TRUE)
+      warning("Could not find ", ifelse(sum(is.na(link) == 1), "array '", "arrays '"), paste0(names(array.alias)[is.na(link)], collapse = "', '"), "' in the study's arrays.", call. = FALSE, immediate. = TRUE)
   } else {
     array.alias <- NULL
   }

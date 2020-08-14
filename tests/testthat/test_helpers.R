@@ -27,6 +27,9 @@ test_that("extractCodeSpaces is working", {
 })
 
 test_that("stationName is working", {
+	expect_error(stationName("a"), "Could not recognise the input as an actel results object.")
+	expect_error(stationName(list("a")), "Could not recognise the input as an actel results object.")
+
 	expect_equal(stationName(example.results, 2:3), c("Station 1", "Station 2"))
 })
 

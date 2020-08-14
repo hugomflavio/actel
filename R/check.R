@@ -394,15 +394,15 @@ checkDupDetections <- function(input) {
     message("")
     decision <- userInput("Decision:(a/b/c) ", choices = letters[1:3], hash = "# dup. detections")
     if (decision == "a")
-      stopAndReport("Function stopped by user command.")
+      stopAndReport("Function stopped by user command.") # nocov
     if (decision == "b") {
       appendTo(c("Screen", "Report"), "M: Removing duplicated detections from the analysis per user command.")
       output <- input[!dups, ]
     }
-    if (decision == "c") {
+    if (decision == "c") { # nocov start
       appendTo(c("Screen", "Report"), "M: Continuing analysis with duplicated detections per user command.")
       output <- input
-    }
+    } # nocov end
   } else {
     output <- input
   }
@@ -886,13 +886,13 @@ checkTagsInUnknownReceivers <- function(detections.list, deployments, spatial) {
       if (length(unknown.receivers) > 0) {
         appendTo(c("Screen", "Report", "Warning"), paste0("Fish ", i, " was detected in one or more receivers that are not listed in the study area (receiver(s): ", paste(unknown.receivers, collapse = ", "), ")!"))
         message("Possible options:\n   a) Stop and double-check the data (recommended)\n   b) Temporarily include receiver(s) \n      (Unknown events will be considered invalid, but will show on detection plots)\n   c) Repeat option b for all unknown receivers\n   d) Discard unknown detections for this fish (not recommended)\n   e) Repeat option d for all fish (very much not recommended!)")
-        decision <- userInput("Which option should be followed?(a/b/comment) ", choices = c("a", "b", "c", "d", "e", "comment"),
+        decision <- userInput("Which option should be followed?(a/b/c/d/comment) ", choices = c("a", "b", "c", "d", "e", "comment"),
                               tag = i, hash = "# unknown receivers")
         if (decision == "a")
           stopAndReport("Stopping analysis per user command.") # nocov
 
         if (decision == "c") 
-          include.all.unknowns <- TRUE
+          include.all.unknowns <- TRUE # nocov
         
         if (include.all.unknowns || decision == "b") {
           recipient <- includeUnknownReceiver(spatial = spatial, deployments = deployments, unknown.receivers = unknown.receivers)
@@ -906,11 +906,10 @@ checkTagsInUnknownReceivers <- function(detections.list, deployments, spatial) {
         }
         
         if (decision == "e")
-          exclude.all.unknowns <- TRUE
+          exclude.all.unknowns <- TRUE # nocov
         
-        if (exclude.all.unknowns || decision == "d") {
-          detections.list[[i]] <- detections.list[[i]][!is.na(match(A, B)), ]
-        }
+        if (exclude.all.unknowns || decision == "d")
+          detections.list[[i]] <- detections.list[[i]][!is.na(match(A, B)), ] # nocov
 
         rm(decision)
       }
@@ -983,10 +982,10 @@ checkDetectionsBeforeRelease <- function(input, bio, discard.orphans = FALSE){
                                 hash = paste("# detections before release for fish", bio$Transmitter[i]))
           
           if (decision == "a")
-            stopAndReport("Function stopped by user command.")
+            stopAndReport("Function stopped by user command.") # nocov
           
           if (decision == "c")
-            discard.orphans = TRUE
+            discard.orphans <- TRUE # nocov
         }
         
         if (all(to.remove)) {

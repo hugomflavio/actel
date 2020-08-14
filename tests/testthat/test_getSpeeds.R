@@ -11,77 +11,79 @@ test_that("getSpeeds stops if input is not recognized", {
 	expect_error(getSpeeds(xresults), "These results do not contain a valid distances matrix.", fixed = TRUE)
 })
 
+xresults <- example.results
+xresults$valid.movements[[1]] <- xresults$valid.movements[[1]][-1, ]
+xresults$valid.movements[[3]] <- xresults$valid.movements[[3]][-1, ]
+xresults$valid.movements[[5]] <- xresults$valid.movements[[5]][-1, ]
 test_that("getSpeeds is extracting speeds.", {
-	x <- getSpeeds(example.results, n.events = "all")
-	expect_equal(nrow(x), 452)
+	x <- getSpeeds(xresults, n.events = "all")
+	expect_equal(nrow(x), 449)
 	expect_equal(colnames(x), c("Fish", "Event", "From.array", "From.station", "To.array", "To.station", "Speed"))
-	expect_equal(x$Speed[1:7], example.results$valid.movements[[1]]$Average.speed.m.s[1:7])
-	expect_equal(as.character(unique(x$Fish)), as.character(names(example.results$valid.movements)))
+	expect_equal(x$Speed[1:6], xresults$valid.movements[[1]]$Average.speed.m.s[1:6])
+	expect_equal(as.character(unique(x$Fish)), as.character(names(xresults$valid.movements)))
 })
 
 test_that("getSpeeds argument 'direct' is working.", {
-	x <- getSpeeds(example.results, direct = TRUE, n.events = "all")
-	expect_equal(nrow(x), 449)
+	x <- getSpeeds(xresults, direct = TRUE, n.events = "all")
+	expect_equal(nrow(x), 443)
 	expect_true(
 		all(
 			apply(x, 1, function(i) {
 				if (i[3] == "Release")
 					i[5] == "A1"
 				else
-					i[5] %in% example.results$arrays[[i[3]]]$neighbours
+					i[5] %in% xresults$arrays[[i[3]]]$neighbours
 				})))
 })
 
 test_that("getSpeeds argument 'type' is working", {
-	x <- getSpeeds(example.results, n.events = "all", type = "forward")
-	expect_equal(nrow(x), 448)
-	expect_true(
-		all(
-			apply(x, 1, function(i) {
-				if (i[3] == "Release")
-					i[5] == "A1"
-				else
-					i[5] %in% example.results$arrays[[i[3]]]$all.after
-				})))
-
-	x <- getSpeeds(example.results, n.events = "all", type = "forward", direct = TRUE)
+	x <- getSpeeds(xresults, n.events = "all", type = "forward")
 	expect_equal(nrow(x), 445)
+	expect_true(all(
+			apply(x, 1, function(i) {
+				if (i[3] == "Release")
+					TRUE # should be equal to A1 but I removed some events at the start, so just skip it
+				else
+					i[5] %in% xresults$arrays[[i[3]]]$all.after
+				})))
+
+	x <- getSpeeds(xresults, n.events = "all", type = "forward", direct = TRUE)
+	expect_equal(nrow(x), 439)
 	expect_true(
 		all(
 			apply(x, 1, function(i) {
 				if (i[3] == "Release")
-					i[5] == "A1"
+					TRUE # should be equal to A1 but I removed some events at the start, so just skip it
 				else
-					i[5] %in% example.results$arrays[[i[3]]]$after
+					i[5] %in% xresults$arrays[[i[3]]]$after
 				})))
 
-	x <- getSpeeds(example.results, n.events = "all", type = "backward")
+	x <- getSpeeds(xresults, n.events = "all", type = "backward")
 	expect_equal(nrow(x), 4)
 	expect_true(
 		all(
 			apply(x, 1, function(i) {
 				if (i[3] == "Release")
-					i[5] == "A1"
+					TRUE # should be equal to A1 but I removed some events at the start, so just skip it
 				else
-					i[5] %in% example.results$arrays[[i[3]]]$all.before
+					i[5] %in% xresults$arrays[[i[3]]]$all.before
 				})))
 })
 
 test_that("getSpeeds argument 'n.events' is working", {
-	x <- getSpeeds(example.results, n.events = "first")
-	expect_equal(nrow(x), 447)
+	x <- getSpeeds(xresults, n.events = "first")
+	expect_equal(nrow(x), 444)
 
 	check <- paste(x$Fish, x$From.array, x$To.array, sep = "_")
 	expect_false(any(duplicated(check)))
 
-	expect_equal(x$Event[259], 15)
+	expect_equal(x$Event[259], 2)
 
-	x <- getSpeeds(example.results, n.events = "last")
-	expect_equal(nrow(x), 447)
+	x <- getSpeeds(xresults, n.events = "last")
+	expect_equal(nrow(x), 444)
 
 	check <- paste(x$Fish, x$From.array, x$To.array, sep = "_")
 	expect_false(any(duplicated(check)))
 
-	expect_equal(x$Event[259], 19)
+	expect_equal(x$Event[259], 2)
 })
-

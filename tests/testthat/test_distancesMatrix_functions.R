@@ -98,7 +98,7 @@ if (any(missing.packages)) {
 			coord.x = "x.32632", coord.y = "y.32632")
 		t.layer <- transitionLayer(base.raster)
 
-		test_that("distancesMatrix produces a warning when there are viable passages between stations", {
+		test_that("distancesMatrix produces a warning when there are no viable passages between stations", {
 			expect_warning(dist.mat <- distancesMatrix(t.layer = t.layer,
 		  		coord.x = "x.32632", coord.y = "y.32632", actel = TRUE),
 			"At least one station is completely blocked off from the remaining stations by land. Filling
@@ -176,6 +176,15 @@ will artificially add water space around the shape file.", fixed = TRUE)
 			expect_message(loadShape(path = tests.home, shape = "aux_transitionLayer.shp", size = 10,
 					coord.x = "x.32632", coord.y = "y.32632", spatial = xspatial),
 			"Extending the shape ranges with open water to ensure the stations fit inside it.", fixed = TRUE)
+		})
+
+		xspatial <- example.spatial[8:11, ]
+		xspatial$x.32632 <- c(453500, 453400, 452047, 452975)
+		xspatial$y.32632 <- c(6242800, 6242630, 6242387, 6241169)
+		test_that("loadShape expands the grid range if the spatial objects are outside the shape range.", {
+			expect_warning(loadShape(path = tests.home, shape = "aux_transitionLayer.shp", size = 10,
+					coord.x = "x.32632", coord.y = "y.32632", spatial = xspatial),
+			"Station 'Station 7' is not placed in water! This can cause several problems.", fixed = TRUE)
 		})
 
 		file.remove("spatial.csv")
