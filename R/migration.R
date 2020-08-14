@@ -668,8 +668,7 @@ by which sections are presented", immediate. = TRUE, call. = FALSE)
       survival.graph.size <- "width=90%" else survival.graph.size <- "height=4in"
 
     if (any(sapply(valid.detections, function(x) any(!is.na(x$Sensor.Value))))) {
-      appendTo(c("Screen", "Report"), "M: Printing sensor values for tags with sensor data.")
-      sensor.plots <- printSensorData(detections = valid.detections)
+      sensor.plots <- printSensorData(detections = valid.detections, rsp.info = rsp.info)
     } else {
       sensor.plots <- NULL
     }

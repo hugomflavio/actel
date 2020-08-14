@@ -4,7 +4,7 @@
 \alias{printSensorData}
 \title{Print sensor data for each individual tag}
 \usage{
-printSensorData(detections, extension = "png")
+printSensorData(detections, rsp.info, extension = "png")
 }
 \arguments{
 \item{detections}{A valid detections list}

@@ -1412,34 +1412,39 @@ printLastArray <- function(status.df) {
 #'
 #' @return A string of file locations in rmd syntax, to be included in printRmd
 #'
-printSensorData <- function(detections, extension = "png") {
+printSensorData <- function(detections, rsp.info, extension = "png") {
   individual.plots <- NULL
   Timestamp <- NULL
   Sensor.Value <- NULL
   Sensor.Unit <- NULL
+
+  appendTo(c("Screen", "Report"), "M: Printing sensor values for tags with sensor data.")
+
+  fake.results <- list(valid.detections = detections,
+                spatial = "spatial",
+                valid.movements = "valid.movements",
+                rsp.info = rsp.info)
+
   if (interactive())
-    pb <- txtProgressBar(min = 0, max = length(detections), style = 3, width = 60)
+    pb <- txtProgressBar(min = 0, max = length(detections), style = 3, width = 60) # nocov
+
   counter <- 0
+  n.plots <- 0
   individual.plots <- ""
+
   capture <- lapply(names(detections), function(fish) {
     counter <<- counter + 1
+
     if (any(!is.na(detections[[fish]]$Sensor.Value))) {
-      plotdata <- detections[[fish]]
-      if (any(link <- is.na(plotdata$Sensor.Unit) | plotdata$Sensor.Unit == ""))
-        plotdata$Sensor.Unit[link] <- paste0("? (", plotdata$Signal[link], ")")
-      p <- ggplot2::ggplot(data = plotdata, ggplot2::aes(x = Timestamp, y = Sensor.Value, by = Sensor.Unit))
-      p <- p + ggplot2::geom_line(col = "grey40")
-      p <- p + ggplot2::geom_point(col = "black", size = 0.5)
-      p <- p + ggplot2::labs(title = fish, x = "", y = "Sensor value")
-      p <- p + ggplot2::theme_bw()
-      p <- p + ggplot2::facet_grid(Sensor.Unit ~ ., scales = "free_y")
-      p <- p + ggplot2::theme(legend.position = "none")
-      if (length(unique(plotdata$Sensor.Unit)) > 2)
-        the.height <- 4 + ((length(unique(plotdata$Sensor.Unit)) - 2) * 2)
+      p <- plotSensors(input = fake.results, tag = fish, verbose = getOption("actel.debug", default = FALSE))
+
+      if (length(unique(detections[[fish]]$Sensor.Unit)) > 2)
+        the.height <- 4 + ((length(unique(detections[[fish]]$Sensor.Unit)) - 2) * 2)
       else
         the.height <- 4
       ggplot2::ggsave(paste0(tempdir(), "/", fish, "_sensors.", extension), width = 5, height = the.height)  # better to save in png to avoid point overlapping issues
-      if (counter %% 2 == 0) {
+      n.plots <- n.plots + 1
+      if (n.plots %% 2 == 0) {
         individual.plots <<- paste0(individual.plots, "![](", tempdir(), "/", fish, "_sensors.", extension, "){ width=50% }\n")
       } else {
         individual.plots <<- paste0(individual.plots, "![](", tempdir(), "/", fish, "_sensors.", extension, "){ width=50% }")

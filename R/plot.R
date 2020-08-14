@@ -1,9 +1,92 @@
-#' Plot detections for a single tag
+#' Plot sensor data for a single tag
 #'
+#' The output of plotSensors is a ggplot object, which means you can then use it in combination
+#' with other ggplot functions, or even together with other packages such as patchwork.
+#'
+#' @param input The results of an actel analysis (either explore, migration or residency).
+#' @param tag The transmitter to be plotted.
+#' @param sensor The sensors to be plotted. If left empty, all available sensors are plotted
+#' @param title An optional title for the plot. If left empty, a default title will be added.
+#' @param xlab,ylab Optional axis names for the plot. If left empty, default axis names will be added.
+#' @param pcol The colour for the points. Defaults to black.
+#' @param lcol The colour for the line. Defaults to grey.
+#' @param verbose Logical: Should warning messages be printed if necessary?
+#'
+#' @return A ggplot object.
+#'
+#' @examples
+#' # Using the example results that come with actel
+#' plotSensors(example.results, 'R64K-4451')
+#'
+#' # Because plotMoves returns a ggplot object, you can store
+#' # it and edit it manually, e.g.:
+#' library(ggplot2)
+#' p <- plotSensors(example.results, 'R64K-4451')
+#' p <- p + xlab("changed the x axis label a posteriori")
+#' p
+#'
+#' # You can also save the plot using ggsave!
+#'
+#' @export
+#'
+plotSensors <- function(input, tag, sensor, title = tag, xlab, ylab, pcol = "black", lcol = "grey40", verbose = TRUE) {
+  Timestamp <- NULL
+  Sensor.Value <- NULL
+  Sensor.Unit <- NULL
+
+  if (!inherits(input, "list"))
+    stop("Could not recognise the input as an actel results object.", call. = FALSE)
+
+  if (is.null(input$valid.movements) | is.null(input$spatial) | is.null(input$rsp.info))
+    stop("Could not recognise the input as an actel results object.", call. = FALSE)
+
+  if (length(tag) > 1)
+    stop("Please list only one tag", call. = FALSE)
+
+  if (is.na(match(tag, names(input$valid.detections))))
+    stop("Could not find tag '", tag, "' in the input.", call. = FALSE)
+
+  detections <- input$valid.detections[[tag]]
+
+  if (all(is.na(detections$Sensor.Value)))
+    stop("No sensor data found for this tag.", call. = FALSE)
+
+  if (any(is.na(detections$Sensor.Value))) {
+    if (verbose)
+      appendTo("Warning", paste0(sum(is.na(detections$Sensor.Value)), " rows in this tag's detections do not contain sensor values and will be discarded."))
+    detections <- detections[!is.na(detections$Sensor.Value), ]
+  }
+
+  if (any(link <- is.na(detections$Sensor.Unit) | detections$Sensor.Unit == "")) {
+    detections$Sensor.Unit[link] <- paste0("? (", detections$Signal[link], ")")
+    if (verbose)
+      appendTo("Warning", "Not all rows with sensor data contain a sensor unit!")
+  }
+
+  if (missing(sensor)) {
+    sensor <- unique(detections$Sensor.Unit)
+  } else {
+    if (any(link <- is.na(match(sensor, unique(detections$Sensor.unit)))))
+      stop("Could not find sensor unit(s) '", paste(sensor[link], collape = "', '", "' in the tag detections"), call. = FALSE)
+  }
+
+  detections <- detections[detections$Sensor.Unit %in% sensor, ]
+
+  p <- ggplot2::ggplot(data = detections, ggplot2::aes(x = Timestamp, y = Sensor.Value, by = Sensor.Unit))
+  p <- p + ggplot2::geom_line(col = lcol)
+  p <- p + ggplot2::geom_point(col = pcol, size = 0.5)
+  p <- p + ggplot2::labs(title = title, x = ifelse(missing(xlab), paste("tz:", input$rsp.info$tz), xlab), y = ifelse(missing(ylab), "Sensor value", ylab))
+  p <- p + ggplot2::theme_bw()
+  p <- p + ggplot2::facet_grid(Sensor.Unit ~ ., scales = "free_y")
+  p <- p + ggplot2::theme(legend.position = "none")
+  return(p)
+}
+
 #' The output of plotMoves is a ggplot object, which means you can then use it in combination
 #' with other ggplot functions, or even together with other packages such as patchwork.
 #'
 #' @param input The results of an actel analysis (either explore, migration or residency).
+#' Plot detections for a single tag
 #' @param tag The transmitter to be plotted.
 #' @param type The type of y axis desired. One of "stations" (default) or "arrays".
 #' @param title An optional title for the plot. If left empty, a default title will be added.

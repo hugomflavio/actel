@@ -18,6 +18,7 @@ Enhancements:
   * Expand unknown receiver options to allow discarding unknown detections and repeating the same action for all occurrences.
   * Improve error messages when something fails during detections loading.
   * Improve detection file recognition mechanics.
+  * New function `plotSensors` can be used to plot the sensor data for each tag.
 
 ## actel 1.1.0
 
