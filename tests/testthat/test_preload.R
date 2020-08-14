@@ -211,7 +211,7 @@ test_that("Data conversion warnings and errors kick in", {
 	"The 'Sensor.Value' column in the detections is not of type numeric. Attempting to convert.", fixed = TRUE)
 
 	d <- detections
-	d$Sensor.value <- "b"
+	d$Sensor.Value <- "b"
 	expect_error(x <- preload(biometrics = bio, deployments = deployments, spatial = spatial, detections = d,
 			dot = dot, distances = example.distances, tz = "Europe/Copenhagen"),
 	"Attempting to convert the 'Sensor.Value' to numeric failed. Aborting.", fixed = TRUE)
