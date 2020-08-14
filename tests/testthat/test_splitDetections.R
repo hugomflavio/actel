@@ -1,7 +1,7 @@
 skip_on_cran()
 oldtz <- Sys.getenv('TZ', unset = NA)
 Sys.setenv(TZ = 'UTC')
-
+	
 tests.home <- getwd()
 setwd(tempdir())
 
@@ -62,20 +62,20 @@ test_that("splitDetections can handle multi-sensor tags", {
 	xbio$Sensor.unit <- ""
 	expect_warning(output <- splitDetections(detections = detections, bio = xbio),
 		"The number of sensor units provided does not match the number of signals emitted ('' < '4453|4454').\n         Aborting sensor unit attribution.", fixed = TRUE)
-	expect_true(all(is.na(output$detections.list[[1]]$Sensor.Unit)))
-	expect_true(all(is.na(output$detections.list[[2]]$Sensor.Unit)))
+	expect_true(all(output$detections.list[[1]]$Sensor.Unit == "Temp"))
+	expect_true(all(output$detections.list[[2]]$Sensor.Unit == "Temp"))
 
 	xbio$Sensor.unit[1] <- "A|B|C"
 	expect_warning(output <- splitDetections(detections = detections, bio = xbio),
 		"The number of sensor units provided does not match the number of signals emitted ('A|B|C' > '4453|4454').\n         Aborting sensor unit attribution.", fixed = TRUE)
-	expect_true(all(is.na(output$detections.list[[1]]$Sensor.Unit)))
-	expect_true(all(is.na(output$detections.list[[2]]$Sensor.Unit)))
+	expect_true(all(output$detections.list[[1]]$Sensor.Unit == "Temp"))
+	expect_true(all(output$detections.list[[2]]$Sensor.Unit == "Temp"))
 
 	xbio$Sensor.unit[1] <- "A|B"
 	tryCatch(output <- splitDetections(detections = detections, bio = xbio), warning = function(w) stop("A warning was produced where it should not have been.", call = FALSE))
 	expect_equal(as.vector(with(output$detections.list[[1]], table(Signal, Sensor.Unit))), c(14, 0, 0, 24))
 	expect_equal(unique(output$detections.list[[1]]$Sensor.Unit), c("B", "A"))
-	expect_true(all(is.na(output$detections.list[[2]]$Sensor.Unit)))
+	expect_true(all(output$detections.list[[2]]$Sensor.Unit == "Temp"))
 
 	xbio$Sensor.unit[2] <- "A|B"
 	expect_warning(output <- splitDetections(detections = detections, bio = xbio),
@@ -87,7 +87,7 @@ test_that("splitDetections can handle multi-sensor tags", {
 	expect_equal(as.vector(with(output$detections.list[[1]], table(Signal, Sensor.Unit))), c(14, 0, 0, 24))
 	expect_equal(unique(output$detections.list[[1]]$Sensor.Unit), c("B", "A"))
 	expect_equal(unique(output$detections.list[[2]]$Sensor.Unit), "A")
-	expect_true(all(is.na(output$detections.list[[3]]$Sensor.Unit)))
+	expect_true(all(output$detections.list[[3]]$Sensor.Unit == "Temp"))
 })
 # n
 # n
