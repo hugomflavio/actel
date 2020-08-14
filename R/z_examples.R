@@ -147,6 +147,8 @@ Once finished, explore the html report and the object 'results' for the output."
 #'   \item{Receiver}{The ALS serial number}
 #'   \item{CodeSpace}{The code space of the detected tag}
 #'   \item{Signal}{The signal of the detected tag}
+#'   \item{Sensor.Value}{The data recorded by the sensor (dummy values)}
+#'   \item{Sensor.Unit}{The unit of the sensor data}
 #' }
 #' @source Data collected by the authors.
 #'

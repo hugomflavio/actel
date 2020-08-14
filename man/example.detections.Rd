@@ -11,6 +11,8 @@ A data frame with 14549 rows and 4 variables:
 \item{Receiver}{The ALS serial number}
 \item{CodeSpace}{The code space of the detected tag}
 \item{Signal}{The signal of the detected tag}
+\item{Sensor.Value}{The data recorded by the sensor (dummy values)}
+\item{Sensor.Unit}{The unit of the sensor data}
 }
 }
 \source{
