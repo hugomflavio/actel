@@ -604,7 +604,7 @@ knitr::kable(intra.array.CJS[[',i ,']]$absolutes)
 #' @inheritParams groupMovements
 #' @inheritParams simplifyMovements
 #' @inheritParams assembleMatrices
-#' @inheritParams plotMoves
+#' @inheritParams plotDetections
 #' @param extension the format of the generated graphics
 #'
 #' @return A string of file locations in rmd syntax, to be included in printRmd
@@ -620,7 +620,7 @@ printIndividuals <- function(detections.list, movements, valid.movements, spatia
   Array <- NULL
   Station <- NULL
 
-  input <- list(detections = detections.list,
+  fake.results <- list(detections = detections.list,
                 movements = movements,
                 valid.movements = valid.movements,
                 spatial = spatial,

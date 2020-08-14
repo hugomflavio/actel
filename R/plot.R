@@ -82,20 +82,19 @@ plotSensors <- function(input, tag, sensor, title = tag, xlab, ylab, pcol = "bla
   return(p)
 }
 
+#' Plot moves for one ore more tags
+#' 
 #' The output of plotMoves is a ggplot object, which means you can then use it in combination
 #' with other ggplot functions, or even together with other packages such as patchwork.
 #'
 #' @param input The results of an actel analysis (either explore, migration or residency).
-#' Plot detections for a single tag
-#' @param tag The transmitter to be plotted.
-#' @param type The type of y axis desired. One of "stations" (default) or "arrays".
-#' @param title An optional title for the plot. If left empty, a default title will be added.
+#' @param tags The transmitters to be plotted (optional).
+#' @param title An optional title for the plot.
 #' @param xlab,ylab Optional axis names for the plot. If left empty, default axis names will be added.
 #' @param col An optional colour scheme for the detections. If left empty, default colours will be added.
 #' @param array.alias A named vector of format c("old_array_name" = "new_array_name") to replace
 #'  default array names with user defined ones.
-#' @param frame.warning Logical. By default, actel highlights manually changed or overridden tags in yellow
-#'  and red plot frames, respectively. Set to FALSE to deactivate this behaviour.
+#' @param show.release Logical: Should the line from release to first detection be displayed?
 #'
 #' @return A ggplot object.
 #'
@@ -114,7 +113,160 @@ plotSensors <- function(input, tag, sensor, title = tag, xlab, ylab, pcol = "bla
 #'
 #' @export
 #'
-plotMoves <- function(input, tag, type = c("stations", "arrays"), title, xlab, ylab, col, array.alias, frame.warning = TRUE) {
+plotMoves <- function(input, tags, title, xlab, ylab, col, array.alias, show.release = TRUE) {
+  message("M: The old plotMoves function has been renamed to plotDetections as of version 1.1.1. Please ensure you are calling the right function!")
+  movements <- NULL
+  tag <- NULL
+  event <- NULL
+
+  cbPalette <- c("#56B4E9", "#E69F00", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7", "#999999")
+  names(cbPalette) <- c("Blue", "Orange", "Green", "Yellow", "Darkblue", "Darkorange", "Pink", "Grey")
+
+  if (!inherits(input, "list"))
+    stop("Could not recognise the input as an actel results object.", call. = FALSE)
+
+  if (is.null(input$valid.movements) | is.null(input$spatial) | is.null(input$rsp.info))
+    stop("Could not recognise the input as an actel results object.", call. = FALSE)
+
+  if (!missing(array.alias)) {
+    link <- match(names(array.alias), names(input$arrays))
+    if (any(is.na(link)))
+      warning("Could not find ", ifelse(sum(is.na(link) == 1), "array ", "arrays "), names(array.alias)[is.na(link)], " in the study's arrays.", call. = FALSE, immediate. = TRUE)
+  } else {
+    array.alias <- NULL
+  }
+
+  if (missing(tags)) {
+    message("M: Argument 'tags' not set. Plotting all detected tags.")
+    tags <- names(input$valid.movements)
+  } else {
+    if (any(link <- is.na(match(tags, names(input$valid.movements)))))
+      stop("There are no valid movements for tag(s) '", paste(tags[link], collapse = "', '"), "'.\n", call. = FALSE)
+  }
+
+  if (length(tags) > 5)
+    warning("Plotting many tags at the same time will likely result in ugly output.", call. = FALSE, immediate. = TRUE)
+
+  # choose colours
+  if (missing(col)) {
+    if (length(tags) <= 7) {
+      col <- as.vector(cbPalette)[1:length(tags)]
+    } else {
+      col <- gg_colour_hue(length(tags))
+    }
+  } else {
+    if (length(col) != length(tags)) {
+      warning("Not enough colours supplied in 'col' (", length(col)," supplied and ", length(tags), " needed). Reusing colours.", immediate. = TRUE, call. = FALSE)
+      col <- rep(col, length.out = length(tags))
+    }
+  }
+
+  # choose title
+  if (missing(title)) {
+    if (length(tags) == 1)
+      title <- tags
+    else
+      title <- NULL
+  }
+
+  # prepare Y axis levels
+  grouping <- names(input$arrays)
+  if (show.release && is.na(match("Release", grouping)))
+    grouping <- c("Release", grouping)
+
+  # extract information
+  plot.list <- lapply(tags, function(fish) {
+    # cat(fish, "\n")
+    moves <- input$valid.movements[[fish]]
+    release.date <- input$rsp.info$bio$Release.date[input$rsp.info$bio$Signal == extractSignals(fish)]
+
+    if (show.release) {
+      x1 <- data.frame(array = factor(c("Release", moves$Array), levels = grouping),
+                       date = c(release.date, moves$First.time),
+                       index = seq(from = 1, to = (nrow(moves) * 2) + 1, by = 2),
+                       tag = rep(fish, nrow(moves) + 1),
+                       event = 0:nrow(moves))
+    } else {
+      x1 <- data.frame(array = factor(moves$Array, levels = grouping),
+                       date = moves$First.time,
+                       index = seq(from = 1, to = (nrow(moves) * 2) - 1, by = 2),
+                       tag = rep(fish, nrow(moves)),
+                       event = 1:nrow(moves))
+    }
+
+    new.i <- seq(from = 2, to = nrow(x1) * 2, by = 2)
+    if (show.release)
+      new.i <- new.i[-length(new.i)]
+
+    x2 <- data.frame(array = factor(moves$Array, levels = grouping),
+                     date = moves$Last.time,
+                     index = new.i,
+                     tag = rep(fish, nrow(moves)),
+                     event = 1:nrow(moves))
+
+    output <- rbind(x1, x2)
+    output <- output[order(output$index), ]
+
+    if (!is.null(array.alias)) {
+      link <- match(names(array.alias), levels(output$array))
+      levels(output$array)[link[!is.na(link)]] <- array.alias[!is.na(link)]
+    }
+
+    return(output)
+  })
+
+  plotdata <- data.table::rbindlist(plot.list)
+
+  aux <- lapply(plot.list, function(x) x[nrow(x), ])
+  final.points <- data.table::rbindlist(aux)
+
+  p <- ggplot2::ggplot(data = plotdata, ggplot2::aes(x = date, y = array, colour = tag))
+  p <- p + ggplot2::geom_line(ggplot2::aes(group = tag))
+  p <- p + ggplot2::geom_line(ggplot2::aes(group = interaction(tag, event)), size = 2)
+  p <- p + ggplot2::geom_point(data = final.points)
+  p <- p + ggplot2::theme_bw()
+  p <- p + ggplot2::scale_color_manual(name = "", values = col, drop = FALSE)
+  if (length(tags) == 1)
+    p <- p + ggplot2::theme(legend.position = "none")
+  p <- p + ggplot2::labs(title = title, x = ifelse(missing(xlab), paste("tz:", input$rsp.info$tz), xlab), y = ifelse(missing(ylab), "Array", ylab))
+  return(p)
+}
+
+
+#' Plot detections for a single tag
+#'
+#' The output of plotDetections is a ggplot object, which means you can then use it in combination
+#' with other ggplot functions, or even together with other packages such as patchwork.
+#'
+#' @param input The results of an actel analysis (either explore, migration or residency).
+#' @param tag The transmitter to be plotted.
+#' @param type The type of y axis desired. One of "stations" (default) or "arrays".
+#' @param title An optional title for the plot. If left empty, a default title will be added.
+#' @param xlab,ylab Optional axis names for the plot. If left empty, default axis names will be added.
+#' @param col An optional colour scheme for the detections. If left empty, default colours will be added.
+#' @param array.alias A named vector of format c("old_array_name" = "new_array_name") to replace
+#'  default array names with user defined ones.
+#' @param frame.warning Logical. By default, actel highlights manually changed or overridden tags in yellow
+#'  and red plot frames, respectively. Set to FALSE to deactivate this behaviour.
+#'
+#' @return A ggplot object.
+#'
+#' @examples
+#' # Using the example results that come with actel
+#' plotDetections(example.results, 'R64K-4451')
+#'
+#' # Because plotMoves returns a ggplot object, you can store
+#' # it and edit it manually, e.g.:
+#' library(ggplot2)
+#' p <- plotDetections(example.results, 'R64K-4451')
+#' p <- p + xlab("changed the x axis label a posteriori")
+#' p
+#'
+#' # You can also save the plot using ggsave!
+#'
+#' @export
+#'
+plotDetections <- function(input, tag, type = c("stations", "arrays"), title, xlab, ylab, col, array.alias, frame.warning = TRUE) {
   # NOTE: The NULL variables below are actually column names used by ggplot.
   # This definition is just to prevent the package check from issuing a note due unknown variables.
   Timestamp <- NULL

@@ -12,13 +12,17 @@ Fixes:
   * Prevent CJS crash due to overlapping array names.
   * Prevent crash if spatial has release sites, but biometrics don't in CJS calculations of migration.
 
+Changes:
+  * **`plotMoves()` has been renamed to `plotDetections()`**
+
 Enhancements:
   * Never show unknown events during movement table display.
   * Show how many invalid events were omitted in the message that opens movement events.
   * Expand unknown receiver options to allow discarding unknown detections and repeating the same action for all occurrences.
   * Improve error messages when something fails during detections loading.
   * Improve detection file recognition mechanics.
-  * New function `plotSensors` can be used to plot the sensor data for each tag.
+  * New function `plotSensors()` can be used to plot the sensor data for each tag.
+  * New function `plotMoves()` can be used to plot the movement evolution of multiple tags simultaneously.
 
 ## actel 1.1.0
 
