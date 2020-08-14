@@ -23,6 +23,8 @@ Enhancements:
   * Improve detection file recognition mechanics.
   * New function `plotSensors()` can be used to plot the sensor data for each tag.
   * New function `plotMoves()` can be used to plot the movement evolution of multiple tags simultaneously.
+  * New function `plotArray()` can be used to plot the simultaneous number of fish present at a subset of arrays or,
+  if cumulative = TRUE, the cumulative number of individual fish to have reached that subset of arrays per unit of time.
 
 ## actel 1.1.0
 

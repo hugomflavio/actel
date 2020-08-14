@@ -82,6 +82,152 @@ plotSensors <- function(input, tag, sensor, title = tag, xlab, ylab, pcol = "bla
   return(p)
 }
 
+#' Plot simultaneous/cumulative presences at a give array or set of arrays
+#' 
+#' @param input The results of an actel analysis (either explore, migration or residency).
+#' @param arrays One or more arrays to be analysed. If multiple arrays are provided, data will be grouped.
+#' @param title An optional title for the plot.
+#' @param xlab,ylab Optional axis names for the plot. If left empty, default axis names will be added.
+#' @param lwd The line width, only relevant for line plots.
+#' @param col The colour of the line or bars. Defaults to blue.
+#' @param type The type of plot to be drawn. By default, a line is plotted if cumulative = TRUE, and bars are plotted otherwise.
+#' @param timestep The time resolution for the grouping of the results. Defaults to "days", but can be set to "hours" and "mins" (at the expnse of computing time).
+#' @param cumulative Logical. If TRUE, a cumulative plot of arrivals is drawn, otherwise the number of fish simultaneously present at the array(s) is drawn.
+#'
+#' @return A ggplot object.
+#'
+#' @examples
+#' # Using the example results that come with actel
+#' plotArray(example.results, arrays = "A9")
+#'
+#' # Because plotArray returns a ggplot object, you can store
+#' # it and edit it manually, e.g.:
+#' library(ggplot2)
+#' p <- plotArray(example.results, arrays = "A9")
+#' p <- p + xlab("changed the x axis label a posteriori")
+#' p
+#'
+#' # You can also save the plot using ggsave!
+#' 
+#' @export
+#' 
+plotArray <- function(input, arrays, title, xlab, ylab, lwd = 1, col = "#56B4E9", 
+  type = c("default", "bars", "lines"), timestep = c("days", "hours", "mins"), cumulative = FALSE) {
+  x <- NULL
+  y <- NULL
+
+  timestep <- match.arg(timestep)
+  type <- match.arg(type)
+
+  if (type == "default") {
+    if (cumulative)
+      type <- "lines"
+    else
+      type <- "bars"
+  }
+
+  if (!inherits(input, "list"))
+    stop("Could not recognise the input as an actel results object.", call. = FALSE)
+
+  if (is.null(input$valid.movements) | is.null(input$spatial) | is.null(input$rsp.info))
+    stop("Could not recognise the input as an actel results object.", call. = FALSE)
+
+  if (any(link <- is.na(match(arrays, names(input$arrays)))))
+    stop("Could not find array(s) '", paste(arrays[link], collapse = "', '"), "' in the study area.", call. = FALSE)
+
+  array.string <- paste0("^", arrays, "$", collapse = "|")
+  # choose title
+  if (missing(title)) {
+    if (cumulative)
+      title <- paste(paste(arrays, collapse = "|"), "- Cumulative arrivals")
+    else
+      title <- paste(paste(arrays, collapse = "|"), "- Simultaneous presence")
+  }
+
+  # extract information
+  first.time <- as.POSIXct(NA)[-1]
+  last.time <- as.POSIXct(NA)[-1]
+  
+  plot.list <- lapply(names(input$valid.movements), function(fish) {
+    # cat(fish, "\n")
+    moves <- as.data.frame(input$valid.movements[[fish]])
+    output <- moves[grepl(array.string, moves$Array), ]
+
+    if (nrow(output) > 0) {
+      first.time <<- c(first.time, output$First.time[1])
+      last.time <<- c(last.time, output$Last.time[nrow(output)])
+      output$First.time <- round.POSIXt(output$First.time, units = timestep)
+      output$Last.time <- round.POSIXt(output$Last.time, units = timestep)
+      return(output)
+    } else {
+      return(NULL)
+    }
+  })
+
+  if (is.null(first.time) | is.null(last.time))
+    stop("Not enough valid data to draw a plot. Aborting.", call. = FALSE)
+
+  plot.list <- plot.list[!sapply(plot.list, is.null)]
+
+  if (cumulative)
+    last.time <- round.POSIXt(max(first.time), units = timestep)
+  else
+    last.time <- round.POSIXt(max(last.time), units = timestep)
+
+  first.time <- round.POSIXt(min(first.time), units = timestep)
+
+  if (timestep == "days")
+    seconds <- 3600 * 24
+
+  if (timestep == "hours")
+    seconds <- 3600
+
+  if (timestep == "mins")
+    seconds <- 60
+
+  timerange <- seq(from = first.time, to = last.time, by = seconds)  
+
+  plotdata <- data.frame(x = timerange, y = rep(0, length(timerange)))
+
+  capture <- lapply(plot.list, function(x) {
+    to.add <- rep(0, nrow(plotdata))
+    if (cumulative) {
+      arrived.here <- which(x$First.time[1] == timerange)
+      to.add[arrived.here:length(to.add)] <- 1
+    } else {
+      arrived.here <- sapply(x$First.time, function(i) which(i == timerange))
+      left.here <- sapply(x$Last.time, function(i) which(i == timerange))
+      for(i in 1:length(arrived.here))
+        to.add[arrived.here[i]:left.here[i]] <- 1
+    }
+    plotdata$y <<- plotdata$y + to.add
+  })
+
+  if (type == "lines") {
+    aux1 <- plotdata
+    aux1$x <- aux1$x - (seconds / 2)
+    aux1$index <- seq(from = 1, to = nrow(aux1) * 2 - 1, by = 2)
+
+    aux2 <- plotdata
+    aux2$x <- aux2$x + (seconds / 2)
+    aux2$index <- seq(from = 2, to = nrow(aux2) * 2, by = 2)
+
+    plotdata <- rbind(aux1, aux2)
+    plotdata <- plotdata[order(plotdata$index), ]
+  }
+
+  p <- ggplot2::ggplot(data = plotdata, ggplot2::aes(x = x, y = y))
+  if (type == "bars") {
+    p <- p + ggplot2::geom_bar(stat = "identity", fill = col)
+    p <- p + ggplot2::scale_y_continuous(expand = c(0, 0, 0.05, 0))
+  }
+  if (type == "lines")
+    p <- p + ggplot2::geom_path(size = lwd, col = col)
+  p <- p + ggplot2::theme_bw()
+  p <- p + ggplot2::labs(title = title, x = ifelse(missing(xlab), paste("tz:", input$rsp.info$tz), xlab), y = ifelse(missing(ylab), "n", ylab))
+  return(p)
+}
+
 #' Plot moves for one ore more tags
 #' 
 #' The output of plotMoves is a ggplot object, which means you can then use it in combination
