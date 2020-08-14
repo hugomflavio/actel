@@ -637,7 +637,7 @@ printIndividuals <- function(detections.list, movements, valid.movements, spatia
   capture <- lapply(names(detections.list), function(fish) {
     counter <<- counter + 1
 
-    p <- plotMoves(input = input, tag = fish, type = type)
+    p <- plotDetections(input = fake.results, tag = fish, type = type)
 
     # decide height
     if (type == "stations")
