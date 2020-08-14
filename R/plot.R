@@ -175,6 +175,9 @@ plotArray <- function(input, arrays, title, xlab, ylab, lwd = 1, col = "#56B4E9"
     last.time <- round.POSIXt(max(last.time), units = timestep)
 
   first.time <- round.POSIXt(min(first.time), units = timestep)
+  
+  attributes(first.time)$tzone <- input$rsp.info$tz
+  attributes(last.time)$tzone <- input$rsp.info$tz
 
   if (timestep == "days")
     seconds <- 3600 * 24
@@ -186,6 +189,8 @@ plotArray <- function(input, arrays, title, xlab, ylab, lwd = 1, col = "#56B4E9"
     seconds <- 60
 
   timerange <- seq(from = first.time, to = last.time, by = seconds)  
+
+  attributes(timerange)$tzone <- input$rsp.info$tz
 
   plotdata <- data.frame(x = timerange, y = rep(0, length(timerange)))
 
