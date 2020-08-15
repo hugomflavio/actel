@@ -18,12 +18,12 @@ skip_on_cran()
 test_that("residency results contains all the expected elements.", {
 	output <- suppressWarnings(residency(tz = 'Europe/Copenhagen', report = FALSE, GUI = "never"))
 
-	expect_false(any(is.na(match(names(output), c('array.times', 'arrays', 'daily.positions', 'daily.ratios', 'deployments',
+	expect_false(any(is.na(match(names(output), c('array.times', 'arrays', 'time.positions', 'time.ratios', 'deployments',
 		'detections', 'dist.mat', 'efficiency', 'global.ratios', 'intra.array.CJS', 'intra.array.matrices',
 		'last.seen', 'movements', 'residency.list', 'rsp.info', 'section.movements', 'section.times',
 		'spatial', 'status.df', 'valid.detections', 'valid.movements')))))
 
-	# all the contents of each object have been tested in their respective function tests, appart from rsp.info and last.seen
+	# all the contents of each object have been tested in their respective function tests, apart from rsp.info and last.seen
 	expect_equal(names(output$rsp.info), c('analysis.type', 'analysis.time', 'bio', 'tz', 'actel.version'))
 	expect_equal(output$rsp.info$analysis.type, "residency")
 	expect_equal(output$rsp.info$bio[,1:ncol(example.biometrics)], example.biometrics)
@@ -43,7 +43,7 @@ test_that("residency is able to run speed and inactiveness checks.", {
 skip_on_cran()
 	output <- suppressWarnings(residency(tz = 'Europe/Copenhagen',
 		report = FALSE, GUI = "never", speed.warning = 1000000, inactive.warning = 1000000, replicates = list(A9 = c("St.16", "St.17"))))
-	expect_false(any(is.na(match(names(output), c('array.times', 'arrays', 'daily.positions', 'daily.ratios',
+	expect_false(any(is.na(match(names(output), c('array.times', 'arrays', 'time.positions', 'time.ratios',
 		'deployments', 'detections', 'dist.mat', 'efficiency', 'global.ratios', 'intra.array.CJS',
 		'intra.array.matrices','last.seen', 'movements', 'residency.list', 'rsp.info', 'section.movements',
 		'section.times', 'spatial', 'status.df', 'valid.detections', 'valid.movements')))))
@@ -51,7 +51,7 @@ skip_on_cran()
 	expect_warning(output <- residency(tz = 'Europe/Copenhagen', report = TRUE,
 			GUI = "never", speed.error = 1000000, inactive.error = 1000000),
 		"Running inactiveness checks without a distance matrix. Performance may be limited.", fixed = TRUE)
-	expect_false(any(is.na(match(names(output), c('array.times', 'arrays', 'daily.positions', 'daily.ratios',
+	expect_false(any(is.na(match(names(output), c('array.times', 'arrays', 'time.positions', 'time.ratios',
 		'deployments', 'detections', 'efficiency', 'global.ratios', 'intra.array.CJS', 'intra.array.matrices',
 		'last.seen', 'movements', 'residency.list', 'rsp.info', 'section.movements', 'section.times',
 		'spatial', 'status.df', 'valid.detections', 'valid.movements')))))
@@ -149,6 +149,16 @@ test_that("the discard.first argument is working properly", {
 # n
 # n
 # n
+
+# last test just for timestep = hours
+test_that("timestep = 'hours' is working too", {
+	skip_on_cran()
+	output <- suppressWarnings(residency(tz = 'Europe/Copenhagen', report = TRUE, GUI = "never", timestep = "hours"))
+	expect_false(any(is.na(match(names(output), c('array.times', 'arrays', 'time.positions', 'time.ratios',
+		'deployments', 'detections', 'dist.mat', 'efficiency', 'global.ratios', 'intra.array.CJS',
+		'intra.array.matrices','last.seen', 'movements', 'residency.list', 'rsp.info', 'section.movements',
+		'section.times', 'spatial', 'status.df', 'valid.detections', 'valid.movements')))))
+})
 
 setwd("..")
 unlink("exampleWorkspace", recursive = TRUE)

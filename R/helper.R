@@ -1,3 +1,23 @@
+#' Match POSIX values
+#' 
+#' @param this the vector of posix to be match
+#' @param there the vector of posix to be matched against
+#' 
+#' @return a vector with the matches
+#' 
+#' @keywords internal
+#' 
+match.POSIXt <- function(this, there) {
+  sapply(this, function(i) {
+    x <- which(i == there)
+    if (length(x) == 0)
+      return(NA)
+    if (length(x) > 1)
+      return(min(x))
+    return(x)
+  })
+}
+
 #' stop function but paste error to the report too
 #' 
 #' @param ... parts of the error string

@@ -29,6 +29,7 @@ NULL
 #' @param dp A preloaded datapack (or NULL if no data was preloaded).
 #' @inheritParams explore
 #' @inheritParams migration
+#' @inheritParams residency
 #'
 #' @keywords internal
 #'
@@ -37,7 +38,7 @@ NULL
 checkArguments <- function(dp, tz, minimum.detections, max.interval, speed.method = c("last to first", "last to last"),
   speed.warning, speed.error, start.time, stop.time, report, auto.open, save.detections, jump.warning, jump.error,
   inactive.warning, inactive.error, exclude.tags, override, print.releases, plot.detections.by = c("stations", "arrays"),
-  if.last.skip.section = NULL, replicates = NULL, section.minimum = NULL, section.order = NULL) {
+  if.last.skip.section = NULL, replicates = NULL, section.minimum = NULL, section.order = NULL, timestep = c("days", "hours")) {
   appendTo("debug", "Running checkArguments.")
 
   no.dp.args <- c("tz", "section.order", "start.time", "stop.time", "save.detections", "exclude.tags")
@@ -155,6 +156,10 @@ checkArguments <- function(dp, tz, minimum.detections, max.interval, speed.metho
     stopAndReport("'plot.detections.by' should be one of 'stations' or 'arrays'")
   plot.detections.by <- match.arg(plot.detections.by)
 
+  if (!is.character(timestep))
+    stopAndReport("'timestep' should be one of 'days' or 'hours'")
+  timestep <- match.arg(timestep)
+
   # Check that all the overridden fish are part of the study
   if (!is.null(dp) && !is.null(override)) {
     lowest_signals <- sapply(dp$bio$Signal, function(i) min(as.numeric(unlist(strsplit(as.character(i), "|", fixed = TRUE)))))
@@ -183,7 +188,8 @@ checkArguments <- function(dp, tz, minimum.detections, max.interval, speed.metho
               speed.error = speed.error,
               inactive.warning = inactive.warning,
               inactive.error = inactive.error,
-              plot.detections.by = plot.detections.by))
+              plot.detections.by = plot.detections.by,
+              timestep = timestep))
 }
 
 

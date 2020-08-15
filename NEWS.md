@@ -10,10 +10,13 @@ Fixes:
   * Prevent bad structuring of the legend in individual plots if `plot.detections.by = 'arrays'`.
   * Prevent crash of CJS functions when running tags with multiple sensors.
   * Prevent CJS crash due to overlapping array names.
-  * Prevent crash if spatial has release sites, but biometrics don't in CJS calculations of migration.
+  * Prevent crash if spatial has release sites, but biometrics doesn't (in CJS calculations of migration).
 
 Changes:
   * **`plotMoves()` has been renamed to `plotDetections()`**
+  * In the residency analysis, the following output **objects have changed name**:
+    * `daily.ratios` is now `time.ratios`
+    * `daily.positions` is now `time.positions`
 
 Enhancements:
   * Never show unknown events during movement table display.
@@ -24,7 +27,8 @@ Enhancements:
   * New function `plotSensors()` can be used to plot the sensor data for each tag.
   * New function `plotMoves()` can be used to plot the movement evolution of multiple tags simultaneously.
   * New function `plotArray()` can be used to plot the simultaneous number of fish present at a subset of arrays or,
-  if cumulative = TRUE, the cumulative number of individual fish to have reached that subset of arrays per unit of time.
+  if `cumulative = TRUE`, the cumulative number of individual fish to have reached that subset of arrays per unit of time.
+  * New argument in the `residency()` analysis: `timestep` allows the user to decide wether residency calculations should be done on a daily basis (default) or an hourly basis (at cost of computing time).
 
 ## actel 1.1.0
 

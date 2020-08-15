@@ -1216,15 +1216,15 @@ printSectionTimes <- function(section.times, bio, detections) {
 #' print the distribution of fish per location
 #'
 #' @param global.ratios the global ratios
-#' @param daily.ratios the daily ratios
+#' @param time.ratios the daily ratios
 #' @inheritParams migration
 #'
 #' @return No return value, called to plot and save graphic.
 #'
 #' @keywords internal
 #'
-printGlobalRatios <- function(global.ratios, daily.ratios, spatial) {
-  Date <- NULL
+printGlobalRatios <- function(global.ratios, time.ratios, spatial, timestep) {
+  Timeslot <- NULL
   Location <- NULL
   n <- NULL
   cbPalette <- c("#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7", "#999999")
@@ -1232,7 +1232,7 @@ printGlobalRatios <- function(global.ratios, daily.ratios, spatial) {
 
   sections <- names(spatial$array.order)
 
-  unordered.unique.values <- sort(unique(unlist(lapply(daily.ratios, function(x) {
+  unordered.unique.values <- sort(unique(unlist(lapply(time.ratios, function(x) {
     aux <- which(grepl("^p", colnames(x)))
     aux <- aux[!is.na(match(colnames(x)[aux - 1], sub("p", "", colnames(x)[aux])))]
     return(colnames(x)[aux - 1])
@@ -1241,12 +1241,11 @@ printGlobalRatios <- function(global.ratios, daily.ratios, spatial) {
   unique.values <- unordered.unique.values[link]
 
   capture <- lapply(names(global.ratios), function(i) {
-    plotdata <- suppressMessages(reshape2::melt(global.ratios[[i]][, -ncol(global.ratios[[i]])]))
-    colnames(plotdata) <- c("Date", "Location", "n")
+    plotdata <- suppressMessages(reshape2::melt(global.ratios[[i]][, -ncol(global.ratios[[i]])], id.vars = "Timeslot"))
+    colnames(plotdata) <- c("Timeslot", "Location", "n")
     plotdata$Location <- factor(plotdata$Location, levels = unique.values)
-    plotdata$Date <- as.Date(plotdata$Date)
-    p <- ggplot2::ggplot(data = plotdata, ggplot2::aes(x = Date, y = n, fill = Location, col = Location))
-    p <- p + ggplot2::geom_bar(width = 1, stat = "identity")
+    p <- ggplot2::ggplot(data = plotdata, ggplot2::aes(x = Timeslot, y = n, fill = Location, col = Location))
+    p <- p + ggplot2::geom_bar(width = ifelse(timestep == "days", 86400, 3600), stat = "identity")
     p <- p + ggplot2::theme_bw()
     if (ncol(global.ratios[[i]]) > 3)
       max.y <- max(apply(global.ratios[[i]][, c(-1, -ncol(global.ratios[[i]]))], 1, sum))
@@ -1277,8 +1276,9 @@ printGlobalRatios <- function(global.ratios, daily.ratios, spatial) {
 #'
 #' @keywords internal
 #'
-printIndividualResidency <- function(ratios, dayrange, spatial) {
-  Date <- NULL
+printIndividualResidency <- function(ratios, time.range, spatial, timestep = c("days", "hours")) {
+  timestep <- match.arg(timestep)
+  Timeslot <- NULL
   Location <- NULL
   n <- NULL
   cbPalette <- c("#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7", "#999999")
@@ -1303,6 +1303,7 @@ printIndividualResidency <- function(ratios, dayrange, spatial) {
 
   if (interactive())
     pb <- txtProgressBar(min = 0, max = length(ratios), style = 3, width = 60)
+
   capture <- lapply(names(ratios), function(i) {
     counter <<- counter + 1
     x <- ratios[[i]]
@@ -1311,9 +1312,8 @@ printIndividualResidency <- function(ratios, dayrange, spatial) {
     new.colnames <-colnames(x)[c(1, aux - 1)]
     x <- x[, c(1, aux)]
     colnames(x) <- new.colnames
-    plotdata <- suppressMessages(reshape2::melt(x))
-    colnames(plotdata) <- c("Date", "Location", "n")
-    plotdata$Date <- as.Date(plotdata$Date)
+    plotdata <- suppressMessages(reshape2::melt(x, id.vars = "Timeslot"))
+    colnames(plotdata) <- c("Timeslot", "Location", "n")
 
     level.link <- !is.na(match(unique.values, unique(plotdata$Location)))
     use.levels <- unique.values[level.link]
@@ -1321,12 +1321,12 @@ printIndividualResidency <- function(ratios, dayrange, spatial) {
 
     plotdata$Location <- factor(plotdata$Location, levels = use.levels)
 
-    p <- ggplot2::ggplot(data = plotdata, ggplot2::aes(x = Date, y = n, fill = Location))
-    p <- p + ggplot2::geom_bar(width = 1, stat = "identity")
+    p <- ggplot2::ggplot(data = plotdata, ggplot2::aes(x = Timeslot, y = n, fill = Location))
+    p <- p + ggplot2::geom_bar(width = ifelse(timestep == "days", 86400, 3600), stat = "identity")
     p <- p + ggplot2::theme_bw()
     p <- p + ggplot2::scale_y_continuous(limits = c(0,  max(apply(ratios[[i]][, aux, drop = FALSE], 1, sum))), expand = c(0, 0))
-    p <- p + ggplot2::labs(title = paste0(i, " (", substring(x$Date[1], 1, 10), " to ", substring(x$Date[nrow(x)], 1, 10), ")") , x = "", y = "% time per day")
-    p <- p + ggplot2::scale_x_date(limits = dayrange)
+    p <- p + ggplot2::labs(title = paste0(i, " (", as.character(x$Timeslot[1]), " to ", as.character(x$Timeslot[nrow(x)]), ")") , x = "", y = ifelse(timestep == "days", "% time per day", "% time per hour"))
+    p <- p + ggplot2::scale_x_datetime(limits = time.range)
     p <- p + ggplot2::scale_fill_manual(values = use.colours, drop = TRUE)
     if (length(use.levels) > 5 & length(use.levels) <= 10)
       p <- p + ggplot2::guides(fill = ggplot2::guide_legend(ncol = 2))

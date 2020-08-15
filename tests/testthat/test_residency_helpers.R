@@ -124,37 +124,60 @@ test_that("getResidency works as expected", {
 	})
 })
 
-test_that("dailyRatios works as expected", {
-  daily.ratios <<- dailyRatios(res = residency.list)
+test_that("resRatios works as expected", {
+  time.ratios.day <<- resRatios(res = residency.list, tz = "Europe/Copenhagen", timestep = "days")
 
   ### ONLY RUN THIS TO RESET REFERENCE
-  # aux_dailyRatios <- daily.ratios
-  # save(aux_dailyRatios, file = paste0(tests.home, "/aux_dailyRatios.RData"))
+  # aux_resRatios_day <- time.ratios.day
+  # save(aux_resRatios_day, file = paste0(tests.home, "/aux_resRatios_day.RData"))
 
-  load(paste0(tests.home, "/aux_dailyRatios.RData"))
-  expect_equal(daily.ratios, aux_dailyRatios)
+  load(paste0(tests.home, "/aux_resRatios_day.RData"))
+  expect_equal(time.ratios.day, aux_resRatios_day)
+
+  time.ratios.hour <<- resRatios(res = residency.list, tz = "Europe/Copenhagen", timestep = "hours")
+
+  ### ONLY RUN THIS TO RESET REFERENCE
+  # aux_resRatios_hour <- time.ratios.hour
+  # save(aux_resRatios_hour, file = paste0(tests.home, "/aux_resRatios_hour.RData"))
+
+  load(paste0(tests.home, "/aux_resRatios_hour.RData"))
+  expect_equal(time.ratios.hour, aux_resRatios_hour)
 })
 
-test_that("dailyPositions works as expected.", {
-  daily.positions <<- dailyPositions(ratios = daily.ratios)
+test_that("resPositions works as expected.", {
+  res.positions.day <<- resPositions(ratios = time.ratios.day, timestep = "days")
 
-  expect_equal(rownames(daily.positions), c('2018-04-18', '2018-04-19', '2018-04-20',
+  expect_equal(as.character(res.positions.day$Timeslot), c('2018-04-18', '2018-04-19', '2018-04-20',
   	'2018-04-21', '2018-04-22', '2018-04-23', '2018-04-24', '2018-04-25', '2018-04-26',
   	'2018-04-27', '2018-04-28', '2018-04-29', '2018-04-30', '2018-05-01', '2018-05-02',
   	'2018-05-03', '2018-05-04', '2018-05-05', '2018-05-06'))
-  expect_equal(as.vector(daily.positions[, 1]), daily.ratios[[1]]$Most.time)
-  expect_equal(as.vector(daily.positions[, 2]), c(NA, NA, daily.ratios[[2]]$Most.time, NA, NA, NA, NA))
+  expect_equal(as.vector(res.positions.day[, 2]), time.ratios.day[[1]]$Most.time)
+  expect_equal(as.vector(res.positions.day[, 3]), c(NA, NA, time.ratios.day[[2]]$Most.time, NA, NA, NA, NA))
+
+  res.positions.hour <<- resPositions(ratios = time.ratios.hour, timestep = "hours")
+
+  expect_equal(as.vector(res.positions.hour[, 2]), time.ratios.hour[[1]]$Most.time)
+  expect_equal(as.vector(res.positions.hour[, 3]), c(rep(NA, 39), time.ratios.hour[[2]]$Most.time, rep(NA, 76)))
 })
 
 test_that("globalRatios works as expected.", {
-  global.ratios <- globalRatios(positions = daily.positions)	
+  global.ratios.day <- globalRatios(positions = res.positions.day)	
 
   ### ONLY RUN THIS TO RESET REFERENCE
-  # aux_globalRatios <- global.ratios
-  # save(aux_globalRatios, file = paste0(tests.home, "/aux_globalRatios.RData"))
+  # aux_globalRatios.day <- global.ratios.day
+  # save(aux_globalRatios.day, file = paste0(tests.home, "/aux_globalRatios_day.RData"))
 
-  load(paste0(tests.home, "/aux_globalRatios.RData"))
-  expect_equal(global.ratios, aux_globalRatios)
+  load(paste0(tests.home, "/aux_globalRatios_day.RData"))
+  expect_equal(global.ratios.day, aux_globalRatios.day)
+
+  global.ratios.hour <- globalRatios(positions = res.positions.hour)  
+
+  ### ONLY RUN THIS TO RESET REFERENCE
+  # aux_globalRatios.hour <- global.ratios.hour
+  # save(aux_globalRatios.hour, file = paste0(tests.home, "/aux_globalRatios_hour.RData"))
+
+  load(paste0(tests.home, "/aux_globalRatios_hour.RData"))
+  expect_equal(global.ratios.hour, aux_globalRatios.hour)
 })
 
 test_that("res_efficiency works as expected, and can include intra array estimates", {

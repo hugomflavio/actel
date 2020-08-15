@@ -9,6 +9,8 @@
 #'
 #' @param section.minimum If a fish has less than \code{section.minimum}
 #'  consecutive detections in a section, a warning is issued. Defaults to 2.
+#' @param timestep The resolution desired for the residency calculations.
+#'  One of "days" (default) or "hours".
 #' @inheritParams migration
 #' @inheritParams explore
 #'
@@ -85,9 +87,9 @@
 #'    fish in each section;
 #'  \item \code{residency.list}: A list containing the places of residency between first and last
 #'    valid detection for each fish;
-#'  \item \code{daily.ratios}: A list containing the daily location per section (both in seconds spent
+#'  \item \code{time.ratios}: A list containing the daily location per section (both in seconds spent
 #'    and in percentage of day) for each fish;
-#'  \item \code{daily.positions}: A data frame showing the location where each
+#'  \item \code{time.positions}: A data frame showing the location where each
 #'    fish spent the most time per day;
 #'  \item \code{global.ratios}: A list containing summary tables showing the number of active fish
 #'    (and respective percentages) present at each location per day;
@@ -127,10 +129,11 @@ residency <- function(
   discard.first = NULL,
   save.detections = FALSE,
   section.minimum = 2,
+  timestep = c("days", "hours"),
   replicates = NULL,
   GUI = c("needed", "always", "never"),
   print.releases = TRUE,
-  plot.detections.by = c("stations", "arrays")) 
+  plot.detections.by = c("stations", "arrays"))
 {
 
   if (!missing(sections))
@@ -182,7 +185,8 @@ by which sections are presented", immediate. = TRUE, call. = FALSE)
                         replicates = replicates,
                         section.minimum = section.minimum,
                         section.order = section.order,
-                        plot.detections.by = plot.detections.by)
+                        plot.detections.by = plot.detections.by,
+                        timestep = timestep)
 
   speed.method <- aux$speed.method
   speed.warning <- aux$speed.warning
@@ -190,6 +194,7 @@ by which sections are presented", immediate. = TRUE, call. = FALSE)
   inactive.warning <- aux$inactive.warning
   inactive.error <- aux$inactive.error
   plot.detections.by <- aux$plot.detections.by
+  timestep <- aux$timestep
   rm(aux)
 
   GUI <- checkGUI(GUI)
@@ -217,6 +222,7 @@ by which sections are presented", immediate. = TRUE, call. = FALSE)
     ", discard.first = ", ifelse(is.null(discard.first), "NULL", discard.first),
     ", save.detections = ", ifelse(save.detections, "TRUE", "FALSE"),
     ", section.minimum = ", section.minimum,
+    ", timestep = '", timestep, "'",
     ", replicates = ", ifelse(is.null(replicates),"NULL", paste0("list(", paste(sapply(1:length(replicates), function(i) paste0("'", names(replicates)[i], "' = c('", paste(replicates[[i]], collapse = "', '"), "')")), collapse = ", "), ")")),
     ", inactive.error = ", ifelse(is.null(inactive.error), "NULL", inactive.error),
     ", GUI = '", GUI, "'",
@@ -257,7 +263,6 @@ by which sections are presented", immediate. = TRUE, call. = FALSE)
   }
 
   bio <- study.data$bio
-  sections <- study.data$sections
   deployments <- study.data$deployments
   spatial <- study.data$spatial
   dot <- study.data$dot
@@ -441,13 +446,16 @@ by which sections are presented", immediate. = TRUE, call. = FALSE)
     stop("No fish have enough data for residency analysis. Consider running explore() instead.\n", call. = FALSE)
   }
 
-  appendTo(c("Screen", "Report"), "M: Calculating daily locations for each fish.")
+  if (timestep == "days")
+    appendTo(c("Screen", "Report"), "M: Calculating daily locations for each fish.")
+  else
+    appendTo(c("Screen", "Report"), "M: Calculating hourly locations for each fish.")
 
-  daily.ratios <- dailyRatios(res = residency.list)
+  time.ratios <- resRatios(res = residency.list, timestep = timestep, tz = tz)
 
-  daily.positions <- dailyPositions(ratios = daily.ratios)
+  time.positions <- resPositions(ratios = time.ratios, timestep = timestep)
 
-  global.ratios <- globalRatios(positions = daily.positions)
+  global.ratios <- globalRatios(positions = time.positions)
 
   appendTo("Screen", "M: Validating detections...")
 
@@ -521,12 +529,12 @@ by which sections are presented", immediate. = TRUE, call. = FALSE)
     if (attributes(dist.mat)$valid)
       save(detections, valid.detections, spatial, deployments, arrays, movements, valid.movements,
         section.movements, status.df, last.seen, array.times, section.times, intra.array.matrices,
-        residency.list, daily.ratios, daily.positions, global.ratios, efficiency, intra.array.CJS, 
+        residency.list, time.ratios, time.positions, global.ratios, efficiency, intra.array.CJS, 
         rsp.info, dist.mat, file = resultsname)
     else
       save(detections, valid.detections, spatial, deployments, arrays, movements, valid.movements,
         section.movements, status.df, last.seen, array.times, section.times, intra.array.matrices,
-        residency.list, daily.ratios, daily.positions, global.ratios, efficiency, intra.array.CJS, 
+        residency.list, time.ratios, time.positions, global.ratios, efficiency, intra.array.CJS, 
         rsp.info, file = resultsname)
   } else {
     appendTo(c("Screen", "Report"), paste0("M: Skipping saving of the results."))
@@ -550,8 +558,9 @@ by which sections are presented", immediate. = TRUE, call. = FALSE)
                       detections = valid.detections)
 
     printGlobalRatios(global.ratios = global.ratios,
-                      daily.ratios = daily.ratios,
-                      spatial = spatial)
+                      time.ratios = time.ratios,
+                      spatial = spatial,
+                      timestep = timestep)
 
     individual.detection.plots <- printIndividuals(detections.list = detections,
                                                    movements = movements,
@@ -575,12 +584,18 @@ by which sections are presented", immediate. = TRUE, call. = FALSE)
 
     appendTo(c("Screen", "Report"), "M: Drawing individual residency graphics.")
     
-    dayrange <- range(as.Date(global.ratios[[1]]$Date))
-    dayrange[1] <- dayrange[1] - 1
-    dayrange[2] <- dayrange[2] + 1
-    individual.residency.plots <- printIndividualResidency(ratios = daily.ratios,
-                                                           dayrange = dayrange,
-                                                           spatial = spatial)
+    time.range <- range(global.ratios[[1]]$Timeslot)
+    if (timestep == "days") {
+      time.range[1] <- time.range[1] - 86400
+      time.range[2] <- time.range[2] + 86400
+    } else {
+      time.range[1] <- time.range[1] - 3600
+      time.range[2] <- time.range[2] + 3600
+    }
+    individual.residency.plots <- printIndividualResidency(ratios = time.ratios,
+                                                           time.range = time.range,
+                                                           spatial = spatial,
+                                                           timestep = timestep)
 
     efficiency.fragment <- printEfficiency(efficiency = efficiency,
                                            intra.CJS = intra.array.CJS,
@@ -697,8 +712,8 @@ by which sections are presented", immediate. = TRUE, call. = FALSE)
                  array.times = array.times,
                  section.times = section.times,
                  residency.list = residency.list,
-                 daily.ratios = daily.ratios,
-                 daily.positions = daily.positions,
+                 time.ratios = time.ratios,
+                 time.positions = time.positions,
                  global.ratios = global.ratios,
                  last.seen = last.seen,
                  rsp.info = rsp.info)
@@ -908,7 +923,7 @@ Note:
 ### Section progression
 
 Note:
-  : The data used in these graphics is stored in the `global.ratios` and `daily.positions` objects.
+  : The data used in these graphics is stored in the `global.ratios` and `time.positions` objects.
 
 #### Absolutes
 
@@ -927,7 +942,7 @@ Note:
 ### Individual residency plots
 
 Note:
-  : The data used in these graphics is stored in the `daily.ratios` object (one table per fish). More condensed information can be found in the `section.movements` object.
+  : The data used in these graphics is stored in the `time.ratios` object (one table per fish). More condensed information can be found in the `section.movements` object.
 
 <center>
 ', individual.residency.plots,'
@@ -1371,31 +1386,33 @@ getResidency <- function(movements, spatial){
   return(output)
 }
 
-#' calculate daily ratios per fish
+#' calculate residency ratios per fish
 #'
 #' @param res a residency list
+#' @param timestep the size of each frame
 #'
-#' @return A list containing the daily ratios for each fish.
+#' @return A list containing the residency ratios for each fish.
 #'
 #' @keywords internal
 #'
-dailyRatios <- function(res) {
+resRatios <- function(res, timestep = c("days", "hours"), tz) {
+  timestep <- match.arg(timestep)
+  num.step <- ifelse(timestep == "days", 86400, 3600)
   counter <- 0
   if (interactive())
     pb <- txtProgressBar(min = 0, max = length(res), style = 3, width = 60) # nocov
   output <- lapply(res, function(x) {
     counter <<- counter + 1
     # cat("\n", counter, "\n")
-    dayrange <- seq(from = round.POSIXt(x$First.time[1] - 43200, units = "days"),
-      to =  round.POSIXt(x$Last.time[nrow(x)] - 43200, units = "days"), by = 86400)
-    days.list <- lapply(dayrange, function(d) {
+    res.range <- seq(from = round.POSIXt(x$First.time[1] - (num.step / 2), units = timestep),
+      to =  round.POSIXt(x$Last.time[nrow(x)] - (num.step / 2), units = timestep), by = num.step)
+    res.list <- lapply(res.range, function(d) {
       # cat(as.character(d), "\n")
-      findSecondsPerSection(res = x, day = d, the.range = range(dayrange))
+      findSecondsPerSection(res = x, frame = d, the.range = range(res.range), num.step = num.step)
     })
     if (interactive())
       setTxtProgressBar(pb, counter) # nocov
-    names(days.list) <- round.POSIXt(dayrange, units = "days")
-    dailyRatiosIndOut(input = days.list)
+    resRatiosIndOut(input = res.list, slots = round.POSIXt(res.range, units = timestep), tz = tz)
   })
   if (interactive())
     close(pb) # nocov
@@ -1404,18 +1421,19 @@ dailyRatios <- function(res) {
 
 #' Calculate number of seconds at each location per day
 #'
-#' @inheritParams dailyRatios
-#' @param day the day being analysed (a Date object)
-#' @param the.range the first and last day for the specific fish
+#' @inheritParams resRatios
+#' @param start.time the start time of the period being analysed (a Date object)
+#' @param the.range the first and last start.time for the specific fish
+#' @param num.step the size of the block
 #'
-#' @return A data frame containing the number of seconds spent at each location for a specific day
+#' @return A data frame containing the number of seconds spent at each location for a specific timeframe
 #'
 #' @keywords internal
 #'
-findSecondsPerSection <- function(res, day, the.range) {
+findSecondsPerSection <- function(res, frame, the.range, num.step) {
   aux <- c()
-  candidate.events <- which(res$First.time <= day + 86400)
-  potential.events <- which(res$First.time[candidate.events] >= day)
+  candidate.events <- which(res$First.time <= frame + num.step)
+  potential.events <- which(res$First.time[candidate.events] >= frame)
   # IF potential events returns 0, then the only valid event is the very last candidate
   if (length(potential.events) == 0)
     e <- tail(candidate.events, 1)
@@ -1425,20 +1443,20 @@ findSecondsPerSection <- function(res, day, the.range) {
   if (length(e) == 1) {
     # and that event is the very first one
     if (e == 1) {
-      # Exception for if the fish was only detected one day, calculates difference between event start and stop.
+      # Exception for if the fish was only detected one frame, calculates difference between event start and stop.
       if (the.range[2] == the.range[1]) {
         aux[length(aux) + 1] <- difftime(res$Last.time[e], res$First.time[e], units = "secs")
         names(aux)[length(aux)] <- res$Section[e]
         aux[length(aux) + 1] <- 0
         names(aux)[length(aux)] <- "Changes"
       } else {
-        # Exception for if the day being analysed is the last day, calculates difference between day start and event stop.
-        if (day == the.range[2]) {
-          aux[length(aux) + 1] <- difftime(res$Last.time[e], day, units = "secs")
+        # Exception for if the frame being analysed is the last frame, calculates difference between frane start and event stop.
+        if (frame == the.range[2]) {
+          aux[length(aux) + 1] <- difftime(res$Last.time[e], frame, units = "secs")
           names(aux)[length(aux)] <- res$Section[e]
-        # Otherwise calculate difference between event start and day end, and trim at a full day.
+        # Otherwise calculate difference between event start and frame end, and trim at a full frame.
         } else {
-          aux[length(aux) + 1] <- min(86400, as.numeric(difftime(day + 86400, res$First.time[e], units = "secs")))
+          aux[length(aux) + 1] <- min(num.step, as.numeric(difftime(frame + num.step, res$First.time[e], units = "secs")))
           names(aux)[length(aux)] <- res$Section[e]
         }
         # Regardless of path, if length(e) == 1 and the event is the first one, the number of changes is 0
@@ -1447,29 +1465,29 @@ findSecondsPerSection <- function(res, day, the.range) {
       }
     # If there is only one event but that event is not the very first one
     } else {
-      # If the start time of the event is previous to the day itself
-      if (res$First.time[e] < day) {
-        # Exception for the last day, calculates difference between day start and event stop.
-        if (day == the.range[2]) {
-          aux[length(aux) + 1] <- difftime(res$Last.time[e], day, units = "secs")
+      # If the frame of the event is previous to the frame itself
+      if (res$First.time[e] < frame) {
+        # Exception for the last frame, calculates difference between frame start and event stop.
+        if (frame == the.range[2]) {
+          aux[length(aux) + 1] <- difftime(res$Last.time[e], frame, units = "secs")
           names(aux)[length(aux)] <- res$Section[e]
-        # otherwise, since there are no more 'e', the fish has stayed the whole day in the event
+        # otherwise, since there are no more 'e', the fish has stayed the whole frame in the event
         } else {
-          aux[length(aux) + 1] <- 86400
+          aux[length(aux) + 1] <- num.step
           names(aux)[length(aux)] <- res$Section[e]
         }
         # In either case above the fish spends the whole time in the event, so changes = 0
         aux[length(aux) + 1] <- 0
         names(aux)[length(aux)] <- "Changes"
-      # If the start time of the event is already in the day itself
+      # If the frame of the event is already in the frame itself
       } else {
-        # Start by storing the time spent in previous event (i.e. difference between day start and event start)
-        aux[length(aux) + 1] <- difftime(res$First.time[e], day, units = "secs")
+        # Start by storing the time spent in previous event (i.e. difference between frame start and event start)
+        aux[length(aux) + 1] <- difftime(res$First.time[e], frame, units = "secs")
         names(aux)[length(aux)] <- res$Section[e - 1]
-        # Then, since there are no more events, calculate difference between event start and day end.
-        aux[length(aux) + 1] <- difftime(day + 86400, res$First.time[e], units = "secs")
+        # Then, since there are no more events, calculate difference between event start and frame end.
+        aux[length(aux) + 1] <- difftime(frame + num.step, res$First.time[e], units = "secs")
         names(aux)[length(aux)] <- res$Section[e]
-        # Since the day is split in two events, there is 1 change
+        # Since the frame is split in two events, there is 1 change
         aux[length(aux) + 1] <- 1
         names(aux)[length(aux)] <- "Changes"
       }
@@ -1477,10 +1495,10 @@ findSecondsPerSection <- function(res, day, the.range) {
   # IF there is more than one 'e'
   } else {
     n <- length(e)
-    # calculate difference between day start and first time
-    aux[length(aux) + 1] <- difftime(res$First.time[e[1]], day, units = "secs")
-    # Exception for if the day being analysed is the first day (in which case this fragment should be excluded at the end)
-    if (day == the.range[1])
+    # calculate difference between frame start and first time
+    aux[length(aux) + 1] <- difftime(res$First.time[e[1]], frame, units = "secs")
+    # Exception for if the frame being analysed is the first frame (in which case this fragment should be excluded at the end)
+    if (frame == the.range[1])
       names(aux)[length(aux)] <- "TO.EXCLUDE"
     else
       names(aux)[length(aux)] <- res$Section[e[1] - 1]
@@ -1489,12 +1507,12 @@ findSecondsPerSection <- function(res, day, the.range) {
       aux[length(aux) + 1] <- difftime(res$Last.time[i], res$First.time[i], units = "secs")
       names(aux)[length(aux)] <- res$Section[i]
     }
-    # For the very last day
-    # exception for if the day being analysed is the last day, where the behaviour should be the same as the above
-    if (day == the.range[2]) {
+    # For the very last frame
+    # exception for if the frame being analysed is the last frame, where the behaviour should be the same as the above
+    if (frame == the.range[2]) {
       aux[length(aux) + 1] <- difftime(res$Last.time[e[n]], res$First.time[e[n]], units = "secs")
       names(aux)[length(aux)] <- res$Section[e[n]]
-    # otherwise, remove the seconds already accounted for to a full day, and store the result
+    # otherwise, remove the seconds already accounted for to a full frame, and store the result
     } else {
       aux[length(aux) + 1] <- 86400 - sum(as.vector(aux))
       names(aux)[length(aux)] <- res$Section[e[n]]
@@ -1514,12 +1532,13 @@ findSecondsPerSection <- function(res, day, the.range) {
 #' compile output of dailyRatios
 #'
 #' @param input a list containing the output of findSecondsPerSection for each day
+#' @param slots the names of the time slots
 #'
 #' @return A data frame with the daily ratios table for the target fish
 #'
 #' @keywords internal
 #'
-dailyRatiosIndOut <- function(input) {
+resRatiosIndOut <- function(input, slots, tz) {
   # sort out all column names
   the.cols <- sort(unique(unlist(lapply(input, names))))
   the.cols <- the.cols[-match("Changes", the.cols)]
@@ -1531,10 +1550,11 @@ dailyRatiosIndOut <- function(input) {
   # merge all tables
   if (is.data.frame(days.tables)) {
     output <- days.tables
-    output$Date <- names(input)
+    output$Timeslot <- as.POSIXct(slots, tz = tz)
     output <- output[, c(ncol(output), 1:(ncol(output) - 1))]
   } else {
-    output <- as.data.frame(data.table::rbindlist(days.tables, idcol = "Date"))
+    output <- as.data.frame(data.table::rbindlist(days.tables, idcol = "Timeslot"))
+    output$Timeslot <- as.POSIXct(slots, tz = tz)
   }
   output[is.na(output)] <- 0
   aux <- which(grepl("^p", colnames(output)))
@@ -1557,18 +1577,35 @@ dailyRatiosIndOut <- function(input) {
 #'
 #' @keywords internal
 #'
-dailyPositions <- function(ratios) {
-  aux <- range(unlist(lapply(ratios, function(x) x$Date)))
-  dayrange <- seq(from = as.Date(aux[1]), to = as.Date(aux[2]), by = 1)
-  output <- matrix(ncol=length(ratios), nrow = length(dayrange))
-  rownames(output) <- as.character(dayrange)
-  colnames(output) <- names(ratios)
+resPositions <- function(ratios, timestep = c("days", "hours")) {
+  timestep <- match.arg(timestep)
+  num.step <- ifelse(timestep == "days", 86400, 3600)
+
+  # extract first and last time
+  first.time <- as.POSIXct(NA)[-1]
+  last.time <- as.POSIXct(NA)[-1]
+  
+  capture <- lapply(ratios, function(x) {
+    first.time <<- c(first.time, x$Timeslot[1])
+    last.time <<- c(last.time, x$Timeslot[nrow(x)])
+  })
+  # --
+  res.range <- seq(from = min(first.time), to = max(last.time), by = num.step)
+  attributes(res.range)$tzone <- attributes(ratios[[1]]$Timeslot)$tzone
+  
+  output <- matrix(ncol = length(ratios) + 1, nrow = length(res.range))
+  rownames(output) <- 1:length(res.range)
+  colnames(output) <- c("Timeslot", names(ratios))
+  output <- as.data.frame(output)
+  output$Timeslot <- res.range
+  
   capture <- lapply(names(ratios), function(i) {
-    link <- match(substring(ratios[[i]]$Date, 1, 10), rownames(output))
+    link <- match.POSIXt(ratios[[i]]$Timeslot, output$Timeslot)
     if (any(is.na(link)))
       stop("Something went wrong when creating the recipient for the global ratios.")
     output[link, i] <<- ratios[[i]]$Most.time
   })
+  
   return(output)
 }
 
@@ -1615,12 +1652,12 @@ vectorsIntoTables <- function(input, columns) {
 #'
 #' @keywords internal
 #'
-globalRatios <- function(positions) {
-  aux <- apply(positions, 1, function(x) as.data.frame(t(as.matrix(table(x)))))
+globalRatios <- function(positions, section.order) {
+  aux <- apply(positions, 1, function(x) as.data.frame(t(as.matrix(table(x[-1])))))
   the.cols <- sort(unique(unlist(lapply(aux, names))))
   the.tables <- vectorsIntoTables(input = aux, columns = the.cols)
   absolutes <- do.call(rbind.data.frame, the.tables)
-  absolutes$Date <- rownames(absolutes)
+  absolutes$Timeslot <- positions$Timeslot
   absolutes <- absolutes[, c(ncol(absolutes), 1:(ncol(absolutes) - 1))]
   rownames(absolutes) <- 1:nrow(absolutes)
   absolutes[is.na(absolutes)] <- 0
