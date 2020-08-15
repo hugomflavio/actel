@@ -4,17 +4,19 @@
 \alias{findSecondsPerSection}
 \title{Calculate number of seconds at each location per day}
 \usage{
-findSecondsPerSection(res, day, the.range)
+findSecondsPerSection(res, frame, the.range, num.step)
 }
 \arguments{
 \item{res}{a residency list}
 
-\item{day}{the day being analysed (a Date object)}
+\item{the.range}{the first and last start.time for the specific fish}
 
-\item{the.range}{the first and last day for the specific fish}
+\item{num.step}{the size of the block}
+
+\item{start.time}{the start time of the period being analysed (a Date object)}
 }
 \value{
-A data frame containing the number of seconds spent at each location for a specific day
+A data frame containing the number of seconds spent at each location for a specific timeframe
 }
 \description{
 Calculate number of seconds at each location per day

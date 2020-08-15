@@ -40,16 +40,27 @@ knitr::opts_chunk$set(
 
 First of all, congratulations! If you are reading this page, you must have successfully ran an actel analysis on your data. I hope you have found the results useful :)
 
-Here you will find some additional examples of things you can do using the output of your analysis. As actel connects to other packages and expands its capacities, so will this page.
+Here you will find some additional examples of things you can do using the output of your analysis. As actel connects to other packages and expands its capacities, so will this page. Because the page is getting a bit long already, here is a list of the subsections you will find here:
 
-<!-- ## Calculating utilization distribution areas and space-use overlaps
+1. [Utilization distribution areas](#calculating-utilization-distribution-areas-and-space-use-overlaps)
+1. [Calculating efficiency ranges](#calculating-efficiency-ranges)
+1. [Plotting personalised circular plots](#plotting-personalised-circular-plots)
+1. [Plotting personalised detection plots](#plotting-personalised-detection-plots)
+1. [Plotting sensor data for individual tags](#plotting-sensor-data-for-individual-tags)
+1. [Plotting movements for multiple tags at the same time](#plotting-movements-for-multiple-tags-at-the-same-time)
+1. [Extracting detailed array-level movement speeds](#extracting-detailed-array-level-movement-speeds)
+1. [Simultaneous and cumulative presence at one or more arrays](#simultaneous-and-cumulative-presence-at-one-or-more-arrays)
+1. [What would you like to see here?](#what-would-you-like-to-see-here)
 
-The R package RSP ([github](https://github.com/YuriNiella/RSP)) allows you to run spatial analyses on the habitat use of your fish using the output of your actel analysis. With the RSP toolkit you can analyse the fine scale movements of aquatic animals while accounting for the surrounding land masses. The animal movements between detections are recreated to have occurred exclusively in water and the utilization distribution areas are limited by the land contours, providing realistic estimations of space use. 
+## Calculating utilization distribution areas and space-use overlaps
+
+The R package RSP ([available here](https://github.com/YuriNiella/RSP#rsp)) allows you to run spatial analyses on the habitat use of your fish using the output of your actel analysis. With the RSP toolkit you can analyse the fine scale movements of aquatic animals while accounting for the surrounding land masses. The animal movements between detections are recreated to have occurred exclusively in water and the utilization distribution areas are limited by the land contours, providing realistic estimations of space use. 
 
 Depending on the research questions being addressed the utilization distribution areas can be calculated for the entire monitoring periods, or in fine-scale according to fixed temporal intervals in hours (timeframes). This approach allows spatial ecologists to use the outputs from such fine scale space use models (areas of use, or between-group overlap frequencies) as input for further statistical analysis.
 
 This is a great R package, so make sure to go check it out!
- -->
+
+
 ## Calculating efficiency ranges
 
 Both the `migration` and the `residency` analyses include efficiency calculations. However, these calculations can sometimes be somewhat limited. To get a better idea of your array efficiencies, you can run the function `advEfficiency` on the efficiency outputs of your actel analysis.
@@ -117,7 +128,10 @@ advEfficiency(x)
 
 `advEfficiency` comes with some additional parameters that will help you get the results exactly as you need them. Find more by running `?advEfficiency`. The advEfficiency manual page also includes additional information on how the calculations are made, and how you could explain them in a paper, if you need to!
 
-## Drawing personalized circular plots
+
+
+
+## Plotting personalised circular plots
 
 Circular plots are a great way to display your results in a publication. Examples include differences between groups or between arrival points at different places. Although actel provides circular plots with its analyses, these default plots may not be exactly what you are looking for. As such, I created the function `plotTimes`, to help you get your plot just right.
 
@@ -126,13 +140,15 @@ You can prepare the input for plotTimes by using two other functions (which may 
 For example, if you want to plot the arrival times for all your fish at two arrays:
 
 ```r
-# Extrat the times from your 'results' object
+# Assuming you saved the output of an actel analysis as 'results',
+# you can use getTimes to extract the times you want. You can specify
+# which locations you are interested in with the argument locations.
 x <- getTimes(results, locations = c("A", "B"))
 
-# Convert the times to a circular object
+# Then, convert the times to a circular object
 x <- timesToCircular(x)
 
-# and plot it
+# and plot it!
 plotTimes(x)
 
 # You can include a night period by using the night argument, e.g.:
@@ -183,38 +199,69 @@ plotTimes(x, col = c("blue", "orange"), title = "A plot of two datasets!")
 
 You can expand on the example above to plot different groups too. Once you have finished your plot, you can save it to an svg file by adding a name to the 'file' argument.
 
-## Drawing personalised detection plots
 
-Detection plots provide a lot of information. However, the default plots printed in the reports may be to small to analyse, or perhaps you would like to edit them to use in a presentation or paper. `plotMoves()` is the function you are looking for.
 
+## Plotting personalised detection plots
+
+Detection plots provide a lot of information. However, the default plots printed in the reports may be to small to analyse, or perhaps you would like to edit them to use in a presentation or paper. `plotDetections()` is the function you are looking for.
 
 ```r
 # Assuming you saved the output of an actel analysis as 'results',
 # you can then plot the detections for single individuals. Imagine
 # you want to see tag 'R64K-1995'. You can run:
-plotMoves(results, tag = "R64K-1995")
+plotDetections(results, tag = "R64K-1995")
 
 # plotMoves comes with some additional personalisation arguments,
 # such as title, or array.alias. array.alias allows you to replace
 # default name of an array with a name of your choosing, e.g.:
-plotMoves(results, tag = "R64K-1995", array.alias = c("River1" = "My_first_array"))
+plotDetections(results, tag = "R64K-1995", array.alias = c("River1" = "My_first_array"))
 
 # additionally, if you give the same name to multiple arrays, they
 # will be combined automatically! e.g.:
-plotMoves(results, tag = "R64K-1995", array.alias = c("River1" = "River", "River2" = "River"))
+plotDetections(results, tag = "R64K-1995", array.alias = c("River1" = "River", "River2" = "River"))
 
-# You can find all the details about plotMoves arguments by running
-?plotMoves
+# You can find all the details about plotDetections arguments by running
+?plotDetections
 
-# plotMoves returns a ggplot object, which means you can edit it further!
+# plotDetections returns a ggplot object, which means you can edit it further!
 # Very simple example:
 library(ggplot2)
-p <- plotMoves(results, tag = "R64K-1995")
-p <- p + xlab("changing the label after running plotMoves is possible!")
+p <- plotDetections(results, tag = "R64K-1995")
+p <- p + xlab("changing the label after running plotDetections is possible!")
 p
 
 # Of course, you can also save your new plots using ggsave.
 ```
+
+## Plotting sensor data for individual tags
+
+When your tags have sensor data, these data will be automatically plotted in the report (just like the detections). However, similarly to `plotDetections()`, you can use `plotSensors()` to plot the sensor data for a specific tag.
+
+
+```r
+# Assuming you saved the output of an actel analysis as 'results',
+# you can then plot the sensor data for single individuals. For example:
+plotSensors(results, tag = "R64K-1995")
+
+# You can also choose to plot only some of the sensors by selecting
+# a specific unit with the 'sensor' argument!
+```
+
+
+
+## Plotting movements for multiple tags at the same time
+
+Sometimes it can be useful to compare the movements of multiple tags at the same time. Comparing individual detection plots works, but beign able to overlap plots would be much nicer! That's exactly why I created the `plotMoves()` function. This function allows you to overlap the movements of multiple tags.
+
+```r
+# Assuming you saved the output of an actel analysis as 'results',
+# you can then plot the moves of multiple tags by running:
+plotMoves(results, tags = c("R64K-1995", "R64K-2001"))
+
+# If you get any tag number wrong, actel will let you know.
+```
+
+
 
 ## Extracting detailed array-level movement speeds
 
@@ -267,6 +314,37 @@ getSpeeds(results, direct = TRUE, type = "all", n.events = "last")
 ```
 
 Because speeds have many underlying variables (from where, to where, which fish, etc.), there is no pre-made plot function for speeds. However, the output of `getSpeeds()` is structured in a way that should make it easy for you to jump to ggplot2 and start drawing your plots, your way :)
+
+
+
+## Simultaneous and cumulative presence at one or more arrays
+
+A classic plot in migration analyses is one showing the cumulative arrival of fish at a specific array. The function `plotArray()` allows you to obtain both the simultaneous presence at an array (if `cumulative = FALSE`, the default), or the cumulative arrivals at an array (yes, you guessed it, with `cumulative = TRUE`). 
+
+```r
+# Assuming you saved the output of an actel analysis as 'results',
+# you can then use plotArray to see the simultaneous or cumulative
+# presence at one or more arrays:
+plotArray(results, arrays = "A1", cumulative = FALSE) # will give you the simultaneous presence
+plotArray(results, arrays = "A1", cumulative = TRUE) # will give you the cumulative arrivals
+
+# additionally, you can adjust the time resolution:
+plotArray(results, arrays = "A1", timestep = "days") # The default; will aggregate the results by day
+plotArray(results, arrays = "A1", timestep = "hours") # Will aggregate the results by hour (takes longer to calculate)
+plotArray(results, arrays = "A1", timestep = "mins") # Will aggregate the results by minute (takes way longer to calculate!)
+
+# Finally, although plotArrays will automatically choose between
+# plotting lines or bars depending on wether the plot is cumulative
+# or not (respectively), you can set a specific plot style with the
+# argument 'type'.
+```
+
+One additional feature of this function is that it allows you to group multiple arrays to obtain combined results! Imagine you had two success arrays: A8 and A9. You can get an aggregated result by running:
+
+```r
+plotArray(results, arrays = c("A8", "A9"))
+```
+
 
 ## What would you like to see here?
 

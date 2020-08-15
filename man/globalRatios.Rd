@@ -4,7 +4,7 @@
 \alias{globalRatios}
 \title{Calculate number/percentage of fish at each location for each day}
 \usage{
-globalRatios(positions)
+globalRatios(positions, section.order)
 }
 \arguments{
 \item{positions}{a positions table, supplied by dailyPositions}

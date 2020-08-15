@@ -28,6 +28,7 @@ residency(
   discard.first = NULL,
   save.detections = FALSE,
   section.minimum = 2,
+  timestep = c("days", "hours"),
   replicates = NULL,
   GUI = c("needed", "always", "never"),
   print.releases = TRUE,
@@ -126,6 +127,9 @@ future runs?}
 \item{section.minimum}{If a fish has less than \code{section.minimum}
 consecutive detections in a section, a warning is issued. Defaults to 2.}
 
+\item{timestep}{The resolution desired for the residency calculations.
+One of "days" (default) or "hours".}
+
 \item{replicates}{A list containing, for each array to which intra-array
 efficiency is to be calculated: The standard names of the stations to be
 used as a replicate. See the vignettes for more details.}
@@ -193,9 +197,9 @@ in each array;
 fish in each section;
 \item \code{residency.list}: A list containing the places of residency between first and last
 valid detection for each fish;
-\item \code{daily.ratios}: A list containing the daily location per section (both in seconds spent
+\item \code{time.ratios}: A list containing the daily location per section (both in seconds spent
 and in percentage of day) for each fish;
-\item \code{daily.positions}: A data frame showing the location where each
+\item \code{time.positions}: A data frame showing the location where each
 fish spent the most time per day;
 \item \code{global.ratios}: A list containing summary tables showing the number of active fish
 (and respective percentages) present at each location per day;

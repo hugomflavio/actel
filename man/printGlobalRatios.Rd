@@ -4,12 +4,12 @@
 \alias{printGlobalRatios}
 \title{print the distribution of fish per location}
 \usage{
-printGlobalRatios(global.ratios, daily.ratios, spatial)
+printGlobalRatios(global.ratios, time.ratios, spatial, timestep)
 }
 \arguments{
 \item{global.ratios}{the global ratios}
 
-\item{daily.ratios}{the daily ratios}
+\item{time.ratios}{the daily ratios}
 }
 \value{
 No return value, called to plot and save graphic.

@@ -28,7 +28,8 @@ checkArguments(
   if.last.skip.section = NULL,
   replicates = NULL,
   section.minimum = NULL,
-  section.order = NULL
+  section.order = NULL,
+  timestep = c("days", "hours")
 )
 }
 \arguments{
@@ -119,8 +120,14 @@ of a given section be considered to have disappeared in the next section?}
 efficiency is to be calculated: The standard names of the stations to be
 used as a replicate. See the vignettes for more details.}
 
+\item{section.minimum}{If a fish has less than \code{section.minimum}
+consecutive detections in a section, a warning is issued. Defaults to 2.}
+
 \item{section.order}{A vector containing the order by which sections should
 be aligned in the results.}
+
+\item{timestep}{The resolution desired for the residency calculations.
+One of "days" (default) or "hours".}
 }
 \value{
 updated parameters

@@ -90,9 +90,9 @@ This table contains information on the all arrival times for each fish, at each 
 `section.times` is a list that contains two tables. The first one has all the arrival times for each fish, at each section, and the second has all the departure times, sorted in the same fashion. These are used to produce circular graphics in the report.
 
 
-### daily.ratios
+### time.ratios
 
-The daily.ratios contains detailed information on the time spent at each location, per day, for each of your fish. These tables can be quite long. Here is an example:
+The `time.ratios` contains detailed information on the time spent at each location, per day (or hour, if `timestep = "hours")` , for each of your fish. These tables can be quite long. Here is an example:
 
 |Date       | Down| pDown| Down-Right| pDown-Right| Right| pRight| ... | Changes|Most.time  |
 |:----------|----:|-----:|----------:|-----------:|-----:|------:|-----|-------:|:----------|
@@ -107,16 +107,16 @@ The daily.ratios contains detailed information on the time spent at each locatio
 (Columns and rows were hidden so the table fits better in the page)
 
 
-### daily.locations
+### time.locations
 
-The `daily.locations` is a data frame showing the place where each fish spent the most time during each day. It is a crucial middle step between the daily ratios and the global ratios.
+The `time.locations` is a data frame showing the place where each fish spent the most time during each day. It is a crucial middle step between the `time.ratios` and the `global.ratios`.
 
 
 ### global.ratios
 
 The global ratios is a list containing two elements:
 
-1. The absolute number of fish at each location in each day:
+1. The absolute number of fish at each location in each day/hour:
 
 |Date       | Down| Down-Left| Down-Right| Left| Left-Right| Right| Total|
 |:----------|----:|---------:|----------:|----:|----------:|-----:|-----:|
@@ -129,7 +129,7 @@ The global ratios is a list containing two elements:
 |...        |  ...|       ...|        ...|  ...|        ...|   ...|   ...|
 
 
-2. The percentage of fish at each location in each day:
+2. The percentage of fish at each location in each day/hour:
 
 |Date       |  Down| Down-Left| Down-Right|  Left| Left-Right| Right| Total|
 |:----------|-----:|---------:|----------:|-----:|----------:|-----:|-----:|
