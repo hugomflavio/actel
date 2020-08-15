@@ -813,6 +813,7 @@ printMigrationRmd <- function(override.fragment, biometric.fragment, section.ove
 
 Note:
   : The data used for these graphics is stored in the `valid.detections` object.
+  : You can replicate these graphics and edit them as needed using the `plotSensors()` function.
 
 <center>\n", sensor.plots, "\n</center>")
   } else {
@@ -974,7 +975,8 @@ Note:
 '  : Manually **edited** fish are highlighted with **yellow** graphic borders.
   : Manually **overridden** fish are highlighted with **red** graphic borders.
   : The ', ifelse(plot.detections.by == "stations", 'stations', 'arrays'), ' have been aligned by ', ifelse(plot.detections.by == "stations", 'array', 'section'), ', following the order provided ', ifelse(plot.detections.by == "stations", '', 'either '), 'in the spatial input', ifelse(plot.detections.by == "stations", '.', ' or the `section.order` argument.'), '
-  : You can replicate these graphics and edit them as needed using the `plotMoves()` function.
+  : You can replicate these graphics and edit them as needed using the `plotDetections()` function.
+  : You can also see the movement events of multiple tags simultaneously using the `plotMoves()` function.
   : The data used in these graphics is stored in the `detections` and `movements` objects (and respective valid counterparts).
 
 <center>
