@@ -981,7 +981,7 @@ loadDetections <- function(start.time = NULL, stop.time = NULL, tz, force = FALS
       appendTo("Screen", paste0("M: The detections have been processed on ", actel.detections$timestamp, ".\n   If the input detection files were not changed, it is safe to use these again."))
       decision <- userInput("   Reuse processed detections?(y/n) ", choices = c("y", "n"), hash = "# reuse detections?")
     } # nocov end
-    if (decision != "n"){
+    if (decision == "y"){
       appendTo(c("Screen","Report"), paste0("M: Using detections previously compiled on ", actel.detections$timestamp, "..."))
       detections <- actel.detections$detections
       attributes(detections$Timestamp)$tzone <- "UTC"
@@ -1137,9 +1137,20 @@ processStandardFile <- function(input) {
     Timestamp = fasttime::fastPOSIXct(sapply(as.character(input$Timestamp), function(x) gsub("Z", "", gsub("T", " ", x))), tz = "UTC"),
     Receiver = input$Receiver,
     CodeSpace = input$CodeSpace,
-    Signal = input$Signal,
-    Sensor.Value = ifelse(any(colnames(input) == "Sensor.Value"), input$Sensor.Value, NA_real_),
-    Sensor.Unit  = ifelse(any(colnames(input) ==  "Sensor.Unit"), input$Sensor.Unit, NA_character_))
+    Signal = input$Signal)
+
+  # include sensor data, if present
+  if (any(colnames(input) == "Sensor.Value"))
+    output$Sensor.Value <- input$Sensor.Value
+  else
+    output$Sensor.Value <- NA_real_
+
+  if (any(colnames(input) == "Sensor.Unit"))
+    output$Sensor.Unit <- input$Sensor.Unit
+  else
+    output$Sensor.Unit <- NA_character_
+
+  # final checks
   if (any(is.na(output$Timestamp)))
     stop("Importing timestamps failed", call. = FALSE)
   if (any(is.na(output$Receiver)))
@@ -1171,6 +1182,7 @@ processThelmaOldFile <- function(input) {
     Signal = input$Id,
     Sensor.Value = input$Data,
     Sensor.Unit = rep(NA_character_, nrow(input)))
+
   if (any(is.na(output$Timestamp)))
     stop("Importing timestamps failed", call. = FALSE)
   if (any(is.na(output$Receiver)))
@@ -1202,6 +1214,7 @@ processThelmaNewFile <- function(input) {
     Signal = input$ID,
     Sensor.Value = input$Data,
     Sensor.Unit = rep(NA_character_, nrow(input)))
+
   if (any(is.na(output$Timestamp)))
     stop("Importing timestamps failed", call. = FALSE)
   if (any(is.na(output$Receiver)))
@@ -1241,6 +1254,7 @@ processVemcoFile <- function(input) {
     input$Sensor.Unit <- rep(NA_character_, nrow(input))
   }
   input$Timestamp <- fasttime::fastPOSIXct(as.character(input$Timestamp), tz = "UTC")
+  
   if (any(is.na(input$Timestamp)))
     stop("Importing timestamps failed", call. = FALSE)
   if (any(is.na(input$Receiver)))

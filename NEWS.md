@@ -11,6 +11,7 @@ Fixes:
   * Prevent crash of CJS functions when running tags with multiple sensors.
   * Prevent CJS crash due to overlapping array names.
   * Prevent crash if spatial has release sites, but biometrics doesn't (in CJS calculations of migration).
+  * Fixed a bug where the sensor data would get scrambled when reading standard format detection files.
 
 Changes:
   * **`plotMoves()` has been renamed to `plotDetections()`**
