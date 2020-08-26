@@ -429,6 +429,14 @@ explore <- function(
   if (report) {
     appendTo(c("Screen", "Report"), "M: Producing the report.")
 
+    if (dir.exists(paste0(tempdir(), "/actel_report_auxiliary_files")))
+      unlink(paste0(tempdir(), "/actel_report_auxiliary_files"), recursive = TRUE)
+
+    dir.create(paste0(tempdir(), "/actel_report_auxiliary_files"))
+
+    if (!getOption("actel.debug", default = FALSE))
+      on.exit(unlink(paste0(tempdir(), "/actel_report_auxiliary_files"), recursive = TRUE), add = TRUE)
+
     biometric.fragment <- printBiometrics(bio = bio)
 
     printDot(dot = dot, 
@@ -498,11 +506,11 @@ explore <- function(
                     plot.detections.by = plot.detections.by)
 
     appendTo("debug", "debug: Converting report to html")
-    rmarkdown::render(input = paste0(tempdir(), "/actel_explore_report.Rmd"),
-      output_dir = tempdir(), quiet = TRUE)
+    rmarkdown::render(input = paste0(tempdir(), "/actel_report_auxiliary_files/actel_explore_report.Rmd"),
+      output_dir = paste0(tempdir(), "/actel_report_auxiliary_files"), quiet = TRUE)
 
     appendTo("debug", "debug: Moving report")
-    file.copy(paste0(tempdir(), "/actel_explore_report.html"), reportname)
+    file.copy(paste0(tempdir(), "/actel_report_auxiliary_files/actel_explore_report.html"), reportname)
     if (interactive() & auto.open) { # nocov start
       appendTo("debug", "debug: Opening report.")
       browseURL(reportname)
@@ -564,6 +572,9 @@ explore <- function(
 #'
 printExploreRmd <- function(override.fragment, biometric.fragment, individual.plots,
   circular.plots, sensor.plots, spatial, deployments, detections, valid.detections, plot.detections.by){
+
+  work.path <- paste0(tempdir(), "/actel_report_auxiliary_files/")
+
  if (any(grepl("Ukn.", spatial$stations$Standard.name))) {
     unknown.fragment <- paste0('<span style="color:red"> Number of relevant unknown receivers: **', sum(grepl("Ukn.", spatial$stations$Standard.name)), '**</span>\n')
   } else {
@@ -586,7 +597,7 @@ Note:
   oldoptions <- options(knitr.kable.NA = "-")
   on.exit(options(oldoptions), add = TRUE)
 
-  sink(paste0(tempdir(), "/actel_explore_report.Rmd"))
+  sink(paste0(work.path, "actel_explore_report.Rmd"))
   cat(paste0(
 '---
 title: "Acoustic telemetry exploratory analysis"
@@ -594,7 +605,7 @@ author: "Actel R package (', utils::packageVersion("actel"), ')"
 output:
   html_document:
     includes:
-      after_body: ', tempdir(), '/toc_menu_explore.html
+      after_body: ', work.path, 'toc_menu_explore.html
 ---
 
 ### Summary
@@ -623,7 +634,7 @@ Want to cite actel in a publication? Run `citation(\'actel\')`
 
 Release sites are marked with "R.S.". Arrays connected with an arrow indicate that the fish can only pass in one direction.
 
-<img src="', tempdir(), '/mb_arrays.svg" alt="Missing file" style="padding-top: 15px;"/>
+<img src=', work.path, ifelse(file.exists(paste0(work.path, "mb_arrays.svg")), "mb_arrays.svg", "mb_arrays.png"), ' style="padding-top: 15px;"/>
 
 ### Receiver stations
 
@@ -702,7 +713,7 @@ cat("', gsub("\\r", "", readr::read_file(paste0(tempdir(), '/temp_log.txt'))), '
 '), fill = TRUE)
 sink()
 
-sink(paste0(tempdir(), "/toc_menu_explore.html"))
+sink(paste0(work.path, "toc_menu_explore.html"))
 cat(
 '<style>
 h3 {

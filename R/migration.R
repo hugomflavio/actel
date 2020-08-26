@@ -623,6 +623,14 @@ by which sections are presented", immediate. = TRUE, call. = FALSE)
   if (report) {
     appendTo(c("Screen", "Report"), "M: Producing the report.")
 
+    if (dir.exists(paste0(tempdir(), "/actel_report_auxiliary_files")))
+      unlink(paste0(tempdir(), "/actel_report_auxiliary_files"), recursive = TRUE)
+
+    dir.create(paste0(tempdir(), "/actel_report_auxiliary_files"))
+
+    if (!getOption("actel.debug", default = FALSE))
+      on.exit(unlink(paste0(tempdir(), "/actel_report_auxiliary_files"), recursive = TRUE), add = TRUE)
+
     biometric.fragment <- printBiometrics(bio = bio)
 
     efficiency.fragment <- printEfficiency(CJS = overall.CJS,
@@ -725,11 +733,11 @@ by which sections are presented", immediate. = TRUE, call. = FALSE)
                         plot.detections.by = plot.detections.by)
 
     appendTo("debug", "debug: Converting report to html")
-    rmarkdown::render(input = paste0(tempdir(), "/actel_migration_report.Rmd"),
-      output_dir = tempdir(), quiet = TRUE)
+    rmarkdown::render(input = paste0(tempdir(), "/actel_report_auxiliary_files/actel_migration_report.Rmd"),
+      output_dir = paste0(tempdir(), "/actel_report_auxiliary_files"), quiet = TRUE)
 
     appendTo("debug", "debug: Moving report")
-    file.copy(paste0(tempdir(), "/actel_migration_report.html"), reportname)
+    file.copy(paste0(tempdir(), "/actel_report_auxiliary_files/actel_migration_report.html"), reportname)
     if (interactive() & auto.open) { # nocov start
       appendTo("debug", "debug: Opening report.")
       browseURL(reportname)
@@ -803,6 +811,9 @@ printMigrationRmd <- function(override.fragment, biometric.fragment, section.ove
   efficiency.fragment, display.progression, array.overview.fragment, survival.graph.size,
   individual.plots, circular.plots, sensor.plots, spatial, deployments, valid.detections, 
   detections, plot.detections.by){
+
+  work.path <- paste0(tempdir(), "/actel_report_auxiliary_files/")
+
   if (any(grepl("Unknown", spatial$stations$Standard.name))) {
     unknown.fragment <- paste0('<span style="color:red"> Number of relevant unknown receivers: **', sum(grepl("Unknown", spatial$stations$Standard.name)), '**</span>\n')
   } else {
@@ -825,7 +836,7 @@ Note:
   oldoptions <- options(knitr.kable.NA = "-")
   on.exit(options(oldoptions), add = TRUE)
 
-  sink(paste0(tempdir(), "/actel_migration_report.Rmd"))
+  sink(paste0(work.path, "actel_migration_report.Rmd"))
   cat(paste0(
 '---
 title: "Acoustic telemetry migration analysis"
@@ -833,7 +844,7 @@ author: "Actel R package (', utils::packageVersion("actel"), ')"
 output:
   html_document:
     includes:
-      after_body: ', tempdir(), '/toc_menu_migration.html
+      after_body: ', work.path, 'toc_menu_migration.html
 ---
 
 ### Summary
@@ -862,7 +873,7 @@ Want to cite actel in a publication? Run `citation(\'actel\')`
 
 Arrays with the same background belong to the same section. Release sites are marked with "R.S.". Arrays connected with an arrow indicate that the fish can only pass in one direction.
 
-<img src="', tempdir(), '/mb_arrays.svg" alt="Missing file" style="padding-top: 15px;"/>
+<img src=', work.path, ifelse(file.exists(paste0(work.path, "mb_arrays.svg")), "mb_arrays.svg", "mb_arrays.png"), ' style="padding-top: 15px;"/>
 
 ### Receiver stations
 
@@ -914,7 +925,7 @@ Note:
 ', paste(knitr::kable(section.overview), collapse = "\n"), '
 
 <center>
-![](', tempdir(), '/survival.png){ ',survival.graph.size ,' }
+![](survival.png){ ',survival.graph.size ,' }
 </center>
 
 
@@ -924,7 +935,7 @@ Note:
   : The data used in this graphic is stored in the `status.df` object (\'Very.last.array\' column).
 
 <center>
-![](', tempdir(), '/last_arrays.png){ width=66% }
+![](last_arrays.png){ width=66% }
 </center>
 
 
@@ -936,7 +947,7 @@ Note:
   : The progression calculations **do not account for** backwards movements. This implies that the total number of fish to have been **last seen** at a given array **may be lower** than the displayed below. Please refer to the [section survival overview](#section-survival) and [last seen arrays](#last-seen-arrays) to find out how many fish were considered to have disappeared per section.
   : The data used in this graphic is stored in the `overall.CJS` object, and the data used in the tables is stored in the `group.overview` object. You can find detailed progressions per release site in the `release.overview` object.
 
-<img src="', tempdir(), '/mb_efficiency.svg" alt="Missing file" style="padding-top: 15px; padding-bottom: 15px;"/>
+<img src=', work.path, ifelse(file.exists(paste0(work.path, "mb_efficiency.svg")), "mb_efficiency.svg", "mb_efficiency.png"), ' style="padding-top: 15px; padding-bottom: 15px;"/>
 
 '), 'Progression cannot be displayed if efficiencies are not calculated. See full log for more details.'), array.overview.fragment, '
 
@@ -962,7 +973,7 @@ Note:
   : The data used in these graphics is stored in the `status.df` object.
 
 <center>
-![](', tempdir(), '/dotplots.png){ width=95% }
+![](', work.path, 'dotplots.png){ width=95% }
 </center>
 
 
@@ -994,7 +1005,7 @@ cat("', gsub("\\r", "", readr::read_file(paste0(tempdir(), '/temp_log.txt'))), '
 '), fill = TRUE)
 sink()
 
-sink(paste0(tempdir(), "/toc_menu_migration.html"))
+sink(paste0(work.path, "toc_menu_migration.html"))
 cat(
 '<style>
 h3 {

@@ -165,7 +165,16 @@ printProgression <- function(dot, overall.CJS, spatial, status.df, print.release
   plot <- DiagrammeR::grViz(x)
   plot_string <- DiagrammeRsvg::export_svg(plot)
   plot_raw <- charToRaw(plot_string)
-  rsvg::rsvg_svg(svg = plot_raw, file = paste0(tempdir(), "/mb_efficiency.svg"))
+  rsvg::rsvg_svg(svg = plot_raw, file = paste0(tempdir(), "/actel_report_auxiliary_files/mb_efficiency.svg"))
+
+  if (!file.exists(paste0(tempdir(), "/actel_report_auxiliary_files/mb_efficiency.svg"))) {
+    {grDevices::png(paste0(tempdir(), "/actel_report_auxiliary_files/mb_efficiency.png"), width = 600, height = 100)
+      par(mar = c(1, 1, 1, 1))
+      plot(NA, xlim = 0:1, ylim = 0:1, xaxt = "n", yaxt = "n", ann = FALSE)
+      text(x = 0.5, y = 0.5, "Could not save SVG graphic.\nPlease verify that the SVG engines are working.")
+      dev.off()
+    }
+  }
 }
 
 #' Print DOT diagram
@@ -305,7 +314,17 @@ printDot <- function(dot, spatial, print.releases) {
   plot <- DiagrammeR::grViz(x)
   plot_string <- DiagrammeRsvg::export_svg(plot)
   plot_raw <- charToRaw(plot_string)
-  rsvg::rsvg_svg(svg = plot_raw, file = paste0(tempdir(), "/mb_arrays.svg"))
+  rsvg::rsvg_svg(svg = plot_raw, file = paste0(tempdir(), "/actel_report_auxiliary_files/mb_arrays.svg"))
+
+  # failsafe in case SVG printing fails
+  if (!file.exists(paste0(tempdir(), "/actel_report_auxiliary_files/mb_arrays.svg"))) {
+    {grDevices::png(paste0(tempdir(), "/actel_report_auxiliary_files/mb_arrays.png"), width = 800, height = 100)
+      par(mar = c(1, 1, 1, 1))
+      plot(NA, xlim = 0:1, ylim = 0:1, xaxt = "n", yaxt = "n", ann = FALSE)
+      text(x = 0.5, y = 0.5, "Could not save SVG graphic.\nPlease verify that the SVG engines are working.")
+      grDevices::dev.off()
+    }
+  }
 }
 
 #' Print biometric graphics
@@ -337,12 +356,12 @@ printBiometrics <- function(bio) {
       p <- p + ggplot2::theme_bw()
       p <- p + ggplot2::theme(panel.grid.minor.x = ggplot2::element_blank(), panel.grid.major.x = ggplot2::element_blank())
       p <- p + ggplot2::labs(x = "", y = i)
-      ggplot2::ggsave(paste0(tempdir(), "/", gsub("[.]", "_", i), "_boxplot.png"), width = 3, height = 4)
+      ggplot2::ggsave(paste0(tempdir(), "/actel_report_auxiliary_files/", gsub("[.]", "_", i), "_boxplot.png"), width = 3, height = 4)
       rm(p)
       if (counter %% 2 == 0)
-        biometric.fragment <- paste0(biometric.fragment, "![](", tempdir(), "/", gsub("[.]", "_", i), "_boxplot.png){ width=", graphic.width, " }\n")
+        biometric.fragment <- paste0(biometric.fragment, "![](", tempdir(), "/actel_report_auxiliary_files/", gsub("[.]", "_", i), "_boxplot.png){ width=", graphic.width, " }\n")
       else
-        biometric.fragment <- paste0(biometric.fragment, "![](", tempdir(), "/", gsub("[.]", "_", i), "_boxplot.png){ width=", graphic.width, " }")
+        biometric.fragment <- paste0(biometric.fragment, "![](", tempdir(), "/actel_report_auxiliary_files/", gsub("[.]", "_", i), "_boxplot.png){ width=", graphic.width, " }")
       counter <- counter + 1
     }
   }
@@ -412,7 +431,7 @@ printDotplots <- function(status.df, valid.dist) {
   p <- p + ggplot2::facet_grid(. ~ variable, scales = "free_x")
   p <- p + ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 45, vjust = 1, hjust = 1))
   p <- p + ggplot2::labs(x = "", y = "")
-  ggplot2::ggsave(paste0(tempdir(), "/dotplots.png"), width = 6, height = (1.3 + 0.115 * (nrow(t2) - 1)))
+  ggplot2::ggsave(paste0(tempdir(), "/actel_report_auxiliary_files/dotplots.png"), width = 6, height = (1.3 + 0.115 * (nrow(t2) - 1)))
   appendTo("debug", "Terminating printDotplots.")
 }
 
@@ -464,7 +483,7 @@ printSurvivalGraphic <- function(section.overview) {
   p <- p + ggplot2::scale_y_continuous(limits = c(0, 1), expand = c(0, 0, 0.05, 0))
   p <- p + ggplot2::labs(x = "", y = "Survival")
   the.width <- max(2, sum(grepl("Disap.", colnames(section.overview))) * nrow(section.overview))
-  ggplot2::ggsave(paste0(tempdir(), "/survival.png"), width = the.width, height = 4)
+  ggplot2::ggsave(paste0(tempdir(), "/actel_report_auxiliary_files/survival.png"), width = the.width, height = 4)
   appendTo("debug", "Terminating printSurvivalGraphic.")
 }
 
@@ -677,12 +696,12 @@ printIndividuals <- function(detections.list, movements, valid.movements, spatia
       }
     }
     # Save
-    ggplot2::ggsave(paste0(tempdir(), "/", fish, ".", extension), width = the.width, height = the.height)  # better to save in png to avoid point overlapping issues
+    ggplot2::ggsave(paste0(tempdir(), "/actel_report_auxiliary_files/", fish, ".", extension), width = the.width, height = the.height)  # better to save in png to avoid point overlapping issues
 
     if (counter %% 2 == 0) {
-      individual.plots <<- paste0(individual.plots, "![](", tempdir(), "/", fish, ".", extension, "){ width=", the.width * 10, "% }\n")
+      individual.plots <<- paste0(individual.plots, "![](", tempdir(), "/actel_report_auxiliary_files/", fish, ".", extension, "){ width=", the.width * 10, "% }\n")
     } else {
-      individual.plots <<- paste0(individual.plots, "![](", tempdir(), "/", fish, ".", extension, "){ width=", the.width * 10, "% }")
+      individual.plots <<- paste0(individual.plots, "![](", tempdir(), "/actel_report_auxiliary_files/", fish, ".", extension, "){ width=", the.width * 10, "% }")
     }
     if (interactive())
       setTxtProgressBar(pb, counter)
@@ -708,6 +727,17 @@ printIndividuals <- function(detections.list, movements, valid.movements, spatia
 printCircular <- function(times, bio, suffix = NULL){
   cbPalette <- c("#56B4E9", "#c0ff3e", "#E69F00", "#F0E442", "#0072B2", "#D55E00", "#CC79A7", "#999999")
   circular.plots <- ""
+
+  work.path <- paste0(tempdir(), "/actel_report_auxiliary_files/")
+
+  # failsafe in case SVG printing fails
+  {
+    grDevices::png(paste0(work.path, "circular_svg_print_failure_bounce_back.png"), width = 500, height = 100)
+    par(mar = c(1, 1, 1, 1))
+    plot(NA, xlim = 0:1, ylim = 0:1, xaxt = "n", yaxt = "n", ann = FALSE)
+    text(x = 0.5, y = 0.5, "Could not save SVG graphic.\nPlease verify that the SVG engines are working.")
+    grDevices::dev.off()
+  }
 
   if (length(unique(bio$Group)) < 8)
     colours <- paste0(cbPalette[c(1:length(unique(bio$Group)))], 80)
@@ -762,7 +792,7 @@ printCircular <- function(times, bio, suffix = NULL){
 
     vertical.mar <- b + 2
    
-    {grDevices::svg(paste0(tempdir(), "/times_", names(times)[i], suffix, ".svg"), 
+    {grDevices::svg(paste0(work.path, "times_", names(times)[i], suffix, ".svg"), 
                     height = 5, width = 5, bg = "transparent")
     
     par(mar = c(b, (b + 2) / 2, 2, (b + 2) / 2), xpd = TRUE) # bottom, left, top, right
@@ -786,10 +816,17 @@ printCircular <- function(times, bio, suffix = NULL){
 
     grDevices::dev.off()}
 
-    if (i %% 2 == 0)
-      circular.plots <- paste0(circular.plots, "![](times_", names(times)[i], suffix, ".svg){ width=50% }\n")
-    else
-      circular.plots <- paste0(circular.plots, "![](times_", names(times)[i], suffix, ".svg){ width=50% }")
+    if (i %% 2 == 0) {
+      if (file.exists(paste0(work.path, "times_", names(times)[i], suffix, ".svg")))
+        circular.plots <- paste0(circular.plots, "![](", work.path, "times_", names(times)[i], suffix, ".svg){ width=50% }\n")
+      else
+        circular.plots <- paste0(circular.plots, "![](", work.path, "circular_svg_print_failure_bounce_back.png){ width=50% }\n")
+    } else {
+      if (file.exists(paste0(work.path, "times_", names(times)[i], suffix, ".svg")))
+        circular.plots <- paste0(circular.plots, "![", work.path, "circular_svg_print_failure_bounce_back.png](times_", names(times)[i], suffix, ".svg){ width=50% }")
+      else
+        circular.plots <- paste0(circular.plots, "![](", work.path, "circular_svg_print_failure_bounce_back.png){ width=50% }")
+    }
   }
   return(circular.plots)
 }
@@ -1209,7 +1246,7 @@ printSectionTimes <- function(section.times, bio, detections) {
     if (length(unique(plotdata$Group)) <= 8) {
       p <- p + ggplot2::scale_fill_manual(values = as.vector(cbPalette)[1:length(unique(plotdata$Group))], drop = FALSE)
     }
-    ggplot2::ggsave(paste0(tempdir(), "/", i,"_days.png"), width = 10, height = length(unique(plotdata$variable)) * 2)
+    ggplot2::ggsave(paste0(tempdir(), "/actel_report_auxiliary_files/", i,"_days.png"), width = 10, height = length(unique(plotdata$variable)) * 2)
   })
 }
 
@@ -1262,7 +1299,8 @@ printGlobalRatios <- function(global.ratios, time.ratios, spatial, timestep) {
       p <- p + ggplot2::scale_fill_manual(values = as.vector(cbPalette)[1:length(unique.values)], drop = FALSE)
       p <- p + ggplot2::scale_colour_manual(values = as.vector(cbPalette)[1:length(unique.values)], drop = FALSE)
     }
-    ggplot2::ggsave(paste0(tempdir(), "/global_ratios_", i,".svg"), width = 10, height = 4)
+    tryCatch(ggplot2::ggsave(paste0(tempdir(), "/actel_report_auxiliary_files/global_ratios_", i,".svg"), width = 10, height = 4),
+      error = ggplot2::ggsave(paste0(tempdir(), "/actel_report_auxiliary_files/global_ratios_", i,".png"), width = 10, height = 4))
   })
 }
 
@@ -1332,8 +1370,8 @@ printIndividualResidency <- function(ratios, time.range, spatial, timestep = c("
       p <- p + ggplot2::guides(fill = ggplot2::guide_legend(ncol = 2))
     if (length(use.levels) > 10)
       p <- p + ggplot2::guides(fill = ggplot2::guide_legend(ncol = 3))
-    ggplot2::ggsave(paste0(tempdir(), "/", i,"_residency.png"), width = 10, height = 1.5)
-    individual.plots <<- paste0(individual.plots, "![](", tempdir(), "/", i, "_residency.png){ width=95% }\n")
+    ggplot2::ggsave(paste0(tempdir(), "/actel_report_auxiliary_files/", i,"_residency.png"), width = 10, height = 1.5)
+    individual.plots <<- paste0(individual.plots, "![](", tempdir(), "/actel_report_auxiliary_files/", i, "_residency.png){ width=95% }\n")
     if (interactive())
       setTxtProgressBar(pb, counter)
   })
@@ -1368,7 +1406,7 @@ printLastSection <- function(input, spatial) {
   p <- p + ggplot2::labs(x = "", y = "n")
   p <- p + ggplot2::scale_y_continuous(expand = c(0, 0, 0.05, 0))
   the.width <- max(2, (ncol(input) - 1) * nrow(input) * 0.7)
-  ggplot2::ggsave(paste0(tempdir(), "/last_section.png"), width = the.width, height = 4)
+  ggplot2::ggsave(paste0(tempdir(), "/actel_report_auxiliary_files/last_section.png"), width = the.width, height = 4)
 }
 
 #' Print a simple barplot with the number of fish last seen at each section
@@ -1400,7 +1438,7 @@ printLastArray <- function(status.df) {
   p <- p + ggplot2::coord_flip()
   p <- p + ggplot2::guides(fill = ggplot2::guide_legend(reverse = TRUE))
   the.height <- max(2, ((length(levels(status.df$Very.last.array)) - 1) * 0.5))
-  ggplot2::ggsave(paste0(tempdir(), "/last_arrays.png"), width = 6, height = the.height)
+  ggplot2::ggsave(paste0(tempdir(), "/actel_report_auxiliary_files/last_arrays.png"), width = 6, height = the.height)
 }
 
 #' Print sensor data for each individual tag
@@ -1442,12 +1480,12 @@ printSensorData <- function(detections, rsp.info, extension = "png") {
         the.height <- 4 + ((length(unique(detections[[fish]]$Sensor.Unit)) - 2) * 2)
       else
         the.height <- 4
-      ggplot2::ggsave(paste0(tempdir(), "/", fish, "_sensors.", extension), width = 5, height = the.height)  # better to save in png to avoid point overlapping issues
+      ggplot2::ggsave(paste0(tempdir(), "/actel_report_auxiliary_files/", fish, "_sensors.", extension), width = 5, height = the.height)  # better to save in png to avoid point overlapping issues
       n.plots <- n.plots + 1
       if (n.plots %% 2 == 0) {
-        individual.plots <<- paste0(individual.plots, "![](", tempdir(), "/", fish, "_sensors.", extension, "){ width=50% }\n")
+        individual.plots <<- paste0(individual.plots, "![](", tempdir(), "/actel_report_auxiliary_files/", fish, "_sensors.", extension, "){ width=50% }\n")
       } else {
-        individual.plots <<- paste0(individual.plots, "![](", tempdir(), "/", fish, "_sensors.", extension, "){ width=50% }")
+        individual.plots <<- paste0(individual.plots, "![](", tempdir(), "/actel_report_auxiliary_files/", fish, "_sensors.", extension, "){ width=50% }")
       }
       if (interactive())
         setTxtProgressBar(pb, counter)

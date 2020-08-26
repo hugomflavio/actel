@@ -31,6 +31,8 @@ Enhancements:
   if `cumulative = TRUE`, the cumulative number of individual fish to have reached that subset of arrays per unit of time.
   * New argument in the `residency()` analysis: `timestep` allows the user to decide wether residency calculations should be done on a daily basis (default) or an hourly basis (at cost of computing time).
   * New failsafe prevents unhandled function failure if arrays were accidentally assigned to more than one section.
+  * Introduced failsafes so report compiling does not fail when R is not being able to produce SVG graphics.
+  * Improved cleaningness by moving temporary report files to a dedicated actel folder.
 
 ## actel 1.1.0
 

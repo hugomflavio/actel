@@ -257,7 +257,7 @@ tableInteraction <- function(moves, fish, trigger, GUI, force = FALSE) { # nocov
     # ---
     # make decision
     if (outside.console) {
-      message("The movements table for fish '", fish, "' is too large to display on the console and GUI is set to 'never'.\nTemporarily saving the table to '", paste0(tempdir(), '/actel_inspect_movements.csv'), "'. Please inspect this file and decide if any events should be considered invalid.\nPlease use the 'Event' column as a reference for the event number. ", sum(!moves$Valid), "invalid event(s) omitted.")
+      message("The movements table for fish '", fish, "' is too large to display on the console and GUI is set to 'never'.\nTemporarily saving the table to '", paste0(tempdir(), '/actel_inspect_movements.csv'), "'. Please inspect this file and decide if any events should be considered invalid.\nPlease use the 'Event' column as a reference for the event number. ", sum(!moves$Valid), " invalid event(s) omitted.")
       to.print <- cbind(data.frame(Event = 1:sum(moves$Valid)), moves[(Valid)])
       write.csv(to.print, paste0(tempdir(), "/actel_inspect_movements.csv"), row.names = FALSE)
       if (force) {

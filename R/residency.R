@@ -547,6 +547,14 @@ by which sections are presented", immediate. = TRUE, call. = FALSE)
   if (report) {
     appendTo(c("Screen", "Report"), "M: Producing the report.")
     
+    if (dir.exists(paste0(tempdir(), "/actel_report_auxiliary_files")))
+      unlink(paste0(tempdir(), "/actel_report_auxiliary_files"), recursive = TRUE)
+
+    dir.create(paste0(tempdir(), "/actel_report_auxiliary_files"))
+
+    if (!getOption("actel.debug", default = FALSE))
+      on.exit(unlink(paste0(tempdir(), "/actel_report_auxiliary_files"), recursive = TRUE), add = TRUE)
+
     biometric.fragment <- printBiometrics(bio = bio)
     
     printDot(dot = dot,
@@ -666,12 +674,12 @@ by which sections are presented", immediate. = TRUE, call. = FALSE)
                       plot.detections.by = plot.detections.by)
 
     appendTo("debug", "debug: Converting report to html")
-    rmarkdown::render(input = paste0(tempdir(), "/actel_residency_report.Rmd"),
-                      output_dir = tempdir(), 
+    rmarkdown::render(input = paste0(tempdir(), "/actel_report_auxiliary_files/actel_residency_report.Rmd"),
+                      output_dir = paste0(tempdir(), "/actel_report_auxiliary_files"), 
                       quiet = TRUE)
 
     appendTo("debug", "debug: Moving report")
-    file.copy(paste0(tempdir(), "/actel_residency_report.html"), reportname)
+    file.copy(paste0(tempdir(), "/actel_report_auxiliary_files/actel_residency_report.html"), reportname)
     if (interactive() & auto.open) { # nocov start
       appendTo("debug", "debug: Opening report.")
       browseURL(reportname)
@@ -753,6 +761,9 @@ printResidencyRmd <- function(
   last.seen.graph.size,
   plot.detections.by)
 {
+
+  work.path <- paste0(tempdir(), "/actel_report_auxiliary_files/")
+
   if (any(grepl("Unknown", spatial$stations$Standard.name))) {
     unknown.fragment <- paste0('<span style="color:red"> Number of relevant unknown receivers: **', sum(grepl("Unknown", spatial$stations$Standard.name)), '**</span>\n')
   } else {
@@ -775,7 +786,7 @@ Note:
   oldoptions <- options(knitr.kable.NA = "-")
   on.exit(options(oldoptions), add = TRUE)
 
-  sink(paste0(tempdir(), "/actel_residency_report.Rmd"))
+  sink(paste0(work.path, "actel_residency_report.Rmd"))
   cat(paste0(
 '---
 title: "Acoustic telemetry residency analysis"
@@ -783,7 +794,7 @@ author: "Actel R package (', utils::packageVersion("actel"), ')"
 output:
   html_document:
     includes:
-      after_body: ', tempdir(), '/toc_menu_residency.html
+      after_body: ', work.path, 'toc_menu_residency.html
 ---
 
 ### Summary
@@ -812,7 +823,7 @@ Want to cite actel in a publication? Run `citation(\'actel\')`
 
 Arrays with the same background belong to the same section. Release sites are marked with "R.S.". Arrays connected with an arrow indicate that the fish can only pass in one direction.
 
-<img src="', tempdir(), '/mb_arrays.svg" alt="Missing file" style="padding-top: 15px;"/>
+<img src=', work.path, ifelse(file.exists(paste0(work.path, "mb_arrays.svg")), "mb_arrays.svg", "mb_arrays.png"), ' style="padding-top: 15px;"/>
 
 ### Receiver stations
 
@@ -864,7 +875,7 @@ Note:
 ', paste(knitr::kable(last.seen), collapse = "\n"), '
 
 <center>
-![](', tempdir(), '/last_section.png){ ',last.seen.graph.size ,' }
+![](', work.path, 'last_section.png){ ',last.seen.graph.size ,' }
 </center>
 
 
@@ -887,7 +898,7 @@ Note:
   : The data used in these graphics is stored in the `section.times$arrival` object.
 
 <center>
-![](', tempdir(), '/arrival_days.png){ width=95% }
+![](', work.path, 'arrival_days.png){ width=95% }
 </center>
 
 #### Arrival times at each section
@@ -907,7 +918,7 @@ Note:
   : The data used in these graphics is stored in the `section.times$departure` object.
 
 <center>
-![](', tempdir(), '/departure_days.png){ width=95% }
+![](', work.path, 'departure_days.png){ width=95% }
 </center>
 
 #### Departure times at each section
@@ -926,19 +937,19 @@ Note:
 Note:
   : The data used in these graphics is stored in the `global.ratios` and `time.positions` objects.
 
+
 #### Absolutes
 
 <center>
-![](', tempdir(), '/global_ratios_absolutes.svg){ width=95% }
+![](', work.path, 'global_ratios_absolutes', ifelse(file.exists(paste0(work.path, 'global_ratios_absolutes.svg')), ".svg", ".png"), '){ width=95% }
 </center>
-
 
 #### Percentages
 
-<center>
-![](', tempdir(), '/global_ratios_percentages.svg){ width=95% }
-</center>
 
+<center>
+![](', work.path, 'global_ratios_percentages', ifelse(file.exists(paste0(work.path, 'global_ratios_percentages.svg')), ".svg", ".png"), '){ width=95% }
+</center>
 
 ### Individual residency plots
 
@@ -977,7 +988,7 @@ cat("', gsub("\\r", "", readr::read_file(paste0(tempdir(), '/temp_log.txt'))), '
 '), fill = TRUE)
 sink()
 
-sink(paste0(tempdir(), "/toc_menu_residency.html"))
+sink(paste0(work.path, "toc_menu_residency.html"))
 cat(
 '<style>
 h3 {
