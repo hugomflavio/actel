@@ -30,6 +30,7 @@ Enhancements:
   * New function `plotArray()` can be used to plot the simultaneous number of fish present at a subset of arrays or,
   if `cumulative = TRUE`, the cumulative number of individual fish to have reached that subset of arrays per unit of time.
   * New argument in the `residency()` analysis: `timestep` allows the user to decide wether residency calculations should be done on a daily basis (default) or an hourly basis (at cost of computing time).
+  * New failsafe prevents unhandled function failure if arrays were accidentally assigned to more than one section.
 
 ## actel 1.1.0
 

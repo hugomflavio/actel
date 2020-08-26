@@ -793,6 +793,17 @@ loadSpatial <- function(input = "spatial.csv", section.order = NULL){
     }
     if (any(nchar(as.character(sections)) > 6))
       appendTo(c("Screen", "Report", "Warning"), "Long section names detected. To improve graphic rendering, consider keeping section names under six characters.")
+
+    # find if arrays are assigned to more than one section
+    aux <- input[input$Type == "Hydrophone", ]
+    aux <- with(aux, as.data.frame.matrix(table(Array, Section)))
+    sections.per.array <- apply(aux, 1, function(i) sum(i > 0))
+    if (any(sections.per.array > 1)) {
+      stopAndReport(ifelse(sum(sections.per.array > 1) == 1, "Array '", "Arrays '"), 
+        paste0(names(sections.per.array)[sections.per.array > 1], collapse = "', '"), 
+        ifelse(sum(sections.per.array > 1) == 1, "' has been", "' have been"), 
+        " assigned to more than one section! Each array can only belong to one section. Please correct the spatial input before continuing.")
+    }
   } else {
     if (!is.null(section.order))
       appendTo(c("Screen", "Report", "Warning"), "'section.order' was set but input has no 'Section' column. Ignoring argument.")
