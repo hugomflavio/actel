@@ -56,6 +56,15 @@ preload <- function(biometrics, spatial, deployments, detections, dot, distances
 
   deleteHelpers()
 
+# debug lines
+  if (getOption("actel.debug", default = FALSE)) { # nocov start
+    on.exit(message("Debug: Progress log available at ", gsub("\\\\", "/", paste0(tempdir(), "/actel_debug_file.txt"))))
+    on.exit(message("Debug: Saving carbon copy to ", gsub("\\\\", "/", paste0(tempdir(), "/actel.preload.debug.RData"))), add = TRUE)
+    on.exit(save(list = ls(), file = paste0(tempdir(), "/actel.preload.debug.RData")), add = TRUE)
+    message("!!!--- Debug mode has been activated ---!!!")
+  } # nocov end
+# ------------------------
+
   if (is.na(match(tz, OlsonNames())))
     stop("'tz' could not be recognized as a timezone. Check available timezones with OlsonNames()\n", call. = FALSE)
 
