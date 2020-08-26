@@ -2,16 +2,16 @@ skip_on_cran()
 
 tests.home <- getwd()
 setwd(tempdir())
+if (dir.exists("actel_report_auxiliary_files"))
+	unlink("actel_report_auxiliary_files", recursive = TRUE)
+
+dir.create("actel_report_auxiliary_files")
 
 exampleWorkspace("exampleWorkspace")
 setwd("exampleWorkspace")
 write.csv(example.distances, "distances.csv")
 
-
 test_that("printProgression can handle over eight sections", {
-	if (file.exists(paste0(tempdir(), "/mb_efficiency.svg")))
-		file.remove(paste0(tempdir(), "/mb_efficiency.svg"))
-
 	xspatial <- example.spatial
 	xspatial$Section <- as.character(xspatial$Section)
 	xspatial$Section[1:(nrow(xspatial) - 1)] <- xspatial$Array[1:(nrow(xspatial) - 1)]
@@ -23,13 +23,10 @@ test_that("printProgression can handle over eight sections", {
 		spatial = xspatial, status.df = example.results$status.df, FALSE),
 		warning = function(w) stop ("Warning in printProgression:", w))
 
-	expect_true(file.exists(paste0(tempdir(), "/mb_efficiency.svg")))
+	expect_true(file.exists(paste0(tempdir(), "/actel_report_auxiliary_files/mb_efficiency.svg")))
 })
 
 test_that("printProgression can handle only one array", {
-	if (file.exists(paste0(tempdir(), "/mb_efficiency.svg")))
-		file.remove(paste0(tempdir(), "/mb_efficiency.svg"))
-
 	xspatial <- example.spatial
 	xspatial$Section <- as.character(xspatial$Section)
 	xspatial$Section[1:(nrow(xspatial) - 1)] <- "River"
@@ -41,13 +38,10 @@ test_that("printProgression can handle only one array", {
 		spatial = xspatial, status.df = example.results$status.df, FALSE),
 		warning = function(w) stop ("Warning in printProgression:", w))
 
-	expect_true(file.exists(paste0(tempdir(), "/mb_efficiency.svg")))
+	expect_true(file.exists(paste0(tempdir(), "/actel_report_auxiliary_files/mb_efficiency.svg")))
 })
 
 test_that("printProgression can handle two arrays", {
-	if (file.exists(paste0(tempdir(), "/mb_efficiency.svg")))
-		file.remove(paste0(tempdir(), "/mb_efficiency.svg"))
-
 	xspatial <- example.spatial
 	xspatial$Section <- as.character(xspatial$Section)
 	xspatial$Section[1:(nrow(xspatial) - 1)] <- "River"
@@ -59,16 +53,13 @@ test_that("printProgression can handle two arrays", {
 		spatial = xspatial, status.df = example.results$status.df, FALSE),
 		warning = function(w) stop ("Warning in printProgression:", w))
 
-	expect_true(file.exists(paste0(tempdir(), "/mb_efficiency.svg")))
+	expect_true(file.exists(paste0(tempdir(), "/actel_report_auxiliary_files/mb_efficiency.svg")))
 })
 
 
 ## printDot
 
 test_that("printDot can handle over eight sections", {
-	if (file.exists(paste0(tempdir(), "/mb_arrays.svg")))
-		file.remove(paste0(tempdir(), "/mb_arrays.svg"))
-
 	xspatial <- example.spatial
 	xspatial$Section <- as.character(xspatial$Section)
 	xspatial$Section[1:(nrow(xspatial) - 1)] <- xspatial$Array[1:(nrow(xspatial) - 1)]
@@ -79,75 +70,55 @@ test_that("printDot can handle over eight sections", {
 	tryCatch(printDot(dot, spatial = xspatial, FALSE),
 		warning = function(w) stop ("Warning in printDot:", w))
 
-	expect_true(file.exists(paste0(tempdir(), "/mb_arrays.svg")))
+	expect_true(file.exists(paste0(tempdir(), "/actel_report_auxiliary_files/mb_arrays.svg")))
 })
 
 test_that("printDot can handle only one array", {
-	if (file.exists(paste0(tempdir(), "/mb_arrays.svg")))
-		file.remove(paste0(tempdir(), "/mb_arrays.svg"))
-
 	xspatial <- example.spatial
 	xspatial$Section <- as.character(xspatial$Section)
 	xspatial$Section[1:(nrow(xspatial) - 1)] <- "River"
 	xspatial$Section <- as.factor(xspatial$Section)
-
 
 	dot <- readDot(string = "River1 -- River1")
 
 	tryCatch(printDot(dot, spatial = xspatial, FALSE),
 		warning = function(w) stop ("Warning in printDot:", w))
 
-	expect_true(file.exists(paste0(tempdir(), "/mb_arrays.svg")))
+	expect_true(file.exists(paste0(tempdir(), "/actel_report_auxiliary_files/mb_arrays.svg")))
 })
 
 test_that("printDot can handle two arrays", {
-	if (file.exists(paste0(tempdir(), "/mb_arrays.svg")))
-		file.remove(paste0(tempdir(), "/mb_arrays.svg"))
-
 	xspatial <- example.spatial
 	xspatial$Section <- as.character(xspatial$Section)
 	xspatial$Section[1:(nrow(xspatial) - 1)] <- "River"
 	xspatial$Section <- as.factor(xspatial$Section)
-
 
 	dot <- readDot(string = "River1 -- River2")
 
 	tryCatch(printDot(dot, spatial = xspatial, FALSE),
 		warning = function(w) stop ("Warning in printDot:", w))
 
-	expect_true(file.exists(paste0(tempdir(), "/mb_arrays.svg")))
+	expect_true(file.exists(paste0(tempdir(), "/actel_report_auxiliary_files/mb_arrays.svg")))
 })
 
 ## printBiometrics
 
 test_that("printBiometrics works for one variable", {
-	if (file.exists(paste0(tempdir(), "/Total_Length_mm_boxplot.png")))
-		file.remove(paste0(tempdir(), "/Total_Length_mm_boxplot.png"))
-
 	bio <- example.results$rsp.info$bio
 	bio <- bio[, -7]
 	output <- printBiometrics(bio)
 	
-	expect_true(file.exists(paste0(tempdir(), "/Total_Length_mm_boxplot.png")))
+	expect_true(file.exists(paste0(tempdir(), "/actel_report_auxiliary_files/Total_Length_mm_boxplot.png")))
 })
 
 test_that("printBiometrics works for more than two variables", {
-	if (file.exists(paste0(tempdir(), "/Total_Length_mm_boxplot.png")))
-		file.remove(paste0(tempdir(), "/Total_Length_mm_boxplot.png"))
-
-	if (file.exists(paste0(tempdir(), "/Length_two_boxplot.png")))
-		file.remove(paste0(tempdir(), "/Length_two_boxplot.png"))
-
-	if (file.exists(paste0(tempdir(), "/Mass_g_boxplot.png")))
-		file.remove(paste0(tempdir(), "/Mass_g_boxplot.png"))
-
 	bio <- example.results$rsp.info$bio
 	bio$Length_two <- bio$Total.Length.mm
 	output <- printBiometrics(bio)
 	
-	expect_true(file.exists(paste0(tempdir(), "/Total_Length_mm_boxplot.png")))
-	expect_true(file.exists(paste0(tempdir(), "/Length_two_boxplot.png")))
-	expect_true(file.exists(paste0(tempdir(), "/Mass_g_boxplot.png")))
+	expect_true(file.exists(paste0(tempdir(), "/actel_report_auxiliary_files/Total_Length_mm_boxplot.png")))
+	expect_true(file.exists(paste0(tempdir(), "/actel_report_auxiliary_files/Length_two_boxplot.png")))
+	expect_true(file.exists(paste0(tempdir(), "/actel_report_auxiliary_files/Mass_g_boxplot.png")))
 })
 
 
@@ -172,5 +143,7 @@ test_that("printEfficiency returns right string when eff. cannot be calculated",
 
 setwd("..")
 unlink("exampleWorkspace", recursive = TRUE)
+unlink("actel_report_auxiliary_files", recursive = TRUE)
+
 setwd(tests.home)
 rm(list = ls())
