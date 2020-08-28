@@ -376,6 +376,7 @@ plotMoves <- function(input, tags, title, xlab, ylab, col, array.alias, show.rel
   p <- p + ggplot2::geom_line(ggplot2::aes(group = interaction(tag, event)), size = 2)
   p <- p + ggplot2::geom_point(data = final.points)
   p <- p + ggplot2::theme_bw()
+  p <- p + ggplot2::scale_y_discrete(drop = FALSE)   # Show all Y axis values
   p <- p + ggplot2::scale_color_manual(name = "", values = col, drop = FALSE)
   if (length(tags) == 1)
     p <- p + ggplot2::theme(legend.position = "none")
@@ -630,7 +631,7 @@ plotDetections <- function(input, tag, type = c("stations", "arrays"), title, xl
   p <- p + ggplot2::scale_color_manual(values = col, drop = FALSE)
   # Plot points
   p <- p + ggplot2::geom_point()
-  # Fixate Y axis
+  # Show all Y axis values
   p <- p + ggplot2::scale_y_discrete(drop = FALSE)
   # Caption and title
   p <- p + ggplot2::guides(colour = ggplot2::guide_legend(reverse = TRUE))
