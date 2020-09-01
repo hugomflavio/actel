@@ -65,8 +65,8 @@ The process of compiling movement events is entirely automatic, and the outcome 
 Arrays
   : When a fish moves from one receiver array to another, a new movement event is created. These arrays are defined by you in the [spatial file](a-0_workspace_requirements.html#spatial-file), so it is worth it to spend some time thinking about how you want to arrange your receivers.
 
-`maximum.time`
-  : This argument controls the creation of multiple events for consecutive detections on the same receiver array. You can [find more information about this argument here](b-0_explore.html#maximum.time).
+`max.interval`
+  : This argument controls the creation of multiple events for consecutive detections on the same receiver array. You can [find more information about this argument here](b-0_explore.html#max.interval).
 
 By the end of this process, you will have a list containing the movement events for each of the target tags that were detected during the study.
 
