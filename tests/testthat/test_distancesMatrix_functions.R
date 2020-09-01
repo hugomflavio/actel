@@ -21,7 +21,7 @@ if (any(missing.packages)) {
       	"' to operate. Please install ", ifelse(sum(missing.packages) > 1, "them", "it"), " before proceeding.\n"), fixed = TRUE)
   })
 } else {
-	if (suppressWarnings(require("rgdal"))) {
+	if (suppressWarnings(require("rgdal")) & suppressWarnings(require("gdistance"))) {
 		tests.home <- getwd()
 		setwd(tempdir())
 
