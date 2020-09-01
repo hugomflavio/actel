@@ -169,10 +169,10 @@ printProgression <- function(dot, overall.CJS, spatial, status.df, print.release
 
   if (!file.exists(paste0(tempdir(), "/actel_report_auxiliary_files/mb_efficiency.svg"))) {
     {grDevices::png(paste0(tempdir(), "/actel_report_auxiliary_files/mb_efficiency.png"), width = 600, height = 100)
-      par(mar = c(1, 1, 1, 1))
-      plot(NA, xlim = 0:1, ylim = 0:1, xaxt = "n", yaxt = "n", ann = FALSE)
-      text(x = 0.5, y = 0.5, "Could not save SVG graphic.\nPlease verify that the SVG engines are working.")
-      dev.off()
+     par(mar = c(1, 1, 1, 1))
+     plot(NA, xlim = 0:1, ylim = 0:1, xaxt = "n", yaxt = "n", ann = FALSE)
+     text(x = 0.5, y = 0.5, "Could not save SVG graphic.\nPlease verify that the SVG engines are working.")
+     grDevices::dev.off()
     }
   }
 }
