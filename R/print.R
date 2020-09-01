@@ -1300,7 +1300,7 @@ printGlobalRatios <- function(global.ratios, time.ratios, spatial, timestep) {
       p <- p + ggplot2::scale_colour_manual(values = as.vector(cbPalette)[1:length(unique.values)], drop = FALSE)
     }
     tryCatch(ggplot2::ggsave(paste0(tempdir(), "/actel_report_auxiliary_files/global_ratios_", i,".svg"), width = 10, height = 4),
-      error = ggplot2::ggsave(paste0(tempdir(), "/actel_report_auxiliary_files/global_ratios_", i,".png"), width = 10, height = 4))
+      error = function(e) {ggplot2::ggsave(paste0(tempdir(), "/actel_report_auxiliary_files/global_ratios_", i,".png"), width = 10, height = 4)})
   })
 }
 
