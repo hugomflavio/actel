@@ -161,7 +161,7 @@ test_that("resPositions works as expected.", {
 })
 
 test_that("globalRatios works as expected.", {
-  global.ratios.day <- globalRatios(positions = res.positions.day)	
+  global.ratios.day <- globalRatios(positions = res.positions.day, section.order = c("River", "Fjord", "Sea"))	
 
   ### ONLY RUN THIS TO RESET REFERENCE
   # aux_globalRatios.day <- global.ratios.day
@@ -170,7 +170,7 @@ test_that("globalRatios works as expected.", {
   load(paste0(tests.home, "/aux_globalRatios_day.RData"))
   expect_equal(global.ratios.day, aux_globalRatios.day)
 
-  global.ratios.hour <- globalRatios(positions = res.positions.hour)  
+  global.ratios.hour <- globalRatios(positions = res.positions.hour, section.order = c("River", "Fjord", "Sea"))  
 
   ### ONLY RUN THIS TO RESET REFERENCE
   # aux_globalRatios.hour <- global.ratios.hour

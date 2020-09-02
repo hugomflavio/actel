@@ -19,7 +19,7 @@ test_that("residency results contains all the expected elements.", {
 	output <- suppressWarnings(residency(tz = 'Europe/Copenhagen', report = FALSE, GUI = "never"))
 
 	expect_false(any(is.na(match(names(output), c('array.times', 'arrays', 'time.positions', 'time.ratios', 'deployments',
-		'detections', 'dist.mat', 'efficiency', 'global.ratios', 'intra.array.CJS', 'intra.array.matrices',
+		'detections', 'dist.mat', 'efficiency', 'global.ratios', 'group.ratios', 'intra.array.CJS', 'intra.array.matrices',
 		'last.seen', 'movements', 'residency.list', 'rsp.info', 'section.movements', 'section.times',
 		'spatial', 'status.df', 'valid.detections', 'valid.movements')))))
 
@@ -44,7 +44,7 @@ skip_on_cran()
 	output <- suppressWarnings(residency(tz = 'Europe/Copenhagen',
 		report = FALSE, GUI = "never", speed.warning = 1000000, inactive.warning = 1000000, replicates = list(A9 = c("St.16", "St.17"))))
 	expect_false(any(is.na(match(names(output), c('array.times', 'arrays', 'time.positions', 'time.ratios',
-		'deployments', 'detections', 'dist.mat', 'efficiency', 'global.ratios', 'intra.array.CJS',
+		'deployments', 'detections', 'dist.mat', 'efficiency', 'global.ratios', 'group.ratios', 'intra.array.CJS',
 		'intra.array.matrices','last.seen', 'movements', 'residency.list', 'rsp.info', 'section.movements',
 		'section.times', 'spatial', 'status.df', 'valid.detections', 'valid.movements')))))
 	file.remove("distances.csv")
@@ -52,7 +52,7 @@ skip_on_cran()
 			GUI = "never", speed.error = 1000000, inactive.error = 1000000),
 		"Running inactiveness checks without a distance matrix. Performance may be limited.", fixed = TRUE)
 	expect_false(any(is.na(match(names(output), c('array.times', 'arrays', 'time.positions', 'time.ratios',
-		'deployments', 'detections', 'efficiency', 'global.ratios', 'intra.array.CJS', 'intra.array.matrices',
+		'deployments', 'detections', 'efficiency', 'global.ratios', 'group.ratios', 'intra.array.CJS', 'intra.array.matrices',
 		'last.seen', 'movements', 'residency.list', 'rsp.info', 'section.movements', 'section.times',
 		'spatial', 'status.df', 'valid.detections', 'valid.movements')))))
 })
@@ -148,14 +148,13 @@ test_that("the discard.first argument is working properly", {
 })
 # n
 # n
-# n
 
 # last test just for timestep = hours
 test_that("timestep = 'hours' is working too", {
 	skip_on_cran()
 	output <- suppressWarnings(residency(tz = 'Europe/Copenhagen', report = TRUE, GUI = "never", timestep = "hours"))
 	expect_false(any(is.na(match(names(output), c('array.times', 'arrays', 'time.positions', 'time.ratios',
-		'deployments', 'detections', 'dist.mat', 'efficiency', 'global.ratios', 'intra.array.CJS',
+		'deployments', 'detections', 'dist.mat', 'efficiency', 'global.ratios', 'group.ratios', 'intra.array.CJS',
 		'intra.array.matrices','last.seen', 'movements', 'residency.list', 'rsp.info', 'section.movements',
 		'section.times', 'spatial', 'status.df', 'valid.detections', 'valid.movements')))))
 })
