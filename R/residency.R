@@ -961,6 +961,7 @@ Note:
 
 Note:
   : The data used in these graphics is stored in the `time.ratios` object (one table per fish). More condensed information can be found in the `section.movements` object.
+  : You can replicate these graphics and edit them as needed using the `plotResidency()` function.
 
 <center>
 ', individual.residency.plots,'
@@ -1435,6 +1436,7 @@ resRatios <- function(res, timestep = c("days", "hours"), tz) {
   })
   if (interactive())
     close(pb) # nocov
+  attributes(output)$timestep <- timestep
   return(output)
 }
 
@@ -1624,7 +1626,8 @@ resPositions <- function(ratios, timestep = c("days", "hours")) {
       stop("Something went wrong when creating the recipient for the global ratios.")
     output[link, i] <<- ratios[[i]]$Most.time
   })
-  
+
+  attributes(output)$timestep <- timestep  
   return(output)
 }
 
@@ -1684,7 +1687,17 @@ globalRatios <- function(positions, section.order) {
     absolutes$Total <- apply(absolutes[, -1], 1, sum)
   else
     absolutes$Total <- absolutes[, 2]
+  link <- unlist(sapply(section.order, function(i) which(grepl(paste0("^", i), colnames(absolutes)))))
+  absolutes <- absolutes[, c(1, link, ncol(absolutes))]
+
   percentages <- absolutes
   percentages[, -1] <- round(percentages[, -1] / percentages[, ncol(percentages)], 3)
+
+  # failsafe in case totals are 0 in group ratios
+  percentages[, 2:ncol(percentages)][is.na(percentages[, 2:ncol(percentages)])] <- 0
+
+  attributes(absolutes)$timestep <- attributes(positions)$timestep
+  attributes(percentages)$timestep <- attributes(positions)$timestep
+
   return(list(absolutes = absolutes, percentages = percentages))
 }
