@@ -1253,3 +1253,224 @@ plotResidency <- function(input, tag, title, xlab, ylab, col) {
   return(p)
 }
 
+#' Plot global/group residency
+#'
+#' By default, this function plots the global residency. However, you can use the argument 'group'
+#' to plot the results only from a specific fish group. Lastly, you can also use 'sections', rather
+#' than 'group', to compare the residency at a specific section (or group of sections) between the 
+#' different groups.
+#' 
+#' The output of plotRatios is a ggplot object, which means you can then use it in combination
+#' with other ggplot functions, or even together with other packages such as patchwork.
+#'
+#' @param input The results of an actel analysis (either explore, migration or residency).
+#' @param group An optional argument to plot only the data corresponding to one group.
+#' @param sections An optional argument to plot the residency of the multiple groups for a specific subset of sections.
+#' @param type The type of residency to be displayed. One of 'absolutes' (the default) or 'percentages'.
+#' @param title An optional title for the plot. If left empty, a default title will be added.
+#' @param xlab,ylab Optional axis names for the plot. If left empty, default axis names will be added.
+#' @param col An optional colour scheme for the detections. If left empty, default colours will be added.
+#'
+#' @return A ggplot object.
+#'
+#' @examples
+#' # For this example, I have modified the example.results that come with actel,
+#' # so they resemble a residency output
+#' \dontshow{
+#' example.residency.results <- c(example.results, additional.residency.results)
+#' example.residency.results$rsp.info$analysis.type <- "residency"
+#' }
+#' plotRatios(example.residency.results)
+#'
+#' # Because plotRatios returns a ggplot object, you can store
+#' # it and edit it manually, e.g.:
+#' library(ggplot2)
+#' p <- plotRatios(example.residency.results, group = "A")
+#' p <- p + xlab("changed the x axis label a posteriori")
+#' p
+#'
+#' # You can also save the plot using ggsave!
+#'
+#' @export
+#'
+plotRatios <- function(input, group, sections, type = c("absolutes", "percentages"), title, xlab, ylab, col) {
+  # NOTE: The NULL variables below are actually column names used by ggplot.
+  # This definition is just to prevent the package check from issuing a note due unknown variables.
+  type <- match.arg(type)
+  Timeslot <- NULL
+  Location <- NULL
+  Group <- NULL
+  n <- NULL
+
+  cbPalette <- c("#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7", "#999999")
+  names(cbPalette) <- c("Orange", "Blue", "Green", "Yellow", "Darkblue", "Darkorange", "Pink", "Grey")
+
+  if (!inherits(input, "list"))
+    stop("Could not recognise the input as an actel results object.", call. = FALSE)
+
+  if (is.null(input$valid.movements) | is.null(input$spatial) | is.null(input$rsp.info))
+    stop("Could not recognise the input as an actel results object.", call. = FALSE)
+
+  if (input$rsp.info$analysis.type != "residency")
+    stop("plotResidency can only be used with residency results.", call. = FALSE)
+
+  if (!missing(group) & !missing(sections))
+    stop("Please use only one of 'group' or 'sections' at a time.", call. = FALSE)
+
+  if (!missing(group) && length(group) > 1)
+    stop("Please select only one group.", call. = FALSE)
+
+  if (!missing(group) && is.na(match(group, names(input$group.ratios))))
+    stop("Could not find group '", group, "' in the input.", call. = FALSE)
+
+  if (!missing(sections)) {
+    if (link <- any(is.na(match(sections, colnames(input$global.ratios$absolutes)))))
+      stop("Section", ifelse(sum(link) > 1, "s '", " '"), paste0(sections[link], collapse = "', '"),
+        ifelse(sum(link) > 1, "' do ", "' does "), "not exist, or no tags have ever been assigned to it.", call. = FALSE)
+  }
+
+  if (missing(group)) {
+    if (missing(sections)) {
+      the.ratios <- input$global.ratios[[type]]
+    } else {
+      if (type == "absolutes") {
+        aux <- lapply(names(input$group.ratios), function(i) {
+          x <- input$group.ratios[[i]]$absolutes
+          x <- x[, c(1, match(sections, colnames(x)))]
+          if (ncol(x) > 2)
+            x$n <- apply(x[, -1], 1, sum)
+          else
+            colnames(x)[2] <- "n"
+          x$Group <- i
+          return(x[, c("Timeslot", "Group", "n")])
+        })
+        the.ratios <- as.data.frame(data.table::rbindlist(aux))
+      } else {
+        # because there is no easy cbindlist function, initiate the dataframe with the timeslots only
+        # and then append the relevant information per group.
+        the.ratios <- input$group.ratios[[1]]$absolutes[, "Timeslot", drop = FALSE]
+        capture <- lapply(names(input$group.ratios), function(i) {
+          if (any(!is.na(match(sections, colnames(input$group.ratios[[i]]$absolutes))))) {
+            x <- input$group.ratios[[i]]$absolutes
+            link <- match(sections, colnames(x))
+            link <- link[!is.na(link)]
+            x <- x[, c(1, link)]
+            if (ncol(x) > 2)
+              x[, i] <- apply(x[, -1], 1, sum)
+            else
+              colnames(x)[2] <- i
+            the.ratios <<- cbind(the.ratios, x[, i, drop = FALSE])
+          } # else skip this group
+        })
+        if (ncol(the.ratios) > 2) {
+          # Turn into percentages (like it is done in globalRatios)
+          the.ratios$Total <- apply(the.ratios[, -1], 1, sum)
+          the.ratios[, -1] <- round(the.ratios[, -1] / the.ratios[, ncol(the.ratios)], 3)
+          # failsafe in case totals are 0 in group ratios
+          the.ratios[, 2:ncol(the.ratios)][is.na(the.ratios[, 2:ncol(the.ratios)])] <- 0
+        } else {
+          # else values are either 1 or 0
+          the.ratios[, 2][the.ratios[, 2] > 1] <- 1
+          the.ratios$Total <- the.ratios[, 2]
+        }
+      }      
+      attributes(the.ratios)$timestep <- attributes(input$global.ratios[[1]])$timestep
+    }
+  } else {
+    the.ratios <- input$group.ratios[[group]][[type]]
+  }
+
+  if (missing(title)) {
+    if (missing(group)) {
+      if (missing(sections))
+        title <- "Global ratios"
+      else
+        title <- paste0("Group ratios for section", ifelse(length(sections) > 1, "s ", " "), paste0(sections, collapse = ", "))
+    } else {
+      title <- paste("Ratios for group", group)
+    }
+  }
+
+  if (missing(xlab))
+    xlab <- ""
+
+  if (missing(ylab)) {
+    if (type == "absolutes")
+      ylab <- "n"
+    else
+      ylab <- "% tags"
+  }
+
+  if (missing(sections)) {
+    plotdata <- suppressMessages(reshape2::melt(the.ratios[, -ncol(the.ratios)], id.vars = "Timeslot"))
+    colnames(plotdata) <- c("Timeslot", "Location", "n")
+    plotdata$Location <- factor(plotdata$Location, levels = colnames(input$global.ratios[[1]])[-c(1, ncol(input$global.ratios[[1]]))])
+  } else {
+    if (type == "absolutes") {
+      plotdata <- the.ratios
+    } else {
+      plotdata <- suppressMessages(reshape2::melt(the.ratios[, -ncol(the.ratios)], id.vars = "Timeslot"))
+      colnames(plotdata) <- c("Timeslot", "Group", "n")
+    }
+  }
+
+  if (missing(col)) {
+    if (missing(sections)) {
+      if ((ncol(input$global.ratios[[1]]) - 2) <= 8)
+        unique.colours <- as.vector(cbPalette)[1:(ncol(input$global.ratios[[1]]) - 2)]
+      else
+        unique.colours <- gg_colour_hue(ncol(input$global.ratios[[1]]) - 2)
+    } else {
+      if (length(unique(plotdata$Group)) <= 8)
+        unique.colours <- as.vector(cbPalette)[1:length(unique(plotdata$Group))]
+      else
+        unique.colours <- gg_colour_hue(length(unique(plotdata$Group)))
+    }
+  } else {
+    if (missing(sections)) {
+      if (length(col) != length(unique(plotdata$Location))) {
+        warning("Not enough colours supplied in 'col' (", length(col)," supplied and ", length(unique(plotdata$Location)), " needed). Reusing colours.", immediate. = TRUE, call. = FALSE)
+        unique.colours <- rep(col, length.out = length(unique(plotdata$Location)))
+      }
+    } else {
+      if (length(col) != length(unique(plotdata$Group))) {
+        warning("Not enough colours supplied in 'col' (", length(col)," supplied and ", length(unique(plotdata$Group)), " needed). Reusing colours.", immediate. = TRUE, call. = FALSE)
+        unique.colours <- rep(col, length.out = length(unique(plotdata$Group)))
+      }
+    }
+  }
+
+  if (missing(sections))
+    p <- ggplot2::ggplot(data = plotdata, ggplot2::aes(x = Timeslot, y = n, fill = Location, col = Location))
+  else
+    p <- ggplot2::ggplot(data = plotdata, ggplot2::aes(x = Timeslot, y = n, fill = Group, col = Group))
+
+  p <- p + ggplot2::geom_bar(width = ifelse(attributes(the.ratios)$timestep == "days", 86400, 3600), stat = "identity")
+  p <- p + ggplot2::theme_bw()
+
+  if (missing(sections) | type == "percentages") {
+    if (ncol(the.ratios) > 3)
+      max.y <- max(apply(the.ratios[, c(-1, -ncol(the.ratios))], 1, sum))
+    else
+      max.y <- max(the.ratios[, 2])
+  } else {
+    max.y <- max(with(the.ratios, aggregate(n, list(Timeslot), sum))$x)
+  }
+
+  if (type == "absolutes")
+    p <- p + ggplot2::scale_y_continuous(limits = c(0,  max.y * 1.05), expand = c(0, 0))
+  else
+    p <- p + ggplot2::scale_y_continuous(limits = c(0,  max.y), expand = c(0, 0))
+
+  p <- p + ggplot2::labs(title = title, x = xlab, y = ylab)
+
+  p <- p + ggplot2::scale_fill_manual(values = unique.colours, drop = FALSE)
+  p <- p + ggplot2::scale_colour_manual(values = unique.colours, drop = FALSE)
+
+  if (length(unique.colours) > 10 & length(unique.colours) <= 20)
+    p <- p + ggplot2::guides(fill = ggplot2::guide_legend(ncol = 2))
+  if (length(unique.colours) > 20)
+    p <- p + ggplot2::guides(fill = ggplot2::guide_legend(ncol = 3))
+
+  return(p)
+}
