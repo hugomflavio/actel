@@ -580,7 +580,7 @@ by which sections are presented", immediate. = TRUE, call. = FALSE)
     printGlobalRatios(global.ratios = global.ratios,
                       time.ratios = time.ratios,
                       spatial = spatial,
-                      timestep = timestep)
+                      rsp.info = rsp.info)
 
     individual.detection.plots <- printIndividuals(detections.list = detections,
                                                    movements = movements,
@@ -604,18 +604,11 @@ by which sections are presented", immediate. = TRUE, call. = FALSE)
 
     appendTo(c("Screen", "Report"), "M: Drawing individual residency graphics.")
     
-    time.range <- range(global.ratios[[1]]$Timeslot)
-    if (timestep == "days") {
-      time.range[1] <- time.range[1] - 86400
-      time.range[2] <- time.range[2] + 86400
-    } else {
-      time.range[1] <- time.range[1] - 3600
-      time.range[2] <- time.range[2] + 3600
-    }
+
     individual.residency.plots <- printIndividualResidency(ratios = time.ratios,
-                                                           time.range = time.range,
+                                                           global.ratios = global.ratios,
                                                            spatial = spatial,
-                                                           timestep = timestep)
+                                                           rsp.info = rsp.info)
 
     efficiency.fragment <- printEfficiency(efficiency = efficiency,
                                            intra.CJS = intra.array.CJS,
@@ -735,6 +728,7 @@ by which sections are presented", immediate. = TRUE, call. = FALSE)
                  time.ratios = time.ratios,
                  time.positions = time.positions,
                  global.ratios = global.ratios,
+                 group.ratios = group.ratios,
                  last.seen = last.seen,
                  rsp.info = rsp.info)
 
