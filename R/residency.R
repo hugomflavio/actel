@@ -942,7 +942,9 @@ Note:
 
 Note:
   : The data used in these graphics is stored in the `global.ratios` and `time.positions` objects.
-
+  : You can replicate these graphics and edit them as needed using the `plotRatios()` function.
+  : This data is also available split by group in the `group.ratios`object.
+  : You can plot these results by group using the \'group\' argument in `plotRatios()`.
 
 #### Absolutes
 
@@ -952,10 +954,10 @@ Note:
 
 #### Percentages
 
-
 <center>
 ![](', work.path, 'global_ratios_percentages', ifelse(file.exists(paste0(work.path, 'global_ratios_percentages.svg')), ".svg", ".png"), '){ width=95% }
 </center>
+
 
 ### Individual residency plots
 
