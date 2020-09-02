@@ -12,14 +12,13 @@ apt_packages:
   - librsvg2-dev
 
 r_github_packages: 
-  # - r-lib/testthat
   - r-lib/covr
 
 # environment variables set for all builds
 env:
   global:
   # don't treat missing suggested packages as error
-  - _R_CHECK_FORCE_SUGGESTS_=false
+  - _R_CHECK_FORCE_SUGGESTS_=true
 
 after_success:
   - travis_wait Rscript -e 'covr::codecov()'
