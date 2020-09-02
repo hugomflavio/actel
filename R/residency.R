@@ -455,7 +455,8 @@ by which sections are presented", immediate. = TRUE, call. = FALSE)
 
   time.positions <- resPositions(ratios = time.ratios, timestep = timestep)
 
-  global.ratios <- globalRatios(positions = time.positions)
+  global.ratios <- globalRatios(positions = time.positions, section.order = names(spatial$array.order))
+
 
   appendTo("Screen", "M: Validating detections...")
 
