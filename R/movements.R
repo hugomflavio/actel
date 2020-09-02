@@ -212,26 +212,35 @@ movementTimes <- function(movements, type = c("array", "section")){
       Last.time = movements$Last.time[-nrow(movements)]
       )
     recipient <- apply(aux, 1, function(x) {
-      a <- as.vector(difftime(x[1], x[2], units = "hours"))
-      h <- a %/% 1
-      m <- ((a %% 1) * 60) %/% 1
+      s <- as.vector(difftime(x[1], x[2], units = "secs"))
+      h <- floor(s / 3600)
+      s <- s - (3600 * h)
+      m <- floor(s / 60)
+      s <- s - (60 * m)
       if (m < 10)
         m <- paste0("0", m)
-      return(paste(h, m, sep = ":"))
+      if (s < 10)
+        s <- paste0("0", s)
+      return(paste(h, m, s, sep = ":"))
     })
     movements$Time.travelling[2:nrow(movements)] <- recipient
   }
   # Time on array
   movements[, time.in] <- apply(movements, 1, function(x) {
-    if (x["Detections"] == 1)
-      return("0:00")
-    else
-      a <- as.vector(difftime(x["Last.time"], x["First.time"], units = "hours"))
-      h <- a %/% 1
-      m <- ((a %% 1) * 60) %/% 1
+    if (x["Detections"] == 1) {
+      return("0:00:00")
+    } else {
+      s <- as.vector(difftime(x["Last.time"], x["First.time"], units = "secs"))
+      h <- floor(s / 3600)
+      s <- s - (3600 * h)
+      m <- floor(s / 60)
+      s <- s - (60 * m)
       if (m < 10)
         m <- paste0("0", m)
-      return(paste(h, m, sep = ":"))
+      if (s < 10)
+        s <- paste0("0", s)
+      return(paste(h, m, s, sep = ":"))
+    }
   })
   return(movements)
 }
@@ -254,12 +263,16 @@ speedReleaseToFirst <- function(fish, bio, movements, dist.mat, speed.method){
   origin.time <- bio[the.row, "Release.date"]
   origin.place <- as.character(bio[the.row, "Release.site"])
   if (origin.time <= movements$First.time[1]) {
-    a <- as.vector(difftime(movements$First.time[1], origin.time, units = "hours"))
-    h <- a%/%1
-    m <- ((a%%1) * 60)%/%1
+    s <- as.vector(difftime(movements$First.time[1], origin.time, units = "secs"))
+    h <- floor(s / 3600)
+    s <- s - (3600 * h)
+    m <- floor(s / 60)
+    s <- s - (60 * m)
     if (m < 10)
       m <- paste0("0", m)
-    movements$Time.travelling[1] <- paste(h, m, sep = ":")
+    if (s < 10)
+      s <- paste0("0", s)
+    movements$Time.travelling[1] <- paste(h, m, s, sep = ":")
     if (attributes(dist.mat)$valid & movements$Array[1] != "Unknown") {
       if (speed.method == "last to first") {
         a.sec <- as.vector(difftime(movements$First.time[1], origin.time, units = "secs"))

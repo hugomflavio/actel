@@ -40,7 +40,7 @@ test_that("sectionMovements correctly compresses array movements", {
 	expect_equal(output$First.time, moves[[1]]$First.time[c(1, 7, 18)])
 	expect_equal(output$Last.time, moves[[1]]$Last.time[c(6, 17, 18)])
 	expect_equal(output$Time.travelling, moves[[1]]$Time.travelling[c(1, 7, 18)])
-	expect_equal(output$Time.in.section, c("26:06", "380:05", "0:04"))
+	expect_equal(output$Time.in.section, c("26:06:50", "380:05:15", "0:04:27"))
 
 	output <- sectionMovements(movements = moves[[1]], spatial = spatial, valid.dist = FALSE)
 	expect_equal(colnames(output), c('Section', 'Events', 'Detections', 'First.array', 'First.station', 'Last.array', 'Last.station', 'First.time', 'Last.time', 'Time.travelling', 'Time.in.section', 'Valid'))

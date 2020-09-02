@@ -70,7 +70,7 @@ test_that("assembleTimetable correctly extracts fish information", {
   expect_equal(output$Status, c("Disap. in Sea", "Succeeded"))
   expect_equal(output$P.type, c("Manual", "Auto"))
   expect_equal(output$Transmitter, names(moves))
-  expect_equal(as.numeric(output$Average.time.until.River), c(12.322, 13.917)) # Time.until first section is only filled in during assembleOutput
+  expect_equal(as.numeric(output$Average.time.until.River), c(12.323, 13.917)) # Time.until first section is only filled in during assembleOutput
   expect_equal(as.numeric(output$Total.time.in.River), c(1.088, 1.545))
   expect_equal(as.numeric(output$Total.time.in.Fjord), c(15.837, 10.753))
   expect_equal(as.numeric(output$Total.time.in.Sea), c(NA, 0.55))

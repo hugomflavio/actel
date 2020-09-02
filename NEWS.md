@@ -39,6 +39,7 @@ Enhancements:
   * New output in the residency analysis: group.ratios (similar to global.ratios, but per group).
   * New function `plotRatios()` can be used to plot the global and group residency.
   * Improve handling of very long legends in the global residency plots.
+  * Display times as hh:mm:ss in the movement tables to avoid ambiguity in interpretation.
 
 ## actel 1.1.0
 
