@@ -1121,3 +1121,135 @@ advEfficiency <- function(x, labels = NULL, q = c(0.025, 0.5, 0.975), force.grid
 
   return(ranges)
 }
+
+
+#' Plot residency for a single tag
+#'
+#' The output of plotResidency is a ggplot object, which means you can then use it in combination
+#' with other ggplot functions, or even together with other packages such as patchwork.
+#'
+#' @param input The results of an actel analysis (either explore, migration or residency).
+#' @param tag The transmitter to be plotted.
+#' @param title An optional title for the plot. If left empty, a default title will be added.
+#' @param xlab,ylab Optional axis names for the plot. If left empty, default axis names will be added.
+#' @param col An optional colour scheme for the detections. If left empty, default colours will be added.
+#'
+#' @return A ggplot object.
+#'
+#' @examples
+#' # For this example, I have modified the example.results that come with actel,
+#' # so they resemble a residency output
+#' \dontshow{
+#' example.residency.results <- c(example.results, additional.residency.results)
+#' example.residency.results$rsp.info$analysis.type <- "residency"
+#' }
+#' plotResidency(example.residency.results, 'R64K-4451')
+#'
+#' # Because plotResidency returns a ggplot object, you can store
+#' # it and edit it manually, e.g.:
+#' library(ggplot2)
+#' p <- plotResidency(example.residency.results, 'R64K-4451')
+#' p <- p + xlab("changed the x axis label a posteriori")
+#' p
+#'
+#' # You can also save the plot using ggsave!
+#'
+#' @export
+#'
+plotResidency <- function(input, tag, title, xlab, ylab, col) {
+  # NOTE: The NULL variables below are actually column names used by ggplot.
+  # This definition is just to prevent the package check from issuing a note due unknown variables.
+  Timeslot <- NULL
+  Location <- NULL
+  n <- NULL
+
+  cbPalette <- c("#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7", "#999999")
+  names(cbPalette) <- c("Orange", "Blue", "Green", "Yellow", "Darkblue", "Darkorange", "Pink", "Grey")
+
+  if (!inherits(input, "list"))
+    stop("Could not recognise the input as an actel results object.", call. = FALSE)
+
+  if (is.null(input$valid.movements) | is.null(input$spatial) | is.null(input$rsp.info))
+    stop("Could not recognise the input as an actel results object.", call. = FALSE)
+
+  if (input$rsp.info$analysis.type != "residency")
+    stop("plotResidency can only be used with residency results.", call. = FALSE)
+
+  if (is.na(match(tag, names(input$time.ratios))))
+    stop("Could not find tag '", tag, "' in the input.", call. = FALSE)
+
+  # start preparing inputs
+  tz <- input$rsp.info$tz
+  timestep <- attributes(input$time.ratios)$timestep
+  ratios <- input$time.ratios[[tag]]
+  sections <- names(input$spatial$array.order)
+
+  time.range <- range(input$global.ratios[[1]]$Timeslot)
+  if (timestep == "days") {
+    time.range[1] <- time.range[1] - 86400
+    time.range[2] <- time.range[2] + 86400
+  } else {
+    time.range[1] <- time.range[1] - 3600
+    time.range[2] <- time.range[2] + 3600
+  }
+
+  unordered.unique.values <- sort(unique(unlist(lapply(input$time.ratios, function(x) {
+    aux <- which(grepl("^p", colnames(x)))
+    aux <- aux[!is.na(match(colnames(x)[aux - 1], sub("p", "", colnames(x)[aux])))]
+    return(colnames(x)[aux - 1])
+  }))))
+  link <- unlist(sapply(sections, function(i) which(grepl(paste0("^", i), unordered.unique.values))))
+  unique.values <- unordered.unique.values[link]
+
+  if (missing(col)) {
+    if (length(unique.values) <= 8)
+      unique.colours <- as.vector(cbPalette)[1:length(unique.values)]
+    else
+      unique.colours <- gg_colour_hue(length(unique.values))
+  } else {
+    if (length(col) != length(unique.values)) {
+      warning("Not enough colours supplied in 'col' (", length(col)," supplied and ", length(unique.values), " needed). Reusing colours.", immediate. = TRUE, call. = FALSE)
+      unique.colours <- rep(col, length.out = length(unique.values))
+    }
+  }
+
+  x <- ratios
+  aux <- which(grepl("^p", colnames(ratios)))
+  columns.to.use <- aux[!is.na(match(colnames(x)[aux - 1], sub("p", "", colnames(x)[aux])))]
+  new.colnames <- colnames(x)[c(1, columns.to.use - 1)]
+  x <- x[, c(1, columns.to.use)]
+  colnames(x) <- new.colnames
+  plotdata <- suppressMessages(reshape2::melt(x, id.vars = "Timeslot"))
+  colnames(plotdata) <- c("Timeslot", "Location", "n")
+
+  level.link <- !is.na(match(unique.values, unique(plotdata$Location)))
+  use.levels <- unique.values[level.link]
+  use.colours <- unique.colours[level.link]
+
+  plotdata$Location <- factor(plotdata$Location, levels = use.levels)
+
+  if (missing(title))
+    title <- paste0(tag, " (", as.character(x$Timeslot[1]), " to ", as.character(x$Timeslot[nrow(x)]), ")")
+
+  if (missing (xlab))
+    xlab <- ""
+
+  if (missing(ylab))
+    ylab <- ifelse(timestep == "days", "% time per day", "% time per hour")
+
+  p <- ggplot2::ggplot(data = plotdata, ggplot2::aes(x = Timeslot, y = n, fill = Location))
+  p <- p + ggplot2::geom_bar(width = ifelse(timestep == "days", 86400, 3600), stat = "identity")
+  p <- p + ggplot2::theme_bw()
+  p <- p + ggplot2::scale_y_continuous(limits = c(0,  max(apply(ratios[, columns.to.use, drop = FALSE], 1, sum))), expand = c(0, 0))
+  p <- p + ggplot2::labs(title = title, x = xlab, y = ylab)
+  p <- p + ggplot2::scale_x_datetime(limits = time.range)
+  p <- p + ggplot2::scale_fill_manual(values = use.colours, drop = TRUE)
+
+  if (length(use.levels) > 5 & length(use.levels) <= 10)
+    p <- p + ggplot2::guides(fill = ggplot2::guide_legend(ncol = 2))
+  if (length(use.levels) > 10)
+    p <- p + ggplot2::guides(fill = ggplot2::guide_legend(ncol = 3))
+
+  return(p)
+}
+

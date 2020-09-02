@@ -33,6 +33,7 @@ Enhancements:
   * New fail-safe prevents unhandled function failure if arrays were accidentally assigned to more than one section.
   * Introduced fail-safes so report compiling does not fail when R is not being able to produce SVG graphics.
   * Improved cleanliness by moving temporary report files to a dedicated actel folder.
+  * New function `plotResidency()` can be used to plot the individual residency for each fish.
 
 ## actel 1.1.0
 
