@@ -1286,76 +1286,41 @@ printGlobalRatios <- function(global.ratios, time.ratios, spatial, rsp.info) {
 #' print the individual locations per day
 #'
 #' @param ratios the daily ratios
-#' @param dayrange the overall first and last detection dates
 #' @inheritParams sectionMovements
 #' 
 #' @return A string of file locations in rmd syntax, to be included in printRmd
 #'
 #' @keywords internal
 #'
-printIndividualResidency <- function(ratios, time.range, spatial, timestep = c("days", "hours")) {
-  timestep <- match.arg(timestep)
-  Timeslot <- NULL
-  Location <- NULL
-  n <- NULL
-  cbPalette <- c("#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7", "#999999")
-  names(cbPalette) <- c("Orange", "Blue", "Green", "Yellow", "Darkblue", "Darkorange", "Pink", "Grey")
+printIndividualResidency <- function(ratios, global.ratios, spatial, rsp.info) {
   counter <- 0
   individual.plots <- NULL
 
-  sections <- names(spatial$array.order)
-
-  unordered.unique.values <- sort(unique(unlist(lapply(ratios, function(x) {
-    aux <- which(grepl("^p", colnames(x)))
-    aux <- aux[!is.na(match(colnames(x)[aux - 1], sub("p", "", colnames(x)[aux])))]
-    return(colnames(x)[aux - 1])
-  }))))
-  link <- unlist(sapply(sections, function(i) which(grepl(paste0("^", i), unordered.unique.values))))
-  unique.values <- unordered.unique.values[link]
-
-  if (length(unique.values) <= 8)
-    unique.colours <- as.vector(cbPalette)[1:length(unique.values)]
-  else
-    unique.colours <- gg_colour_hue(length(unique.values))
+  fake.results <- list(valid.movements = "placeholder",
+                spatial = spatial,
+                rsp.info = rsp.info,
+                time.ratios = ratios,
+                global.ratios = global.ratios)
 
   if (interactive())
     pb <- txtProgressBar(min = 0, max = length(ratios), style = 3, width = 60)
 
   capture <- lapply(names(ratios), function(i) {
     counter <<- counter + 1
-    x <- ratios[[i]]
-    aux <- which(grepl("^p", colnames(x)))
-    aux <- aux[!is.na(match(colnames(x)[aux - 1], sub("p", "", colnames(x)[aux])))]
-    new.colnames <-colnames(x)[c(1, aux - 1)]
-    x <- x[, c(1, aux)]
-    colnames(x) <- new.colnames
-    plotdata <- suppressMessages(reshape2::melt(x, id.vars = "Timeslot"))
-    colnames(plotdata) <- c("Timeslot", "Location", "n")
+    
+    p <- plotResidency(input = fake.results, tag = i)
 
-    level.link <- !is.na(match(unique.values, unique(plotdata$Location)))
-    use.levels <- unique.values[level.link]
-    use.colours <- unique.colours[level.link]
-
-    plotdata$Location <- factor(plotdata$Location, levels = use.levels)
-
-    p <- ggplot2::ggplot(data = plotdata, ggplot2::aes(x = Timeslot, y = n, fill = Location))
-    p <- p + ggplot2::geom_bar(width = ifelse(timestep == "days", 86400, 3600), stat = "identity")
-    p <- p + ggplot2::theme_bw()
-    p <- p + ggplot2::scale_y_continuous(limits = c(0,  max(apply(ratios[[i]][, aux, drop = FALSE], 1, sum))), expand = c(0, 0))
-    p <- p + ggplot2::labs(title = paste0(i, " (", as.character(x$Timeslot[1]), " to ", as.character(x$Timeslot[nrow(x)]), ")") , x = "", y = ifelse(timestep == "days", "% time per day", "% time per hour"))
-    p <- p + ggplot2::scale_x_datetime(limits = time.range)
-    p <- p + ggplot2::scale_fill_manual(values = use.colours, drop = TRUE)
-    if (length(use.levels) > 5 & length(use.levels) <= 10)
-      p <- p + ggplot2::guides(fill = ggplot2::guide_legend(ncol = 2))
-    if (length(use.levels) > 10)
-      p <- p + ggplot2::guides(fill = ggplot2::guide_legend(ncol = 3))
     ggplot2::ggsave(paste0(tempdir(), "/actel_report_auxiliary_files/", i,"_residency.png"), width = 10, height = 1.5)
+    
     individual.plots <<- paste0(individual.plots, "![](", tempdir(), "/actel_report_auxiliary_files/", i, "_residency.png){ width=95% }\n")
+    
     if (interactive())
       setTxtProgressBar(pb, counter)
   })
+
   if (interactive())
     close(pb)
+
   return(individual.plots)
 }
 
