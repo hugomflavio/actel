@@ -654,6 +654,8 @@ plotDetections <- function(input, tag, type = c("stations", "arrays"), title, xl
 #' @param title A title for the plot.
 #' @param mean.dash Logical: Should the mean value be displayed on the plot's edge?
 #' @param mean.range Logical: Should the SEM be displayed? (only relevant if mean.dash = TRUE)
+#' @param mean.range.darken.factor A numeric factor to darken the mean range edges for each group. Values greated
+#'  than 1 darken the colour, and values lower than 1 lighten the colour.
 #' @param rings Logical: Should inner plot rings be displayed?
 #' @param file A file name to save the plot to. Leave NULL to plot on active graphics device. Available file extensions: .svg, .pdf, .png and .tiff.
 #' @param height,width The height and width of the output file. Use inches for .pdf and .svg files or pixels for .png and .tiff files.
@@ -689,7 +691,7 @@ plotDetections <- function(input, tag, type = c("stations", "arrays"), title, xl
 #' @export
 #'
 plotTimes <- function(times, night = NULL, col, alpha = 0.8, title = "", mean.dash = TRUE,
-  mean.range = TRUE, rings = TRUE, file, width, height, bg = "transparent", ncol, 
+  mean.range = TRUE, mean.range.darken.factor = 1.4, rings = TRUE, file, width, height, bg = "transparent", ncol, 
   legend.pos = c("auto", "corner", "bottom"), ylegend, xlegend, xjust = c("auto", "centre", "left", "right"), 
   expand = 0.95, cex = 1){
 
@@ -877,10 +879,10 @@ plotTimes <- function(times, night = NULL, col, alpha = 0.8, title = "", mean.da
     prop = prop, tcl.text = -0.1, tol = 0.05, col = colours, border = "black")
 
   if (mean.dash) {
-    roseMean(times, col = params$col, mean.length = c(0.07, -0.07), mean.lwd = 6,
-      box.range = ifelse(mean.range, "std.error", "none"), fill = "white", border = "black",
-      box.size = c(1.015, 0.985), edge.length = c(0.025, -0.025),
-      edge.lwd = 2)
+    roseMean(times, col = scales::alpha(params$col, 1), mean.length = c(0.07, -0.07), mean.lwd = 6,
+      box.range = ifelse(mean.range, "std.error", "none"), fill = "white", horizontal.border = "black", 
+      vertical.border = scales::alpha(sapply(params$col, function(i) darken(i, mean.range.darken.factor)), 1), box.size = c(1.015, 0.985), 
+      edge.length = c(0.025, -0.025), edge.lwd = 2)
   }
 
   if (rings) {

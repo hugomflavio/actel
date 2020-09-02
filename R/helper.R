@@ -1,3 +1,21 @@
+#' darken colours
+#' 
+#' Copied from https://gist.github.com/Jfortin1/72ef064469d1703c6b30
+#' 
+#' @param color The colour to be darkened
+#' @param factor The level of darkening
+#' 
+#' @return The darker colour code
+#' 
+#' @keywords internal
+#'  
+darken <- function(color, factor = 1.4){
+    col <- grDevices::col2rgb(color)
+    col <- col / factor
+    col <- grDevices::rgb(t(col), maxColorValue = 255)
+    col
+}
+
 #' Match POSIX values
 #' 
 #' @param this the vector of posix to be match

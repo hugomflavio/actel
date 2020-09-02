@@ -12,6 +12,7 @@ plotTimes(
   title = "",
   mean.dash = TRUE,
   mean.range = TRUE,
+  mean.range.darken.factor = 1.4,
   rings = TRUE,
   file,
   width,
@@ -40,6 +41,9 @@ plotTimes(
 \item{mean.dash}{Logical: Should the mean value be displayed on the plot's edge?}
 
 \item{mean.range}{Logical: Should the SEM be displayed? (only relevant if mean.dash = TRUE)}
+
+\item{mean.range.darken.factor}{A numeric factor to darken the mean range edges for each group. Values greated
+than 1 darken the colour, and values lower than 1 lighten the colour.}
 
 \item{rings}{Logical: Should inner plot rings be displayed?}
 

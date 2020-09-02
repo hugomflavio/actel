@@ -40,6 +40,7 @@ Enhancements:
   * New function `plotRatios()` can be used to plot the global and group residency.
   * Improve handling of very long legends in the global residency plots.
   * Display times as hh:mm:ss in the movement tables to avoid ambiguity in interpretation.
+  * Colour the SEM ranges in the circular plots (matching the respective groups). The level of darkening can be controlled with the new `mean.range.darken.factor` argument in `plotTimes()`.
 
 ## actel 1.1.0
 

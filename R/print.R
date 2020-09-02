@@ -802,10 +802,10 @@ printCircular <- function(times, bio, suffix = NULL){
     params <- myRoseDiag(trim.times, bins = 24, radii.scale = "linear",
       prop = prop, tcl.text = -0.1, tol = 0.05, col = colours.to.use, border = "black")
 
-    roseMean(trim.times, col = params$col, mean.length = c(0.07, -0.07), mean.lwd = 6,
-      box.range = "std.error", fill = "white", border = "black",
-      box.size = c(1.015, 0.985), edge.length = c(0.025, -0.025),
-      edge.lwd = 2)
+    roseMean(trim.times, col = scales::alpha(params$col, 1), mean.length = c(0.07, -0.07), mean.lwd = 6,
+      box.range = "std.error", fill = "white", horizontal.border = "black", 
+      vertical.border = scales::alpha(sapply(params$col, darken), 1), box.size = c(1.015, 0.985), 
+      edge.length = c(0.025, -0.025), edge.lwd = 2)
 
     ringsRel(plot.params = params, border = "black", ring.text = TRUE,
       ring.text.pos = 0.07, rings.lty = "f5", ring.text.cex = 0.8)
@@ -1045,7 +1045,8 @@ ringsRel <- function(plot.params, border, rings.lty,
 #' @param mean.lwd width of the mean dash.
 #' @param box.range One of "none", "std.error" or "sd", controls the statistic used to draw the range boxes.
 #' @param fill Fill colour for the range box.
-#' @param border Border colour for the range box.
+#' @param horizontal.border Border colour for the horizontal edges of the range box.
+#' @param vertical.border Border colour for the vertical edges of the range box.
 #' @param box.size Vertical size of the range box.
 #' @param edge.length Vertical size of the edge whiskers in the range box.
 #' @param edge.lwd Width of the edge whiskers in the range box.
@@ -1055,14 +1056,14 @@ ringsRel <- function(plot.params, border, rings.lty,
 #' @keywords internal
 #'
 roseMean <- function(input, col = c("cornflowerblue", "chartreuse3", "deeppink"),
-  mean.length = c(0.0125, -0.0125), mean.lwd = 4,
-  box.range = c("none", "std.error", "sd"), fill = "white", border = "black",
+  mean.length = c(0.0125, -0.0125), mean.lwd = 4, box.range = c("none", "std.error", "sd"), 
+  fill = "white", horizontal.border = "black", vertical.border = "black",
   box.size = c(1.015, 0.985), edge.length = c(0.025, -0.025), edge.lwd = 2){
   box.range <- match.arg(box.range)
-  col <- scales::alpha(col, 1)
   if(is.matrix(input) | is.data.frame(input)){
     plotdata <- list()
-    for(i in 1:ncol(input)) plotdata[[i]] <- input[,i]
+    for(i in 1:ncol(input)) 
+      plotdata[[i]] <- input[,i]
     names(plotdata) <- colnames(input)
   } else {
     if (is.list(input)){
@@ -1075,23 +1076,27 @@ roseMean <- function(input, col = c("cornflowerblue", "chartreuse3", "deeppink")
   }
   if (!exists("plotdata"))
     stop("Input must be a list of circular objects, a data.frame, a matrix or a vector.\n")
+  col <- rep(col, length.out = length(plotdata))
+  fill <- rep(fill, length.out = length(plotdata))
+  horizontal.border <- rep(horizontal.border, length.out = length(plotdata))
+  vertical.border <- rep(vertical.border, length.out = length(plotdata))
   for (i in 1:length(plotdata)) {
-  m <- circular::mean.circular(plotdata[[i]], na.rm = T)
-  if(box.range != "none"){
-    if(box.range == "std.error")
-      range <- std.error.circular(plotdata[[i]], silent = TRUE)
-    if(box.range == "sd")
-      range <- circular::sd.circular(plotdata[[i]])
-    zero <- attr(plotdata[[i]], "circularp")$zero # extracted from the circular data
-    left <- as.numeric(circular::conversion.circular((m - range), units = "radians")) * -1
-    right <- as.numeric(circular::conversion.circular((m + range), units = "radians")) * -1
-    xx <- c(box.size[1] * cos(seq(left, right, length = 1000) + zero), rev(box.size[2] * cos(seq(left, right, length = 1000) + zero)))
-    yy <- c(box.size[1] * sin(seq(left, right, length = 1000) + zero), rev(box.size[2] * sin(seq(left, right, length = 1000) + zero)))
-    polygon(xx, yy, col = fill, border = border)
-    circular::lines.circular(c(m + range, m + range), edge.length, lwd = edge.lwd, col = border)
-    circular::lines.circular(c(m - range, m - range), edge.length, lwd = edge.lwd, col = border)
-  }
-  circular::lines.circular(c(m, m), mean.length, lwd = mean.lwd, col = col[i], lend = 1)
+    m <- circular::mean.circular(plotdata[[i]], na.rm = TRUE)
+    if(box.range != "none"){
+      if(box.range == "std.error")
+        range <- std.error.circular(plotdata[[i]], silent = TRUE)
+      if(box.range == "sd")
+        range <- circular::sd.circular(plotdata[[i]])
+      zero <- attr(plotdata[[i]], "circularp")$zero # extracted from the circular data
+      left <- as.numeric(circular::conversion.circular((m - range), units = "radians")) * -1
+      right <- as.numeric(circular::conversion.circular((m + range), units = "radians")) * -1
+      xx <- c(box.size[1] * cos(seq(left, right, length = 1000) + zero), rev(box.size[2] * cos(seq(left, right, length = 1000) + zero)))
+      yy <- c(box.size[1] * sin(seq(left, right, length = 1000) + zero), rev(box.size[2] * sin(seq(left, right, length = 1000) + zero)))
+      polygon(xx, yy, col = fill[i], border = horizontal.border[i])
+      circular::lines.circular(c(m + range, m + range), edge.length, lwd = edge.lwd, col = vertical.border[i])
+      circular::lines.circular(c(m - range, m - range), edge.length, lwd = edge.lwd, col = vertical.border[i])
+    }
+    circular::lines.circular(c(m, m), mean.length, lwd = mean.lwd, col = col[i], lend = 1)
   }
 }
 

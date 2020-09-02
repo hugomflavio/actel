@@ -11,7 +11,8 @@ roseMean(
   mean.lwd = 4,
   box.range = c("none", "std.error", "sd"),
   fill = "white",
-  border = "black",
+  horizontal.border = "black",
+  vertical.border = "black",
   box.size = c(1.015, 0.985),
   edge.length = c(0.025, -0.025),
   edge.lwd = 2
@@ -30,7 +31,9 @@ roseMean(
 
 \item{fill}{Fill colour for the range box.}
 
-\item{border}{Border colour for the range box.}
+\item{horizontal.border}{Border colour for the horizontal edges of the range box.}
+
+\item{vertical.border}{Border colour for the vertical edges of the range box.}
 
 \item{box.size}{Vertical size of the range box.}
 
