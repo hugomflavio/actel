@@ -14,11 +14,14 @@ apt_packages:
 r_github_packages: 
   - r-lib/covr
 
+r_packages:
+  - igraph
+
 # environment variables set for all builds
 env:
   global:
   # don't treat missing suggested packages as error
-  - _R_CHECK_FORCE_SUGGESTS_=true
+  - _R_CHECK_FORCE_SUGGESTS_=false
 
 after_success:
   - travis_wait Rscript -e 'covr::codecov()'
