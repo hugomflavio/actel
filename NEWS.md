@@ -38,6 +38,7 @@ Enhancements:
   * The column order in global.ratios now follows the section order.
   * New output in the residency analysis: group.ratios (similar to global.ratios, but per group).
   * New function `plotRatios()` can be used to plot the global and group residency.
+  * Improve handling of very long legends in the global residency plots.
 
 ## actel 1.1.0
 
