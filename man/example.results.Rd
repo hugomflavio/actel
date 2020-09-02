@@ -15,5 +15,7 @@ example.results
 }
 \description{
 A list with the results of a migration analysis ran on the example data.
+Note: Many objects were trimmed to reduce package size. Use exampleWorkspace()
+To run an analysis on the example data and obtain a full results object.
 }
 \keyword{internal}

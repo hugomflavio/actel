@@ -46,7 +46,7 @@ with other ggplot functions, or even together with other packages such as patchw
 # Using the example results that come with actel
 plotDetections(example.results, 'R64K-4451')
 
-# Because plotMoves returns a ggplot object, you can store
+# Because plotDetections returns a ggplot object, you can store
 # it and edit it manually, e.g.:
 library(ggplot2)
 p <- plotDetections(example.results, 'R64K-4451')

@@ -4,19 +4,12 @@
 \alias{printIndividualResidency}
 \title{print the individual locations per day}
 \usage{
-printIndividualResidency(
-  ratios,
-  time.range,
-  spatial,
-  timestep = c("days", "hours")
-)
+printIndividualResidency(ratios, global.ratios, spatial, rsp.info)
 }
 \arguments{
 \item{ratios}{the daily ratios}
 
 \item{spatial}{The spatial data list.}
-
-\item{dayrange}{the overall first and last detection dates}
 }
 \value{
 A string of file locations in rmd syntax, to be included in printRmd

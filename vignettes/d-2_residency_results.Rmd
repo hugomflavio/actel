@@ -141,6 +141,9 @@ The global ratios is a list containing two elements:
 |2019-06-10 | 0.333|     0.167|      0.167| 0.167|          0| 0.167|     1|
 |...        |   ...|       ...|        ...|   ...|        ...|   ...|   ...|
 
+## group.ratios
+
+The group ratios are lists similar to the `global.ratios`, but where the data has been split by the groups you defined in the biometrics. This allows you to compare the residency patterns of your different groups!
 
 ### last.seen
 

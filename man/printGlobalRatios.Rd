@@ -4,7 +4,7 @@
 \alias{printGlobalRatios}
 \title{print the distribution of fish per location}
 \usage{
-printGlobalRatios(global.ratios, time.ratios, spatial, timestep)
+printGlobalRatios(global.ratios, time.ratios, spatial, rsp.info)
 }
 \arguments{
 \item{global.ratios}{the global ratios}

@@ -187,7 +187,9 @@ Once finished, explore the html report and the object 'results' for the output."
 
 #' Example migration results
 #'
-#' A list with the results of a migration analysis ran on the example data.
+#' A list with the results of a migration analysis ran on the example data. 
+#' Note: Many objects were trimmed to reduce package size. Use exampleWorkspace()
+#' To run an analysis on the example data and obtain a full results object.
 #'
 #' @format A list of outputs from migration()
 #' @source Data collected by the authors.
@@ -195,3 +197,14 @@ Once finished, explore the html report and the object 'results' for the output."
 #' @keywords internal
 #'
 "example.results"
+
+#' Example residency results
+#'
+#' A list with resinedcy results to append to example.results, so some examples can run.
+#'
+#' @format A list of outputs from residency()
+#' @source Data collected by the authors.
+#'
+#' @keywords internal
+#'
+"additional.residency.results"

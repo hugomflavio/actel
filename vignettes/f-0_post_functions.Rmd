@@ -50,6 +50,8 @@ Here you will find some additional examples of things you can do using the outpu
 1. [Plotting movements for multiple tags at the same time](#plotting-movements-for-multiple-tags-at-the-same-time)
 1. [Extracting detailed array-level movement speeds](#extracting-detailed-array-level-movement-speeds)
 1. [Simultaneous and cumulative presence at one or more arrays](#simultaneous-and-cumulative-presence-at-one-or-more-arrays)
+1. [Plotting individual residency for individual tags](#plotting-individual-residency-for-individual-tags)
+1. [Plotting global (and group) residency!](#plotting-global-and-group-residency)
 1. [What would you like to see here?](#what-would-you-like-to-see-here)
 
 ## Calculating utilization distribution areas and space-use overlaps
@@ -251,7 +253,7 @@ plotSensors(results, tag = "R64K-1995")
 
 ## Plotting movements for multiple tags at the same time
 
-Sometimes it can be useful to compare the movements of multiple tags at the same time. Comparing individual detection plots works, but beign able to overlap plots would be much nicer! That's exactly why I created the `plotMoves()` function. This function allows you to overlap the movements of multiple tags.
+Sometimes it can be useful to compare the movements of multiple tags at the same time. Comparing individual detection plots works, but being able to overlap plots would be much nicer! That's exactly why I created the `plotMoves()` function. This function allows you to overlap the movements of multiple tags.
 
 ```r
 # Assuming you saved the output of an actel analysis as 'results',
@@ -334,7 +336,7 @@ plotArray(results, arrays = "A1", timestep = "hours") # Will aggregate the resul
 plotArray(results, arrays = "A1", timestep = "mins") # Will aggregate the results by minute (takes way longer to calculate!)
 
 # Finally, although plotArrays will automatically choose between
-# plotting lines or bars depending on wether the plot is cumulative
+# plotting lines or bars depending on whether the plot is cumulative
 # or not (respectively), you can set a specific plot style with the
 # argument 'type'.
 ```
@@ -346,9 +348,61 @@ plotArray(results, arrays = c("A8", "A9"))
 ```
 
 
+## Plotting individual residency for individual tags
+
+When you run a residency analysis, one of the outputs is the individual places where your animal spent most of its time. Like the individual detection plots, these are also drawn automatically for each tag in your report. And like the detection plots, you can also get these ones directly in R! Just use `plotResidency()`:
+
+```r
+# Assuming you saved the output of an actel residency analysis as 'results',
+# you can then plot the residency for single individuals. Imagine you want 
+# to see tag 'R64K-1995'. You can run:
+plotResidency(results, tag = "R64K-1995")
+
+# As usual, you can save the output of plotResidency as an object, and edit
+# it as needed using ggplot commands.
+```
+
+Remember, you can always access the numerical data behind these plots by inspecting the object `time.ratios`.
+
+## Plotting global (and group) residency!
+
+Another great output from the residency analysis is the global and group residency ratios (through the objects `global.ratios` and `group.ratios`). The function `plotRatios()` allows you to plot either of these metrics! This function comes with an argument 'group'. If you do not set a 'group', the global ratios will be printed, but if you set a group, then only that group will be plotted. Additionally, you can choose between absolute values (number of animals at each section) and percentage values (proportion of animals at each section), using the argument type.
+
+```r
+# Assuming you saved the output of an actel residency analysis as 'results',
+# you can then plot the global ratios:
+plotRatios(results) # this prints the absolute values
+plotRatios(results, type = "percentages") # this prints the percentage values
+
+# You can then make these plots only for a specific group, using the group
+# argument, e.g.:
+plotRatios(results, group = "A")
+plotRatios(results, group = "B", type = "percentages")
+
+# As usual, you can save the output of plotRatios as an object, and edit
+# it as needed using ggplot commands.
+```
+
+You can also plot the multiple groups simultaneously for a subset of sections using the 'sections' argument!
+
+```r
+# For example, if I wanted to know how many animals were in section "River"
+# during the study period, I could run:
+plotRatios(results, sections = "River")
+
+# or, for the percentage of fish from each group, run:
+plotRatios(results, sections = "River", type = "percentages")
+
+# Keep in mind that you cannot use the arguments 'group' and 'sections' at the same time!
+# But you can see aggregated results for multiple sections, e.g.:
+plotRatios(results, sections = c("River", "River-Fjord", "Fjord"), type = "percentages")
+
+```
+
+
 ## What would you like to see here?
 
-actel is a work in progress. Is there any anything you would like to do or see in your data that is missing? Do you think it could be a useful function for actel? [Get in touch!](mailto:hdmfla@aqua.dtu.dk)
+actel is a work in progress. Is there any anything you would like to do or see in your data that is missing? Have you though of any cool function for actel? [Get in touch!](mailto:hdmfla@aqua.dtu.dk)
 
 I hope you enjoy using actel!
 
