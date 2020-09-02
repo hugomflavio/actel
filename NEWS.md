@@ -18,6 +18,7 @@ Changes:
   * In the residency analysis, the following output **objects have changed name**:
     * `daily.ratios` is now `time.ratios`
     * `daily.positions` is now `time.positions`
+  * In the residency analysis report, the section 'Section progression' has been renamed to 'Global residency'.
 
 Enhancements:
   * Never show unknown events during movement table display.

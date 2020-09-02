@@ -944,7 +944,7 @@ Note:
 ', section.departure.circular.plots,'
 </center>
 
-### Section progression
+### Global residency
 
 Note:
   : The data used in these graphics is stored in the `global.ratios` and `time.positions` objects.
@@ -1090,7 +1090,7 @@ img[src*="#diagram"] {
   <a href="#last-seen">Last seen</a>
   <a href="#average-time-of-arrival-at-each-array">Array times</a>
   <a href="#time-details-for-each-section">Section times</a>
-  <a href="#section-progression">Section progression</a>
+  <a href="#global-residency">Global residency</a>
   <a href="#individual-residency-plots">Individual residency</a>
   <a href="#individual-detection-plots">Individual detections</a>',
   ifelse(is.null(sensor.fragment), '', '\n  <a href="#sensor-plots">Sensor data</a>'),'
