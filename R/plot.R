@@ -53,21 +53,21 @@ plotSensors <- function(input, tag, sensor, title = tag, xlab, ylab, pcol = "bla
 
   if (any(is.na(detections$Sensor.Value))) {
     if (verbose)
-      appendTo("Warning", paste0(sum(is.na(detections$Sensor.Value)), " rows in this tag's detections do not contain sensor values and will be discarded."))
+      appendTo(c("Screen", "Warning"), paste0(sum(is.na(detections$Sensor.Value)), " rows in this tag's detections do not contain sensor values and will be discarded."))
     detections <- detections[!is.na(detections$Sensor.Value), ]
   }
 
   if (any(link <- is.na(detections$Sensor.Unit) | detections$Sensor.Unit == "")) {
     detections$Sensor.Unit[link] <- paste0("? (", detections$Signal[link], ")")
     if (verbose)
-      appendTo("Warning", "Not all rows with sensor data contain a sensor unit!")
+      appendTo(c("Screen", "Warning"), "Not all rows with sensor data contain a sensor unit! Plotting unknown data separately.")
   }
 
   if (missing(sensor)) {
     sensor <- unique(detections$Sensor.Unit)
   } else {
-    if (any(link <- is.na(match(sensor, unique(detections$Sensor.unit)))))
-      stop("Could not find sensor unit(s) '", paste(sensor[link], collape = "', '", "' in the tag detections"), call. = FALSE)
+    if (any(link <- is.na(match(sensor, unique(detections$Sensor.Unit)))))
+      stop("Could not find sensor unit(s) '", paste(sensor[link], collapse = "', '"), "' in the tag detections.", call. = FALSE)
   }
 
   detections <- detections[detections$Sensor.Unit %in% sensor, ]
@@ -306,7 +306,7 @@ plotMoves <- function(input, tags, title, xlab, ylab, col, array.alias, show.rel
       col <- gg_colour_hue(length(tags))
     }
   } else {
-    if (length(col) != length(tags)) {
+    if (length(col) < length(tags)) {
       warning("Not enough colours supplied in 'col' (", length(col)," supplied and ", length(tags), " needed). Reusing colours.", immediate. = TRUE, call. = FALSE)
       col <- rep(col, length.out = length(tags))
     }
@@ -437,7 +437,10 @@ plotDetections <- function(input, tag, type = c("stations", "arrays"), title, xl
   if (is.null(input$valid.movements) | is.null(input$spatial) | is.null(input$rsp.info))
     stop("Could not recognise the input as an actel results object.", call. = FALSE)
 
-  if (is.na(match(tag, names(input$detections))))
+  if (length(tag) > 1)
+    stop("Please list only one tag", call. = FALSE)
+ 
+ if (is.na(match(tag, names(input$detections))))
     stop("Could not find tag '", tag, "' in the input.", call. = FALSE)
 
   # start preparing inputs
@@ -736,7 +739,7 @@ plotTimes <- function(times, night = NULL, col, alpha = 0.8, title = "", mean.da
     }
     colours <- scales::alpha(colour = aux, alpha = alpha)
   } else {
-    if (length(col) != length(times))
+    if (length(col) < length(times))
       stop("'col' must be of the same length as 'times' (", length(col), " != ", length(times), ").", call. = FALSE)
     colours <- scales::alpha(colour = col, alpha = alpha)
   }
@@ -1175,6 +1178,9 @@ plotResidency <- function(input, tag, title, xlab, ylab, col) {
   if (input$rsp.info$analysis.type != "residency")
     stop("plotResidency can only be used with residency results.", call. = FALSE)
 
+  if (length(tag) > 1)
+    stop("Please list only one tag", call. = FALSE)
+ 
   if (is.na(match(tag, names(input$time.ratios))))
     stop("Could not find tag '", tag, "' in the input.", call. = FALSE)
 
@@ -1207,10 +1213,9 @@ plotResidency <- function(input, tag, title, xlab, ylab, col) {
     else
       unique.colours <- gg_colour_hue(length(unique.values))
   } else {
-    if (length(col) != length(unique.values)) {
+    if (length(col) < length(unique.values))
       warning("Not enough colours supplied in 'col' (", length(col)," supplied and ", length(unique.values), " needed). Reusing colours.", immediate. = TRUE, call. = FALSE)
-      unique.colours <- rep(col, length.out = length(unique.values))
-    }
+    unique.colours <- rep(col, length.out = length(unique.values))
   }
 
   x <- ratios
@@ -1428,15 +1433,13 @@ plotRatios <- function(input, group, sections, type = c("absolutes", "percentage
     }
   } else {
     if (missing(sections)) {
-      if (length(col) != length(unique(plotdata$Location))) {
+      if (length(col) < length(unique(plotdata$Location)))
         warning("Not enough colours supplied in 'col' (", length(col)," supplied and ", length(unique(plotdata$Location)), " needed). Reusing colours.", immediate. = TRUE, call. = FALSE)
-        unique.colours <- rep(col, length.out = length(unique(plotdata$Location)))
-      }
+      unique.colours <- rep(col, length.out = length(unique(plotdata$Location)))
     } else {
-      if (length(col) != length(unique(plotdata$Group))) {
+      if (length(col) < length(unique(plotdata$Group)))
         warning("Not enough colours supplied in 'col' (", length(col)," supplied and ", length(unique(plotdata$Group)), " needed). Reusing colours.", immediate. = TRUE, call. = FALSE)
-        unique.colours <- rep(col, length.out = length(unique(plotdata$Group)))
-      }
+      unique.colours <- rep(col, length.out = length(unique(plotdata$Group)))
     }
   }
 

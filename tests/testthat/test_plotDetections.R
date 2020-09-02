@@ -3,6 +3,7 @@ skip_on_cran()
 test_that("plotDetections' failsafes kick in when needed", {
 	expect_error(plotDetections("a"), "Could not recognise the input as an actel results object.", fixed = TRUE)
 	expect_error(plotDetections(list("a")), "Could not recognise the input as an actel results object.", fixed = TRUE)
+	expect_error(plotSensors(example.results, tag = 1:2), "Please list only one tag", fixed = TRUE)
 	expect_error(plotDetections(example.results, tag = "a"),
 		"Could not find tag 'a' in the input.", fixed = TRUE)
 })
