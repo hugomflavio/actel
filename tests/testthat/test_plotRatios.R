@@ -6,9 +6,7 @@ example.residency.results$rsp.info$analysis.type <- "residency"
 test_that("plotRatios' failsafes kick in when needed", {
 	expect_error(plotRatios("a"), "Could not recognise the input as an actel results object.", fixed = TRUE)
 	expect_error(plotRatios(list("a")), "Could not recognise the input as an actel results object.", fixed = TRUE)
-	expect_error(plotRatios(example.residency.results, tag = "a"),
-		"Could not find tag 'a' in the input.", fixed = TRUE)
-	expect_error(plotRatios(example.results, tag = "R64K-4451"),
+	expect_error(plotRatios(example.results),
 		"plotRatios can only be used with residency results.", fixed = TRUE)
 	expect_error(plotRatios(example.residency.results, sections = "River", group = "A"),
 		"Please use only one of 'group' or 'sections' at a time.", fixed = TRUE)
@@ -20,8 +18,8 @@ test_that("plotRatios' failsafes kick in when needed", {
 		"Section '1' does not exist, or no tags have ever been assigned to it.", fixed = TRUE)
 })
 
-test_that("plotRatios is working", {
-	p <- plotRatios(example.residency.results, tag = "R64K-4451")
+test_that("default plotRatios is working", {
+	p <- plotRatios(example.residency.results)
 	expect_that(p, is_a("ggplot"))
 })
 

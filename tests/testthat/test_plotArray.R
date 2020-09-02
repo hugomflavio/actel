@@ -1,11 +1,13 @@
 skip_on_cran()
 
+oldtz <- Sys.getenv('TZ', unset = NA)
+Sys.setenv(TZ = 'UTC')
+
 test_that("plotArray' failsafes kick in when needed", {
 	expect_error(plotArray("a"), "Could not recognise the input as an actel results object.", fixed = TRUE)
 	expect_error(plotArray(list("a")), "Could not recognise the input as an actel results object.", fixed = TRUE)
 	expect_error(plotArray(example.results, arrays = 1:2), "Could not find array(s) '1', '2' in the study area.", fixed = TRUE)
 })
-
 
 test_that("plotArray works properly", {
 	tryCatch(plotArray(example.results, arrays = "A1"),
@@ -20,3 +22,6 @@ test_that("plotArray works properly", {
 	tryCatch(plotArray(example.results, arrays = c("A1", "A2"), cumulative = TRUE),
 	warning = function(w) stop("plotArray threw an unexpected warning!\n", w))
 })
+
+if (is.na(oldtz)) Sys.unsetenv("TZ") else Sys.setenv(TZ = oldtz)
+rm(list = ls())

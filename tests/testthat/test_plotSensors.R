@@ -26,6 +26,6 @@ test_that("plotSensors is working", {
 
 	xresults <- example.results
 	xresults$valid.detections[[1]]$Sensor.Unit[1:5] <- NA
-	expect_error(plotSensors(xresults, tag = "R64K-4451"),
+	expect_warning(plotSensors(xresults, tag = "R64K-4451"),
 		"Not all rows with sensor data contain a sensor unit! Plotting unknown data separately.", fixed = TRUE)
 })
