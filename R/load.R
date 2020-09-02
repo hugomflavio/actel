@@ -738,6 +738,9 @@ loadSpatial <- function(input = "spatial.csv", section.order = NULL){
   # check arrays called "Release"
   if (any(grepl("^Release$", input$Array)))
     stopAndReport("The term 'Release' is reserved for internal calculations. Do not name any sections or arrays as 'Release'.")
+  # check arrays called "Total"
+  if (any(grepl("^Total$", input$Array)))
+    stopAndReport("The term 'Total' is reserved for internal calculations. Do not name any sections or arrays as 'Total'.")
   # check arrays called "Invalid"
   if (any(grepl("^Invalid$", input$Array)))
     stopAndReport("The term 'Invalid' is reserved for internal calculations. Do not name any arrays as 'Invalid'.")
@@ -769,6 +772,8 @@ loadSpatial <- function(input = "spatial.csv", section.order = NULL){
     # check sections called "Release"
     if (any(grepl("^Release$", sections)))
       stopAndReport("The term 'Release' is reserved for internal calculations. Do not name any sections or arrays as 'Release'.")
+    if (any(grepl("^Total$", sections)))
+      stopAndReport("The term 'Total' is reserved for internal calculations. Do not name any sections or arrays as 'Total'.")
     # check that section names are independent
     if (any(link <- sapply(sections, function(i) length(grep(i, sections))) > 1))
       stopAndReport(
