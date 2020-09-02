@@ -1315,7 +1315,7 @@ plotRatios <- function(input, group, sections, type = c("absolutes", "percentage
     stop("Could not recognise the input as an actel results object.", call. = FALSE)
 
   if (input$rsp.info$analysis.type != "residency")
-    stop("plotResidency can only be used with residency results.", call. = FALSE)
+    stop("plotRatios can only be used with residency results.", call. = FALSE)
 
   if (!missing(group) & !missing(sections))
     stop("Please use only one of 'group' or 'sections' at a time.", call. = FALSE)
