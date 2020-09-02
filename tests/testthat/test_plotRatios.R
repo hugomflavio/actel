@@ -43,10 +43,10 @@ test_that("plotRatios with groups is working", {
 })
 
 test_that("plotRatios with sections is working", {
-	tryCatch(p <- plotRatios(example.residency.results, sections = ("River", "River-Fjord")),
+	tryCatch(p <- plotRatios(example.residency.results, sections = c("River", "River-Fjord")),
 		warning = function(w) stop("plotRatios threw an unexpected warning:", w))
 	expect_that(p, is_a("ggplot"))
-	tryCatch(p <- plotRatios(example.residency.results, sections = ("River", "River-Fjord"), type = "percentages"),
+	tryCatch(p <- plotRatios(example.residency.results, sections = c("River", "River-Fjord"), type = "percentages"),
 		warning = function(w) stop("plotRatios threw an unexpected warning:", w))
 	expect_that(p, is_a("ggplot"))
 })
