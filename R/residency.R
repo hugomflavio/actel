@@ -457,6 +457,17 @@ by which sections are presented", immediate. = TRUE, call. = FALSE)
 
   global.ratios <- globalRatios(positions = time.positions, section.order = names(spatial$array.order))
 
+  group.ratios <- lapply(unique(bio$Group), function(i) {
+    the.transmitters <- bio$Transmitter[bio$Group == i]
+    the.transmitters <- the.transmitters[!is.na(the.transmitters)]
+    link <- match(the.transmitters, colnames(time.positions))
+    link <- link[!is.na(link)]
+    trim.positions <- time.positions[, c(1, link)]
+    attributes(trim.positions)$timestep <- attributes(time.positions)$timestep
+    output <- globalRatios(positions = trim.positions, section.order = names(spatial$array.order))
+    return(output)
+  })
+  names(group.ratios) <- unique(bio$Group)
 
   appendTo("Screen", "M: Validating detections...")
 
@@ -530,13 +541,13 @@ by which sections are presented", immediate. = TRUE, call. = FALSE)
     if (attributes(dist.mat)$valid)
       save(detections, valid.detections, spatial, deployments, arrays, movements, valid.movements,
         section.movements, status.df, last.seen, array.times, section.times, intra.array.matrices,
-        residency.list, time.ratios, time.positions, global.ratios, efficiency, intra.array.CJS, 
-        rsp.info, dist.mat, file = resultsname)
+        residency.list, time.ratios, time.positions, global.ratios, group.ratios, efficiency, 
+        intra.array.CJS, rsp.info, dist.mat, file = resultsname)
     else
       save(detections, valid.detections, spatial, deployments, arrays, movements, valid.movements,
         section.movements, status.df, last.seen, array.times, section.times, intra.array.matrices,
-        residency.list, time.ratios, time.positions, global.ratios, efficiency, intra.array.CJS, 
-        rsp.info, file = resultsname)
+        residency.list, time.ratios, time.positions, global.ratios, group.ratios, efficiency, 
+        intra.array.CJS, rsp.info, file = resultsname)
   } else {
     appendTo(c("Screen", "Report"), paste0("M: Skipping saving of the results."))
   }

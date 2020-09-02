@@ -35,6 +35,7 @@ Enhancements:
   * Improved cleanliness by moving temporary report files to a dedicated actel folder.
   * New function `plotResidency()` can be used to plot the individual residency for each fish.
   * The column order in global.ratios now follows the section order.
+  * New output in the residency analysis: group.ratios (similar to global.ratios, but per group).
 
 ## actel 1.1.0
 
