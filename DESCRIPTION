@@ -1,10 +1,10 @@
 Package: actel
 Title: Acoustic Telemetry Data Analysis
-Version: 1.1.0.9091
+Version: 1.1.1
 Authors@R: person("Hugo", "Flávio", role = c("aut", "cre"), email = "hdmfla@aqua.dtu.dk", comment = c(ORCID = "0000-0002-5174-1197"))
-Description: Designed for studies where fish tagged with acoustic tags are expected
+Description: Designed for studies where animals tagged with acoustic tags are expected
     to move through receiver arrays. This package combines the advantages of automatic sorting and checking 
-    of fish movements with the possibility for user intervention on tags that deviate from expected 
+    of animal movements with the possibility for user intervention on tags that deviate from expected 
     behaviour. The three analysis functions (explore(), migration() and residency()) 
     allow the users to analyse their data in a systematic way, making it easy to compare results from 
     different studies.
