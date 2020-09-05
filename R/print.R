@@ -1466,9 +1466,9 @@ printSensorData <- function(detections, spatial, rsp.info, type = c("stations", 
       } else {
         individual.plots <<- paste0(individual.plots, "![](", tempdir(), "/actel_report_auxiliary_files/", tag, "_sensors.", extension, "){ width=", the.width * 10, "% }")
       }
-      if (interactive())
-        setTxtProgressBar(pb, counter)
     }
+    if (interactive())
+      setTxtProgressBar(pb, counter)
   })
   if (interactive())
     close(pb)
