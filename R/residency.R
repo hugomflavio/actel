@@ -621,7 +621,10 @@ by which sections are presented", immediate. = TRUE, call. = FALSE)
       last.seen.graph.size <- "width=90%" else last.seen.graph.size <- "height=4in"
 
     if (any(sapply(valid.detections, function(x) any(!is.na(x$Sensor.Value))))) {
-      sensor.plots <- printSensorData(detections = valid.detections, rsp.info = rsp.info)
+      sensor.plots <- printSensorData(detections = valid.detections, 
+                                      spatial = spatial,
+                                      rsp.info = rsp.info, 
+                                      type = plot.detections.by)
     } else {
       sensor.plots <- NULL
     }

@@ -8,9 +8,14 @@
 #' @param sensor The sensors to be plotted. If left empty, all available sensors are plotted
 #' @param title An optional title for the plot. If left empty, a default title will be added.
 #' @param xlab,ylab Optional axis names for the plot. If left empty, default axis names will be added.
-#' @param pcol The colour for the points. Defaults to black.
+#' @param pcol The colour for the points. If unset, a default palette is used.
+#' @param psize The size of the points. Defaults to 1.
 #' @param lcol The colour for the line. Defaults to grey.
-#' @param verbose Logical: Should warning messages be printed if necessary?
+#' @param lsize The width of the line. Defaults to 0.5 (same as standard ggplots)
+#' @param colour.by One of "arrays" or "sections", defines how the points should be coloured.
+#' @param array.alias A named vector of format c("old_array_name" = "new_array_name") to replace
+#'  default array names with user defined ones. Only relevant if colour.by = "arrays".
+#' @param verbose Logical: Should warning messages be printed, if necessary?
 #'
 #' @return A ggplot object.
 #'
@@ -29,10 +34,16 @@
 #'
 #' @export
 #'
-plotSensors <- function(input, tag, sensor, title = tag, xlab, ylab, pcol = "black", lcol = "grey40", verbose = TRUE) {
+plotSensors <- function(input, tag, sensor, title = tag, xlab, ylab, pcol, psize = 1, lsize = 0.5, 
+  colour.by = c("array", "section"), array.alias, lcol = "grey40", verbose = TRUE) {
   Timestamp <- NULL
   Sensor.Value <- NULL
   Sensor.Unit <- NULL
+  Colour <- NULL
+  colour.by <- match.arg(colour.by)
+
+  cbPalette <- c("#56B4E9", "#E69F00", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7", "#999999")
+  names(cbPalette) <- c("Blue", "Orange", "Green", "Yellow", "Darkblue", "Darkorange", "Pink", "Grey")
 
   if (!inherits(input, "list"))
     stop("Could not recognise the input as an actel results object.", call. = FALSE)
@@ -47,6 +58,7 @@ plotSensors <- function(input, tag, sensor, title = tag, xlab, ylab, pcol = "bla
     stop("Could not find tag '", tag, "' in the input.", call. = FALSE)
 
   detections <- input$valid.detections[[tag]]
+  spatial <- input$spatial
 
   if (all(is.na(detections$Sensor.Value)))
     stop("No sensor data found for this tag.", call. = FALSE)
@@ -70,15 +82,53 @@ plotSensors <- function(input, tag, sensor, title = tag, xlab, ylab, pcol = "bla
       stop("Could not find sensor unit(s) '", paste(sensor[link], collapse = "', '"), "' in the tag detections.", call. = FALSE)
   }
 
+  # renaming arrays if relevant
+  if (!missing(array.alias)) {
+    if (colour.by == "section") {
+      link <- match(names(array.alias), levels(detections$Array))
+      if (any(is.na(link)))
+        warning("Could not find ", ifelse(sum(is.na(link) == 1), "array ", "arrays "), names(array.alias)[is.na(link)], " in the study's arrays.", call. = FALSE, immediate. = TRUE)
+      levels(detections$Array)[link[!is.na(link)]] <- array.alias[!is.na(link)]
+    } else {
+      warning("array.alias can only be used when colour.by = 'array'. Ignoring array.alias.", immediate. = TRUE, call. = FALSE)
+    }
+  }
+
+  # detection colour column
+  if (colour.by == "array") {
+    detections$Colour <- detections$Array
+  } else {
+    aux <- lapply(seq_along(spatial$array.order), function(i) {
+      x <- match(detections$Array, spatial$array.order[[i]])
+      x[!is.na(x)] <- names(spatial$array.order)[i]
+      return(x)
+    })
+    aux <- combine(aux)
+    detections$Colour <- factor(aux, levels = names(spatial$array.order))
+  }
+
+  # choose colours
+  if (missing(pcol)) {
+    if (length(levels(detections$Colour)) <= 7) {
+      pcol <- as.vector(cbPalette)[c(1:length(levels(detections$Colour)))]
+    } else {
+      pcol <- c(gg_colour_hue(length(levels(detections$Colour))))
+    }
+  } else {
+    if (length(pcol) != length(levels(detections$Colour)))
+      warning("Not enough colours supplied in 'pcol' (", length(col)," supplied and ", length(levels(detections$Colour)), " needed). Reusing colours.", immediate. = TRUE, call. = FALSE)
+    pcol <- rep(pcol, length.out = length(levels(detections$Colour)))
+    }
+
   detections <- detections[detections$Sensor.Unit %in% sensor, ]
 
   p <- ggplot2::ggplot(data = detections, ggplot2::aes(x = Timestamp, y = Sensor.Value, by = Sensor.Unit))
-  p <- p + ggplot2::geom_line(col = lcol)
-  p <- p + ggplot2::geom_point(col = pcol, size = 0.5)
+  p <- p + ggplot2::geom_line(col = lcol, size = lsize)
+  p <- p + ggplot2::geom_point(size = psize, ggplot2::aes(colour = Colour))
+  p <- p + ggplot2::scale_color_manual(values = pcol, drop = FALSE, name = ifelse(colour.by == "array", "Array", "Section"))
   p <- p + ggplot2::labs(title = title, x = ifelse(missing(xlab), paste("tz:", input$rsp.info$tz), xlab), y = ifelse(missing(ylab), "Sensor value", ylab))
   p <- p + ggplot2::theme_bw()
   p <- p + ggplot2::facet_grid(Sensor.Unit ~ ., scales = "free_y")
-  p <- p + ggplot2::theme(legend.position = "none")
   return(p)
 }
 

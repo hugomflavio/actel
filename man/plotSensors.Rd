@@ -11,7 +11,11 @@ plotSensors(
   title = tag,
   xlab,
   ylab,
-  pcol = "black",
+  pcol,
+  psize = 1,
+  lsize = 0.5,
+  colour.by = c("array", "section"),
+  array.alias,
   lcol = "grey40",
   verbose = TRUE
 )
@@ -27,11 +31,20 @@ plotSensors(
 
 \item{xlab, ylab}{Optional axis names for the plot. If left empty, default axis names will be added.}
 
-\item{pcol}{The colour for the points. Defaults to black.}
+\item{pcol}{The colour for the points. If unset, a default palette is used.}
+
+\item{psize}{The size of the points. Defaults to 1.}
+
+\item{lsize}{The width of the line. Defaults to 0.5 (same as standard ggplots)}
+
+\item{colour.by}{One of "arrays" or "sections", defines how the points should be coloured.}
+
+\item{array.alias}{A named vector of format c("old_array_name" = "new_array_name") to replace
+default array names with user defined ones. Only relevant if colour.by = "arrays".}
 
 \item{lcol}{The colour for the line. Defaults to grey.}
 
-\item{verbose}{Logical: Should warning messages be printed if necessary?}
+\item{verbose}{Logical: Should warning messages be printed, if necessary?}
 }
 \value{
 A ggplot object.

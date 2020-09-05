@@ -1399,7 +1399,7 @@ printLastArray <- function(status.df) {
 #'
 #' @return A string of file locations in rmd syntax, to be included in printRmd
 #'
-printSensorData <- function(detections, rsp.info, extension = "png") {
+printSensorData <- function(detections, spatial, rsp.info, type = c("stations", "arrays"), extension = "png") {
   individual.plots <- NULL
   Timestamp <- NULL
   Sensor.Value <- NULL
@@ -1408,7 +1408,7 @@ printSensorData <- function(detections, rsp.info, extension = "png") {
   appendTo(c("Screen", "Report"), "M: Printing sensor values for tags with sensor data.")
 
   fake.results <- list(valid.detections = detections,
-                spatial = "spatial",
+                spatial = spatial,
                 valid.movements = "valid.movements",
                 rsp.info = rsp.info)
 
@@ -1419,22 +1419,52 @@ printSensorData <- function(detections, rsp.info, extension = "png") {
   n.plots <- 0
   individual.plots <- ""
 
-  capture <- lapply(names(detections), function(fish) {
+  capture <- lapply(names(detections), function(tag) {
     counter <<- counter + 1
+    if (any(!is.na(detections[[tag]]$Sensor.Value))) {
+      p <- plotSensors(input = fake.results, tag = tag, verbose = getOption("actel.debug", default = FALSE),
+        colour.by = ifelse(type == "stations", "array", "section"))
 
-    if (any(!is.na(detections[[fish]]$Sensor.Value))) {
-      p <- plotSensors(input = fake.results, tag = fish, verbose = getOption("actel.debug", default = FALSE))
-
-      if (length(unique(detections[[fish]]$Sensor.Unit)) > 2)
-        the.height <- 4 + ((length(unique(detections[[fish]]$Sensor.Unit)) - 2) * 2)
+      if (length(unique(detections[[tag]]$Sensor.Unit)) > 2)
+        the.height <- 4 + ((length(unique(detections[[tag]]$Sensor.Unit)) - 2) * 2)
       else
         the.height <- 4
-      ggplot2::ggsave(paste0(tempdir(), "/actel_report_auxiliary_files/", fish, "_sensors.", extension), width = 5, height = the.height)  # better to save in png to avoid point overlapping issues
+
+      # default width:
+      the.width <- 5
+      # Adjustments depending on number of legend valudes
+      if (type == "stations")
+        to.check <- levels(detections[[tag]]$Array)
+      else
+        to.check <- names(spatial$array.order)
+
+      if (length(to.check) > 14 & length(to.check) <= 29) {
+        if (counter %% 2 == 0) {
+          p <- p + ggplot2::guides(colour = ggplot2::guide_legend(ncol = 2))
+          the.width <- 5.8
+        } else {
+          p <- p + ggplot2::theme(legend.position = "none")
+          the.width <- 4.2
+        }
+      }
+      if (length(to.check) >= 29) {
+        if (counter %% 2 == 0) {
+          p <- p + ggplot2::guides(colour = ggplot2::guide_legend(ncol = 3))
+          the.width <- 7.5
+        } else {
+          p <- p + ggplot2::theme(legend.position = "none")
+          the.width <- 2.5
+        }
+      }
+
+      # Save
+      ggplot2::ggsave(paste0(tempdir(), "/actel_report_auxiliary_files/", tag, "_sensors.", extension), width = the.width, height = the.height)  # better to save in png to avoid point overlapping issues
+
       n.plots <- n.plots + 1
       if (n.plots %% 2 == 0) {
-        individual.plots <<- paste0(individual.plots, "![](", tempdir(), "/actel_report_auxiliary_files/", fish, "_sensors.", extension, "){ width=50% }\n")
+        individual.plots <<- paste0(individual.plots, "![](", tempdir(), "/actel_report_auxiliary_files/", tag, "_sensors.", extension, "){ width=", the.width * 10, "% }\n")
       } else {
-        individual.plots <<- paste0(individual.plots, "![](", tempdir(), "/actel_report_auxiliary_files/", fish, "_sensors.", extension, "){ width=50% }")
+        individual.plots <<- paste0(individual.plots, "![](", tempdir(), "/actel_report_auxiliary_files/", tag, "_sensors.", extension, "){ width=", the.width * 10, "% }")
       }
       if (interactive())
         setTxtProgressBar(pb, counter)
