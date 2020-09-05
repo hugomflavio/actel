@@ -1,6 +1,6 @@
 #' Group movements
 #'
-#' Crawls trough the detections of each fish and groups them based on ALS arrays and time requirements.
+#' Crawls trough the detections of each tag and groups them based on ALS arrays and time requirements.
 #'
 #' @param detections.list A list of the detections split by each target tag, created by splitDetections.
 #' @param dist.mat A matrix of the distances between the deployed ALS.
@@ -8,7 +8,7 @@
 #' @inheritParams splitDetections
 #' @inheritParams loadDetections
 #'
-#' @return A list containing the movement events for each fish.
+#' @return A list containing the movement events for each tag.
 #'
 #' @keywords internal
 #'
@@ -21,7 +21,7 @@ groupMovements <- function(detections.list, bio, spatial, speed.method, max.inte
     if (interactive())
       pb <- txtProgressBar(min = 0, max = sum(sapply(detections.list, function(x) sum(x$Valid))), style = 3, width = 60)
     movements <- lapply(names(detections.list), function(i) {
-      appendTo("debug", paste0("Debug: (Movements) Analysing fish ", i, "."))
+      appendTo("debug", paste0("Debug: (Movements) Analysing tag ", i, "."))
       x <- detections.list[[i]]
       # discount invalid detections
       x <- x[x$Valid, ]
@@ -124,11 +124,11 @@ groupMovements <- function(detections.list, bio, spatial, speed.method, max.inte
 #' @inheritParams groupMovements
 #' @param movements A list of movements for each target tag, created by groupMovements.
 #'
-#' @return The movement data frame containing only valid events for the target fish.
+#' @return The movement data frame containing only valid events for the target tag.
 #'
 #' @keywords internal
 #'
-simplifyMovements <- function(movements, discard.first, fish, bio, speed.method, dist.mat) {
+simplifyMovements <- function(movements, discard.first, tag, bio, speed.method, dist.mat) {
   # NOTE: The NULL variables below are actually column names used by data.table.
   # This definition is just to prevent the package check from issuing a note due unknown variables.
   Valid <- NULL
@@ -140,7 +140,7 @@ simplifyMovements <- function(movements, discard.first, fish, bio, speed.method,
         aux <- movementSpeeds(movements = aux, speed.method = speed.method, dist.mat = dist.mat)
 
     if (is.null(discard.first)) {
-      output <- speedReleaseToFirst(fish = fish, bio = bio, movements = aux,
+      output <- speedReleaseToFirst(tag = tag, bio = bio, movements = aux,
         dist.mat = dist.mat, speed.method = speed.method)
     } else {
       output <- aux
@@ -161,7 +161,7 @@ simplifyMovements <- function(movements, discard.first, fish, bio, speed.method,
 #' @inheritParams simplifyMovements
 #' @inheritParams groupMovements
 #'
-#' @return The movement data frame with speed calculations for the target fish.
+#' @return The movement data frame with speed calculations for the target tag.
 #'
 #' @keywords internal
 #'
@@ -197,7 +197,7 @@ movementSpeeds <- function(movements, speed.method, dist.mat) {
 #' @inheritParams movementSpeeds
 #' @param type The type of movements being analysed. One of "array" or "section".
 #'
-#' @return The movement data frame with time calculations for the target fish.
+#' @return The movement data frame with time calculations for the target tag.
 #'
 #' @keywords internal
 #'
@@ -251,15 +251,15 @@ movementTimes <- function(movements, type = c("array", "section")){
 #' @inheritParams explore
 #' @inheritParams groupMovements
 #' @inheritParams movementSpeeds
-#' @param fish The tag ID of the fish currently being analysed
+#' @param tag The tag ID of the animal currently being analysed
 #'
 #' @return The movement data frame containing time and speed from release to first event.
 #'
 #' @keywords internal
 #'
-speedReleaseToFirst <- function(fish, bio, movements, dist.mat, speed.method){
+speedReleaseToFirst <- function(tag, bio, movements, dist.mat, speed.method){
   appendTo("debug", "Running speedReleaseToFirst.")
-  the.row <- match(fish, bio$Transmitter)
+  the.row <- match(tag, bio$Transmitter)
   origin.time <- bio[the.row, "Release.date"]
   origin.place <- as.character(bio[the.row, "Release.site"])
   if (origin.time <= movements$First.time[1]) {
@@ -298,7 +298,7 @@ speedReleaseToFirst <- function(fish, bio, movements, dist.mat, speed.method){
 #' @param spatial The spatial data list.
 #' @param valid.dist Logical: Is a valid distances matrix being used?
 #'
-#' @return A data frame containing the section movements for the target fish.
+#' @return A data frame containing the section movements for the target tag.
 #'
 #' @keywords internal
 #'
@@ -375,7 +375,7 @@ sectionMovements <- function(movements, spatial, valid.dist) {
 #' @param arrmoves the array movements
 #' @param secmoves the section movements
 #'
-#' @return A data frame with the array movements for the target fish, with an updated 'Valid' column.
+#' @return A data frame with the array movements for the target tag, with an updated 'Valid' column.
 #'
 #' @keywords internal
 #'
@@ -391,7 +391,7 @@ updateValidity <- function(arrmoves, secmoves) {
             B <- A + (aux$Events[j] - 1)
             return(A:B)
           }))
-        appendTo(c("Screen", "Report"), paste0("M: Rendering ", length(to.change), " array movement(s) invalid for fish ", i ," as the respective section movements were discarded by the user."))
+        appendTo(c("Screen", "Report"), paste0("M: Rendering ", length(to.change), " array movement(s) invalid for tag ", i ," as the respective section movements were discarded by the user."))
         arrmoves[[i]]$Valid[to.change] <- FALSE
         if (attributes(arrmoves[[i]])$p.type == "Auto")
           attributes(arrmoves[[i]])$p.type <- "Manual"

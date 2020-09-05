@@ -12,7 +12,7 @@ resRatiosIndOut(input, slots, tz)
 \item{slots}{the names of the time slots}
 }
 \value{
-A data frame with the daily ratios table for the target fish
+A data frame with the daily ratios table for the target tag
 }
 \description{
 compile output of dailyRatios

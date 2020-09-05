@@ -9,7 +9,7 @@ findSecondsPerSection(res, frame, the.range, num.step)
 \arguments{
 \item{res}{a residency list}
 
-\item{the.range}{the first and last start.time for the specific fish}
+\item{the.range}{the first and last start.time for the specific tag}
 
 \item{num.step}{the size of the block}
 

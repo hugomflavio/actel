@@ -42,10 +42,10 @@ Note:
 
 ## Additional movement processes
 
-The initial processes of migration() are the same as those from [the explore() function](b-1_explore_processes.html). However, when it comes to movement validity, actel will now also check if the fish was detected at an array that is not directly or indirectly below its release site. Should this happen, the following warning will be issued:
+The initial processes of migration() are the same as those from [the explore() function](b-1_explore_processes.html). However, when it comes to movement validity, actel will now also check if the tag was detected at an array that is not directly or indirectly below its release site. Should this happen, the following warning will be issued:
 
 ````
-Warning: Fish R64K-1234 was detected in an array that is not after its release site! Opening relevant data for inspection.
+Warning: Tag R64K-1234 was detected in an array that is not after its release site! Opening relevant data for inspection.
    Release site: Trap
    Expected first array: River3
 
@@ -68,9 +68,9 @@ Upon validating the movement events, the migration analysis proceeds to compress
 
 ### Backwards movements
 
-Tagged fish can move backwards either because they are reluctant of the new environments or because something ate them and you are now tracking the predator. The very first evidence of this is that the arrays to which each movement event belongs will no longer be arranged as expected. 
+Tagged animals can move backwards either because they are reluctant of the new environments or because something ate them and you are now tracking the predator. The very first evidence of this is that the arrays to which each movement event belongs will no longer be arranged as expected. 
 
-If this happens, but then the fish continues its journey, then the last movement events on each section will still be ordered as expected. Otherwise, if the fish moves backwards and then never returns, then the last movement events of each section will also be in an unexpected order. 
+If this happens, but then the animal continues its journey, then the last movement events on each section will still be ordered as expected. Otherwise, if the animal moves backwards and then never returns, then the last movement events of each section will also be in an unexpected order. 
 
 Let's have a look at two examples:
 
@@ -78,37 +78,37 @@ Let's have a look at two examples:
 
 #### A) Movement events unordered, but last events ordered
 
-In this example, the fish starts by moving towards the Fjord, as expected, but then the moves back upstream into the river again. However, the fish then moves back in the expected direction and eventually leaves the study area. In this case, the last event in the Fjord will be after the last event in the River.
+In this example, the animal starts by moving towards the Fjord, as expected, but then the moves back upstream into the river again. However, the animal then moves back in the expected direction and eventually leaves the study area. In this case, the last event in the Fjord will be after the last event in the River.
 
 These backwards movements imply going to an anterior section. As such, a warning will be issued:
 
 ````
-Warning: Inter-section backwards movements were detected for Fish R64K-4456.
+Warning: Inter-section backwards movements were detected for tag R64K-4456.
 ````
 
 #### B) Both Movement events and last events are unordered
 
-In this example, contrary to the above, the fish moves back into the river and then disappears. This means that the last event in the Fjord is actually **before** the last event in the River. 
+In this example, contrary to the above, the animal moves back into the river and then disappears. This means that the last event in the Fjord is actually **before** the last event in the River. 
 
-This has both an impact the assignment of the fish's fate. As such, a longer warning will be issued:
+This has both an impact the assignment of the animal's fate. As such, a longer warning will be issued:
 
 ````
-Warning: Inter-section backwards movements were detected for Fish R64K-4526 and the last events are not ordered!
+Warning: Inter-section backwards movements were detected for tag R64K-4526 and the last events are not ordered!
 ````
 
 #### Making movements linear
 
-While early versions of actel required you to linearise the movements, the migration update introduced on 2020-05-31 gives migration() the power to handle these events. As such, you can choose to leave them as valid, if you think they represent the movements of your target fish, or invalidate them, if these seem like the movements of a predator, for example.
+While early versions of actel required you to linearise the movements, the migration update introduced on 2020-05-31 gives migration() the power to handle these events. As such, you can choose to leave them as valid, if you think they represent the movements of your target animal, or invalidate them, if these seem like the movements of a predator, for example. Note that, for CJS calculations, only the forward movements are considered! You can read more about the CJS calculations [here](c-3_migration_efficiency.html).
 
-Once you have gone through this process for all relevant fish, if any section movement has been deemed invalid, the respective array movements will also be invalidated. Actel will let you know this happened by issuing a message:
+Once you have gone through this process for all relevant tags, if any section movement has been deemed invalid, the respective array movements will also be invalidated. Actel will let you know this happened by issuing a message:
 
 ````
-M: Rendering 1 array movement(s) invalid for fish R64K-4508 as the respective section movements were discarded by the user.
+M: Rendering 1 array movement(s) invalid for tag R64K-4508 as the respective section movements were discarded by the user.
 ````
 
 ## Compiling a timetable
 
-Once the movement events have been verified, they will be used to fill in the timetable, which is the most important step of migration(). For each fish, actel will compile a series of metrics  for each of the [study area's sections](a-1_study_area.html#sections) (e.g. average speed, total time spent, number of entries, etc). Once actel determines when the fish entered and left the study area's sections, it becomes possible to determine the fish's fate. This is  where the [`success.arrays` variable](c-0_migration.html#success.arrays) comes in. If your fish was last detected on an one of those arrays, it's fate will be assigned as "Succeeded".
+Once the movement events have been verified, they will be used to fill in the timetable, which is the most important step of migration(). For each animal, actel will compile a series of metrics  for each of the [study area's sections](a-1_study_area.html#sections) (e.g. average speed, total time spent, number of entries, etc). Once actel determines when the animals entered and left the study area's sections, it becomes possible to determine the animal's fate. This is where the [`success.arrays` variable](c-0_migration.html#success.arrays) comes in. If the animal was last detected on an one of those arrays, it's fate will be assigned as "Succeeded".
 
 ## Combining the time data with the biometrics
 

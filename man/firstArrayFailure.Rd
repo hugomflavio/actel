@@ -4,12 +4,12 @@
 \alias{firstArrayFailure}
 \title{Determine if the first array after release has failed}
 \usage{
-firstArrayFailure(fish, bio, spatial, first.array, paths, dotmat)
+firstArrayFailure(tag, bio, spatial, first.array, paths, dotmat)
 }
 \arguments{
-\item{fish}{The fish being analysed}
+\item{tag}{The tag being analysed}
 
-\item{bio}{A table with the tags and biometrics of the studied fish.}
+\item{bio}{A table with the tags and biometrics of the studied animals.}
 
 \item{spatial}{A list of spatial objects in the study area}
 

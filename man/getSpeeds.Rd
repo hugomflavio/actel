@@ -24,12 +24,12 @@ only the forward or backwards (relatively to the study area structure) movement 
 \value{
 A data frame with the following columns:
 \itemize{
-\item Fish: The tag of the fish who performed the recorded speed
+\item Tag: The tag of the animal who performed the recorded speed
 \item Event: The valid event where the speed was recorded
-\item From.array: The array from which the fish left
-\item From.station: The station from which the fish left
-\item To.array: The array to which the fish arrived
-\item To.station: The station to which the fish arrived
+\item From.array: The array from which the tags left
+\item From.station: The station from which the tags left
+\item To.array: The array to which the tags arrived
+\item To.station: The station to which the tags arrived
 \item Speed: The speed recorded in the described movement
 }
 }
@@ -45,7 +45,7 @@ getSpeeds(example.results, type = "forward")
 # or
 getSpeeds(example.results, type = "backward")
 
-# and also how many events per fish (this won't change the output 
+# and also how many events per tag (this won't change the output 
 # with the example.results, only because these results are minimal).
 getSpeeds(example.results, n.events = "first")
 # or

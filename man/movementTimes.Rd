@@ -12,7 +12,7 @@ movementTimes(movements, type = c("array", "section"))
 \item{type}{The type of movements being analysed. One of "array" or "section".}
 }
 \value{
-The movement data frame with time calculations for the target fish.
+The movement data frame with time calculations for the target tag.
 }
 \description{
 Determines the duration of an event and the time from an event to the next.

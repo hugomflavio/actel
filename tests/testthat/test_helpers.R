@@ -88,9 +88,9 @@ test_that("roundUp works as expected.", {
 })
 
 test_that("appendTo stores comments.", {
-	appendTo("Comment", "test comment", "Test fish")
+	appendTo("Comment", "test comment", "Test tag")
 	expect_true(file.exists("temp_comments.txt"))
-	expect_equal(read.table("temp_comments.txt", sep = "\t"), read.csv(text = '"V1","V2"\n"Test fish","test comment"'))
+	expect_equal(read.table("temp_comments.txt", sep = "\t"), read.csv(text = '"V1","V2"\n"Test tag","test comment"'))
 	file.remove("temp_comments.txt")
 })
 

@@ -50,7 +50,7 @@ test_that("loadStudyData can handle detections in unknown receivers", {
 	file.remove("detections/actel.detections.RData")
 	expect_warning(output <- loadStudyData(tz = "Europe/Copenhagen", override = NULL, start.time = NULL, stop.time = NULL,
 			  exclude.tags = NULL, disregard.parallels = TRUE),
-		"Fish R64K-4451 was detected in one or more receivers that are not listed in the study area (receiver(s): 132918)!", fixed = TRUE)
+		"Tag R64K-4451 was detected in one or more receivers that are not listed in the study area (receiver(s): 132918)!", fixed = TRUE)
 	file.remove("detections/actel.detections.RData")
 	expect_equal(tail(levels(output$detections.list[[1]]$Array), 1), "Unknown")
 	expect_equal(as.character(output$detections.list[[1]]$Array[13]), "Unknown")

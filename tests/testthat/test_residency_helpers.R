@@ -23,8 +23,8 @@ moves <- groupMovements(detections.list = detections.list[1:2], bio = bio, spati
     speed.method = "last to first", max.interval = 60, tz = "Europe/Copenhagen", dist.mat = dist.mat)
 
 aux <- names(moves)
-moves <- lapply(names(moves), function(fish) {
-    speedReleaseToFirst(fish = fish, bio = bio, movements = moves[[fish]],
+moves <- lapply(names(moves), function(tag) {
+    speedReleaseToFirst(tag = tag, bio = bio, movements = moves[[tag]],
                         dist.mat = dist.mat, speed.method = "last to first")
   })
 names(moves) <- aux
@@ -35,8 +35,8 @@ moves[[1]]$Valid[18] <- FALSE
 attributes(moves[[1]])$p.type <- "Manual"
 
 secmoves <- lapply(seq_along(moves), function(i) {
-  fish <- names(moves)[i]
-  appendTo("debug", paste0("debug: Compiling valid section movements for fish ", fish,"."))
+  tag <- names(moves)[i]
+  appendTo("debug", paste0("debug: Compiling valid section movements for tag ", tag,"."))
   output <- sectionMovements(movements = moves[[i]], spatial = spatial, valid.dist = attributes(dist.mat)$valid)
   return(output)
 })
@@ -182,7 +182,7 @@ test_that("globalRatios works as expected.", {
 
 test_that("res_efficiency works as expected, and can include intra array estimates", {
   efficiency <<- res_efficiency(arrmoves = moves, bio = bio, spatial = spatial, arrays = arrays, paths = paths, dotmat = dotmat)
-  expect_equal(names(efficiency), c("absolutes", "max.efficiency", "min.efficiency",  "values.per.fish"))
+  expect_equal(names(efficiency), c("absolutes", "max.efficiency", "min.efficiency",  "values.per.tag"))
   ### ONLY RUN THIS TO RESET REFERENCE
   # aux_res_efficiency <- efficiency
   # save(aux_res_efficiency, file = paste0(tests.home, "/aux_res_efficiency.RData"))
@@ -265,16 +265,16 @@ A7 -- A8 -- A7
   xspatial <- spatial
   xspatial$release.sites$Array <- "A0|A1"
 
-  first.array <- firstArrayFailure(fish = "R64K-4451", bio = bio, spatial = xspatial, first.array = "A5", paths = xdot$paths, dotmat = xdot$dotmat)
+  first.array <- firstArrayFailure(tag = "R64K-4451", bio = bio, spatial = xspatial, first.array = "A5", paths = xdot$paths, dotmat = xdot$dotmat)
   expect_equal(first.array,  c(known1 = "A0", known2 = "A4"))
 
-  first.array <- firstArrayFailure(fish = "R64K-4451", bio = bio, spatial = xspatial, first.array = "A6", paths = xdot$paths, dotmat = xdot$dotmat)
+  first.array <- firstArrayFailure(tag = "R64K-4451", bio = bio, spatial = xspatial, first.array = "A6", paths = xdot$paths, dotmat = xdot$dotmat)
   expect_equal(first.array,  c(unsure1 = "A0", unsure2 = "A1", unsure3 = "A4", unsure4 = "A5", unsure5 = "A2", unsure6 = "A3"))
 
-  first.array <- firstArrayFailure(fish = "R64K-4451", bio = bio, spatial = xspatial, first.array = "A7", paths = xdot$paths, dotmat = xdot$dotmat)
+  first.array <- firstArrayFailure(tag = "R64K-4451", bio = bio, spatial = xspatial, first.array = "A7", paths = xdot$paths, dotmat = xdot$dotmat)
   expect_equal(first.array,  c(known = "A6", unsure1 = "A0", unsure2 = "A1", unsure3 = "A4", unsure4 = "A5", unsure5 = "A2", unsure6 = "A3"))
 
-  first.array <- firstArrayFailure(fish = "R64K-4451", bio = bio, spatial = xspatial, first.array = "A9", paths = xdot$paths, dotmat = xdot$dotmat)
+  first.array <- firstArrayFailure(tag = "R64K-4451", bio = bio, spatial = xspatial, first.array = "A9", paths = xdot$paths, dotmat = xdot$dotmat)
   expect_equal(first.array,  c(known = "A6", unsure1 = "A0", unsure2 = "A1", unsure3 = "A4", unsure4 = "A5", unsure5 = "A7", unsure6 = "A8", unsure7 = "A2", unsure8 = "A3"))
 })
 

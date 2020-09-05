@@ -9,7 +9,7 @@ printCircular(times, bio, suffix = NULL)
 \arguments{
 \item{times}{a (list of) circular object(s)}
 
-\item{bio}{A table with the tags and biometrics of the studied fish.}
+\item{bio}{A table with the tags and biometrics of the studied animals.}
 }
 \value{
 A string of file locations in rmd syntax, to be included in printRmd

@@ -38,7 +38,7 @@ knitr::opts_chunk$set(
 
 ## The residency() function
 
-The residency() function builds on the same principles as the explore function and, in addition, computes metrics aiming to show the fish behaviour over time.
+The residency() function builds on the same principles as the explore function and, in addition, computes metrics aiming to show the animal behaviour over time.
 
 residency() has the same arguments as explore(), and includes a set of new arguments aimed to control the residency-related metrics. Like with explore, you *do not need to start working with all arguments right away.* Defining the `tz` is enough to get you going!
 
@@ -48,7 +48,7 @@ residency(tz = "Europe/Copenhagen")
 
 ## Residency arguments
 
-The arguments within residency() allow you thoroughly analyse the fish behaviour.
+The arguments within residency() allow you thoroughly analyse the animal behaviour.
 
 ```r
 residency(tz, section.order = NULL, success.arrays = NULL, max.interval = 60, minimum.detections = 2, 
@@ -67,13 +67,13 @@ This argument allows you to specify by which order you would like the sections t
 
 ### section.minimum
 
-This argument controls how many times a fish must be registered at a section for the event to be considered reliable. As part of the analysis, residency() will crunch the array level movement events into section level events. Should there be section events with less overall detections than those listed in `section.minimum`, a warning is raised, and you are given the chance to render events invalid.
+This argument controls how many times a tag must be registered at a section for the event to be considered reliable. As part of the analysis, residency() will crunch the array level movement events into section level events. Should there be section events with less overall detections than those listed in `section.minimum`, a warning is raised, and you are given the chance to render events invalid.
 
 You can find more about the [creation and validation of section movements here](d-1_residency_processes.html#section-movements).
 
 ## timestep
 
-By default, residency metrics are calculated on a daily basis (e.g. where did my fish spent the most time this day?). However, you may be interested in extracting results at a finer scale. By setting `timestep = "hours"`, actel will calculate all residency-related values on an hourly basis, rather than on a daily basis.
+By default, residency metrics are calculated on a daily basis (e.g. where did my animal spent the most time this day?). However, you may be interested in extracting results at a finer scale. By setting `timestep = "hours"`, actel will calculate all residency-related values on an hourly basis, rather than on a daily basis.
 
 Note:
   : Setting `timestep` to hours will increase computing times.

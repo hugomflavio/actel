@@ -2,14 +2,14 @@
 % Please edit documentation in R/check.R
 \name{checkLinearity}
 \alias{checkLinearity}
-\title{Check that the fish linearly moved along the sections}
+\title{Check that the tag linearly moved along the sections}
 \usage{
-checkLinearity(secmoves, fish, spatial, arrays, GUI)
+checkLinearity(secmoves, tag, spatial, arrays, GUI)
 }
 \arguments{
 \item{secmoves}{the section movements list}
 
-\item{fish}{The fish being analysed}
+\item{tag}{The tag being analysed}
 
 \item{spatial}{The spatial data frame, as loaded by loadSpatial}
 
@@ -27,6 +27,6 @@ prompted to open and examine that file. Defaults to "needed".}
 A list of section movements with updated 'Valid' columns
 }
 \description{
-Check that the fish linearly moved along the sections
+Check that the tag linearly moved along the sections
 }
 \keyword{internal}

@@ -4,12 +4,12 @@
 \alias{speedReleaseToFirst}
 \title{Calculate time and speed since release.}
 \usage{
-speedReleaseToFirst(fish, bio, movements, dist.mat, speed.method)
+speedReleaseToFirst(tag, bio, movements, dist.mat, speed.method)
 }
 \arguments{
-\item{fish}{The tag ID of the fish currently being analysed}
+\item{tag}{The tag ID of the animal currently being analysed}
 
-\item{bio}{A table with the tags and biometrics of the studied fish.}
+\item{bio}{A table with the tags and biometrics of the studied animals.}
 
 \item{movements}{A list of movements for each target tag, created by groupMovements.}
 

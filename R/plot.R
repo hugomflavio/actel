@@ -142,7 +142,7 @@ plotSensors <- function(input, tag, sensor, title = tag, xlab, ylab, pcol, psize
 #' @param col The colour of the line or bars. Defaults to blue.
 #' @param type The type of plot to be drawn. By default, a line is plotted if cumulative = TRUE, and bars are plotted otherwise.
 #' @param timestep The time resolution for the grouping of the results. Defaults to "days", but can be set to "hours" and "mins" (at the expnse of computing time).
-#' @param cumulative Logical. If TRUE, a cumulative plot of arrivals is drawn, otherwise the number of fish simultaneously present at the array(s) is drawn.
+#' @param cumulative Logical. If TRUE, a cumulative plot of arrivals is drawn, otherwise the number of tags simultaneously present at the array(s) is drawn.
 #'
 #' @return A ggplot object.
 #'
@@ -198,9 +198,9 @@ plotArray <- function(input, arrays, title, xlab, ylab, lwd = 1, col = "#56B4E9"
   first.time <- as.POSIXct(NA)[-1]
   last.time <- as.POSIXct(NA)[-1]
   
-  plot.list <- lapply(names(input$valid.movements), function(fish) {
-    # cat(fish, "\n")
-    moves <- as.data.frame(input$valid.movements[[fish]])
+  plot.list <- lapply(names(input$valid.movements), function(tag) {
+    # cat(tag, "\n")
+    moves <- as.data.frame(input$valid.movements[[tag]])
     output <- moves[grepl(array.string, moves$Array), ]
 
     if (nrow(output) > 0) {
@@ -374,22 +374,22 @@ plotMoves <- function(input, tags, title, xlab, ylab, col, array.alias, show.rel
     grouping <- c("Release", grouping)
 
   # extract information
-  plot.list <- lapply(tags, function(fish) {
-    # cat(fish, "\n")
-    moves <- input$valid.movements[[fish]]
-    release.date <- input$rsp.info$bio$Release.date[input$rsp.info$bio$Signal == extractSignals(fish)]
+  plot.list <- lapply(tags, function(tag) {
+    # cat(tag, "\n")
+    moves <- input$valid.movements[[tag]]
+    release.date <- input$rsp.info$bio$Release.date[input$rsp.info$bio$Signal == extractSignals(tag)]
 
     if (show.release) {
       x1 <- data.frame(array = factor(c("Release", moves$Array), levels = grouping),
                        date = c(release.date, moves$First.time),
                        index = seq(from = 1, to = (nrow(moves) * 2) + 1, by = 2),
-                       tag = rep(fish, nrow(moves) + 1),
+                       tag = rep(tag, nrow(moves) + 1),
                        event = 0:nrow(moves))
     } else {
       x1 <- data.frame(array = factor(moves$Array, levels = grouping),
                        date = moves$First.time,
                        index = seq(from = 1, to = (nrow(moves) * 2) - 1, by = 2),
-                       tag = rep(fish, nrow(moves)),
+                       tag = rep(tag, nrow(moves)),
                        event = 1:nrow(moves))
     }
 
@@ -400,7 +400,7 @@ plotMoves <- function(input, tags, title, xlab, ylab, col, array.alias, show.rel
     x2 <- data.frame(array = factor(moves$Array, levels = grouping),
                      date = moves$Last.time,
                      index = new.i,
-                     tag = rep(fish, nrow(moves)),
+                     tag = rep(tag, nrow(moves)),
                      event = 1:nrow(moves))
 
     output <- rbind(x1, x2)
@@ -679,7 +679,7 @@ plotDetections <- function(input, tag, type = c("stations", "arrays"), title, xl
   # Trim graphic
   p <- p + ggplot2::xlim(first.time, last.time)
   # Paint
-  p <- p + ggplot2::scale_color_manual(values = col, drop = FALSE)
+  p <- p + ggplot2::scale_color_manual(values = col, drop = FALSE, name = ifelse(type == "stations", "Array", "Section"))
   # Plot points
   p <- p + ggplot2::geom_point()
   # Show all Y axis values
@@ -1298,7 +1298,7 @@ plotResidency <- function(input, tag, title, xlab, ylab, col) {
   p <- p + ggplot2::scale_y_continuous(limits = c(0,  max(apply(ratios[, columns.to.use, drop = FALSE], 1, sum))), expand = c(0, 0))
   p <- p + ggplot2::labs(title = title, x = xlab, y = ylab)
   p <- p + ggplot2::scale_x_datetime(limits = time.range)
-  p <- p + ggplot2::scale_fill_manual(values = use.colours, drop = TRUE)
+  p <- p + ggplot2::scale_fill_manual(values = use.colours, drop = TRUE, name = "Location")
 
   if (length(use.levels) > 5 & length(use.levels) <= 10)
     p <- p + ggplot2::guides(fill = ggplot2::guide_legend(ncol = 2))
@@ -1311,7 +1311,7 @@ plotResidency <- function(input, tag, title, xlab, ylab, col) {
 #' Plot global/group residency
 #'
 #' By default, this function plots the global residency. However, you can use the argument 'group'
-#' to plot the results only from a specific fish group. Lastly, you can also use 'sections', rather
+#' to plot the results only from a specific animal group. Lastly, you can also use 'sections', rather
 #' than 'group', to compare the residency at a specific section (or group of sections) between the 
 #' different groups.
 #' 

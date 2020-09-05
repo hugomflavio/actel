@@ -2,14 +2,14 @@
 % Please edit documentation in R/check.R
 \name{overrideValidityChecks}
 \alias{overrideValidityChecks}
-\title{Skips all validity checks for a fish and allows the user to freely invalidate events}
+\title{Skips all validity checks for a tag and allows the user to freely invalidate events}
 \usage{
-overrideValidityChecks(moves, fish, GUI)
+overrideValidityChecks(moves, tag, GUI)
 }
 \arguments{
 \item{moves}{The movements table}
 
-\item{fish}{The fish being analysed}
+\item{tag}{The tag being analysed}
 
 \item{GUI}{One of "needed", "always" or "never". If "needed", a new window is
 opened to inspect the movements only if the movements table is too big to be
@@ -20,9 +20,9 @@ not fit in R's console, a temporary file will be saved and the user will be
 prompted to open and examine that file. Defaults to "needed".}
 }
 \value{
-A data frame containing the movements for the target fish
+A data frame containing the movements for the target tag
 }
 \description{
-Skips all validity checks for a fish and allows the user to freely invalidate events
+Skips all validity checks for a tag and allows the user to freely invalidate events
 }
 \keyword{internal}

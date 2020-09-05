@@ -57,7 +57,7 @@ invalidate potential efficiency peers? See the vignettes for more details.}
 
 \item{discard.orphans}{Logical: Should actel automatically discard
 detections that do not fall within receiver deployment periods, or that
-were recorded before the respective fish were released?}
+were recorded before the respective animals were released?}
 }
 \value{
 A dataset that can be used as an input for actel's main analyses.

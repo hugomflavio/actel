@@ -38,7 +38,7 @@ knitr::opts_chunk$set(
 
 ## Refining the results
 
-As you inspect your results, you may find out that you would rather change a specific outcome. For example, perhaps a detection was discarded that is actually relevant, or there are detections that clearly match a predator's behaviour rather than your fish and actel didn't pick that up.
+As you inspect your results, you may find out that you would rather change a specific outcome. For example, perhaps a detection was discarded that is actually relevant, or there are detections that clearly match a predator's behaviour rather than your animal, and actel didn't pick that up.
 
 When this happens, it is time to take the lead and tell actel what you want to do, by triggering the manual processing mode. To do this, simply add the signals that you want to deal with manually in the `override` argument (e.g. `override = c(1234, 1405)`).
 
@@ -46,7 +46,7 @@ When you list signals in `override`, actel will bypass all of the normal checks 
 
 ```
 ----------------------------
-M: Override has been triggered for fish R64K-1234. Entering full manual mode.
+M: Override has been triggered for tag R64K-1234. Entering full manual mode.
 Opening movements list for inspection.
 
 [...]
@@ -56,9 +56,9 @@ Would you like to render any movement event invalid?(y/n/comment)
 
 You must then decide whether or not you want to invalidate any events and which events you would like to be invalidated. Once you have finished your edits, actel will automatically terminate manual mode and proceed with the analysis.
 
-## actel report with overridden fish
+## actel report with overridden tags
 
-When you trigger the manual mode, actel will flag that in the report's summary. On top of that, the graphics for fish that have been manually overridden will be highlighted in red, so you can quickly find them. Below you can see the difference between the original graphic (on the left) and the manually overridden version (on the right):
+When you trigger the manual mode, actel will flag that in the report's summary. On top of that, the graphics for tags that have been manually overridden will be highlighted in red, so you can quickly find them. Below you can see the difference between the original graphic (on the left) and the manually overridden version (on the right):
 
 <img src="R64K-4526.png" alt="drawing" width="330"/> <img src="R64K-4526_overridden.png" alt="drawing" width="330"/>
 

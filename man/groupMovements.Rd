@@ -17,7 +17,7 @@ groupMovements(
 \arguments{
 \item{detections.list}{A list of the detections split by each target tag, created by splitDetections.}
 
-\item{bio}{A table with the tags and biometrics of the studied fish.}
+\item{bio}{A table with the tags and biometrics of the studied animals.}
 
 \item{speed.method}{Can take two forms: 'last to first' or 'last to last'.
 If 'last to first' (default), the last detection on the previous array is matched
@@ -34,9 +34,9 @@ present in \code{\link[base]{timezones}}.}
 \item{dist.mat}{A matrix of the distances between the deployed ALS.}
 }
 \value{
-A list containing the movement events for each fish.
+A list containing the movement events for each tag.
 }
 \description{
-Crawls trough the detections of each fish and groups them based on ALS arrays and time requirements.
+Crawls trough the detections of each tag and groups them based on ALS arrays and time requirements.
 }
 \keyword{internal}

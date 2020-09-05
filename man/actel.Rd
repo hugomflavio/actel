@@ -6,9 +6,9 @@
 \alias{actel-package}
 \title{actel: Acoustic Telemetry Data Analysis}
 \description{
-actel is designed for studies where fish tagged with acoustic tags are expected
+actel is designed for studies where animals tagged with acoustic tags are expected
 to move through receiver arrays. actel combines the advantages of automatic sorting and checking
-of fish movements with the possibility for user intervention on tags that deviate from expected
+of animal movements with the possibility for user intervention on tags that deviate from expected
 behaviour. The three analysis functions: \code{\link{explore}}, \code{\link{migration}}
 and \code{\link{residency}}, allow the users to analyse their data in a systematic way,
 making it easy to compare results from different studies.
@@ -63,19 +63,19 @@ analyses.
 \subsection{migration}{
 
 The \code{\link{migration}} analysis runs the same initial checks as
-\code{\link{explore}}, but on top of it, it analyses the fish behaviour.
+\code{\link{explore}}, but on top of it, it analyses the animal behaviour.
 By selecting the arrays that lead to success, you can define whether or not
-your fish survived the migration. Additional plots help you find out if some
-fish has been acting odd. Multiple options allow you to tweak the analysis to
-fit your study perfectly.
+your animals survived the migration. Additional plots help you find out if some
+animals/tags has been acting odd. Multiple options allow you to tweak the
+analysis to fit your study perfectly.
 }
 
 \subsection{residency}{
 
 The \code{\link{residency}} analysis runs the same initial checks as
 \code{\link{explore}}, but, similarly to \code{\link{migration}}, explores
-particular points of the fish behaviour. If you want to know where your fish
-were in each day of the study, how many fish were in each section each day,
+particular points of the animal behaviour. If you want to know where your animals
+were in each day of the study, how many animals were in each section each day,
 and other residency-focused variables, this is the analysis you are looking
 for!
 }

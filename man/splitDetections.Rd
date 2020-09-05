@@ -9,7 +9,7 @@ splitDetections(detections, bio, exclude.tags = NULL)
 \arguments{
 \item{detections}{A data frame with all the detections. Supplied by loadDetections.}
 
-\item{bio}{A table with the tags and biometrics of the studied fish.}
+\item{bio}{A table with the tags and biometrics of the studied animals.}
 
 \item{exclude.tags}{A vector of tags that should be excluded from the
 detection data before any analyses are performed. Intended to be used if

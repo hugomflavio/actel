@@ -2,7 +2,7 @@
 % Please edit documentation in R/residency.R
 \name{resPositions}
 \alias{resPositions}
-\title{Find the location where the fish spent most time per day}
+\title{Find the location where the tag spent most time per day}
 \usage{
 resPositions(ratios, timestep = c("days", "hours"))
 }
@@ -10,9 +10,9 @@ resPositions(ratios, timestep = c("days", "hours"))
 \item{ratios}{the daily ratios}
 }
 \value{
-A data frame containing the section in which each fish spent more time per day.
+A data frame containing the section in which each tag spent more time per day.
 }
 \description{
-Find the location where the fish spent most time per day
+Find the location where the tag spent most time per day
 }
 \keyword{internal}

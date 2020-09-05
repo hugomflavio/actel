@@ -9,7 +9,7 @@ checkDupSignals(input, bio)
 \arguments{
 \item{input}{list of detections}
 
-\item{bio}{A table with the tags and biometrics of the studied fish.}
+\item{bio}{A table with the tags and biometrics of the studied animals.}
 
 \item{tag.list}{list of the target signals}
 }

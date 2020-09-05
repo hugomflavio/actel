@@ -10,9 +10,9 @@ assembleSectionOverview(status.df, spatial)
 \item{spatial}{The spatial data list.}
 }
 \value{
-A data frame containing the survival per group of fish present in the biometrics.
+A data frame containing the survival per group of animals present in the biometrics.
 }
 \description{
-Produces a table with the survival per group of fish present in the biometrics.
+Produces a table with the survival per group of animals present in the biometrics.
 }
 \keyword{internal}

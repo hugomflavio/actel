@@ -14,7 +14,7 @@
 #' # or
 #' getSpeeds(example.results, type = "backward")
 #'
-#' # and also how many events per fish (this won't change the output 
+#' # and also how many events per tag (this won't change the output 
 #' # with the example.results, only because these results are minimal).
 #' getSpeeds(example.results, n.events = "first")
 #' # or
@@ -24,12 +24,12 @@
 #'
 #' @return A data frame with the following columns:
 #' \itemize{
-#'  \item Fish: The tag of the fish who performed the recorded speed
+#'  \item Tag: The tag of the animal who performed the recorded speed
 #'  \item Event: The valid event where the speed was recorded
-#'  \item From.array: The array from which the fish left
-#'  \item From.station: The station from which the fish left
-#'  \item To.array: The array to which the fish arrived
-#'  \item To.station: The station to which the fish arrived
+#'  \item From.array: The array from which the tags left
+#'  \item From.station: The station from which the tags left
+#'  \item To.array: The array to which the tags arrived
+#'  \item To.station: The station to which the tags arrived
 #'  \item Speed: The speed recorded in the described movement
 #' }
 #'
@@ -53,17 +53,17 @@ getSpeeds <- function(input, type = c("all", "forward", "backward"), direct = FA
 	speed.method <- attributes(input$dist.mat)$speed.method
 	to.station.col <- ifelse(speed.method == "last to first", "First.station", "Last.station")
 	
-	output.list <- lapply(names(input$valid.movements), function(fish) {
-		# cat(fish, "\n")
+	output.list <- lapply(names(input$valid.movements), function(tag) {
+		# cat(tag, "\n")
 		# treat movements as data frame to avoid data.table shenanigans
-		aux <- as.data.frame(input$valid.movements[[fish]])
+		aux <- as.data.frame(input$valid.movements[[tag]])
 		# find events with speeds
 		to.extract <- which(!is.na(aux$Average.speed.m.s))
 
 		if (direct) {
 			if (to.extract[1] == 1) {
 				# check that first event is connected to release
-				the.release <- input$rsp.info$bio$Release.site[which(input$rsp.info$bio$Transmitter == fish)]
+				the.release <- input$rsp.info$bio$Release.site[which(input$rsp.info$bio$Transmitter == tag)]
 				the.first.array <- input$spatial$release.sites$Array[input$spatial$release.sites$Standard.name == the.release]
 				# if not, exclude first event
 				if (aux$Array[1] != the.first.array)
@@ -96,7 +96,7 @@ getSpeeds <- function(input, type = c("all", "forward", "backward"), direct = FA
 			# if first event was selected
 			if (to.extract[1] == 1) {
 				# check that first event is at expected first array or at some array coming after it
-				the.release <- input$rsp.info$bio$Release.site[which(input$rsp.info$bio$Transmitter == fish)]
+				the.release <- input$rsp.info$bio$Release.site[which(input$rsp.info$bio$Transmitter == tag)]
 				the.first.array <- input$spatial$release.sites$Array[input$spatial$release.sites$Standard.name == the.release]
 				if (!(aux$Array[1] %in% c(the.first.array, input$arrays[[the.first.array]]$all.after))) #first array must be expected first array or after it
 					to.extract <- to.extract[-1]
@@ -128,7 +128,7 @@ getSpeeds <- function(input, type = c("all", "forward", "backward"), direct = FA
 			# if first event was selected
 			if (to.extract[1] == 1) {
 				# check that first event is at expected first array or at some array coming after it
-				the.release <- input$rsp.info$bio$Release.site[which(input$rsp.info$bio$Transmitter == fish)]
+				the.release <- input$rsp.info$bio$Release.site[which(input$rsp.info$bio$Transmitter == tag)]
 				the.first.array <- input$spatial$release.sites$Array[input$spatial$release.sites$Standard.name == the.release]
 				if (!(aux$Array[1] %in% input$arrays[[the.first.array]]$all.before)) # first array must be before expected first array
 					to.extract <- to.extract[-1]
@@ -159,10 +159,10 @@ getSpeeds <- function(input, type = c("all", "forward", "backward"), direct = FA
 		if (length(to.extract) > 0) {
 			if (to.extract[1] == 1) {
 				first.line <- data.frame(
-					Fish = fish,
+					Tag = tag,
 					Event = 1,
 					From.array = "Release",
-					From.station = input$rsp.info$bio$Release.site[which(input$rsp.info$bio$Transmitter == fish)],
+					From.station = input$rsp.info$bio$Release.site[which(input$rsp.info$bio$Transmitter == tag)],
 					To.array = aux$Array[1],
 					To.station = aux[1, to.station.col],
 					Speed = aux$Average.speed.m.s[1])
@@ -176,7 +176,7 @@ getSpeeds <- function(input, type = c("all", "forward", "backward"), direct = FA
 
 		if (length(to.extract) > 0) {
 			other.lines <- data.frame(
-				Fish = rep(fish, length(to.extract)),
+				Tag = rep(tag, length(to.extract)),
 				Event = to.extract,
 				From.array = aux$Array[to.extract - 1],
 				From.station = aux$Last.station[to.extract - 1],
@@ -228,14 +228,14 @@ getSpeeds <- function(input, type = c("all", "forward", "backward"), direct = FA
 #' # or
 #' getTimes(example.results, event.type = "departure")
 #'
-#' # and also how many events per fish.
+#' # and also how many events per tag.
 #' getTimes(example.results, n.events = "first")
 #' # or
 #' getTimes(example.results, n.events = "all")
 #' # or
 #' getTimes(example.results, n.events = "last")
 #'
-#' @return A data frame with the timestamps for each fish (rows) and array (columns)
+#' @return A data frame with the timestamps for each tag (rows) and array (columns)
 #'
 #' @export
 #'

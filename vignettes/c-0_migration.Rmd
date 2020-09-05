@@ -38,7 +38,7 @@ knitr::opts_chunk$set(
 
 ## The migration() function
 
-The migration() functions builds on the same principles as the explore() function and, in addition, computes metrics under the assumption that the fish will move in a predictable direction.
+The migration() functions builds on the same principles as the explore() function and, in addition, computes metrics under the assumption that the animals will move in a predictable direction.
 
 migration() has the same arguments as explore(), and includes a set of new arguments aimed to fine tune the migration-related metrics. Like with explore, you *do not need to start working with all arguments right away.* For simple study areas, defining the `tz` is enough to get you going!
 
@@ -65,14 +65,14 @@ Below are listed only new arguments that do not exist in [explore](b-0_explore.h
 
 ### section.order
 
-For the `migration()` analysis, the order of the study area sections must reflect the expected order in which your fish will cross them. If a `section.order` is not provided, actel will order the sections by their appearance in the spatial.csv file. However, if you want to alter this default order, you can specify a given order using this argument. E.g. if you expect your fish to move from the river, to a fjord and ultimately to the sea (and you have receivers in all these ecosystems), then `section.order = c("River", "Fjord", "Sea")`. 
+For the `migration()` analysis, the order of the study area sections must reflect the expected order in which your animals will cross them. If a `section.order` is not provided, actel will order the sections by their appearance in the spatial.csv file. However, if you want to alter this default order, you can specify a given order using this argument. E.g. if you expect your animals to move from the river, to a fjord and ultimately to the sea (and you have receivers in all these ecosystems), then `section.order = c("River", "Fjord", "Sea")`. 
 
-In the other hand, if you expect your fish to migrate upstream, then `section.order = c("Sea", "Fjord", "River")`. To learn more about how to organise your study area in an actel-friendly way, have a look at [this manual page.](a-1_study_area.html)
+In the other hand, if you expect your animals to migrate upstream, then `section.order = c("Sea", "Fjord", "River")`. To learn more about how to organise your study area in an actel-friendly way, have a look at [this manual page.](a-1_study_area.html)
 
 
 ### success.arrays
 
-If a fish is last detected at an array listed in `success.arrays`, it will be considered as having successfully crossed the study area. By default, the last array of your study area is considered a success array. However, if you are not sure about your last array's efficiency, you can define multiple success arrays (e.g. `success.arrays = c("Sea1", "Sea2")` ).
+If a tag is last detected at an array listed in `success.arrays`, the respective animal will be considered to have successfully crossed the study area. By default, the last array of your study area is considered a success array. However, if you are not sure about your last array's efficiency, you can define multiple success arrays (e.g. `success.arrays = c("Sea1", "Sea2")` ).
 
 Note:
   : In multi-branch study areas with multiple endings, the last array of each ending is, by default, considered a success array.
@@ -80,13 +80,13 @@ Note:
 
 ### if.last.skip.section
 
-This option is best explained with examples. Let us assume we have a study area with four arrays: River1, River2, Fjord1 and Fjord2. Now, we have a fish that was last detected at River2. Should this fish be considered to have disappeared in the river or in the fjord? It comes down to how your stations are deployed in the field, and this is what `if.last.skip.section` is controlling for. Lets have a look at the two maps below.
+This option is best explained with examples. Let us assume we have a study area with four arrays: River1, River2, Fjord1 and Fjord2. Now, we have a tag that was last detected at River2. Should this animal be considered to have disappeared in the river or in the fjord? It comes down to how your stations are deployed in the field, and this is what `if.last.skip.section` is controlling for. Lets have a look at the two maps below.
 
 <img src="if_last_skip_section_true.svg" alt="drawing" width="330"/> <img src="if_last_skip_section_false.svg" alt="drawing" width="330"/>
 
-On study area **A**, it seems reasonable that a fish last detected at River2 has likely died in the fjord, before reaching Fjord1. In this case, `if.last.skip.section = TRUE`.
+On study area **A**, it seems reasonable that a tag last detected at River2 has likely died in the fjord, before reaching Fjord1. In this case, `if.last.skip.section = TRUE`.
 
-However, on study area **B**, if a fish was last detected at River2, it most likely died somewhere in the river. In this case, `if.last.skip.section = FALSE`.
+However, on study area **B**, if a tag was last detected at River2, it most likely died somewhere in the river. In this case, `if.last.skip.section = FALSE`.
 
 
 ### replicates

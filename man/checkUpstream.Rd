@@ -4,14 +4,14 @@
 \alias{checkUpstream}
 \title{Check for movements upstream of the release site.}
 \usage{
-checkUpstream(movements, fish, release, arrays, GUI)
+checkUpstream(movements, tag, release, arrays, GUI)
 }
 \arguments{
 \item{movements}{The movements table}
 
-\item{fish}{The fish being analysed}
+\item{tag}{The tag being analysed}
 
-\item{release}{The release location of the fish}
+\item{release}{The release location of the animal}
 
 \item{arrays}{a list containing information for each array}
 
@@ -24,7 +24,7 @@ not fit in R's console, a temporary file will be saved and the user will be
 prompted to open and examine that file. Defaults to "needed".}
 }
 \value{
-A data frame with the movements for the target fish with updated 'Valid' column.
+A data frame with the movements for the target tag with updated 'Valid' column.
 }
 \description{
 Check for movements upstream of the release site.

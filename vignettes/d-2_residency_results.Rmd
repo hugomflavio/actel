@@ -43,7 +43,7 @@ The results compiled by the residency() function include [those of the explore()
 
 ### status.df
 
-The `status.df` is a data frame that combines both the timetable data and your biometrics into a single, organised table (see ["Compiling a timetable"](d-1_residency_processes.html#compiling-a-timetable)). If you have stored any comments during the analysis process, they will show up in a reserved column in this table. The `status.df` also contains some more summary information for each fish. This table can be quite big, so it may be a good idea to use `head(status.df)`  the first time you look at it.
+The `status.df` is a data frame that combines both the timetable data and your biometrics into a single, organised table (see ["Compiling a timetable"](d-1_residency_processes.html#compiling-a-timetable)). If you have stored any comments during the analysis process, they will show up in a reserved column in this table. The `status.df` also contains some more summary information for each animal. This table can be quite big, so it may be a good idea to use `head(status.df)`  the first time you look at it.
 
 ### section.movements
 
@@ -63,7 +63,7 @@ The `section.movements` list contains the section-level movement events created 
 
 ### residency.list
 
-The `residency.list` contains a table for each of your fish, detailing where it was since its first valid detection to its last. Here is an example of the residency list produced based on the section movements above:
+The `residency.list` contains a table for each of the target tags, detailing where it was since its first valid detection to its last. Here is an example of the residency list produced based on the section movements above:
 
 |Section    |First.time          |Last.time           |
 |:----------|:-------------------|:-------------------|
@@ -82,17 +82,17 @@ The `residency.list` contains a table for each of your fish, detailing where it 
 
 ### array.times
 
-This table contains information on the all arrival times for each fish, at each array. It is used to produce circular graphics in the report.
+This table contains information on the all arrival times for each tag, at each array. It is used to produce circular graphics in the report.
 
 
 ### section.times
 
-`section.times` is a list that contains two tables. The first one has all the arrival times for each fish, at each section, and the second has all the departure times, sorted in the same fashion. These are used to produce circular graphics in the report.
+`section.times` is a list that contains two tables. The first one has all the arrival times for each tag, at each section, and the second has all the departure times, sorted in the same fashion. These are used to produce circular graphics in the report.
 
 
 ### time.ratios
 
-The `time.ratios` contains detailed information on the time spent at each location, per day (or hour, if `timestep = "hours")` , for each of your fish. These tables can be quite long. Here is an example:
+The `time.ratios` contains detailed information on the time spent at each location, per day (or hour, if `timestep = "hours")` , for each of the target tags. These tables can be quite long. Here is an example:
 
 |Date       | Down| pDown| Down-Right| pDown-Right| Right| pRight| ... | Changes|Most.time  |
 |:----------|----:|-----:|----------:|-----------:|-----:|------:|-----|-------:|:----------|
@@ -109,14 +109,14 @@ The `time.ratios` contains detailed information on the time spent at each locati
 
 ### time.locations
 
-The `time.locations` is a data frame showing the place where each fish spent the most time during each day. It is a crucial middle step between the `time.ratios` and the `global.ratios`.
+The `time.locations` is a data frame showing the place where each tag spent the most time during each day. It is a crucial middle step between the `time.ratios` and the `global.ratios`.
 
 
 ### global.ratios
 
 The global ratios is a list containing two elements:
 
-1. The absolute number of fish at each location in each day/hour:
+1. The absolute number of tags at each location in each day/hour:
 
 |Date       | Down| Down-Left| Down-Right| Left| Left-Right| Right| Total|
 |:----------|----:|---------:|----------:|----:|----------:|-----:|-----:|
@@ -129,7 +129,7 @@ The global ratios is a list containing two elements:
 |...        |  ...|       ...|        ...|  ...|        ...|   ...|   ...|
 
 
-2. The percentage of fish at each location in each day/hour:
+2. The percentage of tags at each location in each day/hour:
 
 |Date       |  Down| Down-Left| Down-Right|  Left| Left-Right| Right| Total|
 |:----------|-----:|---------:|----------:|-----:|----------:|-----:|-----:|
@@ -147,7 +147,7 @@ The group ratios are lists similar to the `global.ratios`, but where the data ha
 
 ### last.seen
 
-The `last.seen` is a simple summary table, showing how many fish from each group were last seen at each section, with an extra column for fish that were never detected:
+The `last.seen` is a simple summary table, showing how many tags from each group were last seen at each section, with an extra column for tags that were never detected:
 
 |         | Disap. in Down| Disap. in Left| Disap. in Right| Disap. at Release|
 |:--------|--------------:|--------------:|---------------:|-----------------:|
@@ -188,30 +188,30 @@ This is the main non-R output. If you activated the `report` option, actel will 
 
 1. **Array efficiency**
 
-  Here you can see how efficient your receiver arrays were at detecting the fish that moved past them. These results can also be found in the `efficiency` object, which is in your results in R. If you supplied replicates, the results of the intra-array estimations will also show up here.
+  Here you can see how efficient your receiver arrays were at detecting the tags that moved past them. These results can also be found in the `efficiency` object, which is in your results in R. If you supplied replicates, the results of the intra-array estimations will also show up here.
 
 2. **Last seen**
 
-  The sections where the fish were last seen is displayed both as a table and a figure, both of which use the content of the `last.seen` object, which is in your results in R.
+  The sections where the tags were last detected is displayed both as a table and a figure, both of which use the content of the `last.seen` object, which is in your results in R.
 
 3. **Average array arrival times**
 
-  For each of your study area's arrays, a circular plot will be drawn with all the arrival times of each fish. The fish are grouped by the groups listed in the *biometrics.csv* file. These plots are saved in .svg format in the Report folder, so you can easily use them elsewhere, if needed.
+  For each of your study area's arrays, a circular plot will be drawn with all the arrival times of each tag. The tags are grouped by the groups listed in the *biometrics.csv* file. These plots are saved in .svg format in the Report folder, so you can easily use them elsewhere, if needed.
 
 
 4. **Time details per section**
 
-  This section is divided in two main subsections: arrivals and departures. A plot with the days when fish arrived/departed each of the sections is made, as well as circular plots with all the times-of-day recorded for each fish arriving/departing each section. These graphics are all based in the `section.times` object.
+  This section is divided in two main subsections: arrivals and departures. A plot with the days when tags arrived/departed each of the sections is made, as well as circular plots with all the times-of-day recorded for each tag arriving/departing each section. These graphics are all based in the `section.times` object.
 
 
 5. **Section progression**
 
-  This section has a graphic representation of the data present in the `global.ratios` object. It shows how the fish have distributed across your study area as the days pass by.
+  This section has a graphic representation of the data present in the `global.ratios` object. It shows how the tags have distributed across your study area as the days pass by.
 
 
 6. **Individual residency plots**
 
-  Here you can find a graphic representation of the data present in the `daily.ratios` object. It shows, for each fish, how much time they spent at each location at each day. All plots start and end in the same day, so it is easy to compare the behaviour of each fish to the remaining.
+  Here you can find a graphic representation of the data present in the `daily.ratios` object. It shows how much time each tag has spent at each location for each day/hour. All plots start and end in the same day, so it is easy to compare the behaviour of different animals.
 
 
 [Back to top.](#)

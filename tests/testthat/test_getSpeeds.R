@@ -18,9 +18,9 @@ xresults$valid.movements[[5]] <- xresults$valid.movements[[5]][-1, ]
 test_that("getSpeeds is extracting speeds.", {
 	x <- getSpeeds(xresults, n.events = "all")
 	expect_equal(nrow(x), 449)
-	expect_equal(colnames(x), c("Fish", "Event", "From.array", "From.station", "To.array", "To.station", "Speed"))
+	expect_equal(colnames(x), c("Tag", "Event", "From.array", "From.station", "To.array", "To.station", "Speed"))
 	expect_equal(x$Speed[1:6], xresults$valid.movements[[1]]$Average.speed.m.s[1:6])
-	expect_equal(as.character(unique(x$Fish)), as.character(names(xresults$valid.movements)))
+	expect_equal(as.character(unique(x$Tag)), as.character(names(xresults$valid.movements)))
 })
 
 test_that("getSpeeds argument 'direct' is working.", {
@@ -74,7 +74,7 @@ test_that("getSpeeds argument 'n.events' is working", {
 	x <- getSpeeds(xresults, n.events = "first")
 	expect_equal(nrow(x), 444)
 
-	check <- paste(x$Fish, x$From.array, x$To.array, sep = "_")
+	check <- paste(x$Tag, x$From.array, x$To.array, sep = "_")
 	expect_false(any(duplicated(check)))
 
 	expect_equal(x$Event[259], 2)
@@ -82,7 +82,7 @@ test_that("getSpeeds argument 'n.events' is working", {
 	x <- getSpeeds(xresults, n.events = "last")
 	expect_equal(nrow(x), 444)
 
-	check <- paste(x$Fish, x$From.array, x$To.array, sep = "_")
+	check <- paste(x$Tag, x$From.array, x$To.array, sep = "_")
 	expect_false(any(duplicated(check)))
 
 	expect_equal(x$Event[259], 2)

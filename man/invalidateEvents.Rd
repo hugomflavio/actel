@@ -4,15 +4,15 @@
 \alias{invalidateEvents}
 \title{Allow the user to determine a given movement event invalid}
 \usage{
-invalidateEvents(movements, fish)
+invalidateEvents(movements, tag)
 }
 \arguments{
 \item{movements}{The movements table}
 
-\item{fish}{The fish being analysed}
+\item{tag}{The tag being analysed}
 }
 \value{
-A data frame with the movement events for the target fish and an updated 'Valid' column.
+A data frame with the movement events for the target tag and an updated 'Valid' column.
 }
 \description{
 Allow the user to determine a given movement event invalid

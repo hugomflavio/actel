@@ -9,7 +9,7 @@ res_efficiency(arrmoves, bio, spatial, arrays, paths, dotmat)
 \arguments{
 \item{arrmoves}{the array movements}
 
-\item{bio}{A table with the tags and biometrics of the studied fish.}
+\item{bio}{A table with the tags and biometrics of the studied animals.}
 
 \item{spatial}{A list of spatial objects in the study area}
 
@@ -22,10 +22,10 @@ res_efficiency(arrmoves, bio, spatial, arrays, paths, dotmat)
 \value{
 A list containing:
 \itemize{
-\item \code{absolutes}: A data frame with the number of fish detected and missed at each array.
-\item \code{max.efficiency}: A vector of efficiency values calculated disregarding potentially missed fish.
-\item \code{min.efficiency}: A vector of efficiency values calculated taking into account potentially missed fish.
-\item \code{values.per.fish}: A list containing details on the arrays that have failed for each fish.
+\item \code{absolutes}: A data frame with the number of tags detected and missed at each array.
+\item \code{max.efficiency}: A vector of efficiency values calculated disregarding potentially missed tags.
+\item \code{min.efficiency}: A vector of efficiency values calculated taking into account potentially missed tags.
+\item \code{values.per.tag}: A list containing details on the arrays that have failed for each tag.
 }
 }
 \description{

@@ -2,12 +2,12 @@
 #'
 #' The \code{\link{residency}} analysis runs the same initial checks as
 #' \code{\link{explore}}, but, similarly to \code{\link{migration}}, explores
-#' particular points of the fish behaviour. If you want to know where your fish
-#' were in each day of the study, how many fish were in each section each day,
+#' particular points of the animal behaviour. If you want to know where your animals
+#' were in each day of the study, how many animals were in each section each day,
 #' and other residency-focused variables, this is the analysis you are looking
 #' for!
 #'
-#' @param section.minimum If a fish has less than \code{section.minimum}
+#' @param section.minimum If a tag has less than \code{section.minimum}
 #'  consecutive detections in a section, a warning is issued. Defaults to 2.
 #' @param timestep The resolution desired for the residency calculations.
 #'  One of "days" (default) or "hours".
@@ -41,57 +41,57 @@
 #'
 #' @return A list containing:
 #' \itemize{
-#'  \item \code{detections}: A list containing all detections for each target fish;
-#'  \item \code{valid.detections}: A list containing the valid detections for each target fish;
+#'  \item \code{detections}: A list containing all detections for each target tag;
+#'  \item \code{valid.detections}: A list containing the valid detections for each target tag;
 #'  \item \code{spatial}: A list containing the spatial information used during the analysis;
 #'  \item \code{deployments}: A data frame containing the deployments of each receiver;
 #'  \item \code{arrays}: A list containing the array details used during the analysis;
-#'  \item \code{movements}: A list containing all movement events for each target fish;
-#'  \item \code{valid.movements}: A list containing the valid movement events for each target fish;
-#'  \item \code{section.movements}: A list containing the valid section shifts for each target fish;
-#'  \item \code{status.df}: A data frame containing summary information for each fish, including the
+#'  \item \code{movements}: A list containing all movement events for each target tag;
+#'  \item \code{valid.movements}: A list containing the valid movement events for each target tag;
+#'  \item \code{section.movements}: A list containing the valid section shifts for each target tag;
+#'  \item \code{status.df}: A data frame containing summary information for each tag, including the
 #'   following columns:
 #'    \itemize{
-#'      \item \emph{Times.entered.\[section\]}: Total number of times the fish
+#'      \item \emph{Times.entered.\[section\]}: Total number of times the tag
 #'        entered a given section
 #'      \item \emph{Average.entry.\[section\]}: Average entry time at a given
 #'        section
-#'      \item \emph{Average.time.\[section\]}: Average time the fish spent in a
+#'      \item \emph{Average.time.\[section\]}: Average time the tag spent in a
 #'        given section during each visit
 #'      \item \emph{Average.departure.\[section\]}: Average departure time from
 #'        a given section
 #'      \item \emph{Total.time.\[section\]}: Total time spent in a given section
-#'      \item \emph{Very.last.array}: Last array where the fish was detected
+#'      \item \emph{Very.last.array}: Last array where the tag was detected
 #'      \item \emph{Very.last.time}: Time of the last valid detection
-#'      \item \emph{Status}: Fate assigned to the fish
+#'      \item \emph{Status}: Fate assigned to the animal
 #'      \item \emph{Valid.detections}: Number of valid detections
 #'      \item \emph{Invalid.detections}: Number of invalid detections
 #'      \item \emph{Valid.events}: Number of valid events
 #'      \item \emph{Invalid.events}: Number of invalid events
 #'      \item \emph{P.type}: Type of processing:
 #'        \itemize{
-#'          \item 'Skipped' if no data was found for the fish,
+#'          \item 'Skipped' if no data was found for the tag,
 #'          \item 'Auto' if no user interaction was required,
 #'          \item 'Manual' if user interaction was suggested and the user made
 #'            changes to the validity of the events,
-#'          \item 'Overridden' if the user listed the fish in the
+#'          \item 'Overridden' if the user listed the tag in the
 #'            \code{override} argument.
 #'        }
 #'      \item \emph{Comments}: Comments left by the user during the analysis
 #'    }
-#'  \item \code{last.seen}: A data frame containing the number of fish last seen in
+#'  \item \code{last.seen}: A data frame containing the number of tags last seen in
 #'    each study area section;
-#'  \item \code{array.times}: A data frame containing ALL the entry times of each fish
+#'  \item \code{array.times}: A data frame containing ALL the entry times of each tag
 #'    in each array;
 #'  \item \code{section.times}: A data frame containing all the entry times of each
-#'    fish in each section;
+#'    tag in each section;
 #'  \item \code{residency.list}: A list containing the places of residency between first and last
-#'    valid detection for each fish;
+#'    valid detection for each tag;
 #'  \item \code{time.ratios}: A list containing the daily location per section (both in seconds spent
-#'    and in percentage of day) for each fish;
+#'    and in percentage of day) for each tag;
 #'  \item \code{time.positions}: A data frame showing the location where each
-#'    fish spent the most time per day;
-#'  \item \code{global.ratios}: A list containing summary tables showing the number of active fish
+#'    tag spent the most time per day;
+#'  \item \code{global.ratios}: A list containing summary tables showing the number of active tag
 #'    (and respective percentages) present at each location per day;
 #'  \item \code{efficiency}: A list containing the results of the inter-array Multi-way efficiency
 #'    calculations (see vignettes for more details);
@@ -310,8 +310,8 @@ by which sections are presented", immediate. = TRUE, call. = FALSE)
 
   if (is.null(discard.first)) {
     aux <- names(movements)
-    movements <- lapply(names(movements), function(fish) {
-        speedReleaseToFirst(fish = fish, bio = bio, movements = movements[[fish]],
+    movements <- lapply(names(movements), function(tag) {
+        speedReleaseToFirst(tag = tag, bio = bio, movements = movements[[tag]],
                             dist.mat = dist.mat, speed.method = speed.method)
       })
     names(movements) <- aux
@@ -345,41 +345,41 @@ by which sections are presented", immediate. = TRUE, call. = FALSE)
   movement.names <- names(movements)
 
   if (any(link <- !override %in% extractSignals(movement.names))) {
-    appendTo(c("Screen", "Warning", "Report"), paste0("Override has been triggered for fish ", paste(override[link], collapse = ", "), " but ",
-      ifelse(sum(link) == 1, "this", "these"), " fish ", ifelse(sum(link) == 1, "was", "were")," not detected."))
+    appendTo(c("Screen", "Warning", "Report"), paste0("Override has been triggered for tag ", paste(override[link], collapse = ", "), " but ",
+      ifelse(sum(link) == 1, "this tag was", "these tags were"), " not detected."))
     override <- override[!link]
   }
 
   movements <- lapply(seq_along(movements), function(i) {
-    fish <- names(movements)[i]
-    appendTo("debug", paste0("debug: Checking movement quality for fish ", fish,"."))
+    tag <- names(movements)[i]
+    appendTo("debug", paste0("debug: Checking movement quality for tag ", tag,"."))
 
-    if (is.na(match(extractSignals(fish), override))) {
-      release <- as.character(bio$Release.site[na.as.false(bio$Transmitter == fish)])
+    if (is.na(match(extractSignals(tag), override))) {
+      release <- as.character(bio$Release.site[na.as.false(bio$Transmitter == tag)])
       release <- unlist(strsplit(with(spatial, release.sites[release.sites$Standard.name == release, "Array"]), "|", fixed = TRUE))
 
-      output <- checkMinimumN(movements = movements[[i]], fish = fish, minimum.detections = minimum.detections)
+      output <- checkMinimumN(movements = movements[[i]], tag = tag, minimum.detections = minimum.detections)
 
-      output <- checkImpassables(movements = output, fish = fish, dotmat = dotmat, GUI = GUI)
+      output <- checkImpassables(movements = output, tag = tag, dotmat = dotmat, GUI = GUI)
 
-      output <- checkJumpDistance(movements = output, release = release, fish = fish, dotmat = dotmat,
+      output <- checkJumpDistance(movements = output, release = release, tag = tag, dotmat = dotmat,
                                   jump.warning = jump.warning, jump.error = jump.error, GUI = GUI)
 
       if (do.checkSpeeds) {
-        temp.valid.movements <- simplifyMovements(movements = output, fish = fish, bio = bio, discard.first = discard.first,
+        temp.valid.movements <- simplifyMovements(movements = output, tag = tag, bio = bio, discard.first = discard.first,
           speed.method = speed.method, dist.mat = dist.mat)
-        output <- checkSpeeds(movements = output, fish = fish, valid.movements = temp.valid.movements,
+        output <- checkSpeeds(movements = output, tag = tag, valid.movements = temp.valid.movements,
           speed.warning = speed.warning, speed.error = speed.error, GUI = GUI)
         rm(temp.valid.movements)
       }
 
       if (do.checkInactiveness) {
-        output <- checkInactiveness(movements = output, fish = fish, detections.list = detections.list[[fish]],
+        output <- checkInactiveness(movements = output, tag = tag, detections.list = detections.list[[tag]],
           inactive.warning = inactive.warning, inactive.error = inactive.error,
           dist.mat = dist.mat, GUI = GUI)
       }
     } else {
-      output <- overrideValidityChecks(moves = movements[[i]], fish = names(movements)[i], GUI = GUI) # nocov
+      output <- overrideValidityChecks(moves = movements[[i]], tag = names(movements)[i], GUI = GUI) # nocov
     }
     return(output)
   })
@@ -392,10 +392,10 @@ by which sections are presented", immediate. = TRUE, call. = FALSE)
   appendTo(c("Screen", "Report"), "M: Compiling and checking section movements for the valid tags.")
 
   section.movements <- lapply(seq_along(movements), function(i) {
-    fish <- names(movements)[i]
-    appendTo("debug", paste0("debug: Compiling section movements for fish ", fish,"."))
+    tag <- names(movements)[i]
+    appendTo("debug", paste0("debug: Compiling section movements for tag ", tag,"."))
     aux <- sectionMovements(movements = movements[[i]], spatial = spatial, valid.dist = attributes(dist.mat)$valid)
-    output <- checkSMovesN(secmoves = aux, fish = fish, section.minimum = section.minimum, GUI = GUI)
+    output <- checkSMovesN(secmoves = aux, tag = tag, section.minimum = section.minimum, GUI = GUI)
     return(output)
   })
   names(section.movements) <- names(movements)
@@ -407,15 +407,15 @@ by which sections are presented", immediate. = TRUE, call. = FALSE)
   appendTo(c("Screen", "Report"), "M: Filtering valid array and section movements.")
 
   valid.movements <- lapply(seq_along(movements), function(i){
-    output <- simplifyMovements(movements = movements[[i]], fish = names(movements)[i], bio = bio, discard.first = discard.first,
+    output <- simplifyMovements(movements = movements[[i]], tag = names(movements)[i], bio = bio, discard.first = discard.first,
       speed.method = speed.method, dist.mat = dist.mat)
   })
   names(valid.movements) <- names(movements)
   valid.movements <- valid.movements[!unlist(lapply(valid.movements, is.null))]
 
   section.movements <- lapply(seq_along(valid.movements), function(i) {
-    fish <- names(valid.movements)[i]
-    appendTo("debug", paste0("debug: Compiling valid section movements for fish ", fish,"."))
+    tag <- names(valid.movements)[i]
+    appendTo("debug", paste0("debug: Compiling valid section movements for tag ", tag,"."))
     output <- sectionMovements(movements = valid.movements[[i]], spatial = spatial, valid.dist = attributes(dist.mat)$valid)
     return(output)
   })
@@ -443,13 +443,13 @@ by which sections are presented", immediate. = TRUE, call. = FALSE)
 
   if (length(residency.list) == 0) {
     emergencyBreak()
-    stop("No fish have enough data for residency analysis. Consider running explore() instead.\n", call. = FALSE)
+    stop("No tags have enough data for residency analysis. Consider running explore() instead.\n", call. = FALSE)
   }
 
   if (timestep == "days")
-    appendTo(c("Screen", "Report"), "M: Calculating daily locations for each fish.")
+    appendTo(c("Screen", "Report"), "M: Calculating daily locations for each tag.")
   else
-    appendTo(c("Screen", "Report"), "M: Calculating hourly locations for each fish.")
+    appendTo(c("Screen", "Report"), "M: Calculating hourly locations for each tag.")
 
   time.ratios <- resRatios(res = residency.list, timestep = timestep, tz = tz)
 
@@ -512,7 +512,7 @@ by which sections are presented", immediate. = TRUE, call. = FALSE)
   rsp.info <- list(analysis.type = "residency", analysis.time = the.time, bio = bio, tz = tz, actel.version = utils::packageVersion("actel"))
 
   if (!is.null(override))
-    override.fragment <- paste0('<span style="color:red">Manual mode has been triggered for **', length(override),'** fish.</span>\n')
+    override.fragment <- paste0('<span style="color:red">Manual mode has been triggered for **', length(override),'** tag(s).</span>\n')
   else
     override.fragment <- ""
 
@@ -782,6 +782,7 @@ printResidencyRmd <- function(
     sensor.fragment <- paste0("### Sensor plots
 
 Note:
+  : You can choose to paint the values by section by setting `plot.detections.by = 'arrays'` during the analysis.
   : The data used for these graphics is stored in the `valid.detections` object.
   : You can replicate these graphics and edit them as needed using the `plotSensors()` function.
 
@@ -830,7 +831,7 @@ Want to cite actel in a publication? Run `citation(\'actel\')`
 
 ### Study area
 
-Arrays with the same background belong to the same section. Release sites are marked with "R.S.". Arrays connected with an arrow indicate that the fish can only pass in one direction.
+Arrays with the same background belong to the same section. Release sites are marked with "R.S.". Arrays connected with an arrow indicate that the animals can only pass in one direction.
 
 <img src=', work.path, ifelse(file.exists(paste0(work.path, "mb_arrays.svg")), "mb_arrays.svg", "mb_arrays.png"), ' style="padding-top: 15px;"/>
 
@@ -965,7 +966,7 @@ Note:
 ### Individual residency plots
 
 Note:
-  : The data used in these graphics is stored in the `time.ratios` object (one table per fish). More condensed information can be found in the `section.movements` object.
+  : The data used in these graphics is stored in the `time.ratios` object (one table per tag). More condensed information can be found in the `section.movements` object.
   : You can replicate these graphics and edit them as needed using the `plotResidency()` function.
 
 <center>
@@ -978,8 +979,8 @@ Note:
   : You can choose to plot detections by station or by array using the `plot.detections.by` argument.
   : The detections are coloured by ', ifelse(plot.detections.by == "stations", 'array', 'section'), '. The vertical black dashed line shows the release time. The full dark-grey line shows the movement events considered valid, while the dashed dark-grey line shows the movement events considered invalid.
 ', ifelse(plot.detections.by == "stations", '  : The movement event lines move straight between the first and last station of each event (i.e. in-between detections will not be individually linked by the line).\n', ''),
-'  : Manually **edited** fish are highlighted with **yellow** graphic borders.
-  : Manually **overridden** fish are highlighted with **red** graphic borders.
+'  : Manually **edited** tags are highlighted with **yellow** graphic borders.
+  : Manually **overridden** tags are highlighted with **red** graphic borders.
   : The ', ifelse(plot.detections.by == "stations", 'stations', 'arrays'), ' have been aligned by ', ifelse(plot.detections.by == "stations", 'array', 'section'), ', following the order provided ', ifelse(plot.detections.by == "stations", '', 'either '), 'in the spatial input', ifelse(plot.detections.by == "stations", '.', ' or the `section.order` argument.'), '
   : You can replicate these graphics and edit them as needed using the `plotDetections()` function.
   : You can also see the movement events of multiple tags simultaneously using the `plotMoves()` function.
@@ -1131,9 +1132,9 @@ assembleResidency <- function(secmoves, movements, spatial) {
   rm(recipient)
   rownames(res.df) <- names(secmoves)
 
-  capture <- lapply(names(secmoves), function(fish) {
-    # cat(fish, "\n")
-    aux <- split(secmoves[[fish]], secmoves[[fish]]$Section)
+  capture <- lapply(names(secmoves), function(tag) {
+    # cat(tag, "\n")
+    aux <- split(secmoves[[tag]], secmoves[[tag]]$Section)
     recipient <- lapply(seq_along(aux), function(i) {
       # cat(i, "\n")
       recipient <- rep(NA, ncol(res.df))
@@ -1159,20 +1160,20 @@ assembleResidency <- function(secmoves, movements, spatial) {
     recipient[, the.cols] <- as.numeric(recipient[, the.cols])
     recipient[, the.cols[which(is.na(recipient[, the.cols]))]] <- 0
     # --
-    recipient$Very.last.array <- secmoves[[fish]][.N, Last.array]
-    recipient$Very.last.time <- as.character(secmoves[[fish]][.N, Last.time])
-    recipient$Status <- paste0("Disap. in ", secmoves[[fish]][.N, Section])
-    recipient$Valid.detections <- sum(secmoves[[fish]]$Detections)
-    recipient$Valid.events <- sum(movements[[fish]]$Valid)
-    if (any(!movements[[fish]]$Valid)) {
-      recipient$Invalid.detections <- sum(movements[[fish]][!(Valid)]$Detections)
-      recipient$Invalid.events <- sum(!movements[[fish]]$Valid)
+    recipient$Very.last.array <- secmoves[[tag]][.N, Last.array]
+    recipient$Very.last.time <- as.character(secmoves[[tag]][.N, Last.time])
+    recipient$Status <- paste0("Disap. in ", secmoves[[tag]][.N, Section])
+    recipient$Valid.detections <- sum(secmoves[[tag]]$Detections)
+    recipient$Valid.events <- sum(movements[[tag]]$Valid)
+    if (any(!movements[[tag]]$Valid)) {
+      recipient$Invalid.detections <- sum(movements[[tag]][!(Valid)]$Detections)
+      recipient$Invalid.events <- sum(!movements[[tag]]$Valid)
     } else {
       recipient$Invalid.detections <- 0
       recipient$Invalid.events <- 0
     }
-    recipient$P.type <- attributes(secmoves[[fish]])$p.type
-    res.df[fish, ] <<- recipient
+    recipient$P.type <- attributes(secmoves[[tag]])$p.type
+    res.df[tag, ] <<- recipient
   })
   # Convert time data
   for (section in sections) {
@@ -1209,7 +1210,7 @@ assembleResidency <- function(secmoves, movements, spatial) {
 #' @inheritParams loadDetections
 #' @inheritParams groupMovements
 #'
-#' @return A data frame containing all the final data for each fish.
+#' @return A data frame containing all the final data for each tag.
 #'
 #' @keywords internal
 #'
@@ -1219,7 +1220,7 @@ res_assembleOutput <- function(res.df, bio, spatial, tz) {
 
   sections <- names(spatial$array.order)
 
-  appendTo("debug", "Completing entries for fish that were never detected.")
+  appendTo("debug", "Completing entries for tags that were never detected.")
   status.df$Status[is.na(status.df$Status)] <- "Disap. at Release"
   status.df$Status <- factor(status.df$Status, levels = c(paste("Disap. in", sections), "Disap. at Release"))
   status.df$Very.last.array[is.na(status.df$Very.last.array)] <- "Release"
@@ -1261,26 +1262,26 @@ res_assembleOutput <- function(res.df, bio, spatial, tz) {
 #'
 #' @return A list containing:
 #' \itemize{
-#'  \item \code{absolutes}: A data frame with the number of fish detected and missed at each array.
-#'  \item \code{max.efficiency}: A vector of efficiency values calculated disregarding potentially missed fish.
-#'  \item \code{min.efficiency}: A vector of efficiency values calculated taking into account potentially missed fish.
-#'  \item \code{values.per.fish}: A list containing details on the arrays that have failed for each fish.
+#'  \item \code{absolutes}: A data frame with the number of tags detected and missed at each array.
+#'  \item \code{max.efficiency}: A vector of efficiency values calculated disregarding potentially missed tags.
+#'  \item \code{min.efficiency}: A vector of efficiency values calculated taking into account potentially missed tags.
+#'  \item \code{values.per.tag}: A list containing details on the arrays that have failed for each tag.
 #' }
 #'
 #' @keywords internal
 #'
 res_efficiency <- function(arrmoves, bio, spatial, arrays, paths, dotmat) {
-  values.per.fish <- lapply(names(arrmoves), function(fish) {
-    # cat(fish, "\n")
-      first.array <- firstArrayFailure(fish = fish, bio = bio, spatial = spatial, first.array = arrmoves[[fish]]$Array[1], paths = paths, dotmat = dotmat)
-      if (nrow(arrmoves[[fish]]) > 1)
-        subsequent <- countArrayFailures(moves = arrmoves[[fish]], paths = paths, dotmat = dotmat)
+  values.per.tag <- lapply(names(arrmoves), function(tag) {
+    # cat(tag, "\n")
+      first.array <- firstArrayFailure(tag = tag, bio = bio, spatial = spatial, first.array = arrmoves[[tag]]$Array[1], paths = paths, dotmat = dotmat)
+      if (nrow(arrmoves[[tag]]) > 1)
+        subsequent <- countArrayFailures(moves = arrmoves[[tag]], paths = paths, dotmat = dotmat)
       else
         subsequent <- NULL
       return(c(first.array, subsequent))
   })
-  names(values.per.fish) <- names(arrmoves)
-  aux <- unlist(values.per.fish)
+  names(values.per.tag) <- names(arrmoves)
+  aux <- unlist(values.per.tag)
   knownMissEvents <- table(aux[grepl("known", names(aux))])
   unsureMissEvents <- table(aux[grepl("unsure", names(aux))])
 
@@ -1312,12 +1313,12 @@ res_efficiency <- function(arrmoves, bio, spatial, arrays, paths, dotmat) {
 
   max.efficiency <- apply(absolutes, 2, function(x) 1 - (x[2] / (x[1] + x[2])))
   min.efficiency <- apply(absolutes, 2, function(x) 1 - ((x[2] + x[3]) / sum(x)))
-  return(list(absolutes = absolutes, max.efficiency = max.efficiency, min.efficiency = min.efficiency, values.per.fish = values.per.fish))
+  return(list(absolutes = absolutes, max.efficiency = max.efficiency, min.efficiency = min.efficiency, values.per.tag = values.per.tag))
 }
 
 #' Determine if the first array after release has failed
 #'
-#' @param fish The fish being analysed
+#' @param tag The tag being analysed
 #' @inheritParams splitDetections
 #' @inheritParams createStandards
 #' @param first.array The array of the first valid movement
@@ -1328,8 +1329,8 @@ res_efficiency <- function(arrmoves, bio, spatial, arrays, paths, dotmat) {
 #'
 #' @keywords internal
 #'
-firstArrayFailure <- function(fish, bio, spatial, first.array, paths, dotmat) {
-  release <- as.character(bio$Release.site[na.as.false(bio$Transmitter == fish)])
+firstArrayFailure <- function(tag, bio, spatial, first.array, paths, dotmat) {
+  release <- as.character(bio$Release.site[na.as.false(bio$Transmitter == tag)])
   aux <- as.character(with(spatial, release.sites[release.sites$Standard.name == release, "Array"]))
   release.arrays <- unlist(strsplit(aux, "|", fixed = TRUE))
   if (any(release.arrays == first.array)) {
@@ -1367,12 +1368,12 @@ firstArrayFailure <- function(fish, bio, spatial, first.array, paths, dotmat) {
 }
 
 
-#' Assemble residency tables per fish
+#' Assemble residency tables per tag
 #'
 #' @param movements the movements list
 #' @inheritParams loadDistances
 #'
-#' @return a list containing residency tables for each fish.
+#' @return a list containing residency tables for each tag.
 #'
 #' @keywords internal
 #'
@@ -1405,18 +1406,18 @@ getResidency <- function(movements, spatial){
     })
   inst.exception <- sapply(output, function(x) nrow(x) == 1 && x$First.time == x$Last.time)
   if (any(inst.exception)) {
-    appendTo(c("Screen", "Report", "Warning"), paste("Valid detections for fish", paste(names(output)[inst.exception], collapse = ", "), "start and end on the same instant. Excluding them from residency analyses."))
+    appendTo(c("Screen", "Report", "Warning"), paste("Valid detections for tag", paste(names(output)[inst.exception], collapse = ", "), "start and end on the same instant. Excluding them from residency analyses."))
     output <- output[!inst.exception]
   }
   return(output)
 }
 
-#' calculate residency ratios per fish
+#' calculate residency ratios per tag
 #'
 #' @param res a residency list
 #' @param timestep the size of each frame
 #'
-#' @return A list containing the residency ratios for each fish.
+#' @return A list containing the residency ratios for each tag.
 #'
 #' @keywords internal
 #'
@@ -1449,7 +1450,7 @@ resRatios <- function(res, timestep = c("days", "hours"), tz) {
 #'
 #' @inheritParams resRatios
 #' @param start.time the start time of the period being analysed (a Date object)
-#' @param the.range the first and last start.time for the specific fish
+#' @param the.range the first and last start.time for the specific tag
 #' @param num.step the size of the block
 #'
 #' @return A data frame containing the number of seconds spent at each location for a specific timeframe
@@ -1469,7 +1470,7 @@ findSecondsPerSection <- function(res, frame, the.range, num.step) {
   if (length(e) == 1) {
     # and that event is the very first one
     if (e == 1) {
-      # Exception for if the fish was only detected one frame, calculates difference between event start and stop.
+      # Exception for if the tag was only detected one frame, calculates difference between event start and stop.
       if (the.range[2] == the.range[1]) {
         aux[length(aux) + 1] <- difftime(res$Last.time[e], res$First.time[e], units = "secs")
         names(aux)[length(aux)] <- res$Section[e]
@@ -1497,12 +1498,12 @@ findSecondsPerSection <- function(res, frame, the.range, num.step) {
         if (frame == the.range[2]) {
           aux[length(aux) + 1] <- difftime(res$Last.time[e], frame, units = "secs")
           names(aux)[length(aux)] <- res$Section[e]
-        # otherwise, since there are no more 'e', the fish has stayed the whole frame in the event
+        # otherwise, since there are no more 'e', the tag has stayed the whole frame in the event
         } else {
           aux[length(aux) + 1] <- num.step
           names(aux)[length(aux)] <- res$Section[e]
         }
-        # In either case above the fish spends the whole time in the event, so changes = 0
+        # In either case above the tag spends the whole time in the event, so changes = 0
         aux[length(aux) + 1] <- 0
         names(aux)[length(aux)] <- "Changes"
       # If the frame of the event is already in the frame itself
@@ -1560,7 +1561,7 @@ findSecondsPerSection <- function(res, frame, the.range, num.step) {
 #' @param input a list containing the output of findSecondsPerSection for each day
 #' @param slots the names of the time slots
 #'
-#' @return A data frame with the daily ratios table for the target fish
+#' @return A data frame with the daily ratios table for the target tag
 #'
 #' @keywords internal
 #'
@@ -1595,11 +1596,11 @@ resRatiosIndOut <- function(input, slots, tz) {
   return(output)
 }
 
-#' Find the location where the fish spent most time per day
+#' Find the location where the tag spent most time per day
 #'
 #' @param ratios the daily ratios
 #'
-#' @return A data frame containing the section in which each fish spent more time per day.
+#' @return A data frame containing the section in which each tag spent more time per day.
 #'
 #' @keywords internal
 #'
@@ -1666,15 +1667,15 @@ vectorsIntoTables <- function(input, columns) {
     return(output)
 }
 
-#' Calculate number/percentage of fish at each location for each day
+#' Calculate number/percentage of tags at each location for each day
 #'
 #' @param positions a positions table, supplied by dailyPositions
 #'
 #' @return A list containing:
 #' \itemize{
-#'  \item \code{absolutes}: A data frame containing the absolute number of fish at each location per day,
-#'  \item \code{percentages}: A data frame containing the percentage of fish relative to the total
-#'    number of active fish at each location per day.
+#'  \item \code{absolutes}: A data frame containing the absolute number of tags at each location per day,
+#'  \item \code{percentages}: A data frame containing the percentage of tag relative to the total
+#'    number of active tags at each location per day.
 #' }
 #'
 #' @keywords internal

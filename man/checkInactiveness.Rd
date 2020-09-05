@@ -2,11 +2,11 @@
 % Please edit documentation in R/check.R
 \name{checkInactiveness}
 \alias{checkInactiveness}
-\title{Find if a fish is standing still in an array}
+\title{Find if a tag is standing still in an array}
 \usage{
 checkInactiveness(
   movements,
-  fish,
+  tag,
   detections.list,
   inactive.warning,
   inactive.error,
@@ -17,17 +17,17 @@ checkInactiveness(
 \arguments{
 \item{movements}{The movements table}
 
-\item{fish}{The fish being analysed}
+\item{tag}{The tag being analysed}
 
 \item{detections.list}{A list of the detections split by each target tag,
 created by \code{\link{splitDetections}}.}
 
-\item{inactive.warning}{If a fish spends a number of days equal or greater
+\item{inactive.warning}{If a tag spends a number of days equal or greater
 than \code{inactive.error} in a given array at the tail of the respective
 detections, a warning is issued. If left NULL (default), no warnings are
 issued.}
 
-\item{inactive.error}{If a fish spends a number of days equal or greater than
+\item{inactive.error}{If a tag spends a number of days equal or greater than
 \code{inactive.error} in a given array at the tail of the respective
 detections, user intervention is suggested. If left NULL (default), user
 intervention is never suggested.}
@@ -44,6 +44,6 @@ prompted to open and examine that file. Defaults to "needed".}
 A list of movements with updated 'Valid' columns
 }
 \description{
-Find if a fish is standing still in an array
+Find if a tag is standing still in an array
 }
 \keyword{internal}

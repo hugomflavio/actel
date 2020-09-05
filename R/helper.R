@@ -80,7 +80,7 @@ userInput <- function(question, choices, tag, hash) {
             warning("A comment was requested but that option is not available here. Please try again.", immediate. = TRUE, call. = FALSE)
           } else {
             appendTo("UD", paste("comment # on", tag))
-            appendTo(c("UD", "Comment"), readline(paste0("New comment on fish ", tag, ": ")), tag)
+            appendTo(c("UD", "Comment"), readline(paste0("New comment on tag ", tag, ": ")), tag)
             appendTo("Screen", "M: Comment successfully stored, returning to the previous interaction.")
           }
         } else {
@@ -492,13 +492,13 @@ roundDown <- function(input, to = 10) {
 #'
 #' @param recipient 'Screen' displays the message on screen, 'Report' appends the message to 'temp_log.txt', 'Warning' appends the message to 'temp_warnings.txt', 'UD' appends the message to 'temp_UD.txt', 'Comment' appends the message to 'temp_comments.txt'. The same message may be appended to multiple recipients at once.
 #' @param line The text to be appended.
-#' @param fish the tag number to which the comment belongs. Only used when recipient = 'Comment'.
+#' @param tag the tag number to which the comment belongs. Only used when recipient = 'Comment'.
 #'
 #' @return No return value, called for side effects.
 #'
 #' @keywords internal
 #'
-appendTo <- function(recipient, line, fish) {
+appendTo <- function(recipient, line, tag) {
   for (i in recipient) {
     if (i == "Screen") {
       if (any(recipient == "Warning"))
@@ -529,7 +529,7 @@ appendTo <- function(recipient, line, fish) {
         append = file.exists(paste(tempdir(), "temp_UD.txt", sep = "/")))
     } # nocov end
     if (i == "Comment") {
-      write(paste(fish, line, sep = "\t"),
+      write(paste(tag, line, sep = "\t"),
         file = paste(tempdir(), "temp_comments.txt", sep = "/"),
         append = file.exists(paste(tempdir(), "temp_comments.txt", sep = "/")))
     }
@@ -1128,7 +1128,7 @@ distancesMatrix <- function(t.layer, starters = NULL, targets = starters,
   dist.mat <- data.frame(gdistance::costDistance(t.layer, starters, targets))
   if (any(dist.mat == Inf)) {
     warning("At least one station is completely blocked off from the remaining stations by land. Filling
-the respective fields with NA. If your fish was expected to travel around the areas present
+the respective fields with NA. If your animals were expected to travel around the areas present
 in the shape file, consider applying a 'buffer' when calculating the transition layer. This
 will artificially add water space around the shape file.", call. = FALSE)
     dist.mat[dist.mat == Inf] <- NA

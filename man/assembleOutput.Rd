@@ -9,7 +9,7 @@ assembleOutput(timetable, bio, spatial, dist.mat, tz)
 \arguments{
 \item{timetable}{A table of the entering and leaving points for each section per target tag, created by assembleTimetable.}
 
-\item{bio}{A table with the tags and biometrics of the studied fish.}
+\item{bio}{A table with the tags and biometrics of the studied animals.}
 
 \item{spatial}{The spatial data list.}
 
@@ -19,7 +19,7 @@ assembleOutput(timetable, bio, spatial, dist.mat, tz)
 present in \code{\link[base]{timezones}}.}
 }
 \value{
-A data frame containing all the final data for each fish.
+A data frame containing all the final data for each tag.
 }
 \description{
 Combines the timetable and the original biometrics.

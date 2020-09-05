@@ -39,22 +39,22 @@ knitr::opts_chunk$set(
 
 ## Forward efficiency
 
-During the migration analysis, actel calculates forward efficiency only, to improve the accuracy of the efficiency measurement. This means that, for each fish, only the first forward movement is considered. Let's have a look at these examples:
+During the migration analysis, actel calculates forward efficiency only, to improve the accuracy of the efficiency measurement. This means that, for each tag, only the first forward movement is considered. Let's have a look at these examples:
 
 <img src="efficiency_a.svg" alt="drawing" width="330"/> <img src="efficiency_b.svg" alt="drawing" width="330"/>
 
-In example **A**, the fish moved out to the sea, and was detected at the array River1 and Fjord2, but not at Fjord1. This is considered a missed event for Fjord1. Even if the fish then moved backwards and ended up being detected at Fjord1 at a later time (example **B**), since the first expected detection was missed, this fish will still be considered as missed by Fjord1, as far as efficiency calculations are concerned.
+In example **A**, the tag moved out to the sea, and was detected at the array River1 and Fjord2, but not at Fjord1. This is considered a missed event for Fjord1. Even if the tag then moved backwards and ended up being detected at Fjord1 at a later time (example **B**), since the first expected detection was missed, this tag will still be considered as missed by Fjord1, as far as efficiency calculations are concerned.
 
 These efficiency calculations are dependant on the way you organise your receivers, so it is important that you [organise your study area in an actel-friendly way.](a-1_study_area.html)
 
 
 ## CJS and multiple branches
 
-Actel calculates array efficiency through CJS modelling, based in the equations provided by <a href="https://www.researchgate.net/publication/256443823_Using_mark-recapture_models_to_estimate_survival_from_telemetry_data" target="_blank">Perry et al. (2012)</a>. In short, this implies comparing the individual fish detected at an array with those detected at the arrays that come after that said array.
+Actel calculates array efficiency through CJS modelling, based in the equations provided by <a href="https://www.researchgate.net/publication/256443823_Using_mark-recapture_models_to_estimate_survival_from_telemetry_data" target="_blank">Perry et al. (2012)</a>. In short, this implies comparing the individual tags detected at an array with those detected at the arrays that come after that said array.
 
-One of the caveats of the CJS calculations is that if, say, we have arrays A and B, and B is after A, then a fish that is detected at B must have passed through A as well. However, this may not be the case if there are multiple water channels that the fish can go through.
+One of the caveats of the CJS calculations is that if, say, we have arrays A and B, and B is after A, then a tag that is detected at B must have passed through A as well. However, this may not be the case if there are multiple water channels that the animal can go through.
 
-To compensate for this, actel finds valid efficiency peers for each array. That is, arrays that are directly or indirectly after a given array, and to which it is not possible to get to without passing through said array (assuming the fish does not move backwards). Then, actel combines the unique fish detected at all of the efficiency peers of a given array, and uses these combined detections as a single array subsequent to the one being analysed. The individual CJS models are then combined to create the [`overall.CJS` object](c-2_migration_results.html#overall.cjs).
+To compensate for this, actel finds valid efficiency peers for each array. That is, arrays that are directly or indirectly after a given array, and to which it is not possible to get to without passing through said array (assuming the tag does not move backwards). Then, actel combines the unique tags detected at all of the efficiency peers of a given array, and uses these combined detections as a single array subsequent to the one being analysed. The individual CJS models are then combined to create the [`overall.CJS` object](c-2_migration_results.html#overall.cjs).
 
 
 ## Dealing with parallel arrays
@@ -93,9 +93,9 @@ Now let's try to determine the valid efficiency peers of array __D__, first with
 
 Array __D__ has three arrays directly or indirectly after it: __E__, __F__ and __G__. When `disregard.parallels = TRUE`, actel will ask the following question, for each of the arrays coming after __D__:
 
-    Can a fish get to array [x] without having to pass through array D?
+    Can an animal get to array [x] without having to pass through array D?
 
-This assumes that the fish is expected to move only in one direction (i.e. from release to a success array). If the answer to this question is no, then array [x] is a valid efficiency peer of array __D__. Both arrays __E__ and __F__ fulfil this requirement, as the only array coming before them is __D__ itself. However, array __G__ fails this requirement, because fish can get to array __G__ coming from array __C__, which is not connected to array __D__.
+This assumes that the animal is expected to move only in one direction (i.e. from release to a success array). If the answer to this question is no, then array [x] is a valid efficiency peer of array __D__. Both arrays __E__ and __F__ fulfil this requirement, as the only array coming before them is __D__ itself. However, array __G__ fails this requirement, because the animals can get to array __G__ coming from array __C__, which is not connected to array __D__.
 
 So, if `disregard.parallels = TRUE`, arrays __E__ and __F__ are valid efficiency peers of array __D__.
 
@@ -108,7 +108,7 @@ So, if `disregard.parallels = TRUE`, arrays __E__ and __F__ are valid efficiency
 
 In this case, since `disregard.parallels = FALSE`, actel asks an additional question:
 
-    1) Can a fish get to array [x] without having to pass through array D?
+    1) Can an animal get to array [x] without having to pass through array D?
     2) Does array [x] have any parallel arrays which can be reached without passing through array D?
 
 Again, if the answer to both of these questions is no, then array [x] is a valid efficiency peer for array __D__. As we saw above, arrays __E__ and __F__ fulfil the first requirement. However, both of these arrays have an extra parallel array (array __C__), and it is possible to reach that array without passing through array __D__. 
@@ -118,7 +118,7 @@ As such, if `disregard.parallels = FALSE`, then array __D__ no longer has any va
 
 ### So, should you go with TRUE or FALSE?
 
-It depends on your study area, and on your fish. If you expect that your fish are likely to move between parallel arrays (e.g. because these arrays are very close to each other), then it may be a good idea to __not__ disregard the presence of parallels (i.e. run the analysis with `disregard.parallels = FALSE`). A practical example would be if you have multiple channels leading to a lake, and you have arrays at each lake entrance. As the fish may have to explore other lake entrances before finding the lake exit, disregarding parallel arrays could potentially lead to underestimations of array efficiency.
+It depends on your study area, and on your animals. If you expect that the tagged animals are likely to move between parallel arrays (e.g. because these arrays are very close to each other), then it may be a good idea to __not__ disregard the presence of parallels (i.e. run the analysis with `disregard.parallels = FALSE`). A practical example would be if you have multiple channels leading to a lake, and you have arrays at each lake entrance. As the animals may have to explore other lake entrances before finding the lake exit, disregarding parallel arrays could potentially lead to underestimations of array efficiency.
 
 Keep in mind that you can always run the analysis twice, and find out which case fits best your data!
 
@@ -130,7 +130,7 @@ Regardless of the mechanics explained above, arrays __C__, __E__, __F__ and __G_
 
 #### Intra-array efficiency
 
-Intra array efficiency calculations are also performed following the equations provided by <a href="https://www.researchgate.net/publication/256443823_Using_mark-recapture_models_to_estimate_survival_from_telemetry_data" target="_blank">Perry et al. (2012)</a>. Specifically, actel splits the array's receivers in "original" and "replicates" (depending on what you specified in the [replicates argument](c-0_migration.html#replicates)), and compares the fish detected at both of these elements. The results of the intra-array calculations for each array are then stored in the [`intra.array.CJS` list](c-2_migration_results.html#intra.array.cjs).
+Intra array efficiency calculations are also performed following the equations provided by <a href="https://www.researchgate.net/publication/256443823_Using_mark-recapture_models_to_estimate_survival_from_telemetry_data" target="_blank">Perry et al. (2012)</a>. Specifically, actel splits the array's receivers in "original" and "replicates" (depending on what you specified in the [replicates argument](c-0_migration.html#replicates)), and compares the tags detected at both of these elements. The results of the intra-array calculations for each array are then stored in the [`intra.array.CJS` list](c-2_migration_results.html#intra.array.cjs).
 
 **<a href="javascript:history.back()">Return to previous page</a>**
 

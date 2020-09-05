@@ -329,7 +329,7 @@ printDot <- function(dot, spatial, print.releases) {
 
 #' Print biometric graphics
 #'
-#' Searches for columns containing biometric data and prints graphics per fish group
+#' Searches for columns containing biometric data and prints graphics per animal group
 #'
 #' @inheritParams splitDetections
 #'
@@ -437,9 +437,9 @@ printDotplots <- function(status.df, valid.dist) {
 
 #' Print survival graphic
 #'
-#' Prints survival graphics per fish group.
+#' Prints survival graphics per animal group.
 #'
-#' @param section.overview A data frame containing the survival per group of fish present in the biometrics. Supplied by assembleOverview.
+#' @param section.overview A data frame containing the survival per animal group present in the biometrics. Supplied by assembleOverview.
 #'
 #' @return No return value, called to plot and save graphic.
 #'
@@ -538,7 +538,7 @@ printEfficiency <- function(CJS = NULL, efficiency = NULL, intra.CJS, type = c("
 
       efficiency.fragment <- paste0('
 Note:
-  : These efficiency calculations **do not account for** backwards movements. This implies that the total number of fish to have been **last seen** at a given array **may be lower** than the displayed below. Please refer to the [section survival overview](#section-survival) and [last seen arrays](#last-seen-arrays) to find out how many fish were considered to have disappeared per section.
+  : These efficiency calculations **do not account for** backwards movements. This implies that the total number of animals to have been **last seen** at a given array **may be lower** than the displayed below. Please refer to the [section survival overview](#section-survival) and [last seen arrays](#last-seen-arrays) to find out how many animals were considered to have disappeared per section.
   : The data used in the tables below is stored in the `overall.CJS` object. Auxiliary information can also be found in the `matrices` and `arrays` objects.
   : These efficiency values are estimated using the analytical equations provided in the paper "Using mark-recapture models to estimate survival from telemetry data" by [Perry et al. (2012)](<https://www.researchgate.net/publication/256443823_Using_mark-recapture_models_to_estimate_survival_from_telemetry_data>). In some situations, more advanced efficiency estimation methods may be required.
   : You can try running `advEfficiency([results]$overall.CJS)` to obtain beta-drawn efficiency distributions (replace `[results]` with the name of the object where you saved the analysis).
@@ -617,7 +617,7 @@ knitr::kable(intra.array.CJS[[',i ,']]$absolutes)
 
 #' Print individual graphics
 #'
-#' Prints the individual detections for each fish, overlaying the points in time considered crucial during the analysis.
+#' Prints the individual detections for each tag, overlaying the points in time considered crucial during the analysis.
 #'
 #' @inheritParams explore
 #' @inheritParams groupMovements
@@ -653,16 +653,16 @@ printIndividuals <- function(detections.list, movements, valid.movements, spatia
   counter <- 0
   individual.plots <- ""
 
-  capture <- lapply(names(detections.list), function(fish) {
+  capture <- lapply(names(detections.list), function(tag) {
     counter <<- counter + 1
 
-    p <- plotDetections(input = fake.results, tag = fish, type = type)
+    p <- plotDetections(input = fake.results, tag = tag, type = type)
 
     # decide height
     if (type == "stations")
-      to.check <- levels(detections.list[[fish]]$Standard.name)
+      to.check <- levels(detections.list[[tag]]$Standard.name)
     else
-      to.check <- levels(detections.list[[fish]]$Array)
+      to.check <- levels(detections.list[[tag]]$Array)
 
     if (length(to.check) <= 29)
       the.height <- 4
@@ -673,7 +673,7 @@ printIndividuals <- function(detections.list, movements, valid.movements, spatia
     the.width <- 5
     # Adjustments depending on number of legend valudes
     if (type == "stations")
-      to.check <- levels(detections.list[[fish]]$Array)
+      to.check <- levels(detections.list[[tag]]$Array)
     else
       to.check <- names(spatial$array.order)
 
@@ -696,12 +696,12 @@ printIndividuals <- function(detections.list, movements, valid.movements, spatia
       }
     }
     # Save
-    ggplot2::ggsave(paste0(tempdir(), "/actel_report_auxiliary_files/", fish, ".", extension), width = the.width, height = the.height)  # better to save in png to avoid point overlapping issues
+    ggplot2::ggsave(paste0(tempdir(), "/actel_report_auxiliary_files/", tag, ".", extension), width = the.width, height = the.height)  # better to save in png to avoid point overlapping issues
 
     if (counter %% 2 == 0) {
-      individual.plots <<- paste0(individual.plots, "![](", tempdir(), "/actel_report_auxiliary_files/", fish, ".", extension, "){ width=", the.width * 10, "% }\n")
+      individual.plots <<- paste0(individual.plots, "![](", tempdir(), "/actel_report_auxiliary_files/", tag, ".", extension, "){ width=", the.width * 10, "% }\n")
     } else {
-      individual.plots <<- paste0(individual.plots, "![](", tempdir(), "/actel_report_auxiliary_files/", fish, ".", extension, "){ width=", the.width * 10, "% }")
+      individual.plots <<- paste0(individual.plots, "![](", tempdir(), "/actel_report_auxiliary_files/", tag, ".", extension, "){ width=", the.width * 10, "% }")
     }
     if (interactive())
       setTxtProgressBar(pb, counter)
@@ -1255,7 +1255,7 @@ printSectionTimes <- function(section.times, bio, detections) {
   })
 }
 
-#' print the distribution of fish per location
+#' print the distribution of tags per location
 #'
 #' @param global.ratios the global ratios
 #' @param time.ratios the daily ratios
@@ -1329,7 +1329,7 @@ printIndividualResidency <- function(ratios, global.ratios, spatial, rsp.info) {
   return(individual.plots)
 }
 
-#' Print a simple barplot with the number of fish last seen at each section
+#' Print a simple barplot with the number of tags last seen at each section
 #'
 #' @param input a table with the last seen data
 #' @inheritParams sectionMovements
@@ -1358,7 +1358,7 @@ printLastSection <- function(input, spatial) {
   ggplot2::ggsave(paste0(tempdir(), "/actel_report_auxiliary_files/last_section.png"), width = the.width, height = 4)
 }
 
-#' Print a simple barplot with the number of fish last seen at each section
+#' Print a simple barplot with the number of tags last seen at each section
 #'
 #' @param input a table with the last seen data
 #' @param sections the order of the sections

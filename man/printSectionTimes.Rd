@@ -9,7 +9,7 @@ printSectionTimes(section.times, bio, detections)
 \arguments{
 \item{section.times}{A list of entry and exit times for each section}
 
-\item{bio}{A table with the tags and biometrics of the studied fish.}
+\item{bio}{A table with the tags and biometrics of the studied animals.}
 
 \item{detections}{A valid detections list}
 }

@@ -171,9 +171,9 @@ t.layer <- transitionLayer(base.raster, directions = 16)
 
 1. The `directions` determine the complexity of R's distance tracking techniques. It can take one of four values: four, eight or sixteen, defaulting to the latter.
 
-    * If `directions = 4`, the fish can only in the direction of the cardinal winds (North, South, East and West). 
-    * If `directions = 8`, the fish can also move in a intercardinal wind direction (Northeast, Northwest, Southeast and Southwest). 
-    * If `directions = 16`, then the fish can also move in the eight half-winds' directions.
+    * If `directions = 4`, the animal can only in the direction of the cardinal winds (North, South, East and West). 
+    * If `directions = 8`, the animal can also move in a intercardinal wind direction (Northeast, Northwest, Southeast and Southwest). 
+    * If `directions = 16`, then the animal can also move in the eight half-winds' directions.
 
     Increasing the `directions` improves the distance estimation fidelity, but also increases computation time.
 

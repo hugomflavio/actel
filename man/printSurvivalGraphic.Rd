@@ -7,12 +7,12 @@
 printSurvivalGraphic(section.overview)
 }
 \arguments{
-\item{section.overview}{A data frame containing the survival per group of fish present in the biometrics. Supplied by assembleOverview.}
+\item{section.overview}{A data frame containing the survival per animal group present in the biometrics. Supplied by assembleOverview.}
 }
 \value{
 No return value, called to plot and save graphic.
 }
 \description{
-Prints survival graphics per fish group.
+Prints survival graphics per animal group.
 }
 \keyword{internal}

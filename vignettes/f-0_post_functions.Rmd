@@ -56,7 +56,7 @@ Here you will find some additional examples of things you can do using the outpu
 
 ## Calculating utilization distribution areas and space-use overlaps
 
-The R package RSP ([available here](https://github.com/YuriNiella/RSP#rsp)) allows you to run spatial analyses on the habitat use of your fish using the output of your actel analysis. With the RSP toolkit you can analyse the fine scale movements of aquatic animals while accounting for the surrounding land masses. The animal movements between detections are recreated to have occurred exclusively in water and the utilization distribution areas are limited by the land contours, providing realistic estimations of space use. 
+The R package RSP ([available here](https://github.com/YuriNiella/RSP#rsp)) allows you to run spatial analyses on the habitat use of your animals using the output of your actel analysis. With the RSP toolkit you can analyse the fine scale movements of aquatic animals while accounting for the surrounding land masses. The animal movements between detections are recreated to have occurred exclusively in water and the utilization distribution areas are limited by the land contours, providing realistic estimations of space use. 
 
 Depending on the research questions being addressed the utilization distribution areas can be calculated for the entire monitoring periods, or in fine-scale according to fixed temporal intervals in hours (timeframes). This approach allows spatial ecologists to use the outputs from such fine scale space use models (areas of use, or between-group overlap frequencies) as input for further statistical analysis.
 
@@ -139,7 +139,7 @@ Circular plots are a great way to display your results in a publication. Example
 
 You can prepare the input for plotTimes by using two other functions (which may also be useful on their own): `getTimes` and `timesToCircular`.
 
-For example, if you want to plot the arrival times for all your fish at two arrays:
+For example, if you want to plot the arrival times for all your tags at two arrays:
 
 ```r
 # Assuming you saved the output of an actel analysis as 'results',
@@ -157,7 +157,7 @@ plotTimes(x)
 plotTimes(x, night = c("20:00", "06:00"))
 ```
 
-This will plot two data series (one for array "A" and one for array "B"), with all your fish pooled together.
+This will plot two data series (one for array "A" and one for array "B"), with all the tags pooled together.
 
 However, if you want to plot the arrival times at a specific array per group, you could do the following:
 
@@ -267,13 +267,13 @@ plotMoves(results, tags = c("R64K-1995", "R64K-2001"))
 
 ## Extracting detailed array-level movement speeds
 
-If you have included a valid distances matrix in your analysis, then there is a lot of valuable information scattered throughout the fish movements. While this information is summarised at the section level in the `status.df` object (for `migration()` and `residency()` analyses), maybe you would like to have a look at the event-to-event values. To avoid having to go through each movement table individually, you can use the function `getSpeeds()`:
+If you have included a valid distances matrix in your analysis, then there is a lot of valuable information scattered throughout the tag movements. While this information is summarised at the section level in the `status.df` object (for `migration()` and `residency()` analyses), maybe you would like to have a look at the event-to-event values. To avoid having to go through each movement table individually, you can use the function `getSpeeds()`:
 
 ```r
 # As usual, lets assume you saved the output of an actel analysis as 'results'.
 
 # Running getSpeeds on the results will return all the recorded speeds, for
-# every fish.
+# every animal.
 getSpeeds(results)
 
 # However, you can trim this output by using the remaining arguments in getSpeeds().
@@ -303,25 +303,25 @@ getSpeeds(results, direct = TRUE, type = "all")
 # Note that movements between parallel arrays are not forward nor backward,
 # and the respective speeds will only be displayed if type = "all".
 
-# Finally, you can choose how many events per fish you want to see:
+# Finally, you can choose how many events per tag you want to see:
 getSpeeds(results, direct = TRUE, type = "all", n.events = "first") # default
 getSpeeds(results, direct = TRUE, type = "all", n.events = "all")
 getSpeeds(results, direct = TRUE, type = "all", n.events = "last")
 
 # The n.events controls how many instances of a specific movement event you would like to see.
-# If a fish moved twice from A to B, "first" will return only the first speed, "last" will
+# If a tag moved twice from A to B, "first" will return only the first speed, "last" will
 # return only the last speed, and "all" will return both.
 # Note that moving from A to B is not the same as moving from B to A, and both will be treated
 # separately by getSpeeds.
 ```
 
-Because speeds have many underlying variables (from where, to where, which fish, etc.), there is no pre-made plot function for speeds. However, the output of `getSpeeds()` is structured in a way that should make it easy for you to jump to ggplot2 and start drawing your plots, your way :)
+Because speeds have many underlying variables (from where, to where, which tag, etc.), there is no pre-made plot function for speeds. However, the output of `getSpeeds()` is structured in a way that should make it easy for you to jump to ggplot2 and start drawing your plots, your way :)
 
 
 
 ## Simultaneous and cumulative presence at one or more arrays
 
-A classic plot in migration analyses is one showing the cumulative arrival of fish at a specific array. The function `plotArray()` allows you to obtain both the simultaneous presence at an array (if `cumulative = FALSE`, the default), or the cumulative arrivals at an array (yes, you guessed it, with `cumulative = TRUE`). 
+A classic plot in migration analyses is one showing the cumulative arrival of tags at a specific array. The function `plotArray()` allows you to obtain both the simultaneous presence at an array (if `cumulative = FALSE`, the default), or the cumulative arrivals at an array (yes, you guessed it, with `cumulative = TRUE`). 
 
 ```r
 # Assuming you saved the output of an actel analysis as 'results',
@@ -390,7 +390,7 @@ You can also plot the multiple groups simultaneously for a subset of sections us
 # during the study period, I could run:
 plotRatios(results, sections = "River")
 
-# or, for the percentage of fish from each group, run:
+# or, for the percentage of tags from each group, run:
 plotRatios(results, sections = "River", type = "percentages")
 
 # Keep in mind that you cannot use the arguments 'group' and 'sections' at the same time!

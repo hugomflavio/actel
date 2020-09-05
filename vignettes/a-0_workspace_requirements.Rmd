@@ -71,7 +71,7 @@ knitr::kable(biometrics)
 Although the column order is not important, it is essential that this table contains two columns:
 
 Release.date
-  : Corresponds to the date and time when the fish was released, and **must** be typed in **yyyy-mm-dd hh:mm:ss** format. Note that the timestamps must be in the **local time zone** of the study area, which you will later supply in the `tz` argument.
+  : Corresponds to the date and time when the animal was released, and **must** be typed in **yyyy-mm-dd hh:mm:ss** format. Note that the timestamps must be in the **local time zone** of the study area, which you will later supply in the `tz` argument.
 
 Signal 
   : Corresponds to the code emitted by your tags. If you are unsure as to what signals are, you should ask the tag manufacturer more about the differences between code spaces and signals.
@@ -80,11 +80,11 @@ The **Group** and **Release.site** columns are also important but, if you only h
 
 ```
 M: No Release site has been indicated in the biometrics file. Creating a 'Release.site' column to avoid script failure. Filling with 'unspecified'.
-M: No 'Group' column found in the biometrics file. Assigning all fish to group 'All'.
+M: No 'Group' column found in the biometrics file. Assigning all animals to group 'All'.
 ```
 
 Note:
-  : You can append as many columns as you want to **biometrics.csv**. Importantly, if the biometrics have columns with keywords such as *length*, *weight* or *mass*, graphics showing the distribution of these parameters per fish group will be drawn for you in the report.
+  : You can append as many columns as you want to **biometrics.csv**. Importantly, if the biometrics have columns with keywords such as *length*, *weight* or *mass*, graphics showing the distribution of these parameters per animal group will be drawn for you in the report.
 
 ### Tags with sensors
 
@@ -136,7 +136,7 @@ Array
   : If you are listing a station: 
     The array to which the station belongs. 
   : If you are listing a release site: 
-    The first array(s) that the fish is expected to cross after being released.
+    The first array(s) that the animal is expected to cross after being released.
 
 Section
   : The study area section to which the hydrophone station belongs. Leave empty for the release sites.
@@ -234,11 +234,11 @@ A distances matrix is a table that contains information on the distance (in metr
 
 If your study area has multiple branches, then you need to tell actel how your arrays connect with each other. This file is optional because, if omitted, actel will assume that your study area is composed by a single branch and that the array order is the one listed in the spatial.csv file.
 
-The spatial.txt file is very simple; all you need to do is connect your arrays with either dashes or arrows (find out the difference below). You can connect your arrays in pairs or make longer strings. To decide whether or not two arrays should be connected, ask yourself the following: "Can fish move from A to B without having to pass through any other array?" If the answer is yes, then the arrays should be connected. Let's have a look at some examples:
+The spatial.txt file is very simple; all you need to do is connect your arrays with either dashes or arrows (find out the difference below). You can connect your arrays in pairs or make longer strings. To decide whether or not two arrays should be connected, ask yourself the following: "Can the animals move from A to B without having to pass through any other array?" If the answer is yes, then the arrays should be connected. Let's have a look at some examples:
 
 #### One branch study area, fully covering arrays
 
-This is the simplest case, e.g. your fish are migrating through a channel, and your arrays split this channel in sections. Like in the figure below:
+This is the simplest case, e.g. your animals are migrating through a channel, and your arrays split this channel in sections. Like in the figure below:
 
 <center>
 <img src="spatialtxt_a.svg" alt="drawing" width="600"/>
@@ -267,7 +267,7 @@ This case is similar to above, but some arrays do not cover the totality. For ex
 <img src="spatialtxt_b.svg" alt="drawing" width="600"/>
 </center>
 
-In this case, fish can move from B to D without passing through C. As such, a spatial.txt file is now required, and it would look like this:
+In this case, the animals can move from B to D without passing through C. As such, a spatial.txt file is now required, and it would look like this:
 
 ```
 A -- B -- D -- E
@@ -328,7 +328,7 @@ If are feeling wary of including multiple links in a single line, you can use th
 
 #### Array direction
 
-In the migration analysis, array direction is relevant. That means that writing `A -- B` is not the same as writing `B -- A`. In the first case, array B comes after array A (i.e. the fish are expected to reach A before reaching B), while in the second case the situation is reversed. This has implications for array efficiency calculations, so be sure to encode your study area carefully.
+In the migration analysis, array direction is relevant. That means that writing `A -- B` is not the same as writing `B -- A`. In the first case, array B comes after array A (i.e. the animals are expected to reach A before reaching B), while in the second case the situation is reversed. This has implications for array efficiency calculations, so be sure to encode your study area carefully.
 
 If you intend to run an explore or residency analysis, array direction is irrelevant.
 
@@ -343,7 +343,7 @@ In an explore/residency analyses, `A -- B` should be read as:
 
 In a migration analysis, `A -- B` should be read as:
   
-    It is possible to move from array A to array B and vice-versa, AND the fish are expected to pass through array A before reaching array B
+    It is possible to move from array A to array B and vice-versa, AND the animals are expected to pass through array A before reaching array B
 
 Let's have a look at this example.
 
@@ -375,18 +375,18 @@ C -- F -- C
 E -- F -- E
 ```
 
-The difference here is that, in the spatial.txt for migration, actel expects arrays to connected in a directional way. That means that connecting `D -- B` and `B -- D` does not mean the same thing, and it is important that you explicitly state that the fish are as likely to reach B coming from D as they are to reach D coming from B. In other words, you are saying that neither of the movements would be an explicit backwards movement. This will inform actel that D and B are parallel arrays, and that special rules should apply to them. The same goes for C, E and F.
+The difference here is that, in the spatial.txt for migration, actel expects arrays to connected in a directional way. That means that connecting `D -- B` and `B -- D` does not mean the same thing, and it is important that you explicitly state that the animals are as likely to reach B coming from D as they are to reach D coming from B. In other words, you are saying that neither of the movements would be an explicit backwards movement. This will inform actel that D and B are parallel arrays, and that special rules should apply to them. The same goes for C, E and F.
 
 
 #### Barriers
 
-Sometimes it is possible for your fish to go from A to B, but not from B to A. In actel, you can include this information to further refine the analysis. In total, there are three symbols you can use to connect your arrays: `--`, `->` or `<-`.
+Sometimes it is possible for your animals to go from A to B, but not from B to A. In actel, you can include this information to further refine the analysis. In total, there are three symbols you can use to connect your arrays: `--`, `->` or `<-`.
 
-If the fish can move from A to B and vice-versa, use `A -- B`.
+If the animals can move from A to B and vice-versa, use `A -- B`.
 
-If the fish can only move from A to B, use either `A -> B` or `B <- A`.
+If the animals can only move from A to B, use either `A -> B` or `B <- A`.
 
-If a fish then actually moves from B to A, actel will try to find an alternative route that the fish could have taken. If there are no alternative routes from B to A, actel will call this situation to your attention.
+If an animal then actually moves from B to A, actel will try to find an alternative route that the animal could have taken. If there are no alternative routes from B to A, actel will call this situation to your attention.
 
 This has implications for array efficiency calculations, so be sure to encode your study area carefully.
 
@@ -407,8 +407,8 @@ Now that you have prepared your workspace, it is time to start the analysis. The
 **2. migration()**
 
   The migration() analysis runs the same initial checks as explore(), but on top of it, it analyses
-  the fish behaviour. By selecting the arrays that lead to success, you can define whether or not
-  your fish survived the migration. Additional plots help you find out if some fish has been acting odd.
+  the animal behaviour. By selecting the arrays that lead to success, you can define whether or not
+  your animals survived the migration. Additional plots help you find out if some animal/tag has been acting odd.
   Multiple options allow you to tweak the analysis to fit your study perfectly.
 
   [Learn more about the migration function.](c-0_migration.html)
@@ -416,8 +416,8 @@ Now that you have prepared your workspace, it is time to start the analysis. The
 **3. residency()**
 
   The residency() analysis runs the same initial checks as explore(), but, similarly to migration, explores
-  particular points of the fish behaviour. If you want to know where your fish were in each day of the study,
-  how many fish were in each section each day, and other residency-focused variables, this is the analysis
+  particular points of the animal behaviour. If you want to know where your animals were in each day of the study,
+  how many animals were in each section each day, and other residency-focused variables, this is the analysis
   you are looking for!
 
   [Learn more about the residency function.](d-0_residency.html)

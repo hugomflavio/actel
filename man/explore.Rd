@@ -59,28 +59,28 @@ to the first detection on the target array to perform the calculations.
 If 'last to last', the last detection on ´the previous array is matched to the
 last detection on the target array to perform the calculations.}
 
-\item{speed.warning}{If a fish moves at a speed equal or greater than
+\item{speed.warning}{If a tag moves at a speed equal or greater than
 \code{speed.warning} (in metres per second), a warning is issued. If left
 NULL (default), no warnings are issued.}
 
-\item{speed.error}{If a fish moves at a speed equal or greater than
+\item{speed.error}{If a tag moves at a speed equal or greater than
 \code{speed.error} (in metres per second), user intervention is suggested.
 If left NULL (default), user intervention is never suggested.}
 
-\item{jump.warning}{If a fish crosses a number of arrays equal or greater
+\item{jump.warning}{If a tag crosses a number of arrays equal or greater
 than \code{jump.error} without being detected, a warning is issued. If left
 NULL (default), no warnings are issued.}
 
-\item{jump.error}{If a fish crosses a number of arrays equal or greater than
+\item{jump.error}{If a tag crosses a number of arrays equal or greater than
 \code{jump.error} without being detected, user intervention is suggested.
 If left NULL (default), user intervention is never suggested.}
 
-\item{inactive.warning}{If a fish spends a number of days equal or greater
+\item{inactive.warning}{If a tag spends a number of days equal or greater
 than \code{inactive.error} in a given array at the tail of the respective
 detections, a warning is issued. If left NULL (default), no warnings are
 issued.}
 
-\item{inactive.error}{If a fish spends a number of days equal or greater than
+\item{inactive.error}{If a tag spends a number of days equal or greater than
 \code{inactive.error} in a given array at the tail of the respective
 detections, user intervention is suggested. If left NULL (default), user
 intervention is never suggested.}
@@ -105,7 +105,7 @@ function terminates.}
 
 \item{discard.orphans}{Logical: Should actel automatically discard
 detections that do not fall within receiver deployment periods, or that
-were recorded before the respective fish were released?}
+were recorded before the respective animals were released?}
 
 \item{discard.first}{A threshold amount of time (in hours) that must pass after
 release for the respective detections to be valid. Set to 0 to discard only
@@ -132,14 +132,14 @@ detection plots. One of "stations" (default) or "arrays".}
 A list containing:
 \itemize{
 \item \code{bio}: A copy of the biometrics input;
-\item \code{detections}: A list containing all detections for each target fish;
-\item \code{valid.detections}: A list containing the valid detections for each target fish;
+\item \code{detections}: A list containing all detections for each target tag;
+\item \code{valid.detections}: A list containing the valid detections for each target tag;
 \item \code{spatial}: A list containing the spatial information used during the analysis;
 \item \code{deployments}: A data frame containing the deployments of each receiver;
 \item \code{arrays}: A list containing the array details used during the analysis;
-\item \code{movements}: A list containing all movement events for each target fish;
-\item \code{valid.movements}: A list containing the valid movement events for each target fish;
-\item \code{times}: A data frame containing all arrival times (per fish) at each array;
+\item \code{movements}: A list containing all movement events for each target tag;
+\item \code{valid.movements}: A list containing the valid movement events for each target tag;
+\item \code{times}: A data frame containing all arrival times (per tag) at each array;
 \item \code{rsp.info}: A list containing containing appendix information for the RSP package;
 \item \code{dist.mat}: A matrix containing the distance matrix used in the analysis (if a valid
 distance matrix was supplied)

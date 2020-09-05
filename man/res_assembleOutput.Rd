@@ -7,13 +7,13 @@
 res_assembleOutput(res.df, bio, spatial, tz)
 }
 \arguments{
-\item{bio}{A table with the tags and biometrics of the studied fish.}
+\item{bio}{A table with the tags and biometrics of the studied animals.}
 
 \item{tz}{The time zone of the study area. Must match one of the values
 present in \code{\link[base]{timezones}}.}
 }
 \value{
-A data frame containing all the final data for each fish.
+A data frame containing all the final data for each tag.
 }
 \description{
 Combines the timetable and the original biometrics.

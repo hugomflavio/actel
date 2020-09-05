@@ -52,11 +52,11 @@ to the first detection on the target array to perform the calculations.
 If 'last to last', the last detection on ´the previous array is matched to the
 last detection on the target array to perform the calculations.}
 
-\item{speed.warning}{If a fish moves at a speed equal or greater than
+\item{speed.warning}{If a tag moves at a speed equal or greater than
 \code{speed.warning} (in metres per second), a warning is issued. If left
 NULL (default), no warnings are issued.}
 
-\item{speed.error}{If a fish moves at a speed equal or greater than
+\item{speed.error}{If a tag moves at a speed equal or greater than
 \code{speed.error} (in metres per second), user intervention is suggested.
 If left NULL (default), user intervention is never suggested.}
 
@@ -81,20 +81,20 @@ function terminates.}
 \item{save.detections}{Logical: Should the processed detections be saved for
 future runs?}
 
-\item{jump.warning}{If a fish crosses a number of arrays equal or greater
+\item{jump.warning}{If a tag crosses a number of arrays equal or greater
 than \code{jump.error} without being detected, a warning is issued. If left
 NULL (default), no warnings are issued.}
 
-\item{jump.error}{If a fish crosses a number of arrays equal or greater than
+\item{jump.error}{If a tag crosses a number of arrays equal or greater than
 \code{jump.error} without being detected, user intervention is suggested.
 If left NULL (default), user intervention is never suggested.}
 
-\item{inactive.warning}{If a fish spends a number of days equal or greater
+\item{inactive.warning}{If a tag spends a number of days equal or greater
 than \code{inactive.error} in a given array at the tail of the respective
 detections, a warning is issued. If left NULL (default), no warnings are
 issued.}
 
-\item{inactive.error}{If a fish spends a number of days equal or greater than
+\item{inactive.error}{If a tag spends a number of days equal or greater than
 \code{inactive.error} in a given array at the tail of the respective
 detections, user intervention is suggested. If left NULL (default), user
 intervention is never suggested.}
@@ -113,14 +113,14 @@ study area diagrams?}
 \item{plot.detections.by}{The type of y axis desired for the individual
 detection plots. One of "stations" (default) or "arrays".}
 
-\item{if.last.skip.section}{Logical: Should a fish detected at the last array
+\item{if.last.skip.section}{Logical: Should a tag detected at the last array
 of a given section be considered to have disappeared in the next section?}
 
 \item{replicates}{A list containing, for each array to which intra-array
 efficiency is to be calculated: The standard names of the stations to be
 used as a replicate. See the vignettes for more details.}
 
-\item{section.minimum}{If a fish has less than \code{section.minimum}
+\item{section.minimum}{If a tag has less than \code{section.minimum}
 consecutive detections in a section, a warning is issued. Defaults to 2.}
 
 \item{section.order}{A vector containing the order by which sections should

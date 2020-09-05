@@ -53,24 +53,24 @@ You can find some examples below.
 
 #### Release sites
 
-Release sites are a special form of station. Used to pinpoint the release locations of the tagged fish, release sites do not have receivers associated to them. Additionally, instead of being allocated to an array, they indicate which array is expected to be the first to detect the released fish. If you are not sure which array is expected to detect your fish first (i.e. upon release, fish can move to multiple arrays), you can tell actel to expect a first detection at multiple arrays. This has important consequences for array efficiency estimation, so it is important to get this right. Some examples are provided further down.
+Release sites are a special form of station. Used to pinpoint the release locations of the tagged animals, release sites do not have receivers associated to them. Additionally, instead of being allocated to an array, they indicate which array is expected to be the first to detect the released animals. If you are not sure which array is expected to detect your animals first (i.e. upon release, animals can move to multiple arrays), you can tell actel to expect a first detection at multiple arrays. This has important consequences for array efficiency estimation, so it is important to get this right. Some examples are provided further down.
 
 
 ### Arrays
 
-Arrays are the functional movement unit for actel. They determine groups of stations that, together, represent a point of change in the fish position. In the study area above, there are seven arrays, which are grouped into three sections. Arrays can be named freely, and must be connected to their respective sections using the _spatial.csv_ file.  
+Arrays are the functional movement unit for actel. They determine groups of stations that, together, represent a point of change in the animal position. In the study area above, there are seven arrays, which are grouped into three sections. Arrays can be named freely, and must be connected to their respective sections using the _spatial.csv_ file.  
 
 
 #### Avoid overlapping arrays
 
-When a fish moves from one array to another, a new movement event is created (you will learn more about movement events later on). This means that, if you have two stations close to each other, but listed in two different arrays, you can end up with many 'false' movement events (i.e. the fish is just standing still within range of both arrays). Here is an example:
+When a tag moves from one array to another, a new movement event is created (you will learn more about movement events later on). This means that, if you have two stations close to each other, but listed in two different arrays, you can end up with many 'false' movement events (i.e. the tag is just standing still within range of both arrays). Here is an example:
 
 ```{r, echo=FALSE, results='asis'}
 load("badmovements.Rdata")
 knitr::kable(badmovements[20:25,1:7])
 ```
 
-Stations 15 and 17 are very close to each other, but were placed in different arrays. That in turn led to the creation of numerous movement events with only one detection, with nearly no time travelling between them. This fish ended up having 58 movement events, during most of which it was most likely just standing still.
+Stations 15 and 17 are very close to each other, but were placed in different arrays. That in turn led to the creation of numerous movement events with only one detection, with nearly no time travelling between them. This tag ended up having 58 movement events, during most of which it was most likely just standing still.
 
 As a rule of thumb, if two stations' ranges are likely to overlap, you should consider assigning them to the same array:
 
@@ -81,7 +81,7 @@ As a rule of thumb, if two stations' ranges are likely to overlap, you should co
 
 The sections divide your study area in big blocks, for which you would like specific metrics to be calculated (e.g. residency time, survival, etc.). In the example above, there are three sections: River, Fjord and Sea. The sections must be filled in in the 'Section' column of the _spatial.csv_ file.
 
-When running a `migration()` analysis, the order of the sections is relevant and represents the order in which you expect your fish will move. By default, actel will order the sections by the order in which they appear in the spatial.csv file. However, you can force a specific order using the `section.order` argument. For example, if you expect your fish to move from the river to a fjord and ultimately to the sea (and you have receiver arrays in all these sections), then `section.order = c("River", "Fjord", "Sea")`. In the other hand, if you expect your fish to migrate upstream, then `section.order = c("Sea", "Fjord", "River")`.
+When running a `migration()` analysis, the order of the sections is relevant and represents the order in which you expect your animals will move. By default, actel will order the sections by the order in which they appear in the spatial.csv file. However, you can force a specific order using the `section.order` argument. For example, if you expect your animals to move from the river to a fjord and ultimately to the sea (and you have receiver arrays in all these sections), then `section.order = c("River", "Fjord", "Sea")`. In the other hand, if you expect your animals to migrate upstream, then `section.order = c("Sea", "Fjord", "River")`.
 
 For the residency analysis, the order of the sections is not relevant, except for plotting and column order purposes. Like above, actel can sort out the order by itself, or you can specify a specific order using the `section.order` argument.
 
@@ -90,7 +90,7 @@ The `explore()` analysis does not take sections into consideration.
 
 ### Rivers with multiple parallel channels
 
-If your study area includes multiple pathways that the fish may take, you must tell actel how to connect the arrays. By default, arrays are sorted in a linear order according to the spatial.csv file. To instruct actel to act otherwise, you must create a '**spatial.txt**' file. The spatial.txt file is very simple; all you need to do is connect your arrays in pairs. [You can learn more about spatial.txt files here](a-0_workspace_requirements.html#optional-spatial.txt-file)
+If your study area includes multiple pathways that the animals may take, you must tell actel how to connect the arrays. By default, arrays are sorted in a linear order according to the spatial.csv file. To instruct actel to act otherwise, you must create a '**spatial.txt**' file. The spatial.txt file is very simple; all you need to do is connect your arrays in pairs. [You can learn more about spatial.txt files here](a-0_workspace_requirements.html#optional-spatial.txt-file)
 
 Now you know how to organise your study area in a way that actel will understand!
 
@@ -135,7 +135,7 @@ Now onwards to the release sites. If you only have one release site at the top o
 <img src="spatialcsv_a5.svg" alt="drawing" width="400"/>
 </center>
 
-Then you are sure that the fish are expected to be first detected at array A:
+Then you are sure that the animals are expected to be first detected at array A:
 
 
 ```{r, echo=FALSE, results='asis'}
@@ -147,13 +147,13 @@ Then you are sure that the fish are expected to be first detected at array A:
 knitr::kable(spatial)
 ```
 
-However, you can also have fish released somewhere in the middle of the study area, i.e.:
+However, you can also have animals released somewhere in the middle of the study area, i.e.:
 
 <center>
 <img src="spatialcsv_a6.svg" alt="drawing" width="400"/>
 </center>
 
-In this case, if you know that your fish are expected to move in a specific direction (i.e. a migration scenario), then we could say that there is only one expected first array (array D, if the fish is migrating left to right):
+In this case, if you know that your animals are expected to move in a specific direction (i.e. a migration scenario), then we could say that there is only one expected first array (array D, if the animal is migrating left to right):
 
 ```{r, echo=FALSE, results='asis'}
   spatial <- data.frame(Station.name = "RS2",
@@ -164,7 +164,7 @@ In this case, if you know that your fish are expected to move in a specific dire
 knitr::kable(spatial)
 ```
 
-However, if you do not know which direction the fish will take (i.e. a residency scenario), then the fish is just as likely to be first detected at array D as it is to be detected at array C. To account for this, you must include both arrays in the spatial.csv file, separating them with a "\|".
+However, if you do not know which direction the animals will take (i.e. a residency scenario), then the animal is just as likely to be first detected at array D as it is to be detected at array C. To account for this, you must include both arrays in the spatial.csv file, separating them with a "\|".
 
 ```{r, echo=FALSE, results='asis'}
   spatial <- data.frame(Station.name = "RS2",
@@ -212,15 +212,15 @@ We can then start filling in the spatial.csv file:
 knitr::kable(spatial)
 ```
 
-Now let's assume the fish are released inside the lake:
+Now let's assume the animals are released inside the lake:
 
 <center>
 <img src="spatialcsv_b3.svg" alt="drawing" width="400"/>
 </center>
 
-In this case, regardless of the analysis you are running (migration or residency), there is uncertainty in the first expected array. If you expect that the fish will be migrating from the Lake to the River, you should state that the expected first arrays are either East1 or East2. If you are running a residency analysis, then it may make more sense to consider all Lake arrays as potential first arrays.
+In this case, regardless of the analysis you are running (migration or residency), there is uncertainty in the first expected array. If you expect that the animals will be migrating from the Lake to the River, you should state that the expected first arrays are either East1 or East2. If you are running a residency analysis, then it may make more sense to consider all Lake arrays as potential first arrays.
 
-So, if you know your fish are moving to the river:
+So, if you know your animals are moving to the river:
 
 ```{r, echo=FALSE, results='asis'}
   spatial <- data.frame(Station.name = "RS1",
@@ -231,7 +231,7 @@ So, if you know your fish are moving to the river:
 knitr::kable(spatial)
 ```
 
-If you don't know where the fish will go to:
+If you don't know where the animals will go to:
 
 ```{r, echo=FALSE, results='asis'}
   spatial <- data.frame(Station.name= "RS1",

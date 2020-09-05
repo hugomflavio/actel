@@ -47,9 +47,10 @@ The `section.movements` list contains the section-level movement events created 
 
 |Section  | Events| Detections|First.array  |Last.array  |First.time |Last.time |Time.travelling |Time.in.section |
 |:--------|------:|----------:|:------------|:-----------|:----------|:---------|:---------------|:---------------|
-|River    |      3|         10|River1       |River3      |...        |...       |11:45           |0:00            |
-|Fjord    |      2|          5|Fjord1       |Fjord2      |...        |...       |14:00           |03:32           |
-|Sea      |      2|          7|Sea1         |Sea1        |...        |...       |26:27           |15:59           |
+|River    |      3|         10|River1       |River3      |...        |...       |        11:45:03|         0:15:58|
+|Fjord    |      2|          5|Fjord1       |Fjord2      |...        |...       |        14:00:45|        03:32:01|
+|Sea      |      2|          7|Sea1         |Sea1        |...        |...       |        26:27:24|        15:59:13|
+
 (Timestamps were trimmed so the table fits better in the page)
 
 
@@ -57,12 +58,12 @@ The `section.movements` list contains the section-level movement events created 
 
 The `status.df` is a data frame that combines both the timetable data and your biometrics into a single, organised table. If you have stored any comments during the analysis process, they will show up in a reserved column in this table. 
 
-The `status.df` also contains the recorded fate for each fish (i.e. disappeared somewhere or succeeded at crossing the study area), and summary information on the number and length of the recorded backwards movements. This table can be quite big, so it may be a good idea to use `head(status.df)`  the first time you look at it.
+The `status.df` also contains the recorded fate for each animal (i.e. disappeared somewhere or succeeded at crossing the study area), and summary information on the number and length of the recorded backwards movements. This table can be quite big, so it may be a good idea to use `head(status.df)`  the first time you look at it.
 
 
 ### section.overview
 
-This small table is automatically generated with data extracted from the `status.df`. For each fish group, it details the number of fish that disappeared on any section and those that passed to the next. It is very helpful to get a quick overview of the results, and is incorporated in the [actel report](#actel_migration_report.html-if-report-true). Here is an example:
+This small table is automatically generated with data extracted from the `status.df`. For each animal group, it details the number of tags that disappeared on any section and those that passed to the next. It is very helpful to get a quick overview of the results, and is incorporated in the [actel report](#actel_migration_report.html-if-report-true). Here is an example:
 
 |         | Total| Disap..in.River| Migrated.to.Sea| Disap..in.Sea| Succeeded|
 |:--------|-----:|---------------:|---------------:|-------------:|---------:|
@@ -72,10 +73,10 @@ This small table is automatically generated with data extracted from the `status
 
 ### array.overview
 
-The `array.overview` shows you the number of known and estimated fish, per group, to have passed each of your arrays.
+The `array.overview` shows you the number of known and estimated tags, per group, to have passed each of your arrays.
 
 Note:
-  : These only take into account forward movements. I.e., if the fish moved backwards, the results displayed in array.overview will no longer match the known survival. When looking for survival estimates, you should always refer back to the `section.overview` object for confirmation of the number of fish that entered/left each section.
+  : These only take into account forward movements. I.e., if the tag moved backwards, the results displayed in array.overview will no longer match the known survival. When looking for survival estimates, you should always refer back to the `section.overview` object for confirmation of the number of tags that entered/left each section.
 
 If you activated the [report option](b-0_explore.html#report), this table is then converted into a graphic, which can be found in the actel migration report, under the section "Progression".
 
@@ -114,7 +115,7 @@ This is the main non-R output. If you activated the `report` option, actel will 
 
 1. **Array forward efficiency**
 
-  Here you can see how efficient your receiver arrays were at detecting the fish that moved past them. These results can also be found in the `overall.CJS` object, which is in your results in R. If you supplied replicates, the results of the intra-array estimations will also show up here.
+  Here you can see how efficient your receiver arrays were at detecting the tags that moved past them. These results can also be found in the `overall.CJS` object, which is in your results in R. If you supplied replicates, the results of the intra-array estimations will also show up here.
 
 2. **Section survival**
 
@@ -122,7 +123,7 @@ This is the main non-R output. If you activated the `report` option, actel will 
 
 2. **Last seen arrays**
 
-  This graphic compiles the information on where each fish was last seen. The information used for this graphic can be found in the `status.df` object, which is in your results in R (more specifically in the 'Very.last.array' column).
+  This graphic compiles the information on where each tag was last seen. The information used for this graphic can be found in the `status.df` object, which is in your results in R (more specifically in the 'Very.last.array' column).
 
 3. **Progression**
 
@@ -130,22 +131,22 @@ This is the main non-R output. If you activated the `report` option, actel will 
   You can also examine the detailed values per group in the tables supplied (i.e. the `array.overview` object).
 
 
-4. **Fish comparisons (Dotplots)**
+4. **Tag comparisons (Dotplots)**
 
-  As the name suggests, this plot compares variables across all your fish: The total number of detections, and the time to/time in each of your study area sections. To simplify the visualisation, for each variable, the **top 10%** of the data is painted in **red**, and the **bottom 10%** of the data is painted in **blue**.
+  As the name suggests, this plot compares variables across all your tags: The total number of detections, and the time to/time in each of your study area sections. To simplify the visualisation, for each variable, the **top 10%** of the data is painted in **red**, and the **bottom 10%** of the data is painted in **blue**.
 
-  This plot is meant to help you find fish with uncommon behaviour. Fish with a lot of detections are likely staying for a very long time within receiver range; a fish that moves too fast in comparison to the remaining may have been carried by a predator. It is up to you to look at these graphics and decide if anything looks odd. If it does, then note down the tag number, so you can have a closer look at the respective plot of detections.
+  This plot is meant to help you find tags with uncommon behaviour. Tags with a lot of detections are likely staying for a very long time within receiver range; a tag that moves too fast in comparison to the remaining may have been carried by a predator. It is up to you to look at these graphics and decide if anything looks odd. If it does, then note down the tag number, so you can have a closer look at the respective plot of detections.
 
 
 5. **Graphics of detected tags**
 
-  These graphics contain more information than those created by the explore function: the vertical grey dashed lines show the assigned moments of entry and exit for each study area section, and the assigned fate of the fish is shown in the header.
+  These graphics contain more information than those created by the explore function: the vertical grey dashed lines show the assigned moments of entry and exit for each study area section, and the assigned fate of the animal is shown in the header.
 
   It is a good idea to have a good look at all of these graphics and verify that everything is looking correct (i.e. actel has assigned fates and entry/exit points correctly). This is also a good chance to have a closer look at the tags you flagged as suspicious during the analysis.
 
 
 ## What if actel has miss-assigned something?
 
-Fish with strange behaviour can be complicated to analyse. While actel's functions have been designed to deal with this as best as possible, you can always [enter manual mode](e-0_manual_mode.html) if you find out that actel has miss-assigned something. I.e. has a movement event been invalidated that seems valid, or vice-versa? Are part of the movements detected characteristic of predator behaviour?
+Tags with strange behaviour can be complicated to analyse. While actel's functions have been designed to deal with this as best as possible, you can always [enter manual mode](e-0_manual_mode.html) if you find out that actel has miss-assigned something. I.e. has a movement event been invalidated that seems valid, or vice-versa? Are part of the movements detected characteristic of predator behaviour?
 
 [Back to top.](#)

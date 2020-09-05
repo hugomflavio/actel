@@ -4,7 +4,13 @@
 \alias{printSensorData}
 \title{Print sensor data for each individual tag}
 \usage{
-printSensorData(detections, rsp.info, extension = "png")
+printSensorData(
+  detections,
+  spatial,
+  rsp.info,
+  type = c("stations", "arrays"),
+  extension = "png"
+)
 }
 \arguments{
 \item{detections}{A valid detections list}

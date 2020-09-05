@@ -2,7 +2,7 @@
 % Please edit documentation in R/residency.R
 \name{resRatios}
 \alias{resRatios}
-\title{calculate residency ratios per fish}
+\title{calculate residency ratios per tag}
 \usage{
 resRatios(res, timestep = c("days", "hours"), tz)
 }
@@ -12,9 +12,9 @@ resRatios(res, timestep = c("days", "hours"), tz)
 \item{timestep}{the size of each frame}
 }
 \value{
-A list containing the residency ratios for each fish.
+A list containing the residency ratios for each tag.
 }
 \description{
-calculate residency ratios per fish
+calculate residency ratios per tag
 }
 \keyword{internal}

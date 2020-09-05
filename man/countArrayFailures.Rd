@@ -2,7 +2,7 @@
 % Please edit documentation in R/CJS.R
 \name{countArrayFailures}
 \alias{countArrayFailures}
-\title{Find and list arrays which failed during the movements of the fish}
+\title{Find and list arrays which failed during the movements of the tags}
 \usage{
 countArrayFailures(moves, paths, dotmat)
 }
@@ -17,6 +17,6 @@ countArrayFailures(moves, paths, dotmat)
 NULL if no arrays failed, or a list containing information on the arrays that failed
 }
 \description{
-Find and list arrays which failed during the movements of the fish
+Find and list arrays which failed during the movements of the tags
 }
 \keyword{internal}

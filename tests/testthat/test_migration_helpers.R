@@ -21,14 +21,14 @@ moves <- groupMovements(detections.list = detections.list[1:2], bio = bio, spati
     speed.method = "last to first", max.interval = 60, tz = "Europe/Copenhagen", dist.mat = dist.mat)
 
 aux <- names(moves)
-moves <- lapply(names(moves), function(fish) {
-    speedReleaseToFirst(fish = fish, bio = bio, movements = moves[[fish]],
+moves <- lapply(names(moves), function(tag) {
+    speedReleaseToFirst(tag = tag, bio = bio, movements = moves[[tag]],
                         dist.mat = dist.mat, speed.method = "last to first")
   })
 names(moves) <- aux
 rm(aux)
 
-test_that("assembleTimetable correctly extracts fish information", {
+test_that("assembleTimetable correctly extracts tag information", {
   xmoves <- moves
   attributes(xmoves[[1]])$p.type <- "Manual"
   xmoves[[1]]$Valid[18] <- FALSE
@@ -36,8 +36,8 @@ test_that("assembleTimetable correctly extracts fish information", {
   vm[[1]] <- vm[[1]][-18, ]
 
   secmoves <- lapply(seq_along(vm), function(i) {
-    fish <- names(vm)[i]
-    appendTo("debug", paste0("debug: Compiling valid section movements for fish ", fish,"."))
+    tag <- names(vm)[i]
+    appendTo("debug", paste0("debug: Compiling valid section movements for tag ", tag,"."))
     output <- sectionMovements(movements = vm[[i]], spatial = spatial, valid.dist = attributes(dist.mat)$valid)
     return(output)
   })
@@ -81,8 +81,8 @@ test_that("assembleTimetable correctly handles speed methods and invalid.dist", 
       speed.method = "last to last", max.interval = 60, tz = "Europe/Copenhagen", dist.mat = dist.mat)
 
   aux <- names(moves.ff)
-  xmoves <- lapply(names(moves.ff), function(fish) {
-      speedReleaseToFirst(fish = fish, bio = bio, movements = moves.ff[[fish]],
+  xmoves <- lapply(names(moves.ff), function(tag) {
+      speedReleaseToFirst(tag = tag, bio = bio, movements = moves.ff[[tag]],
                           dist.mat = dist.mat, speed.method = "last to last")
     })
   names(xmoves) <- aux
@@ -95,8 +95,8 @@ test_that("assembleTimetable correctly handles speed methods and invalid.dist", 
   vm.ff[[1]] <- vm.ff[[1]][-18, ]
 
   secmoves.ff <- lapply(seq_along(vm.ff), function(i) {
-    fish <- names(vm.ff)[i]
-    appendTo("debug", paste0("debug: Compiling valid section movements for fish ", fish,"."))
+    tag <- names(vm.ff)[i]
+    appendTo("debug", paste0("debug: Compiling valid section movements for tag ", tag,"."))
     output <- sectionMovements(movements = vm.ff[[i]], spatial = spatial, valid.dist = attributes(dist.mat)$valid)
     return(output)
   })
@@ -143,8 +143,8 @@ test_that("assembleTimetable correctly handles speed methods and invalid.dist", 
   vm.ff <- xmoves.ff[1]
   vm.ff[[1]] <- vm.ff[[1]][-18, ]
   secmoves.ff <- lapply(seq_along(vm.ff), function(i) {
-    fish <- names(vm.ff)[i]
-    appendTo("debug", paste0("debug: Compiling valid section movements for fish ", fish,"."))
+    tag <- names(vm.ff)[i]
+    appendTo("debug", paste0("debug: Compiling valid section movements for tag ", tag,"."))
     output <- sectionMovements(movements = vm.ff[[i]], spatial = spatial, valid.dist = attributes(dist.mat)$valid)
     return(output)
   })
@@ -195,8 +195,8 @@ vm <- xmoves
 vm[[1]] <- vm[[1]][-18, ]
 
 secmoves <- lapply(seq_along(vm), function(i) {
-  fish <- names(vm)[i]
-  appendTo("debug", paste0("debug: Compiling valid section movements for fish ", fish,"."))
+  tag <- names(vm)[i]
+  appendTo("debug", paste0("debug: Compiling valid section movements for tag ", tag,"."))
   output <- sectionMovements(movements = vm[[i]], spatial = spatial, valid.dist = attributes(dist.mat)$valid)
   return(output)
 })

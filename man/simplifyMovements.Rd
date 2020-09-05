@@ -4,7 +4,7 @@
 \alias{simplifyMovements}
 \title{Removes invalid events}
 \usage{
-simplifyMovements(movements, discard.first, fish, bio, speed.method, dist.mat)
+simplifyMovements(movements, discard.first, tag, bio, speed.method, dist.mat)
 }
 \arguments{
 \item{movements}{A list of movements for each target tag, created by groupMovements.}
@@ -13,7 +13,7 @@ simplifyMovements(movements, discard.first, fish, bio, speed.method, dist.mat)
 release for the respective detections to be valid. Set to 0 to discard only
 the release-to-first-detection calculations.}
 
-\item{bio}{A table with the tags and biometrics of the studied fish.}
+\item{bio}{A table with the tags and biometrics of the studied animals.}
 
 \item{speed.method}{Can take two forms: 'last to first' or 'last to last'.
 If 'last to first' (default), the last detection on the previous array is matched
@@ -24,7 +24,7 @@ last detection on the target array to perform the calculations.}
 \item{dist.mat}{A matrix of the distances between the deployed ALS.}
 }
 \value{
-The movement data frame containing only valid events for the target fish.
+The movement data frame containing only valid events for the target tag.
 }
 \description{
 Remove invalid movement events and recalculate times/speeds.

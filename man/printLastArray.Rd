@@ -2,7 +2,7 @@
 % Please edit documentation in R/print.R
 \name{printLastArray}
 \alias{printLastArray}
-\title{Print a simple barplot with the number of fish last seen at each section}
+\title{Print a simple barplot with the number of tags last seen at each section}
 \usage{
 printLastArray(status.df)
 }
@@ -15,6 +15,6 @@ printLastArray(status.df)
 No return value, called to plot and save graphic.
 }
 \description{
-Print a simple barplot with the number of fish last seen at each section
+Print a simple barplot with the number of tags last seen at each section
 }
 \keyword{internal}

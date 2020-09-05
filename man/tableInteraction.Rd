@@ -4,12 +4,12 @@
 \alias{tableInteraction}
 \title{Handler for table interaction events}
 \usage{
-tableInteraction(moves, fish, trigger, GUI, force = FALSE)
+tableInteraction(moves, tag, trigger, GUI, force = FALSE)
 }
 \arguments{
 \item{moves}{The movements table}
 
-\item{fish}{The fish being analysed}
+\item{tag}{The tag being analysed}
 
 \item{trigger}{The message/warning that triggered the interaction}
 

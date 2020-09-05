@@ -49,8 +49,8 @@ be aligned in the results.}
 May be used to run actel analyses based on R objects, rather than input files.}
 
 \item{success.arrays}{The arrays that mark the end of the study area. If a
-fish crosses one of these arrays, it is considered to have successfully
-migrated through the study area.}
+tag crosses one of these arrays, the respective animal is considered to have
+successfully migrated through the study area.}
 
 \item{max.interval}{The number of minutes that must pass between detections
 for a new event to be created. Defaults to 60.}
@@ -74,28 +74,28 @@ to the first detection on the target array to perform the calculations.
 If 'last to last', the last detection on ´the previous array is matched to the
 last detection on the target array to perform the calculations.}
 
-\item{speed.warning}{If a fish moves at a speed equal or greater than
+\item{speed.warning}{If a tag moves at a speed equal or greater than
 \code{speed.warning} (in metres per second), a warning is issued. If left
 NULL (default), no warnings are issued.}
 
-\item{speed.error}{If a fish moves at a speed equal or greater than
+\item{speed.error}{If a tag moves at a speed equal or greater than
 \code{speed.error} (in metres per second), user intervention is suggested.
 If left NULL (default), user intervention is never suggested.}
 
-\item{jump.warning}{If a fish crosses a number of arrays equal or greater
+\item{jump.warning}{If a tag crosses a number of arrays equal or greater
 than \code{jump.error} without being detected, a warning is issued. If left
 NULL (default), no warnings are issued.}
 
-\item{jump.error}{If a fish crosses a number of arrays equal or greater than
+\item{jump.error}{If a tag crosses a number of arrays equal or greater than
 \code{jump.error} without being detected, user intervention is suggested.
 If left NULL (default), user intervention is never suggested.}
 
-\item{inactive.warning}{If a fish spends a number of days equal or greater
+\item{inactive.warning}{If a tag spends a number of days equal or greater
 than \code{inactive.error} in a given array at the tail of the respective
 detections, a warning is issued. If left NULL (default), no warnings are
 issued.}
 
-\item{inactive.error}{If a fish spends a number of days equal or greater than
+\item{inactive.error}{If a tag spends a number of days equal or greater than
 \code{inactive.error} in a given array at the tail of the respective
 detections, user intervention is suggested. If left NULL (default), user
 intervention is never suggested.}
@@ -120,7 +120,7 @@ function terminates.}
 
 \item{discard.orphans}{Logical: Should actel automatically discard
 detections that do not fall within receiver deployment periods, or that
-were recorded before the respective fish were released?}
+were recorded before the respective animals were released?}
 
 \item{discard.first}{A threshold amount of time (in hours) that must pass after
 release for the respective detections to be valid. Set to 0 to discard only
@@ -129,7 +129,7 @@ the release-to-first-detection calculations.}
 \item{save.detections}{Logical: Should the processed detections be saved for
 future runs?}
 
-\item{if.last.skip.section}{Logical: Should a fish detected at the last array
+\item{if.last.skip.section}{Logical: Should a tag detected at the last array
 of a given section be considered to have disappeared in the next section?}
 
 \item{replicates}{A list containing, for each array to which intra-array
@@ -156,18 +156,18 @@ detection plots. One of "stations" (default) or "arrays".}
 \value{
 A list containing:
 \itemize{
-\item \code{detections}: A list containing all detections for each target fish;
-\item \code{valid.detections}: A list containing the valid detections for each target fish;
+\item \code{detections}: A list containing all detections for each target tag;
+\item \code{valid.detections}: A list containing the valid detections for each target tag;
 \item \code{spatial}: A list containing the spatial information used during the analysis;
 \item \code{deployments}: A data frame containing the deployments of each receiver;
 \item \code{arrays}: A list containing the array details used during the analysis;
-\item \code{movements}: A list containing all movement events for each target fish;
-\item \code{valid.movements}: A list containing the valid movement events for each target fish;
-\item \code{section.movements}: A list containing the valid section shifts for each target fish;
-\item \code{status.df}: A data.frame containing summary information for each fish, including the
+\item \code{movements}: A list containing all movement events for each target tag;
+\item \code{valid.movements}: A list containing the valid movement events for each target tag;
+\item \code{section.movements}: A list containing the valid section shifts for each target tag;
+\item \code{status.df}: A data.frame containing summary information for each tag, including the
 following columns:
 \itemize{
-\item \emph{Times.entered.[section]}: Number of times the fish was recorded
+\item \emph{Times.entered.[section]}: Number of times the tag was recorded
 entering a given section.
 \item \emph{Average.time.until.[section]}: Time spent between release
 or leaving another section and reaching at the given section.
@@ -175,48 +175,48 @@ or leaving another section and reaching at the given section.
 one section and reaching the given section (if speed.method = "last to first"),
 or from release/leaving one section and leaving the given section (if speed.method
 = "last to last").
-\item \emph{First.array.[section]}: Array in which the fish was
+\item \emph{First.array.[section]}: Array in which the tag was
 first detected in a given section
 \item \emph{First.station.[section]}: Standard name of the first station
-where the fish was detected in a given section
+where the tag was detected in a given section
 \item \emph{First.arrived.[section]}: Very first arrival time at a given section
 \item \emph{Average.time.in.[section]}: Average time spent within a given section
 at each stay.
 \item \emph{Average.speed.in.[section]}: Average speed within a given section
 at each stay (only displayed if speed.method = "last to first").
-\item \emph{Last.array.[section]}: Array in which the fish was
+\item \emph{Last.array.[section]}: Array in which the tag was
 last detected in a given section
 \item \emph{Last.station.[section]}: Standard name of the last station
-where the fish was detected in a given section
+where the tag was detected in a given section
 \item \emph{Last.left.[section]}: Very last departure time from a given section
 \item \emph{Total.time.in[section]}: Total time spent in a given section
-\item \emph{Very.last.array}: Last array where the fish was detected
-\item \emph{Status}: Fate assigned to the fish
+\item \emph{Very.last.array}: Last array where the tag was detected
+\item \emph{Status}: Fate assigned to the tag
 \item \emph{Valid.detections}: Number of valid detections
 \item \emph{Invalid.detections}: Number of invalid detections
 \item \emph{Backwards.movements}: Number of backward movement events
 \item \emph{Max.cons.back.moves}: Longest successive backwards movements
 \item \emph{P.type}: Type of processing:
 \itemize{
-\item 'Skipped' if no data was found for the fish,
+\item 'Skipped' if no data was found for the tag,
 \item 'Auto' if no user interaction was required,
 \item 'Manual' if user interaction was suggested and the user made
 changes to the validity of the events,
-\item 'Overridden' if the user listed the fish in the
+\item 'Overridden' if the user listed the tag in the
 \code{override} argument.
 }
 \item \emph{Comments}: Comments left by the user during the analysis
 }
-\item \code{section.overview}: A data frame containing the number of fish that
+\item \code{section.overview}: A data frame containing the number of tags that
 disappeared in each section;
 \item \code{group.overview}: A list containing the number of known and
-estimated fish to have passed through each array, divided by group;
+estimated tags to have passed through each array, divided by group;
 \item \code{release.overview}: A list containing the number of known and
-estimated fish to have passed through each array, divided by group and release sites;
+estimated tags to have passed through each array, divided by group and release sites;
 \item \code{matrices}: A list of CJS matrices used for the efficiency calculations;
 \item \code{overall.CJS}: A list of CJS results of the inter-array CJS calculations;
 \item \code{intra.array.CJS}: A list of CJS results of the intra-array CJS calculations;
-\item \code{times}: A data frame containing all arrival times (per fish) at each array;
+\item \code{times}: A data frame containing all arrival times (per tag) at each array;
 \item \code{rsp.info}: A list containing appendix information for the RSP package;
 \item \code{dist.mat}: The distance matrix used in the analysis (if a valid
 distance matrix was supplied)
@@ -224,9 +224,9 @@ distance matrix was supplied)
 }
 \description{
 The \code{migration} analysis runs the same initial checks as \code{explore},
-but on top of it, it analyses the fish behaviour. By selecting the arrays
-that lead to success, you can define whether or not your fish survived the
-migration. Additional plots help you find out if some fish has been acting
+but on top of it, it analyses the animal behaviour. By selecting the arrays
+that lead to success, you can define whether or not your animals survived the
+migration. Additional plots help you find out if some animal/tag has been acting
 odd. Multiple options allow you to tweak the analysis to fit your study
 perfectly.
 }

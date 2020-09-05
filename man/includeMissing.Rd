@@ -2,7 +2,7 @@
 % Please edit documentation in R/CJS.R
 \name{includeMissing}
 \alias{includeMissing}
-\title{Include fish that were never detected}
+\title{Include tags that were never detected}
 \usage{
 includeMissing(x, status.df)
 }
@@ -12,9 +12,9 @@ includeMissing(x, status.df)
 \item{status.df}{The main results table.}
 }
 \value{
-A matrix of detection histories per fish, including fish that were never detected.
+A matrix of detection histories per tag, including tags that were never detected.
 }
 \description{
-Include fish that were never detected
+Include tags that were never detected
 }
 \keyword{internal}

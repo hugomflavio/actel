@@ -2,11 +2,11 @@
 % Please edit documentation in R/check.R
 \name{checkJumpDistance}
 \alias{checkJumpDistance}
-\title{Check if fish are jumping over arrays}
+\title{Check if tags are jumping over arrays}
 \usage{
 checkJumpDistance(
   movements,
-  fish,
+  tag,
   release,
   dotmat,
   jump.warning,
@@ -17,17 +17,17 @@ checkJumpDistance(
 \arguments{
 \item{movements}{The movements table}
 
-\item{fish}{The fish being analysed}
+\item{tag}{The tag being analysed}
 
-\item{release}{The release location of the fish}
+\item{release}{The release location of the animal}
 
 \item{dotmat}{The matrix of distances between arrays}
 
-\item{jump.warning}{If a fish crosses a number of arrays equal or greater
+\item{jump.warning}{If a tag crosses a number of arrays equal or greater
 than \code{jump.error} without being detected, a warning is issued. If left
 NULL (default), no warnings are issued.}
 
-\item{jump.error}{If a fish crosses a number of arrays equal or greater than
+\item{jump.error}{If a tag crosses a number of arrays equal or greater than
 \code{jump.error} without being detected, user intervention is suggested.
 If left NULL (default), user intervention is never suggested.}
 
@@ -43,6 +43,6 @@ prompted to open and examine that file. Defaults to "needed".}
 A list of movements with updated 'Valid' columns
 }
 \description{
-Check if fish are jumping over arrays
+Check if tags are jumping over arrays
 }
 \keyword{internal}

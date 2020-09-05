@@ -7,9 +7,9 @@
 blameArrays(from, to, paths)
 }
 \arguments{
-\item{from}{The array where the fish started}
+\item{from}{The array where the tag started}
 
-\item{to}{The array where the fish was next detected}
+\item{to}{The array where the tag was next detected}
 
 \item{paths}{a list containing the shortest paths between arrays with distance > 1}
 }

@@ -24,7 +24,7 @@ getTimes(
 \item{n.events}{The events to record. One of "first", "all", or "last".}
 }
 \value{
-A data frame with the timestamps for each fish (rows) and array (columns)
+A data frame with the timestamps for each tag (rows) and array (columns)
 }
 \description{
 Extract timestamps from the analysis results.
@@ -38,7 +38,7 @@ getTimes(example.results, event.type = "arrival")
 # or
 getTimes(example.results, event.type = "departure")
 
-# and also how many events per fish.
+# and also how many events per tag.
 getTimes(example.results, n.events = "first")
 # or
 getTimes(example.results, n.events = "all")

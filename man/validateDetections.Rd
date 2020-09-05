@@ -7,12 +7,12 @@
 validateDetections(detections.list, movements)
 }
 \arguments{
-\item{detections.list}{The list of detections per fish}
+\item{detections.list}{The list of detections per tag}
 
 \item{movements}{The list of movements to be matched}
 }
 \value{
-A list containing the valid detections per fish.
+A list containing the valid detections per tag.
 }
 \description{
 Compare original detections with the valid movements and exclude invalid detections

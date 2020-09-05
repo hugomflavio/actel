@@ -34,7 +34,7 @@ plotArray(
 
 \item{timestep}{The time resolution for the grouping of the results. Defaults to "days", but can be set to "hours" and "mins" (at the expnse of computing time).}
 
-\item{cumulative}{Logical. If TRUE, a cumulative plot of arrivals is drawn, otherwise the number of fish simultaneously present at the array(s) is drawn.}
+\item{cumulative}{Logical. If TRUE, a cumulative plot of arrivals is drawn, otherwise the number of tags simultaneously present at the array(s) is drawn.}
 }
 \value{
 A ggplot object.

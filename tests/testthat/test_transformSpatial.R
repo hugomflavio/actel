@@ -20,7 +20,7 @@ test_that("transformSpatial handles release site mismatches properly and stops w
 	expect_warning(
 		expect_error(transformSpatial(spatial = spatial, bio = xbio, arrays = dot$arrays),
 			"There is more than one top level array in the study area. Please specify release site(s) in the 'spatial.csv' file and in the 'biometrics.csv' file.", fixed = TRUE),
-	"At least one release site has been indicated in the spatial.csv file, but no release sites were specified in the biometrics file.\n         Discarding release site information and assuming all fish were released at the top level array to avoid function failure.\n         Please double-check your data.", fixed = TRUE)
+	"At least one release site has been indicated in the spatial.csv file, but no release sites were specified in the biometrics file.\n         Discarding release site information and assuming all animals were released at the top level array to avoid function failure.\n         Please double-check your data.", fixed = TRUE)
 
 	xbio <- bio
 	levels(xbio$Release.site) <- c("RS1", "test")
@@ -33,7 +33,7 @@ test_that("transformSpatial handles release site mismatches properly and stops w
 	expect_warning(
 		expect_error(transformSpatial(spatial = xspatial, bio = bio, arrays = dot$arrays, first.array = NULL),
 			"There is more than one top level array in the study area. Please specify release site(s) in the spatial.csv file and in the biometrics.csv file.", fixed = TRUE),
-		"Release sites were not specified in the spatial.csv file. Attempting to assume all released fish start at the top level array.", fixed = TRUE)
+		"Release sites were not specified in the spatial.csv file. Attempting to assume all released animals start at the top level array.", fixed = TRUE)
 })
 
 test_that("transformSpatial handles release site mismatches properly and delivers correct output when possible", {
@@ -41,7 +41,7 @@ test_that("transformSpatial handles release site mismatches properly and deliver
 	xbio$Release.site <- "unspecified"
 
 	expect_warning(output <- transformSpatial(spatial = spatial, bio = xbio, arrays = dot$arrays, first.array = "A1"),
-		"At least one release site has been indicated in the spatial.csv file, but no release sites were specified in the biometrics file.\n         Discarding release site information and assuming all fish were released at the top level array to avoid function failure.\n         Please double-check your data.", fixed = TRUE)
+		"At least one release site has been indicated in the spatial.csv file, but no release sites were specified in the biometrics file.\n         Discarding release site information and assuming all animals were released at the top level array to avoid function failure.\n         Please double-check your data.", fixed = TRUE)
 
 	expect_equal(as.character(output$release.sites$Station.name), "unspecified")
 
@@ -54,11 +54,11 @@ test_that("transformSpatial handles release site mismatches properly and deliver
 	
 	xspatial <- spatial[-18, ]
 	expect_warning(output <- transformSpatial(spatial = xspatial, bio = bio, arrays = dot$arrays, first.array = "A1"),
-	"Release sites were not specified in the spatial.csv file. Attempting to assume all released fish start at the top level array.", fixed = TRUE)
+	"Release sites were not specified in the spatial.csv file. Attempting to assume all released animals start at the top level array.", fixed = TRUE)
 	expect_equal(as.character(output$release.sites$Station.name), "RS1")
 	expect_equal(as.character(output$release.sites$Array), "A1")
 	
-	# check counting of fish released per site
+	# check counting of animals released per site
 	expect_equal(output$release.sites$n.A, 30)
 	expect_equal(output$release.sites$n.B, 30)
 })

@@ -2,9 +2,9 @@
 % Please edit documentation in R/check.R
 \name{checkMinimumN}
 \alias{checkMinimumN}
-\title{Check that the fish have enough detections to be valid}
+\title{Check that the tag have enough detections to be valid}
 \usage{
-checkMinimumN(movements, minimum.detections, fish)
+checkMinimumN(movements, minimum.detections, tag)
 }
 \arguments{
 \item{movements}{The movements table}
@@ -14,12 +14,12 @@ minimum number of times a tag must have been recorded during the study
 period for it to be considered true detections and not random noise.
 Defaults to 2.}
 
-\item{fish}{The fish being analysed}
+\item{tag}{The tag being analysed}
 }
 \value{
 A data frame containing the movements with valid/invalid notes
 }
 \description{
-Check that the fish have enough detections to be valid
+Check that the tag have enough detections to be valid
 }
 \keyword{internal}

@@ -77,13 +77,13 @@ Using array B as an example, actel finds out which arrays are directly connected
 
     B -> C -> G
 
-    (the fish could go through D and E/F, but that would require one more jump)
+    (the animal could go through D and E/F, but that would require one more array jump)
 
-Now, why is this relevant? If a fish is detected at B and then, for example, at F, the fish is equally likely to have gone through C or D. This means we cannot choose a most likely path. However, if a fish is detected at B and then at G, we can assume it is more likely that array C failed, than that the fish passed through two arrays undetected (i.e. D and E or F).
+Now, why is this relevant? If a tag is detected at B and then, for example, at F, the animal is equally likely to have gone through C or D. This means we cannot choose a most likely path. However, if a tag is detected at B and then at G, we can assume it is more likely that array C failed, than that the tag passed through two arrays undetected (i.e. D and E or F).
 
 ## Assigning successful events
 
-To count the number of successful events, actel assigns one point for every time the fish shifts positions. This means that, if a fish has multiple detection events in one single array, it counts as a single point, but if a fish goes somewhere else and returns to the initial array, it will count as two points in the initial array. Let's see some movement tables as examples:
+To count the number of successful events, actel assigns one point for every time the tags shift positions. This means that, if a tag has multiple detection events in one single array, it counts as a single point, but if a tag goes somewhere else and returns to the initial array, it will count as two points in the initial array. Let's see some movement tables as examples:
 
 |Array  | Detections|First.station |Last.station |First.time          |Last.time           |... |
 |:------|----------:|:-------------|:------------|:-------------------|:-------------------|:---|
@@ -95,7 +95,7 @@ To count the number of successful events, actel assigns one point for every time
 |C      |          1|St.3          |St.3         |2019-08-30 22:26:42 |2019-08-30 22:26:42 |... |
 
 
-In this example, the fish was detected at A, D, E and C. Even though there are three movement events at D, since they are sequential, they will count as a single successful detection.
+In this example, the tag was detected at A, D, E and C. Even though there are three movement events at D, since they are sequential, they will count as a single successful detection.
 
 |Array  | Detections|First.station |Last.station |First.time          |Last.time           |... |
 |:------|----------:|:-------------|:------------|:-------------------|:-------------------|:---|
@@ -106,11 +106,11 @@ In this example, the fish was detected at A, D, E and C. Even though there are t
 |A      |          1|St.1          |St.1         |2019-07-15 10:26:41 |2019-07-15 10:26:41 |... |
 |A      |          1|St.1          |St.1         |2019-08-30 22:26:42 |2019-08-30 22:26:42 |... |
 
-In this case, the fish is detected at A, D and E. However, unlike the example above, there are multiple occasions when the fish was detected at A and D (i.e., the fish was elsewhere in between). As such, this fish would award one point to array E and two points to arrays A and D.
+In this case, the tag is detected at A, D and E. However, unlike the example above, there are multiple occasions when the tag was detected at A and D (i.e., the tag was elsewhere in between). As such, this tag would award one point to array E and two points to arrays A and D.
 
 ## Assigning failed events
 
-When a fish is detected at more than one array, actel checks if consecutive events are at neighbouring arrays or not. If the two consecutive arrays are neighbours, everything is in order, but if not, actel proceeds to finding out which arrays have failed. If there is one single shortest path between the two arrays, actel attributes a "surely missed" point to the arrays constituting that path. If there are more than one equally short paths between the two arrays, actel attributes a "potentially missed" point to all the arrays involved in those paths. Here is an example:
+When a tag is detected at more than one array, actel checks if consecutive events are at neighbouring arrays or not. If the two consecutive arrays are neighbours, everything is in order, but if not, actel proceeds to finding out which arrays have failed. If there is one single shortest path between the two arrays, actel attributes a "surely missed" point to the arrays constituting that path. If there are more than one equally short paths between the two arrays, actel attributes a "potentially missed" point to all the arrays involved in those paths. Here is an example:
 
 
 |Array  | Detections|First.station |Last.station |First.time          |Last.time           |... |
@@ -123,28 +123,28 @@ When a fish is detected at more than one array, actel checks if consecutive even
 
 Let's go by events:
 
-1. The fish moved from A to D.
+1. The tag moved from A to D.
 
     These two arrays are neighbours, so everything is ok.
 
-2. The fish moved from D to G.
+2. The tag moved from D to G.
 
     These two arrays are not neighbours, and there are two equally long paths between them. As such, actel will attribute one "potentially missed" point to arrays E and F.
 
-3. The fish moved from G to C.
+3. The tag moved from G to C.
 
     These two arrays are neighbours, so everything is ok.
 
-4. The fish moved from C to A.
+4. The tag moved from C to A.
 
     These two arrays are not neighbours, and there is only one shortest path between them. As such, actel will attribute one "surely missed" point to array B.
 
-The process for this fish is then finished.
+The process for this tag is then finished.
 
 
 ## Minimum and maximum efficiency
 
-Actel repeats the processes above for all fish, and compiles a table of successful, surely missed and potentially missed events. Then, we have what we need to calculate efficiency:
+Actel repeats the processes above for all tags, and compiles a table of successful, surely missed and potentially missed events. Then, we have what we need to calculate efficiency:
 
 `max_efficiency = 1 - (s / (r + s))`
 
@@ -163,7 +163,7 @@ All the information used to calculate the efficiency is stored in the [`efficien
 
 ## Intra-array efficiency
 
-Intra array efficiency calculations are performed following the equations provided by <a href="https://www.researchgate.net/publication/256443823_Using_mark-recapture_models_to_estimate_survival_from_telemetry_data" target="_blank">Perry et al. (2012)</a>. Specifically, actel splits the array's receivers in "original" and "replicates" (depending on what you specified in the [replicates argument](d-0_residency.html#replicates)), and compares the fish detected at both of these elements. The results of the intra-array calculations for each array are then stored in the [`intra.array.CJS` list](d-2_residency_results.html#intra.array.cjs).
+Intra array efficiency calculations are performed following the equations provided by <a href="https://www.researchgate.net/publication/256443823_Using_mark-recapture_models_to_estimate_survival_from_telemetry_data" target="_blank">Perry et al. (2012)</a>. Specifically, actel splits the array's receivers in "original" and "replicates" (depending on what you specified in the [replicates argument](d-0_residency.html#replicates)), and compares the tags detected at both of these elements. The results of the intra-array calculations for each array are then stored in the [`intra.array.CJS` list](d-2_residency_results.html#intra.array.cjs).
 
 
 **<a href="javascript:history.back()">Return to previous page</a>**

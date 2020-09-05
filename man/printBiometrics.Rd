@@ -7,12 +7,12 @@
 printBiometrics(bio)
 }
 \arguments{
-\item{bio}{A table with the tags and biometrics of the studied fish.}
+\item{bio}{A table with the tags and biometrics of the studied animals.}
 }
 \value{
 A string of file locations in rmd syntax, to be included in printRmd
 }
 \description{
-Searches for columns containing biometric data and prints graphics per fish group
+Searches for columns containing biometric data and prints graphics per animal group
 }
 \keyword{internal}

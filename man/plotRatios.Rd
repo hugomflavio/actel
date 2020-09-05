@@ -35,7 +35,7 @@ A ggplot object.
 }
 \description{
 By default, this function plots the global residency. However, you can use the argument 'group'
-to plot the results only from a specific fish group. Lastly, you can also use 'sections', rather
+to plot the results only from a specific animal group. Lastly, you can also use 'sections', rather
 than 'group', to compare the residency at a specific section (or group of sections) between the
 different groups.
 }

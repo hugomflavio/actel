@@ -51,7 +51,7 @@ Once everything is in place, actel will start by:
 
 It is at this point that the argument [exclude.tags](b-0_explore.html#exclude.tags) comes in:
 
-Actel uses the tag's signal to find your fish. However, if two tags with the same signal but different code spaces show up at your study area, actel will not know which one to choose. Should this happen, you must specify which tag **should be excluded** in the `exclude.tags` argument and restart the analysis. You can [find an example here.](b-0_explore.html#exclude.tags)
+Actel uses the tag's signal to find your animal. However, if two tags with the same signal but different code spaces show up at your study area, actel will not know which one to choose. Should this happen, you must specify which tag **should be excluded** in the `exclude.tags` argument and restart the analysis. You can [find an example here.](b-0_explore.html#exclude.tags)
 
 Once the detections are sorted and validated, actel is ready to start compiling movement events.
 
@@ -63,7 +63,7 @@ Note:
 The process of compiling movement events is entirely automatic, and the outcome depends on two things:
 
 Arrays
-  : When a fish moves from one receiver array to another, a new movement event is created. These arrays are defined by you in the [spatial file](a-0_workspace_requirements.html#spatial-file), so it is worth it to spend some time thinking about how you want to arrange your receivers.
+  : When a tag moves from one receiver array to another, a new movement event is created. These arrays are defined by you in the [spatial file](a-0_workspace_requirements.html#spatial-file), so it is worth it to spend some time thinking about how you want to arrange your receivers.
 
 `max.interval`
   : This argument controls the creation of multiple events for consecutive detections on the same receiver array. You can [find more information about this argument here](b-0_explore.html#max.interval).
@@ -79,18 +79,18 @@ Note:
 
 ### Impassables
 
-As you probably know by now, you can [define unidirectional connections between arrays](a-0_workspace_requirements.html#barriers). This tells actel that something (e.g. a weir or dam) prevents the fish from moving in a particular direction. Let's see the examples below, with arrays A, B and C:
+As you probably know by now, you can [define unidirectional connections between arrays](a-0_workspace_requirements.html#barriers). This tells actel that something (e.g. a weir or dam) prevents the animal from moving in a particular direction. Let's see the examples below, with arrays A, B and C:
 
 <img src="impassables_a.svg" alt="drawing" width="330"/> <img src="impassables_b.svg" alt="drawing" width="330"/>
 
-In example 1, fish can pass from A to C and C to A freely. However, they can only pass from B to C, as the way in the opposite direction (C to B) is blocked by a weir. If a fish has a detection in C and then in B, actel will assume it passed through A undetected.
+In example 1, animals can pass from A to C and C to A freely. However, they can only pass from B to C, as the way in the opposite direction (C to B) is blocked by a weir. If a tag has a detection in C and then in B, actel will assume the animal passed through A undetected.
 
-On the other hand, in example 2, the way from C to A is also blocked by a weir. If a fish is detected in C and afterwards either in A or B, actel will complain, as there is no viable way between both arrays.
+On the other hand, in example 2, the way from C to A is also blocked by a weir. If a tag is detected in C and afterwards either in A or B, actel will complain, as there is no viable way for the respective animal to move between both arrays.
 
 This is the respective warning:
 
 ```
-Warning: Fish R64K-1234 made an impassable jump: It is not possible to go from array C to A.
+Warning: Tag R64K-1234 made an impassable jump: It is not possible to go from array C to A.
          Please resolve this either by invalidating events or by adjusting your 'spatial.txt' file and restarting.
 
 Opening valid movement table for inspection:
@@ -107,7 +107,7 @@ As the warning says, you then have two options: Invalidate events until the impa
 ### Jumping arrays
 
 
-If the fish has been jumping around (i.e. passing through multiple arrays undetected), actel will issue warnings and prompt user intervention, depending on [the values set for `jump.warning` and `jump.error`.](b-0_explore.html#jump.warning-and-jump.error)
+If the tag has been jumping around (i.e. passing through multiple arrays undetected), actel will issue warnings and prompt user intervention, depending on [the values set for `jump.warning` and `jump.error`.](b-0_explore.html#jump.warning-and-jump.error)
 
 
 Let's have a look at the examples below:
@@ -119,14 +119,14 @@ Assuming `jump.warning = 2` and `jump.error = 3`, examples **1** and **2** would
 However, in example **3**, the jump size is equal to `jump.warning`, but lower than `jump.error`. When this happens, actel will display a warning:
 
 ````
-Warning: Fish R64K-1234 jumped through 2 arrays in events 1 -> 2 (A -> D).
+Warning: Tag R64K-1234 jumped through 2 arrays in events 1 -> 2 (A -> D).
 ````
 
 Then, actel would continue the analysis. This warning is issued whenever the jump size equals or is greater than `jump.warning`. Lastly, in example **4**, the jump size is equal to the `jump.error`. When this happens, actel issues a warning like the one above, and on top of that allows the user to intervene:
 
 ````
-Warning: Fish R64K-1234 jumped through 3 arrays in events 1 -> 2 (A -> E).
-M: Opening movement table of fish R64K-2791 for inspection:
+Warning: Tag R64K-1234 jumped through 3 arrays in events 1 -> 2 (A -> E).
+M: Opening movement table of tag R64K-2791 for inspection:
 [...]
 Would you like to render any movement event invalid?(y/N/comment)
 ````
@@ -136,19 +136,19 @@ From here, you can inspect the movement table and find out if some events should
 
 ### Average speed
 
-If you include a [distance matrix](a-0_workspace_requirements.html#optional-distances-matrix) in the analysis, you can specify the maximum expected speed for your fish using [speed.warning and speed.error](b-0_explore.html#speed.warning-and-speed.error). Doing so will trigger the speed checks, where the average speed between each movement event is compared to the specified arguments.
+If you include a [distance matrix](a-0_workspace_requirements.html#optional-distances-matrix) in the analysis, you can specify the maximum expected speed for your animals using [speed.warning and speed.error](b-0_explore.html#speed.warning-and-speed.error). Doing so will trigger the speed checks, where the average speed between each movement event is compared to the specified arguments.
 
 If the average speed is higher than `speed.warning`, a warning is triggered:
 
 ````
-Warning: Fish R64K-1234 had an average speed of 1.3 m/s from valid event 3 to 4 (Array1 -> Array2).
+Warning: Tag R64K-1234 had an average speed of 1.3 m/s from valid event 3 to 4 (Array1 -> Array2).
 ````
 
 If, on top of this, any of the average speeds is higher than `speed.error`, user interaction is suggested:
 
 ````
-Warning: Fish R64K-1234 had an average speed of 1.3 m/s from valid event 5 to 6 (Array4 -> Array5).
-M: Opening valid movements table of fish R64K-1234 for inspection:
+Warning: Tag R64K-1234 had an average speed of 1.3 m/s from valid event 5 to 6 (Array4 -> Array5).
+M: Opening valid movements table of tag R64K-1234 for inspection:
 
 [...]
 
@@ -179,21 +179,21 @@ In this case, the last three events are valid candidates for inactiveness. Actel
 Actel will gather all the stations where these last detections occurred and check if they are less than 1500 metres a part. If this is true, then there is a valid case for inactivity, and a warning will be issued:
 
 ````
-Warning: Fish R64K-1234 was detected 7 times at stations less than 1.5 km apart in array 'C' (St.5, St.6), over 3.07 days and then disappeared. Could it be inactive?
+Warning: Tag R64K-1234 was detected 7 times at stations less than 1.5 km apart in array 'C' (St.5, St.6), over 3.07 days and then disappeared. Could it be inactive?
 ````
 
 #### If a distances matrix is NOT present
 
-Actel will count the number of individual stations in which the fish was detected. If there are three or less individual stations, there is a valid case for inactivity, and a similar warning will be issued:
+Actel will count the number of individual stations in which the tag was detected. If there are three or less individual stations, there is a valid case for inactivity, and a similar warning will be issued:
 
 ````
-Warning: Fish R64K-1234 was detected 7 times at three or less stations of array 'C' (St.5, St.6) over 3.07 days and then disappeared. Could it be inactive?
+Warning: Tag R64K-1234 was detected 7 times at three or less stations of array 'C' (St.5, St.6) over 3.07 days and then disappeared. Could it be inactive?
 ````
 
 Since `inactive.error` was also set to three, this situation would trigger the possibility for user interaction:
 
 ````
-M: Opening valid movement table of fish R64K-1234 for inspection. Inactiveness started on event [#] (2019-05-17):
+M: Opening valid movement table of tag R64K-1234 for inspection. Inactiveness started on event [#] (2019-05-17):
 
 [...]
 
@@ -203,20 +203,20 @@ Would you like to render any movement event invalid?(y/N/comment)
 From here you could then decide if some events should be removed.
 
 
-#### What if the fish reached the array, moved about a bit, and only then stopped moving?
+#### What if the tag reached the array, moved about a bit, and only then stopped moving?
 
-If the fish was active in array C, then it is possible that the initial detections will be in receivers located further away than 1500 metres, or in more than three unique receivers. To search for this cases, actel iterates the process above, removing one event from the top at a time, for as long as the period of residency at the array is higher than `inactive.warning`.
+If the tag was active in array C, then it is possible that the initial detections will be in receivers located further away than 1500 metres, or in more than three unique receivers. To search for this cases, actel iterates the process above, removing one event from the top at a time, for as long as the period of residency at the array is higher than `inactive.warning`.
 
 This means that, even if there are detections at many stations at the first events under scrutiny, potential inactiveness can still be detected at the trailing events.
 
 
 ### Leaving comments for later
 
-If a fish is causing doubts, you can attach a comment to it at any time. Just reply "comment" to a question when the word "comment" shows up between brackets and the comment dialogue will be triggered:
+If a tag is causing doubts, you can attach a comment to it at any time. Just reply "comment" to a question when the word "comment" shows up between brackets and the comment dialogue will be triggered:
 
 ````
 Continue editing last valid events?(y/N/comment) comment
-New comment on fish R64K-4456: Was this fish eaten?
+New comment on tag R64K-4456: Was this animal eaten?
 M: Comment successfully stored, returning to the previous interaction.
 Continue editing last valid events?(y/N/comment) 
 ````
@@ -226,7 +226,7 @@ You can then find all your comments in the [html report](b-2_explore_results.htm
 
 ## Time of first detection at each array
 
-The last thing explore() does is find out the time of first detection at each array, for each fish. This information is then used to plot [circular graphics in the report](b-2_explore_results.html#times), and is also returned within R as an output of the function.
+The last thing explore() does is find out the time of first detection at each array, for each tag. This information is then used to plot [circular graphics in the report](b-2_explore_results.html#times), and is also returned within R as an output of the function.
 
 
 ## The explore() analysis ends here

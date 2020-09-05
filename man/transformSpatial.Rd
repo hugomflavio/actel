@@ -7,7 +7,7 @@
 transformSpatial(spatial, bio, arrays, dotmat, first.array = NULL)
 }
 \arguments{
-\item{bio}{A table with the tags and biometrics of the studied fish.}
+\item{bio}{A table with the tags and biometrics of the studied animals.}
 
 \item{first.array}{Either NULL or the top level array in the study area.}
 

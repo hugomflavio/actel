@@ -37,8 +37,8 @@ moves <- groupMovements(detections.list = detections.list, bio = bio, spatial = 
     dist.mat = dist.mat)
 
 aux <- names(moves)
-moves <- lapply(names(moves), function(fish) {
-    speedReleaseToFirst(fish = fish, bio = bio, movements = moves[[fish]],
+moves <- lapply(names(moves), function(tag) {
+    speedReleaseToFirst(tag = tag, bio = bio, movements = moves[[tag]],
                         dist.mat = dist.mat, speed.method = "last to first")
   })
 names(moves) <- aux
@@ -54,8 +54,8 @@ vm <- lapply(xmoves, function(x) x[x$Valid, ])
 vm <- vm[sapply(vm, nrow) != 0]
 
 secmoves <- lapply(seq_along(vm), function(i) {
-  fish <- names(vm)[i]
-  appendTo("debug", paste0("debug: Compiling valid section movements for fish ", fish,"."))
+  tag <- names(vm)[i]
+  appendTo("debug", paste0("debug: Compiling valid section movements for tag ", tag,"."))
   output <- sectionMovements(movements = vm[[i]], spatial = spatial, valid.dist = attributes(dist.mat)$valid)
   return(output)
 })
@@ -72,7 +72,7 @@ the.matrices <- assembleMatrices(spatial = spatial, movements = vm, status.df = 
     arrays = arrays, paths = paths, dotmat = dotmat)[[2]]
 
 expect_warning(m.by.array <- breakMatricesByArray(m = the.matrices, arrays = arrays, type = "all"),
-  "No fish passed through array A0. Skipping efficiency estimations for this array.", fixed = TRUE)
+  "No tags passed through array A0. Skipping efficiency estimations for this array.", fixed = TRUE)
 
 CJS.list <- lapply(m.by.array, function(m) {
   if (length(m) == 1)
@@ -97,7 +97,7 @@ test_that("assembleArrayCJS can cope with 0% efficiency", {
   xmatrices$B.RS1$A5 <- c(0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0)
 
   expect_warning(m.by.array <- breakMatricesByArray(m = xmatrices, arrays = arrays, type = "all"),
-    "No fish passed through array A0. Skipping efficiency estimations for this array.", fixed = TRUE)
+    "No tags passed through array A0. Skipping efficiency estimations for this array.", fixed = TRUE)
 
   CJS.list <- lapply(m.by.array, function(m) {
     if (length(m) == 1)
@@ -177,8 +177,8 @@ moves <- groupMovements(detections.list = detections.list, bio = bio, spatial = 
     dist.mat = dist.mat)
 
 aux <- names(moves)
-moves <- lapply(names(moves), function(fish) {
-    speedReleaseToFirst(fish = fish, bio = bio, movements = moves[[fish]],
+moves <- lapply(names(moves), function(tag) {
+    speedReleaseToFirst(tag = tag, bio = bio, movements = moves[[tag]],
                         dist.mat = dist.mat, speed.method = "last to first")
   })
 names(moves) <- aux
@@ -194,8 +194,8 @@ vm <- lapply(xmoves, function(x) x[x$Valid, ])
 vm <- vm[sapply(vm, nrow) != 0]
 
 secmoves <- lapply(seq_along(vm), function(i) {
-  fish <- names(vm)[i]
-  appendTo("debug", paste0("debug: Compiling valid section movements for fish ", fish,"."))
+  tag <- names(vm)[i]
+  appendTo("debug", paste0("debug: Compiling valid section movements for tag ", tag,"."))
   output <- sectionMovements(movements = vm[[i]], spatial = spatial, valid.dist = attributes(dist.mat)$valid)
   return(output)
 })
@@ -212,7 +212,7 @@ the.matrices <- assembleMatrices(spatial = spatial, movements = vm, status.df = 
     arrays = arrays, paths = paths, dotmat = dotmat)[[2]]
 
 expect_warning(m.by.array <- breakMatricesByArray(m = the.matrices, arrays = arrays, type = "all"),
-  "No fish passed through array A0. Skipping efficiency estimations for this array.", fixed = TRUE)
+  "No tags passed through array A0. Skipping efficiency estimations for this array.", fixed = TRUE)
 
 CJS.list <- lapply(m.by.array, function(m) {
   if (length(m) == 1)

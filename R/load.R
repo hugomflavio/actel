@@ -13,7 +13,7 @@
 #'  \item \code{arrays}: A list containing detailed information on the arrays
 #'  \item \code{dotmat}: A matrix of the distance (in number of arrays) between pairs of arrays
 #'  \item \code{dist.mat}: A matrix of the distances (in metres) between stations (if a 'distances.csv' is present)
-#'  \item \code{detections.list}: A list containing the detection data for each fish
+#'  \item \code{detections.list}: A list containing the detection data for each tag
 #'  \item \code{paths}: A list of the all array paths between each pair of arrays.
 #' }
 #'
@@ -34,7 +34,7 @@ loadStudyData <- function(tz, override = NULL, start.time, stop.time, save.detec
   bio <- loadBio(input = "biometrics.csv", tz = tz)
   appendTo(c("Screen", "Report"), paste0("M: Number of target tags: ", nrow(bio), "."))
 
-  # Check that all the overridden fish are part of the study
+  # Check that all the overridden tags are part of the study
   if (!is.null(override)) {
     lowest_signals <- sapply(bio$Signal, function(i) min(as.numeric(unlist(strsplit(as.character(i), "|", fixed = TRUE)))))
     if (any(link <- is.na(match(override, lowest_signals))))
@@ -889,7 +889,7 @@ loadBio <- function(input, tz){
   }
 
   if (any(is.na(bio$Signal))) {
-    stopAndReport("Some fish have no 'Signal' information. Please double-check the biometrics.")
+    stopAndReport("Some animals have no 'Signal' information. Please double-check the biometrics.")
   }
 
   if (any(grepl("|", bio$Signal, fixed = TRUE))) {
@@ -926,19 +926,19 @@ loadBio <- function(input, tz){
     bio$Release.site <-  gsub(" ", "", bio$Release.site)
     bio$Release.site <- factor(bio$Release.site)
     if (any(link <- is.na(bio$Release.site) | bio$Release.site == "")) {
-      appendTo(c("Screen","Report","Warning"),"Some fish contain no release site information. You may want to double-check the data.\n   Filling the blanks with 'unspecified'.")
+      appendTo(c("Screen","Report","Warning"),"Some animals contain no release site information. You may want to double-check the data.\n   Filling the blanks with 'unspecified'.")
       levels(bio$Release.site) <- c(levels(bio$Release.site), "unspecified")
       bio$Release.site[link] <- "unspecified"
       bio$Release.site <- droplevels(bio$Release.site)
     }
   }
   if (!any(grepl("Group", colnames(bio)))) {
-    appendTo("Screen", paste0("M: No 'Group' column found in the biometrics. Assigning all fish to group 'All'."))
+    appendTo("Screen", paste0("M: No 'Group' column found in the biometrics. Assigning all animals to group 'All'."))
     bio$Group <- "All"
   } else {
     bio$Group <- factor(bio$Group)
     if (any(link <- is.na(bio$Group) | bio$Group == "")) {
-      appendTo(c("Screen", "Report", "Warning"),"Some fish contain no group information. You may want to double-check the data.\n   Filling the blanks with 'unspecified'.")
+      appendTo(c("Screen", "Report", "Warning"),"Some animals contain no group information. You may want to double-check the data.\n   Filling the blanks with 'unspecified'.")
       levels(bio$Group) <- c(levels(bio$Group), "unspecified")
       bio$Group[link] <- "unspecified"
       bio$Group <- droplevels(bio$Group)
@@ -953,7 +953,7 @@ loadBio <- function(input, tz){
       levels(bio$Group)[link] <- paste(levels(bio$Group)[link], 1:sum(link), sep = "_")
     }
     if (any(link <- grepl("\\.", levels(bio$Group)))) {
-      appendTo(c("Screen", "Report"), "M: Some fish groups contain one or more '.' characters. To avoid function failure, these will be replaced with '_'.")
+      appendTo(c("Screen", "Report"), "M: Some groups contain one or more '.' characters. To avoid function failure, these will be replaced with '_'.")
       levels(bio$Group) <- gsub("\\.", "_", levels(bio$Group))
     }
   }
@@ -1382,7 +1382,7 @@ createUniqueSerials <- function(input) {
 #'
 #' @inheritParams explore
 #' @inheritParams loadDetections
-#' @param bio A table with the tags and biometrics of the studied fish.
+#' @param bio A table with the tags and biometrics of the studied animals.
 #' @param detections A data frame with all the detections. Supplied by loadDetections.
 #'
 #' @return A list of detections for each tag.
@@ -1639,7 +1639,7 @@ transformSpatial <- function(spatial, bio, arrays, dotmat, first.array = NULL) {
   if (sum(spatial$Type == "Release") > 0) {
     # If no release sites were specified in the biometrics
     if (length(unique(bio$Release.site)) == 1 && unique(bio$Release.site) == "unspecified") {
-      appendTo(c("Screen", "Report", "Warning"), "At least one release site has been indicated in the spatial.csv file, but no release sites were specified in the biometrics file.\n         Discarding release site information and assuming all fish were released at the top level array to avoid function failure.\n         Please double-check your data.")
+      appendTo(c("Screen", "Report", "Warning"), "At least one release site has been indicated in the spatial.csv file, but no release sites were specified in the biometrics file.\n         Discarding release site information and assuming all animals were released at the top level array to avoid function failure.\n         Please double-check your data.")
       # Try to recover by assigning a first array, if possible
       if (is.null(first.array)) {
         stopAndReport("There is more than one top level array in the study area. Please specify release site(s) in the 'spatial.csv' file and in the 'biometrics.csv' file.")
@@ -1659,7 +1659,7 @@ transformSpatial <- function(spatial, bio, arrays, dotmat, first.array = NULL) {
       B <- unique(bio$Release.site)
       # If any release sites in the biometrics are missing in the spatial
       if (any(link <- is.na(match(B, A)))) {
-        appendTo(c("Report", "Warning"), "There is a mismatch between the release sites reported and the release locations for the fish.")
+        appendTo(c("Report", "Warning"), "There is a mismatch between the release sites reported and the release locations for the animals.")
         stopAndReport("The following release sites were listed in the biometrics.csv file but are not part of the release sites listed in the spatial.csv file: ",
           paste(sort(B[link]), collapse = ", "), "\nPlease include the missing release sites in the spatial.csv file.", call. = FALSE)
       } else {
@@ -1690,7 +1690,7 @@ transformSpatial <- function(spatial, bio, arrays, dotmat, first.array = NULL) {
       }
     }
   } else {
-    appendTo(c("Screen", "Report", "Warning"), "Release sites were not specified in the spatial.csv file. Attempting to assume all released fish start at the top level array.")
+    appendTo(c("Screen", "Report", "Warning"), "Release sites were not specified in the spatial.csv file. Attempting to assume all released animals start at the top level array.")
     if (is.null(first.array)) {
       stopAndReport("There is more than one top level array in the study area. Please specify release site(s) in the spatial.csv file and in the biometrics.csv file.")
     }
@@ -1711,7 +1711,7 @@ transformSpatial <- function(spatial, bio, arrays, dotmat, first.array = NULL) {
   # Wrap up
   if (any(grepl("^Section$", colnames(spatial)))) {
     sections <- levels(spatial$Section)
-    array.order <- list()  # Used to determine if the fish's last detection was in the last array of a given section
+    array.order <- list()  # Used to determine if the tag's last detection was in the last array of a given section
     for (j in sections) {
       array.order[[j]] <- unique(spatial$Array[spatial$Type == "Hydrophone" & spatial$Section == j])
     }

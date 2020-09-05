@@ -14,7 +14,7 @@ sectionMovements(movements, spatial, valid.dist)
 \item{valid.dist}{Logical: Is a valid distances matrix being used?}
 }
 \value{
-A data frame containing the section movements for the target fish.
+A data frame containing the section movements for the target tag.
 }
 \description{
 Compress array-movements into section-movements

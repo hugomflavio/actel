@@ -27,7 +27,7 @@ assembleTimetable(
 
 \item{arrays}{A list containing information for each array.}
 
-\item{bio}{A table with the tags and biometrics of the studied fish.}
+\item{bio}{A table with the tags and biometrics of the studied animals.}
 
 \item{tz}{The time zone of the study area. Must match one of the values
 present in \code{\link[base]{timezones}}.}
@@ -40,17 +40,17 @@ to the first detection on the target array to perform the calculations.
 If 'last to last', the last detection on ´the previous array is matched to the
 last detection on the target array to perform the calculations.}
 
-\item{if.last.skip.section}{Logical: Should a fish detected at the last array
+\item{if.last.skip.section}{Logical: Should a tag detected at the last array
 of a given section be considered to have disappeared in the next section?}
 
 \item{success.arrays}{The arrays that mark the end of the study area. If a
-fish crosses one of these arrays, it is considered to have successfully
-migrated through the study area.}
+tag crosses one of these arrays, the respective animal is considered to have
+successfully migrated through the study area.}
 }
 \value{
 A data frame containing the entering and leaving timestamps for each section per target tag
 }
 \description{
-Crawls trough the movement events of each fish to find when it entered and left each section of the study area.
+Crawls trough the movement events of each tag to find when it entered and left each section of the study area.
 }
 \keyword{internal}

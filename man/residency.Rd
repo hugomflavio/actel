@@ -69,28 +69,28 @@ to the first detection on the target array to perform the calculations.
 If 'last to last', the last detection on ´the previous array is matched to the
 last detection on the target array to perform the calculations.}
 
-\item{speed.warning}{If a fish moves at a speed equal or greater than
+\item{speed.warning}{If a tag moves at a speed equal or greater than
 \code{speed.warning} (in metres per second), a warning is issued. If left
 NULL (default), no warnings are issued.}
 
-\item{speed.error}{If a fish moves at a speed equal or greater than
+\item{speed.error}{If a tag moves at a speed equal or greater than
 \code{speed.error} (in metres per second), user intervention is suggested.
 If left NULL (default), user intervention is never suggested.}
 
-\item{jump.warning}{If a fish crosses a number of arrays equal or greater
+\item{jump.warning}{If a tag crosses a number of arrays equal or greater
 than \code{jump.error} without being detected, a warning is issued. If left
 NULL (default), no warnings are issued.}
 
-\item{jump.error}{If a fish crosses a number of arrays equal or greater than
+\item{jump.error}{If a tag crosses a number of arrays equal or greater than
 \code{jump.error} without being detected, user intervention is suggested.
 If left NULL (default), user intervention is never suggested.}
 
-\item{inactive.warning}{If a fish spends a number of days equal or greater
+\item{inactive.warning}{If a tag spends a number of days equal or greater
 than \code{inactive.error} in a given array at the tail of the respective
 detections, a warning is issued. If left NULL (default), no warnings are
 issued.}
 
-\item{inactive.error}{If a fish spends a number of days equal or greater than
+\item{inactive.error}{If a tag spends a number of days equal or greater than
 \code{inactive.error} in a given array at the tail of the respective
 detections, user intervention is suggested. If left NULL (default), user
 intervention is never suggested.}
@@ -115,7 +115,7 @@ function terminates.}
 
 \item{discard.orphans}{Logical: Should actel automatically discard
 detections that do not fall within receiver deployment periods, or that
-were recorded before the respective fish were released?}
+were recorded before the respective animals were released?}
 
 \item{discard.first}{A threshold amount of time (in hours) that must pass after
 release for the respective detections to be valid. Set to 0 to discard only
@@ -124,7 +124,7 @@ the release-to-first-detection calculations.}
 \item{save.detections}{Logical: Should the processed detections be saved for
 future runs?}
 
-\item{section.minimum}{If a fish has less than \code{section.minimum}
+\item{section.minimum}{If a tag has less than \code{section.minimum}
 consecutive detections in a section, a warning is issued. Defaults to 2.}
 
 \item{timestep}{The resolution desired for the residency calculations.
@@ -151,57 +151,57 @@ detection plots. One of "stations" (default) or "arrays".}
 \value{
 A list containing:
 \itemize{
-\item \code{detections}: A list containing all detections for each target fish;
-\item \code{valid.detections}: A list containing the valid detections for each target fish;
+\item \code{detections}: A list containing all detections for each target tag;
+\item \code{valid.detections}: A list containing the valid detections for each target tag;
 \item \code{spatial}: A list containing the spatial information used during the analysis;
 \item \code{deployments}: A data frame containing the deployments of each receiver;
 \item \code{arrays}: A list containing the array details used during the analysis;
-\item \code{movements}: A list containing all movement events for each target fish;
-\item \code{valid.movements}: A list containing the valid movement events for each target fish;
-\item \code{section.movements}: A list containing the valid section shifts for each target fish;
-\item \code{status.df}: A data frame containing summary information for each fish, including the
+\item \code{movements}: A list containing all movement events for each target tag;
+\item \code{valid.movements}: A list containing the valid movement events for each target tag;
+\item \code{section.movements}: A list containing the valid section shifts for each target tag;
+\item \code{status.df}: A data frame containing summary information for each tag, including the
 following columns:
 \itemize{
-\item \emph{Times.entered.[section]}: Total number of times the fish
+\item \emph{Times.entered.[section]}: Total number of times the tag
 entered a given section
 \item \emph{Average.entry.[section]}: Average entry time at a given
 section
-\item \emph{Average.time.[section]}: Average time the fish spent in a
+\item \emph{Average.time.[section]}: Average time the tag spent in a
 given section during each visit
 \item \emph{Average.departure.[section]}: Average departure time from
 a given section
 \item \emph{Total.time.[section]}: Total time spent in a given section
-\item \emph{Very.last.array}: Last array where the fish was detected
+\item \emph{Very.last.array}: Last array where the tag was detected
 \item \emph{Very.last.time}: Time of the last valid detection
-\item \emph{Status}: Fate assigned to the fish
+\item \emph{Status}: Fate assigned to the animal
 \item \emph{Valid.detections}: Number of valid detections
 \item \emph{Invalid.detections}: Number of invalid detections
 \item \emph{Valid.events}: Number of valid events
 \item \emph{Invalid.events}: Number of invalid events
 \item \emph{P.type}: Type of processing:
 \itemize{
-\item 'Skipped' if no data was found for the fish,
+\item 'Skipped' if no data was found for the tag,
 \item 'Auto' if no user interaction was required,
 \item 'Manual' if user interaction was suggested and the user made
 changes to the validity of the events,
-\item 'Overridden' if the user listed the fish in the
+\item 'Overridden' if the user listed the tag in the
 \code{override} argument.
 }
 \item \emph{Comments}: Comments left by the user during the analysis
 }
-\item \code{last.seen}: A data frame containing the number of fish last seen in
+\item \code{last.seen}: A data frame containing the number of tags last seen in
 each study area section;
-\item \code{array.times}: A data frame containing ALL the entry times of each fish
+\item \code{array.times}: A data frame containing ALL the entry times of each tag
 in each array;
 \item \code{section.times}: A data frame containing all the entry times of each
-fish in each section;
+tag in each section;
 \item \code{residency.list}: A list containing the places of residency between first and last
-valid detection for each fish;
+valid detection for each tag;
 \item \code{time.ratios}: A list containing the daily location per section (both in seconds spent
-and in percentage of day) for each fish;
+and in percentage of day) for each tag;
 \item \code{time.positions}: A data frame showing the location where each
-fish spent the most time per day;
-\item \code{global.ratios}: A list containing summary tables showing the number of active fish
+tag spent the most time per day;
+\item \code{global.ratios}: A list containing summary tables showing the number of active tag
 (and respective percentages) present at each location per day;
 \item \code{efficiency}: A list containing the results of the inter-array Multi-way efficiency
 calculations (see vignettes for more details);
@@ -214,8 +214,8 @@ distance matrix was supplied)
 \description{
 The \code{\link{residency}} analysis runs the same initial checks as
 \code{\link{explore}}, but, similarly to \code{\link{migration}}, explores
-particular points of the fish behaviour. If you want to know where your fish
-were in each day of the study, how many fish were in each section each day,
+particular points of the animal behaviour. If you want to know where your animals
+were in each day of the study, how many animals were in each section each day,
 and other residency-focused variables, this is the analysis you are looking
 for!
 }

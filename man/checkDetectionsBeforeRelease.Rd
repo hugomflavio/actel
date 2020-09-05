@@ -9,7 +9,7 @@ checkDetectionsBeforeRelease(input, bio, discard.orphans = FALSE)
 \arguments{
 \item{input}{The list of detections}
 
-\item{bio}{A table with the tags and biometrics of the studied fish.}
+\item{bio}{A table with the tags and biometrics of the studied animals.}
 }
 \value{
 A list containing the detections without invalid data.

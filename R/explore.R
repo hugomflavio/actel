@@ -16,7 +16,7 @@
 #'  the release-to-first-detection calculations.
 #' @param discard.orphans Logical: Should actel automatically discard
 #'  detections that do not fall within receiver deployment periods, or that
-#'  were recorded before the respective fish were released?
+#'  were recorded before the respective animals were released?
 #' @param exclude.tags A vector of tags that should be excluded from the
 #'  detection data before any analyses are performed. Intended to be used if
 #'  stray tags from a different code space but with the same signal as a target
@@ -28,18 +28,18 @@
 #'  interface is never invoked. In this case, if the table to be displayed does
 #'  not fit in R's console, a temporary file will be saved and the user will be
 #'  prompted to open that file and examine it. Defaults to "needed".
-#' @param inactive.error If a fish spends a number of days equal or greater than
+#' @param inactive.error If a tag spends a number of days equal or greater than
 #'  \code{inactive.error} in a given array at the tail of the respective
 #'  detections, user intervention is suggested. If left NULL (default), user
 #' intervention is never suggested.
-#' @param inactive.warning If a fish spends a number of days equal or greater
+#' @param inactive.warning If a tag spends a number of days equal or greater
 #'  than \code{inactive.error} in a given array at the tail of the respective
 #'  detections, a warning is issued. If left NULL (default), no warnings are
 #'  issued.
-#' @param jump.error If a fish crosses a number of arrays equal or greater than
+#' @param jump.error If a tag crosses a number of arrays equal or greater than
 #'  \code{jump.error} without being detected, user intervention is suggested.
 #'  If left NULL (default), user intervention is never suggested.
-#' @param jump.warning If a fish crosses a number of arrays equal or greater
+#' @param jump.warning If a tag crosses a number of arrays equal or greater
 #'  than \code{jump.error} without being detected, a warning is issued. If left
 #'  NULL (default), no warnings are issued.
 #' @param max.interval The number of minutes that must pass between detections
@@ -58,7 +58,7 @@
 #'  analysis? NOTE: Setting report to TRUE will generate an HTML file in the current
 #'  directory. Additionally, if auto.open = TRUE (default), the web browser will
 #'  automatically be launched to open the report once the function terminates.
-#' @param speed.error If a fish moves at a speed equal or greater than
+#' @param speed.error If a tag moves at a speed equal or greater than
 #'  \code{speed.error} (in metres per second), user intervention is suggested.
 #'  If left NULL (default), user intervention is never suggested.
 #' @param speed.method Can take two forms: 'last to first' or 'last to last'.
@@ -66,7 +66,7 @@
 #'  to the first detection on the target array to perform the calculations.
 #'  If 'last to last', the last detection on ´the previous array is matched to the
 #'  last detection on the target array to perform the calculations.
-#' @param speed.warning If a fish moves at a speed equal or greater than
+#' @param speed.warning If a tag moves at a speed equal or greater than
 #'  \code{speed.warning} (in metres per second), a warning is issued. If left
 #'  NULL (default), no warnings are issued.
 #' @param start.time Detection data prior to the timestamp set in
@@ -107,14 +107,14 @@
 #' @return A list containing:
 #' \itemize{
 #'  \item \code{bio}: A copy of the biometrics input;
-#'  \item \code{detections}: A list containing all detections for each target fish;
-#'  \item \code{valid.detections}: A list containing the valid detections for each target fish;
+#'  \item \code{detections}: A list containing all detections for each target tag;
+#'  \item \code{valid.detections}: A list containing the valid detections for each target tag;
 #'  \item \code{spatial}: A list containing the spatial information used during the analysis;
 #'  \item \code{deployments}: A data frame containing the deployments of each receiver;
 #'  \item \code{arrays}: A list containing the array details used during the analysis;
-#'  \item \code{movements}: A list containing all movement events for each target fish;
-#'  \item \code{valid.movements}: A list containing the valid movement events for each target fish;
-#'  \item \code{times}: A data frame containing all arrival times (per fish) at each array;
+#'  \item \code{movements}: A list containing all movement events for each target tag;
+#'  \item \code{valid.movements}: A list containing the valid movement events for each target tag;
+#'  \item \code{times}: A data frame containing all arrival times (per tag) at each array;
 #'  \item \code{rsp.info}: A list containing containing appendix information for the RSP package;
 #'  \item \code{dist.mat}: A matrix containing the distance matrix used in the analysis (if a valid
 #'   distance matrix was supplied)
@@ -283,8 +283,8 @@ explore <- function(
 
   if (is.null(discard.first)) {
     aux <- names(movements)
-    movements <- lapply(names(movements), function(fish) {
-        speedReleaseToFirst(fish = fish, bio = bio, movements = movements[[fish]],
+    movements <- lapply(names(movements), function(tag) {
+        speedReleaseToFirst(tag = tag, bio = bio, movements = movements[[tag]],
                             dist.mat = dist.mat, speed.method = speed.method)
       })
     names(movements) <- aux
@@ -317,41 +317,41 @@ explore <- function(
   movement.names <- names(movements)
 
   if (any(link <- !override %in% extractSignals(movement.names))) {
-    appendTo(c("Screen", "Warning", "Report"), paste0("Override has been triggered for fish ", paste(override[link], collapse = ", "), " but ",
+    appendTo(c("Screen", "Warning", "Report"), paste0("Override has been triggered for tag ", paste(override[link], collapse = ", "), " but ",
       ifelse(sum(link) == 1, "this signal was", "these signals were"), " not detected."))
     override <- override[!link]
   }
 
   movements <- lapply(seq_along(movements), function(i) {
-    fish <- names(movements)[i]
-    appendTo("debug", paste0("debug: Checking movement quality for fish ", fish,"."))
+    tag <- names(movements)[i]
+    appendTo("debug", paste0("debug: Checking movement quality for tag ", tag,"."))
 
-    if (is.na(match(extractSignals(fish), override))) {
-      release <- as.character(bio$Release.site[na.as.false(bio$Transmitter == fish)])
+    if (is.na(match(extractSignals(tag), override))) {
+      release <- as.character(bio$Release.site[na.as.false(bio$Transmitter == tag)])
       release <- unlist(strsplit(with(spatial, release.sites[release.sites$Standard.name == release, "Array"]), "|", fixed = TRUE))
 
-      output <- checkMinimumN(movements = movements[[i]], fish = fish, minimum.detections = minimum.detections)
+      output <- checkMinimumN(movements = movements[[i]], tag = tag, minimum.detections = minimum.detections)
 
-      output <- checkImpassables(movements = output, fish = fish, dotmat = dotmat, GUI = GUI)
+      output <- checkImpassables(movements = output, tag = tag, dotmat = dotmat, GUI = GUI)
 
-      output <- checkJumpDistance(movements = output, release = release, fish = fish, dotmat = dotmat,
+      output <- checkJumpDistance(movements = output, release = release, tag = tag, dotmat = dotmat,
                                   jump.warning = jump.warning, jump.error = jump.error, GUI = GUI)
 
       if (do.checkSpeeds) {
-        temp.valid.movements <- simplifyMovements(movements = output, fish = fish, bio = bio, discard.first = discard.first,
+        temp.valid.movements <- simplifyMovements(movements = output, tag = tag, bio = bio, discard.first = discard.first,
           speed.method = speed.method, dist.mat = dist.mat)
-        output <- checkSpeeds(movements = output, fish = fish, valid.movements = temp.valid.movements,
+        output <- checkSpeeds(movements = output, tag = tag, valid.movements = temp.valid.movements,
           speed.warning = speed.warning, speed.error = speed.error, GUI = GUI)
         rm(temp.valid.movements)
       }
 
       if (do.checkInactiveness) {
-        output <- checkInactiveness(movements = output, fish = fish, detections.list = detections.list[[fish]],
+        output <- checkInactiveness(movements = output, tag = tag, detections.list = detections.list[[tag]],
           inactive.warning = inactive.warning, inactive.error = inactive.error,
           dist.mat = dist.mat, GUI = GUI)
       }
     } else {
-      output <- overrideValidityChecks(moves = movements[[i]], fish = names(movements)[i], GUI = GUI) # nocov
+      output <- overrideValidityChecks(moves = movements[[i]], tag = names(movements)[i], GUI = GUI) # nocov
     }
     return(output)
   })
@@ -361,7 +361,7 @@ explore <- function(
   appendTo(c("Screen", "Report"), "M: Filtering valid array movements.")
 
   valid.movements <- lapply(seq_along(movements), function(i){
-    output <- simplifyMovements(movements = movements[[i]], fish = names(movements)[i], bio = bio, discard.first = discard.first,
+    output <- simplifyMovements(movements = movements[[i]], tag = names(movements)[i], bio = bio, discard.first = discard.first,
       speed.method = speed.method, dist.mat = dist.mat)
   })
   names(valid.movements) <- names(movements)
@@ -386,7 +386,7 @@ explore <- function(
   rsp.info <- list(analysis.type = "explore", analysis.time = the.time, bio = bio, tz = tz, actel.version = utils::packageVersion("actel"))
 
   if (!is.null(override))
-    override.fragment <- paste0('<span style="color:red">Manual mode has been triggered for **', length(override),'** fish.</span>\n')
+    override.fragment <- paste0('<span style="color:red">Manual mode has been triggered for **', length(override),'** tag(s).</span>\n')
   else
     override.fragment <- ""
 
@@ -587,6 +587,7 @@ printExploreRmd <- function(override.fragment, biometric.fragment, individual.pl
     sensor.fragment <- paste0("### Sensor plots
 
 Note:
+  : You can choose to paint the values by section by setting `plot.detections.by = 'arrays'` during the analysis.
   : The data used for these graphics is stored in the `valid.detections` object.
   : You can replicate these graphics and edit them as needed using the `plotSensors()` function.
 
@@ -635,7 +636,7 @@ Want to cite actel in a publication? Run `citation(\'actel\')`
 
 ### Study area
 
-Release sites are marked with "R.S.". Arrays connected with an arrow indicate that the fish can only pass in one direction.
+Release sites are marked with "R.S.". Arrays connected with an arrow indicate that the tags can only pass in one direction.
 
 <img src=', work.path, ifelse(file.exists(paste0(work.path, "mb_arrays.svg")), "mb_arrays.svg", "mb_arrays.png"), ' style="padding-top: 15px;"/>
 
@@ -695,7 +696,7 @@ Note:
   : You can choose to plot detections by station or by array using the `plot.detections.by` argument.
   : The detections are coloured by ', ifelse(plot.detections.by == "stations", 'array', 'section'), '. The vertical black dashed line shows the release time. The full dark-grey line shows the movement events considered valid, while the dashed dark-grey line shows the movement events considered invalid.
 ', ifelse(plot.detections.by == "stations", '  : The movement event lines move straight between the first and last station of each event (i.e. in-between detections will not be individually linked by the line).\n', ''),
-'  : Manually **edited** fish are highlighted with **yellow** graphic borders.
+'  : Manually **edited** tags are highlighted with **yellow** graphic borders.
   : The ', ifelse(plot.detections.by == "stations", 'stations', 'arrays'), ' have been aligned by ', ifelse(plot.detections.by == "stations", 'array', 'section'), ', following the order provided ', ifelse(plot.detections.by == "stations", '', 'either '), 'in the spatial input', ifelse(plot.detections.by == "stations", '.', ' or the `section.order` argument.'), '
   : You can replicate these graphics and edit them as needed using the `plotDetections()` function.
   : You can also see the movement events of multiple tags simultaneously using the `plotMoves()` function.
@@ -807,10 +808,10 @@ sink()
 
 #' Compare original detections with the valid movements and exclude invalid detections
 #'
-#' @param detections.list The list of detections per fish
+#' @param detections.list The list of detections per tag
 #' @param movements The list of movements to be matched
 #'
-#' @return A list containing the valid detections per fish.
+#' @return A list containing the valid detections per tag.
 #'
 #' @keywords internal
 #'

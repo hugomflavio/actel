@@ -27,7 +27,7 @@ printMigrationRmd(
 
 \item{biometric.fragment}{Rmarkdown string specifying the biometric graphics drawn.}
 
-\item{section.overview}{A summary table with the number of fish that disappeared/moved onwards at each section.}
+\item{section.overview}{A summary table with the number of tags that disappeared/moved onwards at each section.}
 
 \item{efficiency.fragment}{Rmarkdown string specifying the efficiency results.}
 

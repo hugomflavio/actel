@@ -23,8 +23,8 @@ moves <- groupMovements(detections.list = detections.list, bio = bio, spatial = 
     dist.mat = dist.mat)
 
 aux <- names(moves)
-moves <- lapply(names(moves), function(fish) {
-    speedReleaseToFirst(fish = fish, bio = bio, movements = moves[[fish]],
+moves <- lapply(names(moves), function(tag) {
+    speedReleaseToFirst(tag = tag, bio = bio, movements = moves[[tag]],
                         dist.mat = dist.mat, speed.method = "last to first")
   })
 names(moves) <- aux
@@ -37,8 +37,8 @@ vm <- xmoves
 vm[[1]] <- vm[[1]][-18, ]
 
 secmoves <- lapply(seq_along(vm), function(i) {
-  fish <- names(vm)[i]
-  appendTo("debug", paste0("debug: Compiling valid section movements for fish ", fish,"."))
+  tag <- names(vm)[i]
+  appendTo("debug", paste0("debug: Compiling valid section movements for tag ", tag,"."))
   output <- sectionMovements(movements = vm[[i]], spatial = spatial, valid.dist = attributes(dist.mat)$valid)
   return(output)
 })
@@ -86,7 +86,7 @@ test_that("assembleMatrices works as expected", {
 
 test_that("breakMatricesByArray works as expected.", {
   expect_warning(output <- breakMatricesByArray(m = the.matrices, arrays = arrays, type = "peers"),
-  	"No fish passed through array A0. Skipping efficiency estimations for this array.", fixed = TRUE)
+  	"No tags passed through array A0. Skipping efficiency estimations for this array.", fixed = TRUE)
 
   m.by.array <<- output
 
@@ -113,14 +113,14 @@ test_that("breakMatricesByArray works as expected.", {
 	})
 
   expect_warning(output <- breakMatricesByArray(m = the.matrices, arrays = arrays, type = "all"),
-  	"No fish passed through array A0. Skipping efficiency estimations for this array.", fixed = TRUE)
+  	"No tags passed through array A0. Skipping efficiency estimations for this array.", fixed = TRUE)
 
   xmatrices <- the.matrices
   xmatrices[[1]][, "A9"] <- 0
 	xmatrices[[2]][, "A9"] <- 0
 
 	expect_warning(output <- breakMatricesByArray(m = xmatrices, arrays = arrays, type = "all"),
-  	"No fish passed through any of the efficiency peers of array A8. Skipping efficiency estimations for this array.", fixed = TRUE)
+  	"No tags passed through any of the efficiency peers of array A8. Skipping efficiency estimations for this array.", fixed = TRUE)
 
   xarrays <- lapply(arrays, function(x) {
   	x$after.peers <- NULL
@@ -171,7 +171,7 @@ test_that("simpleCJS works as expected.", {
 	xm <- m.by.array[[1]][[1]]
 	xm[, 2] <- 0
 	expect_warning(simpleCJS(xm, silent = FALSE),
-		"No fish were detected at array 'A1'. Skipping survival estimation.", fixed = TRUE)
+		"No tags were detected at array 'A1'. Skipping survival estimation.", fixed = TRUE)
 
 	xm <- m.by.array[[1]][[1]]
 	xm[1:20, 2] <- 0

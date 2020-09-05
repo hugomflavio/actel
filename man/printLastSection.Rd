@@ -2,7 +2,7 @@
 % Please edit documentation in R/print.R
 \name{printLastSection}
 \alias{printLastSection}
-\title{Print a simple barplot with the number of fish last seen at each section}
+\title{Print a simple barplot with the number of tags last seen at each section}
 \usage{
 printLastSection(input, spatial)
 }
@@ -15,6 +15,6 @@ printLastSection(input, spatial)
 No return value, called to plot and save graphic.
 }
 \description{
-Print a simple barplot with the number of fish last seen at each section
+Print a simple barplot with the number of tags last seen at each section
 }
 \keyword{internal}

@@ -177,14 +177,14 @@ test_that("checkDetectionsBeforeRelease kicks in if needed.", {
   bio$Release.date[2] <- bio$Release.date[2] + (3600 * 24 * 13)
   expect_message(
   	expect_warning(checkDetectionsBeforeRelease(input = detections.list, bio = bio),
-  		"Fish R64K-4451 was detected before being released!", fixed = TRUE),
-  "12 detections from Fish R64K-4451 were removed per user command", fixed = TRUE)
+  		"Tag R64K-4451 was detected before being released!", fixed = TRUE),
+  "12 detections from tag R64K-4451 were removed per user command", fixed = TRUE)
 
   bio$Release.date[2] <- bio$Release.date[2] + (3600 * 24 * 3)
   expect_message(
   	expect_warning(output <- checkDetectionsBeforeRelease(input = detections.list, bio = bio),
-  		"Fish R64K-4451 was detected before being released!", fixed = TRUE),
-  "ALL detections from Fish R64K-4451 were removed per user command.", fixed = TRUE)
+  		"Tag R64K-4451 was detected before being released!", fixed = TRUE),
+  "ALL detections from tag R64K-4451 were removed per user command.", fixed = TRUE)
 
   expect_equal(length(output), length(detections.list) - 1)
 })

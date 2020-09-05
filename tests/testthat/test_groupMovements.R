@@ -95,8 +95,8 @@ test_that("Movement events with one detection have '0:00' residency time.", {
 
 test_that("speedReleaseToFirst can handle unknown events", {
   aux <- names(moves)
-  output <- lapply(names(moves), function(fish) {
-      speedReleaseToFirst(fish = fish, bio = bio, movements = moves[[fish]],
+  output <- lapply(names(moves), function(tag) {
+      speedReleaseToFirst(tag = tag, bio = bio, movements = moves[[tag]],
                           dist.mat = dist.mat, speed.method = "last to last")
     })
   names(output) <- aux
@@ -111,8 +111,8 @@ test_that("speedReleaseToFirst can handle a first detection previous to release"
   xbio <- bio
   xbio$Release.date[4] <- xbio$Release.date[4] + (40 * 24 * 3600)
   aux <- names(moves)
-  output <- lapply(names(moves), function(fish) {
-      speedReleaseToFirst(fish = fish, bio = xbio, movements = moves[[fish]],
+  output <- lapply(names(moves), function(tag) {
+      speedReleaseToFirst(tag = tag, bio = xbio, movements = moves[[tag]],
                           dist.mat = dist.mat, speed.method = "last to last")
     })
   names(output) <- aux

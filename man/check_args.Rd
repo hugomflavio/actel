@@ -6,14 +6,14 @@
 \arguments{
 \item{arrays}{a list containing information for each array}
 
-\item{bio}{A table with the tags and biometrics of the studied fish.}
+\item{bio}{A table with the tags and biometrics of the studied animals.}
 
 \item{detections.list}{A list of the detections split by each target tag,
 created by \code{\link{splitDetections}}.}
 
 \item{dotmat}{The matrix of distances between arrays}
 
-\item{fish}{The fish being analysed}
+\item{tag}{The tag being analysed}
 
 \item{GUI}{One of "needed", "always" or "never". If "needed", a new window is
 opened to inspect the movements only if the movements table is too big to be
@@ -25,7 +25,7 @@ prompted to open and examine that file. Defaults to "needed".}
 
 \item{movements, moves}{The movements table}
 
-\item{release}{The release location of the fish}
+\item{release}{The release location of the animal}
 
 \item{secmoves}{the section movements list}
 

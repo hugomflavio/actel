@@ -72,16 +72,16 @@ The `arrays` list contains detailed information for each array: Which arrays are
 
 ### movements
 
-The `movements` list contains the movement events created during [the detection sorting process](b-1_explore_processes.html#from-detections-to-movements). These records can become very useful if you need to go back to a given fish and inspect its behaviour in more detail. Here is an example:
+The `movements` list contains the movement events created during [the detection sorting process](b-1_explore_processes.html#from-detections-to-movements). These records can become very useful if you need to go back to a given tag and inspect its behaviour in more detail. Here is an example:
 
 |Array  | Detections|First station |Last station |First time          |Last time           |Time travelling |Time on array |
-|:------|----------:|:-------------|:------------|:-------------------|:-------------------|:---------------|:-------------|
-|River1 |         92|St.2          |St.2         |2018-04-18 19:07:45 |2018-04-18 23:27:29 |NA              |4:19          |
-|River2 |          1|St.11         |St.11        |2018-04-18 23:49:16 |2018-04-18 23:49:16 |0:21            |-             |
-|River3 |          3|St.12         |St.12        |2018-04-19 01:52:34 |2018-04-19 01:57:01 |2:03            |0:04          |
-|River4 |         10|St.13         |St.13        |2018-04-19 03:35:44 |2018-04-19 03:42:17 |1:38            |0:06          |
-|Bay1   |         52|St.16         |St.17        |2018-04-20 05:33:51 |2018-04-20 06:12:20 |25:51           |0:38          |
-|Bay1   |         69|St.17         |St.16        |2018-04-20 12:00:31 |2018-04-20 13:00:36 |5:48            |1:00          |
+|:------|----------:|:-------------|:------------|:-------------------|:-------------------|---------------:|-------------:|
+|River1 |         92|St.2          |St.2         |2018-04-18 19:07:45 |2018-04-18 23:27:29 |              NA|       4:19:44|
+|River2 |          1|St.11         |St.11        |2018-04-18 23:49:16 |2018-04-18 23:49:16 |         0:21:47|       0:00:00|
+|River3 |          3|St.12         |St.12        |2018-04-19 01:52:34 |2018-04-19 01:57:01 |         2:03:18|       0:04:27|
+|River4 |         10|St.13         |St.13        |2018-04-19 03:35:44 |2018-04-19 03:42:17 |         1:38:43|       0:06:33|
+|Bay1   |         52|St.16         |St.17        |2018-04-20 05:33:51 |2018-04-20 06:12:20 |        25:51:34|       0:38:29|
+|Bay1   |         69|St.17         |St.16        |2018-04-20 12:00:31 |2018-04-20 13:00:36 |         5:48:11|       1:00:05|
 
 ### valid.movements
 
@@ -89,7 +89,7 @@ The `valid.movements` represents a refined version of the `movements` object, wh
 
 ### times
 
-The `times` data frame contains the timestamps of first valid detection in each array, for each fish. These are used to draw the circular plots in the report (like the ones below), but you can also use them to test for differences between groups!
+The `times` data frame contains the timestamps of first valid detection in each array, for each tag. These are used to draw the circular plots in the report (like the ones below), but you can also use them to test for differences between groups!
 
 <center>
 <img src="times_Sea1.svg" alt="drawing" width="330"/>
@@ -150,25 +150,25 @@ This is the main non-R output. If you activated the `report` option, actel will 
 
 4. **User comments**
 
-  Should you type in any [comments during the analysis](b-1_explore_processes.html#leaving-comments-for-later), they will be displayed here, so you can quickly remember that lingering detail you didn't want to forget while looking at the fish's movement table.
+  Should you type in any [comments during the analysis](b-1_explore_processes.html#leaving-comments-for-later), they will be displayed here, so you can quickly remember that lingering detail you didn't want to forget while looking at the tag's movement table.
 
 5. **Biometrics**
 
-  Actel crawls through you biometrics file in search for columns containing the keywords *length*, *weight* or *mass*. Should it find any matching column, it will print boxplots of the distribution of the selected variables, split by each fish group listed in the same file. This can be very helpful in quickly finding typos in the data (e.g. a displaced decimal separator).
+  Actel crawls through you biometrics file in search for columns containing the keywords *length*, *weight* or *mass*. Should it find any matching column, it will print boxplots of the distribution of the selected variables, split by each animal group listed in the same file. This can be very helpful in quickly finding typos in the data (e.g. a displaced decimal separator).
 
 6. **Time of arrival at each array**
 
-  For each of your study area's arrays, a circular plot will be drawn of the first arrival time of each fish. The fish are grouped by the groups listed in the *biometrics.csv* file. These plots are saved in .svg format in the Report folder, so you can easily use them elsewhere, if needed.
+  For each of your study area's arrays, a circular plot will be drawn of the first arrival time of each tag. The tags are grouped by the groups listed in the *biometrics.csv* file. These plots are saved in .svg format in the Report folder, so you can easily use them elsewhere, if needed.
 
 7. **Graphics of detected tags**
 
-  This section contains a plot for each of your target tags, showing all the detections found in the data for the respective fish. The detections are coloured by array. The vertical black dashed line shows the time of release. 
+  This section contains a plot for each of your animals, showing all the detections found in the data for the respective tags. The detections are coloured by array. The vertical black dashed line shows the time of release. 
   
   The full dark-grey line moving between detections shows the movement events considered valid, while the dashed dark-grey line shows the movement events considered invalid. The movement event lines move straight between the first and last station of each event (i.e. in-between detections will not be individually linked by the line). 
 
-  Note that fish where you had to manually intervene during the analysis will be highlighted with a yellow border, and fish that were manually overridden through the [`override` argument](b-0_explore.html#override) will be highlighted with a red border.
+  Note that the tags where you had to manually intervene during the analysis will be highlighted with a yellow border, and the tags that were manually overridden through the [`override` argument](b-0_explore.html#override) will be highlighted with a red border.
 
-  Lastly, the total number of detections for the fish is displayed in the header, between brackets.
+  Lastly, the total number of detections for the tag is displayed in the header, between brackets.
 
 8. **Sensor data**
 
@@ -176,12 +176,12 @@ This is the main non-R output. If you activated the `report` option, actel will 
   
 9. **Actel log**
 
-  This section contains the same information as the actel log saved in your target folder. It is useful to have a look at a few things. For example, the number of target tags, the detection data range or the number of ALS (i.e. receivers) can help you spot any missing data (i.e. if you tagged 100 fish and had only 80 target tags, some tags are missing from your input files!).
+  This section contains the same information as the actel log saved in your target folder. It is useful to have a look at a few things. For example, the number of target tags, the detection data range or the number of ALS (i.e. receivers) can help you spot any missing data (i.e. if you tagged 100 animals and had only 80 target tags, some tags are missing from your input files!).
 
 
 ## What if actel has miss-assigned something?
 
-Fish with strange behaviour can be complicated to analyse. While actel's functions have been designed to deal with this as best as possible, you can always [enter manual mode](e-0_manual_mode.html) if you find out that actel has miss-assigned something. I.e. has a movement event been invalidated that seems valid, or vice-versa? Are part of the movements detected characteristic of predator behaviour?
+Tags with strange behaviour can be complicated to analyse. While actel's functions have been designed to deal with this as best as possible, you can always [enter manual mode](e-0_manual_mode.html) if you find out that actel has miss-assigned something. I.e. has a movement event been invalidated that seems valid, or vice-versa? Are part of the movements detected characteristic of predator behaviour?
 
 
 ## More detailed analyses

@@ -20,8 +20,8 @@ moves <- groupMovements(detections.list = detections.list[1:2], bio = bio, spati
     speed.method = "last to first", max.interval = 60, tz = "Europe/Copenhagen", dist.mat = dist.mat)
 
 aux <- names(moves)
-moves <- lapply(names(moves), function(fish) {
-    speedReleaseToFirst(fish = fish, bio = bio, movements = moves[[fish]],
+moves <- lapply(names(moves), function(tag) {
+    speedReleaseToFirst(tag = tag, bio = bio, movements = moves[[tag]],
                         dist.mat = dist.mat, speed.method = "last to first")
   })
 names(moves) <- aux
@@ -61,21 +61,21 @@ test_that("sectionMovements returns NULL if all events are invalid", {
 test_that("checkLinearity throws warning only if movements are not ordered", {
 	aux <- sectionMovements(movements = moves[[1]], spatial = spatial, valid.dist = attributes(dist.mat)$valid)
 
-  tryCatch(checkLinearity(secmoves = aux, fish = "test", spatial = spatial, arrays = arrays, GUI = "never"),
+  tryCatch(checkLinearity(secmoves = aux, tag = "test", spatial = spatial, arrays = arrays, GUI = "never"),
     warning = function(w) stop("A warning was issued where it should not have been."))
 
   xspatial <- spatial
   xspatial$array.order <- spatial$array.order[3:1]
   aux <- sectionMovements(movements = moves[[1]], spatial = xspatial, valid.dist = attributes(dist.mat)$valid)
 
-	expect_warning(checkLinearity(secmoves = aux, fish = "test", spatial = xspatial, arrays = arrays, GUI = "never"),
-		"Inter-section backwards movements were detected for fish test and the last events are not ordered!", fixed = TRUE)
+	expect_warning(checkLinearity(secmoves = aux, tag = "test", spatial = xspatial, arrays = arrays, GUI = "never"),
+		"Inter-section backwards movements were detected for tag test and the last events are not ordered!", fixed = TRUE)
 
 	xmoves <- moves[[1]]
 	xmoves$Array[4] <- "A9"
 	aux <- sectionMovements(movements = xmoves, spatial = spatial, valid.dist = FALSE)
-	expect_warning(output <- checkLinearity(secmoves = aux, fish = "test", spatial = spatial, arrays = arrays, GUI = "never"),
-		"Inter-section backwards movements were detected for fish test.", fixed = TRUE)
+	expect_warning(output <- checkLinearity(secmoves = aux, tag = "test", spatial = spatial, arrays = arrays, GUI = "never"),
+		"Inter-section backwards movements were detected for tag test.", fixed = TRUE)
 	expect_equal(output$Valid, c(TRUE, TRUE, TRUE, TRUE, TRUE))
 })
 # n
@@ -88,7 +88,7 @@ test_that("updateValidity correctly transfers invalid events.", {
 	secmoves$Valid[3:4] <- FALSE
 
 	expect_message(output <- updateValidity(arrmoves = list(test = xmoves), secmoves = list(test = secmoves)),
-		"M: Rendering 13 array movement(s) invalid for fish test as the respective section movements were discarded by the user.", fixed = TRUE)
+		"M: Rendering 13 array movement(s) invalid for tag test as the respective section movements were discarded by the user.", fixed = TRUE)
 	expect_type(output, "list")
 	expect_equal(names(output), "test")
 	expect_equal(sum(!output[[1]]$Valid), 13)
@@ -97,11 +97,11 @@ test_that("updateValidity correctly transfers invalid events.", {
 test_that("checkSMovesN throws warning only if movements are not ordered", {
 	aux <- sectionMovements(movements = moves[[1]], spatial = spatial, valid.dist = attributes(dist.mat)$valid)
 
-  tryCatch(checkSMovesN(secmoves = aux, fish = "test", section.minimum = 1, GUI = "never"),
+  tryCatch(checkSMovesN(secmoves = aux, tag = "test", section.minimum = 1, GUI = "never"),
     warning = function(w) stop("A warning was issued where it should not have been."))
 
-	expect_warning(checkSMovesN(secmoves = aux, fish = "test", section.minimum = 15, GUI = "never"),
-		"Section movements with less than 15 detections are present for fish test.", fixed = TRUE)
+	expect_warning(checkSMovesN(secmoves = aux, tag = "test", section.minimum = 15, GUI = "never"),
+		"Section movements with less than 15 detections are present for tag test.", fixed = TRUE)
 })
 # n
 

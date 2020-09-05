@@ -110,7 +110,7 @@ test_that("explore stops when any argument does not make sense", {
 		"'override' must be numeric. Please include only the tag signals in the 'override' argument.", fixed = TRUE)
 	
 	expect_warning(explore(tz = "Europe/Copenhagen", override = 4450, report = FALSE, GUI = "never"),
-		"Override has been triggered for fish 4450 but this signal was not detected.", fixed = TRUE)
+		"Override has been triggered for tag 4450 but this signal was not detected.", fixed = TRUE)
 	
 	expect_error(explore(tz = "Europe/Copenhagen", GUI = 1),
 		"'GUI' should be one of 'needed', 'always' or 'never'.", fixed = TRUE)

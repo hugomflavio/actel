@@ -1,9 +1,9 @@
 #' Migration Analysis
 #'
 #' The \code{migration} analysis runs the same initial checks as \code{explore},
-#' but on top of it, it analyses the fish behaviour. By selecting the arrays
-#' that lead to success, you can define whether or not your fish survived the
-#' migration. Additional plots help you find out if some fish has been acting
+#' but on top of it, it analyses the animal behaviour. By selecting the arrays
+#' that lead to success, you can define whether or not your animals survived the
+#' migration. Additional plots help you find out if some animal/tag has been acting
 #' odd. Multiple options allow you to tweak the analysis to fit your study
 #' perfectly.
 #'
@@ -11,9 +11,9 @@
 #' @param section.order A vector containing the order by which sections should 
 #' be aligned in the results.
 #' @param success.arrays The arrays that mark the end of the study area. If a
-#'  fish crosses one of these arrays, it is considered to have successfully
-#'  migrated through the study area.
-#' @param if.last.skip.section Logical: Should a fish detected at the last array
+#'  tag crosses one of these arrays, the respective animal is considered to have 
+#'  successfully migrated through the study area.
+#' @param if.last.skip.section Logical: Should a tag detected at the last array
 #'  of a given section be considered to have disappeared in the next section?
 #' @param disregard.parallels Logical:  Should the presence of parallel arrays
 #'  invalidate potential efficiency peers? See the vignettes for more details.
@@ -49,18 +49,18 @@
 #'
 #' @return A list containing:
 #' \itemize{
-#'  \item \code{detections}: A list containing all detections for each target fish;
-#'  \item \code{valid.detections}: A list containing the valid detections for each target fish;
+#'  \item \code{detections}: A list containing all detections for each target tag;
+#'  \item \code{valid.detections}: A list containing the valid detections for each target tag;
 #'  \item \code{spatial}: A list containing the spatial information used during the analysis;
 #'  \item \code{deployments}: A data frame containing the deployments of each receiver;
 #'  \item \code{arrays}: A list containing the array details used during the analysis;
-#'  \item \code{movements}: A list containing all movement events for each target fish;
-#'  \item \code{valid.movements}: A list containing the valid movement events for each target fish;
-#'  \item \code{section.movements}: A list containing the valid section shifts for each target fish;
-#'  \item \code{status.df}: A data.frame containing summary information for each fish, including the
+#'  \item \code{movements}: A list containing all movement events for each target tag;
+#'  \item \code{valid.movements}: A list containing the valid movement events for each target tag;
+#'  \item \code{section.movements}: A list containing the valid section shifts for each target tag;
+#'  \item \code{status.df}: A data.frame containing summary information for each tag, including the
 #'   following columns:
 #'    \itemize{
-#'      \item \emph{Times.entered.\[section\]}: Number of times the fish was recorded
+#'      \item \emph{Times.entered.\[section\]}: Number of times the tag was recorded
 #'        entering a given section.
 #'      \item \emph{Average.time.until.\[section\]}: Time spent between release
 #'        or leaving another section and reaching at the given section.
@@ -68,48 +68,48 @@
 #'        one section and reaching the given section (if speed.method = "last to first"),
 #'        or from release/leaving one section and leaving the given section (if speed.method
 #'        = "last to last").
-#'      \item \emph{First.array.\[section\]}: Array in which the fish was
+#'      \item \emph{First.array.\[section\]}: Array in which the tag was
 #'        first detected in a given section
 #'      \item \emph{First.station.\[section\]}: Standard name of the first station
-#'        where the fish was detected in a given section
+#'        where the tag was detected in a given section
 #'      \item \emph{First.arrived.\[section\]}: Very first arrival time at a given section
 #'      \item \emph{Average.time.in.\[section\]}: Average time spent within a given section
 #'        at each stay.
 #'      \item \emph{Average.speed.in.\[section\]}: Average speed within a given section
 #'        at each stay (only displayed if speed.method = "last to first").
-#'      \item \emph{Last.array.\[section\]}: Array in which the fish was
+#'      \item \emph{Last.array.\[section\]}: Array in which the tag was
 #'        last detected in a given section
 #'      \item \emph{Last.station.\[section\]}: Standard name of the last station
-#'        where the fish was detected in a given section
+#'        where the tag was detected in a given section
 #'      \item \emph{Last.left.\[section\]}: Very last departure time from a given section
 #'      \item \emph{Total.time.in\[section\]}: Total time spent in a given section
-#'      \item \emph{Very.last.array}: Last array where the fish was detected
-#'      \item \emph{Status}: Fate assigned to the fish
+#'      \item \emph{Very.last.array}: Last array where the tag was detected
+#'      \item \emph{Status}: Fate assigned to the tag
 #'      \item \emph{Valid.detections}: Number of valid detections
 #'      \item \emph{Invalid.detections}: Number of invalid detections
 #'      \item \emph{Backwards.movements}: Number of backward movement events
 #'      \item \emph{Max.cons.back.moves}: Longest successive backwards movements
 #'      \item \emph{P.type}: Type of processing:
 #'        \itemize{
-#'          \item 'Skipped' if no data was found for the fish,
+#'          \item 'Skipped' if no data was found for the tag,
 #'          \item 'Auto' if no user interaction was required,
 #'          \item 'Manual' if user interaction was suggested and the user made
 #'            changes to the validity of the events,
-#'          \item 'Overridden' if the user listed the fish in the
+#'          \item 'Overridden' if the user listed the tag in the
 #'            \code{override} argument.
 #'        }
 #'      \item \emph{Comments}: Comments left by the user during the analysis
 #'    }
-#'  \item \code{section.overview}: A data frame containing the number of fish that
+#'  \item \code{section.overview}: A data frame containing the number of tags that
 #'    disappeared in each section;
 #'  \item \code{group.overview}: A list containing the number of known and
-#'    estimated fish to have passed through each array, divided by group;
+#'    estimated tags to have passed through each array, divided by group;
 #'  \item \code{release.overview}: A list containing the number of known and
-#'    estimated fish to have passed through each array, divided by group and release sites;
+#'    estimated tags to have passed through each array, divided by group and release sites;
 #'  \item \code{matrices}: A list of CJS matrices used for the efficiency calculations;
 #'  \item \code{overall.CJS}: A list of CJS results of the inter-array CJS calculations;
 #'  \item \code{intra.array.CJS}: A list of CJS results of the intra-array CJS calculations;
-#'  \item \code{times}: A data frame containing all arrival times (per fish) at each array;
+#'  \item \code{times}: A data frame containing all arrival times (per tag) at each array;
 #'  \item \code{rsp.info}: A list containing appendix information for the RSP package;
 #'  \item \code{dist.mat}: The distance matrix used in the analysis (if a valid
 #'   distance matrix was supplied)
@@ -320,9 +320,9 @@ by which sections are presented", immediate. = TRUE, call. = FALSE)
   if (is.null(success.arrays)) {
     success.arrays <- names(arrays)[unlist(lapply(arrays, function(x) is.null(x$after)))]
     if (length(success.arrays) == 1)
-      appendTo(c("Screen", "Warning", "Report"), paste0("'success.arrays' was not defined. Assuming success if fish are last detected at array ", success.arrays, "."))
+      appendTo(c("Screen", "Warning", "Report"), paste0("'success.arrays' was not defined. Assuming success if tshe tags are last detected at array ", success.arrays, "."))
     else
-      appendTo(c("Screen", "Warning", "Report"), paste0("'success.arrays' was not defined. Assuming success if fish are last detected at arrays ", paste(success.arrays[-length(success.arrays)], collapse = ", "), " or ", tail(success.arrays, 1), "."))
+      appendTo(c("Screen", "Warning", "Report"), paste0("'success.arrays' was not defined. Assuming success if the tags are last detected at arrays ", paste(success.arrays[-length(success.arrays)], collapse = ", "), " or ", tail(success.arrays, 1), "."))
   } else {
     if (any(link <- is.na(match(success.arrays, unlist(spatial$array.order))))) {
       stopAndReport(ifelse(sum(link) > 1, "Arrays '", "Array '"), paste(success.arrays[link], collapse = "', '"),
@@ -344,8 +344,8 @@ by which sections are presented", immediate. = TRUE, call. = FALSE)
 
   if (is.null(discard.first)) {
     aux <- names(movements)
-    movements <- lapply(names(movements), function(fish) {
-        speedReleaseToFirst(fish = fish, bio = bio, movements = movements[[fish]],
+    movements <- lapply(names(movements), function(tag) {
+        speedReleaseToFirst(tag = tag, bio = bio, movements = movements[[tag]],
                             dist.mat = dist.mat, speed.method = speed.method)
       })
     names(movements) <- aux
@@ -378,43 +378,43 @@ by which sections are presented", immediate. = TRUE, call. = FALSE)
   movement.names <- names(movements)
 
   if (any(link <- !override %in% extractSignals(movement.names))) {
-    appendTo(c("Screen", "Warning", "Report"), paste0("Override has been triggered for fish ", paste(override[link], collapse = ", "), " but ",
-      ifelse(sum(link) == 1, "this", "these"), " fish ", ifelse(sum(link) == 1, "was", "were")," not detected."))
+    appendTo(c("Screen", "Warning", "Report"), paste0("Override has been triggered for tag ", paste(override[link], collapse = ", "), " but ",
+      ifelse(sum(link) == 1, "this tag was", "these tags were"), " not detected."))
     override <- override[!link]
   }
 
   movements <- lapply(seq_along(movements), function(i) {
-    fish <- names(movements)[i]
-    appendTo("debug", paste0("debug: Checking movement quality for fish ", fish,"."))
+    tag <- names(movements)[i]
+    appendTo("debug", paste0("debug: Checking movement quality for tag ", tag,"."))
 
-    if (is.na(match(extractSignals(fish), override))) {
-      release <- as.character(bio$Release.site[na.as.false(bio$Transmitter == fish)])
+    if (is.na(match(extractSignals(tag), override))) {
+      release <- as.character(bio$Release.site[na.as.false(bio$Transmitter == tag)])
       release <- unlist(strsplit(with(spatial, release.sites[release.sites$Standard.name == release, "Array"]), "|", fixed = TRUE))
 
-      output <- checkMinimumN(movements = movements[[i]], fish = fish, minimum.detections = minimum.detections)
+      output <- checkMinimumN(movements = movements[[i]], tag = tag, minimum.detections = minimum.detections)
 
-      output <- checkUpstream(movements = output, fish = fish, release = release, arrays = arrays, GUI = GUI)
+      output <- checkUpstream(movements = output, tag = tag, release = release, arrays = arrays, GUI = GUI)
 
-      output <- checkImpassables(movements = output, fish = fish, dotmat = dotmat, GUI = GUI)
+      output <- checkImpassables(movements = output, tag = tag, dotmat = dotmat, GUI = GUI)
 
-      output <- checkJumpDistance(movements = output, release = release, fish = fish, dotmat = dotmat,
+      output <- checkJumpDistance(movements = output, release = release, tag = tag, dotmat = dotmat,
                                   jump.warning = jump.warning, jump.error = jump.error, GUI = GUI)
 
       if (do.checkSpeeds) {
-        temp.valid.movements <- simplifyMovements(movements = output, fish = fish, bio = bio, discard.first = discard.first,
+        temp.valid.movements <- simplifyMovements(movements = output, tag = tag, bio = bio, discard.first = discard.first,
           speed.method = speed.method, dist.mat = dist.mat)
-        output <- checkSpeeds(movements = output, fish = fish, valid.movements = temp.valid.movements,
+        output <- checkSpeeds(movements = output, tag = tag, valid.movements = temp.valid.movements,
           speed.warning = speed.warning, speed.error = speed.error, GUI = GUI)
         rm(temp.valid.movements)
       }
 
       if (do.checkInactiveness) {
-        output <- checkInactiveness(movements = output, fish = fish, detections.list = detections.list[[fish]],
+        output <- checkInactiveness(movements = output, tag = tag, detections.list = detections.list[[tag]],
           inactive.warning = inactive.warning, inactive.error = inactive.error,
           dist.mat = dist.mat, GUI = GUI)
       }
     } else {
-      output <- overrideValidityChecks(moves = movements[[i]], fish = names(movements)[i], GUI = GUI) # nocov
+      output <- overrideValidityChecks(moves = movements[[i]], tag = names(movements)[i], GUI = GUI) # nocov
     }
     return(output)
   })
@@ -426,11 +426,11 @@ by which sections are presented", immediate. = TRUE, call. = FALSE)
   appendTo(c("Screen", "Report"), "M: Compiling and checking section movements for the valid tags.")
 
   section.movements <- lapply(seq_along(movements), function(i) {
-    fish <- names(movements)[i]
-    appendTo("debug", paste0("debug: Compiling section movements for fish ", fish,"."))
+    tag <- names(movements)[i]
+    appendTo("debug", paste0("debug: Compiling section movements for tag ", tag,"."))
     aux <- sectionMovements(movements = movements[[i]], spatial = spatial, valid.dist = attributes(dist.mat)$valid)
     if (!is.null(aux)) {
-      output <- checkLinearity(secmoves = aux, fish = fish, spatial = spatial, arrays = arrays, GUI = GUI)
+      output <- checkLinearity(secmoves = aux, tag = tag, spatial = spatial, arrays = arrays, GUI = GUI)
       return(output)
     } else {
       return(NULL)
@@ -445,15 +445,15 @@ by which sections are presented", immediate. = TRUE, call. = FALSE)
   appendTo(c("Screen", "Report"), "M: Filtering valid array and section movements.")
 
   valid.movements <- lapply(seq_along(movements), function(i){
-    output <- simplifyMovements(movements = movements[[i]], fish = names(movements)[i], bio = bio, discard.first = discard.first,
+    output <- simplifyMovements(movements = movements[[i]], tag = names(movements)[i], bio = bio, discard.first = discard.first,
       speed.method = speed.method, dist.mat = dist.mat)
   })
   names(valid.movements) <- names(movements)
   valid.movements <- valid.movements[!sapply(valid.movements, is.null)]
 
   section.movements <- lapply(seq_along(valid.movements), function(i) {
-    fish <- names(valid.movements)[i]
-    appendTo("debug", paste0("debug: Compiling valid section movements for fish ", fish,"."))
+    tag <- names(valid.movements)[i]
+    appendTo("debug", paste0("debug: Compiling valid section movements for tag ", tag,"."))
     output <- sectionMovements(movements = valid.movements[[i]], spatial = spatial, valid.dist = attributes(dist.mat)$valid)
     return(output)
   })
@@ -577,7 +577,7 @@ by which sections are presented", immediate. = TRUE, call. = FALSE)
   rsp.info <- list(analysis.type = "migration", analysis.time = the.time, bio = bio, tz = tz, actel.version = utils::packageVersion("actel"))
 
   if (!is.null(override))
-    override.fragment <- paste0('<span style="color:red">Manual mode has been triggered for **', length(override),'** fish.</span>\n')
+    override.fragment <- paste0('<span style="color:red">Manual mode has been triggered for **', length(override),'** tag(s).</span>\n')
   else
     override.fragment <- ""
 
@@ -796,7 +796,7 @@ by which sections are presented", immediate. = TRUE, call. = FALSE)
 #'
 #' @param override.fragment Rmarkdown string specifying the type of report for the header.
 #' @param biometric.fragment Rmarkdown string specifying the biometric graphics drawn.
-#' @param section.overview A summary table with the number of fish that disappeared/moved onwards at each section.
+#' @param section.overview A summary table with the number of tags that disappeared/moved onwards at each section.
 #' @param efficiency.fragment Rmarkdown string specifying the efficiency results.
 #' @param display.progression Logical. If TRUE, the progression plot has been created and can be displayed.
 #' @param array.overview.fragment Rmarkdown string specifying the array overview results.
@@ -826,6 +826,7 @@ printMigrationRmd <- function(override.fragment, biometric.fragment, section.ove
     sensor.fragment <- paste0("### Sensor plots
 
 Note:
+  : You can choose to paint the values by section by setting `plot.detections.by = 'arrays'` during the analysis.
   : The data used for these graphics is stored in the `valid.detections` object.
   : You can replicate these graphics and edit them as needed using the `plotSensors()` function.
 
@@ -874,7 +875,7 @@ Want to cite actel in a publication? Run `citation(\'actel\')`
 
 ### Study area
 
-Arrays with the same background belong to the same section. Release sites are marked with "R.S.". Arrays connected with an arrow indicate that the fish can only pass in one direction.
+Arrays with the same background belong to the same section. Release sites are marked with "R.S.". Arrays connected with an arrow indicate that the animals can only pass in one direction.
 
 <img src=', work.path, ifelse(file.exists(paste0(work.path, "mb_arrays.svg")), "mb_arrays.svg", "mb_arrays.png"), ' style="padding-top: 15px;"/>
 
@@ -947,7 +948,7 @@ Note:
 ', ifelse(display.progression, paste0('Zoom in or open the figure in a new tab to clearly read the text within each circle.
 
 Note:
-  : The progression calculations **do not account for** backwards movements. This implies that the total number of fish to have been **last seen** at a given array **may be lower** than the displayed below. Please refer to the [section survival overview](#section-survival) and [last seen arrays](#last-seen-arrays) to find out how many fish were considered to have disappeared per section.
+  : The progression calculations **do not account for** backwards movements. This implies that the total number of animals to have been **last seen** at a given array **may be lower** than the displayed below. Please refer to the [section survival overview](#section-survival) and [last seen arrays](#last-seen-arrays) to find out how many animals were considered to have disappeared per section.
   : The data used in this graphic is stored in the `overall.CJS` object, and the data used in the tables is stored in the `group.overview` object. You can find detailed progressions per release site in the `release.overview` object.
 
 <img src=', work.path, ifelse(file.exists(paste0(work.path, "mb_efficiency.svg")), "mb_efficiency.svg", "mb_efficiency.png"), ' style="padding-top: 15px; padding-bottom: 15px;"/>
@@ -986,8 +987,8 @@ Note:
   : You can choose to plot detections by station or by array using the `plot.detections.by` argument.
   : The detections are coloured by ', ifelse(plot.detections.by == "stations", 'array', 'section'), '. The vertical black dashed line shows the time of release. The vertical grey dashed lines show the assigned moments of entry and exit for each study area section. The full dark-grey line shows the movement events considered valid, while the dashed dark-grey line shows the movement events considered invalid.
 ', ifelse(plot.detections.by == "stations", '  : The movement event lines move straight between the first and last station of each event (i.e. in-between detections will not be individually linked by the line).\n', ''),
-'  : Manually **edited** fish are highlighted with **yellow** graphic borders.
-  : Manually **overridden** fish are highlighted with **red** graphic borders.
+'  : Manually **edited** tag detections are highlighted with **yellow** graphic borders.
+  : Manually **overridden** tag detections are highlighted with **red** graphic borders.
   : The ', ifelse(plot.detections.by == "stations", 'stations', 'arrays'), ' have been aligned by ', ifelse(plot.detections.by == "stations", 'array', 'section'), ', following the order provided ', ifelse(plot.detections.by == "stations", '', 'either '), 'in the spatial input', ifelse(plot.detections.by == "stations", '.', ' or the `section.order` argument.'), '
   : You can replicate these graphics and edit them as needed using the `plotDetections()` function.
   : You can also see the movement events of multiple tags simultaneously using the `plotMoves()` function.
@@ -1110,7 +1111,7 @@ sink()
 
 #' Create the timetable
 #'
-#' Crawls trough the movement events of each fish to find when it entered and left each section of the study area.
+#' Crawls trough the movement events of each tag to find when it entered and left each section of the study area.
 #'
 #' @inheritParams explore
 #' @inheritParams migration
@@ -1143,12 +1144,12 @@ assembleTimetable <- function(secmoves, valid.moves, all.moves, spatial, arrays,
   # temporarily calculate inter-section speeds
   if (attributes(dist.mat)$valid) {
     aux <- names(secmoves)
-    secmoves <- lapply(names(secmoves), function(fish) {
-      # cat(fish, "\n")
-      aux <- secmoves[[fish]]
+    secmoves <- lapply(names(secmoves), function(tag) {
+      # cat(tag, "\n")
+      aux <- secmoves[[tag]]
       aux$Speed.until <- NA
 
-      the.row <- match(fish, bio$Transmitter)
+      the.row <- match(tag, bio$Transmitter)
       origin.time <- bio[the.row, "Release.date"]
       origin.place <- as.character(bio[the.row, "Release.site"])
       if (origin.time <= aux$First.time[1]) {
@@ -1204,10 +1205,10 @@ assembleTimetable <- function(secmoves, valid.moves, all.moves, spatial, arrays,
   rownames(timetable) <- names(secmoves)
 
   # Start filling it up
-  capture <- lapply(names(secmoves), function(fish) {
-    # cat(fish, "\n")
-    aux <- split(secmoves[[fish]], secmoves[[fish]]$Section)
-    appendTo("debug", paste0("Assembling timetable values for fish ", fish, "."))
+  capture <- lapply(names(secmoves), function(tag) {
+    # cat(tag, "\n")
+    aux <- split(secmoves[[tag]], secmoves[[tag]]$Section)
+    appendTo("debug", paste0("Assembling timetable values for tag ", tag, "."))
     recipient <- lapply(seq_along(aux), function(i) {
       # cat(i, "\n")
       recipient <- rep(NA, ncol(timetable))
@@ -1252,28 +1253,28 @@ assembleTimetable <- function(secmoves, valid.moves, all.moves, spatial, arrays,
     recipient[, the.cols] <- as.numeric(recipient[, the.cols])
     # --
 
-    recipient$Very.last.array <- secmoves[[fish]][.N, Last.array]
-    recipient$Very.last.time <- as.character(secmoves[[fish]][.N, Last.time])
-    recipient$Valid.detections <- sum(secmoves[[fish]]$Detections)
-    recipient$Valid.events <- nrow(valid.moves[[fish]])
-    if (any(!all.moves[[fish]]$Valid)) {
-      recipient$Invalid.detections <- sum(all.moves[[fish]][!(Valid)]$Detections)
-      recipient$Invalid.events <- sum(!all.moves[[fish]]$Valid)
+    recipient$Very.last.array <- secmoves[[tag]][.N, Last.array]
+    recipient$Very.last.time <- as.character(secmoves[[tag]][.N, Last.time])
+    recipient$Valid.detections <- sum(secmoves[[tag]]$Detections)
+    recipient$Valid.events <- nrow(valid.moves[[tag]])
+    if (any(!all.moves[[tag]]$Valid)) {
+      recipient$Invalid.detections <- sum(all.moves[[tag]][!(Valid)]$Detections)
+      recipient$Invalid.events <- sum(!all.moves[[tag]]$Valid)
     } else {
       recipient$Invalid.detections <- 0
       recipient$Invalid.events <- 0
     }
-    recipient$P.type <- attributes(secmoves[[fish]])$p.type
+    recipient$P.type <- attributes(secmoves[[tag]])$p.type
 
-    aux <- countBackMoves(movements = valid.moves[[fish]], arrays = arrays)
+    aux <- countBackMoves(movements = valid.moves[[tag]], arrays = arrays)
     recipient$Backwards.movements <- aux[[1]]
     recipient$Max.cons.back.moves <- aux[[2]]
-    recipient$P.type <- attributes(valid.moves[[fish]])$p.type
+    recipient$P.type <- attributes(valid.moves[[tag]])$p.type
 
 
     # assign fate
-    the.last.section <- secmoves[[fish]][.N, Section]
-    the.last.array <- secmoves[[fish]][.N, Last.array]
+    the.last.section <- secmoves[[tag]][.N, Section]
+    the.last.array <- secmoves[[tag]][.N, Last.array]
     recipient$Status <- paste0("Disap. in ", the.last.section)
 
     not.last.section <- match(the.last.section, sections) != length(sections)
@@ -1289,8 +1290,8 @@ assembleTimetable <- function(secmoves, valid.moves, all.moves, spatial, arrays,
       recipient$Status <- "Succeeded"
 
     # deploy values
-    appendTo("debug", paste0("Deploy timetable values for fish ", fish, "."))
-    timetable[fish, ] <<- recipient
+    appendTo("debug", paste0("Deploy timetable values for tag ", tag, "."))
+    timetable[tag, ] <<- recipient
 
     return(NULL)
   })
@@ -1378,7 +1379,7 @@ countBackMoves <- function(movements, arrays){
 #' @inheritParams groupMovements
 #' @inheritParams sectionMovements
 #'
-#' @return A data frame containing all the final data for each fish.
+#' @return A data frame containing all the final data for each tag.
 #'
 #' @keywords internal
 #'
@@ -1386,7 +1387,7 @@ assembleOutput <- function(timetable, bio, spatial, dist.mat, tz) {
   appendTo("debug", "Merging 'bio' and 'timetable'.")
   status.df <- merge(bio, timetable, by = "Transmitter", all = TRUE)
 
-  appendTo("debug", "Completing entries for fish that were never detected.")
+  appendTo("debug", "Completing entries for tags that were never detected.")
   sections <- names(spatial$array.order)
 
   status.df$Status[is.na(status.df$Status)] <- paste("Disap. in", sections[1])
@@ -1416,14 +1417,14 @@ assembleOutput <- function(timetable, bio, spatial, dist.mat, tz) {
 
 #' Create section.overview
 #'
-#' Produces a table with the survival per group of fish present in the biometrics.
+#' Produces a table with the survival per group of animals present in the biometrics.
 #'
 #' @inheritParams explore
 #' @inheritParams migration
 #' @inheritParams simplifyMovements
 #' @inheritParams sectionMovements
 #'
-#' @return A data frame containing the survival per group of fish present in the biometrics.
+#' @return A data frame containing the survival per group of animals present in the biometrics.
 #'
 #' @keywords internal
 #'

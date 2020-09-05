@@ -2,22 +2,22 @@
 % Please edit documentation in R/check.R
 \name{checkSpeeds}
 \alias{checkSpeeds}
-\title{check fish speeds against defined thresholds (in m/s)}
+\title{check tag speeds against defined thresholds (in m/s)}
 \usage{
-checkSpeeds(movements, fish, valid.movements, speed.warning, speed.error, GUI)
+checkSpeeds(movements, tag, valid.movements, speed.warning, speed.error, GUI)
 }
 \arguments{
 \item{movements}{The movements table}
 
-\item{fish}{The fish being analysed}
+\item{tag}{The tag being analysed}
 
 \item{valid.movements}{The valid movements table}
 
-\item{speed.warning}{If a fish moves at a speed equal or greater than
+\item{speed.warning}{If a tag moves at a speed equal or greater than
 \code{speed.warning} (in metres per second), a warning is issued. If left
 NULL (default), no warnings are issued.}
 
-\item{speed.error}{If a fish moves at a speed equal or greater than
+\item{speed.error}{If a tag moves at a speed equal or greater than
 \code{speed.error} (in metres per second), user intervention is suggested.
 If left NULL (default), user intervention is never suggested.}
 
@@ -33,6 +33,6 @@ prompted to open and examine that file. Defaults to "needed".}
 A list of movements with updated 'Valid' columns
 }
 \description{
-check fish speeds against defined thresholds (in m/s)
+check tag speeds against defined thresholds (in m/s)
 }
 \keyword{internal}

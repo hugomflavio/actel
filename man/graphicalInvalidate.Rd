@@ -4,17 +4,17 @@
 \alias{graphicalInvalidate}
 \title{Opens a new window that allows the user to determine movement event invalidity}
 \usage{
-graphicalInvalidate(moves, fish, trigger)
+graphicalInvalidate(moves, tag, trigger)
 }
 \arguments{
 \item{moves}{The movements table}
 
-\item{fish}{The fish being analysed}
+\item{tag}{The tag being analysed}
 
 \item{trigger}{The warning/message that triggered the interaction}
 }
 \value{
-A data frame with the movement events for the target fish and an updated 'Valid' column.
+A data frame with the movement events for the target tag and an updated 'Valid' column.
 }
 \description{
 Opens a new window that allows the user to determine movement event invalidity

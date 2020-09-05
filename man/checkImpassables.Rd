@@ -2,14 +2,14 @@
 % Please edit documentation in R/check.R
 \name{checkImpassables}
 \alias{checkImpassables}
-\title{Find out if a fish moved in an impossible direction}
+\title{Find out if a tag moved in an impossible direction}
 \usage{
-checkImpassables(movements, fish, dotmat, GUI)
+checkImpassables(movements, tag, dotmat, GUI)
 }
 \arguments{
 \item{movements}{The movements table}
 
-\item{fish}{The fish being analysed}
+\item{tag}{The tag being analysed}
 
 \item{dotmat}{The matrix of distances between arrays}
 
@@ -25,6 +25,6 @@ prompted to open and examine that file. Defaults to "needed".}
 A list of movements with updated 'Valid' columns
 }
 \description{
-Find out if a fish moved in an impossible direction
+Find out if a tag moved in an impossible direction
 }
 \keyword{internal}

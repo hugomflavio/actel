@@ -2,7 +2,7 @@
 % Please edit documentation in R/residency.R
 \name{globalRatios}
 \alias{globalRatios}
-\title{Calculate number/percentage of fish at each location for each day}
+\title{Calculate number/percentage of tags at each location for each day}
 \usage{
 globalRatios(positions, section.order)
 }
@@ -12,12 +12,12 @@ globalRatios(positions, section.order)
 \value{
 A list containing:
 \itemize{
-\item \code{absolutes}: A data frame containing the absolute number of fish at each location per day,
-\item \code{percentages}: A data frame containing the percentage of fish relative to the total
-number of active fish at each location per day.
+\item \code{absolutes}: A data frame containing the absolute number of tags at each location per day,
+\item \code{percentages}: A data frame containing the percentage of tag relative to the total
+number of active tags at each location per day.
 }
 }
 \description{
-Calculate number/percentage of fish at each location for each day
+Calculate number/percentage of tags at each location for each day
 }
 \keyword{internal}

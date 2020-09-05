@@ -9,7 +9,7 @@ checkNoDetections(input, bio)
 \arguments{
 \item{input}{The list of detections}
 
-\item{bio}{A table with the tags and biometrics of the studied fish.}
+\item{bio}{A table with the tags and biometrics of the studied animals.}
 }
 \value{
 No return value, called for side effects.

@@ -1,11 +1,11 @@
 #' check.R arguments
 #'
 #' @param arrays a list containing information for each array
-#' @param bio A table with the tags and biometrics of the studied fish.
+#' @param bio A table with the tags and biometrics of the studied animals.
 #' @param detections.list A list of the detections split by each target tag,
 #'  created by \code{\link{splitDetections}}.
 #' @param dotmat The matrix of distances between arrays
-#' @param fish The fish being analysed
+#' @param tag The tag being analysed
 #' @param GUI One of "needed", "always" or "never". If "needed", a new window is
 #'  opened to inspect the movements only if the movements table is too big to be
 #'  displayed in R's console. If "always", a graphical interface is always created
@@ -14,7 +14,7 @@
 #'  not fit in R's console, a temporary file will be saved and the user will be
 #'  prompted to open and examine that file. Defaults to "needed".
 #' @param movements,moves The movements table
-#' @param release The release location of the fish
+#' @param release The release location of the animal
 #' @param secmoves the section movements list
 #' @param spatial The spatial data frame, as loaded by loadSpatial
 #' @param valid.movements The valid movements table
@@ -160,7 +160,7 @@ checkArguments <- function(dp, tz, minimum.detections, max.interval, speed.metho
     stopAndReport("'timestep' should be one of 'days' or 'hours'")
   timestep <- match.arg(timestep)
 
-  # Check that all the overridden fish are part of the study
+  # Check that all the overridden tags are part of the study
   if (!is.null(dp) && !is.null(override)) {
     lowest_signals <- sapply(dp$bio$Signal, function(i) min(as.numeric(unlist(strsplit(as.character(i), "|", fixed = TRUE)))))
     if (any(link <- is.na(match(override, lowest_signals))))
@@ -223,7 +223,7 @@ checkToken <- function(token, timestamp) {
 #'
 #' @keywords internal
 #'
-tableInteraction <- function(moves, fish, trigger, GUI, force = FALSE) { # nocov start
+tableInteraction <- function(moves, tag, trigger, GUI, force = FALSE) { # nocov start
   Valid <- NULL
   appendTo("debug", "Running tableInteraction.")
   if (GUI == "never")
@@ -238,9 +238,9 @@ tableInteraction <- function(moves, fish, trigger, GUI, force = FALSE) { # nocov
     popup <- TRUE
 
   if (popup) {
-    output <- graphicalInvalidate(moves = moves, fish = fish, trigger = trigger)
-    decision <- userInput(paste0("Would you like to leave a comment for fish ", fish, "?(comment/n) "), 
-                          choices = c("comment", "n"), hash = paste0("# comment ", fish, "?"))
+    output <- graphicalInvalidate(moves = moves, tag = tag, trigger = trigger)
+    decision <- userInput(paste0("Would you like to leave a comment for tag ", tag, "?(comment/n) "), 
+                          choices = c("comment", "n"), hash = paste0("# comment ", tag, "?"))
   } else {
     # check if table can be printed on console
     if (colnames(moves)[1] == "Section")
@@ -257,19 +257,19 @@ tableInteraction <- function(moves, fish, trigger, GUI, force = FALSE) { # nocov
     # ---
     # make decision
     if (outside.console) {
-      message("The movements table for fish '", fish, "' is too large to display on the console and GUI is set to 'never'.\nTemporarily saving the table to '", paste0(tempdir(), '/actel_inspect_movements.csv'), "'. Please inspect this file and decide if any events should be considered invalid.\nPlease use the 'Event' column as a reference for the event number. ", sum(!moves$Valid), " invalid event(s) omitted.")
+      message("The movements table for tag '", tag, "' is too large to display on the console and GUI is set to 'never'.\nTemporarily saving the table to '", paste0(tempdir(), '/actel_inspect_movements.csv'), "'. Please inspect this file and decide if any events should be considered invalid.\nPlease use the 'Event' column as a reference for the event number. ", sum(!moves$Valid), " invalid event(s) omitted.")
       to.print <- cbind(data.frame(Event = 1:sum(moves$Valid)), moves[(Valid)])
       write.csv(to.print, paste0(tempdir(), "/actel_inspect_movements.csv"), row.names = FALSE)
       if (force) {
-        aux <- invalidateEvents(movements = to.print, fish = fish)
+        aux <- invalidateEvents(movements = to.print, tag = tag)
         output <- transferValidity(from = aux, to = moves)
       } else {
         decision <- userInput("Would you like to render any movement event invalid?(y/n/comment) ",
                               choices = c("y", "n", "comment"), 
-                              tag = fish, 
-                              hash = paste0("# invalidate moves in ", fish, "?"))
+                              tag = tag, 
+                              hash = paste0("# invalidate moves in ", tag, "?"))
         if (decision == "y") {
-          aux <- invalidateEvents(movements = to.print, fish = fish)
+          aux <- invalidateEvents(movements = to.print, tag = tag)
           output <- transferValidity(from = aux, to = moves)
         } else {
           output <- moves
@@ -286,10 +286,10 @@ tableInteraction <- function(moves, fish, trigger, GUI, force = FALSE) { # nocov
       }
     } else {
       if (colnames(moves)[1] == "Section") {
-        appendTo("Screen", paste0("Opening ", fish, "'s section movement events for inspection (", sum(!moves$Valid), " invalid event(s) omitted):"))
+        appendTo("Screen", paste0("Opening ", tag, "'s section movement events for inspection (", sum(!moves$Valid), " invalid event(s) omitted):"))
         to.display <- moves[, -c(5, 7)]
       } else {
-        appendTo("Screen", paste0("Opening ", fish, "'s array movement events for inspection (", sum(!moves$Valid), " invalid event(s) omitted):"))
+        appendTo("Screen", paste0("Opening ", tag, "'s array movement events for inspection (", sum(!moves$Valid), " invalid event(s) omitted):"))
         to.display <- moves[(Valid)]
       }
       message(paste0(capture.output(print(to.display, topn = nrow(to.display))), collapse = "\n"))
@@ -299,15 +299,15 @@ tableInteraction <- function(moves, fish, trigger, GUI, force = FALSE) { # nocov
         message("\nM: Please find the exception which triggered this interaction at the top of the table.")
       message("")
       if (force) {
-        aux <- invalidateEvents(movements = to.display, fish = fish)
+        aux <- invalidateEvents(movements = to.display, tag = tag)
         output <- transferValidity(from = aux, to = moves)
       } else {
         decision <- userInput("Would you like to render any movement event invalid?(y/n/comment) ",
                               choices = c("y", "n", "comment"), 
-                              tag = fish, 
-                              hash = paste0("# invalidate moves in ", fish, "?"))
+                              tag = tag, 
+                              hash = paste0("# invalidate moves in ", tag, "?"))
         if (decision == "y") {
-          aux <- invalidateEvents(movements = to.display, fish = fish)
+          aux <- invalidateEvents(movements = to.display, tag = tag)
           output <- transferValidity(from = aux, to = moves)
         } else {
           output <- moves
@@ -416,25 +416,25 @@ checkDupDetections <- function(input) {
 }
 
 
-#' Skips all validity checks for a fish and allows the user to freely invalidate events
+#' Skips all validity checks for a tag and allows the user to freely invalidate events
 #'
 #' @inheritParams check_args
 #'
-#' @return A data frame containing the movements for the target fish
+#' @return A data frame containing the movements for the target tag
 #'
 #' @keywords internal
 #'
-overrideValidityChecks <- function(moves, fish, GUI) { # nocov start
+overrideValidityChecks <- function(moves, tag, GUI) { # nocov start
   appendTo("debug", "Starting overrideValidityChecks.")
   message("----------------------------")
-  appendTo(c("Screen", "Report"), trigger <- paste0("M: Override has been triggered for fish ", fish, ". Entering full manual mode."))
-  moves <- tableInteraction(moves = moves, fish = fish, trigger = trigger, GUI = GUI)
+  appendTo(c("Screen", "Report"), trigger <- paste0("M: Override has been triggered for tag ", tag, ". Entering full manual mode."))
+  moves <- tableInteraction(moves = moves, tag = tag, trigger = trigger, GUI = GUI)
   attributes(moves)$p.type <- "Overridden"
   message("Terminating full manual mode\n----------------------------")
   return(moves) # nocov end
 }
 
-#' Check that the fish have enough detections to be valid
+#' Check that the tag have enough detections to be valid
 #'
 #' @inheritParams check_args
 #' @inheritParams explore
@@ -443,16 +443,16 @@ overrideValidityChecks <- function(moves, fish, GUI) { # nocov start
 #'
 #' @keywords internal
 #'
-checkMinimumN <- function(movements, minimum.detections, fish) {
+checkMinimumN <- function(movements, minimum.detections, tag) {
   appendTo("debug", "Running checkMinimumN.")  
   if (nrow(movements) == 1 && movements$Detections < minimum.detections) {
-    appendTo(c("Screen", "Report", "Warning"), paste0("Fish ", fish, " only has one movement event (", movements$Array, ") with ", movements$Detections, " detections. Considered invalid."))
+    appendTo(c("Screen", "Report", "Warning"), paste0("Tag ", tag, " only has one movement event (", movements$Array, ") with ", movements$Detections, " detections. Considered invalid."))
     movements$Valid <- FALSE
   }
   return(movements)
 }
 
-#' check fish speeds against defined thresholds (in m/s)
+#' check tag speeds against defined thresholds (in m/s)
 #'
 #' @inheritParams check_args
 #' @inheritParams explore
@@ -461,7 +461,7 @@ checkMinimumN <- function(movements, minimum.detections, fish) {
 #'
 #' @keywords internal
 #'
-checkSpeeds <- function(movements, fish, valid.movements, speed.warning, speed.error, GUI) {
+checkSpeeds <- function(movements, tag, valid.movements, speed.warning, speed.error, GUI) {
   appendTo("debug", "Running checkSpeeds.")
   the.warning <- NULL
   vm <- valid.movements
@@ -469,7 +469,7 @@ checkSpeeds <- function(movements, fish, valid.movements, speed.warning, speed.e
     link <- which(vm$Average.speed.m.s >= speed.warning)
     if (link[1] == 1) {
       appendTo(c("Report", "Warning", "Screen"),
-        the.warning <- paste0("Fish ", fish, " had an average speed of ", round(vm$Average.speed.m.s[1], 2),
+        the.warning <- paste0("Tag ", tag, " had an average speed of ", round(vm$Average.speed.m.s[1], 2),
           " m/s from release to first valid event (Release -> ", vm$Array[1], ")."))
       the.warning <- paste("Warning:", the.warning)
       link <- link[-1]
@@ -477,7 +477,7 @@ checkSpeeds <- function(movements, fish, valid.movements, speed.warning, speed.e
     if (length(link) > 0) {
       for (i in 1:length(link)) {
         appendTo(c("Report", "Warning", "Screen"),
-          other.warning <- paste0("Fish ", fish, " had an average speed of ", round(vm$Average.speed.m.s[link[i]], 2),
+          other.warning <- paste0("Tag ", tag, " had an average speed of ", round(vm$Average.speed.m.s[link[i]], 2),
             " m/s from valid event ", link[i] - 1, " to ", link[i], " (",vm$Array[link[i] - 1], " -> ", vm$Array[link[i]], ")."))
         other.warning <- paste("Warning:", other.warning)
         the.warning <- paste0(the.warning, "\n", other.warning)
@@ -486,12 +486,12 @@ checkSpeeds <- function(movements, fish, valid.movements, speed.warning, speed.e
   }
   # Trigger user interaction
   if (any(na.as.false(vm$Average.speed.m.s >= speed.error))) { # nocov start
-    movements <- tableInteraction(moves = movements, fish = fish, trigger = the.warning, GUI = GUI)
+    movements <- tableInteraction(moves = movements, tag = tag, trigger = the.warning, GUI = GUI)
   } # nocov end
   return(movements)
 }
 
-#' Find if a fish is standing still in an array
+#' Find if a tag is standing still in an array
 #'
 #' @inheritParams check_args
 #' @inheritParams explore
@@ -500,7 +500,7 @@ checkSpeeds <- function(movements, fish, valid.movements, speed.warning, speed.e
 #'
 #' @keywords internal
 #'
-checkInactiveness <- function(movements, fish, detections.list,
+checkInactiveness <- function(movements, tag, detections.list,
   inactive.warning, inactive.error, dist.mat, GUI) {
   Valid <- NULL
   appendTo("debug", "Running checkInactiveness.")
@@ -545,7 +545,7 @@ checkInactiveness <- function(movements, fish, detections.list,
         if (all(aux <= 1500)) {
           n.detections <- sum(valid.moves$Detections[start_i:Stop])
           appendTo(c("Report", "Warning", "Screen"),
-            the.warning <- paste0("Fish ", fish, " was detected ", n.detections,
+            the.warning <- paste0("Tag ", tag, " was detected ", n.detections,
               " times at stations less than 1.5 km apart in array '", tail(breaks$values, 1),
               "' (", paste(the.stations, collapse = ", "), "), over ", days.spent,
               " days and then disappeared. Could it be inactive?"))
@@ -558,7 +558,7 @@ checkInactiveness <- function(movements, fish, detections.list,
         if (length(the.stations) <= 3) {
           n.detections <- sum(valid.moves$Detections[start_i:Stop])
           appendTo(c("Report", "Warning", "Screen"),
-            the.warning <- paste0("Fish ", fish, " was detected ", n.detections,
+            the.warning <- paste0("Tag ", tag, " was detected ", n.detections,
               " times at three or less stations of array '", tail(breaks$values, 1),
               "' (", paste(the.stations, collapse = ", "), ") over ", days.spent,
               " days and then disappeared. Could it be inactive?"))
@@ -570,8 +570,8 @@ checkInactiveness <- function(movements, fish, detections.list,
       }
       # Trigger user interaction
       if (trigger.error) { # nocov start
-        appendTo("Screen", error.message <- paste0("M: ", fish, " has been inactive for more than ", inactive.error," days. Inactiveness started on event ", start_i, " (", as.Date(valid.moves$First.time[start_i]),")."))
-        movements <- tableInteraction(moves = movements, fish = fish, trigger = paste0(the.warning, "\n", error.message), GUI = GUI)
+        appendTo("Screen", error.message <- paste0("M: Tah ", tag, " has been inactive for more than ", inactive.error," days. Inactiveness started on event ", start_i, " (", as.Date(valid.moves$First.time[start_i]),")."))
+        movements <- tableInteraction(moves = movements, tag = tag, trigger = paste0(the.warning, "\n", error.message), GUI = GUI)
       } # nocov end
       iteration <- iteration + 1
     }
@@ -579,7 +579,7 @@ checkInactiveness <- function(movements, fish, detections.list,
   return(movements)
 }
 
-#' Find out if a fish moved in an impossible direction
+#' Find out if a tag moved in an impossible direction
 #'
 #' @inheritParams check_args
 #'
@@ -587,7 +587,7 @@ checkInactiveness <- function(movements, fish, detections.list,
 #'
 #' @keywords internal
 #'
-checkImpassables <- function(movements, fish, dotmat, GUI){
+checkImpassables <- function(movements, tag, dotmat, GUI){
   appendTo("debug", "Running checkImpassables.")
   Valid <- NULL
   restart <- TRUE
@@ -602,12 +602,12 @@ checkImpassables <- function(movements, fish, dotmat, GUI){
       if (any(is.na(distances))) {
         the.warning <- NULL
         sapply(which(is.na(distances)), function(i) {
-          appendTo(c("Screen", "Warning", "Report"), aux <- paste0("Fish ", fish, " made an impassable jump: It is not possible to go from array ", shifts[i, 1], " to ", shifts[i, 2], ".\n         Please resolve this either by invalidating events or by adjusting your 'spatial.txt' file and restarting."))
+          appendTo(c("Screen", "Warning", "Report"), aux <- paste0("Tag ", tag, " made an impassable jump: It is not possible to go from array ", shifts[i, 1], " to ", shifts[i, 2], ".\n         Please resolve this either by invalidating events or by adjusting your 'spatial.txt' file and restarting."))
           the.warning <- c(the.warning, aux)
         })
         if (interactive()) { # nocov start
           the.warning <- paste("Warning:", the.warning, collapse = "\n")
-          movements <- tableInteraction(moves = movements, fish = fish, trigger = the.warning, GUI = GUI, force = TRUE)
+          movements <- tableInteraction(moves = movements, tag = tag, trigger = the.warning, GUI = GUI, force = TRUE)
           restart <- TRUE
         } else { # nocov end
           stop("Preventing analysis from entering interactive mode in a non-interactive session.\n")
@@ -627,17 +627,17 @@ checkImpassables <- function(movements, fish, dotmat, GUI){
 #'
 #' @keywords internal
 #'
-checkSMovesN <- function(secmoves, fish, section.minimum, GUI) {
+checkSMovesN <- function(secmoves, tag, section.minimum, GUI) {
   appendTo("debug", "Running checkSMovesN.")
   if (any(link <- secmoves$Detections < section.minimum)) {
-    appendTo(c("Screen", "Report", "Warning"), the.warning <- paste0("Section movements with less than ", section.minimum, " detections are present for fish ", fish, "."))
+    appendTo(c("Screen", "Report", "Warning"), the.warning <- paste0("Section movements with less than ", section.minimum, " detections are present for tag ", tag, "."))
     if (interactive())
-      secmoves <- tableInteraction(moves = secmoves, fish = fish, trigger = the.warning, GUI = GUI) # nocov
+      secmoves <- tableInteraction(moves = secmoves, tag = tag, trigger = the.warning, GUI = GUI) # nocov
   }
   return(secmoves)
 }
 
-#' Check that the fish linearly moved along the sections
+#' Check that the tag linearly moved along the sections
 #'
 #' @inheritParams check_args
 #' @inheritParams migration
@@ -646,18 +646,18 @@ checkSMovesN <- function(secmoves, fish, section.minimum, GUI) {
 #'
 #' @keywords internal
 #'
-checkLinearity <- function(secmoves, fish, spatial, arrays, GUI) {
+checkLinearity <- function(secmoves, tag, spatial, arrays, GUI) {
   appendTo("debug", "Running checkLinearity.")
   sections <- names(spatial$array.order)
   back.check <- match(secmoves$Section, sections)
   turn.check <- rev(match(sections, rev(secmoves$Section))) # captures the last event of each section. Note, the values count from the END of the events
   if (is.unsorted(back.check)) {
       if (is.unsorted(turn.check, na.rm = TRUE))
-        appendTo(c("Screen", "Report", "Warning"), the.warning <- paste0("Inter-section backwards movements were detected for fish ", fish, " and the last events are not ordered!"))
+        appendTo(c("Screen", "Report", "Warning"), the.warning <- paste0("Inter-section backwards movements were detected for tag ", tag, " and the last events are not ordered!"))
       else
-        appendTo(c("Screen", "Report", "Warning"), the.warning <- paste0("Inter-section backwards movements were detected for fish ", fish, "."))
+        appendTo(c("Screen", "Report", "Warning"), the.warning <- paste0("Inter-section backwards movements were detected for tag ", tag, "."))
     if (interactive()) { # nocov start
-      secmoves <- tableInteraction(moves = secmoves, fish = fish, trigger = the.warning, GUI = GUI, force = FALSE)
+      secmoves <- tableInteraction(moves = secmoves, tag = tag, trigger = the.warning, GUI = GUI, force = FALSE)
     } # nocov end
   }
   return(secmoves)
@@ -696,11 +696,11 @@ checkReport <- function(report){
 #'
 #' @inheritParams check_args
 #'
-#' @return A data frame with the movements for the target fish with updated 'Valid' column.
+#' @return A data frame with the movements for the target tag with updated 'Valid' column.
 #'
 #' @keywords internal
 #'
-checkUpstream <- function(movements, fish, release, arrays, GUI) {
+checkUpstream <- function(movements, tag, release, arrays, GUI) {
   appendTo("debug", "Running checkUpstream.")
   # NOTE: The NULL variables below are actually column names used by data.table.
   # This definition is just to prevent the package check from issuing a note due unknown variables.
@@ -716,16 +716,16 @@ checkUpstream <- function(movements, fish, release, arrays, GUI) {
     return(movements)
 
   if (any(is.na(match(vm$Array, after.arrays)))) {
-    appendTo(c("Screen", "Report", "Warning"), the.warning <- paste0("Fish ", fish, " was detected in an array that is not after its release site! Opening relevant data for inspection.\nExpected first array: ", release))
+    appendTo(c("Screen", "Report", "Warning"), the.warning <- paste0("Tag ", tag, " was detected in an array that is not after its release site! Opening relevant data for inspection.\nExpected first array: ", release))
     the.warning <- paste("Warning:", the.warning)
     if (interactive()) { # nocov start
-      movements <- tableInteraction(moves = movements, fish = fish, trigger = the.warning, GUI = GUI)
+      movements <- tableInteraction(moves = movements, tag = tag, trigger = the.warning, GUI = GUI)
     } # nocov end
   }
   return(movements)
 }
 
-#' Check if fish are jumping over arrays
+#' Check if tags are jumping over arrays
 #'
 #' @inheritParams check_args
 #' @inheritParams explore
@@ -734,7 +734,7 @@ checkUpstream <- function(movements, fish, release, arrays, GUI) {
 #'
 #' @keywords internal
 #'
-checkJumpDistance <- function(movements, fish, release, dotmat, jump.warning, jump.error, GUI) {
+checkJumpDistance <- function(movements, tag, release, dotmat, jump.warning, jump.error, GUI) {
   appendTo("debug", "Running checkJumpDistance.")
   # NOTE: The NULL variables below are actually column names used by data.table.
   # This definition is just to prevent the package check from issuing a note due unknown variables.
@@ -747,7 +747,7 @@ checkJumpDistance <- function(movements, fish, release, dotmat, jump.warning, ju
     if (release.jump > jump.warning) {
       # Trigger warning
       appendTo(c("Report", "Warning", "Screen"),
-        the.warning <- paste0("Fish ", fish, " jumped through ", release.jump - 1,
+        the.warning <- paste0("Tag ", tag, " jumped through ", release.jump - 1,
           ifelse(release.jump > 2, " arrays ", " array "),
           "from release to first valid event (Release -> ", vm$Array[1], ")."))
       the.warning <- paste("Warning:", the.warning)
@@ -770,7 +770,7 @@ checkJumpDistance <- function(movements, fish, release, dotmat, jump.warning, ju
         for (i in 1:length(link)) {
           # Trigger warning
           appendTo(c("Report", "Warning", "Screen"),
-            other.warning <- paste0("Fish ", fish, " jumped through ", jumps[link[i]] - 1,
+            other.warning <- paste0("Tag ", tag, " jumped through ", jumps[link[i]] - 1,
               ifelse(jumps[link[i]] > 2, " arrays ", " array "),
               "in valid events ", link[i], " -> ", link[i] + 1, " (", names(jumps)[link[i]], ")."))
           other.warning <- paste("Warning:", other.warning)
@@ -782,7 +782,7 @@ checkJumpDistance <- function(movements, fish, release, dotmat, jump.warning, ju
     }
     # Trigger user interaction
     if (interactive() && trigger.error) { # nocov start
-      movements <- tableInteraction(moves = movements, fish = fish, trigger = the.warning, GUI = GUI)
+      movements <- tableInteraction(moves = movements, tag = tag, trigger = the.warning, GUI = GUI)
     } # nocov end
   }
   return(movements)
@@ -871,7 +871,7 @@ checkUnknownReceivers <- function(input) {
 #' \itemize{
 #'  \item \code{spatial}: A list containing the spatial elements of the study, with data for the unknown receivers, if relevant.
 #'  \item \code{deployments}: A list containing the receiver deployments, with data for the unknown receivers, if relevant.
-#'  \item \code{detections.list}: A list containing the detections for each fish, with updated station names.
+#'  \item \code{detections.list}: A list containing the detections for each tag, with updated station names.
 #' }
 #'
 #' @keywords internal
@@ -890,8 +890,8 @@ checkTagsInUnknownReceivers <- function(detections.list, deployments, spatial) {
       B <- names(deployments)
       unknown.receivers <- unique(detections.list[[i]][is.na(match(A, B)), Receiver])
       if (length(unknown.receivers) > 0) {
-        appendTo(c("Screen", "Report", "Warning"), paste0("Fish ", i, " was detected in one or more receivers that are not listed in the study area (receiver(s): ", paste(unknown.receivers, collapse = ", "), ")!"))
-        message("Possible options:\n   a) Stop and double-check the data (recommended)\n   b) Temporarily include receiver(s) \n      (Unknown events will be considered invalid, but will show on detection plots)\n   c) Repeat option b for all unknown receivers\n   d) Discard unknown detections for this fish (not recommended)\n   e) Repeat option d for all fish (very much not recommended!)")
+        appendTo(c("Screen", "Report", "Warning"), paste0("Tag ", i, " was detected in one or more receivers that are not listed in the study area (receiver(s): ", paste(unknown.receivers, collapse = ", "), ")!"))
+        message("Possible options:\n   a) Stop and double-check the data (recommended)\n   b) Temporarily include receiver(s) \n      (Unknown events will be considered invalid, but will show on detection plots)\n   c) Repeat option b for all unknown receivers\n   d) Discard unknown detections for this tag (not recommended)\n   e) Repeat option d for all tags (very much not recommended!)")
         decision <- userInput("Which option should be followed?(a/b/c/d/comment) ", choices = c("a", "b", "c", "d", "e", "comment"),
                               tag = i, hash = "# unknown receivers")
         if (decision == "a")
@@ -976,7 +976,7 @@ checkDetectionsBeforeRelease <- function(input, bio, discard.orphans = FALSE){
   for(i in seq_len(length(link))) {
     if (!is.na(link[i])) {
       if (any(to.remove <- !(input[[link[i]]]$Timestamp > bio$Release.date[i]))) {
-        appendTo(c("Screen", "Warning", "Report"), paste0("Fish ", names(input)[link[i]], " was detected before being released!"))
+        appendTo(c("Screen", "Warning", "Report"), paste0("Tag ", names(input)[link[i]], " was detected before being released!"))
         if (!discard.orphans) {
           appendTo("Screen", paste0("  Release time: ", bio$Release.date[i]))
           appendTo("Screen", paste0("  First detection time: ", input[[link[i]]]$Timestamp[1]))
@@ -985,7 +985,7 @@ checkDetectionsBeforeRelease <- function(input, bio, discard.orphans = FALSE){
           decision <- userInput("Decision:(a/b/c/comment) ", 
                                 choices = c("a", "b", "c", "comment"),
                                 tag = bio$Transmitter[i], 
-                                hash = paste("# detections before release for fish", bio$Transmitter[i]))
+                                hash = paste("# detections before release for tag", bio$Transmitter[i]))
           
           if (decision == "a")
             stopAndReport("Function stopped by user command.") # nocov
@@ -995,11 +995,11 @@ checkDetectionsBeforeRelease <- function(input, bio, discard.orphans = FALSE){
         }
         
         if (all(to.remove)) {
-          appendTo(c("Screen", "Report"), paste0("ALL detections from Fish ", names(input)[link[i]], " were removed per user command."))
+          appendTo(c("Screen", "Report"), paste0("ALL detections from tag ", names(input)[link[i]], " were removed per user command."))
           remove.tag <- c(remove.tag, link[i])
         } else {
           input[[link[i]]] <- input[[link[i]]][!to.remove, ]
-          appendTo(c("Screen", "Report"), paste0("M: ", sum(to.remove), " detections from Fish ", names(input)[link[i]], " were removed per user command."))
+          appendTo(c("Screen", "Report"), paste0("M: ", sum(to.remove), " detections from tag ", names(input)[link[i]], " were removed per user command."))
         }
       }
     }
@@ -1065,16 +1065,16 @@ checkDupSignals <- function(input, bio){
 #'
 #' @inheritParams check_args
 #'
-#' @return A data frame with the movement events for the target fish and an updated 'Valid' column.
+#' @return A data frame with the movement events for the target tag and an updated 'Valid' column.
 #'
 #' @keywords internal
 #'
-invalidateEvents <- function(movements, fish) { # nocov start
+invalidateEvents <- function(movements, tag) { # nocov start
   appendTo("debug", "Running invalidateEvents.")
   appendTo("Screen", "Note: You can select event ranges by separating them with a ':' and/or multiple events at once by separating them with a space or a comma.")
   check <- TRUE
   while (check) {
-    the.string <- userInput("Events to be rendered invalid: ", tag = fish)
+    the.string <- userInput("Events to be rendered invalid: ", tag = tag)
     the.inputs <- unlist(strsplit(the.string, "\ |,"))
     the.rows <- the.inputs[grepl("^[0-9]*$", the.inputs)]
     n.rows <- length(the.rows)
@@ -1096,7 +1096,7 @@ invalidateEvents <- function(movements, fish) { # nocov start
     the.rows <- sort(unique(c(the.rows, the.ranges)))
     if (is.null(the.rows)) {
       decision <- userInput("The input could not be recognised as row numbers, would you like to abort invalidation the process?(y/n/comment) ",
-                            choices = c("y", "n", "comment"), tag = fish, hash = "# abort invalidation process?")
+                            choices = c("y", "n", "comment"), tag = tag, hash = "# abort invalidation process?")
       if (decision == "y") {
         appendTo("Screen", "Aborting.")
         check <- FALSE
@@ -1111,10 +1111,10 @@ invalidateEvents <- function(movements, fish) { # nocov start
         
         if (length(the.rows) <= 10)
           decision <- userInput(paste0("Confirm: Would you like to render event(s) ", paste(the.rows, collapse = ", "), " invalid?(y/n/comment) "),
-                                choices = c("y", "n", "comment"), tag = fish, hash = "# confirm?")
+                                choices = c("y", "n", "comment"), tag = tag, hash = "# confirm?")
         else
           decision <- userInput(paste0("Confirm: Would you like to render ", length(the.rows), " events invalid?(y/n/comment) "),
-                                choices = c("y", "n", "comment"), tag = fish, hash = "# confirm?")
+                                choices = c("y", "n", "comment"), tag = tag, hash = "# confirm?")
         
         if (decision == "y") {
           movements$Valid[the.rows] <- FALSE
@@ -1122,12 +1122,12 @@ invalidateEvents <- function(movements, fish) { # nocov start
           
           if (any(movements$Valid)) {
             if (length(the.rows) <= 10)
-              appendTo(c("Screen", "Report"), paste0("M: Movement event(s) ", paste(the.rows, collapse = ", "), " from fish ", fish," were rendered invalid per user command."))
+              appendTo(c("Screen", "Report"), paste0("M: Movement event(s) ", paste(the.rows, collapse = ", "), " from tag ", tag," were rendered invalid per user command."))
             else
-              appendTo(c("Screen", "Report"), paste0("M: ", length(the.rows), " movement event(s) from fish ", fish," were rendered invalid per user command."))
+              appendTo(c("Screen", "Report"), paste0("M: ", length(the.rows), " movement event(s) from tag ", tag," were rendered invalid per user command."))
             
             decision <- userInput("Would you like to render any more movements invalid?(y/n/comment) ",
-                                  choices = c("y", "n", "comment"), tag = fish, hash = "# invalidate more?")
+                                  choices = c("y", "n", "comment"), tag = tag, hash = "# invalidate more?")
             
             if (decision == "y") {
               if (colnames(movements)[1] == "Section")
@@ -1135,7 +1135,7 @@ invalidateEvents <- function(movements, fish) { # nocov start
               else
                 to.display <- movements
               check <- TRUE
-              appendTo("Screen", paste0("M: Updated movement table of fish ", fish, ":"))
+              appendTo("Screen", paste0("M: Updated movement table of tag ", tag, ":"))
               message(paste0(capture.output(print(to.display, topn = nrow(to.display))), collapse = "\n"))
               appendTo("Screen", "Note: You can select event ranges by separating them with a ':' and/or multiple events at once by separating them with a space or a comma.")
             } else {
@@ -1143,7 +1143,7 @@ invalidateEvents <- function(movements, fish) { # nocov start
             }
 
           } else {
-            appendTo(c("Screen", "Report"), paste0("M: ALL movement events from fish ", fish," were rendered invalid per user command."))
+            appendTo(c("Screen", "Report"), paste0("M: ALL movement events from tag ", tag," were rendered invalid per user command."))
             check <- FALSE
           }
         }
@@ -1161,11 +1161,11 @@ invalidateEvents <- function(movements, fish) { # nocov start
 #' @inheritParams check_args
 #' @param trigger The warning/message that triggered the interaction
 #'
-#' @return A data frame with the movement events for the target fish and an updated 'Valid' column.
+#' @return A data frame with the movement events for the target tag and an updated 'Valid' column.
 #'
 #' @keywords internal
 #'
-graphicalInvalidate <- function(moves, fish, trigger) { # nocov start
+graphicalInvalidate <- function(moves, tag, trigger) { # nocov start
   appendTo("debug", "Running graphicalInvalidate.")
   on.exit({if(gWidgets2::isExtant(w)) gWidgets2::dispose(w)}, add = TRUE)
 
@@ -1176,7 +1176,7 @@ graphicalInvalidate <- function(moves, fish, trigger) { # nocov start
   to.print$Last.time <- as.character(to.print$Last.time)
   to.print <- to.print[to.print$Valid, ]
 
-  w <- gWidgets2::gwindow(paste0("Valid events for fish  ", fish, " (", sum(!moves$Valid), " invalid event(s) omitted)"), width = 800, height = 300)
+  w <- gWidgets2::gwindow(paste0("Valid events for tag  ", tag, " (", sum(!moves$Valid), " invalid event(s) omitted)"), width = 800, height = 300)
   g <- gWidgets2::ggroup(horizontal = FALSE, container = w)
   hdr <- gWidgets2::glayout(container = g)
   hdr[1, 1] <- gWidgets2::glabel("<b>Warning message:</b>", markup = TRUE)
@@ -1234,7 +1234,7 @@ graphicalInvalidate <- function(moves, fish, trigger) { # nocov start
 #' @param from The valid movements table with newly invalidated moves
 #' @param to The target movements table
 #'
-#' @return A data frame with the movement events for the target fish and an updated 'Valid' column.
+#' @return A data frame with the movement events for the target tag and an updated 'Valid' column.
 #'
 #' @keywords internal
 #'

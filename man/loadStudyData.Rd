@@ -47,7 +47,7 @@ invalidate potential efficiency peers? See the vignettes for more details.}
 
 \item{discard.orphans}{Logical: Should actel automatically discard
 detections that do not fall within receiver deployment periods, or that
-were recorded before the respective fish were released?}
+were recorded before the respective animals were released?}
 }
 \value{
 A list containing:
@@ -60,7 +60,7 @@ A list containing:
 \item \code{arrays}: A list containing detailed information on the arrays
 \item \code{dotmat}: A matrix of the distance (in number of arrays) between pairs of arrays
 \item \code{dist.mat}: A matrix of the distances (in metres) between stations (if a 'distances.csv' is present)
-\item \code{detections.list}: A list containing the detection data for each fish
+\item \code{detections.list}: A list containing the detection data for each tag
 \item \code{paths}: A list of the all array paths between each pair of arrays.
 }
 }

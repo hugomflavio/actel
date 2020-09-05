@@ -4,14 +4,14 @@
 \alias{appendTo}
 \title{Append to ...}
 \usage{
-appendTo(recipient, line, fish)
+appendTo(recipient, line, tag)
 }
 \arguments{
 \item{recipient}{'Screen' displays the message on screen, 'Report' appends the message to 'temp_log.txt', 'Warning' appends the message to 'temp_warnings.txt', 'UD' appends the message to 'temp_UD.txt', 'Comment' appends the message to 'temp_comments.txt'. The same message may be appended to multiple recipients at once.}
 
 \item{line}{The text to be appended.}
 
-\item{fish}{the tag number to which the comment belongs. Only used when recipient = 'Comment'.}
+\item{tag}{the tag number to which the comment belongs. Only used when recipient = 'Comment'.}
 }
 \value{
 No return value, called for side effects.

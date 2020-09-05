@@ -14,7 +14,7 @@ dualMatrix(array, replicates, spatial, detections.list)
 \item{detections.list}{A list of the detections split by each target tag.}
 }
 \value{
-A matrix of detection histories per fish for the last array.
+A matrix of detection histories per tag for the last array.
 }
 \description{
 Compile detection matrix for last array

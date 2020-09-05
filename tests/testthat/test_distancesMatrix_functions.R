@@ -102,7 +102,7 @@ if (any(missing.packages)) {
 			expect_warning(dist.mat <- distancesMatrix(t.layer = t.layer,
 		  		coord.x = "x.32632", coord.y = "y.32632", actel = TRUE),
 			"At least one station is completely blocked off from the remaining stations by land. Filling
-the respective fields with NA. If your fish was expected to travel around the areas present
+the respective fields with NA. If your animals were expected to travel around the areas present
 in the shape file, consider applying a 'buffer' when calculating the transition layer. This
 will artificially add water space around the shape file.", fixed = TRUE)
 		})

@@ -50,7 +50,7 @@ test_that("loadBio fails if needed columns are missing", {
 	bio <- example.biometrics
 	write.csv(bio[, -5], "biometrics.csv", row.names = FALSE)
 	expect_message(loadBio("biometrics.csv", tz = "Europe/Copenhagen"),
-		"M: No 'Group' column found in the biometrics. Assigning all fish to group 'All'.", fixed = TRUE)
+		"M: No 'Group' column found in the biometrics. Assigning all animals to group 'All'.", fixed = TRUE)
 	file.remove("biometrics.csv")
 })
 
@@ -83,7 +83,7 @@ test_that("loadBio stops if column content is unexpected", {
 	bio$Signal[1] <- NA
 	write.csv(bio, "biometrics.csv", row.names = FALSE)
 	expect_error(loadBio("biometrics.csv", tz = "Europe/Copenhagen"),
-		"Some fish have no 'Signal' information. Please double-check the biometrics.", fixed = TRUE)
+		"Some animals have no 'Signal' information. Please double-check the biometrics.", fixed = TRUE)
 
 	# one duplicated signal
 	bio <- example.biometrics
@@ -99,33 +99,33 @@ test_that("loadBio stops if column content is unexpected", {
 	expect_error(loadBio("biometrics.csv", tz = "Europe/Copenhagen"),
 		"Signals 1234, 5678 are duplicated in the biometrics.", fixed = TRUE)
 
-	# some fish missing release site information	
+	# some animals missing release site information	
 	bio <- example.biometrics
 	bio$Release.site[1] <- NA
 	write.csv(bio, "biometrics.csv", row.names = FALSE)
 	expect_warning(loadBio("biometrics.csv", tz = "Europe/Copenhagen"),
-		"Some fish contain no release site information. You may want to double-check the data.\n   Filling the blanks with 'unspecified'.", fixed = TRUE)
+		"Some animals contain no release site information. You may want to double-check the data.\n   Filling the blanks with 'unspecified'.", fixed = TRUE)
 	
 	bio <- example.biometrics
 	bio$Release.site <- as.character(bio$Release.site)
 	bio$Release.site[1] <- ""
 	write.csv(bio, "biometrics.csv", row.names = FALSE)
 	expect_warning(loadBio("biometrics.csv", tz = "Europe/Copenhagen"),
-		"Some fish contain no release site information. You may want to double-check the data.\n   Filling the blanks with 'unspecified'.", fixed = TRUE)
+		"Some animals contain no release site information. You may want to double-check the data.\n   Filling the blanks with 'unspecified'.", fixed = TRUE)
 
-	# some fish missing group information	
+	# some animals missing group information	
 	bio <- example.biometrics
 	bio$Group[1] <- NA
 	write.csv(bio, "biometrics.csv", row.names = FALSE)
 	expect_warning(loadBio("biometrics.csv", tz = "Europe/Copenhagen"),
-		"Some fish contain no group information. You may want to double-check the data.\n   Filling the blanks with 'unspecified'.", fixed = TRUE)
+		"Some animals contain no group information. You may want to double-check the data.\n   Filling the blanks with 'unspecified'.", fixed = TRUE)
 
 	bio <- example.biometrics
 	bio$Group <- as.character(bio$Group)
 	bio$Group[1] <- ""
 	write.csv(bio, "biometrics.csv", row.names = FALSE)
 	expect_warning(loadBio("biometrics.csv", tz = "Europe/Copenhagen"),
-		"Some fish contain no group information. You may want to double-check the data.\n   Filling the blanks with 'unspecified'.", fixed = TRUE)
+		"Some animals contain no group information. You may want to double-check the data.\n   Filling the blanks with 'unspecified'.", fixed = TRUE)
 
 	# Some groups are contained within others
 	bio <- example.biometrics
@@ -141,7 +141,7 @@ test_that("loadBio stops if column content is unexpected", {
 	levels(bio$Group) <- c("A", "B.C")
 	write.csv(bio, "biometrics.csv", row.names = FALSE)
 	expect_message(output <- loadBio("biometrics.csv", tz = "Europe/Copenhagen"),
-		"M: Some fish groups contain one or more '.' characters. To avoid function failure, these will be replaced with '_'.", fixed = TRUE)
+		"M: Some groups contain one or more '.' characters. To avoid function failure, these will be replaced with '_'.", fixed = TRUE)
 	expect_equal(levels(output$Group), c("A", "B_C"))
 	rm(output)
 	file.remove("biometrics.csv")
