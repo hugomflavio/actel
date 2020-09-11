@@ -42,7 +42,7 @@ plotTimes(
 
 \item{mean.range}{Logical: Should the SEM be displayed? (only relevant if mean.dash = TRUE)}
 
-\item{mean.range.darken.factor}{A numeric factor to darken the mean range edges for each group. Values greated
+\item{mean.range.darken.factor}{A numeric factor to darken the mean range edges for each group. Values greater
 than 1 darken the colour, and values lower than 1 lighten the colour.}
 
 \item{rings}{Logical: Should inner plot rings be displayed?}
