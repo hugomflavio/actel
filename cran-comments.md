@@ -2,13 +2,12 @@
 
 * Fixed errors found on some CRAN checks (namely macOS-oldrel and windows-oldrel)
 
-* Timestamp notes found on most environments below are apparently
-  related to the fact that http://worldclockapi.com/ is currently
-  down.
+* Timestamp notes found on most environments below are apparently related 
+  to the fact that http://worldclockapi.com/ is currently down.
 
-* The missing package for Mac OS builds is non-essential for actel
-  and failsafes are in place to prevent function failure in its
-  absense.
+* The missing package note for MacOS in R 3.6.3 corresponds to a non-essential 
+  package for actel and failsafes are in place to prevent function failure 
+  in its absense.
 
 * On some of the CRAN checks run for actel 1.1.0, a note is issued regarding 
   svglite being an unused dependency. While actel does not require svglite 
@@ -18,19 +17,21 @@
 ## Test environments
 
 * Windows Server 2019 (on GitHub), R 3.6.3, 4.0.2 and devel
-* Mac OS (on GitHub), R 3.6.3, 4.0.2
-* Ubuntu 16.04 (on GitHub), R 3.6.3, 4.0.2
+* Mac OS (on GitHub), R 3.6.3 and 4.0.2
+* Ubuntu 16.04 (on GitHub), R 3.6.3 and 4.0.2
 * local Windows 10, R 4.0.2
+
 
 ## R CMD check results
 
-On windows server R devel:
+On Windows Server (R devel):
 
 0 errors | 0 warnings | 0 notes
 
 ---
 
-On R 3.6.3 and R 4.0.2 for Windows Server, Ubuntu and local Windows:
+On Windows Server (R 3.6.3 and 4.0.2), Ubuntu (R 3.6.3 and 4.0.2), 
+MacOS (R 4.0.2) and local Windows (R 4.0.2):
 
 0 errors | 0 warnings | 1 note
 
@@ -39,7 +40,7 @@ On R 3.6.3 and R 4.0.2 for Windows Server, Ubuntu and local Windows:
 
 ---
 
-On R 3.6.3 and R 4.0.2 for Mac OS:
+On MacOS (R 3.6.3):
 
 0 errors | 0 warnings | 2 notes
 
