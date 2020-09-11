@@ -2,7 +2,7 @@
 
 Find out the main highlights of each update.
 
-## Development
+## actel 1.1.1
 
 Fixes:
   * Prevent crash if data used as input for `preload()` contains factors.
@@ -182,7 +182,7 @@ Enhancements:
   * Improve the distances matrix so it can cope with unspecified release sites.
   * transitionLayer can now take into account the station positions and expand the study area as needed.
   * transitionLayer now has a "buffer" argument, which can be used to expand the study area beyond the limits of the shape file.
-  * distanceMatrix will now warn the user if some stations are completely cut off from the rest (i.e. there is no water path).
+  * distancesMatrix will now warn the user if some stations are completely cut off from the rest (i.e. there is no water path).
   * Reports are now opened using utils::browseURL, allowing the report to be open even when the computer is not connected to the internet.
   * Sensor values are now transported through the analysis and returned in the valid detections (for Vemco loggers only for now).
   * Ensure the legend in the residency graphics follows the order specified in the sections argument.

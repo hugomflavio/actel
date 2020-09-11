@@ -200,7 +200,7 @@ Once finished, explore the html report and the object 'results' for the output."
 
 #' Example residency results
 #'
-#' A list with resinedcy results to append to example.results, so some examples can run.
+#' A list with residency results to append to example.results, so some examples can run.
 #'
 #' @format A list of outputs from residency()
 #' @source Data collected by the authors.

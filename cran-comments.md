@@ -1,16 +1,51 @@
-## Main changes relevant to the CRAN check:
+## Comments:
 
-* Fixed errors found on some CRAN checks (macOS-oldrel and windows-oldrel)
+* Fixed errors found on some CRAN checks (namely macOS-oldrel and windows-oldrel)
+
+* Timestamp notes found on most environments below are apparently related 
+  to the fact that http://worldclockapi.com/ is currently down.
+
+* The missing package note for MacOS in R 3.6.3 corresponds to a non-essential 
+  package for actel and failsafes are in place to prevent function failure 
+  in its absense.
+
+* On some of the CRAN checks run for actel 1.1.0, a note is issued regarding 
+  svglite being an unused dependency. While actel does not require svglite 
+  directly, it is a necessary "suggested" package of ggplot2, and I want 
+  to ensure that it is installed.
 
 ## Test environments
 
-* Windows Server 2019 (on GitHub), R 4.0.2 and devel
-* Mac OS (on GitHub), R 4.0.2
-* Ubuntu 16.04 (on GitHub), R 4.0.2
+* Windows Server 2019 (on GitHub), R 3.6.3, 4.0.2 and devel
+* Mac OS (on GitHub), R 3.6.3 and 4.0.2
+* Ubuntu 16.04 (on GitHub), R 3.6.3 and 4.0.2
 * local Windows 10, R 4.0.2
+
 
 ## R CMD check results
 
-On all tested platforms:
+On Windows Server (R devel):
 
 0 errors | 0 warnings | 0 notes
+
+---
+
+On Windows Server (R 3.6.3 and 4.0.2), Ubuntu (R 3.6.3 and 4.0.2), 
+MacOS (R 4.0.2) and local Windows (R 4.0.2):
+
+0 errors | 0 warnings | 1 note
+
+> checking for future file timestamps ... NOTE
+  unable to verify current time
+
+---
+
+On MacOS (R 3.6.3):
+
+0 errors | 0 warnings | 2 notes
+
+> checking package dependencies ... NOTE
+  Package suggested but not available for checking: ‘gWidgets2RGtk2’
+
+> checking for future file timestamps ... NOTE
+  unable to verify current time

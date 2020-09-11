@@ -32,7 +32,7 @@ plotArray(
 
 \item{type}{The type of plot to be drawn. By default, a line is plotted if cumulative = TRUE, and bars are plotted otherwise.}
 
-\item{timestep}{The time resolution for the grouping of the results. Defaults to "days", but can be set to "hours" and "mins" (at the expnse of computing time).}
+\item{timestep}{The time resolution for the grouping of the results. Defaults to "days", but can be set to "hours" and "mins" (at the expense of computing time).}
 
 \item{cumulative}{Logical. If TRUE, a cumulative plot of arrivals is drawn, otherwise the number of tags simultaneously present at the array(s) is drawn.}
 }

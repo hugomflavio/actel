@@ -141,7 +141,7 @@ plotSensors <- function(input, tag, sensor, title = tag, xlab, ylab, pcol, psize
 #' @param lwd The line width, only relevant for line plots.
 #' @param col The colour of the line or bars. Defaults to blue.
 #' @param type The type of plot to be drawn. By default, a line is plotted if cumulative = TRUE, and bars are plotted otherwise.
-#' @param timestep The time resolution for the grouping of the results. Defaults to "days", but can be set to "hours" and "mins" (at the expnse of computing time).
+#' @param timestep The time resolution for the grouping of the results. Defaults to "days", but can be set to "hours" and "mins" (at the expense of computing time).
 #' @param cumulative Logical. If TRUE, a cumulative plot of arrivals is drawn, otherwise the number of tags simultaneously present at the array(s) is drawn.
 #'
 #' @return A ggplot object.
@@ -704,7 +704,7 @@ plotDetections <- function(input, tag, type = c("stations", "arrays"), title, xl
 #' @param title A title for the plot.
 #' @param mean.dash Logical: Should the mean value be displayed on the plot's edge?
 #' @param mean.range Logical: Should the SEM be displayed? (only relevant if mean.dash = TRUE)
-#' @param mean.range.darken.factor A numeric factor to darken the mean range edges for each group. Values greated
+#' @param mean.range.darken.factor A numeric factor to darken the mean range edges for each group. Values greater
 #'  than 1 darken the colour, and values lower than 1 lighten the colour.
 #' @param rings Logical: Should inner plot rings be displayed?
 #' @param file A file name to save the plot to. Leave NULL to plot on active graphics device. Available file extensions: .svg, .pdf, .png and .tiff.

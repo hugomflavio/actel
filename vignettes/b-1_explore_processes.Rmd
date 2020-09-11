@@ -165,12 +165,12 @@ Specifying a value for [inactive.warning and/or inactive.error](b-0_explore.html
 Inactiveness checks are performed in the tail of the movement events. That is, actel grabs the events in the last array and analyses those. Let's have a look at the example below, and assume `inactive.warning` and `inactive.error` were both set to 3 days.
 
 |Array  | Detections|First station |Last station |First time          |Last time           |Time travelling |Time on array |
-|:------|----------:|:-------------|:------------|:-------------------|:-------------------|:---------------|:-------------|
-|A      |          4|St.1          |St.2         |2019-05-15 12:00:00 |2019-05-15 13:00:00 |NA              |1:00          |
-|B      |          3|St.3          |St.4         |2019-05-16 13:50:00 |2019-05-16 14:40:00 |24:50           |0:50          |
-|**C**  |          2|St.5          |St.6         |2019-05-17 16:00:00 |2019-05-17 16:20:00 |25:20           |0:20          |
-|**C**  |          4|St.6          |St.5         |2019-05-17 17:10:00 |2019-05-17 18:00:00 |0:50            |0:50          |
-|**C**  |          1|St.5          |St.5         |2019-05-20 19:45:00 |2019-05-20 19:45:00 |73:45           |0:00          |
+|:------|----------:|:-------------|:------------|:-------------------|:-------------------|---------------:|-------------:|
+|A      |          4|St.1          |St.2         |2019-05-15 12:00:00 |2019-05-15 13:00:00 |              NA|       1:00:00|
+|B      |          3|St.3          |St.4         |2019-05-16 13:50:00 |2019-05-16 14:40:00 |        24:50:00|       0:50:00|
+|**C**  |          2|St.5          |St.6         |2019-05-17 16:00:00 |2019-05-17 16:20:00 |        25:20:00|       0:20:00|
+|**C**  |          4|St.6          |St.5         |2019-05-17 17:10:00 |2019-05-17 18:00:00 |         0:50:00|       0:50:00|
+|**C**  |          1|St.5          |St.5         |2019-05-20 19:45:00 |2019-05-20 19:45:00 |        73:45:00|       0:00:00|
 
 In this case, the last three events are valid candidates for inactiveness. Actel will then check the time difference between the first detection at event 3 and the last detection at event 5. Should this difference be larger than `inactive.warning`, actel will proceed to the next step, which depends on whether the distances.matrix is present.
 

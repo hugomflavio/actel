@@ -14,6 +14,6 @@ Data collected by the authors.
 additional.residency.results
 }
 \description{
-A list with resinedcy results to append to example.results, so some examples can run.
+A list with residency results to append to example.results, so some examples can run.
 }
 \keyword{internal}
