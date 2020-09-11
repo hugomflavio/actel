@@ -67,6 +67,9 @@ checkArguments <- function(dp, tz, minimum.detections, max.interval, speed.metho
   if (max.interval <= 0)
     stopAndReport("'max.interval' must be positive.")
 
+  if (max.interval < 10)
+    appendTo(c("Screen", "Warning"), "Setting 'max.interval' to less than 10 minutes is not recommended!\n         This can lead to the creation of an immense number of movement events,\n         which will be hardly manageable if any quality check is triggered.")
+
   if (!is.character(speed.method))
     stopAndReport("'speed.method' should be one of 'last to first' or 'last to last'.")
   speed.method <- match.arg(speed.method)
