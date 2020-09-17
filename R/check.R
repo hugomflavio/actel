@@ -573,7 +573,7 @@ checkInactiveness <- function(movements, tag, detections.list,
       }
       # Trigger user interaction
       if (trigger.error) { # nocov start
-        appendTo("Screen", error.message <- paste0("M: Tah ", tag, " has been inactive for more than ", inactive.error," days. Inactiveness started on event ", start_i, " (", as.Date(valid.moves$First.time[start_i]),")."))
+        appendTo("Screen", error.message <- paste0("M: Tag ", tag, " has been inactive for more than ", inactive.error," days. Inactiveness started on event ", start_i, " (", as.Date(valid.moves$First.time[start_i]),")."))
         movements <- tableInteraction(moves = movements, tag = tag, trigger = paste0(the.warning, "\n", error.message), GUI = GUI)
       } # nocov end
       iteration <- iteration + 1
