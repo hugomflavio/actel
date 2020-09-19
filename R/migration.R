@@ -320,7 +320,7 @@ by which sections are presented", immediate. = TRUE, call. = FALSE)
   if (is.null(success.arrays)) {
     success.arrays <- names(arrays)[unlist(lapply(arrays, function(x) is.null(x$after)))]
     if (length(success.arrays) == 1)
-      appendTo(c("Screen", "Warning", "Report"), paste0("'success.arrays' was not defined. Assuming success if tshe tags are last detected at array ", success.arrays, "."))
+      appendTo(c("Screen", "Warning", "Report"), paste0("'success.arrays' was not defined. Assuming success if the tags are last detected at array ", success.arrays, "."))
     else
       appendTo(c("Screen", "Warning", "Report"), paste0("'success.arrays' was not defined. Assuming success if the tags are last detected at arrays ", paste(success.arrays[-length(success.arrays)], collapse = ", "), " or ", tail(success.arrays, 1), "."))
   } else {
