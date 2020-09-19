@@ -2,6 +2,11 @@
 
 Find out the main highlights of each update.
 
+## Development
+
+Fixes:
+  * Prevent warning during printing of the progression flowchart, related to overlapping array names (that could also lead to an actual error).
+
 ## actel 1.1.1
 
 Fixes:

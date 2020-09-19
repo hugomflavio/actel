@@ -56,7 +56,7 @@ printProgression <- function(dot, overall.CJS, spatial, status.df, print.release
   }
 
   for (i in 1:nrow(diagram_nodes)) {
-    link <- grep(diagram_nodes$label[i], names(overall.CJS$absolutes))
+    link <- grep(paste0("^", diagram_nodes$label[i], "$"), names(overall.CJS$absolutes))
     diagram_nodes$label[i] <- paste0(diagram_nodes$label[i],
       "\\nEfficiency: ", ifelse(is.na(overall.CJS$efficiency[link]), "--", round(overall.CJS$efficiency[link] * 100, 0)),
       "%\\nDetected: ", overall.CJS$absolutes["detected", link],
