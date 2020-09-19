@@ -375,7 +375,7 @@ by which sections are presented", immediate. = TRUE, call. = FALSE)
 
       if (do.checkInactiveness) {
         output <- checkInactiveness(movements = output, tag = tag, detections.list = detections.list[[tag]],
-          inactive.warning = inactive.warning, inactive.error = inactive.error, detections = detections.list[[tag]],
+          inactive.warning = inactive.warning, inactive.error = inactive.error,
           dist.mat = dist.mat, GUI = GUI)
       }
     } else {
