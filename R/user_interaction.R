@@ -1,8 +1,29 @@
+#' user_interaction.R arguments
+#'
+#' @param tag The tag being analysed.
+#' @param detections The detections data.frame for a specific tag.
+#' @param force Logical: If TRUE, the user is moved directly to indicating which movements should be invalidated.
+#' @param trigger The message/warning that triggered the interaction
+#' @param moves,all.moves The complete movements table for a specific tag.
+#' @param displayed.moves The valid movements table for a specific tag.
+#' @param event The event selected for expansion.
+#' @param GUI One of "needed", "always" or "never". If "needed", a new window is
+#'  opened to inspect the movements only if the movements table is too big to be
+#'  displayed in R's console. If "always", a graphical interface is always created
+#'  when the possibility to invalidate events emerges. If "never", a graphical
+#'  interface is never invoked. In this case, if the table to be displayed does
+#'  not fit in R's console, a temporary file will be saved and the user will be
+#'  prompted to open and examine that file. Defaults to "needed".
+#' 
+#' @name user_interaction_args
+#' @keywords internal
+#'
+NULL
+
+
 #' Handler for table interaction events
 #'
-#' @inheritParams check_args
-#' @param trigger The message/warning that triggered the interaction
-#' @param force Logical: If TRUE, the user is moved directly to indicating which movements should be invalidated.
+#' @inheritParams user_interaction_args
 #'
 #' @return A data frame with the updated movements table
 #'
@@ -122,7 +143,7 @@ tableInteraction <- function(moves, detections, tag, trigger, GUI, force = FALSE
 
 #' Allow the user to determine a given movement event invalid
 #'
-#' @inheritParams check_args
+#' @inheritParams user_interaction_args
 #'
 #' @return A data frame with the movement events for the target tag and an updated 'Valid' column.
 #'
@@ -249,8 +270,7 @@ invalidateEvents <- function(displayed.moves, all.moves, detections, tag, GUI) {
 
 #' Opens a new window that allows the user to determine movement event invalidity
 #'
-#' @inheritParams check_args
-#' @param trigger The warning/message that triggered the interaction
+#' @inheritParams user_interaction_args
 #'
 #' @return A data frame with the movement events for the target tag and an updated 'Valid' column.
 #'
@@ -331,7 +351,15 @@ graphicalInvalidate <- function(detections, moves, tag, trigger) { # nocov start
   return(moves)
 } # nocov end
 
-expandEvent <- function(displayed.moves, all.moves, detections, tag, GUI) {
+#' Handler for event expansion
+#' 
+#' @inheritParams user_interaction_args
+#' 
+#' @return An updated movements table
+#' 
+#' @keywords internal
+#' 
+expandEvent <- function(displayed.moves, all.moves, detections, tag, GUI) { # nocov start
   check <- TRUE
   abort <- FALSE
   while(check) {
@@ -375,12 +403,12 @@ expandEvent <- function(displayed.moves, all.moves, detections, tag, GUI) {
     popup <- TRUE
 
   if (popup) {
-    output <- graphicalInvalidate_detections(dets = sub.det,
-                                             displayed.moves = displayed.moves, 
-                                             all.moves = all.moves, 
-                                             event = event, 
-                                             tag = tag,
-                                             silent = FALSE)
+    output <- graphicalInvalidateDetections(detections = sub.det,
+                                            displayed.moves = displayed.moves, 
+                                            all.moves = all.moves, 
+                                            event = event, 
+                                            tag = tag,
+                                            silent = FALSE)
   } else {
     # check if table can be printed on console
     outside.console <- nrow(sub.det) > min(800, (floor(getOption("max.print") / ncol(sub.det))))
@@ -435,8 +463,16 @@ expandEvent <- function(displayed.moves, all.moves, detections, tag, GUI) {
     }
   }
   return(output)
-}
+} # nocov end
 
+#' Allow the user to determine a given set of detections invalid
+#'
+#' @inheritParams user_interaction_args
+#'
+#' @return A data frame with the movement events for the target tag and an updated 'Valid' column.
+#'
+#' @keywords internal
+#'
 invalidateDetections <- function(displayed.moves, all.moves, detections, tag, event) { # nocov start
   appendTo("debug", "Running invalidateEvents.")
   appendTo("Screen", "Note: You can select row ranges by separating them with a ':' and/or multiple rows at once by separating them with a space or a comma.")
@@ -517,19 +553,18 @@ invalidateDetections <- function(displayed.moves, all.moves, detections, tag, ev
   return(all.moves)
 } # nocov end
 
-#' Opens a new window that allows the user to determine movement event invalidity
+#' Opens a new window that allows the user to determine detection invalidity
 #'
-#' @inheritParams check_args
-#' @param trigger The warning/message that triggered the interaction
+#' @inheritParams user_interaction_args
 #'
 #' @return A data frame with the movement events for the target tag and an updated 'Valid' column.
 #'
 #' @keywords internal
 #'
-graphicalInvalidate_detections <- function(dets, displayed.moves, all.moves, event, tag, silent = FALSE) { # nocov start
-  appendTo("debug", "Running graphicalInvalidate_detections.")
+graphicalInvalidateDetections <- function(detections, displayed.moves, all.moves, event, tag, silent = FALSE) { # nocov start
+  appendTo("debug", "Running graphicalInvalidateDetections.")
 
-  to.print <- cbind(data.frame(Index = 1:nrow(dets)), dets)
+  to.print <- cbind(data.frame(Index = 1:nrow(detections)), detections)
   to.print$Timestamp <- as.character(to.print$Timestamp)
   if (all(is.na(to.print$Sensor.Value)))
     to.print$Sensor.Value <- "NA"
@@ -558,14 +593,14 @@ graphicalInvalidate_detections <- function(dets, displayed.moves, all.moves, eve
   
   if (is.null(graphical_valid)) {
     appendTo(c("Screen", "Warning", "Report"), "External visualization window was closed before result submission. Assuming no changes are to be made.")
-    graphical_valid <- dets$Valid
+    graphical_valid <- detections$Valid
   }
 
-  dets$Valid <- graphical_valid
+  detections$Valid <- graphical_valid
 
   all.moves <- createNewEvents(displayed.moves = displayed.moves, 
                                all.moves = all.moves, 
-                               detections = dets, 
+                               detections = detections, 
                                event = event)
 
   aux <- rle(!graphical_valid)
@@ -606,7 +641,7 @@ transferValidity <- function(from, to) { # nocov start
 
 #' Skips all validity checks for a tag and allows the user to freely invalidate events
 #'
-#' @inheritParams check_args
+#' @inheritParams user_interaction_args
 #'
 #' @return A data frame containing the movements for the target tag
 #'
@@ -622,7 +657,16 @@ overrideValidityChecks <- function(moves, detections, tag, GUI) { # nocov start
   return(moves) # nocov end
 }
 
-createNewEvents <- function(displayed.moves, all.moves, detections, event) {
+#' Upon invalidating detections, recombines the remaining valid detections 
+#' into new events, and merges them with the remaining events.
+#' 
+#' @inheritParams user_interaction_args
+#' 
+#' @return A data frame containing the movements for the target tag
+#'
+#' @keywords internal
+#'
+createNewEvents <- function(displayed.moves, all.moves, detections, event) { # nocov start
   # compile new events and combine with movements
   aux <- rle(detections$Valid)
   aux <- data.frame(Value = aux[[2]], n = aux[[1]])
@@ -662,4 +706,4 @@ createNewEvents <- function(displayed.moves, all.moves, detections, event) {
 
   attributes(all.moves)$p.type <- "Manual"
   return(all.moves)
-}
+} # nocov end

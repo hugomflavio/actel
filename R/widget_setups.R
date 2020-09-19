@@ -1,4 +1,29 @@
-eventsTabbedWidget <- function(tag, displayed.moves, all.moves, detections, trigger, first.time, type) {
+#' widget_setups.R arguments
+#'
+#' @param displayed.moves The valid movements table for a specific tag.
+#' @param all.moves The complete movements table for a specific tag.
+#' @param detections The detections data.frame for a specific tag.
+#' @param trigger The message/warning that triggered the interaction
+#' @param first.time Logical: Is this the first time this widget is running for this tag?
+#' @param type The type of events (Array or Section)
+#' @param tag The tag being analysed.
+#' @param event The event selected for expansion.
+#' @param to.print The subset of detections to be displayed.
+#' 
+#' @name widget_args
+#' @keywords internal
+#'
+NULL
+
+#' Event Widget (Tabbed version)
+#' 
+#' @inheritParams widget_args
+#' 
+#' @return The movements list, a vector of event validities, and a note on whether or not the widget should be restarted.
+#' 
+#' @keywords internal
+#' 
+eventsTabbedWidget <- function(tag, displayed.moves, all.moves, detections, trigger, first.time, type) { # nocov start
   appendTo("debug", "Running eventsTabbedWidget.")
 
   # initiate button variables
@@ -111,12 +136,12 @@ eventsTabbedWidget <- function(tag, displayed.moves, all.moves, detections, trig
         link <- detections$Timestamp >= displayed.moves$First.time[event] & 
                 detections$Timestamp <= displayed.moves$Last.time[event]
         sub.det <- detections[link, ]
-        all.moves <<- graphicalInvalidate_detections(dets = sub.det, 
-                                                     displayed.moves = displayed.moves, 
-                                                     all.moves = all.moves, 
-                                                     event = event, 
-                                                     tag = tag,
-                                                     silent = TRUE)
+        all.moves <<- graphicalInvalidateDetections(detections = sub.det, 
+                                                    displayed.moves = displayed.moves, 
+                                                    all.moves = all.moves, 
+                                                    event = event, 
+                                                    tag = tag,
+                                                    silent = TRUE)
         graphical_valid <<- all.moves$Valid
         restart <<- TRUE
         gWidgets2::dispose(w)
@@ -174,9 +199,17 @@ eventsTabbedWidget <- function(tag, displayed.moves, all.moves, detections, trig
   while (gWidgets2::isExtant(w)) {}
 
   return(list(all.moves = all.moves, graphical_valid = graphical_valid, restart = restart))
-}
+} # nocov end
 
-eventsSingleWidget <- function(tag, displayed.moves, all.moves, detections, trigger, first.time, type) {
+#' Event Widget (Single table version)
+#' 
+#' @inheritParams widget_args
+#' 
+#' @return The movements list, a vector of event validities, and a note on whether or not the widget should be restarted.
+#' 
+#' @keywords internal
+#' 
+eventsSingleWidget <- function(tag, displayed.moves, all.moves, detections, trigger, first.time, type) { # nocov start
   appendTo("debug", "Running eventsSingleWidget.")
 
   # initiate button variables
@@ -247,12 +280,12 @@ eventsSingleWidget <- function(tag, displayed.moves, all.moves, detections, trig
         link <- detections$Timestamp >= displayed.moves$First.time[displayed.moves$Valid][event] &
                 detections$Timestamp <= displayed.moves$Last.time[displayed.moves$Valid][event]
         sub.det <- detections[link, ]
-        all.moves <<- graphicalInvalidate_detections(dets = sub.det, 
-                                                     displayed.moves = displayed.moves, 
-                                                     all.moves = all.moves, 
-                                                     event = event, 
-                                                     tag = tag,
-                                                     silent = TRUE)
+        all.moves <<- graphicalInvalidateDetections(detections = sub.det, 
+                                                    displayed.moves = displayed.moves, 
+                                                    all.moves = all.moves, 
+                                                    event = event, 
+                                                    tag = tag,
+                                                    silent = TRUE)
         graphical_valid <<- all.moves$Valid
         restart <<- TRUE
         gWidgets2::dispose(w)
@@ -309,9 +342,17 @@ eventsSingleWidget <- function(tag, displayed.moves, all.moves, detections, trig
   while (gWidgets2::isExtant(w)) {}
 
   return(list(all.moves = all.moves, graphical_valid = graphical_valid, restart = restart))
-}
+} # nocov end
 
-detectionsTabbedWidget <- function(event, tag, to.print, silent) {
+#' Detections Widget (Tabbed version)
+#' 
+#' @inheritParams widget_args
+#' 
+#' @return A vector of detection validities.
+#' 
+#' @keywords internal
+#' 
+detectionsTabbedWidget <- function(event, tag, to.print, silent) { # nocov start
   appendTo("debug", "Running detectionsTabbedWidget.")
 
   # initiate button variables
@@ -441,9 +482,17 @@ detectionsTabbedWidget <- function(event, tag, to.print, silent) {
   while (gWidgets2::isExtant(w2)) {}
 
   return(graphical_valid)
-} 
+}  # nocov end
 
-detectionsSingleWidget <- function(event, tag, to.print, silent) {
+#' Detections Widget (Single table version)
+#' 
+#' @inheritParams widget_args
+#' 
+#' @return A vector of detection validities.
+#' 
+#' @keywords internal
+#' 
+detectionsSingleWidget <- function(event, tag, to.print, silent) { # nocov start
   appendTo("debug", "Running detectionsSingleWidget.")
 
   # initiate button variables
@@ -532,4 +581,4 @@ detectionsSingleWidget <- function(event, tag, to.print, silent) {
   while (gWidgets2::isExtant(w2)) {}
 
   return(graphical_valid)
-}
+} # nocov end

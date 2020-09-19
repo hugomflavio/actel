@@ -10,6 +10,10 @@ checkDetectionsBeforeRelease(input, bio, discard.orphans = FALSE)
 \item{input}{The list of detections}
 
 \item{bio}{A table with the tags and biometrics of the studied animals.}
+
+\item{discard.orphans}{Logical: Should actel automatically discard
+detections that do not fall within receiver deployment periods, or that
+were recorded before the respective animals were released?}
 }
 \value{
 A list containing the detections without invalid data.

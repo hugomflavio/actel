@@ -7,11 +7,13 @@
 graphicalInvalidate(detections, moves, tag, trigger)
 }
 \arguments{
-\item{moves}{The movements table}
+\item{detections}{The detections data.frame for a specific tag.}
 
-\item{tag}{The tag being analysed}
+\item{moves}{The complete movements table for a specific tag.}
 
-\item{trigger}{The warning/message that triggered the interaction}
+\item{tag}{The tag being analysed.}
+
+\item{trigger}{The message/warning that triggered the interaction}
 }
 \value{
 A data frame with the movement events for the target tag and an updated 'Valid' column.

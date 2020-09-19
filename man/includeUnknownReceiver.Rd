@@ -7,9 +7,11 @@
 includeUnknownReceiver(spatial, deployments, unknown.receivers)
 }
 \arguments{
-\item{spatial}{The spatial data frame, as loaded by loadSpatial}
+\item{spatial}{A list of spatial objects in the study area.}
 
-\item{unknown.receivers}{serial number of the receivers to be included}
+\item{deployments}{a list of deployments.}
+
+\item{unknown.receivers}{serial number of the receivers to be included.}
 }
 \value{
 A list containing:

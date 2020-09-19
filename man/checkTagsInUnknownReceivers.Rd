@@ -10,7 +10,9 @@ checkTagsInUnknownReceivers(detections.list, deployments, spatial)
 \item{detections.list}{A list of the detections split by each target tag,
 created by \code{\link{splitDetections}}.}
 
-\item{spatial}{The spatial data frame, as loaded by loadSpatial}
+\item{deployments}{a list of deployments.}
+
+\item{spatial}{A list of spatial objects in the study area.}
 }
 \value{
 A list containing an updated spatial list and a TRUE/FALSE object indicating whether or not Standard station names must be reprocessed.

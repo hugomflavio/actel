@@ -9,7 +9,7 @@ checkDeploymentStations(input, spatial)
 \arguments{
 \item{input}{The table of deployments}
 
-\item{spatial}{The spatial data frame, as loaded by loadSpatial}
+\item{spatial}{A list of spatial objects in the study area.}
 }
 \value{
 A data frame with the deployment locations

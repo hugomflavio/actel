@@ -346,7 +346,7 @@ explore <- function(
       }
 
       if (do.checkInactiveness) {
-        output <- checkInactiveness(movements = output, tag = tag, detections.list = detections.list[[tag]],
+        output <- checkInactiveness(movements = output, tag = tag, detections = detections.list[[tag]],
           inactive.warning = inactive.warning, inactive.error = inactive.error,
           dist.mat = dist.mat, GUI = GUI)
       }

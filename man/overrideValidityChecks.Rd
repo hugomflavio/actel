@@ -7,9 +7,11 @@
 overrideValidityChecks(moves, detections, tag, GUI)
 }
 \arguments{
-\item{moves}{The movements table}
+\item{moves}{The complete movements table for a specific tag.}
 
-\item{tag}{The tag being analysed}
+\item{detections}{The detections data.frame for a specific tag.}
+
+\item{tag}{The tag being analysed.}
 
 \item{GUI}{One of "needed", "always" or "never". If "needed", a new window is
 opened to inspect the movements only if the movements table is too big to be

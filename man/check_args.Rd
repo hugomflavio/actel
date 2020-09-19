@@ -4,16 +4,24 @@
 \alias{check_args}
 \title{check.R arguments}
 \arguments{
-\item{arrays}{a list containing information for each array}
+\item{arrays}{a list containing information for each array.}
 
 \item{bio}{A table with the tags and biometrics of the studied animals.}
+
+\item{deployments}{a list of deployments.}
+
+\item{detections}{The detections data.frame for a specific tag.}
 
 \item{detections.list}{A list of the detections split by each target tag,
 created by \code{\link{splitDetections}}.}
 
-\item{dotmat}{The matrix of distances between arrays}
+\item{dist.mat}{A distances matrix.}
 
-\item{tag}{The tag being analysed}
+\item{discard.orphans}{Logical: Should actel automatically discard
+detections that do not fall within receiver deployment periods, or that
+were recorded before the respective animals were released?}
+
+\item{dotmat}{The matrix of distances between arrays.}
 
 \item{GUI}{One of "needed", "always" or "never". If "needed", a new window is
 opened to inspect the movements only if the movements table is too big to be
@@ -23,15 +31,19 @@ interface is never invoked. In this case, if the table to be displayed does
 not fit in R's console, a temporary file will be saved and the user will be
 prompted to open and examine that file. Defaults to "needed".}
 
-\item{movements, moves}{The movements table}
+\item{movements}{The movements table for a specific tag.}
 
-\item{release}{The release location of the animal}
+\item{release}{The release location of the animal.}
 
-\item{secmoves}{the section movements list}
+\item{secmoves}{the section movements list.}
 
-\item{spatial}{The spatial data frame, as loaded by loadSpatial}
+\item{spatial}{A list of spatial objects in the study area.}
 
-\item{valid.movements}{The valid movements table}
+\item{tag}{The tag being analysed.}
+
+\item{unknown.receivers}{serial number of the receivers to be included.}
+
+\item{valid.movements}{The valid movements table for a specific tag.}
 }
 \description{
 check.R arguments

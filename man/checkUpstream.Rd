@@ -7,13 +7,15 @@
 checkUpstream(movements, tag, release, detections, arrays, GUI)
 }
 \arguments{
-\item{movements}{The movements table}
+\item{movements}{The movements table for a specific tag.}
 
-\item{tag}{The tag being analysed}
+\item{tag}{The tag being analysed.}
 
-\item{release}{The release location of the animal}
+\item{release}{The release location of the animal.}
 
-\item{arrays}{a list containing information for each array}
+\item{detections}{The detections data.frame for a specific tag.}
+
+\item{arrays}{a list containing information for each array.}
 
 \item{GUI}{One of "needed", "always" or "never". If "needed", a new window is
 opened to inspect the movements only if the movements table is too big to be

@@ -7,11 +7,13 @@
 checkImpassables(movements, tag, detections, dotmat, GUI)
 }
 \arguments{
-\item{movements}{The movements table}
+\item{movements}{The movements table for a specific tag.}
 
-\item{tag}{The tag being analysed}
+\item{tag}{The tag being analysed.}
 
-\item{dotmat}{The matrix of distances between arrays}
+\item{detections}{The detections data.frame for a specific tag.}
+
+\item{dotmat}{The matrix of distances between arrays.}
 
 \item{GUI}{One of "needed", "always" or "never". If "needed", a new window is
 opened to inspect the movements only if the movements table is too big to be
