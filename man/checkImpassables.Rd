@@ -4,7 +4,7 @@
 \alias{checkImpassables}
 \title{Find out if a tag moved in an impossible direction}
 \usage{
-checkImpassables(movements, tag, dotmat, GUI)
+checkImpassables(movements, tag, detections, dotmat, GUI)
 }
 \arguments{
 \item{movements}{The movements table}

@@ -4,7 +4,15 @@
 \alias{checkSpeeds}
 \title{check tag speeds against defined thresholds (in m/s)}
 \usage{
-checkSpeeds(movements, tag, valid.movements, speed.warning, speed.error, GUI)
+checkSpeeds(
+  movements,
+  tag,
+  detections,
+  valid.movements,
+  speed.warning,
+  speed.error,
+  GUI
+)
 }
 \arguments{
 \item{movements}{The movements table}

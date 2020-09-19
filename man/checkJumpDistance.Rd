@@ -7,6 +7,7 @@
 checkJumpDistance(
   movements,
   tag,
+  detections,
   release,
   dotmat,
   jump.warning,
