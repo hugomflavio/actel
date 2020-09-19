@@ -1,5 +1,10 @@
 eventsTabbedWidget <- function(tag, displayed.moves, all.moves, detections, trigger, first.time, type) {
   appendTo("debug", "Running eventsTabbedWidget.")
+
+  # initiate button variables
+  cp <- NULL
+  complain <- NULL
+  confirm <- NULL
   restart <- FALSE
   graphical_valid <- NULL
   graphical_valid_indexes <- which(all.moves$Valid)
@@ -18,7 +23,7 @@ eventsTabbedWidget <- function(tag, displayed.moves, all.moves, detections, trig
   
   tbl <- list()
   nb <- gWidgets2::gnotebook(tab.pos = 3, expand = TRUE, container = g)
-  addHandlerChanged(nb, handler = function(h, ...) {
+  gWidgets2::addHandlerChanged(nb, handler = function(h, ...) {
     cp <<- h$page.no
   })
 
@@ -173,6 +178,10 @@ eventsTabbedWidget <- function(tag, displayed.moves, all.moves, detections, trig
 
 eventsSingleWidget <- function(tag, displayed.moves, all.moves, detections, trigger, first.time, type) {
   appendTo("debug", "Running eventsSingleWidget.")
+
+  # initiate button variables
+  complain <- NULL
+  confirm <- NULL
   restart <- FALSE
   graphical_valid <- NULL
   graphical_valid_indexes <- which(all.moves$Valid)
@@ -305,6 +314,9 @@ eventsSingleWidget <- function(tag, displayed.moves, all.moves, detections, trig
 detectionsTabbedWidget <- function(event, tag, to.print, silent) {
   appendTo("debug", "Running detectionsTabbedWidget.")
 
+  # initiate button variables
+  cp <- NULL
+  confirm <- NULL
   graphical_valid <- NULL
 
   w2 <- gWidgets2::gwindow(paste0("Detections for valid event ", event, " from tag ", tag ,"."), width = 900, height = 500)
@@ -317,7 +329,7 @@ detectionsTabbedWidget <- function(event, tag, to.print, silent) {
   
   tbl2 <- list()
   nb <- gWidgets2::gnotebook(tab.pos = 3, expand = TRUE, container = g2)
-  addHandlerChanged(nb, handler = function(h, ...) {
+  gWidgets2::addHandlerChanged(nb, handler = function(h, ...) {
     cp <<- h$page.no
   })
 
@@ -357,7 +369,7 @@ detectionsTabbedWidget <- function(event, tag, to.print, silent) {
   btns2[1, 3] <- gWidgets2::gbutton(text = "Invalidate all", handler = invalid_all_function, action = NULL)
 
   reset_all_function <- function(h, ...) {
-    processing <<- gWidgets2::gwindow("Processing...", width = 300, height = 30)
+    processing <- gWidgets2::gwindow("Processing...", width = 300, height = 30)
     for (i in 1:length(tbl2)) {
       capture <- gWidgets2::glabel(paste("Processing page", i, "of", length(tbl2)), container = processing)
       tbl2[[i]][, "Valid"] <- TRUE
@@ -434,6 +446,8 @@ detectionsTabbedWidget <- function(event, tag, to.print, silent) {
 detectionsSingleWidget <- function(event, tag, to.print, silent) {
   appendTo("debug", "Running detectionsSingleWidget.")
 
+  # initiate button variables
+  confirm <- NULL
   graphical_valid <- NULL
 
   w2 <- gWidgets2::gwindow(paste0("Detections for valid event ", event, " from tag ", tag ,"."), width = 900, height = 500)
