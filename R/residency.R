@@ -358,28 +358,28 @@ by which sections are presented", immediate. = TRUE, call. = FALSE)
       release <- as.character(bio$Release.site[na.as.false(bio$Transmitter == tag)])
       release <- unlist(strsplit(with(spatial, release.sites[release.sites$Standard.name == release, "Array"]), "|", fixed = TRUE))
 
-      output <- checkMinimumN(movements = movements[[i]], tag = tag, minimum.detections = minimum.detections)
+      output <- checkMinimumN(movements = movements[[tag]], tag = tag, minimum.detections = minimum.detections)
 
-      output <- checkImpassables(movements = output, tag = tag, dotmat = dotmat, GUI = GUI)
+      output <- checkImpassables(movements = output, tag = tag, detections = detections.list[[tag]], dotmat = dotmat, GUI = GUI)
 
-      output <- checkJumpDistance(movements = output, release = release, tag = tag, dotmat = dotmat,
+      output <- checkJumpDistance(movements = output, release = release, tag = tag, dotmat = dotmat, detections = detections.list[[tag]],
                                   jump.warning = jump.warning, jump.error = jump.error, GUI = GUI)
 
       if (do.checkSpeeds) {
         temp.valid.movements <- simplifyMovements(movements = output, tag = tag, bio = bio, discard.first = discard.first,
           speed.method = speed.method, dist.mat = dist.mat)
-        output <- checkSpeeds(movements = output, tag = tag, valid.movements = temp.valid.movements,
+        output <- checkSpeeds(movements = output, tag = tag, valid.movements = temp.valid.movements, detections = detections.list[[tag]],
           speed.warning = speed.warning, speed.error = speed.error, GUI = GUI)
         rm(temp.valid.movements)
       }
 
       if (do.checkInactiveness) {
         output <- checkInactiveness(movements = output, tag = tag, detections.list = detections.list[[tag]],
-          inactive.warning = inactive.warning, inactive.error = inactive.error,
+          inactive.warning = inactive.warning, inactive.error = inactive.error, detections = detections.list[[tag]],
           dist.mat = dist.mat, GUI = GUI)
       }
     } else {
-      output <- overrideValidityChecks(moves = movements[[i]], tag = names(movements)[i], GUI = GUI) # nocov
+      output <- overrideValidityChecks(moves = movements[[tag]], tag = tag, detections = detections.list[[tag]], GUI = GUI) # nocov
     }
     return(output)
   })
