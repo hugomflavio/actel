@@ -302,3 +302,220 @@ eventsSingleWidget <- function(tag, displayed.moves, all.moves, detections, trig
   return(list(all.moves = all.moves, graphical_valid = graphical_valid, restart = restart))
 }
 
+detectionsTabbedWidget <- function(event, tag, to.print, silent) {
+  appendTo("debug", "Running detectionsTabbedWidget.")
+
+  graphical_valid <- NULL
+
+  w2 <- gWidgets2::gwindow(paste0("Detections for valid event ", event, " from tag ", tag ,"."), width = 900, height = 500)
+  on.exit({if(gWidgets2::isExtant(w2)) gWidgets2::dispose(w2)}, add = TRUE)
+  g2 <- gWidgets2::ggroup(horizontal = FALSE, container = w2)
+  hdr2 <- gWidgets2::glayout(container = g2)
+  hdr2[1, 1, expand = TRUE] <- gWidgets2::glabel("<b>Usage notes:</b>\n   - Edit detection validity by selecting rows and choosing the desired action below. Use CTRL + F to search for specific keywords\n   - Loading large tables can take some time. Please wait until the interaction buttons show up at the bottom of this window.", markup = TRUE)
+
+  hdr2[2, 1, expand = TRUE] <- gWidgets2::glabel("<b>This table is very long!</b>\n   - Please allow some time for the action buttons to complete their tasks (particularly those that span multiple pages).\n   - <b>Please wait</b> until the buttons appear at the bottom of the page before performing any action!", markup = TRUE)
+  
+  tbl2 <- list()
+  nb <- gWidgets2::gnotebook(tab.pos = 3, expand = TRUE, container = g2)
+  addHandlerChanged(nb, handler = function(h, ...) {
+    cp <<- h$page.no
+  })
+
+  for (i in 1:length(to.print))
+    tbl2[[i]] <- gWidgets2::gtable(to.print[[i]], multiple = TRUE, expand = TRUE, container = nb, label = names(to.print)[i])
+
+  btns2 <- gWidgets2::glayout(container = g2)
+
+  invalid_selected_function <- function(h, ...) {
+    tbl2[[cp]][match(tbl2[[cp]]$get_value(), tbl2[[cp]][, "Index"]), "Valid"] <- FALSE
+  }
+  btns2[1, 1] <- gWidgets2::gbutton(text = "Invalidate selected", handler = invalid_selected_function, action = NULL)
+
+  reset_selected_function <- function(h, ...) {
+    tbl2[[cp]][match(tbl2[[cp]]$get_value(), tbl2[[cp]][, "Index"]), "Valid"] <- TRUE
+  }
+  btns2[2, 1] <- gWidgets2::gbutton(text = "Revalidate selected", handler = reset_selected_function, action = NULL)
+
+  invalid_page_function <- function(h, ...) {
+    tbl2[[cp]][, "Valid"] <- FALSE
+  }
+  btns2[1, 2] <- gWidgets2::gbutton(text = "Invalidate page", handler = invalid_page_function, action = NULL)
+
+  reset_page_function <- function(h, ...) {
+    tbl2[[cp]][, "Valid"] <- TRUE
+  }
+  btns2[2, 2] <- gWidgets2::gbutton(text = "Revalidate page", handler = reset_page_function, action = NULL)
+
+  invalid_all_function <- function(h, ...) {
+    processing <- gWidgets2::gwindow("Processing...", width = 300, height = 30)
+    for (i in 1:length(tbl2)) {
+      capture <- gWidgets2::glabel(paste("Processing page", i, "of", length(tbl2)), container = processing)
+      tbl2[[i]][, "Valid"] <- FALSE
+    }
+    gWidgets2::dispose(processing)
+  }
+  btns2[1, 3] <- gWidgets2::gbutton(text = "Invalidate all", handler = invalid_all_function, action = NULL)
+
+  reset_all_function <- function(h, ...) {
+    processing <<- gWidgets2::gwindow("Processing...", width = 300, height = 30)
+    for (i in 1:length(tbl2)) {
+      capture <- gWidgets2::glabel(paste("Processing page", i, "of", length(tbl2)), container = processing)
+      tbl2[[i]][, "Valid"] <- TRUE
+    }
+    gWidgets2::dispose(processing)
+  }
+  btns2[2, 3] <- gWidgets2::gbutton(text = "Revalidate all", handler = reset_all_function, action = NULL)
+
+  invert_page_function <- function(h, ...) {
+    tbl2[[cp]][, "Valid"] <- !tbl2[[cp]][, "Valid"]
+  }
+  btns2[1, 4] <- gWidgets2::gbutton(text = "Invert page validities", handler = invert_page_function, action = NULL)
+
+  invert_all_function <- function(h, ...) {
+    processing <- gWidgets2::gwindow("Processing...", width = 300, height = 30)
+    for (i in 1:length(tbl2)) {
+      capture <- gWidgets2::glabel(paste("Processing page", i, "of", length(tbl2)), container = processing)
+      tbl2[[i]][, "Valid"] <- !tbl2[[i]][, "Valid"]
+    }
+    gWidgets2::dispose(processing)
+  }
+  btns2[2, 4] <- gWidgets2::gbutton(text = "Invert all validities", handler = invert_all_function, action = NULL)
+
+  btns2[2, 5, expand = TRUE] <- ""
+
+  btn_function <- function(h, ...) {
+    aux <- lapply(tbl2, function(x) as.data.frame(x[, c("Index", "Valid")]))
+    x <- data.table::rbindlist(aux)
+    graphical_valid <<- x$Valid[order(x$Index)]
+
+    aux <- rle(graphical_valid)
+    aux <- data.frame(Value = aux[[2]], n = aux[[1]])
+    aux$stop <- cumsum(aux$n)
+    aux$start <- c(1, aux$stop[-1] - (aux$n[-1] - 1))
+    aux$combine <- aux$start != aux$stop
+    aux$final <- aux$start
+    aux$final[aux$combine] <- paste(aux$start[aux$combine], aux$stop[aux$combine], sep = ":")
+
+    valid.summary <- aux[, c("final", "Value")]
+    colnames(valid.summary) <- c("Detections", "Validity")
+
+    if (exists("confirm") && gWidgets2::isExtant(confirm))
+      gWidgets2::dispose(confirm)
+
+    confirm <<- gWidgets2::gwindow(paste0("Confirm"), width = 300, height = 300)
+    confirm_layout <- gWidgets2::ggroup(horizontal = FALSE, container = confirm)
+    gWidgets2::glabel("Confirm the following validity ranges.", container = confirm_layout)
+    gWidgets2::gtable(valid.summary, multiple = TRUE, expand = TRUE, container = confirm_layout)
+    confirm_btns <- gWidgets2::glayout(container = confirm_layout)
+
+    was.confirmed <- NULL
+
+    confirm_function <- function(h, ...) {
+      gWidgets2::dispose(confirm)
+      gWidgets2::dispose(w2)
+    }
+    confirm_btns[1, 1, expand = TRUE] <- gWidgets2::gbutton(text = "Confirm", handler = confirm_function, action = NULL)
+
+    abort_function <- function(h, ...) {
+      gWidgets2::dispose(confirm)
+    }
+    confirm_btns[1, 2, expand = TRUE] <- gWidgets2::gbutton(text = "Return", handler = abort_function, action = NULL)      
+  }
+  btns2[2, 6] <- gWidgets2::gbutton(text = "Submit and close", handler = btn_function, action = NULL)
+
+  if (!silent)
+    message("M: Make any necessary edits in the external visualization window and submit the result to continue the analysis.\nNote: You can use Ctrl and Shift to select multiple detections, and Ctrl+A to select all events at once."); flush.console()
+
+  while (gWidgets2::isExtant(w2)) {}
+
+  return(graphical_valid)
+} 
+
+detectionsSingleWidget <- function(event, tag, to.print, silent) {
+  appendTo("debug", "Running detectionsSingleWidget.")
+
+  graphical_valid <- NULL
+
+  w2 <- gWidgets2::gwindow(paste0("Detections for valid event ", event, " from tag ", tag ,"."), width = 900, height = 500)
+  on.exit({if(gWidgets2::isExtant(w2)) gWidgets2::dispose(w2)}, add = TRUE)
+  g2 <- gWidgets2::ggroup(horizontal = FALSE, container = w2)
+  hdr2 <- gWidgets2::glayout(container = g2)
+  hdr2[1, 1, expand = TRUE] <- gWidgets2::glabel("<b>Usage notes:</b>\n   - Edit detection validity by selecting rows and choosing the desired action below. Use CTRL + F to search for specific keywords\n   - Loading large tables can take some time. Please wait until the interaction buttons show up at the bottom of this window.", markup = TRUE)
+
+  tbl2 <- gWidgets2::gtable(to.print, multiple = TRUE, expand = TRUE, container = g2)
+
+  btns2 <- gWidgets2::glayout(container = g2)
+
+  invalid_selected_function <- function(h, ...) {
+    tbl2[match(tbl2$get_value(), tbl2[, "Index"]), "Valid"] <- FALSE
+  }
+  btns2[1, 1] <- gWidgets2::gbutton(text = "Invalidate selected", handler = invalid_selected_function, action = NULL)
+
+  reset_selected_function <- function(h, ...) {
+    tbl2[match(tbl2$get_value(), tbl2[, "Index"]), "Valid"] <- TRUE
+  }
+  btns2[2, 1] <- gWidgets2::gbutton(text = "Revalidate selected", handler = reset_selected_function, action = NULL)
+
+  invalid_all_function <- function(h, ...) {
+    tbl2[, "Valid"] <- FALSE
+  }
+  btns2[1, 2] <- gWidgets2::gbutton(text = "Invalidate all", handler = invalid_all_function, action = NULL)
+
+  reset_all_function <- function(h, ...) {
+    tbl2[, "Valid"] <- TRUE
+  }
+  btns2[2, 2] <- gWidgets2::gbutton(text = "Revalidate all", handler = reset_all_function, action = NULL)
+
+  invert_all_function <- function(h, ...) {
+    tbl2[, "Valid"] <- !tbl2[, "Valid"]
+  }
+  btns2[1, 3] <- gWidgets2::gbutton(text = "Invert all validities", handler = invert_all_function, action = NULL)
+
+  btns2[2, 4, expand = TRUE] <- ""
+
+  btn_function <- function(h, ...) {
+    x <- as.data.frame(tbl2[, c("Index", "Valid")])
+    graphical_valid <<- x$Valid[order(x$Index)]
+
+    aux <- rle(graphical_valid)
+    aux <- data.frame(Value = aux[[2]], n = aux[[1]])
+    aux$stop <- cumsum(aux$n)
+    aux$start <- c(1, aux$stop[-1] - (aux$n[-1] - 1))
+    aux$combine <- aux$start != aux$stop
+    aux$final <- aux$start
+    aux$final[aux$combine] <- paste(aux$start[aux$combine], aux$stop[aux$combine], sep = ":")
+
+    valid.summary <- aux[, c("final", "Value")]
+    colnames(valid.summary) <- c("Detections", "Validity")
+
+    if (exists("confirm") && gWidgets2::isExtant(confirm))
+      gWidgets2::dispose(confirm)
+
+    confirm <<- gWidgets2::gwindow(paste0("Confirm"), width = 300, height = 300)
+    confirm_layout <- gWidgets2::ggroup(horizontal = FALSE, container = confirm)
+    gWidgets2::glabel("Confirm the following validity ranges.", container = confirm_layout)
+    gWidgets2::gtable(valid.summary, multiple = TRUE, expand = TRUE, container = confirm_layout)
+    confirm_btns <- gWidgets2::glayout(container = confirm_layout)
+
+    was.confirmed <- NULL
+
+    confirm_function <- function(h, ...) {
+      gWidgets2::dispose(confirm)
+      gWidgets2::dispose(w2)
+    }
+    confirm_btns[1, 1, expand = TRUE] <- gWidgets2::gbutton(text = "Confirm", handler = confirm_function, action = NULL)
+
+    abort_function <- function(h, ...) {
+      gWidgets2::dispose(confirm)
+    }
+    confirm_btns[1, 2, expand = TRUE] <- gWidgets2::gbutton(text = "Return", handler = abort_function, action = NULL)      
+  }
+  btns2[2, 5] <- gWidgets2::gbutton(text = "Submit and close", handler = btn_function, action = NULL)
+
+  if (!silent)
+    message("M: Make any necessary edits in the external visualization window and submit the result to continue the analysis.\nNote: You can use Ctrl and Shift to select multiple detections, and Ctrl+A to select all events at once."); flush.console()
+
+  while (gWidgets2::isExtant(w2)) {}
+
+  return(graphical_valid)
+}
