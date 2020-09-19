@@ -55,7 +55,7 @@ tableInteraction <- function(moves, detections, tag, trigger, GUI, force = FALSE
         decision <- userInput("Would you like to render any movement event invalid, or expand an event?(y/n/comment) ",
                               choices = c("y", "n", "comment"), 
                               tag = tag, 
-                              hash = paste0("# invalidate moves in ", tag, "?"))
+                              hash = paste0("# invalidate/expand moves in ", tag, "?"))
         if (decision == "y") {
           output <- invalidateEvents(displayed.moves = to.display, 
                                     all.moves = moves, 
@@ -99,7 +99,7 @@ tableInteraction <- function(moves, detections, tag, trigger, GUI, force = FALSE
         decision <- userInput("Would you like to render any movement event invalid, or expand an event?(y/n/comment) ",
                               choices = c("y", "n", "comment"), 
                               tag = tag, 
-                              hash = paste0("# invalidate moves in ", tag, "?"))
+                              hash = paste0("# invalidate/expand moves in ", tag, "?"))
         if (decision == "y") {
           output <- invalidateEvents(displayed.moves = to.display, 
                                     all.moves = moves, 
@@ -154,7 +154,7 @@ invalidateEvents <- function(displayed.moves, all.moves, detections, tag, GUI) {
         decision <- userInput("Would you like to render any movement event invalid, or expand an event?(y/n/comment) ",
                               choices = c("y", "n", "comment"), 
                               tag = tag, 
-                              hash = paste0("# invalidate moves in ", tag, "?"))
+                              hash = paste0("# invalidate/expand moves in ", tag, "?"))
         if (decision == "y") {
           appendTo("Screen", "Note: You can select event ranges by separating them with a ':' and/or multiple events at once by separating them with a space or a comma.")
         } else {
@@ -302,14 +302,11 @@ graphicalInvalidate <- function(detections, moves, tag, trigger) { # nocov start
       moves <- recipient$all.moves
       graphical_valid <- recipient$graphical_valid
       restart <- recipient$restart
-      save(list = ls(), file = "debug2.RData")
       rm(recipient)
     }
     
     first.time <- FALSE
     
-    save(list = ls(), file = "debug.RData")
-
     moves$Valid <- graphical_valid
 
     if (restart)
@@ -330,7 +327,7 @@ graphicalInvalidate <- function(detections, moves, tag, trigger) { # nocov start
   aux$final <- aux$start
 
   aux$final[aux$combine] <- paste(aux$start[aux$combine], aux$stop[aux$combine], sep = ":")
-  appendTo("UD", paste("from_gui:", aux$final, collapse = " "))
+  appendTo("UD", paste("# From the GUI, these events are invalid:", aux$final, collapse = " "))
   return(moves)
 } # nocov end
 
@@ -399,7 +396,7 @@ expandEvent <- function(displayed.moves, all.moves, detections, tag, GUI) {
       decision <- userInput("Would you like to render any detections invalid?(y/n/comment) ",
                             choices = c("y", "n", "comment"), 
                             tag = tag, 
-                            hash = paste0("# invalidate moves in ", tag, "?"))
+                            hash = paste0("# invalidate detections in event ", event, " of ", tag, "?"))
       if (decision == "y") {
         output <- invalidateDetections(displayed.moves = displayed.moves, 
                                        all.moves = all.moves, 
@@ -425,7 +422,7 @@ expandEvent <- function(displayed.moves, all.moves, detections, tag, GUI) {
       decision <- userInput("Would you like to render any detections invalid?(y/n/comment) ",
                             choices = c("y", "n", "comment"), 
                             tag = tag, 
-                            hash = paste0("# invalidate moves in ", tag, "?"))
+                            hash = paste0("# invalidate detections in event ", event, " of ", tag, "?"))
       if (decision == "y") {
         output <- invalidateDetections(displayed.moves = displayed.moves, 
                                        all.moves = all.moves, 
@@ -558,8 +555,6 @@ graphicalInvalidate_detections <- function(dets, displayed.moves, all.moves, eve
                                               to.print = to.print,
                                               silent = silent)
   }
-
-  save(list = ls(), file = "debug.RData")
   
   if (is.null(graphical_valid)) {
     appendTo(c("Screen", "Warning", "Report"), "External visualization window was closed before result submission. Assuming no changes are to be made.")
@@ -573,6 +568,16 @@ graphicalInvalidate_detections <- function(dets, displayed.moves, all.moves, eve
                                detections = dets, 
                                event = event)
 
+  aux <- rle(!graphical_valid)
+  aux <- data.frame(Value = aux[[2]], n = aux[[1]])
+  aux$stop <- cumsum(aux$n)
+  aux$start <- c(1, aux$stop[-1] - (aux$n[-1] - 1))
+  aux <- aux[aux$Value, ]
+  aux$combine <- aux$start != aux$stop
+  aux$final <- aux$start
+
+  aux$final[aux$combine] <- paste(aux$start[aux$combine], aux$stop[aux$combine], sep = ":")
+  appendTo("UD", paste("# From the GUI, these detections are invalid:", aux$final, collapse = " "))
   return(all.moves)
 } # nocov end
 
