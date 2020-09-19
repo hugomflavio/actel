@@ -401,7 +401,7 @@ checkInactiveness <- function(movements, tag, detections,
     Stop <- nrow(valid.moves)
     # Fetch respective detection rows
     valid.row.list <- lapply(Start:Stop, function(j) {
-      Start <- min(which(detections.list$Timestamp == valid.moves$First.time[j] & detections.list$Standard.name == valid.moves$First.station[j]))
+      Start <- min(which(detections$Timestamp == valid.moves$First.time[j] & detections$Standard.name == valid.moves$First.station[j]))
       Stop <- Start + (valid.moves$Detections[j] - 1)
       return(Start:Stop)
     })
@@ -420,7 +420,7 @@ checkInactiveness <- function(movements, tag, detections,
       if (days.spent < inactive.warning)
         break()
       valid.rows <- unlist(valid.row.list[iteration:length(valid.row.list)])
-      the.detections <- detections.list[valid.rows, ]
+      the.detections <- detections[valid.rows, ]
       # find all stations
       the.stations <- as.character(sort(unique(the.detections$Standard.name)))
       trigger.error <- FALSE
@@ -456,7 +456,7 @@ checkInactiveness <- function(movements, tag, detections,
       # Trigger user interaction
       if (trigger.error) { # nocov start
         appendTo("Screen", error.message <- paste0("M: Tag ", tag, " has been inactive for more than ", inactive.error," days. Inactiveness started on event ", start_i, " (", as.Date(valid.moves$First.time[start_i]),")."))
-        movements <- tableInteraction(moves = movements, tag = tag, detections = detections.list, trigger = paste0(the.warning, "\n", error.message), GUI = GUI)
+        movements <- tableInteraction(moves = movements, tag = tag, detections = detections, trigger = paste0(the.warning, "\n", error.message), GUI = GUI)
       } # nocov end
       iteration <- iteration + 1
     }
