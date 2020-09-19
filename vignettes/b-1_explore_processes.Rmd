@@ -128,7 +128,7 @@ Then, actel would continue the analysis. This warning is issued whenever the jum
 Warning: Tag R64K-1234 jumped through 3 arrays in events 1 -> 2 (A -> E).
 M: Opening movement table of tag R64K-2791 for inspection:
 [...]
-Would you like to render any movement event invalid?(y/N/comment)
+Would you like to render any movement event invalid, or expand an event?(y/n/comment)
 ````
 
 From here, you can inspect the movement table and find out if some events should be removed from the analysis.
@@ -152,7 +152,7 @@ M: Opening valid movements table of tag R64K-1234 for inspection:
 
 [...]
 
-Would you like to render any movement event invalid?(y/N/comment) 
+Would you like to render any movement event invalid, or expand an event?(y/n/comment) 
 ````
 
 From here you can then decide whether or not some movement events should be excluded.
@@ -197,7 +197,7 @@ M: Opening valid movement table of tag R64K-1234 for inspection. Inactiveness st
 
 [...]
 
-Would you like to render any movement event invalid?(y/N/comment) 
+Would you like to render any movement event invalid, or expand an event?(y/n/comment) 
 ````
 
 From here you could then decide if some events should be removed.
