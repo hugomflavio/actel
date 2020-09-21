@@ -21,7 +21,7 @@ output <- groupMovements(detections.list = detections.list[1:2], bio = bio, spat
 
 test_that("groupMovements assigns correct names to objects", {
 	expect_equal(names(output), c("R64K-4451", "R64K-4453"))
-	expect_equal(colnames(output[[1]]), c('Array', 'Detections', 'First.station', 'Last.station', 'First.time', 'Last.time', 'Time.travelling', 'Time.in.array', 'Average.speed.m.s', 'Valid'))
+	expect_equal(colnames(output[[1]]), c('Array', 'Section', 'Detections', 'First.station', 'Last.station', 'First.time', 'Last.time', 'Time.travelling', 'Time.in.array', 'Average.speed.m.s', 'Valid'))
 })
 
 test_that("groupMovements assigns timestamps correctly", {
@@ -52,7 +52,7 @@ test_that("groupMovements only uses dist.mat if it is valid", {
 	aux <- groupMovements(detections.list = detections.list[1:2], bio = bio, spatial = spatial,
     speed.method = "last to first", max.interval = 60, tz = "Europe/Copenhagen", dist.mat = xdist)
 	expect_equal(names(aux), c("R64K-4451", "R64K-4453"))
-	expect_equal(colnames(aux[[1]]), c('Array', 'Detections', 'First.station', 'Last.station', 'First.time', 'Last.time', 'Time.travelling', 'Time.in.array', 'Valid'))
+	expect_equal(colnames(aux[[1]]), c('Array', 'Section', 'Detections', 'First.station', 'Last.station', 'First.time', 'Last.time', 'Time.travelling', 'Time.in.array', 'Valid'))
 })
 
 test_that("groupMovements can handle unknown detections", {
@@ -65,7 +65,7 @@ test_that("groupMovements can handle unknown detections", {
 	  	speed.method = "last to first", max.interval = 60, tz = "Europe/Copenhagen", dist.mat = dist.mat),
 		"Movement events at 'Unknown' locations have been rendered invalid.", fixed = TRUE)
 	expect_equal(names(aux), c("R64K-4451", "R64K-4453"))
-	expect_equal(colnames(aux[[1]]), c('Array', 'Detections', 'First.station', 'Last.station', 'First.time', 'Last.time', 'Time.travelling', 'Time.in.array', 'Average.speed.m.s', 'Valid'))
+	expect_equal(colnames(aux[[1]]), c('Array', 'Section', 'Detections', 'First.station', 'Last.station', 'First.time', 'Last.time', 'Time.travelling', 'Time.in.array', 'Average.speed.m.s', 'Valid'))
 	expect_equal(aux[[1]]$Array[1], "Unknown")
 	expect_equal(aux[[1]]$First.station[1], "Ukn.")
 	expect_equal(aux[[1]]$Last.station[1], "Ukn.")

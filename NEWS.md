@@ -9,6 +9,7 @@ Fixes:
 
 Enhancements:
   * New functionality: expand events and edit the validity of individual detections.
+  * Added Section information to the detections and the movement tables.
 
 ## actel 1.1.1
 
