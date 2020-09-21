@@ -1199,6 +1199,10 @@ processThelmaOldFile <- function(input) {
     Sensor.Value = input$Data,
     Sensor.Unit = rep(NA_character_, nrow(input)))
 
+  # Some thelma output files come with "-" rather than NA...
+  output$Sensor.Value[output$Sensor.Value == "-"] <- NA
+  output$Sensor.Value <- as.numeric(output$Sensor.Value)
+
   if (any(is.na(output$Timestamp)))
     stop("Importing timestamps failed", call. = FALSE)
   if (any(is.na(output$Receiver)))
@@ -1230,6 +1234,10 @@ processThelmaNewFile <- function(input) {
     Signal = input$ID,
     Sensor.Value = input$Data,
     Sensor.Unit = rep(NA_character_, nrow(input)))
+
+  # Some thelma output files come with "-" rather than NA...
+  output$Sensor.Value[output$Sensor.Value == "-"] <- NA
+  output$Sensor.Value <- as.numeric(output$Sensor.Value)
 
   if (any(is.na(output$Timestamp)))
     stop("Importing timestamps failed", call. = FALSE)
