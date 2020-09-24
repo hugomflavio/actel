@@ -2,6 +2,11 @@
 
 Find out the main highlights of each update.
 
+## Development
+
+Fixes:
+  * Fix undesired behaviour in unknown receiver mechanisms and improve unknown handling.
+
 ## actel 1.1.1
 
 Fixes:

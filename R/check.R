@@ -882,29 +882,39 @@ checkUnknownReceivers <- function(input) {
 checkTagsInUnknownReceivers <- function(detections.list, deployments, spatial) {
   # NOTE: The NULL variables below are actually column names used by data.table.
   # This definition is just to prevent the package check from issuing a note due unknown variables.
-  Receiver <- NULL
   include.all.unknowns <- FALSE
   exclude.all.unknowns <- FALSE
+  excluded.unknowns <- NULL
 
   appendTo("debug", "Running tagsInUnknownReceivers")
   for (i in names(detections.list)) {
     if (any(is.na(detections.list[[i]]$Standard.name))) {
-      A <- detections.list[[i]]$Receiver
-      B <- names(deployments)
-      unknown.receivers <- unique(detections.list[[i]][is.na(match(A, B)), Receiver])
-      if (length(unknown.receivers) > 0) {
-        appendTo(c("Screen", "Report", "Warning"), paste0("Tag ", i, " was detected in one or more receivers that are not listed in the study area (receiver(s): ", paste(unknown.receivers, collapse = ", "), ")!"))
-        message("Possible options:\n   a) Stop and double-check the data (recommended)\n   b) Temporarily include receiver(s) \n      (Unknown events will be considered invalid, but will show on detection plots)\n   c) Repeat option b for all unknown receivers\n   d) Discard unknown detections for this tag (not recommended)\n   e) Repeat option d for all tags (very much not recommended!)")
-        decision <- userInput("Which option should be followed?(a/b/c/d/comment) ", choices = c("a", "b", "c", "d", "e", "comment"),
-                              tag = i, hash = "# unknown receivers")
+      # If this is not the first iteration, some receivers may have already been excluded.
+      if (!is.null(excluded.unknowns))
+        detections.list[[i]] <- detections.list[[i]][!(detections.list[[i]]$Receiver %in% excluded.unknowns), ]
+
+      receivers <- detections.list[[i]]$Receiver
+      new.unknowns <- unique(detections.list[[i]]$Receiver[is.na(match(receivers, names(deployments)))])
+      
+      if (length(new.unknowns) > 0) {
+        appendTo(c("Screen", "Report", "Warning"), paste0("Tag ", i, " was detected in one or more receivers that are not listed in the study area (receiver(s): ", paste(new.unknowns, collapse = ", "), ")!"))
+        if (!include.all.unknowns & !exclude.all.unknowns) {
+          message("Possible options:\n   a) Stop and double-check the data (recommended)\n   b) Temporarily include receiver(s) \n      (Unknown events will be considered invalid, but will be visible in the detection plots)\n   c) Repeat option b for all unknown receivers\n   d) Discard detections for this unknown receiver (not recommended)\n   e) Repeat option d for all unknown receivers (very much not recommended!)")
+          decision <- userInput("Which option should be followed?(a/b/c/d/e/comment) ", choices = c("a", "b", "c", "d", "e", "comment"),
+                                tag = i, hash = "# unknown receivers")
+        } else {
+          decision <- "ignore"
+        }
+
         if (decision == "a")
           stopAndReport("Stopping analysis per user command.") # nocov
 
-        if (decision == "c") 
+        if (decision == "c") {
           include.all.unknowns <- TRUE # nocov
+        }
         
         if (include.all.unknowns || decision == "b") {
-          recipient <- includeUnknownReceiver(spatial = spatial, deployments = deployments, unknown.receivers = unknown.receivers)
+          recipient <- includeUnknownReceiver(spatial = spatial, deployments = deployments, unknown.receivers = new.unknowns)
           spatial <- recipient[[1]]
           deployments <- recipient[[2]]
           link <- is.na(detections.list[[i]]$Standard.name)
@@ -914,12 +924,14 @@ checkTagsInUnknownReceivers <- function(detections.list, deployments, spatial) {
           detections.list[[i]]$Array[link] <- "Unknown"
         }
         
-        if (decision == "e")
+        if (decision == "e") {
           exclude.all.unknowns <- TRUE # nocov
+        }
         
-        if (exclude.all.unknowns || decision == "d")
-          detections.list[[i]] <- detections.list[[i]][!is.na(match(A, B)), ] # nocov
-
+        if (exclude.all.unknowns || decision == "d") {
+          detections.list[[i]] <- detections.list[[i]][is.na(match(receivers, new.unknowns)), ] # keep the ones that are not unknown
+          excluded.unknowns <- c(excluded.unknowns, paste(new.unknowns))
+        }
         rm(decision)
       }
     }

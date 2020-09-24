@@ -48,7 +48,8 @@ loadStudyData <- function(tz, override = NULL, start.time, stop.time, save.detec
   deployments <- checkDeploymentStations(input = deployments, spatial = spatial) # match Station.name in the deployments to Station.name in spatial, and vice-versa
   deployments <- createUniqueSerials(input = deployments) # Prepare serial numbers to overwrite the serials in detections
 
-  detections <- loadDetections(start.time = start.time, stop.time = stop.time, tz = tz, save.detections = save.detections)
+  detections <- loadDetections(start.time = start.time, stop.time = stop.time, tz = tz,
+    save.detections = save.detections, record.source = getOption("actel.debug", default = FALSE))
   detections <- checkDupDetections(input = detections)
   detections <- createStandards(detections = detections, spatial = spatial, deployments = deployments, discard.orphans = discard.orphans) # get standardized station and receiver names, check for receivers with no detections
   appendTo(c("Screen","Report"), paste0("M: Data time range: ", as.character(head(detections$Timestamp, 1)), " to ", as.character(tail(detections$Timestamp, 1)), " (", tz, ")."))
@@ -974,7 +975,8 @@ loadBio <- function(input, tz){
 #'
 #' @keywords internal
 #'
-loadDetections <- function(start.time = NULL, stop.time = NULL, tz, force = FALSE, save.detections = FALSE) {
+loadDetections <- function(start.time = NULL, stop.time = NULL, tz, force = FALSE, 
+  save.detections = FALSE, record.source = FALSE) {
   # NOTE: The variable actel.detections is loaded from a RData file, if present. To avoid package check
   #   notes, the variable name is created before any use.
   actel.detections <- NULL
@@ -1011,7 +1013,7 @@ loadDetections <- function(start.time = NULL, stop.time = NULL, tz, force = FALS
 
   if (recompile)
     detections <- compileDetections(path = "detections", start.time = start.time,
-      stop.time = stop.time, tz = tz, save.detections = save.detections)
+      stop.time = stop.time, tz = tz, save.detections = save.detections, record.source = record.source)
 
   detections$Valid <- TRUE
   return(detections)
@@ -1032,7 +1034,8 @@ loadDetections <- function(start.time = NULL, stop.time = NULL, tz, force = FALS
 #'
 #' @keywords internal
 #'
-compileDetections <- function(path = "detections", start.time = NULL, stop.time = NULL, tz, save.detections = FALSE) {
+compileDetections <- function(path = "detections", start.time = NULL, stop.time = NULL, 
+  tz, save.detections = FALSE, record.source = FALSE) {
   appendTo("Screen", "M: Compiling detections...")
   # Find the detection files
   if (file_test("-d", path)) {
@@ -1097,6 +1100,8 @@ compileDetections <- function(path = "detections", start.time = NULL, stop.time 
             paste0("File '", i, "' does not match to any of the supported hydrophone file formats!\n         If your file corresponds to a hydrophone log and actel did not recognize it, please get in contact through www.github.com/hugomflavio/actel/issues/new"))
           return(NULL)
         }
+        if (record.source)
+          output$Source.file <- i
         return(output)
       }
     }
@@ -1575,7 +1580,7 @@ createStandards <- function(detections, spatial, deployments, discard.orphans = 
         if (!discard.orphans) {
           appendTo(c("Screen", "Report"), paste0("Error: ", sum(the.error), " detections for receiver ", names(deployments)[i], " do not fall within deployment periods."))
           message("")
-          message(paste0(capture.output(print(detections[receiver.link][the.error, -c(6, 7)])), collapse = "\n"))
+          message(paste0(capture.output(print(detections[receiver.link, ][the.error, !c("Transmitter", "Valid", "Standard.name", "Array", "Section")])), collapse = "\n"))
           message("")
           message("Possible options:\n   a) Stop and double-check the data (recommended)\n   b) Discard orphan detections in this instance.\n   c) Discard orphan detections for all instances.")
           
