@@ -414,7 +414,7 @@ by which sections are presented", immediate. = TRUE, call. = FALSE)
           dist.mat = dist.mat, GUI = GUI)
       }
     } else {
-      output <- overrideValidityChecks(moves = movements[[tag]], detections = detections.list[[tag]], tag = names(movements)[tag], GUI = GUI) # nocov
+      output <- overrideValidityChecks(moves = movements[[tag]], detections = detections.list[[tag]], tag = tag, GUI = GUI) # nocov
     }
     return(output)
   })

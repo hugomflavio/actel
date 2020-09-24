@@ -73,7 +73,12 @@ tableInteraction <- function(moves, detections, tag, trigger, GUI, force = FALSE
                                    tag = tag,
                                    GUI = GUI)
       } else {
-        decision <- userInput("Would you like to render any movement event invalid, or expand an event?(y/n/comment) ",
+        if (colnames(moves)[1] == "Section")
+          text.to.display <- "Would you like to render any movement event invalid?(y/n/comment) "
+        else
+          text.to.display <- "Would you like to render any movement event invalid, or expand an event?(y/n/comment) "
+        
+        decision <- userInput(text.to.display,
                               choices = c("y", "n", "comment"), 
                               tag = tag, 
                               hash = paste0("# invalidate/expand moves in ", tag, "?"))
@@ -117,7 +122,12 @@ tableInteraction <- function(moves, detections, tag, trigger, GUI, force = FALSE
                                   tag = tag,
                                   GUI = GUI)
       } else {
-        decision <- userInput("Would you like to render any movement event invalid, or expand an event?(y/n/comment) ",
+        if (colnames(moves)[1] == "Section")
+          text.to.display <- "Would you like to render any movement event invalid?(y/n/comment) "
+        else
+          text.to.display <- "Would you like to render any movement event invalid, or expand an event?(y/n/comment) "
+
+        decision <- userInput(text.to.display,
                               choices = c("y", "n", "comment"), 
                               tag = tag, 
                               hash = paste0("# invalidate/expand moves in ", tag, "?"))
@@ -172,7 +182,12 @@ invalidateEvents <- function(displayed.moves, all.moves, detections, tag, GUI) {
         appendTo("Screen", paste0("M: Updated movement table of tag ", tag, ":"))
         message(paste0(capture.output(print(displayed.moves, topn = nrow(displayed.moves))), collapse = "\n"))
         message("")
-        decision <- userInput("Would you like to render any movement event invalid, or expand an event?(y/n/comment) ",
+        if (colnames(moves)[1] == "Section")
+          text.to.display <- "Would you like to render any movement event invalid?(y/n/comment) "
+        else
+          text.to.display <- "Would you like to render any movement event invalid, or expand an event?(y/n/comment) "
+        
+        decision <- userInput(text.to.display,
                               choices = c("y", "n", "comment"), 
                               tag = tag, 
                               hash = paste0("# invalidate/expand moves in ", tag, "?"))
@@ -238,7 +253,12 @@ invalidateEvents <- function(displayed.moves, all.moves, detections, tag, GUI) {
             else
               appendTo(c("Screen", "Report"), paste0("M: ", length(the.rows), " movement event(s) from tag ", tag," were rendered invalid per user command."))
             
-            decision <- userInput("Would you like to render any more movements invalid, or expand more events?(y/n/comment) ",
+            if (colnames(all.moves)[1] == "Section")
+              text.to.display <- "Would you like to render any more movement event invalid?(y/n/comment) "
+            else
+              text.to.display <- "Would you like to render any more movement event invalid, or expand an event?(y/n/comment) "
+
+            decision <- userInput(text.to.display,
                                   choices = c("y", "n", "comment"), tag = tag, hash = "# invalidate more?")
             
             if (decision == "y") {
@@ -474,7 +494,7 @@ expandEvent <- function(displayed.moves, all.moves, detections, tag, GUI) { # no
 #' @keywords internal
 #'
 invalidateDetections <- function(displayed.moves, all.moves, detections, tag, event) { # nocov start
-  appendTo("debug", "Running invalidateEvents.")
+  appendTo("debug", "Running invalidateDetections")
   appendTo("Screen", "Note: You can select row ranges by separating them with a ':' and/or multiple rows at once by separating them with a space or a comma.")
 
   check <- TRUE
