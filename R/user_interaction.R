@@ -182,7 +182,7 @@ invalidateEvents <- function(displayed.moves, all.moves, detections, tag, GUI) {
         appendTo("Screen", paste0("M: Updated movement table of tag ", tag, ":"))
         message(paste0(capture.output(print(displayed.moves, topn = nrow(displayed.moves))), collapse = "\n"))
         message("")
-        if (colnames(moves)[1] == "Section")
+        if (colnames(displayed.moves)[1] == "Section")
           text.to.display <- "Would you like to render any movement event invalid?(y/n/comment) "
         else
           text.to.display <- "Would you like to render any movement event invalid, or expand an event?(y/n/comment) "
