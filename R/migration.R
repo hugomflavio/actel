@@ -534,7 +534,7 @@ by which sections are presented", immediate. = TRUE, call. = FALSE)
     release.overview <- lapply(names(split.CJS), function(i, releases = spatial$release.sites) {
       output <- split.CJS[[i]]
       x <- unlist(stringr::str_split(i, "\\.", 2))
-      output$Release <- rep(c(releases[releases$Station.name == x[2], paste0("n.", x[1])], NA, NA), 2)
+      output$Release <- rep(c(releases[releases$Standard.name == x[2], paste0("n.", x[1])], NA, NA), 2)
       output <- output[, c(ncol(output), 1:(ncol(output) - 1))]
       return(output)
     })
