@@ -7,6 +7,7 @@
 checkJumpDistance(
   movements,
   tag,
+  detections,
   release,
   dotmat,
   jump.warning,
@@ -15,13 +16,15 @@ checkJumpDistance(
 )
 }
 \arguments{
-\item{movements}{The movements table}
+\item{movements}{The movements table for a specific tag.}
 
-\item{tag}{The tag being analysed}
+\item{tag}{The tag being analysed.}
 
-\item{release}{The release location of the animal}
+\item{detections}{The detections data.frame for a specific tag.}
 
-\item{dotmat}{The matrix of distances between arrays}
+\item{release}{The release location of the animal.}
+
+\item{dotmat}{The matrix of distances between arrays.}
 
 \item{jump.warning}{If a tag crosses a number of arrays equal or greater
 than \code{jump.error} without being detected, a warning is issued. If left

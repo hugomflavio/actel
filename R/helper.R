@@ -1,3 +1,33 @@
+#' Split a dataframe every nth row
+#' 
+#' Idea from here: https://stackoverflow.com/questions/7060272/split-up-a-dataframe-by-number-of-rows
+#' 
+#' @param x the dataframe
+#' @param n the number of rows to keep in each chunk
+#' 
+#' @return A list of equal-sized dataframes
+#' 
+#' @keywords internal
+#' 
+splitN <- function(x, n, row.names = FALSE) {
+  r <- nrow(x)
+  z <- rep(1:ceiling(r / n), each = n)[1:r]
+  output <- split(x, z)
+  
+  if (!row.names)
+    output <- lapply(output, function(x) {
+      rownames(x) <- 1:nrow(x)
+      return(x)
+    })
+
+  aux <- unique(z) * n
+  breaks <- aux[-length(aux)]
+  starts <- c(1, breaks + 1)
+  ends <- c(breaks, r)
+  names(output) <- paste0(starts, ":", ends)
+  return(output)
+}
+
 #' darken colours
 #' 
 #' Copied from https://gist.github.com/Jfortin1/72ef064469d1703c6b30

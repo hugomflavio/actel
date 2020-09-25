@@ -10,12 +10,12 @@ checkGUI(GUI = c("needed", "always", "never"))
 }
 \arguments{
 \item{GUI}{One of "needed", "always" or "never". If "needed", a new window is
-opened to inspect the movements only when the movements table is too big to be
+opened to inspect the movements only if the movements table is too big to be
 displayed in R's console. If "always", a graphical interface is always created
 when the possibility to invalidate events emerges. If "never", a graphical
 interface is never invoked. In this case, if the table to be displayed does
 not fit in R's console, a temporary file will be saved and the user will be
-prompted to open that file and examine it. Defaults to "needed".}
+prompted to open and examine that file. Defaults to "needed".}
 }
 \value{
 An updated GUI argument (character string)

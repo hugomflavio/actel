@@ -51,9 +51,6 @@ loadStudyData <- function(tz, override = NULL, start.time, stop.time, save.detec
   detections <- loadDetections(start.time = start.time, stop.time = stop.time, tz = tz,
     save.detections = save.detections, record.source = getOption("actel.debug", default = FALSE))
   detections <- checkDupDetections(input = detections)
-  detections <- createStandards(detections = detections, spatial = spatial, deployments = deployments, discard.orphans = discard.orphans) # get standardized station and receiver names, check for receivers with no detections
-  appendTo(c("Screen","Report"), paste0("M: Data time range: ", as.character(head(detections$Timestamp, 1)), " to ", as.character(tail(detections$Timestamp, 1)), " (", tz, ")."))
-  checkUnknownReceivers(input = detections) # Check if there are detections from unknown detections
 
   use.fakedot <- TRUE
   if (file.exists("spatial.dot")) {
@@ -92,10 +89,13 @@ loadStudyData <- function(tz, override = NULL, start.time, stop.time, save.detec
     first.array <- NULL
   spatial <- transformSpatial(spatial = spatial, bio = bio, arrays = arrays, dotmat = dotmat, first.array = first.array) # Finish structuring the spatial file
 
-  detections$Array <- factor(detections$Array, levels = unlist(spatial$array.order)) # Fix array levels
+  detections <- createStandards(detections = detections, spatial = spatial, deployments = deployments, discard.orphans = discard.orphans) # get standardized station and receiver names, check for receivers with no detections
+  checkUnknownReceivers(input = detections) # Check if there are detections from unknown receivers
+  appendTo(c("Screen","Report"), paste0("M: Data time range: ", as.character(head(detections$Timestamp, 1)), " to ", as.character(tail(detections$Timestamp, 1)), " (", tz, ")."))
 
+  # Reorder arrays object by spatial order
   link <- match(unlist(spatial$array.order), names(arrays))
-  arrays <- arrays[link] # Reorder arrays by spatial order
+  arrays <- arrays[link] 
   rm(link)
 
   dist.mat <- loadDistances(spatial = spatial) # Load distances and check if they are valid
@@ -1204,6 +1204,10 @@ processThelmaOldFile <- function(input) {
     Sensor.Value = input$Data,
     Sensor.Unit = rep(NA_character_, nrow(input)))
 
+  # Some thelma output files come with "-" rather than NA...
+  output$Sensor.Value[output$Sensor.Value == "-"] <- NA
+  output$Sensor.Value <- as.numeric(output$Sensor.Value)
+
   if (any(is.na(output$Timestamp)))
     stop("Importing timestamps failed", call. = FALSE)
   if (any(is.na(output$Receiver)))
@@ -1235,6 +1239,10 @@ processThelmaNewFile <- function(input) {
     Signal = input$ID,
     Sensor.Value = input$Data,
     Sensor.Unit = rep(NA_character_, nrow(input)))
+
+  # Some thelma output files come with "-" rather than NA...
+  output$Sensor.Value[output$Sensor.Value == "-"] <- NA
+  output$Sensor.Value <- as.numeric(output$Sensor.Value)
 
   if (any(is.na(output$Timestamp)))
     stop("Importing timestamps failed", call. = FALSE)
@@ -1557,6 +1565,7 @@ createStandards <- function(detections, spatial, deployments, discard.orphans = 
   detections$Receiver <- as.character(detections$Receiver)
   detections$Standard.name <- NA_character_
   detections$Array <- NA_character_
+  detections$Section <- NA_character_
   empty.receivers <- NULL
   for (i in 1:length(deployments)) {
     receiver.link <- detections$Receiver == names(deployments)[i]
@@ -1570,11 +1579,14 @@ createStandards <- function(detections, spatial, deployments, discard.orphans = 
         # rename receiver
         detections$Receiver[receiver.link][deployment.link] <- deployments[[i]]$Receiver[j]
         # find corresponding standard station name
-        the.station <- match(deployments[[i]]$Station.name[j], spatial$Station.name)
+        the.station <- match(deployments[[i]]$Station.name[j], spatial$stations$Station.name)
         # include Standard.name
-        detections$Standard.name[receiver.link][deployment.link] <- spatial$Standard.name[the.station]
+        detections$Standard.name[receiver.link][deployment.link] <- spatial$stations$Standard.name[the.station]
         # include Array
-        detections$Array[receiver.link][deployment.link] <- as.character(spatial$Array[the.station])
+        detections$Array[receiver.link][deployment.link] <- as.character(spatial$stations$Array[the.station])
+        # include Section
+        if (any(grepl("Section", colnames(spatial$stations))))
+          detections$Section[receiver.link][deployment.link] <- as.character(spatial$stations$Section[the.station])
       }
       if (any(the.error <- is.na(detections$Standard.name[receiver.link]))) {
         if (!discard.orphans) {
@@ -1613,10 +1625,11 @@ createStandards <- function(detections, spatial, deployments, discard.orphans = 
   appendTo(c("Screen", "Report"), paste0("M: Number of ALS: ", length(deployments), " (of which ", length(empty.receivers), " had no detections)"))
   if (!is.null(empty.receivers))
     appendTo(c("Screen", "Report", "Warning"), paste0("No detections were found for receiver(s) ", paste0(empty.receivers, collapse = ", "), "."))
-  aux <- spatial[spatial$Type == "Hydrophone", ]
   detections$Receiver <- as.factor(detections$Receiver)
-  detections$Array <- factor(detections$Array, levels = unique(aux$Array))
-  detections$Standard.name <- factor(detections$Standard.name, levels = aux$Standard.name)
+  detections$Array <- factor(detections$Array, levels = unlist(spatial$array.order))
+  if (any(grepl("Section", colnames(spatial$stations))))
+    detections$Section <- factor(detections$Section, levels = names(spatial$array.order))
+  detections$Standard.name <- factor(detections$Standard.name, levels = spatial$stations$Standard.name)
   return(detections)
 }
 

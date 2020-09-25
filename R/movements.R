@@ -31,6 +31,7 @@ groupMovements <- function(detections.list, bio, spatial, speed.method, max.inte
         if (attributes(dist.mat)$valid) {
           recipient <- data.frame(
             Array = NA_character_,
+            Section = NA_character_,
             Detections = NA_integer_,
             First.station = NA_character_,
             Last.station = NA_character_,
@@ -45,6 +46,7 @@ groupMovements <- function(detections.list, bio, spatial, speed.method, max.inte
         } else {
           recipient <- data.frame(
             Array = NA_character_,
+            Section = NA_character_,
             Detections = NA_integer_,
             First.station = NA_character_,
             Last.station = NA_character_,
@@ -67,6 +69,7 @@ groupMovements <- function(detections.list, bio, spatial, speed.method, max.inte
             start <- all.shifts[j - 1] + 1
           stop <- all.shifts[j]
           recipient[z, "Array"] <<- paste(x$Array[start])
+          recipient[z, "Section"] <<- paste(x$Section[start])
           recipient[z, "Detections"] <<- stop - start + 1
           recipient[z, "First.station"] <<- paste(x$Standard.name[start])
           recipient[z, "First.time"] <<- x$Timestamp[start]

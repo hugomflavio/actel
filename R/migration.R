@@ -320,7 +320,7 @@ by which sections are presented", immediate. = TRUE, call. = FALSE)
   if (is.null(success.arrays)) {
     success.arrays <- names(arrays)[unlist(lapply(arrays, function(x) is.null(x$after)))]
     if (length(success.arrays) == 1)
-      appendTo(c("Screen", "Warning", "Report"), paste0("'success.arrays' was not defined. Assuming success if tshe tags are last detected at array ", success.arrays, "."))
+      appendTo(c("Screen", "Warning", "Report"), paste0("'success.arrays' was not defined. Assuming success if the tags are last detected at array ", success.arrays, "."))
     else
       appendTo(c("Screen", "Warning", "Report"), paste0("'success.arrays' was not defined. Assuming success if the tags are last detected at arrays ", paste(success.arrays[-length(success.arrays)], collapse = ", "), " or ", tail(success.arrays, 1), "."))
   } else {
@@ -391,30 +391,30 @@ by which sections are presented", immediate. = TRUE, call. = FALSE)
       release <- as.character(bio$Release.site[na.as.false(bio$Transmitter == tag)])
       release <- unlist(strsplit(with(spatial, release.sites[release.sites$Standard.name == release, "Array"]), "|", fixed = TRUE))
 
-      output <- checkMinimumN(movements = movements[[i]], tag = tag, minimum.detections = minimum.detections)
+      output <- checkMinimumN(movements = movements[[tag]], tag = tag, minimum.detections = minimum.detections)
 
-      output <- checkUpstream(movements = output, tag = tag, release = release, arrays = arrays, GUI = GUI)
+      output <- checkUpstream(movements = output, tag = tag, detections = detections.list[[tag]], release = release, arrays = arrays, GUI = GUI)
 
-      output <- checkImpassables(movements = output, tag = tag, dotmat = dotmat, GUI = GUI)
+      output <- checkImpassables(movements = output, tag = tag, detections = detections.list[[tag]], dotmat = dotmat, GUI = GUI)
 
-      output <- checkJumpDistance(movements = output, release = release, tag = tag, dotmat = dotmat,
+      output <- checkJumpDistance(movements = output, release = release, tag = tag, dotmat = dotmat, detections = detections.list[[tag]],
                                   jump.warning = jump.warning, jump.error = jump.error, GUI = GUI)
 
       if (do.checkSpeeds) {
         temp.valid.movements <- simplifyMovements(movements = output, tag = tag, bio = bio, discard.first = discard.first,
           speed.method = speed.method, dist.mat = dist.mat)
-        output <- checkSpeeds(movements = output, tag = tag, valid.movements = temp.valid.movements,
+        output <- checkSpeeds(movements = output, tag = tag, valid.movements = temp.valid.movements, detections = detections.list[[tag]],
           speed.warning = speed.warning, speed.error = speed.error, GUI = GUI)
         rm(temp.valid.movements)
       }
 
       if (do.checkInactiveness) {
-        output <- checkInactiveness(movements = output, tag = tag, detections.list = detections.list[[tag]],
+        output <- checkInactiveness(movements = output, tag = tag, detections = detections.list[[tag]],
           inactive.warning = inactive.warning, inactive.error = inactive.error,
           dist.mat = dist.mat, GUI = GUI)
       }
     } else {
-      output <- overrideValidityChecks(moves = movements[[i]], tag = names(movements)[i], GUI = GUI) # nocov
+      output <- overrideValidityChecks(moves = movements[[tag]], detections = detections.list[[tag]], tag = tag, GUI = GUI) # nocov
     }
     return(output)
   })
@@ -534,7 +534,7 @@ by which sections are presented", immediate. = TRUE, call. = FALSE)
     release.overview <- lapply(names(split.CJS), function(i, releases = spatial$release.sites) {
       output <- split.CJS[[i]]
       x <- unlist(stringr::str_split(i, "\\.", 2))
-      output$Release <- rep(c(releases[releases$Station.name == x[2], paste0("n.", x[1])], NA, NA), 2)
+      output$Release <- rep(c(releases[releases$Standard.name == x[2], paste0("n.", x[1])], NA, NA), 2)
       output <- output[, c(ncol(output), 1:(ncol(output) - 1))]
       return(output)
     })
