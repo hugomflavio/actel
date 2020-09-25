@@ -42,8 +42,6 @@ test_that("checkArguments stops if wrong override is provided with preload", {
 	expect_error(explore(datapack = d, override = 1234),
 		"Some tag signals listed in 'override' (1234) are not listed in the biometrics data", fixed = TRUE)
 })
-# n
-# n
 
 test_that("explore with preload yields the same results as with traditional loading", {
 	results <- explore(datapack = d)

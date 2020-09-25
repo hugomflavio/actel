@@ -4,14 +4,24 @@
 \alias{checkSpeeds}
 \title{check tag speeds against defined thresholds (in m/s)}
 \usage{
-checkSpeeds(movements, tag, valid.movements, speed.warning, speed.error, GUI)
+checkSpeeds(
+  movements,
+  tag,
+  detections,
+  valid.movements,
+  speed.warning,
+  speed.error,
+  GUI
+)
 }
 \arguments{
-\item{movements}{The movements table}
+\item{movements}{The movements table for a specific tag.}
 
-\item{tag}{The tag being analysed}
+\item{tag}{The tag being analysed.}
 
-\item{valid.movements}{The valid movements table}
+\item{detections}{The detections data.frame for a specific tag.}
+
+\item{valid.movements}{The valid movements table for a specific tag.}
 
 \item{speed.warning}{If a tag moves at a speed equal or greater than
 \code{speed.warning} (in metres per second), a warning is issued. If left

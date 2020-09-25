@@ -7,13 +7,13 @@
 checkLinearity(secmoves, tag, spatial, arrays, GUI)
 }
 \arguments{
-\item{secmoves}{the section movements list}
+\item{secmoves}{the section movements list.}
 
-\item{tag}{The tag being analysed}
+\item{tag}{The tag being analysed.}
 
-\item{spatial}{The spatial data frame, as loaded by loadSpatial}
+\item{spatial}{A list of spatial objects in the study area.}
 
-\item{arrays}{a list containing information for each array}
+\item{arrays}{a list containing information for each array.}
 
 \item{GUI}{One of "needed", "always" or "never". If "needed", a new window is
 opened to inspect the movements only if the movements table is too big to be

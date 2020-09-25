@@ -89,9 +89,6 @@ preload <- function(biometrics, spatial, deployments, detections, dot, distances
 
   detections <- preloadDetections(input = detections, tz = tz, start.time = start.time, stop.time = stop.time)
   detections <- checkDupDetections(input = detections)
-  detections <- createStandards(detections = detections, spatial = spatial, deployments = deployments, discard.orphans = discard.orphans) # get standardized station and receiver names, check for receivers with no detections
-  appendTo(c("Screen", "Report"), paste0("M: Data time range: ", as.character(head(detections$Timestamp, 1)), " to ", as.character(tail(detections$Timestamp, 1)), " (", tz, ")."))
-  checkUnknownReceivers(input = detections) # Check if there are detections from unknown detections
 
   if (missing(dot)) {
     n <- length(unique(spatial$Array[spatial$Type == "Hydrophone"]))
@@ -124,9 +121,13 @@ preload <- function(biometrics, spatial, deployments, detections, dot, distances
     first.array <- NULL
   spatial <- transformSpatial(spatial = spatial, bio = bio, arrays = arrays, dotmat = dotmat, first.array = first.array) # Finish structuring the spatial file
 
-  detections$Array <- factor(detections$Array, levels = unlist(spatial$array.order)) # Fix array levels
+  detections <- createStandards(detections = detections, spatial = spatial, deployments = deployments, discard.orphans = discard.orphans) # get standardized station and receiver names, check for receivers with no detections
+  appendTo(c("Screen", "Report"), paste0("M: Data time range: ", as.character(head(detections$Timestamp, 1)), " to ", as.character(tail(detections$Timestamp, 1)), " (", tz, ")."))
+  checkUnknownReceivers(input = detections) # Check if there are detections from unknown receivers
+
+  # Reorder arrays by spatial order
   link <- match(unlist(spatial$array.order), names(arrays))
-  arrays <- arrays[link] # Reorder arrays by spatial order
+  arrays <- arrays[link]
   rm(link)
 
   if (missing(distances)) {

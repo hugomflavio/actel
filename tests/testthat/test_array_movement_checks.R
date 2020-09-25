@@ -117,7 +117,7 @@ test_that("checkSpeeds reacts as expected.", {
 test_that("checkInactiveness reacts as expected.", {
   xmoves <- moves[[1]][-c(17, 18), ]
   # With distances
-  expect_warning(output <- checkInactiveness(movements = xmoves, tag = "test", detections.list = detections.list[[1]],
+  expect_warning(output <- checkInactiveness(movements = xmoves, tag = "test", detections = detections.list[[1]],
     inactive.warning = 1, inactive.error = Inf, dist.mat = dist.mat, GUI = "never"),
   "Tag test was detected 292 times at stations less than 1.5 km apart in array 'A7' (St.9, St.10, St.11), over 2.57 days and then disappeared. Could it be inactive?", fixed = TRUE)
   expect_equal(output, xmoves)
@@ -125,19 +125,19 @@ test_that("checkInactiveness reacts as expected.", {
   # Without distances
   xdist <- dist.mat
   attributes(xdist)$valid <- FALSE
-  expect_warning(output <- checkInactiveness(movements = xmoves, tag = "test", detections.list = detections.list[[1]],
+  expect_warning(output <- checkInactiveness(movements = xmoves, tag = "test", detections = detections.list[[1]],
     inactive.warning = 1, inactive.error = Inf, dist.mat = xdist, GUI = "never"),
   "Tag test was detected 292 times at three or less stations of array 'A7' (St.9, St.10, St.11) over 2.57 days and then disappeared. Could it be inactive?", fixed = TRUE)
   expect_equal(output, xmoves)
 
   # no warnings
-  output <- checkInactiveness(movements = xmoves, tag = "test", detections.list = detections.list[[1]],
+  output <- checkInactiveness(movements = xmoves, tag = "test", detections = detections.list[[1]],
     inactive.warning = Inf, inactive.error = Inf, dist.mat = xdist, GUI = "never")
   expect_equal(output, xmoves)
 
   # internal code option for no shifts
   xmoves <- moves[[1]][-c(1:6, 17, 18), ]
-  output <- checkInactiveness(movements = xmoves, tag = "test", detections.list = detections.list[[1]],
+  output <- checkInactiveness(movements = xmoves, tag = "test", detections = detections.list[[1]],
     inactive.warning = Inf, inactive.error = Inf, dist.mat = xdist, GUI = "never")
   expect_equal(output, xmoves)
 })

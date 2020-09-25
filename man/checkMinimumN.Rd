@@ -7,14 +7,14 @@
 checkMinimumN(movements, minimum.detections, tag)
 }
 \arguments{
-\item{movements}{The movements table}
+\item{movements}{The movements table for a specific tag.}
 
 \item{minimum.detections}{For tags with only one movement event, defines the
 minimum number of times a tag must have been recorded during the study
 period for it to be considered true detections and not random noise.
 Defaults to 2.}
 
-\item{tag}{The tag being analysed}
+\item{tag}{The tag being analysed.}
 }
 \value{
 A data frame containing the movements with valid/invalid notes

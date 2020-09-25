@@ -7,9 +7,9 @@
 checkSMovesN(secmoves, tag, section.minimum, GUI)
 }
 \arguments{
-\item{secmoves}{the section movements list}
+\item{secmoves}{the section movements list.}
 
-\item{tag}{The tag being analysed}
+\item{tag}{The tag being analysed.}
 
 \item{section.minimum}{If a tag has less than \code{section.minimum}
 consecutive detections in a section, a warning is issued. Defaults to 2.}
