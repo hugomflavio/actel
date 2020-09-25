@@ -9,7 +9,8 @@ loadDetections(
   stop.time = NULL,
   tz,
   force = FALSE,
-  save.detections = FALSE
+  save.detections = FALSE,
+  record.source = FALSE
 )
 }
 \arguments{

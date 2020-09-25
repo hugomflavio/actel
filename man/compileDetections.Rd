@@ -9,7 +9,8 @@ compileDetections(
   start.time = NULL,
   stop.time = NULL,
   tz,
-  save.detections = FALSE
+  save.detections = FALSE,
+  record.source = FALSE
 )
 }
 \arguments{
