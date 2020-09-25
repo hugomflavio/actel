@@ -172,7 +172,7 @@ breakMatricesByArray <- function(m, arrays, type = c("peers", "all"), verbose = 
         a.regex <- paste0("^", c(names(arrays)[i], arrays[[i]]$all.after), "$", collapse = "|")
       aux  <- lapply(m, function(m) m[, which(grepl(a.regex, colnames(m)))])
       # Failsafe in case some tags are released at one of the peers
-      keep <- unlist(lapply(m, function(m) any(grepl(names(arrays)[i], colnames(m)))))
+      keep <- unlist(lapply(m, function(m) any(grepl(paste0("^", names(arrays)[i], "$"), colnames(m)))))
       aux  <- aux[keep]
       # Convert peers to single column and add fake start
       aux  <- lapply(aux, function(m) {

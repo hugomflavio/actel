@@ -8,6 +8,7 @@ Fixes:
   * Prevent warning during printing of the progression flowchart, related to overlapping array names (that could also lead to an actual error).
   * Fix undesired behaviour in unknown receiver mechanisms and improve unknown handling.
   * Prevent crash in array efficiency estimation if release sites have spaces.
+  * Prevent wrong output in array efficiency estimations if array names are contained within each other.
 
 Enhancements:
   * New functionality: expand events and edit the validity of individual detections.
