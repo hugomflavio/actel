@@ -818,6 +818,9 @@ checkTagsInUnknownReceivers <- function(detections.list, deployments, spatial) {
       }
     }
   }
+  # remove empty data frames (for tags detected only at excluded unknown receivers)
+  detections.list <- detections.list[sapply(detections.list, nrow) > 0]
+  
   return(list(spatial = spatial, deployments = deployments, detections.list = detections.list))
 }
 
