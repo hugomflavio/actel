@@ -751,7 +751,7 @@ plotTimes <- function(times, night = NULL, col, alpha = 0.8, title = "", mean.da
   if (!inherits(times, "list"))
     stop("'times' must be a list.", call. = FALSE)
 
-  if (any(link <- !sapply(aux, function(i) "circular" %in% class(i))))
+  if (any(link <- !sapply(times, function(i) "circular" %in% class(i))))
     stop(ifelse(sum(link) > 1, "Element(s) ", "Element "),
          paste(which(link), collapse = " "), " in 'times' ",
          ifelse(sum(link) > 1, "are not ", "is not a "), "circular ",
