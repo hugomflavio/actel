@@ -751,6 +751,12 @@ plotTimes <- function(times, night = NULL, col, alpha = 0.8, title = "", mean.da
   if (!inherits(times, "list"))
     stop("'times' must be a list.", call. = FALSE)
 
+  if (any(link <- !sapply(aux, function(i) "circular" %in% class(i))))
+    stop(ifelse(sum(link) > 1, "Element(s) ", "Element "),
+         paste(which(link), collapse = " "), " in 'times' ",
+         ifelse(sum(link) > 1, "are not ", "is not a "), "circular ",
+         ifelse(sum(link) > 1, "objects.", "object."), call. = FALSE)
+
   if (!is.null(night) && length(night) != 2)
     stop("'night' must have two values.", call. = FALSE)
 
@@ -831,6 +837,7 @@ plotTimes <- function(times, night = NULL, col, alpha = 0.8, title = "", mean.da
     if (unk.ext) {
       stop("Could not recognise 'file' extension (recognised extensions: .svg, .pdf, .png, .tiff).", call. = FALSE)
     }
+    on.exit(grDevices::dev.off())
   }
 
   if (legend.pos == "auto") {
@@ -944,10 +951,8 @@ plotTimes <- function(times, night = NULL, col, alpha = 0.8, title = "", mean.da
     legend = paste(names(times), " (", unlist(lapply(times, function(x) sum(!is.na(x)))), ")", sep =""),
     fill = params$col, bty = "n", x.intersp = 0.3, cex = 0.8, ncol = ncol)
 
-  if(!missing(file)) {
-    grDevices::dev.off()
+  if(!missing(file))
     message("M: Plot saved to ", file)
-  }
 }
 
 #' Calculate beta estimations for efficiency
