@@ -936,6 +936,7 @@ loadBio <- function(input, tz){
   if (!any(grepl("Group", colnames(bio)))) {
     appendTo("Screen", paste0("M: No 'Group' column found in the biometrics. Assigning all animals to group 'All'."))
     bio$Group <- "All"
+    bio$Group <- as.factor(bio$Group)
   } else {
     bio$Group <- factor(bio$Group)
     if (any(link <- is.na(bio$Group) | bio$Group == "")) {
