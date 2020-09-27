@@ -59,6 +59,9 @@ checkArguments <- function(dp, tz, minimum.detections, max.interval, speed.metho
     appendTo(c("Screen", "Warning", "Report"), paste0("Argument", ifelse(sum(link) > 1, "s '", " '"), paste(no.dp.args[link], collapse = "', '"),
       ifelse(sum(link) > 1, "' were ", "' was "), "set but a datapack was provided. Disregarding set arguments."))
 
+  if (is.null(dp) & is.null(tz))
+    stopAndReport('argument "tz" is missing, with no default')
+
   if (is.null(dp) && is.na(match(tz, OlsonNames())))
     stopAndReport("'tz' could not be recognized as a timezone. Check available timezones with OlsonNames()")
 
