@@ -746,9 +746,10 @@ loadSpatial <- function(input = "spatial.csv", section.order = NULL){
   if (any(grepl("^Invalid$", input$Array)))
     stopAndReport("The term 'Invalid' is reserved for internal calculations. Do not name any arrays as 'Invalid'.")
   # check array name length
-  if (any(nchar(as.character(input$Array)) > 6))
+  aux <- unlist(strsplit(input$Array, "|", fixed = TRUE))
+  if (any(nchar(as.character(aux)) > 6))
     appendTo(c("Screen", "Report", "Warning"), "Long array names detected. To improve graphic rendering, consider keeping array names under six characters.")
-  
+  rm(aux)
   # check missing Type column
   if (!any(grepl("Type", colnames(input)))) {
     appendTo(c("Screen", "Report"), paste0("M: No 'Type' column found in the spatial input. Assigning all rows as hydrophones."))
