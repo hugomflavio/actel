@@ -1,0 +1,23 @@
+pandoc: 2.7.2
+pkgdown: 1.6.1
+pkgdown_sha: ~
+articles:
+  a-0_workspace_requirements: a-0_workspace_requirements.html
+  a-1_study_area: a-1_study_area.html
+  a-2_distances_matrix: a-2_distances_matrix.html
+  a-3_preload: a-3_preload.html
+  b-0_explore: b-0_explore.html
+  b-1_explore_processes: b-1_explore_processes.html
+  b-2_explore_results: b-2_explore_results.html
+  c-0_migration: c-0_migration.html
+  c-1_migration_processes: c-1_migration_processes.html
+  c-2_migration_results: c-2_migration_results.html
+  c-3_migration_efficiency: c-3_migration_efficiency.html
+  d-0_residency: d-0_residency.html
+  d-1_residency_processes: d-1_residency_processes.html
+  d-2_residency_results: d-2_residency_results.html
+  d-3_residency_efficiency: d-3_residency_efficiency.html
+  e-0_manual_mode: e-0_manual_mode.html
+  f-0_post_functions: f-0_post_functions.html
+last_built: 2020-09-29T13:40Z
+
