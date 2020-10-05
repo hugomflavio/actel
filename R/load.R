@@ -388,7 +388,7 @@ findPeers <- function(input, dotmat, type = c("before", "after"), disregard.para
           if (length(input[[b]][[opposite]]) == 1) {
             # IF B has no parallels or parallels are being discarded
             if (is.null(input[[b]]$parallel) || disregard.parallels) {
-              if (is.null(peers) || all(!grepl(b, peers))) {
+              if (is.null(peers) || all(!grepl(paste0("^", b, "$"), peers))) {
                 peers <- c(peers, b)
                 new.check <- c(new.check, input[[b]][[type]])
               }
@@ -408,7 +408,7 @@ findPeers <- function(input, dotmat, type = c("before", "after"), disregard.para
         if (dotmat[a, b] > 1 && all(!is.na(match(input[[b]][[opposite]], peers)))) {
           # IF B has no parallel arrays, or disregard parallels is set to TRUE
           if (is.null(input[[b]]$parallel) || disregard.parallels) {
-            if (is.null(peers) || all(!grepl(b, peers))) {
+            if (is.null(peers) || all(!grepl(paste0("^", b, "$"), peers))) {
               peers <- c(peers, b)
               new.check <- c(new.check, input[[b]][[type]])
             }
@@ -449,7 +449,7 @@ findDirectChains <- function(input, dotmat, type = c("before", "after")) {
     while (!is.null(to.check)) {
       new.check <- NULL
       for (b in to.check) {
-          if (is.null(chain) || all(!grepl(b, chain))) {
+          if (is.null(chain) || all(!grepl(paste0("^", b, "$"), chain))) {
             chain <- c(chain, b)
             parallel.aux <- c(parallel.aux, input[[b]]$parallel)
             new.check <- c(new.check, input[[b]][[type]])
@@ -716,7 +716,7 @@ loadSpatial <- function(input = "spatial.csv", section.order = NULL){
   if (!is.na(link <- match("Station.Name", colnames(input))))
     colnames(input)[link] <- "Station.name"
   # Check missing Station.name
-  if (!any(grepl("Station.name", colnames(input)))) {
+  if (!any(grepl("^Station.name$", colnames(input)))) {
     stopAndReport("The spatial input must contain a 'Station.name' column.")
   } else {
     # Check all station names are unique
@@ -725,7 +725,7 @@ loadSpatial <- function(input = "spatial.csv", section.order = NULL){
     }
   }
   # Check missing Array column
-  if (!any(grepl("Array", colnames(input)))) {
+  if (!any(grepl("^Array$", colnames(input)))) {
     stopAndReport("The spatial input must contain an 'Array' column.")
   }
   # check missing data in the arrays
@@ -751,7 +751,7 @@ loadSpatial <- function(input = "spatial.csv", section.order = NULL){
     appendTo(c("Screen", "Report", "Warning"), "Long array names detected. To improve graphic rendering, consider keeping array names under six characters.")
   rm(aux)
   # check missing Type column
-  if (!any(grepl("Type", colnames(input)))) {
+  if (!any(grepl("^Type$", colnames(input)))) {
     appendTo(c("Screen", "Report"), paste0("M: No 'Type' column found in the spatial input. Assigning all rows as hydrophones."))
     input$Type <- "Hydrophone"
   } else {
@@ -870,7 +870,7 @@ loadBio <- function(input, tz){
     stopAndReport("The following columns are duplicated in the biometrics: '",
       paste(unique(colnames(bio)[link]), sep = "', '"), "'.")
 
-  if (!any(grepl("Release.date", colnames(bio)))) {
+  if (!any(grepl("^Release.date$", colnames(bio)))) {
     stopAndReport("The biometrics must contain an 'Release.date' column.")
   }
 
@@ -886,7 +886,7 @@ loadBio <- function(input, tz){
     stopAndReport("Could not recognise the data in the 'Release.date' column as POSIX-compatible timestamps. Please double-check the biometrics.")
   }
 
-  if (!any(grepl("Signal", colnames(bio)))){
+  if (!any(grepl("^Signal$", colnames(bio)))){
     stopAndReport("The biometrics must contain an 'Signal' column.")
   }
 
@@ -918,10 +918,10 @@ loadBio <- function(input, tz){
     }
   }
 
-  if (!expect_integer & !any(grepl("Sensor.unit", colnames(bio))))
+  if (!expect_integer & !any(grepl("^Sensor.unit$", colnames(bio))))
     appendTo(c("Screen", "Warning"), "Tags with multiple sensors are listed in the biometrics, but a 'Sensor.unit' column could not be found. Skipping sensor unit assignment.")
 
-  if (!any(grepl("Release.site", colnames(bio)))) {
+  if (!any(grepl("^Release.site$", colnames(bio)))) {
     appendTo("Screen", "M: No Release site has been indicated in the biometrics. Creating a 'Release.site' column to avoid function failure. Filling with 'unspecified'.")
     bio$Release.site <- "unspecified"
   } else {
@@ -934,7 +934,7 @@ loadBio <- function(input, tz){
       bio$Release.site <- droplevels(bio$Release.site)
     }
   }
-  if (!any(grepl("Group", colnames(bio)))) {
+  if (!any(grepl("^Group$", colnames(bio)))) {
     appendTo("Screen", paste0("M: No 'Group' column found in the biometrics. Assigning all animals to group 'All'."))
     bio$Group <- "All"
     bio$Group <- as.factor(bio$Group)
@@ -1434,7 +1434,7 @@ splitDetections <- function(detections, bio, exclude.tags = NULL) {
     to.combine <- names(which(table(signal_match) > 1))
     for (i in to.combine) {
       unordered_indexes <- which(signal_match %in% i)
-      if (any(grepl("Sensor.unit", colnames(bio)))) {
+      if (any(grepl("^Sensor.unit$", colnames(bio)))) {
         sensor_units <- unlist(strsplit(bio$Sensor.unit[as.numeric(i)], "|", fixed = TRUE))
         if (length(sensor_units) != length(unordered_indexes)) {
           appendTo(c("Screen", "Warning", "Report"),
@@ -1466,7 +1466,7 @@ splitDetections <- function(detections, bio, exclude.tags = NULL) {
   trimmed.list <- my.list[na.exclude(link)]
 
   # include sensor units for single signal tags, if relevant
-  if (any(grepl("Sensor.unit", colnames(bio)))) {
+  if (any(grepl("^Sensor.unit$", colnames(bio)))) {
     link <- match(extractSignals(names(trimmed.list)), bio$Signal)
     aux <- names(trimmed.list)
     trimmed.list <- lapply(1:length(link), function(i) {
@@ -1594,7 +1594,7 @@ createStandards <- function(detections, spatial, deployments, discard.orphans = 
         # include Array
         detections$Array[receiver.link][deployment.link] <- as.character(spatial$stations$Array[the.station])
         # include Section
-        if (any(grepl("Section", colnames(spatial$stations))))
+        if (any(grepl("^Section$", colnames(spatial$stations))))
           detections$Section[receiver.link][deployment.link] <- as.character(spatial$stations$Section[the.station])
       }
       if (any(the.error <- is.na(detections$Standard.name[receiver.link]))) {
@@ -1646,7 +1646,7 @@ createStandards <- function(detections, spatial, deployments, discard.orphans = 
     appendTo(c("Screen", "Report", "Warning"), paste0("No detections were found for receiver(s) ", paste0(empty.receivers, collapse = ", "), "."))
   detections$Receiver <- as.factor(detections$Receiver)
   detections$Array <- factor(detections$Array, levels = unlist(spatial$array.order))
-  if (any(grepl("Section", colnames(spatial$stations))))
+  if (any(grepl("^Section$", colnames(spatial$stations))))
     detections$Section <- factor(detections$Section, levels = names(spatial$array.order))
   detections$Standard.name <- factor(detections$Standard.name, levels = spatial$stations$Standard.name)
   return(detections)
