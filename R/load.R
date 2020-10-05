@@ -162,10 +162,10 @@ loadDot <- function(string = NULL, input = NULL, spatial, disregard.parallels) {
   unique.arrays <- unique(unlist(sapply(spatial$Array, function(x) unlist(strsplit(x, "|", fixed = TRUE)))))
   if (any(link <- is.na(match(unique.arrays, colnames(mat))))) {
     if (file.exists("spatial.txt"))
-      stopAndReport(paste0("Not all the arrays listed in the spatial.csv file are present in the spatial.txt.\nMissing arrays: ", paste(unique.arrays[link], collapse = ", "), "\n"), call. = FALSE)
+      stopAndReport(paste0("Not all the arrays listed in the spatial.csv file are present in the spatial.txt.\nMissing arrays: ", paste(unique.arrays[link], collapse = ", "), "\n"))
     
     if (file.exists("spatial.dot")) {
-      stopAndReport(paste0("Not all the arrays listed in the spatial.csv file are present in the spatial.dot.\nMissing arrays: ", paste(unique.arrays[link], collapse = ", "), "\n"), call. = FALSE)
+      stopAndReport(paste0("Not all the arrays listed in the spatial.csv file are present in the spatial.dot.\nMissing arrays: ", paste(unique.arrays[link], collapse = ", "), "\n"))
     } else {
       stopAndReport(
 "Something went wrong when compiling the dot file:
@@ -634,7 +634,7 @@ loadDeployments <- function(input, tz){
     colnames(input)[link] <- "Station.name"
 
   if (any(link <- duplicated(colnames(input))))
-    stopAndReport("The following columns are duplicated in the deployments: '", paste(unique(colnames(input)[link]), sep = "', '"), "'.", call. = FALSE)
+    stopAndReport("The following columns are duplicated in the deployments: '", paste(unique(colnames(input)[link]), sep = "', '"), "'.")
 
   default.cols <- c("Receiver", "Station.name", "Start", "Stop")
   link <- match(default.cols, colnames(input))
@@ -643,7 +643,7 @@ loadDeployments <- function(input, tz){
       ifelse(sum(is.na(link)) > 1, "(s) '", " '"),
       paste(default.cols[is.na(link)], collapse = "', '"),
       ifelse(sum(is.na(link)) > 1, "' are", "' is"),
-      " missing in the deployments."), call. = FALSE)
+      " missing in the deployments."))
   }
   if (any(!grepl("^[1-2][0-9][0-9][0-9]-[0-1][0-9]-[0-3][0-9][ |T|t][0-2][0-9]:[0-5][0-9]", input$Start))) {
     stopAndReport("Not all values in the 'Start' column appear to be in a 'yyyy-mm-dd hh:mm' format (seconds are optional). Please double-check the deployments.")
