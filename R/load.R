@@ -1569,8 +1569,15 @@ createStandards <- function(detections, spatial, deployments, discard.orphans = 
   detections$Array <- NA_character_
   detections$Section <- NA_character_
   empty.receivers <- NULL
+  appendTo(c("Screen", "Report"), "M: Matching detections with deployment periods.")
+  
+  if (interactive())
+    pb <- txtProgressBar(min = 0, max = nrow(detections), style = 3, width = 60)
+  counter <- 0
+  
   for (i in 1:length(deployments)) {
     receiver.link <- detections$Receiver == names(deployments)[i]
+    counter <- counter + sum(receiver.link)
     if (all(!receiver.link)) {
       empty.receivers <- c(empty.receivers, names(deployments)[i])
     } else {
@@ -1591,6 +1598,8 @@ createStandards <- function(detections, spatial, deployments, discard.orphans = 
           detections$Section[receiver.link][deployment.link] <- as.character(spatial$stations$Section[the.station])
       }
       if (any(the.error <- is.na(detections$Standard.name[receiver.link]))) {
+        if (interactive())
+          message("")
         if (!discard.orphans) {
           appendTo(c("Screen", "Report"), paste0("Error: ", sum(the.error), " detections for receiver ", names(deployments)[i], " do not fall within deployment periods."))
           message("")
@@ -1615,7 +1624,6 @@ createStandards <- function(detections, spatial, deployments, discard.orphans = 
 
           if (decision == "c")
             discard.orphans <- TRUE
-
         } else {
           appendTo(c("Screen", "Report"), paste0("Error: ", sum(the.error), " detections for receiver ", names(deployments)[i], " do not fall within deployment periods. Discarding orphan detections."))
           rows.to.remove <- detections[receiver.link, which = TRUE][the.error]
@@ -1623,7 +1631,16 @@ createStandards <- function(detections, spatial, deployments, discard.orphans = 
         }
       }
     }
+    if (interactive())
+      setTxtProgressBar(pb, counter)
+    flush.console()
   }
+
+  if (interactive()) {
+    setTxtProgressBar(pb, nrow(detections))
+    close(pb)
+  }
+
   appendTo(c("Screen", "Report"), paste0("M: Number of ALS: ", length(deployments), " (of which ", length(empty.receivers), " had no detections)"))
   if (!is.null(empty.receivers))
     appendTo(c("Screen", "Report", "Warning"), paste0("No detections were found for receiver(s) ", paste0(empty.receivers, collapse = ", "), "."))
