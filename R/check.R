@@ -772,6 +772,8 @@ checkTagsInUnknownReceivers <- function(detections.list, deployments, spatial) {
   excluded.unknowns <- NULL
 
   appendTo("debug", "Running tagsInUnknownReceivers")
+
+  deployed.receivers <- unlist(lapply(deployments, function(x) x$Receiver))
   for (i in names(detections.list)) {
     if (any(is.na(detections.list[[i]]$Standard.name))) {
       # If this is not the first iteration, some receivers may have already been excluded.
@@ -779,7 +781,8 @@ checkTagsInUnknownReceivers <- function(detections.list, deployments, spatial) {
         detections.list[[i]] <- detections.list[[i]][!(detections.list[[i]]$Receiver %in% excluded.unknowns), ]
 
       receivers <- detections.list[[i]]$Receiver
-      new.unknowns <- unique(detections.list[[i]]$Receiver[is.na(match(receivers, names(deployments)))])
+      link <- is.na(match(receivers, deployed.receivers))
+      new.unknowns <- unique(detections.list[[i]]$Receiver[link])
       
       if (length(new.unknowns) > 0) {
         appendTo(c("Screen", "Report", "Warning"), paste0("Tag ", i, " was detected in one or more receivers that are not listed in the study area (receiver(s): ", paste(new.unknowns, collapse = ", "), ")!"))
