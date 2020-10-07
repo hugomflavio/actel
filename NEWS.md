@@ -10,6 +10,7 @@ Fixes:
   * Prevent crash in array efficiency estimation if release sites have spaces.
   * Prevent wrong output in array efficiency estimations if array names are contained within each other.
   * Prevent missing arrays when finding array paths due to overlapping array names.
+  * Prevent crash in distancesMatrix if spatial contains a "longitude" or "latitude" column.
 
 Enhancements:
   * New functionality: expand events and edit the validity of individual detections.

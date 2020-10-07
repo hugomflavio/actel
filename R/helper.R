@@ -1114,12 +1114,13 @@ distancesMatrix <- function(t.layer, starters = NULL, targets = starters,
   if (is.na(match(coord.y, colnames(targets))))
     stop(paste0("Could not find a column '", coord.y, "' in 'targets'."), call. = FALSE)
 
-  colnames(starters)[colnames(starters) == coord.x] <- "longitude"
-  colnames(starters)[colnames(starters) == coord.y] <- "latitude"
-  colnames(targets)[colnames(targets) == coord.x] <- "longitude"
-  colnames(targets)[colnames(targets) == coord.y] <- "latitude"
+    starters <- starters[, c(id.col, coord.x, coord.y)]
+    colnames(starters) <- c(id.col, "longitude", "latitude")
 
-  if (!missing(id.col)) {
+    targets <- targets[, c(id.col, coord.x, coord.y)]
+    colnames(targets) <- c(id.col, "longitude", "latitude")
+    
+  if (!is.null(id.col)) {
     if (!is.na(match(id.col, colnames(starters)))) {
       outputRows <- starters[, id.col]
       if (any(duplicated(outputRows))) {
@@ -1148,12 +1149,15 @@ distancesMatrix <- function(t.layer, starters = NULL, targets = starters,
     row.rename <- FALSE
     col.rename <- FALSE
   }
+
   #### Process the "from" coordinates (this would be the starters ".csv" file)
   sp::coordinates(starters) <- ~ longitude + latitude # converts the file to a spatialPoints object
   raster::crs(starters) <- raster::crs(t.layer) # sets the crs
+  
   #### Process the "to" coordinates (this would be the targets ".csv" file)
   sp::coordinates(targets) <- ~ longitude + latitude # converts the file to a spatialPoints object
   raster::crs(targets) <- raster::crs(t.layer)
+  
   #### Calculate a matrix of distances to each object
   dist.mat <- data.frame(gdistance::costDistance(t.layer, starters, targets))
   if (any(dist.mat == Inf)) {
@@ -1163,11 +1167,14 @@ in the shape file, consider applying a 'buffer' when calculating the transition 
 will artificially add water space around the shape file.", call. = FALSE)
     dist.mat[dist.mat == Inf] <- NA
   }
+  
   if (row.rename)
     rownames(dist.mat) <- outputRows
+  
   if (col.rename)
     colnames(dist.mat) <- outputCols
-  if (interactive () & actel) { # nocov start
+  
+  if (interactive() & actel) { # nocov start
     decision <- userInput("Would you like to save an actel-compatible distances matrix as 'distances.csv' in the current work directory?(y/n) ",
                           choices = c("y", "n"))
     if (decision == "y") {
