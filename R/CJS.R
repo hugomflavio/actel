@@ -165,17 +165,23 @@ breakMatricesByArray <- function(m, arrays, type = c("peers", "all"), verbose = 
   recipient <- list()
   for (i in 1:length(arrays)) {
     if ((type == "peers" & !is.null(arrays[[i]]$after.peers)) | (type == "all" & !is.null(arrays[[i]]$all.after))) {
-      # grab only relevant arrays
+      # find out relevant arrays
       if (type == "peers")
         a.regex <- paste0("^", c(names(arrays)[i], arrays[[i]]$after.peers), "$", collapse = "|")
       else
         a.regex <- paste0("^", c(names(arrays)[i], arrays[[i]]$all.after), "$", collapse = "|")
-      aux  <- lapply(m, function(m) m[, which(grepl(a.regex, colnames(m)))])
+      # grab only relevant arrays
+      aux  <- lapply(m, function(m_i) m_i[, which(grepl(a.regex, colnames(m_i)))])
       # Failsafe in case some tags are released at one of the peers
-      keep <- unlist(lapply(m, function(m) any(grepl(paste0("^", names(arrays)[i], "$"), colnames(m)))))
+      keep <- unlist(lapply(m, function(m_i) any(grepl(paste0("^", names(arrays)[i], "$"), colnames(m_i)))))
       aux  <- aux[keep]
+      # reorder columns if necessary
+      aux <- lapply(aux, function(x) {
+        peer.cols <- colnames(x)[!grepl(paste0("^", names(arrays)[i], "$"), colnames(x))]
+        return(x[, c(names(arrays)[i], peer.cols)])
+      })
       # Convert peers to single column and add fake start
-      aux  <- lapply(aux, function(m) {
+      aux <- lapply(aux, function(m) {
         if (ncol(m) > 2) {
           m[, 2:ncol(m)] <- apply(m[, 2:ncol(m)], 2, as.logical)
           m$AnyPeer <- as.numeric(apply(m[-1], 1, any))
@@ -190,7 +196,7 @@ breakMatricesByArray <- function(m, arrays, type = c("peers", "all"), verbose = 
       own.zero.check <- unlist(lapply(aux, function(x) sum(x[, 2]) == 0))
       peer.zero.check <- unlist(lapply(aux, function(x) sum(x$AnyPeer) == 0))
       zero.check <- all(own.zero.check) | all(peer.zero.check)
-      if (all(zero.check)) {
+      if (zero.check) {
         if (all(own.zero.check) & verbose) {
           appendTo(c("Screen", "Warning", "Report"), paste0("No tags passed through array ", names(arrays)[i], ". Skipping efficiency estimations for this array."))
         } else {
@@ -512,7 +518,10 @@ mbSplitCJS <- function(mat, fixed.efficiency = NULL) {
       array.efficiency <- NULL
     else
       array.efficiency <- c(1, fixed.efficiency[grepl(paste0("^", colnames(m[[1]])[2], "$"), names(fixed.efficiency))], 1)
-    return(lapply(m, function(mm) simpleCJS(mm, fixed.efficiency = array.efficiency, silent = TRUE)))
+    output <- lapply(m, function(mm) {
+      simpleCJS(mm, fixed.efficiency = array.efficiency, silent = TRUE)
+    })
+    return(output)
   })
   groups <- unique(unlist(lapply(recipient, names)))
   output <- list()
