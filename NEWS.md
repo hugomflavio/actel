@@ -17,6 +17,7 @@ Enhancements:
   * New functionality: expand events and edit the validity of individual detections.
   * Added Section information to the detections and the movement tables.
   * Automatically convert "-" to NA in the Data column of Thelma log files.
+  * Automatically rename Y axis in plotDetections to "Array" if type = "arrays".
 
 ## actel 1.1.1
 

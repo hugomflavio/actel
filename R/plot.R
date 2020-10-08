@@ -686,7 +686,12 @@ plotDetections <- function(input, tag, type = c("stations", "arrays"), title, xl
   p <- p + ggplot2::scale_y_discrete(drop = FALSE)
   # Caption and title
   p <- p + ggplot2::guides(colour = ggplot2::guide_legend(reverse = TRUE))
-  p <- p + ggplot2::labs(title = title, x = ifelse(missing(xlab), paste("tz:", tz), xlab), y = ifelse(missing(ylab), "Station Standard Name", ylab))
+  if (missing(ylab) {
+    if (type == "stations")
+      ylab <- "Station Standard Name"
+    else
+      ylab <- "Array"
+  p <- p + ggplot2::labs(title = title, x = ifelse(missing(xlab), paste("tz:", tz), xlab), y = ylab)
 
   return(p)
 }
