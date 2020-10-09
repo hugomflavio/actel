@@ -686,7 +686,7 @@ plotDetections <- function(input, tag, type = c("stations", "arrays"), title, xl
   p <- p + ggplot2::scale_y_discrete(drop = FALSE)
   # Caption and title
   p <- p + ggplot2::guides(colour = ggplot2::guide_legend(reverse = TRUE))
-  if (missing(ylab) {
+  if (missing(ylab)) {
     if (type == "stations")
       ylab <- "Station Standard Name"
     else
