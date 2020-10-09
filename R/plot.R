@@ -691,6 +691,7 @@ plotDetections <- function(input, tag, type = c("stations", "arrays"), title, xl
       ylab <- "Station Standard Name"
     else
       ylab <- "Array"
+  }
   p <- p + ggplot2::labs(title = title, x = ifelse(missing(xlab), paste("tz:", tz), xlab), y = ylab)
 
   return(p)
