@@ -86,7 +86,7 @@ for!
 \code{\link{exampleWorkspace}}, \code{\link{createWorkspace}}
 }
 \author{
-\strong{Maintainer}: Hugo Flávio \email{hdmfla@aqua.dtu.dk} (\href{https://orcid.org/0000-0002-5174-1197}{ORCID})
+\strong{Maintainer}: Hugo Flávio \email{hflavio@wlu.ca} (\href{https://orcid.org/0000-0002-5174-1197}{ORCID})
 
 }
 \keyword{internal}
