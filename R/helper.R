@@ -80,60 +80,6 @@ stopAndReport <- function(...) {
   stop(the.string, call. = FALSE)
 }
 
-#' Wrap frequently used code to handle user input
-#' 
-#' @param question The question to be asked
-#' @param choices The accepted inputs. Leave empty for any input
-#' @param tag the tag code (for comments only)
-#' @param hash A string to attach to the decision in the UD. Ignored if input already has a hash string
-#' 
-#' @keywords internal
-#' 
-userInput <- function(question, choices, tag, hash) {
-  appendTo("debug", "Running userInput.")
-  if (interactive()) { # nocov start
-    try.again <- TRUE
-    
-    while (try.again) {
-      decision <- readline(question)
-      aux <- strsplit(as.character(decision), "[ ]*#")[[1]]
-      output <- tolower(aux[1])
-      
-      if (!missing(choices) && is.na(match(output, choices))) {
-        appendTo("Screen", paste0("Option not recognized, please choose one of: '", paste0(choices, collapse = "', '"), "'."))
-        output <- NULL
-      }
-      
-      if (!is.null(output)) {
-        if (output == "comment") {
-          if (missing(tag)) {
-            warning("A comment was requested but that option is not available here. Please try again.", immediate. = TRUE, call. = FALSE)
-          } else {
-            appendTo("UD", paste("comment # on", tag))
-            appendTo(c("UD", "Comment"), readline(paste0("New comment on tag ", tag, ": ")), tag)
-            appendTo("Screen", "M: Comment successfully stored, returning to the previous interaction.")
-          }
-        } else {
-          try.again <- FALSE
-        }
-      }
-    } 
-    
-    if (length(aux) == 1 & !missing(hash))
-      appendTo("UD", paste(decision, hash))
-    else
-      appendTo("UD", paste(decision))
-
-  } else { # nocov end
-
-    if (any(choices == "n"))
-      output <- "n"
-    if (any(choices == "b"))
-      output <- "b"
-  }
-  return(output)
-}
-
 #' Find original station name
 #' 
 #' @param input The results of an actel analysis (either explore, migration or residency).
