@@ -313,7 +313,6 @@ plotArray <- function(input, arrays, title, xlab, ylab, lwd = 1, col = "#56B4E9"
 #' @export
 #'
 plotMoves <- function(input, tags, title, xlab, ylab, col, array.alias, show.release = TRUE) {
-  message("M: The old plotMoves function has been renamed to plotDetections as of version 1.1.1. Please ensure you are calling the right function!")
   movements <- NULL
   tag <- NULL
   event <- NULL
