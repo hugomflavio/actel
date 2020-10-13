@@ -185,30 +185,6 @@ dataToList <- function(source){
   return(as.list(e))
 }
 
-#' @title Remove Code Spaces from transmitter names
-#'
-#' @param input A vector of transmitter names
-#'
-#' @return A vector of transmitter signals
-#'
-#' @name stripCodeSpaces-deprecated
-#' @usage stripCodeSpaces(input)
-#' @seealso \code{\link{actel-deprecated}}
-#' @keywords internal
-NULL
-
-#' @rdname stripCodeSpaces-deprecated
-#'
-#' @section \code{stripCodeSpaces}:
-#' For \code{stripCodeSpaces}, use \code{\link{extractSignals}}.
-#'
-#' @export
-#'
-stripCodeSpaces <- function(input) {
-  .Deprecated("extractSignals")
-  extractSignals(input)
-}
-
 #' Extract signals from transmitter names
 #'
 #' @param input A vector of transmitter names
