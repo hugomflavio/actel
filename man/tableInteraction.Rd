@@ -4,7 +4,15 @@
 \alias{tableInteraction}
 \title{Handler for table interaction events}
 \usage{
-tableInteraction(moves, detections, tag, trigger, GUI, force = FALSE)
+tableInteraction(
+  moves,
+  detections,
+  tag,
+  trigger,
+  GUI,
+  force = FALSE,
+  save.tables.locally
+)
 }
 \arguments{
 \item{moves}{The complete movements table for a specific tag.}
@@ -24,6 +32,10 @@ not fit in R's console, a temporary file will be saved and the user will be
 prompted to open and examine that file. Defaults to "needed".}
 
 \item{force}{Logical: If TRUE, the user is moved directly to indicating which movements should be invalidated.}
+
+\item{save.tables.locally}{Logical: If a table must be temporarily stored into a file
+for user inspection, should it be saved in the current working directory, or
+in R's temporary folder?}
 }
 \value{
 A data frame with the updated movements table

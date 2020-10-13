@@ -14,6 +14,9 @@
 #'  interface is never invoked. In this case, if the table to be displayed does
 #'  not fit in R's console, a temporary file will be saved and the user will be
 #'  prompted to open and examine that file. Defaults to "needed".
+#' @param save.tables.locally Logical: If a table must be temporarily stored into a file
+#'  for user inspection, should it be saved in the current working directory, or
+#'  in R's temporary folder?
 #' 
 #' @name user_interaction_args
 #' @keywords internal
@@ -86,7 +89,7 @@ userInput <- function(question, choices, tag, hash) {
 #'
 #' @keywords internal
 #'
-tableInteraction <- function(moves, detections, tag, trigger, GUI, force = FALSE) { # nocov start
+tableInteraction <- function(moves, detections, tag, trigger, GUI, force = FALSE, save.tables.locally) { # nocov start
   Valid <- NULL
   appendTo("debug", "Running tableInteraction.")
   if (GUI == "never")
@@ -120,9 +123,23 @@ tableInteraction <- function(moves, detections, tag, trigger, GUI, force = FALSE
     # ---
     # make decision
     if (outside.console) {
-      message("The movements table for tag '", tag, "' is too large to display on the console and GUI is set to 'never'.\nTemporarily saving the table to '", paste0(tempdir(), '/actel_inspect_movements.csv'), "'. Please inspect this file and decide if any events should be considered invalid.\nPlease use the 'Event' column as a reference for the event number. ", sum(!moves$Valid), " invalid event(s) omitted.")
+      if (save.tables.locally)
+        target.file <- "actel_inspect_movements.csv"
+      else
+        target.file <- paste0(tempdir(), '/actel_inspect_movements.csv')
+      
+      # save file
       to.display <- cbind(data.frame(Event = 1:sum(moves$Valid)), moves[(Valid)])
-      write.csv(to.display, paste0(tempdir(), "/actel_inspect_movements.csv"), row.names = FALSE)
+      write.csv(to.display, target.file, row.names = FALSE)
+      # display instructions
+      message("M: The movements table for tag '", tag, "' is too large to display on the console and GUI is set to 'never'.\n   Temporarily saving the table to '", target.file, "'.\n   Please inspect this file and decide if any events should be considered invalid.")
+      if (save.tables.locally)
+        message("   This file will be automatically deleted once it has served its purpose.")
+      else
+        message("   Can't find the file? Check out the save.tables.locally argument.")
+      message("Please use the 'Event' column as a reference for the event number. ", sum(!moves$Valid), " invalid event(s) omitted.")
+      flush.console()
+      # start interaction
       if (force) {
         output <- invalidateEvents(displayed.moves = to.display, 
                                    all.moves = moves, 
@@ -144,14 +161,15 @@ tableInteraction <- function(moves, detections, tag, trigger, GUI, force = FALSE
                                     all.moves = moves, 
                                     detections = detections, 
                                     tag = tag,
-                                    GUI = GUI)
+                                    GUI = GUI,
+                                    save.tables.locally = save.tables.locally)
         } else {
           output <- moves
         }
       }
       first.try <- TRUE
-      while (file.exists(paste0(tempdir(), "/actel_inspect_movements.csv"))) {
-        if (!suppressWarnings(file.remove(paste0(tempdir(), "/actel_inspect_movements.csv")))) {
+      while (file.exists(target.file)) {
+        if (!suppressWarnings(file.remove(target.file))) {
           if (first.try) {
             warning("Please close the currently open 'actel_inspect_movements.csv' file so the analysis can continue", immediate. = TRUE, call. = FALSE); flush.console()
             first.try <- FALSE
@@ -177,7 +195,8 @@ tableInteraction <- function(moves, detections, tag, trigger, GUI, force = FALSE
                                   all.moves = moves, 
                                   detections = detections, 
                                   tag = tag,
-                                  GUI = GUI)
+                                  GUI = GUI,
+                                  save.tables.locally = save.tables.locally)
       } else {
         if (colnames(moves)[1] == "Section")
           text.to.display <- "Would you like to render any movement event invalid?(y/n/comment) "
@@ -193,7 +212,8 @@ tableInteraction <- function(moves, detections, tag, trigger, GUI, force = FALSE
                                     all.moves = moves, 
                                     detections = detections, 
                                     tag = tag,
-                                    GUI = GUI)
+                                    GUI = GUI,
+                                    save.tables.locally = save.tables.locally)
         } else {
           output <- moves
         }
@@ -216,7 +236,7 @@ tableInteraction <- function(moves, detections, tag, trigger, GUI, force = FALSE
 #'
 #' @keywords internal
 #'
-invalidateEvents <- function(displayed.moves, all.moves, detections, tag, GUI) { # nocov start
+invalidateEvents <- function(displayed.moves, all.moves, detections, tag, GUI, save.tables.locally) { # nocov start
   Valid <- NULL
   appendTo("debug", "Running invalidateEvents.")
   appendTo("Screen", "Note: You can select event ranges by separating them with a ':' and/or multiple events at once by separating them with a space or a comma.")
@@ -233,7 +253,8 @@ invalidateEvents <- function(displayed.moves, all.moves, detections, tag, GUI) {
                                  all.moves = all.moves, 
                                  detections = detections, 
                                  tag = tag,
-                                 GUI = GUI)
+                                 GUI = GUI,
+                                 save.tables.locally = save.tables.locally)
         displayed.moves <- all.moves[(Valid)]
         message("")
         appendTo("Screen", paste0("M: Updated movement table of tag ", tag, ":"))
@@ -436,7 +457,7 @@ graphicalInvalidate <- function(detections, moves, tag, trigger) { # nocov start
 #' 
 #' @keywords internal
 #' 
-expandEvent <- function(displayed.moves, all.moves, detections, tag, GUI) { # nocov start
+expandEvent <- function(displayed.moves, all.moves, detections, tag, GUI, save.tables.locally) { # nocov start
   check <- TRUE
   abort <- FALSE
   while(check) {
@@ -495,9 +516,23 @@ expandEvent <- function(displayed.moves, all.moves, detections, tag, GUI) { # no
     # ---
     # make decision
     if (outside.console) {
-      message("M: The detections table from event ", event, " of tag '", tag, "' is too large to display on the console and GUI is set to 'never'.\n   Temporarily saving the table to '", paste0(tempdir(), '/actel_inspect_detections.csv'), "'.\n   Please inspect this file and decide if any detections should be considered invalid.\n   Please use the 'Index' column as a reference for the row number. "); flush.console()
+      if (save.tables.locally)
+        target.file <- "actel_inspect_detections.csv"
+      else
+        target.file <- paste0(tempdir(), '/actel_inspect_detections.csv')
+      
+      # save file
       to.display <- cbind(data.frame(Index = 1:nrow(sub.det)), sub.det)
-      data.table::fwrite(to.display, paste0(tempdir(), "/actel_inspect_detections.csv"), row.names = FALSE)
+      write.csv(to.display, target.file, row.names = FALSE)
+      # display instructions
+      message("M: The detections table from event ", event, " of tag '", tag, "' is too large to display on the console and GUI is set to 'never'.\n   Temporarily saving the table to '", target.file, "'.\n   Please inspect this file and decide if any detections should be considered invalid.")
+      if (save.tables.locally)
+        message("   This file will be automatically deleted once it has served its purpose.")
+      else
+        message("   Can't find the file? Check out the save.tables.locally argument.")
+      message("Please use the 'Index' column as a reference for the row number. ")
+      flush.console()
+      # start interaction
       decision <- userInput("Would you like to render any detections invalid?(y/n/comment) ",
                             choices = c("y", "n", "comment"), 
                             tag = tag, 
@@ -724,11 +759,12 @@ transferValidity <- function(from, to) { # nocov start
 #'
 #' @keywords internal
 #'
-overrideValidityChecks <- function(moves, detections, tag, GUI) { # nocov start
+overrideValidityChecks <- function(moves, detections, tag, GUI, save.tables.locally) { # nocov start
   appendTo("debug", "Starting overrideValidityChecks.")
   message("----------------------------")
   appendTo(c("Screen", "Report"), trigger <- paste0("M: Override has been triggered for tag ", tag, ". Entering full manual mode."))
-  moves <- tableInteraction(moves = moves, detections = detections, tag = tag, trigger = trigger, GUI = GUI)
+  moves <- tableInteraction(moves = moves, detections = detections, tag = tag, 
+                            trigger = trigger, GUI = GUI, save.tables.locally = save.tables.locally)
   attributes(moves)$p.type <- "Overridden"
   message("Terminating full manual mode\n----------------------------")
   return(moves) # nocov end

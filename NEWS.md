@@ -20,6 +20,7 @@ Enhancements:
   * Automatically rename Y axis in plotDetections to "Array" if type = "arrays".
   * Added possibility to save orphan detection files for later inspection.
   * Include detections source file in a new "Source.file" column.
+  * New argument 'save.tables.locally' allows the user to save temporary tables in the current working directory. Particularly useful for Mac users that cannot activate the graphical user interface.
 
 ## actel 1.1.1
 

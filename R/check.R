@@ -237,11 +237,14 @@ checkToken <- function(token, timestamp) {
 #' @return An updated GUI argument (character string)
 #'
 #'
-checkGUI <- function(GUI = c("needed", "always", "never")) {
+checkGUI <- function(GUI = c("needed", "always", "never"), save.tables.locally) {
   appendTo("debug", "Running checkGUI.")
+
   if (!is.character(GUI))
     stopAndReport("'GUI' should be one of 'needed', 'always' or 'never'.")
+  
   GUI <- match.arg(GUI)
+  
   if (GUI != "never") {
     aux <- c(
       length(suppressWarnings(packageDescription("gWidgets2"))),
@@ -275,6 +278,13 @@ checkGUI <- function(GUI = c("needed", "always", "never")) {
       }
     }
   }
+
+  if (GUI == "never" & save.tables.locally & file.exists("actel_inspect_movements.csv"))
+    stopAndReport("GUI is set to 'never' and save.tables.locally is set to TRUE, but a file 'actel_inspect_movements.csv' already exists in the current work directory.\n       Stopping to prevent data loss. Delete/rename the existing 'actel_inspect_movements.csv' to be able to run this analysis.")
+
+  if (GUI == "never" & save.tables.locally & file.exists("actel_inspect_detections.csv"))
+    stopAndReport("GUI is set to 'never' and save.tables.locally is set to TRUE, but a file 'actel_inspect_detections.csv' already exists in the current work directory.\n       Stopping to prevent data loss. Delete/rename the existing 'actel_inspect_detections.csv' to be able to run this analysis.")
+
   return(GUI)
 }
 
@@ -392,7 +402,8 @@ checkMinimumN <- function(movements, minimum.detections, tag) {
 #'
 #' @keywords internal
 #'
-checkSpeeds <- function(movements, tag, detections, valid.movements, speed.warning, speed.error, GUI) {
+checkSpeeds <- function(movements, tag, detections, valid.movements, 
+  speed.warning, speed.error, GUI, save.tables.locally) {
   appendTo("debug", "Running checkSpeeds.")
   the.warning <- NULL
   vm <- valid.movements
@@ -417,7 +428,8 @@ checkSpeeds <- function(movements, tag, detections, valid.movements, speed.warni
   }
   # Trigger user interaction
   if (any(na.as.false(vm$Average.speed.m.s >= speed.error))) { # nocov start
-    movements <- tableInteraction(moves = movements, tag = tag, detections = detections, trigger = the.warning, GUI = GUI)
+    movements <- tableInteraction(moves = movements, tag = tag, detections = detections, 
+                                  trigger = the.warning, GUI = GUI, save.tables.locally = save.tables.locally)
   } # nocov end
   return(movements)
 }
@@ -432,7 +444,7 @@ checkSpeeds <- function(movements, tag, detections, valid.movements, speed.warni
 #' @keywords internal
 #'
 checkInactiveness <- function(movements, tag, detections,
-  inactive.warning, inactive.error, dist.mat, GUI) {
+  inactive.warning, inactive.error, dist.mat, GUI, save.tables.locally) {
   Valid <- NULL
   appendTo("debug", "Running checkInactiveness.")
   if (any(movements$Valid)) {
@@ -502,7 +514,9 @@ checkInactiveness <- function(movements, tag, detections,
       # Trigger user interaction
       if (trigger.error) { # nocov start
         appendTo("Screen", error.message <- paste0("M: Tag ", tag, " has been inactive for more than ", inactive.error," days. Inactiveness started on event ", start_i, " (", as.Date(valid.moves$First.time[start_i]),")."))
-        movements <- tableInteraction(moves = movements, tag = tag, detections = detections, trigger = paste0(the.warning, "\n", error.message), GUI = GUI)
+        movements <- tableInteraction(moves = movements, tag = tag, detections = detections, 
+                                      trigger = paste0(the.warning, "\n", error.message), GUI = GUI,
+                                      save.tables.locally = save.tables.locally)
       } # nocov end
       iteration <- iteration + 1
     }
@@ -518,7 +532,7 @@ checkInactiveness <- function(movements, tag, detections,
 #'
 #' @keywords internal
 #'
-checkImpassables <- function(movements, tag, detections, dotmat, GUI){
+checkImpassables <- function(movements, tag, detections, dotmat, GUI, save.tables.locally){
   appendTo("debug", "Running checkImpassables.")
   Valid <- NULL
   restart <- TRUE
@@ -538,7 +552,9 @@ checkImpassables <- function(movements, tag, detections, dotmat, GUI){
         })
         if (interactive()) { # nocov start
           the.warning <- paste("Warning:", the.warning, collapse = "\n")
-          movements <- tableInteraction(moves = movements, tag = tag, detections = detections, trigger = the.warning, GUI = GUI, force = TRUE)
+          movements <- tableInteraction(moves = movements, tag = tag, detections = detections, 
+                                        trigger = the.warning, GUI = GUI, force = TRUE, 
+                                        save.tables.locally = save.tables.locally)
           restart <- TRUE
         } else { # nocov end
           stop("Preventing analysis from entering interactive mode in a non-interactive session.\n")
@@ -558,12 +574,13 @@ checkImpassables <- function(movements, tag, detections, dotmat, GUI){
 #'
 #' @keywords internal
 #'
-checkSMovesN <- function(secmoves, tag, section.minimum, GUI) {
+checkSMovesN <- function(secmoves, tag, section.minimum, GUI, save.tables.locally) {
   appendTo("debug", "Running checkSMovesN.")
   if (any(link <- secmoves$Detections < section.minimum)) {
     appendTo(c("Screen", "Report", "Warning"), the.warning <- paste0("Section movements with less than ", section.minimum, " detections are present for tag ", tag, "."))
     if (interactive())
-      secmoves <- tableInteraction(moves = secmoves, tag = tag, trigger = the.warning, GUI = GUI) # nocov
+      secmoves <- tableInteraction(moves = secmoves, tag = tag, trigger = the.warning, # nocov
+                                   GUI = GUI, save.tables.locally = save.tables.locally) # nocov
   }
   return(secmoves)
 }
@@ -577,7 +594,7 @@ checkSMovesN <- function(secmoves, tag, section.minimum, GUI) {
 #'
 #' @keywords internal
 #'
-checkLinearity <- function(secmoves, tag, spatial, arrays, GUI) {
+checkLinearity <- function(secmoves, tag, spatial, arrays, GUI, save.tables.locally) {
   appendTo("debug", "Running checkLinearity.")
   sections <- names(spatial$array.order)
   back.check <- match(secmoves$Section, sections)
@@ -588,7 +605,8 @@ checkLinearity <- function(secmoves, tag, spatial, arrays, GUI) {
       else
         appendTo(c("Screen", "Report", "Warning"), the.warning <- paste0("Inter-section backwards movements were detected for tag ", tag, "."))
     if (interactive()) { # nocov start
-      secmoves <- tableInteraction(moves = secmoves, tag = tag, trigger = the.warning, GUI = GUI, force = FALSE)
+      secmoves <- tableInteraction(moves = secmoves, tag = tag, trigger = the.warning, 
+                                   GUI = GUI, force = FALSE, save.tables.locally = save.tables.locally)
     } # nocov end
   }
   return(secmoves)
@@ -631,7 +649,7 @@ checkReport <- function(report){
 #'
 #' @keywords internal
 #'
-checkUpstream <- function(movements, tag, release, detections, arrays, GUI) {
+checkUpstream <- function(movements, tag, release, detections, arrays, GUI, save.tables.locally) {
   appendTo("debug", "Running checkUpstream.")
   # NOTE: The NULL variables below are actually column names used by data.table.
   # This definition is just to prevent the package check from issuing a note due unknown variables.
@@ -650,7 +668,8 @@ checkUpstream <- function(movements, tag, release, detections, arrays, GUI) {
     appendTo(c("Screen", "Report", "Warning"), the.warning <- paste0("Tag ", tag, " was detected in an array that is not after its release site! Opening relevant data for inspection.\nExpected first array: ", release))
     the.warning <- paste("Warning:", the.warning)
     if (interactive()) { # nocov start
-      movements <- tableInteraction(moves = movements, tag = tag, detections = detections, trigger = the.warning, GUI = GUI)
+      movements <- tableInteraction(moves = movements, tag = tag, detections = detections, 
+                                    trigger = the.warning, GUI = GUI, save.tables.locally = save.tables.locally)
     } # nocov end
   }
   return(movements)
@@ -665,7 +684,9 @@ checkUpstream <- function(movements, tag, release, detections, arrays, GUI) {
 #'
 #' @keywords internal
 #'
-checkJumpDistance <- function(movements, tag, detections, release, dotmat, jump.warning, jump.error, GUI) {
+checkJumpDistance <- function(movements, tag, detections, release, 
+  dotmat, jump.warning, jump.error, GUI, save.tables.locally) {
+
   appendTo("debug", "Running checkJumpDistance.")
   # NOTE: The NULL variables below are actually column names used by data.table.
   # This definition is just to prevent the package check from issuing a note due unknown variables.
@@ -713,7 +734,8 @@ checkJumpDistance <- function(movements, tag, detections, release, dotmat, jump.
     }
     # Trigger user interaction
     if (interactive() && trigger.error) { # nocov start
-      movements <- tableInteraction(moves = movements, tag = tag, detections = detections, trigger = the.warning, GUI = GUI)
+      movements <- tableInteraction(moves = movements, tag = tag, detections = detections, 
+                                    trigger = the.warning, GUI = GUI, save.tables.locally = save.tables.locally)
     } # nocov end
   }
   return(movements)

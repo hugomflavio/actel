@@ -11,7 +11,8 @@ checkInactiveness(
   inactive.warning,
   inactive.error,
   dist.mat,
-  GUI
+  GUI,
+  save.tables.locally
 )
 }
 \arguments{
@@ -40,6 +41,10 @@ when the possibility to invalidate events emerges. If "never", a graphical
 interface is never invoked. In this case, if the table to be displayed does
 not fit in R's console, a temporary file will be saved and the user will be
 prompted to open and examine that file. Defaults to "needed".}
+
+\item{save.tables.locally}{Logical: If a table must be temporarily stored into a file
+for user inspection, should it be saved in the current working directory, or
+in R's temporary folder?}
 }
 \value{
 A list of movements with updated 'Valid' columns

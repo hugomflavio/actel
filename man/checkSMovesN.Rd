@@ -4,7 +4,7 @@
 \alias{checkSMovesN}
 \title{Verify number of detections in section movements}
 \usage{
-checkSMovesN(secmoves, tag, section.minimum, GUI)
+checkSMovesN(secmoves, tag, section.minimum, GUI, save.tables.locally)
 }
 \arguments{
 \item{secmoves}{the section movements list.}
@@ -21,6 +21,10 @@ when the possibility to invalidate events emerges. If "never", a graphical
 interface is never invoked. In this case, if the table to be displayed does
 not fit in R's console, a temporary file will be saved and the user will be
 prompted to open and examine that file. Defaults to "needed".}
+
+\item{save.tables.locally}{Logical: If a table must be temporarily stored into a file
+for user inspection, should it be saved in the current working directory, or
+in R's temporary folder?}
 }
 \value{
 A list of section movements with updated 'Valid' columns

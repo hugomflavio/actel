@@ -4,7 +4,14 @@
 \alias{invalidateEvents}
 \title{Allow the user to determine a given movement event invalid}
 \usage{
-invalidateEvents(displayed.moves, all.moves, detections, tag, GUI)
+invalidateEvents(
+  displayed.moves,
+  all.moves,
+  detections,
+  tag,
+  GUI,
+  save.tables.locally
+)
 }
 \arguments{
 \item{displayed.moves}{The valid movements table for a specific tag.}
@@ -22,6 +29,10 @@ when the possibility to invalidate events emerges. If "never", a graphical
 interface is never invoked. In this case, if the table to be displayed does
 not fit in R's console, a temporary file will be saved and the user will be
 prompted to open and examine that file. Defaults to "needed".}
+
+\item{save.tables.locally}{Logical: If a table must be temporarily stored into a file
+for user inspection, should it be saved in the current working directory, or
+in R's temporary folder?}
 }
 \value{
 A data frame with the movement events for the target tag and an updated 'Valid' column.

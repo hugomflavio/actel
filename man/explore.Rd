@@ -26,6 +26,7 @@ explore(
   discard.first = NULL,
   save.detections = FALSE,
   GUI = c("needed", "always", "never"),
+  save.tables.locally = FALSE,
   print.releases = TRUE,
   plot.detections.by = c("stations", "arrays")
 )
@@ -121,6 +122,10 @@ when the possibility to invalidate events emerges. If "never", a graphical
 interface is never invoked. In this case, if the table to be displayed does
 not fit in R's console, a temporary file will be saved and the user will be
 prompted to open that file and examine it. Defaults to "needed".}
+
+\item{save.tables.locally}{Logical: If a table must be temporarily stored into a file
+for user inspection, should it be saved in the current working directory, or
+in R's temporary folder?}
 
 \item{print.releases}{Logical: Should the release sites be printed in the
 study area diagrams?}

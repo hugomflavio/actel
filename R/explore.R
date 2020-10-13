@@ -58,6 +58,11 @@
 #'  analysis? NOTE: Setting report to TRUE will generate an HTML file in the current
 #'  directory. Additionally, if auto.open = TRUE (default), the web browser will
 #'  automatically be launched to open the report once the function terminates.
+#' @param save.detections Logical: Should the processed detections be saved for
+#'  future runs?
+#' @param save.tables.locally Logical: If a table must be temporarily stored into a file
+#'  for user inspection, should it be saved in the current working directory, or
+#'  in R's temporary folder?
 #' @param speed.error If a tag moves at a speed equal or greater than
 #'  \code{speed.error} (in metres per second), user intervention is suggested.
 #'  If left NULL (default), user intervention is never suggested.
@@ -72,8 +77,6 @@
 #' @param start.time Detection data prior to the timestamp set in
 #'  \code{start.time} (in YYYY-MM-DD HH:MM:SS format) is not considered during
 #'  the analysis.
-#' @param save.detections Logical: Should the processed detections be saved for
-#'  future runs?
 #' @param stop.time Detection data posterior to the timestamp set in
 #'  \code{stop.time} (in YYYY-MM-DD HH:MM:SS format) is not considered during
 #'  the analysis.
@@ -146,6 +149,7 @@ explore <- function(
   discard.first = NULL,
   save.detections = FALSE,
   GUI = c("needed", "always", "never"),
+  save.tables.locally = FALSE,
   print.releases = TRUE,
   plot.detections.by = c("stations", "arrays")) 
 {
@@ -199,7 +203,7 @@ explore <- function(
   plot.detections.by <- aux$plot.detections.by
   rm(aux)
 
-  GUI <- checkGUI(GUI)
+  GUI <- checkGUI(GUI, save.tables.locally = save.tables.locally)
 # ------------------------
 
 # Store function call
@@ -224,6 +228,7 @@ explore <- function(
     ", auto.open = ", ifelse(auto.open, "TRUE", "FALSE"),
     ", save.detections = ", ifelse(save.detections, "TRUE", "FALSE"),
     ", GUI = '", GUI, "'",
+    ", save.tables.locally = '", ifelse(save.tables.locally, "TRUE", "FALSE"),
     ", print.releases = ", ifelse(print.releases, "TRUE", "FALSE"),
     ", plot.detections.by = '", plot.detections.by, "'",
     ")")
@@ -332,27 +337,31 @@ explore <- function(
 
       output <- checkMinimumN(movements = movements[[tag]], tag = tag, minimum.detections = minimum.detections)
 
-      output <- checkImpassables(movements = output, tag = tag, detections = detections.list[[tag]], dotmat = dotmat, GUI = GUI)
+      output <- checkImpassables(movements = output, tag = tag, detections = detections.list[[tag]], 
+                                 dotmat = dotmat, GUI = GUI, save.tables.locally = save.tables.locally)
 
       output <- checkJumpDistance(movements = output, release = release, tag = tag, dotmat = dotmat,
-                                  jump.warning = jump.warning, jump.error = jump.error, GUI = GUI)
+                                  jump.warning = jump.warning, jump.error = jump.error, GUI = GUI,
+                                  save.tables.locally = save.tables.locally)
 
       if (do.checkSpeeds) {
         temp.valid.movements <- simplifyMovements(movements = output, tag = tag, bio = bio, discard.first = discard.first,
-          speed.method = speed.method, dist.mat = dist.mat)
-        output <- checkSpeeds(movements = output, tag = tag, detections = detections.list[[tag]], valid.movements = temp.valid.movements,
-          speed.warning = speed.warning, speed.error = speed.error, GUI = GUI)
+                                                  speed.method = speed.method, dist.mat = dist.mat)
+        output <- checkSpeeds(movements = output, tag = tag, detections = detections.list[[tag]], 
+                              valid.movements = temp.valid.movements, speed.warning = speed.warning, 
+                              speed.error = speed.error, GUI = GUI, save.tables.locally = save.tables.locally)
         rm(temp.valid.movements)
       }
 
       if (do.checkInactiveness) {
         output <- checkInactiveness(movements = output, tag = tag, detections = detections.list[[tag]],
-          inactive.warning = inactive.warning, inactive.error = inactive.error,
-          dist.mat = dist.mat, GUI = GUI)
-      }
-    } else {
-      output <- overrideValidityChecks(moves = movements[[tag]], tag = tag, detections = detections.list[[tag]], GUI = GUI) # nocov
-    }
+                                    inactive.warning = inactive.warning, inactive.error = inactive.error,
+                                    dist.mat = dist.mat, GUI = GUI, save.tables.locally = save.tables.locally)
+      }  
+    } else { # nocov start
+      output <- overrideValidityChecks(moves = movements[[tag]], tag = tag, detections = detections.list[[tag]], 
+                                       GUI = GUI, save.tables.locally = save.tables.locally)
+    } # nocov end
     return(output)
   })
   names(movements) <- movement.names
@@ -361,13 +370,16 @@ explore <- function(
   appendTo(c("Screen", "Report"), "M: Filtering valid array movements.")
 
   valid.movements <- lapply(seq_along(movements), function(i){
-    output <- simplifyMovements(movements = movements[[i]], tag = names(movements)[i], bio = bio, discard.first = discard.first,
-      speed.method = speed.method, dist.mat = dist.mat)
+    output <- simplifyMovements(movements = movements[[i]], tag = names(movements)[i], bio = bio, 
+                                discard.first = discard.first, speed.method = speed.method, dist.mat = dist.mat)
   })
   names(valid.movements) <- names(movements)
   valid.movements <- valid.movements[!unlist(lapply(valid.movements, is.null))]
 
-  aux <- list(valid.movements = valid.movements, spatial = spatial, rsp.info = list(bio = bio, analysis.type = "explore"))
+  aux <- list(valid.movements = valid.movements,
+              spatial = spatial,
+              rsp.info = list(bio = bio, 
+                              analysis.type = "explore"))
   times <- getTimes(input = aux, move.type = "array", event.type = "arrival", n.events = "first")
   rm(aux)
 
@@ -383,10 +395,12 @@ explore <- function(
   deployments <- do.call(rbind.data.frame, deployments)
 
   # extra info for potential RSP analysis
-  rsp.info <- list(analysis.type = "explore", analysis.time = the.time, bio = bio, tz = tz, actel.version = utils::packageVersion("actel"))
+  rsp.info <- list(analysis.type = "explore", analysis.time = the.time, 
+                   bio = bio, tz = tz, actel.version = utils::packageVersion("actel"))
 
   if (!is.null(override))
-    override.fragment <- paste0('<span style="color:red">Manual mode has been triggered for **', length(override),'** tag(s).</span>\n')
+    override.fragment <- paste0('<span style="color:red">Manual mode has been triggered for **',
+                                length(override), '** tag(s).</span>\n')
   else
     override.fragment <- ""
 

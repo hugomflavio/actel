@@ -6,7 +6,7 @@
 opening a GUI does not throw an error. Some code adapted from RGtk2's
 .onLoad function.}
 \usage{
-checkGUI(GUI = c("needed", "always", "never"))
+checkGUI(GUI = c("needed", "always", "never"), save.tables.locally)
 }
 \arguments{
 \item{GUI}{One of "needed", "always" or "never". If "needed", a new window is

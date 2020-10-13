@@ -4,7 +4,15 @@
 \alias{checkUpstream}
 \title{Check for movements upstream of the release site.}
 \usage{
-checkUpstream(movements, tag, release, detections, arrays, GUI)
+checkUpstream(
+  movements,
+  tag,
+  release,
+  detections,
+  arrays,
+  GUI,
+  save.tables.locally
+)
 }
 \arguments{
 \item{movements}{The movements table for a specific tag.}

@@ -131,6 +131,7 @@ residency <- function(
   timestep = c("days", "hours"),
   replicates = NULL,
   GUI = c("needed", "always", "never"),
+  save.tables.locally = FALSE,
   print.releases = TRUE,
   plot.detections.by = c("stations", "arrays"))
 {
@@ -189,7 +190,7 @@ residency <- function(
   timestep <- aux$timestep
   rm(aux)
 
-  GUI <- checkGUI(GUI)
+  GUI <- checkGUI(GUI, save.tables.locally)
 # ------------------------
 
 # Store function call
@@ -218,6 +219,7 @@ residency <- function(
     ", replicates = ", ifelse(is.null(replicates),"NULL", paste0("list(", paste(sapply(1:length(replicates), function(i) paste0("'", names(replicates)[i], "' = c('", paste(replicates[[i]], collapse = "', '"), "')")), collapse = ", "), ")")),
     ", inactive.error = ", ifelse(is.null(inactive.error), "NULL", inactive.error),
     ", GUI = '", GUI, "'",
+    ", save.tables.locally = ", ifelse(save.tables.locally, "TRUE", "FALSE"),
     ", print.releases = ", ifelse(print.releases, "TRUE", "FALSE"),
     ", plot.detections.by = '", plot.detections.by, "'",
     ")")
@@ -297,8 +299,8 @@ residency <- function(
 # Compile array movements
   appendTo(c("Screen", "Report"), "M: Creating movement records for the valid tags.")
   movements <- groupMovements(detections.list = detections.list, bio = bio, spatial = spatial,
-    speed.method = speed.method, max.interval = max.interval, tz = tz,
-    dist.mat = dist.mat)
+                              speed.method = speed.method, max.interval = max.interval, tz = tz,
+                              dist.mat = dist.mat)
 
   if (is.null(discard.first)) {
     aux <- names(movements)
@@ -352,26 +354,30 @@ residency <- function(
 
       output <- checkMinimumN(movements = movements[[tag]], tag = tag, minimum.detections = minimum.detections)
 
-      output <- checkImpassables(movements = output, tag = tag, detections = detections.list[[tag]], dotmat = dotmat, GUI = GUI)
+      output <- checkImpassables(movements = output, tag = tag, detections = detections.list[[tag]], 
+                                 dotmat = dotmat, GUI = GUI, save.tables.locally = save.tables.locally)
 
-      output <- checkJumpDistance(movements = output, release = release, tag = tag, dotmat = dotmat, detections = detections.list[[tag]],
-                                  jump.warning = jump.warning, jump.error = jump.error, GUI = GUI)
+      output <- checkJumpDistance(movements = output, release = release, tag = tag, dotmat = dotmat, 
+                                  detections = detections.list[[tag]], jump.warning = jump.warning, 
+                                  jump.error = jump.error, GUI = GUI, save.tables.locally = save.tables.locally)
 
       if (do.checkSpeeds) {
         temp.valid.movements <- simplifyMovements(movements = output, tag = tag, bio = bio, discard.first = discard.first,
-          speed.method = speed.method, dist.mat = dist.mat)
-        output <- checkSpeeds(movements = output, tag = tag, valid.movements = temp.valid.movements, detections = detections.list[[tag]],
-          speed.warning = speed.warning, speed.error = speed.error, GUI = GUI)
+                                                  speed.method = speed.method, dist.mat = dist.mat)
+        output <- checkSpeeds(movements = output, tag = tag, valid.movements = temp.valid.movements, 
+                              detections = detections.list[[tag]], speed.warning = speed.warning, 
+                              speed.error = speed.error, GUI = GUI, save.tables.locally = save.tables.locally)
         rm(temp.valid.movements)
       }
 
       if (do.checkInactiveness) {
         output <- checkInactiveness(movements = output, tag = tag, detections = detections.list[[tag]],
-          inactive.warning = inactive.warning, inactive.error = inactive.error,
-          dist.mat = dist.mat, GUI = GUI)
+                                    inactive.warning = inactive.warning, inactive.error = inactive.error,
+                                    dist.mat = dist.mat, GUI = GUI, save.tables.locally = save.tables.locally)
       }
     } else {
-      output <- overrideValidityChecks(moves = movements[[tag]], tag = tag, detections = detections.list[[tag]], GUI = GUI) # nocov
+      output <- overrideValidityChecks(moves = movements[[tag]], tag = tag, detections = detections.list[[tag]], # nocov
+                                       GUI = GUI, save.tables.locally = save.tables.locally) # nocov
     }
     return(output)
   })
@@ -399,8 +405,8 @@ residency <- function(
   appendTo(c("Screen", "Report"), "M: Filtering valid array and section movements.")
 
   valid.movements <- lapply(seq_along(movements), function(i){
-    output <- simplifyMovements(movements = movements[[i]], tag = names(movements)[i], bio = bio, discard.first = discard.first,
-      speed.method = speed.method, dist.mat = dist.mat)
+    output <- simplifyMovements(movements = movements[[i]], tag = names(movements)[i], bio = bio, 
+                                discard.first = discard.first, speed.method = speed.method, dist.mat = dist.mat)
   })
   names(valid.movements) <- names(movements)
   valid.movements <- valid.movements[!unlist(lapply(valid.movements, is.null))]
@@ -423,12 +429,13 @@ residency <- function(
   last.seen <- as.data.frame.matrix(with(status.df, table(Group, Status)))
 
   aux <- list(valid.movements = valid.movements, section.movements = section.movements,
-    spatial = spatial, rsp.info = list(bio = bio, analysis.type = "residency"))
+              spatial = spatial, rsp.info = list(bio = bio, analysis.type = "residency"))
   array.times <- getTimes(input = aux, move.type = "array", event.type = "arrival", n.events = "all")
 
-  section.times <- list(
-    arrival = getTimes(input = aux, move.type = "section", event.type = "arrival", n.events = "all"),
-    departure = getTimes(input = aux, move.type = "section", event.type = "departure", n.events = "all"))
+  section.times <- list(arrival = getTimes(input = aux, move.type = "section", 
+                                           event.type = "arrival", n.events = "all"),
+                        departure = getTimes(input = aux, move.type = "section", 
+                                             event.type = "departure", n.events = "all"))
   rm(aux)
 
   residency.list <- getResidency(movements = section.movements, spatial = spatial)
@@ -501,7 +508,8 @@ residency <- function(
   efficiency <- efficiency[1:3]
 
   # extra info for potential RSP analysis
-  rsp.info <- list(analysis.type = "residency", analysis.time = the.time, bio = bio, tz = tz, actel.version = utils::packageVersion("actel"))
+  rsp.info <- list(analysis.type = "residency", analysis.time = the.time, bio = bio, 
+                   tz = tz, actel.version = utils::packageVersion("actel"))
 
   if (!is.null(override))
     override.fragment <- paste0('<span style="color:red">Manual mode has been triggered for **', length(override),'** tag(s).</span>\n')
