@@ -112,8 +112,8 @@ eventsTabbedWidget <- function(tag, displayed.moves, all.moves, detections, trig
   }
   btns[2, 4] <- gWidgets2::gbutton(text = "Invert all validities", handler = invert_all_function, action = NULL)
 
-  btns2[1, 5, expand = TRUE] <- ""
-  btns2[2, 5, expand = TRUE] <- ""
+  btns[1, 5, expand = TRUE] <- ""
+  btns[2, 5, expand = TRUE] <- ""
 
   if (type == "Array") {
     expand_event_function <- function(h, ...) {
@@ -191,7 +191,7 @@ eventsTabbedWidget <- function(tag, displayed.moves, all.moves, detections, trig
     }
     confirm_btns[1, 2, expand = TRUE] <- gWidgets2::gbutton(text = "Return", handler = abort_function, action = NULL)      
   }
-  btns2[2, 6] <- gWidgets2::gbutton(text = "Submit and close", handler = btn_function, action = NULL)
+  btns[2, 6] <- gWidgets2::gbutton(text = "Submit and close", handler = btn_function, action = NULL)
 
   if (first.time)
     message("M: Make any necessary edits in the external visualization window and submit the result to continue the analysis.\nNote: You can use Ctrl and Shift to select multiple events, and Ctrl+A to select all events at once."); flush.console()
