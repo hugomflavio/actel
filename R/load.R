@@ -49,7 +49,7 @@ loadStudyData <- function(tz, override = NULL, start.time, stop.time, save.detec
   deployments <- createUniqueSerials(input = deployments) # Prepare serial numbers to overwrite the serials in detections
 
   detections <- loadDetections(start.time = start.time, stop.time = stop.time, tz = tz,
-    save.detections = save.detections, record.source = getOption("actel.debug", default = FALSE))
+    save.detections = save.detections, record.source = TRUE)
   detections <- checkDupDetections(input = detections)
 
   use.fakedot <- TRUE
@@ -1603,7 +1603,7 @@ createStandards <- function(detections, spatial, deployments, discard.orphans = 
         if (!discard.orphans) {
           appendTo(c("Screen", "Report"), paste0("Error: ", sum(the.error), " detections for receiver ", names(deployments)[i], " do not fall within deployment periods."))
           message("")
-          message(paste0(capture.output(print(detections[receiver.link, ][the.error, !c("Transmitter", "Valid", "Standard.name", "Array", "Section")])), collapse = "\n"))
+          message(paste0(capture.output(print(detections[receiver.link, ][the.error, !c("Transmitter", "Valid", "Standard.name", "Array", "Section", "Source.file")])), collapse = "\n"))
           message("")
           message("Possible options:\n   a) Stop and double-check the data (recommended)\n   b) Discard orphan detections in this instance.\n   c) Discard orphan detections for all instances.")
           
