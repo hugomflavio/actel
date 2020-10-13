@@ -154,7 +154,7 @@ test_that("migration can handle multiple expected first arrays", {
 	xspatial <- example.spatial
 	xspatial$Array[18] <- "A1|A2"
 	write.csv(xspatial, "spatial.csv", row.names = FALSE)
-	expect_message(suppressWarnings(output <- migration(sections = c("A", "Fjord", "Sea"),
+	expect_message(suppressWarnings(output <- migration(section.order = c("A", "Fjord", "Sea"),
 		tz = 'Europe/Copenhagen', report = TRUE, success.arrays = "A9", GUI = "never")),
 		"Multiple possible first arrays detected for release site 'RS1'.", fixed = TRUE)
 })
