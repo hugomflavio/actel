@@ -107,7 +107,6 @@
 #'
 residency <- function(
   tz = NULL,
-  sections,
   section.order = NULL,
   datapack = NULL,
   max.interval = 60,
@@ -135,13 +134,6 @@ residency <- function(
   print.releases = TRUE,
   plot.detections.by = c("stations", "arrays"))
 {
-
-  if (!missing(sections))
-    warning(
-"Argument 'sections' has been deprecated and will be ignored. Please list the
-sections to which each of the arrays belong in a new 'Section' column in the
-spatial input. You can now use the argument 'section.order' to define the order
-by which sections are presented", immediate. = TRUE, call. = FALSE)
 
 # clean up any lost helpers
   deleteHelpers()
