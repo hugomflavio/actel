@@ -289,7 +289,7 @@ checkGUI <- function(GUI = c("needed", "always", "never")) {
 #'
 checkDupDetections <- function(input) {
   appendTo("debug", "Running checkDupDetections.")
-  aux <- data.frame(
+  paired <- data.frame(
     TimestampA = input$Timestamp[-nrow(input)],
     TimestampB = input$Timestamp[-1],
     ReceiverA = input$Receiver[-nrow(input)],
@@ -297,23 +297,66 @@ checkDupDetections <- function(input) {
     TransmitterA = input$Transmitter[-nrow(input)],
     TransmitterB = input$Transmitter[-1]
     )
-  dups <- c(FALSE, aux[,1] == aux[,2] & aux[,3] == aux[,4] & aux[,5] == aux[,6])
+
+  if (any(colnames(input) == "Source.file")) {
+    paired$Source.FileA <- input$Source.file[-nrow(input)]
+    paired$Source.fileB <- input$Source.file[-1]
+  }
+
+  dups <- c(FALSE, paired[,1] == paired[,2] & paired[,3] == paired[,4] & paired[,5] == paired[,6])
   if (any(dups)) {
     appendTo(c("Screen", "Report", "Warning"), paste0(sum(dups), " duplicated detection", ifelse(sum(dups) == 1, " was", "s were"), " found. Could an input file be duplicated?"))
     message("")
-    appendTo("Screen", "Possible options:\n   a) Stop and double-check the data\n   b) Remove duplicated detections\n   c) Continue without changes")
+    message("Screen", "Possible options:\n   a) Stop and double-check the data\n   b) Remove duplicated detections\n   c) Continue without changes\n   d) Save duplicated detections to a file and re-open dialogue.")
     message("")
-    decision <- userInput("Decision:(a/b/c) ", choices = letters[1:3], hash = "# dup. detections")
-    if (decision == "a")
-      stopAndReport("Function stopped by user command.") # nocov
-    if (decision == "b") {
-      appendTo(c("Screen", "Report"), "M: Removing duplicated detections from the analysis per user command.")
-      output <- input[!dups, ]
+    restart <- TRUE
+    while (restart) {
+      decision <- userInput("Decision:(a/b/c/d) ", choices = letters[1:4], hash = "# dup. detections")
+      if (decision == "a")
+        stopAndReport("Function stopped by user command.") # nocov
+      if (decision == "b") {
+        appendTo(c("Screen", "Report"), "M: Removing duplicated detections from the analysis per user command.")
+        output <- input[!dups, ]
+        restart <- FALSE
+      }
+      if (decision == "c") { # nocov start
+        appendTo(c("Screen", "Report"), "M: Continuing analysis with duplicated detections per user command.")
+        output <- input
+        restart <- FALSE
+      } # nocov end
+      if (decision == "d") { # nocov start
+        file.name <- userInput("Please specify a file name (leave empty to abort saving): ", hash = "# save dups to this file")
+        # break if empty
+        if (file.name == "")
+          next()
+        # confirm extension
+        if (!grepl("\\.csv$", file.name))
+          file.name <- paste0(file.name, ".csv")
+        # prevent auto-overwrite
+        if (file.exists(file.name)) {
+          aux <- userInput(paste0("File '", file.name, "' already exists. Overwrite contents?(y/n) "), 
+                           choices = c("y", "n"), 
+                           hash = "# overwrite file with same name?")
+          if (aux == "y")
+            overwrite <- TRUE
+          else
+            overwrite <- FALSE 
+        }
+        else
+          overwrite <- TRUE
+        # save
+        if (overwrite) {
+          success <- TRUE
+          # recover if saving fails
+          tryCatch(data.table::fwrite(paired[dups[-1], ], file.name, , dateTimeAs = "write.csv"), error = function(e) {
+            appendTo(c("Screen", "Report"), paste0("Error: Could not save file (reason: '", sub("\n$", "", e), "').\n       Reopening previous interaction."))
+            success <<- FALSE
+          })
+          if (success)
+            appendTo(c("Screen", "Report"), paste0("M: A copy of the duplicated detections has been saved to '", file.name, "'.\n   Reopening previous interaction."))
+        }
+      } # nocov end
     }
-    if (decision == "c") { # nocov start
-      appendTo(c("Screen", "Report"), "M: Continuing analysis with duplicated detections per user command.")
-      output <- input
-    } # nocov end
   } else {
     output <- input
   }
@@ -886,19 +929,60 @@ checkDetectionsBeforeRelease <- function(input, bio, discard.orphans = FALSE){
           appendTo("Screen", paste0("  Release time: ", bio$Release.date[i]))
           appendTo("Screen", paste0("  First detection time: ", input[[link[i]]]$Timestamp[1]))
           appendTo("Screen", paste0("  Number of detections before release: ", sum(to.remove)))
-          message("\nPossible options:\n   a) Stop and double-check the data (recommended)\n   b) Discard orphan detections in this instance.\n   c) Discard orphan detections for all instances.\n")
-          decision <- userInput("Decision:(a/b/c/comment) ", 
-                                choices = c("a", "b", "c", "comment"),
-                                tag = bio$Transmitter[i], 
-                                hash = paste("# detections before release for tag", bio$Transmitter[i]))
+          appendTo("Screen", "\nPossible options:\n   a) Stop and double-check the data (recommended)\n   b) Discard orphan detections in this instance.\n   c) Discard orphan detections for all instances.\n   d) Save orphan detections to a file and re-open dialogue.")
           
-          if (decision == "a")
-            stopAndReport("Function stopped by user command.") # nocov
-          
-          if (decision == "c")
-            discard.orphans <- TRUE # nocov
+          restart <- TRUE
+          while (restart) {
+            decision <- userInput("Decision:(a/b/c/d/comment) ", 
+                                  choices = c("a", "b", "c", "d", "comment"),
+                                  tag = bio$Transmitter[i], 
+                                  hash = paste("# detections before release for tag", bio$Transmitter[i]))
+            
+            if (decision == "a")
+              stopAndReport("Function stopped by user command.") # nocov
+            
+            if (decision == "b")
+              restart <- FALSE
+
+            if (decision == "c") {
+              discard.orphans <- TRUE # nocov
+              restart <- FALSE # nocov
+            }
+
+            if (decision == "d") { # nocov start
+              file.name <- userInput("Please specify a file name (leave empty to abort saving): ", hash = "# save pre-release orphans to this file")
+              # break if empty
+              if (file.name == "")
+                next()
+              # confirm extension
+              if (!grepl("\\.csv$", file.name))
+                file.name <- paste0(file.name, ".csv")
+              # prevent auto-overwrite
+              if (file.exists(file.name)) {
+                aux <- userInput(paste0("File '", file.name, "' already exists. Overwrite contents?(y/n) "), 
+                                 choices = c("y", "n"), 
+                                 hash = "# overwrite file with same name?")
+                if (aux == "y")
+                  overwrite <- TRUE
+                else
+                  overwrite <- FALSE 
+              }
+              else
+                overwrite <- TRUE
+              # save
+              if (overwrite) {
+                success <- TRUE
+                # recover if saving fails
+                tryCatch(data.table::fwrite(input[[link[i]]][to.remove, ], file.name, , dateTimeAs = "write.csv"), error = function(e) {
+                  appendTo(c("Screen", "Report"), paste0("Error: Could not save file (reason: '", sub("\n$", "", e), "').\n       Reopening previous interaction."))
+                  success <<- FALSE
+                })
+                if (success)
+                  appendTo(c("Screen", "Report"), paste0("M: A copy of the orphan detections has been saved to '", file.name, "'.\n   Reopening previous interaction."))
+              }
+            } # nocov end
+          }
         }
-        
         if (all(to.remove)) {
           appendTo(c("Screen", "Report"), paste0("ALL detections from tag ", names(input)[link[i]], " were removed per user command."))
           remove.tag <- c(remove.tag, link[i])

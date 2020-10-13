@@ -1605,28 +1605,69 @@ createStandards <- function(detections, spatial, deployments, discard.orphans = 
           message("")
           message(paste0(capture.output(print(detections[receiver.link, ][the.error, !c("Transmitter", "Valid", "Standard.name", "Array", "Section", "Source.file")])), collapse = "\n"))
           message("")
-          message("Possible options:\n   a) Stop and double-check the data (recommended)\n   b) Discard orphan detections in this instance.\n   c) Discard orphan detections for all instances.")
+          message("Possible options:\n   a) Stop and double-check the data (recommended)\n   b) Discard orphan detections in this instance.\n   c) Discard orphan detections for all instances.\n   d) Save orphan detections to a file and re-open dialogue.")
           
-          if (interactive()) { # nocov start
-            decision <- userInput("Which option should be followed?(a/b/c) ", 
-                                  choices = letters[1:3], 
-                                  hash = paste("# orphan detections for receiver", names(deployments)[i]))
-          } else { # nocov end
-            decision <- "b"
-          }
+          rows.to.remove <- detections[receiver.link, which = TRUE][the.error]
 
-          if (decision == "a") { # nocov start
-            stopAndReport("Stopping analysis per user command.")
-          } else { # nocov end
-            rows.to.remove <- detections[receiver.link, which = TRUE][the.error]
-            detections <- detections[-rows.to.remove]
-          }
+          restart <- TRUE
+          while (restart) {
+            if (interactive()) { # nocov start
+              decision <- userInput("Which option should be followed?(a/b/c/d) ", 
+                                    choices = letters[1:4], 
+                                    hash = paste("# orphan detections for receiver", names(deployments)[i]))
+            } else { # nocov end
+              decision <- "b"
+            }
 
-          if (decision == "c")
-            discard.orphans <- TRUE
+            if (decision == "a")
+              stopAndReport("Stopping analysis per user command.")
+            
+            if (decision == "b") {
+              detections <- detections[-rows.to.remove]
+              restart <- FALSE
+            }
+
+            if (decision == "c") {
+              detections <- detections[-rows.to.remove]
+              discard.orphans <- TRUE
+              restart <- FALSE
+            }
+
+            if (decision == "d") { # nocov start
+              file.name <- userInput("Please specify a file name (leave empty to abort saving): ", hash = "# save receiver orphans to this file")
+              # break if empty
+              if (file.name == "")
+                next()
+              # confirm extension
+              if (!grepl("\\.csv$", file.name))
+                file.name <- paste0(file.name, ".csv")
+              # prevent auto-overwrite
+              if (file.exists(file.name)) {
+                aux <- userInput(paste0("File '", file.name, "' already exists. Overwrite contents?(y/n) "), 
+                                 choices = c("y", "n"), 
+                                 hash = "# overwrite file with same name?")
+                if (aux == "y")
+                  overwrite <- TRUE
+                else
+                  overwrite <- FALSE 
+              }
+              else
+                overwrite <- TRUE
+              # save
+              if (overwrite) {
+                success <- TRUE
+                # recover if saving fails
+                tryCatch(data.table::fwrite(detections[rows.to.remove], file.name, dateTimeAs = "write.csv"), error = function(e) {
+                  appendTo(c("Screen", "Report"), paste0("Error: Could not save file (reason: '", sub("\n$", "", e), "').\n       Reopening previous interaction."))
+                  success <<- FALSE
+                })
+                if (success)
+                  appendTo(c("Screen", "Report"), paste0("M: A copy of the orphan detections has been saved to '", file.name, "'.\n   Reopening previous interaction."))
+              }
+            } # nocov end
+          }
         } else {
           appendTo(c("Screen", "Report"), paste0("Error: ", sum(the.error), " detections for receiver ", names(deployments)[i], " do not fall within deployment periods. Discarding orphan detections."))
-          rows.to.remove <- detections[receiver.link, which = TRUE][the.error]
           detections <- detections[-rows.to.remove]
         }
       }
@@ -1642,12 +1683,16 @@ createStandards <- function(detections, spatial, deployments, discard.orphans = 
   }
 
   appendTo(c("Screen", "Report"), paste0("M: Number of ALS: ", length(deployments), " (of which ", length(empty.receivers), " had no detections)"))
+  
   if (!is.null(empty.receivers))
     appendTo(c("Screen", "Report", "Warning"), paste0("No detections were found for receiver(s) ", paste0(empty.receivers, collapse = ", "), "."))
+  
   detections$Receiver <- as.factor(detections$Receiver)
   detections$Array <- factor(detections$Array, levels = unlist(spatial$array.order))
+  
   if (any(grepl("^Section$", colnames(spatial$stations))))
     detections$Section <- factor(detections$Section, levels = names(spatial$array.order))
+  
   detections$Standard.name <- factor(detections$Standard.name, levels = spatial$stations$Standard.name)
   return(detections)
 }

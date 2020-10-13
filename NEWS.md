@@ -18,6 +18,7 @@ Enhancements:
   * Added Section information to the detections and the movement tables.
   * Automatically convert "-" to NA in the Data column of Thelma log files.
   * Automatically rename Y axis in plotDetections to "Array" if type = "arrays".
+  * Added possibility to save orphan detection files for later inspection.
   * Include detections source file in a new "Source.file" column.
 
 ## actel 1.1.1
