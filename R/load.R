@@ -1598,6 +1598,7 @@ createStandards <- function(detections, spatial, deployments, discard.orphans = 
           detections$Section[receiver.link][deployment.link] <- as.character(spatial$stations$Section[the.station])
       }
       if (any(the.error <- is.na(detections$Standard.name[receiver.link]))) {
+        rows.to.remove <- detections[receiver.link, which = TRUE][the.error]
         if (interactive())
           message("")
         if (!discard.orphans) {
@@ -1607,8 +1608,6 @@ createStandards <- function(detections, spatial, deployments, discard.orphans = 
           message("")
           message("Possible options:\n   a) Stop and double-check the data (recommended)\n   b) Discard orphan detections in this instance.\n   c) Discard orphan detections for all instances.\n   d) Save orphan detections to a file and re-open dialogue.")
           
-          rows.to.remove <- detections[receiver.link, which = TRUE][the.error]
-
           restart <- TRUE
           while (restart) {
             if (interactive()) { # nocov start
