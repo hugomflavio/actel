@@ -519,24 +519,68 @@ emergencyBreak <- function(the.function.call) { # nocov start
   appendTo("Report", "\nA fatal exception occurred, stopping the process!\nFound a bug? Report it here: https://github.com/hugomflavio/actel/issues\n\n-------------------")
   logname <- paste(gsub(":", ".", sub(" ", ".", as.character(Sys.time()))), "actel.log-ERROR.txt", sep = ".")
 
-  if (file.exists(paste(tempdir(), "temp_comments.txt", sep = "/")))
-    appendTo("Report", paste0("User comments:\n-------------------\n", gsub("\t", ": ", gsub("\r", "", readr::read_file(paste(tempdir(), "temp_comments.txt", sep = "/")))), "-------------------")) # nocov
+  if (file.exists(paste0(tempdir(), "/temp_comments.txt")))
+    appendTo("Report", paste0("User comments:\n-------------------\n", gsub("\t", ": ", gsub("\r", "", readr::read_file(paste0(tempdir(), "/temp_comments.txt")))), "-------------------")) # nocov
 
-  if (file.exists(paste(tempdir(), "temp_UD.txt", sep = "/")))
-    appendTo("Report", paste0("User interventions:\n-------------------\n", gsub("\r", "", readr::read_file(paste(tempdir(), "temp_UD.txt", sep = "/"))), "-------------------")) # nocov
+  if (file.exists(paste0(tempdir(), "/temp_UD.txt")))
+    appendTo("Report", paste0("User interventions:\n-------------------\n", gsub("\r", "", readr::read_file(paste0(tempdir(), "/temp_UD.txt"))), "-------------------")) # nocov
 
   appendTo("Report", paste0("Function call:\n-------------------\n", the.function.call, "\n-------------------"))
 
-  message("")
-  decision <- userInput(paste0("\nThe analysis errored. Save job log (including comments and decisions) to ", logname, "?(y/n) "), choices = c("y", "n"))
+  message("\nM: The analysis errored. You can recover latest the job log (including your comments and decisions) by running recoverLog().")
   
-  if (decision == "y")
-    file.copy(paste(tempdir(), "temp_log.txt", sep = "/"), logname)
-  else
-    file.rename(paste(tempdir(), "temp_log.txt", sep = "/"), paste(tempdir(), logname, sep = "/"))
+  file.rename(paste0(tempdir(), "/temp_log.txt"), paste0(tempdir(), "/latest_actel_error_log.txt"))
 
   deleteHelpers()
 } # nocov end
+
+#' Recover latest actel crash log
+#' 
+#' @param file Name of the file to which the log should be saved.
+#' @param overwrite Logical: If 'file' already exists, should its content be overwritten?
+#' 
+#' @examples
+#' \dontshow{
+#' sink(paste0(tempdir(), "latest_actel_error_log.txt"))
+#' cat(
+#' "This is an example file
+#' -
+#' -
+#' -
+#' Timestamp: ", Sys.Date(), "
+#' Function: example()")
+#' sink()
+#' }
+#' 
+#' recoverLog(file = paste0(tempdir(), "new_log.txt"))
+#' 
+#' \dontshow{
+#' file.remove(paste0(tempdir(), "latest_actel_error_log.txt"))
+#' file.remove(paste0(tempdir(), "new_log.txt"))
+#' }
+#' 
+#' @return No return value, called for side effects.
+#' 
+#' @export
+#' 
+recoverLog <- function(file, overwrite = FALSE) {
+  if (!file.exists(paste0(tempdir(), "/latest_actel_error_log.txt")))
+    stop("No crash logs found.", call. = FALSE)
+
+  if (missing(file))
+    stop("Please state the name of the output file", call. = FALSE)
+
+  if (grepl(".txt$", file))
+    file <- paste0(file, ".txt")
+
+  if (file.exists(file))
+    stop("File '", file, "' already exists and overwrite = FALSE", call. = FALSE)
+
+  file.copy(paste0(tempdir(), "/latest_actel_error_log.txt"), file, overwrite = overwrite)
+
+  x <- readLines(file)
+  message("M: Job log for ", sub("Function: ", "", x[6]), " analysis run on ", sub("Timestamp: ", "", x[5]), " recovered to ", file)
+}
 
 #' Convert a data frame with timestamps into a list of circular objects
 #'
