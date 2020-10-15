@@ -342,7 +342,7 @@ explore <- function(
 
       output <- checkJumpDistance(movements = output, release = release, tag = tag, dotmat = dotmat,
                                   jump.warning = jump.warning, jump.error = jump.error, GUI = GUI,
-                                  save.tables.locally = save.tables.locally)
+                                  detections = detections.list[[tag]], save.tables.locally = save.tables.locally)
 
       if (do.checkSpeeds) {
         temp.valid.movements <- simplifyMovements(movements = output, tag = tag, bio = bio, discard.first = discard.first,
