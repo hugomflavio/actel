@@ -374,7 +374,7 @@ migration <- function(
   if (any(link <- !override %in% extractSignals(movement.names))) {
     appendTo(c("Screen", "Warning", "Report"), paste0("Override has been triggered for ",
       ifelse(sum(link) == 1, "tag ", "tags "), paste(override[link], collapse = ", "), " but ",
-      ifelse(sum(link) == 1, "this tag was", "these tags were"), " not detected."))
+      ifelse(sum(link) == 1, "this signal was", "these signals were"), " not detected."))
     override <- override[!link]
   }
 
