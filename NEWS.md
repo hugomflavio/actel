@@ -22,6 +22,7 @@ Enhancements:
   * Include detections source file in a new "Source.file" column.
   * New argument 'save.tables.locally' allows the user to save temporary tables in the current working directory. Particularly useful for Mac users that cannot activate the graphical user interface.
   * Improve job log recovery method so it is not as intrusive. Including new function recoverLog().
+  * Only display GUI windows once they are ready.
 
 ## actel 1.1.1
 

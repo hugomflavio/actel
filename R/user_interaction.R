@@ -389,13 +389,10 @@ graphicalInvalidate <- function(detections, moves, tag, trigger) { # nocov start
     displayed.moves$Last.time <- as.character(displayed.moves$Last.time)
     displayed.moves <- displayed.moves[displayed.moves$Valid, ]
 
-
-    if (nrow(displayed.moves) > 1500) {
+    if (nrow(displayed.moves) > 1200)
       tabbed <- TRUE
-      displayed.moves <- splitN(displayed.moves, 1000)
-    } else {
+    else
       tabbed <- FALSE
-    }
 
     if (tabbed) {
       recipient <- eventsTabbedWidget(tag = tag,
@@ -429,11 +426,6 @@ graphicalInvalidate <- function(detections, moves, tag, trigger) { # nocov start
 
     if (restart)
       message("M: Saving detection-level changes and refreshing event table."); flush.console()
-  }
-
-  if (is.null(graphical_valid)) {
-    appendTo(c("Screen", "Warning", "Report"), "External visualization window was closed before result submission. Assuming no changes are to be made.")
-    graphical_valid <- moves$Valid
   }
 
   aux <- rle(!graphical_valid)
@@ -675,9 +667,11 @@ invalidateDetections <- function(displayed.moves, all.moves, detections, tag, ev
 #'
 graphicalInvalidateDetections <- function(detections, displayed.moves, all.moves, event, tag, silent = FALSE) { # nocov start
   appendTo("debug", "Running graphicalInvalidateDetections.")
+  on.exit(save(list = ls(), file = "inside_graphInv.RData"), add = TRUE)
 
   to.print <- cbind(data.frame(Index = 1:nrow(detections)), detections)
   to.print$Timestamp <- as.character(to.print$Timestamp)
+
   if (all(is.na(to.print$Sensor.Value)))
     to.print$Sensor.Value <- "NA"
   if (all(is.na(to.print$Sensor.Unit)))
@@ -691,6 +685,7 @@ graphicalInvalidateDetections <- function(detections, displayed.moves, all.moves
     tabbed <- FALSE
   }
 
+
   if (tabbed) {
     graphical_valid <- detectionsTabbedWidget(event = event,
                                               tag = tag,
@@ -703,11 +698,6 @@ graphicalInvalidateDetections <- function(detections, displayed.moves, all.moves
                                               silent = silent)
   }
   
-  if (is.null(graphical_valid)) {
-    appendTo(c("Screen", "Warning", "Report"), "External visualization window was closed before result submission. Assuming no changes are to be made.")
-    graphical_valid <- detections$Valid
-  }
-
   detections$Valid <- graphical_valid
 
   all.moves <- createNewEvents(displayed.moves = displayed.moves, 
@@ -780,6 +770,7 @@ overrideValidityChecks <- function(moves, detections, tag, GUI, save.tables.loca
 #' @keywords internal
 #'
 createNewEvents <- function(displayed.moves, all.moves, detections, event) { # nocov start
+  appendTo("debug", "Running createNewEvents.")
   # compile new events and combine with movements
   aux <- rle(detections$Valid)
   aux <- data.frame(Value = aux[[2]], n = aux[[1]])

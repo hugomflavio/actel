@@ -26,6 +26,7 @@ NULL
 eventsTabbedWidget <- function(tag, displayed.moves, all.moves, detections, trigger, first.time, type) { # nocov start
   appendTo("debug", "Running eventsTabbedWidget.")
 
+  on.exit(save(list = ls(), file = "tabbed_widget_ls.RData"), add = TRUE)
   # initiate button variables
   cp <- NULL
   complain <- NULL
@@ -34,7 +35,16 @@ eventsTabbedWidget <- function(tag, displayed.moves, all.moves, detections, trig
   graphical_valid <- NULL
   graphical_valid_indexes <- which(all.moves$Valid)
 
-  w <- gWidgets2::gwindow(paste0("Valid events for tag  ", tag, " (", sum(!all.moves$Valid), " invalid event(s) omitted)"), width = 900, height = 500)
+  placeholder <- gWidgets2::gwindow("Please wait", width = 300, height = 20)
+  on.exit({if(gWidgets2::isExtant(placeholder)) gWidgets2::dispose(placeholder)}, add = TRUE)
+  placeholder_layout <- gWidgets2::ggroup(horizontal = FALSE, container = placeholder)
+  gWidgets2::glabel("The GUI window is loading...", container = placeholder_layout)
+
+  message("M: Please wait while the GUI loads."); flush.console()
+
+  w <- gWidgets2::gwindow(paste0("Valid events for tag  ", tag, " (", sum(!all.moves$Valid), " invalid event(s) omitted)"),
+                          width = 900, height = 500, visible = FALSE)
+
   on.exit({if(gWidgets2::isExtant(w)) gWidgets2::dispose(w)}, add = TRUE)
 
   g <- gWidgets2::ggroup(horizontal = FALSE, container = w)
@@ -48,12 +58,16 @@ eventsTabbedWidget <- function(tag, displayed.moves, all.moves, detections, trig
   
   tbl <- list()
   nb <- gWidgets2::gnotebook(tab.pos = 3, expand = TRUE, container = g)
+  # add handler that keeps track of current tab
   gWidgets2::addHandlerChanged(nb, handler = function(h, ...) {
     cp <<- h$page.no
   })
 
-  for (i in 1:length(displayed.moves))
-    tbl[[i]] <- gWidgets2::gtable(displayed.moves[[i]], multiple = TRUE, expand = TRUE, container = nb, label = names(displayed.moves)[i])
+  tabbed.moves <- splitN(displayed.moves, 1000)
+
+  for (i in 1:length(tabbed.moves)) {
+    tbl[[i]] <- gWidgets2::gtable(tabbed.moves[[i]], multiple = TRUE, expand = TRUE, container = nb, label = names(tabbed.moves)[i])
+  }
 
   btns <- gWidgets2::glayout(container = g)
 
@@ -118,7 +132,20 @@ eventsTabbedWidget <- function(tag, displayed.moves, all.moves, detections, trig
   if (type == "Array") {
     expand_event_function <- function(h, ...) {
       event <- match(tbl[[cp]]$get_value(), displayed.moves$Event)
+      if (length(event) < 1) {
+        if (exists("complain") && gWidgets2::isExtant(complain))
+          gWidgets2::dispose(complain)
 
+        complain <<- gWidgets2::gwindow("Warning", width = 300, height = 20)
+        complain_layout <- gWidgets2::ggroup(horizontal = FALSE, container = complain)
+        gWidgets2::glabel("No event was selected to expand.", container = complain_layout)
+        
+        complain_function <- function(h, ...) {
+          gWidgets2::dispose(complain)
+        }
+        complain_btn <- gWidgets2::gbutton(text = "Close", handler = complain_function, action = NULL, 
+          expand = TRUE, container = complain_layout)
+      }
       if (length(event) > 1) {
         if (exists("complain") && gWidgets2::isExtant(complain))
           gWidgets2::dispose(complain)
@@ -132,10 +159,16 @@ eventsTabbedWidget <- function(tag, displayed.moves, all.moves, detections, trig
         }
         complain_btn <- gWidgets2::gbutton(text = "Close", handler = complain_function, action = NULL, 
           expand = TRUE, container = complain_layout)
-      } else {
+      }
+      if (length(event) == 1) {
         link <- detections$Timestamp >= displayed.moves$First.time[event] & 
                 detections$Timestamp <= displayed.moves$Last.time[event]
-        sub.det <- detections[link, ]
+
+        from <- match(displayed.moves$First.time[event], as.character(detections$Timestamp))
+        to   <- match(displayed.moves$Last.time[event], as.character(detections$Timestamp))
+        sub.det <- detections[from:to, ]
+
+        save(list = ls(), file = "tabbed_before_graphInv.RData")
         all.moves <<- graphicalInvalidateDetections(detections = sub.det, 
                                                     displayed.moves = displayed.moves, 
                                                     all.moves = all.moves, 
@@ -152,7 +185,7 @@ eventsTabbedWidget <- function(tag, displayed.moves, all.moves, detections, trig
     btns[1, 6] <- ""
   }
 
-  btn_function <- function(h, ...) {
+  close_function <- function(h, ...) {
     aux <- lapply(tbl, function(x) as.data.frame(x[, c("Event", "Valid")]))
     x <- data.table::rbindlist(aux)
     graphical_valid <<- rep(FALSE, nrow(all.moves))
@@ -178,8 +211,6 @@ eventsTabbedWidget <- function(tag, displayed.moves, all.moves, detections, trig
     gWidgets2::gtable(valid.summary, multiple = TRUE, expand = TRUE, container = confirm_layout)
     confirm_btns <- gWidgets2::glayout(container = confirm_layout)
 
-    was.confirmed <- NULL
-
     confirm_function <- function(h, ...) {
       gWidgets2::dispose(confirm)
       gWidgets2::dispose(w)
@@ -191,12 +222,20 @@ eventsTabbedWidget <- function(tag, displayed.moves, all.moves, detections, trig
     }
     confirm_btns[1, 2, expand = TRUE] <- gWidgets2::gbutton(text = "Return", handler = abort_function, action = NULL)      
   }
-  btns[2, 6] <- gWidgets2::gbutton(text = "Submit and close", handler = btn_function, action = NULL)
+  btns[2, 6] <- gWidgets2::gbutton(text = "Submit and close", handler = close_function, action = NULL)
+
+  gWidgets2::dispose(placeholder)
+  gWidgets2::visible(w) <- TRUE
 
   if (first.time)
     message("M: Make any necessary edits in the external visualization window and submit the result to continue the analysis.\nNote: You can use Ctrl and Shift to select multiple events, and Ctrl+A to select all events at once."); flush.console()
 
   while (gWidgets2::isExtant(w)) {}
+
+  if (is.null(graphical_valid)) {
+    appendTo(c("Screen", "Warning", "Report"), "External visualization window was closed before result submission. Assuming no changes are to be made.")
+    graphical_valid <- all.moves$Valid
+  }
 
   return(list(all.moves = all.moves, graphical_valid = graphical_valid, restart = restart))
 } # nocov end
@@ -212,6 +251,7 @@ eventsTabbedWidget <- function(tag, displayed.moves, all.moves, detections, trig
 eventsSingleWidget <- function(tag, displayed.moves, all.moves, detections, trigger, first.time, type) { # nocov start
   appendTo("debug", "Running eventsSingleWidget.")
 
+  on.exit(save(list = ls(), file = "single_widget_ls.RData"), add = TRUE)
   # initiate button variables
   complain <- NULL
   confirm <- NULL
@@ -219,8 +259,18 @@ eventsSingleWidget <- function(tag, displayed.moves, all.moves, detections, trig
   graphical_valid <- NULL
   graphical_valid_indexes <- which(all.moves$Valid)
 
-  w <- gWidgets2::gwindow(paste0("Valid events for tag  ", tag, " (", sum(!all.moves$Valid), " invalid event(s) omitted)"), width = 900, height = 500)
+  placeholder <- gWidgets2::gwindow("Please wait", width = 300, height = 20)
+  on.exit({if(gWidgets2::isExtant(placeholder)) gWidgets2::dispose(placeholder)}, add = TRUE)
+  placeholder_layout <- gWidgets2::ggroup(horizontal = FALSE, container = placeholder)
+  gWidgets2::glabel("The GUI window is loading...", container = placeholder_layout)
+
+  message("M: Please wait while the GUI loads."); flush.console()
+
+  w <- gWidgets2::gwindow(paste0("Valid events for tag  ", tag, " (", sum(!all.moves$Valid), " invalid event(s) omitted)"),
+                          width = 900, height = 500, visible = FALSE)
+
   on.exit({if(gWidgets2::isExtant(w)) gWidgets2::dispose(w)}, add = TRUE)
+
   g <- gWidgets2::ggroup(horizontal = FALSE, container = w)
   hdr <- gWidgets2::glayout(container = g)
   hdr[1, 1] <- gWidgets2::glabel("<b>Warning message:</b>", markup = TRUE)
@@ -263,6 +313,20 @@ eventsSingleWidget <- function(tag, displayed.moves, all.moves, detections, trig
   if (type == "Array") {
     expand_event_function <- function(h, ...) {
       event <- match(tbl$get_value(), displayed.moves$Event)
+      if (length(event) < 1) {
+        if (exists("complain") && gWidgets2::isExtant(complain))
+          gWidgets2::dispose(complain)
+
+        complain <<- gWidgets2::gwindow("Warning", width = 300, height = 20)
+        complain_layout <- gWidgets2::ggroup(horizontal = FALSE, container = complain)
+        gWidgets2::glabel("No event was selected to expand.", container = complain_layout)
+        
+        complain_function <- function(h, ...) {
+          gWidgets2::dispose(complain)
+        }
+        complain_btn <- gWidgets2::gbutton(text = "Close", handler = complain_function, action = NULL, 
+          expand = TRUE, container = complain_layout)
+      }
       if (length(event) > 1) {
         if (exists("complain") && gWidgets2::isExtant(complain))
           gWidgets2::dispose(complain)
@@ -276,10 +340,16 @@ eventsSingleWidget <- function(tag, displayed.moves, all.moves, detections, trig
         }
         complain_btn <- gWidgets2::gbutton(text = "Close", handler = complain_function, action = NULL, 
           expand = TRUE, container = complain_layout)
-      } else {
+      }
+      if (length(event) == 1) {
         link <- detections$Timestamp >= displayed.moves$First.time[displayed.moves$Valid][event] &
                 detections$Timestamp <= displayed.moves$Last.time[displayed.moves$Valid][event]
-        sub.det <- detections[link, ]
+ 
+        from <- match(displayed.moves$First.time[event], as.character(detections$Timestamp))
+        to   <- match(displayed.moves$Last.time[event], as.character(detections$Timestamp))
+        sub.det <- detections[from:to, ]
+ 
+        save(list = ls(), file = "single_before_graphInv.RData")
         all.moves <<- graphicalInvalidateDetections(detections = sub.det, 
                                                     displayed.moves = displayed.moves, 
                                                     all.moves = all.moves, 
@@ -295,7 +365,7 @@ eventsSingleWidget <- function(tag, displayed.moves, all.moves, detections, trig
   } else {
     btns[1, 5] <- ""
   }
-  btn_function <- function(h, ...) {
+  close_function <- function(h, ...) {
     x <- as.data.frame(tbl[, c("Event", "Valid")])
 
     graphical_valid <<- rep(FALSE, nrow(all.moves))
@@ -321,8 +391,6 @@ eventsSingleWidget <- function(tag, displayed.moves, all.moves, detections, trig
     gWidgets2::gtable(valid.summary, multiple = TRUE, expand = TRUE, container = confirm_layout)
     confirm_btns <- gWidgets2::glayout(container = confirm_layout)
 
-    was.confirmed <- NULL
-
     confirm_function <- function(h, ...) {
       gWidgets2::dispose(confirm)
       gWidgets2::dispose(w)
@@ -334,12 +402,20 @@ eventsSingleWidget <- function(tag, displayed.moves, all.moves, detections, trig
     }
     confirm_btns[1, 2, expand = TRUE] <- gWidgets2::gbutton(text = "Return", handler = abort_function, action = NULL)      
   }
-  btns[2, 5] <- gWidgets2::gbutton(text = "Submit and close", handler = btn_function, action = NULL)
+  btns[2, 5] <- gWidgets2::gbutton(text = "Submit and close", handler = close_function, action = NULL)
+
+  gWidgets2::dispose(placeholder)
+  gWidgets2::visible(w) <- TRUE
 
   if (first.time)
     message("M: Make any necessary edits in the external visualization window and submit the result to continue the analysis.\nNote: You can use Ctrl and Shift to select multiple events, and Ctrl+A to select all events at once."); flush.console()
 
   while (gWidgets2::isExtant(w)) {}
+
+  if (is.null(graphical_valid)) {
+    appendTo(c("Screen", "Warning", "Report"), "External visualization window was closed before result submission. Assuming no changes are to be made.")
+    graphical_valid <- all.moves$Valid
+  }
 
   return(list(all.moves = all.moves, graphical_valid = graphical_valid, restart = restart))
 } # nocov end
@@ -360,8 +436,18 @@ detectionsTabbedWidget <- function(event, tag, to.print, silent) { # nocov start
   confirm <- NULL
   graphical_valid <- NULL
 
-  w2 <- gWidgets2::gwindow(paste0("Detections for valid event ", event, " from tag ", tag ,"."), width = 900, height = 500)
+  placeholder <- gWidgets2::gwindow("Please wait", width = 300, height = 20)
+  on.exit({if(gWidgets2::isExtant(placeholder)) gWidgets2::dispose(placeholder)}, add = TRUE)
+  placeholder_layout <- gWidgets2::ggroup(horizontal = FALSE, container = placeholder)
+  gWidgets2::glabel("The GUI window is loading...", container = placeholder_layout)
+
+  message("M: Please wait while the GUI loads."); flush.console()
+
+  w2 <- gWidgets2::gwindow(paste0("Detections for valid event ", event, " from tag ", tag ,"."), 
+                           width = 900, height = 500, visible = FALSE)
+
   on.exit({if(gWidgets2::isExtant(w2)) gWidgets2::dispose(w2)}, add = TRUE)
+  
   g2 <- gWidgets2::ggroup(horizontal = FALSE, container = w2)
   hdr2 <- gWidgets2::glayout(container = g2)
   hdr2[1, 1, expand = TRUE] <- gWidgets2::glabel("<b>Usage notes:</b>\n   - Edit detection validity by selecting rows and choosing the desired action below. Use CTRL + F to search for specific keywords\n   - Loading large tables can take some time. Please wait until the interaction buttons show up at the bottom of this window.", markup = TRUE)
@@ -370,12 +456,14 @@ detectionsTabbedWidget <- function(event, tag, to.print, silent) { # nocov start
   
   tbl2 <- list()
   nb <- gWidgets2::gnotebook(tab.pos = 3, expand = TRUE, container = g2)
+  # add handler that keeps track of current tab
   gWidgets2::addHandlerChanged(nb, handler = function(h, ...) {
     cp <<- h$page.no
   })
 
-  for (i in 1:length(to.print))
-    tbl2[[i]] <- gWidgets2::gtable(to.print[[i]], multiple = TRUE, expand = TRUE, container = nb, label = names(to.print)[i])
+  for (i in 1:length(to.print)) {
+      tbl2[[i]] <- gWidgets2::gtable(to.print[[i]], multiple = TRUE, expand = TRUE, container = nb, label = names(to.print)[i])
+  }
 
   btns2 <- gWidgets2::glayout(container = g2)
 
@@ -436,7 +524,7 @@ detectionsTabbedWidget <- function(event, tag, to.print, silent) { # nocov start
 
   btns2[2, 5, expand = TRUE] <- ""
 
-  btn_function <- function(h, ...) {
+  close_function <- function(h, ...) {
     aux <- lapply(tbl2, function(x) as.data.frame(x[, c("Index", "Valid")]))
     x <- data.table::rbindlist(aux)
     graphical_valid <<- x$Valid[order(x$Index)]
@@ -461,8 +549,6 @@ detectionsTabbedWidget <- function(event, tag, to.print, silent) { # nocov start
     gWidgets2::gtable(valid.summary, multiple = TRUE, expand = TRUE, container = confirm_layout)
     confirm_btns <- gWidgets2::glayout(container = confirm_layout)
 
-    was.confirmed <- NULL
-
     confirm_function <- function(h, ...) {
       gWidgets2::dispose(confirm)
       gWidgets2::dispose(w2)
@@ -474,12 +560,20 @@ detectionsTabbedWidget <- function(event, tag, to.print, silent) { # nocov start
     }
     confirm_btns[1, 2, expand = TRUE] <- gWidgets2::gbutton(text = "Return", handler = abort_function, action = NULL)      
   }
-  btns2[2, 6] <- gWidgets2::gbutton(text = "Submit and close", handler = btn_function, action = NULL)
+  btns2[2, 6] <- gWidgets2::gbutton(text = "Submit and close", handler = close_function, action = NULL)
+
+  gWidgets2::dispose(placeholder)
+  gWidgets2::visible(w2) <- TRUE
 
   if (!silent)
     message("M: Make any necessary edits in the external visualization window and submit the result to continue the analysis.\nNote: You can use Ctrl and Shift to select multiple detections, and Ctrl+A to select all events at once."); flush.console()
 
   while (gWidgets2::isExtant(w2)) {}
+
+  if (is.null(graphical_valid)) {
+    appendTo(c("Screen", "Warning", "Report"), "External visualization window was closed before result submission. Assuming no changes are to be made.")
+    graphical_valid <- to.print$Valid
+  }
 
   return(graphical_valid)
 }  # nocov end
@@ -499,8 +593,18 @@ detectionsSingleWidget <- function(event, tag, to.print, silent) { # nocov start
   confirm <- NULL
   graphical_valid <- NULL
 
-  w2 <- gWidgets2::gwindow(paste0("Detections for valid event ", event, " from tag ", tag ,"."), width = 900, height = 500)
+  placeholder <- gWidgets2::gwindow("Please wait", width = 300, height = 20)
+  on.exit({if(gWidgets2::isExtant(placeholder)) gWidgets2::dispose(placeholder)}, add = TRUE)
+  placeholder_layout <- gWidgets2::ggroup(horizontal = FALSE, container = placeholder)
+  gWidgets2::glabel("The GUI window is loading...", container = placeholder_layout)
+
+  message("M: Please wait while the GUI loads."); flush.console()
+
+  w2 <- gWidgets2::gwindow(paste0("Detections for valid event ", event, " from tag ", tag ,"."),
+                           width = 900, height = 500, visible = FALSE)
+
   on.exit({if(gWidgets2::isExtant(w2)) gWidgets2::dispose(w2)}, add = TRUE)
+  
   g2 <- gWidgets2::ggroup(horizontal = FALSE, container = w2)
   hdr2 <- gWidgets2::glayout(container = g2)
   hdr2[1, 1, expand = TRUE] <- gWidgets2::glabel("<b>Usage notes:</b>\n   - Edit detection validity by selecting rows and choosing the desired action below. Use CTRL + F to search for specific keywords\n   - Loading large tables can take some time. Please wait until the interaction buttons show up at the bottom of this window.", markup = TRUE)
@@ -536,7 +640,7 @@ detectionsSingleWidget <- function(event, tag, to.print, silent) { # nocov start
 
   btns2[2, 4, expand = TRUE] <- ""
 
-  btn_function <- function(h, ...) {
+  close_function <- function(h, ...) {
     x <- as.data.frame(tbl2[, c("Index", "Valid")])
     graphical_valid <<- x$Valid[order(x$Index)]
 
@@ -560,8 +664,6 @@ detectionsSingleWidget <- function(event, tag, to.print, silent) { # nocov start
     gWidgets2::gtable(valid.summary, multiple = TRUE, expand = TRUE, container = confirm_layout)
     confirm_btns <- gWidgets2::glayout(container = confirm_layout)
 
-    was.confirmed <- NULL
-
     confirm_function <- function(h, ...) {
       gWidgets2::dispose(confirm)
       gWidgets2::dispose(w2)
@@ -573,12 +675,20 @@ detectionsSingleWidget <- function(event, tag, to.print, silent) { # nocov start
     }
     confirm_btns[1, 2, expand = TRUE] <- gWidgets2::gbutton(text = "Return", handler = abort_function, action = NULL)      
   }
-  btns2[2, 5] <- gWidgets2::gbutton(text = "Submit and close", handler = btn_function, action = NULL)
+  btns2[2, 5] <- gWidgets2::gbutton(text = "Submit and close", handler = close_function, action = NULL)
+
+  gWidgets2::dispose(placeholder)
+  gWidgets2::visible(w2) <- TRUE
 
   if (!silent)
     message("M: Make any necessary edits in the external visualization window and submit the result to continue the analysis.\nNote: You can use Ctrl and Shift to select multiple detections, and Ctrl+A to select all events at once."); flush.console()
 
   while (gWidgets2::isExtant(w2)) {}
+
+  if (is.null(graphical_valid)) {
+    appendTo(c("Screen", "Warning", "Report"), "External visualization window was closed before result submission. Assuming no changes are to be made.")
+    graphical_valid <- to.print$Valid
+  }
 
   return(graphical_valid)
 } # nocov end
