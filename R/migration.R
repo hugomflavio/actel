@@ -372,7 +372,8 @@ migration <- function(
   movement.names <- names(movements)
 
   if (any(link <- !override %in% extractSignals(movement.names))) {
-    appendTo(c("Screen", "Warning", "Report"), paste0("Override has been triggered for tag ", paste(override[link], collapse = ", "), " but ",
+    appendTo(c("Screen", "Warning", "Report"), paste0("Override has been triggered for ",
+      ifelse(sum(link) == 1, "tag ", "tags "), paste(override[link], collapse = ", "), " but ",
       ifelse(sum(link) == 1, "this tag was", "these tags were"), " not detected."))
     override <- override[!link]
   }
@@ -442,36 +443,26 @@ migration <- function(
   movements <- updateValidity(arrmoves = movements, secmoves = section.movements)
 
   # compile valid movements
-  appendTo(c("Screen", "Report"), "M: Filtering valid array and section movements.")
+  appendTo(c("Screen", "Report"), "M: Filtering valid array movements.")
 
-  valid.movements <- lapply(seq_along(movements), function(i){
-    output <- simplifyMovements(movements = movements[[i]], tag = names(movements)[i], bio = bio, 
-                                discard.first = discard.first, speed.method = speed.method, dist.mat = dist.mat)
-  })
-  names(valid.movements) <- names(movements)
-  valid.movements <- valid.movements[!sapply(valid.movements, is.null)]
+  valid.movements <- assembleValidMoves(movements = movements, bio = bio, discard.first = discard.first,
+                                         speed.method = speed.method, dist.mat = dist.mat)
 
-  section.movements <- lapply(seq_along(valid.movements), function(i) {
-    tag <- names(valid.movements)[i]
-    appendTo("debug", paste0("debug: Compiling valid section movements for tag ", tag,"."))
-    output <- sectionMovements(movements = valid.movements[[i]], spatial = spatial, 
-                               valid.dist = attributes(dist.mat)$valid)
-    return(output)
-  })
-  names(section.movements) <- names(valid.movements)
+  appendTo(c("Screen", "Report"), "M: Filtering valid section movements.")
 
-  appendTo(c("Screen", "Report"), "M: Filling in the timetable.")
+  section.movements <- assembleValidSecMoves(valid.moves = valid.movements, spatial = spatial, 
+                                             valid.dist = attributes(dist.mat)$valid)
+
+  appendTo(c("Screen", "Report"), "M: Compiling migration timetable.")
 
   timetable <- assembleTimetable(secmoves = section.movements, valid.moves = valid.movements, all.moves = movements, spatial = spatial,
                                  arrays = arrays, bio = bio, tz = tz, dist.mat = dist.mat, speed.method = speed.method,
                                  if.last.skip.section = if.last.skip.section, success.arrays = success.arrays)
 
-  appendTo(c("Screen", "Report"), "M: Timetable successfully filled. Fitting in the remaining variables.")
-
   status.df <- assembleOutput(timetable = timetable, bio = bio, spatial = spatial,
                               dist.mat = dist.mat, tz = tz)
 
-  appendTo(c("Screen", "Report"), "M: Getting summary information tables.")
+  appendTo(c("Screen", "Report"), "M: Compiling summary information tables.")
 
   section.overview <- assembleSectionOverview(status.df = status.df, spatial = spatial)
 
@@ -480,7 +471,7 @@ migration <- function(
   times <- getTimes(input = aux, move.type = "array", event.type = "arrival", n.events = "first")
   rm(aux)
 
-  appendTo("Screen", "M: Validating detections...")
+  appendTo("Screen", "M: Validating detections.")
 
   recipient <- validateDetections(detections.list = detections.list, movements = valid.movements)
   detections <- recipient$detections

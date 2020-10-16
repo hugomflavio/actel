@@ -7,13 +7,15 @@
 simplifyMovements(movements, discard.first, tag, bio, speed.method, dist.mat)
 }
 \arguments{
-\item{movements}{A list of movements for each target tag, created by groupMovements.}
+\item{movements}{the movement dataframe for the tag being analysed.}
 
 \item{discard.first}{A threshold amount of time (in hours) that must pass after
 release for the respective detections to be valid. Set to 0 to discard only
 the release-to-first-detection calculations.}
 
-\item{bio}{A table with the tags and biometrics of the studied animals.}
+\item{tag}{The tag ID of the animal currently being analysed}
+
+\item{bio}{The biometrics table.}
 
 \item{speed.method}{Can take two forms: 'last to first' or 'last to last'.
 If 'last to first' (default), the last detection on the previous array is matched

@@ -322,8 +322,9 @@ explore <- function(
   movement.names <- names(movements)
 
   if (any(link <- !override %in% extractSignals(movement.names))) {
-    appendTo(c("Screen", "Warning", "Report"), paste0("Override has been triggered for tag ", paste(override[link], collapse = ", "), " but ",
-      ifelse(sum(link) == 1, "this signal was", "these signals were"), " not detected."))
+    appendTo(c("Screen", "Warning", "Report"), paste0("Override has been triggered for ",
+      ifelse(sum(link) == 1, "tag ", "tags "), paste(override[link], collapse = ", "), " but ",
+      ifelse(sum(link) == 1, "this tag was", "these tags were"), " not detected."))
     override <- override[!link]
   }
 
@@ -369,12 +370,11 @@ explore <- function(
 
   appendTo(c("Screen", "Report"), "M: Filtering valid array movements.")
 
-  valid.movements <- lapply(seq_along(movements), function(i){
-    output <- simplifyMovements(movements = movements[[i]], tag = names(movements)[i], bio = bio, 
-                                discard.first = discard.first, speed.method = speed.method, dist.mat = dist.mat)
-  })
-  names(valid.movements) <- names(movements)
-  valid.movements <- valid.movements[!unlist(lapply(valid.movements, is.null))]
+  valid.movements <- assembleValidMoves(movements = movements, bio = bio, discard.first = discard.first,
+                                         speed.method = speed.method, dist.mat = dist.mat)
+
+
+  appendTo(c("Screen", "Report"), "M: Compiling circular times.")
 
   aux <- list(valid.movements = valid.movements,
               spatial = spatial,
@@ -383,7 +383,7 @@ explore <- function(
   times <- getTimes(input = aux, move.type = "array", event.type = "arrival", n.events = "first")
   rm(aux)
 
-  appendTo("Screen", "M: Validating detections...")
+  appendTo("Screen", "M: Validating detections.")
 
   recipient <- validateDetections(detections.list = detections.list, movements = valid.movements)
   detections <- recipient$detections

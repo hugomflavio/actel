@@ -9,7 +9,7 @@ printIndividualResidency(ratios, global.ratios, spatial, rsp.info)
 \arguments{
 \item{ratios}{the daily ratios}
 
-\item{spatial}{The spatial data list.}
+\item{spatial}{The spatial list.}
 }
 \value{
 A string of file locations in rmd syntax, to be included in printRmd

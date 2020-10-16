@@ -16,11 +16,11 @@ printIndividuals(
 )
 }
 \arguments{
-\item{detections.list}{A list of the detections split by each target tag, created by splitDetections.}
+\item{detections.list}{A list of the detections split by each target tag.}
 
-\item{movements}{A list of movements for each target tag, created by groupMovements.}
+\item{movements}{the movement dataframe for the tag being analysed.}
 
-\item{spatial}{The spatial data frame.}
+\item{spatial}{The spatial list.}
 
 \item{status.df}{The main results table.}
 

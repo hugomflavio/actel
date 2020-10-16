@@ -6,13 +6,8 @@
 \usage{
 updateValidity(arrmoves, secmoves)
 }
-\arguments{
-\item{arrmoves}{the array movements}
-
-\item{secmoves}{the section movements}
-}
 \value{
-A data frame with the array movements for the target tag, with an updated 'Valid' column.
+A list with the updated array movements.
 }
 \description{
 update array-movement validity based on the section-movements

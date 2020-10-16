@@ -9,7 +9,7 @@ printLastSection(input, spatial)
 \arguments{
 \item{input}{a table with the last seen data}
 
-\item{spatial}{The spatial data list.}
+\item{spatial}{The spatial list.}
 }
 \value{
 No return value, called to plot and save graphic.

@@ -11,7 +11,7 @@ assembleOutput(timetable, bio, spatial, dist.mat, tz)
 
 \item{bio}{A table with the tags and biometrics of the studied animals.}
 
-\item{spatial}{The spatial data list.}
+\item{spatial}{The spatial list.}
 
 \item{dist.mat}{A matrix of the distances between the deployed ALS.}
 

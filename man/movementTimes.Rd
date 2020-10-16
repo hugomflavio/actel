@@ -7,7 +7,7 @@
 movementTimes(movements, type = c("array", "section"))
 }
 \arguments{
-\item{movements}{A list of movements for each target tag, created by groupMovements.}
+\item{movements}{the movement dataframe for the tag being analysed.}
 
 \item{type}{The type of movements being analysed. One of "array" or "section".}
 }

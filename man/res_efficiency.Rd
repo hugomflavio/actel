@@ -7,8 +7,6 @@
 res_efficiency(arrmoves, bio, spatial, arrays, paths, dotmat)
 }
 \arguments{
-\item{arrmoves}{the array movements}
-
 \item{bio}{A table with the tags and biometrics of the studied animals.}
 
 \item{spatial}{A list of spatial objects in the study area}

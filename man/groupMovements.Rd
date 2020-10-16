@@ -15,9 +15,11 @@ groupMovements(
 )
 }
 \arguments{
-\item{detections.list}{A list of the detections split by each target tag, created by splitDetections.}
+\item{detections.list}{A list of the detections split by each target tag.}
 
-\item{bio}{A table with the tags and biometrics of the studied animals.}
+\item{bio}{The biometrics table.}
+
+\item{spatial}{The spatial list.}
 
 \item{speed.method}{Can take two forms: 'last to first' or 'last to last'.
 If 'last to first' (default), the last detection on the previous array is matched

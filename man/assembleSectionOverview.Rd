@@ -7,7 +7,7 @@
 assembleSectionOverview(status.df, spatial)
 }
 \arguments{
-\item{spatial}{The spatial data list.}
+\item{spatial}{The spatial list.}
 }
 \value{
 A data frame containing the survival per group of animals present in the biometrics.

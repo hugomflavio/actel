@@ -9,6 +9,8 @@ res_assembleOutput(res.df, bio, spatial, tz)
 \arguments{
 \item{bio}{A table with the tags and biometrics of the studied animals.}
 
+\item{spatial}{The spatial list.}
+
 \item{tz}{The time zone of the study area. Must match one of the values
 present in \code{\link[base]{timezones}}.}
 }

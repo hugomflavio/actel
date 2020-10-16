@@ -7,9 +7,9 @@
 sectionMovements(movements, spatial, valid.dist)
 }
 \arguments{
-\item{movements}{A list of movements for each target tag, created by groupMovements.}
+\item{movements}{the movement dataframe for the tag being analysed.}
 
-\item{spatial}{The spatial data list.}
+\item{spatial}{The spatial list.}
 
 \item{valid.dist}{Logical: Is a valid distances matrix being used?}
 }

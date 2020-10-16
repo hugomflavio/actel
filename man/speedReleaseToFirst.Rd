@@ -9,9 +9,9 @@ speedReleaseToFirst(tag, bio, movements, dist.mat, speed.method)
 \arguments{
 \item{tag}{The tag ID of the animal currently being analysed}
 
-\item{bio}{A table with the tags and biometrics of the studied animals.}
+\item{bio}{The biometrics table.}
 
-\item{movements}{A list of movements for each target tag, created by groupMovements.}
+\item{movements}{the movement dataframe for the tag being analysed.}
 
 \item{dist.mat}{A matrix of the distances between the deployed ALS.}
 

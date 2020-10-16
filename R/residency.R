@@ -339,7 +339,8 @@ residency <- function(
   movement.names <- names(movements)
 
   if (any(link <- !override %in% extractSignals(movement.names))) {
-    appendTo(c("Screen", "Warning", "Report"), paste0("Override has been triggered for tag ", paste(override[link], collapse = ", "), " but ",
+    appendTo(c("Screen", "Warning", "Report"), paste0("Override has been triggered for ",
+      ifelse(sum(link) == 1, "tag ", "tags "), paste(override[link], collapse = ", "), " but ",
       ifelse(sum(link) == 1, "this tag was", "these tags were"), " not detected."))
     override <- override[!link]
   }
@@ -402,23 +403,16 @@ residency <- function(
   movements <- updateValidity(arrmoves = movements, secmoves = section.movements)
 
   # compile valid movements
-  appendTo(c("Screen", "Report"), "M: Filtering valid array and section movements.")
+  appendTo(c("Screen", "Report"), "M: Filtering valid array movements.")
 
-  valid.movements <- lapply(seq_along(movements), function(i){
-    output <- simplifyMovements(movements = movements[[i]], tag = names(movements)[i], bio = bio, 
-                                discard.first = discard.first, speed.method = speed.method, dist.mat = dist.mat)
-  })
-  names(valid.movements) <- names(movements)
-  valid.movements <- valid.movements[!unlist(lapply(valid.movements, is.null))]
+  valid.movements <- assembleValidMoves(movements = movements, bio = bio, discard.first = discard.first,
+                                         speed.method = speed.method, dist.mat = dist.mat)
 
-  section.movements <- lapply(seq_along(valid.movements), function(i) {
-    tag <- names(valid.movements)[i]
-    appendTo("debug", paste0("debug: Compiling valid section movements for tag ", tag,"."))
-    output <- sectionMovements(movements = valid.movements[[i]], spatial = spatial, valid.dist = attributes(dist.mat)$valid)
-    return(output)
-  })
-  names(section.movements) <- names(valid.movements)
+  appendTo(c("Screen", "Report"), "M: Filtering valid section movements.")
 
+  section.movements <- assembleValidSecMoves(valid.moves = valid.movements, spatial = spatial, 
+                                             valid.dist = attributes(dist.mat)$valid)
+  
   # Grab summary information
   appendTo(c("Screen", "Report"), "M: Compiling residency objects.")
 
@@ -428,6 +422,9 @@ residency <- function(
 
   last.seen <- as.data.frame.matrix(with(status.df, table(Group, Status)))
 
+  residency.list <- getResidency(movements = section.movements, spatial = spatial)
+
+  # Circular data
   aux <- list(valid.movements = valid.movements, section.movements = section.movements,
               spatial = spatial, rsp.info = list(bio = bio, analysis.type = "residency"))
   array.times <- getTimes(input = aux, move.type = "array", event.type = "arrival", n.events = "all")
@@ -438,11 +435,9 @@ residency <- function(
                                              event.type = "departure", n.events = "all"))
   rm(aux)
 
-  residency.list <- getResidency(movements = section.movements, spatial = spatial)
-
   if (length(residency.list) == 0) {
     emergencyBreak()
-    stop("No tags have enough data for residency analysis. Consider running explore() instead.\n", call. = FALSE)
+    stopAndReport("No tags have enough data for residency analysis. Consider running explore() instead.\n")
   }
 
   if (timestep == "days")
@@ -468,7 +463,7 @@ residency <- function(
   })
   names(group.ratios) <- unique(bio$Group)
 
-  appendTo("Screen", "M: Validating detections...")
+  appendTo("Screen", "M: Validating detections.")
 
   recipient <- validateDetections(detections.list = detections.list, movements = valid.movements)
   detections <- recipient$detections
@@ -498,7 +493,6 @@ residency <- function(
   }
 
 # ----------
-
 
 # ---------------
 

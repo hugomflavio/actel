@@ -25,9 +25,11 @@ assembleTimetable(
 
 \item{all.moves}{all array movements}
 
+\item{spatial}{The spatial list.}
+
 \item{arrays}{A list containing information for each array.}
 
-\item{bio}{A table with the tags and biometrics of the studied animals.}
+\item{bio}{The biometrics table.}
 
 \item{tz}{The time zone of the study area. Must match one of the values
 present in \code{\link[base]{timezones}}.}
