@@ -19,7 +19,7 @@ Recover latest actel crash log
 }
 \examples{
 \dontshow{
-sink(paste0(tempdir(), "latest_actel_error_log.txt"))
+sink(paste0(tempdir(), "/latest_actel_error_log.txt"))
 cat(
 "This is an example file
 -
@@ -30,11 +30,11 @@ Function: example()")
 sink()
 }
 
-recoverLog(file = paste0(tempdir(), "new_log.txt"))
+recoverLog(file = paste0(tempdir(), "/new_log.txt"))
 
 \dontshow{
-file.remove(paste0(tempdir(), "latest_actel_error_log.txt"))
-file.remove(paste0(tempdir(), "new_log.txt"))
+file.remove(paste0(tempdir(), "/latest_actel_error_log.txt"))
+file.remove(paste0(tempdir(), "/new_log.txt"))
 }
 
 }
