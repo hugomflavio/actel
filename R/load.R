@@ -93,6 +93,8 @@ loadStudyData <- function(tz, override = NULL, start.time, stop.time, save.detec
   checkUnknownReceivers(input = detections) # Check if there are detections from unknown receivers
   appendTo(c("Screen","Report"), paste0("M: Data time range: ", as.character(head(detections$Timestamp, 1)), " to ", as.character(tail(detections$Timestamp, 1)), " (", tz, ")."))
 
+  arrays <- liveArrayTimes(arrays = arrays, deployments = deployments, spatial = spatial)
+
   # Reorder arrays object by spatial order
   link <- match(unlist(spatial$array.order), names(arrays))
   arrays <- arrays[link] 
@@ -1868,4 +1870,33 @@ discardFirst <- function(input, bio, trim) {
   names(output) <- names(input)
   appendTo("Screen", paste0("M: ", count, " detection(s) were invalidated because they were recorded before the time set in 'discard.first' had passed."))
   return(output)
+}
+
+#' Assign live times to arrays
+#' 
+#' @param arrays The array list
+#' @param deployments the deployments list
+#' @param spatial The spatial list
+#' 
+#' @return an expanded array list
+#' 
+#' @keywords internal
+#' 
+liveArrayTimes <- function(arrays, deployments, spatial) {
+  xdep <- do.call(rbind, deployments)
+  capture <- lapply(names(arrays), function(a) {
+    sts <- spatial$stations$Station.name[spatial$stations$Array == a]
+    aux <- xdep[xdep$Station.name %in% sts, ]
+    aux <- aux[order(aux$Start), ]
+    overlaps <- c(TRUE, aux$Stop[-nrow(live)] > aux$Start[-1])
+    # First one is always TRUE, so it can be merged with the second if relevant
+    stops <- rle(overlaps)$lengths
+    starts <- c(1, stops[-length(stops)] + 1)
+
+    live <- data.frame(Start = aux$Start[starts],
+                      Stop = aux$Stop[stops])
+
+    arrays[[a]]$live <<- live
+  })
+  return(arrays)
 }
