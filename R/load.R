@@ -1887,15 +1887,15 @@ liveArrayTimes <- function(arrays, deployments, spatial) {
   capture <- lapply(names(arrays), function(a) {
     sts <- spatial$stations$Station.name[spatial$stations$Array == a]
     aux <- xdep[xdep$Station.name %in% sts, ]
-    aux <- aux[order(aux$Start), ]
-    overlaps <- c(TRUE, aux$Stop[-nrow(live)] > aux$Start[-1])
-    # First one is always TRUE, so it can be merged with the second if relevant
-    stops <- rle(overlaps)$lengths
-    starts <- c(1, stops[-length(stops)] + 1)
-
+    aux <- aux[order(aux$Start, aux$Stop), ]
+    overlaps <- c(FALSE, aux$Stop[-nrow(aux)] >= aux$Start[-1])
+    # First one is always FALSE (i.e. it cannot overlap with a previous one)
+    starts <- which(!overlaps)
+    stops <- c(starts[-1] - 1, nrow(aux))
+    # extract values
     live <- data.frame(Start = aux$Start[starts],
                       Stop = aux$Stop[stops])
-
+    # store the result
     arrays[[a]]$live <<- live
   })
   return(arrays)
