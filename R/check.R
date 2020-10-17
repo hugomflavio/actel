@@ -532,12 +532,23 @@ checkInactiveness <- function(movements, tag, detections,
 #'
 #' @keywords internal
 #'
-checkImpassables <- function(movements, tag, detections, dotmat, GUI, save.tables.locally){
+checkImpassables <- function(movements, tag, bio, detections, dotmat, GUI, save.tables.locally){
   appendTo("debug", "Running checkImpassables.")
   Valid <- NULL
+
+  release <- as.character(bio$Release.site[na.as.false(bio$Transmitter == tag)])
+  release <- unlist(strsplit(with(spatial, release.sites[release.sites$Standard.name == release, "Array"]), "|", fixed = TRUE))
+
   restart <- TRUE
   while (restart) {
     restart <- FALSE
+    the.warning <- NULL
+    # check release movement
+    if(all(is.na(dotmat[as.character(release), as.character(vm$Array[1])]))) {
+      appendTo(c("Screen", "Warning", "Report"), aux <- paste0("Tag ", tag, " made an impassable jump: It is not possible to go from release site '," as.character(release), "' to ", as.character(vm$Array[1]), ".\n         Please resolve this either by invalidating events or by adjusting your 'spatial.txt' file and restarting."))
+      the.warning <- c(the.warning, aux)
+    }
+    # check other movements
     if (sum(movements$Valid) > 1) {
       valid.moves <- movements[(Valid)]
       shifts <- data.frame(
@@ -545,20 +556,21 @@ checkImpassables <- function(movements, tag, detections, dotmat, GUI, save.table
         B = valid.moves$Array[-1])
       distances <- apply(shifts, 1, function(x) dotmat[x[1], x[2]])
       if (any(is.na(distances))) {
-        the.warning <- NULL
         sapply(which(is.na(distances)), function(i) {
           appendTo(c("Screen", "Warning", "Report"), aux <- paste0("Tag ", tag, " made an impassable jump: It is not possible to go from array ", shifts[i, 1], " to ", shifts[i, 2], ".\n         Please resolve this either by invalidating events or by adjusting your 'spatial.txt' file and restarting."))
           the.warning <- c(the.warning, aux)
         })
-        if (interactive()) { # nocov start
-          the.warning <- paste("Warning:", the.warning, collapse = "\n")
-          movements <- tableInteraction(moves = movements, tag = tag, detections = detections, 
-                                        trigger = the.warning, GUI = GUI, force = TRUE, 
-                                        save.tables.locally = save.tables.locally)
-          restart <- TRUE
-        } else { # nocov end
-          stop("Preventing analysis from entering interactive mode in a non-interactive session.\n")
-        }
+      }
+    }
+    if (!is.null(the.warning)) {
+      if (interactive()) { # nocov start
+        the.warning <- paste("Warning:", the.warning, collapse = "\n")
+        movements <- tableInteraction(moves = movements, tag = tag, detections = detections, 
+                                      trigger = the.warning, GUI = GUI, force = TRUE, 
+                                      save.tables.locally = save.tables.locally)
+        restart <- TRUE
+      } else { # nocov end
+        stop("Preventing analysis from entering interactive mode in a non-interactive session.")
       }
     }
   }
