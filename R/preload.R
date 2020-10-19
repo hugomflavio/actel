@@ -125,6 +125,8 @@ preload <- function(biometrics, spatial, deployments, detections, dot, distances
   appendTo(c("Screen", "Report"), paste0("M: Data time range: ", as.character(head(detections$Timestamp, 1)), " to ", as.character(tail(detections$Timestamp, 1)), " (", tz, ")."))
   checkUnknownReceivers(input = detections) # Check if there are detections from unknown receivers
 
+  arrays <- liveArrayTimes(arrays = arrays, deployments = deployments, spatial = spatial)
+
   # Reorder arrays by spatial order
   link <- match(unlist(spatial$array.order), names(arrays))
   arrays <- arrays[link]
