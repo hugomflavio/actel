@@ -272,6 +272,7 @@ explore <- function(
   dot <- study.data$dot
   arrays <- study.data$arrays
   dotmat <- study.data$dotmat
+  paths <- study.data$paths
   dist.mat <- study.data$dist.mat
   attributes(dist.mat)$speed.method <- speed.method
   detections.list <- study.data$detections.list
@@ -333,16 +334,13 @@ explore <- function(
     appendTo("debug", paste0("debug: Checking movement quality for tag ", tag,"."))
 
     if (is.na(match(extractSignals(tag), override))) {
-      release <- as.character(bio$Release.site[na.as.false(bio$Transmitter == tag)])
-      release <- unlist(strsplit(with(spatial, release.sites[release.sites$Standard.name == release, "Array"]), "|", fixed = TRUE))
-
       output <- checkMinimumN(movements = movements[[tag]], tag = tag, minimum.detections = minimum.detections)
 
-      output <- checkImpassables(movements = output, tag = tag, detections = detections.list[[tag]], 
-                                 dotmat = dotmat, GUI = GUI, save.tables.locally = save.tables.locally)
+      output <- checkImpassables(movements = output, tag = tag, bio = bio, detections = detections.list[[tag]], 
+                                 spatial = spatial, dotmat = dotmat, GUI = GUI, save.tables.locally = save.tables.locally)
 
-      output <- checkJumpDistance(movements = output, release = release, tag = tag, dotmat = dotmat,
-                                  jump.warning = jump.warning, jump.error = jump.error, GUI = GUI,
+      output <- checkJumpDistance(movements = output, bio = bio, tag = tag, dotmat = dotmat, paths = paths, arrays = arrays,
+                                  spatial = spatial, jump.warning = jump.warning, jump.error = jump.error, GUI = GUI,
                                   detections = detections.list[[tag]], save.tables.locally = save.tables.locally)
 
       if (do.checkSpeeds) {

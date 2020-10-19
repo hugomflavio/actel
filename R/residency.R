@@ -350,17 +350,14 @@ residency <- function(
     appendTo("debug", paste0("debug: Checking movement quality for tag ", tag,"."))
 
     if (is.na(match(extractSignals(tag), override))) {
-      release <- as.character(bio$Release.site[na.as.false(bio$Transmitter == tag)])
-      release <- unlist(strsplit(with(spatial, release.sites[release.sites$Standard.name == release, "Array"]), "|", fixed = TRUE))
-
       output <- checkMinimumN(movements = movements[[tag]], tag = tag, minimum.detections = minimum.detections)
 
-      output <- checkImpassables(movements = output, tag = tag, detections = detections.list[[tag]], 
-                                 dotmat = dotmat, GUI = GUI, save.tables.locally = save.tables.locally)
+      output <- checkImpassables(movements = output, tag = tag, bio = bio, detections = detections.list[[tag]], 
+                                 spatial = spatial, dotmat = dotmat, GUI = GUI, save.tables.locally = save.tables.locally)
 
-      output <- checkJumpDistance(movements = output, release = release, tag = tag, dotmat = dotmat, 
-                                  detections = detections.list[[tag]], jump.warning = jump.warning, 
-                                  jump.error = jump.error, GUI = GUI, save.tables.locally = save.tables.locally)
+      output <- checkJumpDistance(movements = output, bio = bio, tag = tag, dotmat = dotmat, paths = paths, arrays = arrays,
+                                  spatial = spatial, jump.warning = jump.warning, jump.error = jump.error, GUI = GUI,
+                                  detections = detections.list[[tag]], save.tables.locally = save.tables.locally)
 
       if (do.checkSpeeds) {
         temp.valid.movements <- simplifyMovements(movements = output, tag = tag, bio = bio, discard.first = discard.first,

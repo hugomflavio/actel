@@ -24,6 +24,9 @@ Enhancements:
   * Improve job log recovery method so it is not as intrusive. Including new function recoverLog().
   * Only display GUI windows once they are ready.
   * Check for impassable jumps between release and first event too.
+  * Array live times are now calculated and included in the 'arrays' object.
+  * The 'deployments' object has been extended and now includes array and standard station name.
+  * actel can now dynamically check for array live times when checking jump distances, to avoid triggering warnings and errors simply because some arrays were not active.
 
 ## actel 1.1.1
 

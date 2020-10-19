@@ -532,7 +532,7 @@ checkInactiveness <- function(movements, tag, detections,
 #'
 #' @keywords internal
 #'
-checkImpassables <- function(movements, tag, bio, detections, dotmat, GUI, save.tables.locally){
+checkImpassables <- function(movements, tag, bio, spatial, detections, dotmat, GUI, save.tables.locally){
   appendTo("debug", "Running checkImpassables.")
   Valid <- NULL
 
@@ -543,14 +543,16 @@ checkImpassables <- function(movements, tag, bio, detections, dotmat, GUI, save.
   while (restart) {
     restart <- FALSE
     the.warning <- NULL
+    valid.moves <- movements[(Valid)]
     # check release movement
-    if(all(is.na(dotmat[as.character(release), as.character(vm$Array[1])]))) {
-      appendTo(c("Screen", "Warning", "Report"), aux <- paste0("Tag ", tag, " made an impassable jump: It is not possible to go from release site '," as.character(release), "' to ", as.character(vm$Array[1]), ".\n         Please resolve this either by invalidating events or by adjusting your 'spatial.txt' file and restarting."))
-      the.warning <- c(the.warning, aux)
+    if (sum(movements$Valid) > 0) {
+      if(all(is.na(dotmat[as.character(release), as.character(valid.moves$Array[1])]))) {
+        appendTo(c("Screen", "Warning", "Report"), aux <- paste0("Tag ", tag, " made an impassable jump: It is not possible to go from release site ", as.character(release), " to ", as.character(valid.moves$Array[1]), ".\n         Please resolve this either by invalidating events or by adjusting your 'spatial.txt' file and restarting."))
+        the.warning <- c(the.warning, aux)
+      }
     }
     # check other movements
     if (sum(movements$Valid) > 1) {
-      valid.moves <- movements[(Valid)]
       shifts <- data.frame(
         A = valid.moves$Array[-nrow(valid.moves)],
         B = valid.moves$Array[-1])
@@ -661,12 +663,15 @@ checkReport <- function(report){
 #'
 #' @keywords internal
 #'
-checkUpstream <- function(movements, tag, release, detections, arrays, GUI, save.tables.locally) {
+checkUpstream <- function(movements, tag, bio, detections, arrays, spatial, GUI, save.tables.locally) {
   appendTo("debug", "Running checkUpstream.")
   # NOTE: The NULL variables below are actually column names used by data.table.
   # This definition is just to prevent the package check from issuing a note due unknown variables.
   Valid <- NULL
   Array <- NULL
+
+  release <- as.character(bio$Release.site[na.as.false(bio$Transmitter == tag)])
+  release <- unlist(strsplit(with(spatial, release.sites[release.sites$Standard.name == release, "Array"]), "|", fixed = TRUE))
 
   the.warning <- NULL
   after.arrays <- unique(c(release, unlist(lapply(release, function(x) arrays[[x]]$all.after.and.par))))
@@ -696,52 +701,132 @@ checkUpstream <- function(movements, tag, release, detections, arrays, GUI, save
 #'
 #' @keywords internal
 #'
-checkJumpDistance <- function(movements, tag, detections, release, 
-  dotmat, jump.warning, jump.error, GUI, save.tables.locally) {
+checkJumpDistance <- function(movements, tag, bio, detections, spatial, arrays,
+  dotmat, paths, jump.warning, jump.error, GUI, save.tables.locally) {
 
   appendTo("debug", "Running checkJumpDistance.")
   # NOTE: The NULL variables below are actually column names used by data.table.
   # This definition is just to prevent the package check from issuing a note due unknown variables.
   Valid <- NULL
   the.warning <- NULL
+ 
+  release <- as.character(bio$Release.site[na.as.false(bio$Transmitter == tag)])
+  release <- unlist(strsplit(with(spatial, release.sites[release.sites$Standard.name == release, "Array"]), "|", fixed = TRUE))
+  release.time <- bio$Release.date[na.as.false(bio$Transmitter == tag)] 
+
   if (any(movements$Valid)) {
     vm <- movements[(Valid)]
+    #########################
+    # CHECK RELEASE TO FIRST
+    #########################
+    # remove any potential first array that is not connected do the first move (this should never happen, but still...)
+    release <- release[!is.na(dotmat[as.character(release), as.character(vm$Array[1])])]
+    # minimum jump size
+    release.steps <- min(dotmat[as.character(release), as.character(vm$Array[1])] + 1)
     # Check release-to-first
-    release.jump <- min(dotmat[as.character(release), as.character(vm$Array[1])] + 1)
-    if (release.jump > jump.warning) {
+    if (release.steps > 1) {
+      # determine if any arrays were not active during the movement.
+      path.dist <- list()
+      for (r in release) {
+        sub.paths <- paths[[paste0(release[r], "_to_", vm$Array[1])]]
+        if (is.null(sub.paths)) { # failsafe in case jump size is 2
+          aux <- list(n = 1, names = release[r])
+        } else {
+          aux <- lapply(sub.paths, function(p) {
+            xarrays <- unlist(strsplit(p, " -> "))
+            xarrays <- sapply(xarrays, function(a) {
+              # if the movement ocurred before the start
+              v1 <- arrays[[a]]$live$Start > release.time & 
+                    arrays[[a]]$live$Start > vm$First.time[1]
+              # or after the stop
+              v2 <- arrays[[a]]$live$Stop < release.time & 
+                    arrays[[a]]$live$Stop < vm$First.time[1]
+              # then that period does not qualify
+              v3 <- !(v1 | v2)
+              # and if any period qualifies, then the array was up during the movememnt
+              any(v3)
+            })
+            return(list(n = sum(xarrays) + 1, names = names(xarrays)[xarrays]))
+          })
+        }
+        names(aux) <- sub.paths
+        path.dist <- c(path.dist, aux)
+        rm(aux)
+      }
+      new.steps <- sapply(path.dist, function(x) x$n)
+      release.steps <- min(new.steps)
+      say.at.least <- min(new.steps) != max(new.steps)
+      rm(new.steps)
+    }
+    if (release.steps > jump.warning) {
       # Trigger warning
       appendTo(c("Report", "Warning", "Screen"),
-        the.warning <- paste0("Tag ", tag, " jumped through ", release.jump - 1,
-          ifelse(release.jump > 2, " arrays ", " array "),
+        the.warning <- paste0("Tag ", tag, " jumped through ", 
+          ifelse(say.at.least, "at least ", ""), release.steps - 1,
+          ifelse(release.steps > 2, " arrays ", " array "),
           "from release to first valid event (Release -> ", vm$Array[1], ")."))
       the.warning <- paste("Warning:", the.warning)
+      rm(say.at.least)
     }
-    if (release.jump > jump.error)
+    if (release.steps > jump.error)
       trigger.error <- TRUE # nocov
     else
       trigger.error <- FALSE
-    # Check event-to-event
+
+    #########################
+    # CHECK EVENT TO EVENT
+    #########################
     if (nrow(vm) > 1) {
       A <- vm$Array[-nrow(vm)]
       B <- vm$Array[-1]
       aux <- cbind(A, B)
-      jumps <- apply(aux, 1, function(x) dotmat[x[1], x[2]])
-      names(jumps) <- paste(A, "->", B)
-      if (any(is.na(jumps)))
+      move.steps <- apply(aux, 1, function(x) dotmat[x[1], x[2]])
+      names(move.steps) <- paste(A, "->", B)
+
+      if (any(is.na(move.steps)))
         stopAndReport("There are unresolved impassable jumps in the movements.")
-      if (any(jumps > jump.warning)) {
-        link <- which(jumps > jump.warning)
-        for (i in 1:length(link)) {
-          # Trigger warning
-          appendTo(c("Report", "Warning", "Screen"),
-            other.warning <- paste0("Tag ", tag, " jumped through ", jumps[link[i]] - 1,
-              ifelse(jumps[link[i]] > 2, " arrays ", " array "),
-              "in valid events ", link[i], " -> ", link[i] + 1, " (", names(jumps)[link[i]], ")."))
-          other.warning <- paste("Warning:", other.warning)
-        the.warning <- paste0(the.warning, "\n", other.warning)
+
+      if (any(move.steps > 1)) {
+        # isolate troublesome events
+        steps.to.check <- which(move.steps > 1)
+        # confirm that arrays were active
+        for (i in steps.to.check) {
+          sub.paths <- paths[[paste0( vm$Array[i], "_to_", vm$Array[i + 1])]]
+          path.dist <- lapply(sub.paths, function(p) {
+            xarrays <- unlist(strsplit(p, " -> "))
+            xarrays <- sapply(xarrays, function(a) {
+              # if the movement ocurred before the start
+              v1 <- arrays[[a]]$live$Start > vm$Last.time[i] & 
+                    arrays[[a]]$live$Start > vm$First.time[i + 1]
+              # or after the stop
+              v2 <- arrays[[a]]$live$Stop < vm$Last.time[i] & 
+                    arrays[[a]]$live$Stop < vm$First.time[i + 1]
+              # then that period does not qualify
+              v3 <- !(v1 | v2)
+              # and if any period qualifies, then the array was up during the movememnt
+              any(v3)
+            })
+            return(list(n = sum(xarrays) + 1, names = names(xarrays)[xarrays]))
+          })
+          names(path.dist) <- sub.paths
+          new.steps <- sapply(path.dist, function(x) x$n)
+          move.steps[i] <- min(new.steps)
+          say.at.least <- min(new.steps) != max(new.steps)
+          if (move.steps[i] > jump.warning) { # because ">", then if jump.warning = 1, actel only complains if steps = 2.
+            # Trigger warning
+            appendTo(c("Report", "Warning", "Screen"),
+              other.warning <- paste0("Tag ", tag, " jumped through ",  
+                ifelse(say.at.least, "at least ", ""), move.steps[i] - 1,
+                ifelse(move.steps[i] > 2, " arrays ", " array "),
+                "in valid events ", i, " -> ", i + 1, " (", names(move.steps)[i], ")."))
+            other.warning <- paste("Warning:", other.warning)
+            the.warning <- paste0(the.warning, "\n", other.warning)
+          }
+          rm(say.at.least)
+          if (move.steps[i] > jump.error) { # same as if above.
+            trigger.error <- TRUE # nocov
+          }
         }
-      if (any(jumps[link] > jump.error))
-        trigger.error <- TRUE # nocov
       }
     }
     # Trigger user interaction
@@ -807,7 +892,10 @@ checkDeploymentStations <- function(input, spatial) {
       ifelse(sum(is.na(link)) > 1, "' are", "' is"),
       " listed in the spatial file but no receivers were ever deployed there.\n"))
   }
-  return(input)
+  input$Standard.name <- aux$Standard.name[match(input$Station.name, aux$Station.name)]
+  input$Array <- aux$Array[match(input$Station.name, aux$Station.name)]
+
+  return(input[, c("Receiver", "Array", "Station.name", "Standard.name", "Start", "Stop")])
 }
 
 #' Find detections from unknown receivers
