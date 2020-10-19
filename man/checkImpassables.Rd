@@ -4,12 +4,25 @@
 \alias{checkImpassables}
 \title{Find out if a tag moved in an impossible direction}
 \usage{
-checkImpassables(movements, tag, detections, dotmat, GUI, save.tables.locally)
+checkImpassables(
+  movements,
+  tag,
+  bio,
+  spatial,
+  detections,
+  dotmat,
+  GUI,
+  save.tables.locally
+)
 }
 \arguments{
 \item{movements}{The movements table for a specific tag.}
 
 \item{tag}{The tag being analysed.}
+
+\item{bio}{A table with the tags and biometrics of the studied animals.}
+
+\item{spatial}{A list of spatial objects in the study area.}
 
 \item{detections}{The detections data.frame for a specific tag.}
 

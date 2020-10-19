@@ -7,9 +7,12 @@
 checkJumpDistance(
   movements,
   tag,
+  bio,
   detections,
-  release,
+  spatial,
+  arrays,
   dotmat,
+  paths,
   jump.warning,
   jump.error,
   GUI,
@@ -21,9 +24,13 @@ checkJumpDistance(
 
 \item{tag}{The tag being analysed.}
 
+\item{bio}{A table with the tags and biometrics of the studied animals.}
+
 \item{detections}{The detections data.frame for a specific tag.}
 
-\item{release}{The release location of the animal.}
+\item{spatial}{A list of spatial objects in the study area.}
+
+\item{arrays}{a list containing information for each array.}
 
 \item{dotmat}{The matrix of distances between arrays.}
 

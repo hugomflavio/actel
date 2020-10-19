@@ -7,9 +7,10 @@
 checkUpstream(
   movements,
   tag,
-  release,
+  bio,
   detections,
   arrays,
+  spatial,
   GUI,
   save.tables.locally
 )
@@ -19,11 +20,13 @@ checkUpstream(
 
 \item{tag}{The tag being analysed.}
 
-\item{release}{The release location of the animal.}
+\item{bio}{A table with the tags and biometrics of the studied animals.}
 
 \item{detections}{The detections data.frame for a specific tag.}
 
 \item{arrays}{a list containing information for each array.}
+
+\item{spatial}{A list of spatial objects in the study area.}
 
 \item{GUI}{One of "needed", "always" or "never". If "needed", a new window is
 opened to inspect the movements only if the movements table is too big to be
