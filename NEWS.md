@@ -27,6 +27,7 @@ Enhancements:
   * Array live times are now calculated and included in the 'arrays' object.
   * The 'deployments' object has been extended and now includes array and standard station name.
   * actel can now dynamically check for array live times when checking jump distances, to avoid triggering warnings and errors simply because some arrays were not active.
+  * New `plotLive()` function allows the user to plot the periods during which each array was active. The option 'show.stations' can be used to plot each individual station live time as well.
 
 ## actel 1.1.1
 
