@@ -41,9 +41,14 @@ splitN <- function(x, n, row.names = FALSE) {
 #'  
 darken <- function(color, factor = 1.4){
     col <- grDevices::col2rgb(color)
-    col <- col / factor
+
+    if (factor > 1)
+      col <- col / factor
+    else
+      col <- col + (255 - col) * (1 - factor)
+
     col <- grDevices::rgb(t(col), maxColorValue = 255)
-    col
+    return(col)
 }
 
 #' Match POSIX values
