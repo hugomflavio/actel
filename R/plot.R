@@ -53,9 +53,18 @@ plotLive <- function(input, arrays, show.stations = FALSE, array.size = 2, stati
   deployments <- input$deployments
   study.arrays <- input$arrays
 
+  if (!is.data.frame(deployments))
+    xdep <- do.call(rbind, deployments)
+  else
+    xdep <- deployments
+
+  if (any(xdep$Array == "Unknown")) {
+    warning("This dataset contains unknown stations. These stations will not be plotted.", immediate. = TRUE, call. = FALSE)
+    xdep <- xdep[xdep$Array != "Unknown", ]
+  }
+  
   # prepare input
   if (show.stations) {
-    xdep <- do.call(rbind, deployments)
     xdep$line <- 1:nrow(xdep)
     pd <- reshape2::melt(xdep[, c("Array", "line", "Standard.name", "Start", "Stop")], id.vars = c("Array", "line", "Standard.name"))
     colnames(pd)[colnames(pd) == "Standard.name"] <- "Y"

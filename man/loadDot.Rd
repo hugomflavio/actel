@@ -4,7 +4,13 @@
 \alias{loadDot}
 \title{Load spatial.dot}
 \usage{
-loadDot(string = NULL, input = NULL, spatial, disregard.parallels)
+loadDot(
+  string = NULL,
+  input = NULL,
+  spatial,
+  disregard.parallels,
+  preloading = FALSE
+)
 }
 \arguments{
 \item{string}{A string of dot connections.}
@@ -15,6 +21,8 @@ loadDot(string = NULL, input = NULL, spatial, disregard.parallels)
 
 \item{disregard.parallels}{Logical:  Should the presence of parallel arrays
 invalidate potential efficiency peers? See the vignettes for more details.}
+
+\item{preloading}{Logical: Is this function being called from preload()?}
 }
 \value{
 A list containing:

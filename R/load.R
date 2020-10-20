@@ -138,6 +138,7 @@ loadStudyData <- function(tz, override = NULL, start.time, stop.time, save.detec
 #' @param input The name of a file containing dot connections.
 #' @param spatial A spatial data frame.
 #' @param string A string of dot connections.
+#' @param preloading Logical: Is this function being called from preload()?
 #' @inheritParams migration
 #'
 #' @return A list containing:
@@ -150,7 +151,7 @@ loadStudyData <- function(tz, override = NULL, start.time, stop.time, save.detec
 #'
 #' @keywords internal
 #'
-loadDot <- function(string = NULL, input = NULL, spatial, disregard.parallels) {
+loadDot <- function(string = NULL, input = NULL, spatial, disregard.parallels, preloading = FALSE) {
   appendTo("debug", "Running loadDot.")
   if (is.null(string) & is.null(input))
     stopAndReport("No dot file or dot string were specified.")
@@ -163,16 +164,27 @@ loadDot <- function(string = NULL, input = NULL, spatial, disregard.parallels) {
   mat <- dotMatrix(input = dot)
   unique.arrays <- unique(unlist(sapply(spatial$Array, function(x) unlist(strsplit(x, "|", fixed = TRUE)))))
   if (any(link <- is.na(match(unique.arrays, colnames(mat))))) {
-    if (file.exists("spatial.txt"))
-      stopAndReport(paste0("Not all the arrays listed in the spatial.csv file are present in the spatial.txt.\nMissing arrays: ", paste(unique.arrays[link], collapse = ", "), "\n"))
-    
-    if (file.exists("spatial.dot")) {
-      stopAndReport(paste0("Not all the arrays listed in the spatial.csv file are present in the spatial.dot.\nMissing arrays: ", paste(unique.arrays[link], collapse = ", "), "\n"))
+    if (preloading) {
+      stopAndReport(paste0("Not all arrays listed in the spatial input are present in the dot input. Double-check that the array names in the dot string match the array names in the spatial input.\n       Missing arrays: ", paste(unique.arrays[link], collapse = ", "), "\n"))
     } else {
-      stopAndReport(
-"Something went wrong when compiling the dot file:
- - If you are using preload(), double-check that the array names in the dot string match the array names in the spatial input.
- - If you are using input files, try restarting R and trying again. If the problem persists, contact the developer.")
+      if (file.exists("spatial.txt"))
+        stopAndReport(paste0("Not all the arrays listed in the spatial.csv file are present in the spatial.txt.\n       Missing arrays: ", paste(unique.arrays[link], collapse = ", "), "\n"))
+      if (file.exists("spatial.dot"))
+        stopAndReport(paste0("Not all the arrays listed in the spatial.csv file are present in the spatial.dot.\n       Missing arrays: ", paste(unique.arrays[link], collapse = ", "), "\n"))
+      if (!file.exists("spatial.txt") & !file.exists("spatial.dot"))
+        stopAndReport("Something went wrong when compiling the dot input. Try restarting R and trying again. If the problem persists, contact the developer.")
+    }
+  }
+  if (any(link <- is.na(match(colnames(mat), unique.arrays)))) {
+    if (preloading) {
+      stopAndReport(paste0("Not all arrays listed in the dot input are present in the spatial input. The dot input should only contain arrays that are listed in spatial.\n       Alien arrays: ", paste(colnames(mat)[link], collapse = ", "), "\n"))
+    } else {
+      if (file.exists("spatial.txt"))
+        stopAndReport(paste0("Some arrays listed in the spatial.txt file are not present in the spatial.csv file. The dot input should only contain arrays that are listed in spatial.\n       Alien arrays: ", paste(colnames(mat)[link], collapse = ", "), "\n"))
+      if (file.exists("spatial.dot"))
+        stopAndReport(paste0("Some arrays listed in the spatial.dot file are not present in the spatial.csv file. The dot input should only contain arrays that are listed in spatial.\n       Alien arrays: ", paste(colnames(mat)[link], collapse = ", "), "\n"))
+      if (!file.exists("spatial.txt") & !file.exists("spatial.dot"))
+        stopAndReport("Something went wrong when compiling the dot input. Try restarting R and trying again. If the problem persists, contact the developer.")
     }
   }
   arrays <- dotList(input = dot, spatial = spatial)
@@ -1885,6 +1897,7 @@ discardFirst <- function(input, bio, trim) {
 liveArrayTimes <- function(arrays, deployments, spatial) {
   xdep <- do.call(rbind, deployments)
   capture <- lapply(names(arrays), function(a) {
+    # cat(a, "\n")
     sts <- spatial$stations$Station.name[spatial$stations$Array == a]
     aux <- xdep[xdep$Station.name %in% sts, ]
     aux <- aux[order(aux$Start, aux$Stop), ]

@@ -559,8 +559,8 @@ checkImpassables <- function(movements, tag, bio, spatial, detections, dotmat, G
       distances <- apply(shifts, 1, function(x) dotmat[x[1], x[2]])
       if (any(is.na(distances))) {
         sapply(which(is.na(distances)), function(i) {
-          appendTo(c("Screen", "Warning", "Report"), aux <- paste0("Tag ", tag, " made an impassable jump: It is not possible to go from array ", shifts[i, 1], " to ", shifts[i, 2], ".\n         Please resolve this either by invalidating events or by adjusting your 'spatial.txt' file and restarting."))
-          the.warning <- c(the.warning, aux)
+          appendTo(c("Screen", "Warning", "Report"), aux <- paste0("Tag ", tag, " made an impassable jump in events ", i," to ", i + 1, ": It is not possible to go from array ", shifts[i, 1], " to ", shifts[i, 2], ".\n         Please resolve this either by invalidating events or by adjusting your 'spatial.txt' file and restarting."))
+          the.warning <<- c(the.warning, aux)
         })
       }
     }
@@ -721,6 +721,9 @@ checkJumpDistance <- function(movements, tag, bio, detections, spatial, arrays,
     #########################
     # remove any potential first array that is not connected do the first move (this should never happen, but still...)
     release <- release[!is.na(dotmat[as.character(release), as.character(vm$Array[1])])]
+    # stop if no arrays are connected to the first move. This should also never happen actually.
+    if (length(release) == 0)
+        stopAndReport("There are unresolved impassable jumps in the movements (Found at release).")
     # minimum jump size
     release.steps <- min(dotmat[as.character(release), as.character(vm$Array[1])] + 1)
     # Check release-to-first
@@ -728,9 +731,9 @@ checkJumpDistance <- function(movements, tag, bio, detections, spatial, arrays,
       # determine if any arrays were not active during the movement.
       path.dist <- list()
       for (r in release) {
-        sub.paths <- paths[[paste0(release[r], "_to_", vm$Array[1])]]
-        if (is.null(sub.paths)) { # failsafe in case jump size is 2
-          aux <- list(n = 1, names = release[r])
+        sub.paths <- paths[[paste0(r, "_to_", vm$Array[1])]]
+        if (is.null(sub.paths)) { # failsafe in case step size is 2
+          aux <- list(list(n = 2, names = r))
         } else {
           aux <- lapply(sub.paths, function(p) {
             xarrays <- unlist(strsplit(p, " -> "))
@@ -746,7 +749,9 @@ checkJumpDistance <- function(movements, tag, bio, detections, spatial, arrays,
               # and if any period qualifies, then the array was up during the movememnt
               any(v3)
             })
-            return(list(n = sum(xarrays) + 1, names = names(xarrays)[xarrays]))
+            return(list(n = sum(xarrays) + 2, names = names(xarrays)[xarrays])) 
+            # +2 because the release site and the array that picked up the animal also
+            # count as steps, so the minimal step size is two.
           })
         }
         names(aux) <- sub.paths
@@ -784,7 +789,7 @@ checkJumpDistance <- function(movements, tag, bio, detections, spatial, arrays,
       names(move.steps) <- paste(A, "->", B)
 
       if (any(is.na(move.steps)))
-        stopAndReport("There are unresolved impassable jumps in the movements.")
+        stopAndReport("There are unresolved impassable jumps in the movements (Found during moves).")
 
       if (any(move.steps > 1)) {
         # isolate troublesome events
@@ -807,6 +812,7 @@ checkJumpDistance <- function(movements, tag, bio, detections, spatial, arrays,
               any(v3)
             })
             return(list(n = sum(xarrays) + 1, names = names(xarrays)[xarrays]))
+            # +1 because the target array also counts as a step
           })
           names(path.dist) <- sub.paths
           new.steps <- sapply(path.dist, function(x) x$n)
@@ -910,7 +916,13 @@ checkUnknownReceivers <- function(input) {
   appendTo("debug", "Running checkUnknownReceivers.")
   unknown <- is.na(input$Standard.name)
   if (any(unknown)) {
-    appendTo(c("Screen", "Report", "Warning"), paste0("Detections from receivers ", paste(unique(input$Receiver[unknown]), collapse = ", "), " are present in the data, but these receivers are not part of the study's stations. Double-check potential errors."))
+    how.many <- length(unique(input$Receiver[unknown]))
+    appendTo(c("Screen", "Report", "Warning"), 
+      paste0("Detections from receiver", 
+        ifelse(how.many > 1, "s ", " "), 
+        paste(unique(input$Receiver[unknown]), collapse = ", "), " are present in the data, but ",
+        ifelse(how.many > 1, "these receivers are", "this receiver is"),
+        " not part of the study's stations. Double-check potential errors."))
   }
 }
 
@@ -975,6 +987,9 @@ checkTagsInUnknownReceivers <- function(detections.list, deployments, spatial) {
           detections.list[[i]]$Standard.name[link] <- "Ukn."
           levels(detections.list[[i]]$Array) <- c(levels(detections.list[[i]]$Array), "Unknown")
           detections.list[[i]]$Array[link] <- "Unknown"
+          levels(detections.list[[i]]$Section) <- c(levels(detections.list[[i]]$Section), "Unknown")
+          detections.list[[i]]$Section[link] <- "Unknown"
+          excluded.unknowns <- c(excluded.unknowns, paste(new.unknowns))
         }
         
         if (decision == "e") {
@@ -1013,15 +1028,19 @@ includeUnknownReceiver <- function(spatial, deployments, unknown.receivers){
   if (is.na(match("Unknown", levels(spatial$stations$Station.name)))) {
     levels(spatial$stations$Station.name) <- c(levels(spatial$stations$Station.name), "Unknown")
     levels(spatial$stations$Array) <- c(levels(spatial$stations$Array), "Unknown")
+    levels(spatial$stations$Section) <- c(levels(spatial$stations$Section), "Unknown")
     spatial$stations[nrow(spatial$stations) + 1, "Station.name"] <- "Unknown"
     spatial$stations[nrow(spatial$stations), "Array"] <- "Unknown"
+    spatial$stations[nrow(spatial$stations), "Section"] <- "Unknown"
     spatial$stations[nrow(spatial$stations), "Standard.name"] <- "Ukn."
   }
   for (i in unknown.receivers) {
     if (is.na(match(i, names(deployments)))) {
       deployments[[length(deployments) + 1]] <- data.frame(
         Receiver = i,
+        Array = "Unknown",
         Station.name = "Unknown",
+        Standard.name = "Ukn.",
         Start = NA_character_,
         Stop = NA_character_)
       names(deployments)[length(deployments)] <- i

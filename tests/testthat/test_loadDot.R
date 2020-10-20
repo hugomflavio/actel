@@ -17,24 +17,36 @@ test_that("loadDot stops if file is badly formatted or missing", {
 })
 
 test_that("loadDot stops if contents of file do not match spatial", {
-	expect_error(loadDot(string = "A1--A2--A3--A4--A5--A6\n", spatial = example.spatial, disregard.parallels = TRUE),
-"Something went wrong when compiling the dot file:
- - If you are using preload(), double-check that the array names in the dot string match the array names in the spatial input.
- - If you are using input files, try restarting R and trying again. If the problem persists, contact the developer.", fixed = TRUE)
+	expect_error(loadDot(string = "A1--A2--A3--A4--A5--A6\n", spatial = example.spatial, disregard.parallels = TRUE, preload = TRUE),
+"Not all arrays listed in the spatial input are present in the dot input. Double-check that the array names in the dot string match the array names in the spatial input.", fixed = TRUE)
 
 	sink("spatial.dot")
 	cat("A1--A2--A3--A4--A5--A6\n")
 	sink()
 	expect_error(loadDot(input = "spatial.dot", spatial = example.spatial, disregard.parallels = TRUE),
-		"Not all the arrays listed in the spatial.csv file are present in the spatial.dot.\nMissing arrays: A0, A7, A8, A9", fixed = TRUE)
+		"Not all the arrays listed in the spatial.csv file are present in the spatial.dot.\n       Missing arrays: A0, A7, A8, A9", fixed = TRUE)
 	file.remove("spatial.dot")
 
 	sink("spatial.txt")
 	cat("A1--A2--A3--A4--A5--A6\n")
 	sink()
 	expect_error(loadDot(input = "spatial.txt", spatial = example.spatial, disregard.parallels = TRUE),
-		"Not all the arrays listed in the spatial.csv file are present in the spatial.txt.\nMissing arrays: A0, A7, A8, A9", fixed = TRUE)
+		"Not all the arrays listed in the spatial.csv file are present in the spatial.txt.\n       Missing arrays: A0, A7, A8, A9", fixed = TRUE)
 	file.remove("spatial.txt")
+
+	sink("spatial.txt")
+	cat("A0--A1--A2--A3--A4--A5--A6--A7--A8--A9--A10\n")
+	sink()
+	expect_error(loadDot(input = "spatial.txt", spatial = example.spatial, disregard.parallels = TRUE),
+		"Some arrays listed in the spatial.txt file are not present in the spatial.csv file. The dot input should only contain arrays that are listed in spatial.\n       Alien arrays: A10", fixed = TRUE)
+	file.remove("spatial.txt")
+
+	sink("spatial.dot")
+	cat("A0--A1--A2--A3--A4--A5--A6--A7--A8--A9--A10\n")
+	sink()
+	expect_error(loadDot(input = "spatial.dot", spatial = example.spatial, disregard.parallels = TRUE),
+		"Some arrays listed in the spatial.dot file are not present in the spatial.csv file. The dot input should only contain arrays that are listed in spatial.\n       Alien arrays: A10", fixed = TRUE)
+	file.remove("spatial.dot")
 })
 
 test_that("loadDot output is as expected for simple single channel study areas", {

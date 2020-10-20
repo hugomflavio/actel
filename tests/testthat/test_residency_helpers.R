@@ -260,7 +260,7 @@ A1 -- A2 -- A3 -- A6 -- A7 -- A9
 A0 -- A4 -- A5 -- A6 -- A8 -- A9
 A5 -- A3 -- A5
 A7 -- A8 -- A7
-", spatial = spatial, disregard.parallels = TRUE)
+", spatial = example.spatial, disregard.parallels = TRUE)
 
   xspatial <- spatial
   xspatial$release.sites$Array <- "A0|A1"

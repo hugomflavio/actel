@@ -98,12 +98,12 @@ preload <- function(biometrics, spatial, deployments, detections, dot, distances
       aux <- unique(spatial$Array[spatial$Type == "Hydrophone"])
       fakedot <- paste(aux, "--", aux)
     }
-    recipient <- loadDot(string = fakedot, spatial = spatial, disregard.parallels = disregard.parallels)
+    recipient <- loadDot(string = fakedot, spatial = spatial, disregard.parallels = disregard.parallels, preloading = TRUE)
   } else {
   	if (!is.character(dot))
   		stop("'dot' was set but could not recognised as a string. Please prepare a dot string and include it in the dot argument.\nYou can use readDot to check the quality of your dot string.", call. = FALSE)
   	else
-  		recipient <- loadDot(string = dot, spatial = spatial, disregard.parallels = disregard.parallels)
+  		recipient <- loadDot(string = dot, spatial = spatial, disregard.parallels = disregard.parallels, preloading = TRUE)
   }
   dot <- recipient$dot
   arrays <- recipient$arrays
