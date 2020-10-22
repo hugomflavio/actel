@@ -25,8 +25,6 @@ NULL
 #' 
 eventsTabbedWidget <- function(tag, displayed.moves, all.moves, detections, trigger, first.time, type) { # nocov start
   appendTo("debug", "Running eventsTabbedWidget.")
-
-  on.exit(save(list = ls(), file = "tabbed_widget_ls.RData"), add = TRUE)
   # initiate button variables
   cp <- NULL
   complain <- NULL
@@ -168,7 +166,6 @@ eventsTabbedWidget <- function(tag, displayed.moves, all.moves, detections, trig
         to   <- match(displayed.moves$Last.time[event], as.character(detections$Timestamp))
         sub.det <- detections[from:to, ]
 
-        save(list = ls(), file = "tabbed_before_graphInv.RData")
         all.moves <<- graphicalInvalidateDetections(detections = sub.det, 
                                                     displayed.moves = displayed.moves, 
                                                     all.moves = all.moves, 
@@ -251,7 +248,6 @@ eventsTabbedWidget <- function(tag, displayed.moves, all.moves, detections, trig
 eventsSingleWidget <- function(tag, displayed.moves, all.moves, detections, trigger, first.time, type) { # nocov start
   appendTo("debug", "Running eventsSingleWidget.")
 
-  on.exit(save(list = ls(), file = "single_widget_ls.RData"), add = TRUE)
   # initiate button variables
   complain <- NULL
   confirm <- NULL
@@ -349,7 +345,6 @@ eventsSingleWidget <- function(tag, displayed.moves, all.moves, detections, trig
         to   <- match(displayed.moves$Last.time[event], as.character(detections$Timestamp))
         sub.det <- detections[from:to, ]
  
-        save(list = ls(), file = "single_before_graphInv.RData")
         all.moves <<- graphicalInvalidateDetections(detections = sub.det, 
                                                     displayed.moves = displayed.moves, 
                                                     all.moves = all.moves, 
