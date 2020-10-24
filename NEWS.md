@@ -12,6 +12,7 @@ Fixes:
   * Prevent missing arrays when finding array paths due to overlapping array names.
   * Prevent crash in distancesMatrix if spatial contains a "longitude" or "latitude" column.
   * **Fix silent bug that could cause array efficiency estimates to be misplaced in the output.**
+  * Prevent crash during circular plot saving caused by illegal characters in the file name.
 
 Enhancements:
   * New functionality: expand events and edit the validity of individual detections.

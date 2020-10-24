@@ -984,6 +984,11 @@ plotTimes <- function(times, night = NULL, col, alpha = 0.8, title = "", mean.da
         width <- 5
     }
 
+    if (grepl("\\\\|/|:|\\*|\\?|\\\"|<|>|\\|", file)) {
+      warning("Illegal characters found in the file name (\\/:*?\"<>|). Replacing these with '_' to prevent function failure.", immediate. = TRUE, call. = FALSE)
+      file <- gsub("\\\\|/|:|\\*|\\?|\\\"|<|>|\\|", "_", file)
+    }
+
     if (grepl(".png$", file) | grepl(".tiff$", file)) {
       if (missing(height))
         height <- 500
