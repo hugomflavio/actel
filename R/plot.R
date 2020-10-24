@@ -46,7 +46,7 @@ plotLive <- function(input, arrays, show.stations = FALSE, array.size = 2, stati
   if (is.null(input$spatial) | is.null(input$arrays) | is.null(input$deployments))
     stop("Could not recognise the input as an actel results or preload object.", call. = FALSE)
 
-  if (!missing(arrays) && any(is.na(match(arrays, unlist(input$spatial$station.order)))))
+  if (!missing(arrays) && any(is.na(match(arrays, unlist(input$spatial$array.order)))))
     stop("'arrays' was set but not all contents match array names in the study area.", call. = FALSE)
 
   spatial <- input$spatial
@@ -162,7 +162,7 @@ plotLive <- function(input, arrays, show.stations = FALSE, array.size = 2, stati
 
   p <- p + ggplot2::theme_bw()
   p <- p + ggplot2::labs(title = title, x = xlab, y = ylab)
-  p <- p + ggplot2::scale_color_manual(values = col)
+  p <- p + ggplot2::scale_color_manual(values = col, drop = FALSE)
   p <- p + ggplot2::guides(colour = ggplot2::guide_legend(override.aes = list(size = array.size)))
   p
 }
