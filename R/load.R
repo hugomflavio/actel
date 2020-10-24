@@ -156,10 +156,10 @@ loadDot <- function(string = NULL, input = NULL, spatial, disregard.parallels, p
   if (is.null(string) & is.null(input))
     stopAndReport("No dot file or dot string were specified.")
   if (is.null(string)) {
-    tryCatch(dot <- readDot(input = input),
+    tryCatch(dot <- readDot(input = input, silent = TRUE),
       error = function(e) stopAndReport("The contents of the '", input, "' file could not be recognised by the readDot function."))
   } else {
-    dot <- readDot(string = string)
+    dot <- readDot(string = string, silent = TRUE)
   }
   mat <- dotMatrix(input = dot)
   unique.arrays <- unique(unlist(sapply(spatial$Array, function(x) unlist(strsplit(x, "|", fixed = TRUE)))))
@@ -196,6 +196,7 @@ loadDot <- function(string = NULL, input = NULL, spatial, disregard.parallels, p
 #' Read dot file or string
 #'
 #' @inheritParams loadDot
+#' @param silent Logical: Should warnings be suppressed?
 #'
 #' @examples
 #' # create dummy dot string
@@ -225,7 +226,7 @@ loadDot <- function(string = NULL, input = NULL, spatial, disregard.parallels, p
 #'
 #' @export
 #'
-readDot <- function (input = NULL, string = NULL) {
+readDot <- function (input = NULL, string = NULL, silent = FALSE) {
   if (is.null(string) & is.null(input))
     stop("No dot file or data were specified.")
   if (is.null(string)) {
@@ -238,8 +239,28 @@ readDot <- function (input = NULL, string = NULL) {
   paths <- lines[grepl("[<-][->]", lines)]
   if (length(paths) == 0)
     stop("Could not recognise the input contents as DOT formatted connections.")
-  paths <- gsub("[ ;]", "", paths)
+  # there's probably a smarter way to do these, but hey, this works.
+  paths <- gsub("[ ]*<-", "<-", paths)
+  paths <- gsub("<-[ ]*", "<-", paths)
+  paths <- gsub("[ ]*->", "->", paths)
+  paths <- gsub("->[ ]*", "->", paths)
+  paths <- gsub("[ ]*--", "--", paths)
+  paths <- gsub("--[ ]*", "--", paths)
+  paths <- gsub("[;]", "", paths)
   paths <- gsub("\\[label=[^\\]]","", paths)
+  paths <- gsub("^[ ]*", "", paths)
+  paths <- gsub("[ ]*$", "", paths)
+  # only spaces left now should be part of array names, and need to be replaced
+  if (any(grepl(" ", paths))) {
+    if (!silent)
+      warning("Replacing spaces with '_' in the node names.", immediate. = TRUE, call. = FALSE)
+    paths <- gsub(" ", "_", paths)
+  }
+  if (any(grepl("\\\\|/|:|\\*|\\?|\\\"|<|>", paths))) {
+    if (!silent)
+      warning("Troublesome characters found in the node names (\\/:*?\"<>). Replacing these with '_'.", immediate. = TRUE, call. = FALSE)
+    paths <- gsub("\\\\|/|:|\\*|\\?|\\\"|<|>", "_", paths)
+  }
   nodes <- strsplit(paths,"[<-][->]")
   recipient <- data.frame(
     A = character(),
