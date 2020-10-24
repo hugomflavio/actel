@@ -1934,18 +1934,48 @@ liveArrayTimes <- function(arrays, deployments, spatial) {
   xdep <- do.call(rbind, deployments)
   capture <- lapply(names(arrays), function(a) {
     # cat(a, "\n")
-    sts <- spatial$stations$Station.name[spatial$stations$Array == a]
-    aux <- xdep[xdep$Station.name %in% sts, ]
-    aux <- aux[order(aux$Start, aux$Stop), ]
-    overlaps <- c(FALSE, aux$Stop[-nrow(aux)] >= aux$Start[-1])
-    # First one is always FALSE (i.e. it cannot overlap with a previous one)
-    starts <- which(!overlaps)
-    stops <- c(starts[-1] - 1, nrow(aux))
-    # extract values
-    live <- data.frame(Start = aux$Start[starts],
-                      Stop = aux$Stop[stops])
+    sts <- spatial$stations$Standard.name[spatial$stations$Array == a]
+
+    if (sum(xdep$Standard.name %in% sts) > 1) {
+      aux <- xdep[xdep$Standard.name %in% sts, ]
+      aux <- aux[order(aux$Start, aux$Stop), ]
+      aux$overlaps <- c(FALSE, aux$Stop[-nrow(aux)] >= aux$Start[-1])
+
+      if (any(aux$overlaps)) {
+        restart <- TRUE
+        while (restart) {
+          breaks <- rle(aux$overlaps)
+          to.combine <- data.frame(from = cumsum(breaks$lengths)[which(breaks$values) - 1],
+                                   to = cumsum(breaks$lengths)[which(breaks$values)])
+
+          aux$isolated <- !aux$overlaps & !c(aux$overlaps[-1], FALSE)
+
+          output <- aux[aux$isolated, c("Start", "Stop")]
+
+          for (i in 1:nrow(to.combine)) {
+            tmp <- data.frame(Start = aux$Start[to.combine$from[i]],
+                              Stop = max(aux$Stop[to.combine$from[i]:to.combine$to[i]]))
+            output <- rbind(output, tmp)
+          }
+
+          output <- output[order(output$Start, output$Stop), ]
+
+          output$overlaps <- c(FALSE, output$Stop[-nrow(output)] >= output$Start[-1])
+
+          if (any(output$overlaps))
+            aux <- output
+          else
+            restart <- FALSE
+        }
+      } else {
+        output <- aux
+      }
+    } else {
+      output <- xdep[xdep$Standard.name %in% sts, ]
+    }
     # store the result
-    arrays[[a]]$live <<- live
+    row.names(output) <- 1:nrow(output)
+    arrays[[a]]$live <<- output[, c("Start", "Stop")]
   })
   return(arrays)
 }
