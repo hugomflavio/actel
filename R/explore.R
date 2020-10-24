@@ -592,8 +592,8 @@ printExploreRmd <- function(override.fragment, biometric.fragment, individual.pl
 
   work.path <- paste0(tempdir(), "/actel_report_auxiliary_files/")
 
- if (any(grepl("Ukn.", spatial$stations$Standard.name))) {
-    unknown.fragment <- paste0('<span style="color:red"> Number of relevant unknown receivers: **', sum(grepl("Ukn.", spatial$stations$Standard.name)), '**</span>\n')
+ if (!is.null(spatial$unknowns)) {
+    unknown.fragment <- paste0('<span style="color:red"> Number of relevant unknown receivers: **', sum(sapply(spatial$unknowns, length)), '** (of which ', length(spatial$unknowns$included),' were included)</span>\n')
   } else {
     unknown.fragment <- ""
   }
@@ -611,6 +611,21 @@ Note:
   }
 
   report <- readr::read_file(paste0(tempdir(), "/temp_log.txt"))
+  report <- gsub("(\\\\|\")", "\\\\\\1", report)
+
+  if (file.exists(paste0(tempdir(), '/temp_warnings.txt'))) {
+    warning.messages <- gsub("\\r", "", readr::read_file(paste0(tempdir(), '/temp_warnings.txt')))
+    warning.messages <- gsub("(\\\\|\")", "\\\\\\1", warning.messages)
+  } else {
+    warning.messages <- 'No warnings were raised during the analysis.'
+  }
+
+  if (file.exists(paste0(tempdir(), '/temp_comments.txt'))) {
+    comment.fragment <- gsub("\\r", "", readr::read_file(paste0(tempdir(), '/temp_comments.txt')))
+    comment.fragment <- gsub("(\\\\|\")", "\\\\\\1", comment.fragment)
+  } else {
+    comment.fragment <- 'No comments were included during the analysis.'
+  }
 
   oldoptions <- options(knitr.kable.NA = "-")
   on.exit(options(oldoptions), add = TRUE)
@@ -669,17 +684,13 @@ Release sites are marked with "R.S.". Arrays connected with an arrow indicate th
 ### Warning messages
 
 ```{r warnings, echo = FALSE, comment = NA}
-cat("', ifelse(file.exists(paste0(tempdir(), '/temp_warnings.txt')),
-  gsub("\\r", "", readr::read_file(paste0(tempdir(), '/temp_warnings.txt'))),
-  'No warnings were raised during the analysis.'), '")
+cat("', warning.messages, '")
 ```
 
 ### User comments
 
 ```{r comments, echo = FALSE, comment = NA}
-cat("', ifelse(file.exists(paste0(tempdir(), '/temp_comments.txt')),
-  gsub("\\r", "", readr::read_file(paste0(tempdir(), '/temp_comments.txt'))),
-  'No comments were included during the analysis.'), '")
+cat("', comment.fragment, '")
 ```
 
 ', ifelse(biometric.fragment == '', '', paste0('### Biometric graphics
@@ -725,7 +736,7 @@ Note:
 ### Full log
 
 ```{r log, echo = FALSE, comment = NA}
-cat("', gsub("\\r", "", readr::read_file(paste0(tempdir(), '/temp_log.txt'))), '")
+cat("', gsub("\\r", "", report), '")
 ```
 
 '), fill = TRUE)
