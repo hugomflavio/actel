@@ -972,7 +972,7 @@ loadBio <- function(input, tz){
     appendTo("Screen", "M: No Release site has been indicated in the biometrics. Creating a 'Release.site' column to avoid function failure. Filling with 'unspecified'.")
     bio$Release.site <- "unspecified"
   } else {
-    bio$Release.site <-  gsub(" ", "", bio$Release.site)
+    bio$Release.site <- gsub(" ", "_", bio$Release.site)
     bio$Release.site <- factor(bio$Release.site)
     if (any(link <- is.na(bio$Release.site) | bio$Release.site == "")) {
       appendTo(c("Screen","Report","Warning"),"Some animals contain no release site information. You may want to double-check the data.\n   Filling the blanks with 'unspecified'.")
@@ -1105,10 +1105,12 @@ compileDetections <- function(path = "detections", start.time = NULL, stop.time 
     aux <- data.table::fread(i, fill = TRUE, sep = ",", showProgress = FALSE)
     if (ncol(aux) < 3) {
       appendTo(c("Screen", "Warning", "Report"), paste0("File '", i, "' could not be recognized as a valid detections table (ncol < 3), skipping processing. Are you sure it is a comma separated file?"))
+      flush.console()
       return(NULL)
     } else {
       if(nrow(aux) == 0){
         appendTo(c("Screen", "Report"), paste0("File '", i, "' is empty, skipping processing."))
+        flush.console()
         return(NULL)
       } else {
         unknown.file <- TRUE
@@ -1147,6 +1149,7 @@ compileDetections <- function(path = "detections", start.time = NULL, stop.time 
         if (unknown.file) {
           appendTo(c("Screen", "Report", "Warning"),
             paste0("File '", i, "' does not match to any of the supported hydrophone file formats!\n         If your file corresponds to a hydrophone log and actel did not recognize it, please get in contact through www.github.com/hugomflavio/actel/issues/new"))
+          flush.console()
           return(NULL)
         }
         if (record.source)
