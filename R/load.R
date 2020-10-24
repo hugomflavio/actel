@@ -558,7 +558,7 @@ findShortestChains <- function(input) {
 setSpatialStandards <- function(input){
   appendTo("debug","Running setSpatialStandards.")
   input$Standard.name <- as.character(input$Station.name)
-  input$Standard.name <- gsub(" ", "", input$Standard.name)
+  input$Standard.name <- gsub(" ", "_", input$Standard.name)
   link <- input$Type == "Hydrophone"
   input$Standard.name[link] <- paste0("St.", seq_len(sum(input$Type == "Hydrophone")))
   return(input)
