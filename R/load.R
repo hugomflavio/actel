@@ -768,18 +768,23 @@ loadSpatial <- function(input = "spatial.csv", section.order = NULL){
     stopAndReport("Some rows do not contain 'Array' information in the spatial input. Please double-check the input files.")
   # check spaces in the array names
   if (any(grepl(" ", input$Array))) {
-    appendTo("Screen", "M: Replacing spaces in array names to prevent function failure.")
+    appendTo("Screen", "M: Replacing spaces with '_' in array names to prevent function failure.")
     input$Array <- gsub(" ", "_", input$Array)
   }
-  # check arrays called "Release"
+  if (any(grepl("\\\\|/|:|\\*|\\?|\\\"|<|>", input$Array))) {
+    appendTo(c("Screen", "Warning", "Report"), "Troublesome characters found in the array names (\\/:*?\"<>). Replacing these with '_' to prevent function failure.")
+    input$Array <- gsub("\\\\|/|:|\\*|\\?|\\\"|<|>", "_", input$Array)
+  }
+
+  # check reserved array names
   if (any(grepl("^Release$", input$Array)))
     stopAndReport("The term 'Release' is reserved for internal calculations. Do not name any sections or arrays as 'Release'.")
-  # check arrays called "Total"
   if (any(grepl("^Total$", input$Array)))
     stopAndReport("The term 'Total' is reserved for internal calculations. Do not name any sections or arrays as 'Total'.")
-  # check arrays called "Invalid"
   if (any(grepl("^Invalid$", input$Array)))
     stopAndReport("The term 'Invalid' is reserved for internal calculations. Do not name any arrays as 'Invalid'.")
+  if (any(grepl("^Unknown$", input$Array)))
+    stopAndReport("The term 'Unknown' is reserved for internal calculations. Do not name any arrays as 'Unknown'.")
   # check array name length
   aux <- unlist(strsplit(input$Array, "|", fixed = TRUE))
   if (any(nchar(as.character(aux)) > 6))
@@ -805,19 +810,26 @@ loadSpatial <- function(input = "spatial.csv", section.order = NULL){
       appendTo("Screen", "M: Replacing spaces in section names to prevent function failure.")
       input$Section <- gsub(" ", "_", input$Section)
     }
+    if (any(grepl("\\\\|/|:|\\*|\\?|\\\"|<|>|\\|", input$Section))) {
+      appendTo(c("Screen", "Warning", "Report"), "Troublesome characters found in the section names (\\/:*?\"<>|). Replacing these with '_' to prevent function failure.")
+      input$Section <- gsub("\\\\|/|:|\\*|\\?|\\\"|<|>|\\|", "_", input$Section)
+    }
     sections <- unique(input$Section[input$Type == "Hydrophone"])
-    # check sections called "Release"
+    # check reserved section names
     if (any(grepl("^Release$", sections)))
       stopAndReport("The term 'Release' is reserved for internal calculations. Do not name any sections or arrays as 'Release'.")
     if (any(grepl("^Total$", sections)))
       stopAndReport("The term 'Total' is reserved for internal calculations. Do not name any sections or arrays as 'Total'.")
+    if (any(grepl("^Unknown$", sections)))
+      stopAndReport("The term 'Unknown' is reserved for internal calculations. Do not name any sections or arrays as 'Unknown'.")
     # check that section names are independent
-    if (any(link <- sapply(sections, function(i) length(grep(i, sections))) > 1))
+    if (any(link <- sapply(sections, function(i) length(grep(i, sections))) > 1)) {
       stopAndReport(
         ifelse(sum(link) == 1, "Section '", "Sections '"),
         paste(sections[link], collapse = "', '"),
         ifelse(sum(link) == 1, "' is", "' are"),
         " contained within other section names. Sections must be unique and independent.\n       Please rename your sections so that section names are not contained within each other.")
+    }
 
     if (is.null(section.order)) {
       input$Section <- factor(input$Section, levels = sections)
