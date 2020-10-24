@@ -595,10 +595,10 @@ recoverLog <- function(file, overwrite = FALSE) {
   if (missing(file))
     stop("Please state the name of the output file", call. = FALSE)
 
-  if (grepl(".txt$", file))
+  if (!grepl(".txt$", file))
     file <- paste0(file, ".txt")
 
-  if (file.exists(file))
+  if (file.exists(file) & !overwrite)
     stop("File '", file, "' already exists and overwrite = FALSE", call. = FALSE)
 
   file.copy(paste0(tempdir(), "/latest_actel_error_log.txt"), file, overwrite = overwrite)
