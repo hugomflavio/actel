@@ -129,8 +129,8 @@ tableInteraction <- function(moves, detections, tag, trigger, GUI, force = FALSE
         target.file <- paste0(tempdir(), '/actel_inspect_movements.csv')
       
       # save file
-      to.display <- cbind(data.frame(Event = 1:sum(moves$Valid)), moves[(Valid)])
-      write.csv(to.display, target.file, row.names = FALSE)
+      to.display <- data.table::as.data.table(cbind(data.frame(Event = 1:sum(moves$Valid)), moves[(Valid)]))
+      data.table::fwrite(to.display, target.file, dateTimeAs = "write.csv", showProgress = FALSE)
       # display instructions
       message("M: The movements table for tag '", tag, "' is too large to display on the console and GUI is set to 'never'.\n   Temporarily saving the table to '", target.file, "'.\n   Please inspect this file and decide if any events should be considered invalid.")
       if (save.tables.locally)
@@ -141,7 +141,7 @@ tableInteraction <- function(moves, detections, tag, trigger, GUI, force = FALSE
       flush.console()
       # start interaction
       if (force) {
-        output <- invalidateEvents(displayed.moves = to.display, 
+        output <- invalidateEvents(displayed.moves = moves[(Valid)], # beware: table interaction blindly calls to the first column of "from".
                                    all.moves = moves, 
                                    detections = detections, 
                                    tag = tag,
@@ -157,7 +157,7 @@ tableInteraction <- function(moves, detections, tag, trigger, GUI, force = FALSE
                               tag = tag, 
                               hash = paste0("# invalidate/expand moves in ", tag, "?"))
         if (decision == "y") {
-          output <- invalidateEvents(displayed.moves = to.display, 
+          output <- invalidateEvents(displayed.moves = moves[(Valid)], # beware: table interaction blindly calls to the first column of "from".
                                     all.moves = moves, 
                                     detections = detections, 
                                     tag = tag,
