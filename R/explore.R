@@ -240,7 +240,9 @@ explore <- function(
   finished.unexpectedly <- TRUE
   on.exit({if (interactive() & finished.unexpectedly) emergencyBreak(the.function.call)}, add = TRUE)
 
-  on.exit(deleteHelpers(), add = TRUE)
+  if (!getOption("actel.debug", default = FALSE))
+    on.exit(deleteHelpers(), add = TRUE)
+
   on.exit(tryCatch(sink(), warning = function(w) {hide <- NA}), add = TRUE)
 # --------------------------------------
 
