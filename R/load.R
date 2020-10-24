@@ -580,7 +580,7 @@ loadDistances <- function(input = "distances.csv", spatial) {
   if (is.character(input)) {
     if (file.exists(input)) {
       appendTo(c("Screen", "Report"), paste0("M: File '", input, "' found, activating speed calculations."))
-      dist.mat <- read.csv(input, row.names = 1)
+      dist.mat <- read.csv(input, row.names = 1, check.names = FALSE)
       if (ncol(dist.mat) == 1)
         warning("Only one column was identified in '", input, "'. If this seems wrong, please make sure that the values are separated using commas.", immediate. = TRUE, call. = FALSE)
     } else {
@@ -591,8 +591,8 @@ loadDistances <- function(input = "distances.csv", spatial) {
   }
 
   if (!is.null(dist.mat)) {
-    rownames(dist.mat) <- gsub(" ", "", rownames(dist.mat))
-    colnames(dist.mat) <- gsub(" ", "", colnames(dist.mat))
+    rownames(dist.mat) <- gsub(" ", "_", rownames(dist.mat))
+    colnames(dist.mat) <- gsub(" ", "_", colnames(dist.mat))
     invalid.dist <- FALSE
     if (nrow(dist.mat) != ncol(dist.mat)){
       appendTo(c("Screen", "Report", "Warning"), "The distances matrix appears to be missing data (ncol != nrow). Deactivating speed calculations to avoid function failure.")
