@@ -11,7 +11,7 @@ Fixes:
   * Prevent wrong output in array efficiency estimations if array names are contained within each other.
   * Prevent missing arrays when finding array paths due to overlapping array names.
   * Prevent crash in distancesMatrix if spatial contains a "longitude" or "latitude" column.
-  * Fix silent bug that could cause array efficiency estimates to be misplaced in the output.
+  * **Fix silent bug that could cause array efficiency estimates to be misplaced in the output.**
 
 Enhancements:
   * New functionality: expand events and edit the validity of individual detections.
