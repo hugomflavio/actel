@@ -4,12 +4,14 @@
 \alias{readDot}
 \title{Read dot file or string}
 \usage{
-readDot(input = NULL, string = NULL)
+readDot(input = NULL, string = NULL, silent = FALSE)
 }
 \arguments{
 \item{input}{The name of a file containing dot connections.}
 
 \item{string}{A string of dot connections.}
+
+\item{silent}{Logical: Should warnings be suppressed?}
 }
 \value{
 A data frame with the connections present in the input.
