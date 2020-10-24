@@ -1,3 +1,23 @@
+#' collapse event indexes into ranges
+#' 
+#' @param x a numerical vector
+#' 
+#' @return a string of isolated events and event ranges
+#' 
+#' @keywords internal
+#' 
+createEventRanges <- function(x) {
+  overlaps <- c(FALSE, x[-length(x)] == x[-1]-1)
+  starts <- which(!overlaps)
+  stops <- c(starts[-1] - 1, length(x))
+  aux <- data.frame(Start = x[starts],
+                    Stop = x[stops])
+  aux$Combine <- aux$Start != aux$Stop
+  aux$Final <- aux$Start
+  aux$Final[aux$Combine] <- paste(aux$Start[aux$Combine], aux$Stop[aux$Combine], sep = ":")
+  return(aux$Final)  
+}
+
 #' Split a dataframe every nth row
 #' 
 #' Idea from here: https://stackoverflow.com/questions/7060272/split-up-a-dataframe-by-number-of-rows

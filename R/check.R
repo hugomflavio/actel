@@ -407,6 +407,7 @@ checkSpeeds <- function(movements, tag, detections, valid.movements,
   appendTo("debug", "Running checkSpeeds.")
   the.warning <- NULL
   vm <- valid.movements
+  warning.counter <- 0
   if (any(na.as.false(vm$Average.speed.m.s >= speed.warning))) {
     link <- which(vm$Average.speed.m.s >= speed.warning)
     if (link[1] == 1) {
@@ -415,14 +416,28 @@ checkSpeeds <- function(movements, tag, detections, valid.movements,
           " m/s from release to first valid event (Release -> ", vm$Array[1], ")."))
       the.warning <- paste("Warning:", the.warning)
       link <- link[-1]
+      warning.counter <- warning.counter + 1
     }
     if (length(link) > 0) {
       for (i in 1:length(link)) {
-        appendTo(c("Report", "Warning", "Screen"),
-          other.warning <- paste0("Tag ", tag, " had an average speed of ", round(vm$Average.speed.m.s[link[i]], 2),
-            " m/s from valid event ", link[i] - 1, " to ", link[i], " (",vm$Array[link[i] - 1], " -> ", vm$Array[link[i]], ")."))
-        other.warning <- paste("Warning:", other.warning)
-        the.warning <- paste0(the.warning, "\n", other.warning)
+        warning.counter <- warning.counter + 1
+        if (warning.counter < 5) {
+          appendTo(c("Report", "Warning", "Screen"),
+            other.warning <- paste0("Tag ", tag, " had an average speed of ", round(vm$Average.speed.m.s[link[i]], 2),
+              " m/s from valid event ", link[i] - 1, " to ", link[i], " (",vm$Array[link[i] - 1], " -> ", vm$Array[link[i]], ")."))
+          other.warning <- paste("Warning:", other.warning)
+          the.warning <- paste0(the.warning, "\n", other.warning)
+        } else {
+          final.warning <- paste0("Warning: Tag ", tag, " had an average speed higher than ", speed.warning, " m/s in ", warning.counter, " events (of which the first 4 are displayed above).")
+          message(paste0("\r", final.warning), appendLF = FALSE); flush.console()
+        }
+      }
+      if (warning.counter >= 5) {
+        message()
+        appendTo(c("Report", "Warning"), sub("Warning: ", "", final.warning))
+        link <- createEventRanges(link)
+        appendTo(c("Screen", "Report"), event.list <- paste0("         Events that raised warnings: ", paste(link, collapse = ", ")))
+        the.warning <- paste0(the.warning, "\n", final.warning, "\n", event.list)
       }
     }
   }
@@ -542,13 +557,15 @@ checkImpassables <- function(movements, tag, bio, spatial, detections, dotmat, G
   restart <- TRUE
   while (restart) {
     restart <- FALSE
+    warning.counter <- 0
     the.warning <- NULL
     valid.moves <- movements[(Valid)]
     # check release movement
     if (sum(movements$Valid) > 0) {
       if(all(is.na(dotmat[as.character(release), as.character(valid.moves$Array[1])]))) {
-        appendTo(c("Screen", "Warning", "Report"), aux <- paste0("Tag ", tag, " made an impassable jump: It is not possible to go from release site ", as.character(release), " to ", as.character(valid.moves$Array[1]), ".\n         Please resolve this either by invalidating events or by adjusting your 'spatial.txt' file and restarting."))
-        the.warning <- c(the.warning, aux)
+        appendTo(c("Screen", "Warning", "Report"), the.warning <- paste0("Tag ", tag, " made an impassable jump: It is not possible to go from release site ", as.character(release), " to ", as.character(valid.moves$Array[1]), ".\n         Please resolve this either by invalidating events or by adjusting your 'spatial.txt' file and restarting."))
+        the.warning <- paste("Warning:", the.warning)
+        warning.counter <- warning.counter + 1
       }
     }
     # check other movements
@@ -558,15 +575,30 @@ checkImpassables <- function(movements, tag, bio, spatial, detections, dotmat, G
         B = valid.moves$Array[-1])
       distances <- apply(shifts, 1, function(x) dotmat[x[1], x[2]])
       if (any(is.na(distances))) {
-        sapply(which(is.na(distances)), function(i) {
-          appendTo(c("Screen", "Warning", "Report"), aux <- paste0("Tag ", tag, " made an impassable jump in events ", i," to ", i + 1, ": It is not possible to go from array ", shifts[i, 1], " to ", shifts[i, 2], ".\n         Please resolve this either by invalidating events or by adjusting your 'spatial.txt' file and restarting."))
-          the.warning <<- c(the.warning, aux)
-        })
+        for (i in which(is.na(distances))) {
+          warning.counter <- warning.counter + 1
+          if (warning.counter < 5) {
+            appendTo(c("Screen", "Warning", "Report"), other.warning <- paste0("Tag ", tag, " made an impassable jump in events ", i," to ", i + 1, ": It is not possible to go from array ", shifts[i, 1], " to ", shifts[i, 2], "."))
+            other.warning <- paste("Warning:", other.warning)
+            the.warning <- paste0(the.warning, "\n", other.warning)
+          } else {
+            final.warning <- paste0("Warning: Tag ", tag, " made ", warning.counter, " impassable jumps (of which the first 4 are displayed above).")
+            message(paste0("\r", final.warning), appendLF = FALSE); flush.console()
+          }
+        }
+        if (warning.counter >= 5) {
+          message("")
+          appendTo(c("Report", "Warning"), sub("Warning: ", "", final.warning))
+          link <- createEventRanges(which(is.na(distances)))
+          appendTo(c("Screen", "Report"), event.list <- paste0("         Events that raised warnings: ", paste(link, collapse = ", ")))
+          the.warning <- paste0(the.warning, "\n", final.warning, "\n", event.list)
+        }
       }
     }
     if (!is.null(the.warning)) {
+      message("Please resolve this either by invalidating events or by adjusting your 'spatial.txt' file and restarting.")
       if (interactive()) { # nocov start
-        the.warning <- paste("Warning:", the.warning, collapse = "\n")
+        the.warning <- paste(the.warning, "\nPlease resolve this either by invalidating events or by adjusting your 'spatial.txt' file and restarting.", collapse = "\n")
         movements <- tableInteraction(moves = movements, tag = tag, detections = detections, 
                                       trigger = the.warning, GUI = GUI, force = TRUE, 
                                       save.tables.locally = save.tables.locally)
@@ -709,6 +741,8 @@ checkJumpDistance <- function(movements, tag, bio, detections, spatial, arrays,
   # This definition is just to prevent the package check from issuing a note due unknown variables.
   Valid <- NULL
   the.warning <- NULL
+  warning.counter <- 0
+  events.to.complain.about <- NULL
  
   release <- as.character(bio$Release.site[na.as.false(bio$Transmitter == tag)])
   release <- unlist(strsplit(with(spatial, release.sites[release.sites$Standard.name == release, "Array"]), "|", fixed = TRUE))
@@ -771,6 +805,8 @@ checkJumpDistance <- function(movements, tag, bio, detections, spatial, arrays,
           ifelse(release.steps > 2, " arrays ", " array "),
           "from release to first valid event (Release -> ", vm$Array[1], ")."))
       the.warning <- paste("Warning:", the.warning)
+      warning.counter <- warning.counter + 1
+      events.to.complain.about <- c(events.to.complain.about, 1)
       rm(say.at.least)
     }
     if (release.steps > jump.error)
@@ -819,19 +855,33 @@ checkJumpDistance <- function(movements, tag, bio, detections, spatial, arrays,
           move.steps[i] <- min(new.steps)
           say.at.least <- min(new.steps) != max(new.steps)
           if (move.steps[i] > jump.warning) { # because ">", then if jump.warning = 1, actel only complains if steps = 2.
-            # Trigger warning
-            appendTo(c("Report", "Warning", "Screen"),
-              other.warning <- paste0("Tag ", tag, " jumped through ",  
-                ifelse(say.at.least, "at least ", ""), move.steps[i] - 1,
-                ifelse(move.steps[i] > 2, " arrays ", " array "),
-                "in valid events ", i, " -> ", i + 1, " (", names(move.steps)[i], ")."))
-            other.warning <- paste("Warning:", other.warning)
-            the.warning <- paste0(the.warning, "\n", other.warning)
+            warning.counter <- warning.counter + 1
+            events.to.complain.about <- c(events.to.complain.about, i + 1)
+            if (warning.counter < 5) {
+              # Trigger warning
+              appendTo(c("Report", "Warning", "Screen"),
+                other.warning <- paste0("Tag ", tag, " jumped through ",  
+                  ifelse(say.at.least, "at least ", ""), move.steps[i] - 1,
+                  ifelse(move.steps[i] > 2, " arrays ", " array "),
+                  "in valid events ", i, " -> ", i + 1, " (", names(move.steps)[i], ")."))
+              other.warning <- paste("Warning:", other.warning)
+              the.warning <- paste0(the.warning, "\n", other.warning)
+            } else {
+              final.warning <- paste0("Warning: Tag ", tag, " jumped ", jump.warning, " or more arrays on ", warning.counter, " occasions (of which the first 4 are displayed above).")
+              message(paste0("\r", final.warning), appendLF = FALSE); flush.console()
+            }
           }
           rm(say.at.least)
           if (move.steps[i] > jump.error) { # same as if above.
             trigger.error <- TRUE # nocov
           }
+        }
+        if (warning.counter >= 5) {
+          message("")
+          appendTo(c("Report", "Warning"), sub("Warning: ", "", final.warning))
+          link <- createEventRanges(events.to.complain.about)         
+          appendTo(c("Screen", "Report"), event.list <- paste0("         Events that raised warnings: ", paste(link, collapse = ", ")))
+          the.warning <- paste0(the.warning, "\n", final.warning, "\n", event.list)
         }
       }
     }
@@ -946,16 +996,18 @@ checkTagsInUnknownReceivers <- function(detections.list, deployments, spatial) {
   # This definition is just to prevent the package check from issuing a note due unknown variables.
   include.all.unknowns <- FALSE
   exclude.all.unknowns <- FALSE
-  excluded.unknowns <- NULL
+  processed.unknowns <- NULL
+  excluded <- NULL
+  included <- NULL
 
   appendTo("debug", "Running tagsInUnknownReceivers")
 
   deployed.receivers <- unlist(lapply(deployments, function(x) x$Receiver))
   for (i in names(detections.list)) {
     if (any(is.na(detections.list[[i]]$Standard.name))) {
-      # If this is not the first iteration, some receivers may have already been excluded.
-      if (!is.null(excluded.unknowns))
-        detections.list[[i]] <- detections.list[[i]][!(detections.list[[i]]$Receiver %in% excluded.unknowns), ]
+      # If this is not the first iteration, some receivers may have already been processed.
+      if (!is.null(processed.unknowns))
+        detections.list[[i]] <- detections.list[[i]][!(detections.list[[i]]$Receiver %in% processed.unknowns), ]
 
       receivers <- detections.list[[i]]$Receiver
       link <- is.na(match(receivers, deployed.receivers))
@@ -989,7 +1041,8 @@ checkTagsInUnknownReceivers <- function(detections.list, deployments, spatial) {
           detections.list[[i]]$Array[link] <- "Unknown"
           levels(detections.list[[i]]$Section) <- c(levels(detections.list[[i]]$Section), "Unknown")
           detections.list[[i]]$Section[link] <- "Unknown"
-          excluded.unknowns <- c(excluded.unknowns, paste(new.unknowns))
+          processed.unknowns <- c(processed.unknowns, new.unknowns)
+          included <- c(included, new.unknowns)
         }
         
         if (decision == "e") {
@@ -998,7 +1051,8 @@ checkTagsInUnknownReceivers <- function(detections.list, deployments, spatial) {
         
         if (exclude.all.unknowns || decision == "d") {
           detections.list[[i]] <- detections.list[[i]][is.na(match(receivers, new.unknowns)), ] # keep the ones that are not unknown
-          excluded.unknowns <- c(excluded.unknowns, paste(new.unknowns))
+          processed.unknowns <- c(processed.unknowns, new.unknowns)
+          excluded <- c(excluded, new.unknowns)
         }
         rm(decision)
       }
@@ -1006,6 +1060,9 @@ checkTagsInUnknownReceivers <- function(detections.list, deployments, spatial) {
   }
   # remove empty data frames (for tags detected only at excluded unknown receivers)
   detections.list <- detections.list[sapply(detections.list, nrow) > 0]
+  # append summary to spatial
+  if (!is.null(included) | !is.null(excluded))
+    spatial$unknowns <- list(included = included, excluded = excluded)
   
   return(list(spatial = spatial, deployments = deployments, detections.list = detections.list))
 }

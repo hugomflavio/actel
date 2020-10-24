@@ -428,16 +428,8 @@ graphicalInvalidate <- function(detections, moves, tag, trigger) { # nocov start
       message("M: Saving detection-level changes and refreshing event table."); flush.console()
   }
 
-  aux <- rle(!graphical_valid)
-  aux <- data.frame(Value = aux[[2]], n = aux[[1]])
-  aux$stop <- cumsum(aux$n)
-  aux$start <- c(1, aux$stop[-1] - (aux$n[-1] - 1))
-  aux <- aux[aux$Value, ]
-  aux$combine <- aux$start != aux$stop
-  aux$final <- aux$start
-
-  aux$final[aux$combine] <- paste(aux$start[aux$combine], aux$stop[aux$combine], sep = ":")
-  appendTo("UD", paste("# From the GUI, these events are invalid:", aux$final, collapse = " "))
+  link <- createEventRanges(which(!graphical_valid))
+  appendTo("UD", paste0("# From the GUI, these events are invalid: ", paste(link, collapse = " ")))
   return(moves)
 } # nocov end
 
@@ -705,16 +697,8 @@ graphicalInvalidateDetections <- function(detections, displayed.moves, all.moves
                                detections = detections, 
                                event = event)
 
-  aux <- rle(!graphical_valid)
-  aux <- data.frame(Value = aux[[2]], n = aux[[1]])
-  aux$stop <- cumsum(aux$n)
-  aux$start <- c(1, aux$stop[-1] - (aux$n[-1] - 1))
-  aux <- aux[aux$Value, ]
-  aux$combine <- aux$start != aux$stop
-  aux$final <- aux$start
-
-  aux$final[aux$combine] <- paste(aux$start[aux$combine], aux$stop[aux$combine], sep = ":")
-  appendTo("UD", paste("# From the GUI, these detections are invalid:", aux$final, collapse = " "))
+  link <- createEventRanges(which(!graphical_valid))
+  appendTo("UD", paste0("# From the GUI, these events are invalid: ", paste(link, collapse = " ")))
   return(all.moves)
 } # nocov end
 
