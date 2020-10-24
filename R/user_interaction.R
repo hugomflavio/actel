@@ -659,7 +659,6 @@ invalidateDetections <- function(displayed.moves, all.moves, detections, tag, ev
 #'
 graphicalInvalidateDetections <- function(detections, displayed.moves, all.moves, event, tag, silent = FALSE) { # nocov start
   appendTo("debug", "Running graphicalInvalidateDetections.")
-  on.exit(save(list = ls(), file = "inside_graphInv.RData"), add = TRUE)
 
   to.print <- cbind(data.frame(Index = 1:nrow(detections)), detections)
   to.print$Timestamp <- as.character(to.print$Timestamp)
