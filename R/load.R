@@ -240,7 +240,7 @@ readDot <- function (input = NULL, string = NULL, silent = FALSE) {
   if (length(paths) == 0)
     stop("Could not recognise the input contents as DOT formatted connections.", call. = FALSE)
   # if something looks like a badly formatted connector, complain and stop
-  if (grepl("<<|>>|>-|-<|><|<>|<->", paths))
+  if (any(grepl("<<|>>|>-|-<|><|<>|<->", paths)))
     stop("The input appears to have badly formatted connectors ('<<', '>>', '>-', '-<'', '><', '<>' or '<->'). Please fix these before continuing.", call. = FALSE)
   # there's probably a smarter way to do these, but hey, this works.
   paths <- gsub("[ ]*<-", "<-", paths)

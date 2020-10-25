@@ -14,9 +14,9 @@ B,--,C
 C,--,D
 D,<-,E
 E,->,F
-F,<>,D
+F,<-,D
 "), stringsAsFactors = FALSE)
-	expect_equal(readDot(string = "A--B--C--D<-E->F<>D"), dot)
+	expect_equal(readDot(string = "A--B--C--D<-E->F<-D"), dot)
 })
 
 test_that("readDot stops if the data inside the file/string does not meet expectations", {
@@ -31,3 +31,4 @@ test_that("readDot stops if the data inside the file/string does not meet expect
 })
 
 setwd(tests.home)
+rm(list = ls())
