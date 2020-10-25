@@ -390,4 +390,4 @@ River3 -- River6")
 })
 
 setwd(tests.home)
-
+rm(list = ls())

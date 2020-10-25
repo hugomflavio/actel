@@ -1,7 +1,8 @@
 skip_on_cran()
 
 test_that("dotMatrix stops if any connector is not one of '--', '<-' or '->'", {
-	dot <- readDot(string = "A--B--C--D--E--F<>G")
+	dot <- readDot(string = "A--B--C--D--E--F--G")
+	dot$to[1] <- "<>"
 	expect_error(dotMatrix(input = dot),
 		"Unrecognized connectors. Only use '--', '->' or '<-' to connect nodes.", fixed = TRUE)
 	# all other combinations are not recognized by readDot (i.e <<, >>, ><, >-, -<)

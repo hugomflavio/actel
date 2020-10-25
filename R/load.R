@@ -238,7 +238,10 @@ readDot <- function (input = NULL, string = NULL, silent = FALSE) {
   }
   paths <- lines[grepl("[<-][->]", lines)]
   if (length(paths) == 0)
-    stop("Could not recognise the input contents as DOT formatted connections.")
+    stop("Could not recognise the input contents as DOT formatted connections.", call. = FALSE)
+  # if something looks like a badly formatted connector, complain and stop
+  if (grepl("<<|>>|>-|-<|><|<>|<->", paths))
+    stop("The input appears to have badly formatted connectors ('<<', '>>', '>-', '-<'', '><', '<>' or '<->'). Please fix these before continuing.", call. = FALSE)
   # there's probably a smarter way to do these, but hey, this works.
   paths <- gsub("[ ]*<-", "<-", paths)
   paths <- gsub("<-[ ]*", "<-", paths)
@@ -256,10 +259,10 @@ readDot <- function (input = NULL, string = NULL, silent = FALSE) {
       warning("Replacing spaces with '_' in the node names.", immediate. = TRUE, call. = FALSE)
     paths <- gsub(" ", "_", paths)
   }
-  if (any(grepl("\\\\|/|:|\\*|\\?|\\\"|<|>", paths))) {
+  if (any(grepl("\\\\|/|:|\\*|\\?|\\\"|<(?!-)|(?<!-)>", paths, perl = TRUE))) {
     if (!silent)
       warning("Troublesome characters found in the node names (\\/:*?\"<>). Replacing these with '_'.", immediate. = TRUE, call. = FALSE)
-    paths <- gsub("\\\\|/|:|\\*|\\?|\\\"|<|>", "_", paths)
+    paths <- gsub("\\\\|/|:|\\*|\\?|\\\"|<(?!-)|(?<!-)>", "_", paths, perl = TRUE)
   }
   nodes <- strsplit(paths,"[<-][->]")
   recipient <- data.frame(
@@ -807,7 +810,7 @@ loadSpatial <- function(input = "spatial.csv", section.order = NULL){
       stopAndReport("Some rows do not contain 'Section' information in the spatial input. Please double-check the input files.")
     # check spaces in the array names
     if (any(grepl(" ", input$Section))) {
-      appendTo("Screen", "M: Replacing spaces in section names to prevent function failure.")
+      appendTo("Screen", "M: Replacing spaces with '_' in section names to prevent function failure.")
       input$Section <- gsub(" ", "_", input$Section)
     }
     if (any(grepl("\\\\|/|:|\\*|\\?|\\\"|<|>|\\|", input$Section))) {
