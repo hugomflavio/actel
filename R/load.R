@@ -900,13 +900,7 @@ loadBio <- function(input, tz){
   else
     preloaded <- TRUE
 
-  if (!preloaded) {
-    if (file.exists(input))
-      bio <- as.data.frame(suppressWarnings(data.table::fread(input, colClasses = c("Release.date" = "character"))),
-                           stringsAsFactors = FALSE)
-    else
-      stopAndReport("Could not find a '", input, "' file in the working directory.")
-  } else {
+  if (preloaded) {
     bio <- as.data.frame(input, stringsAsFactors = FALSE)
     to.convert <- which(sapply(bio, class) == "factor")
     if (length(to.convert) > 0) {
@@ -914,6 +908,12 @@ loadBio <- function(input, tz){
         bio[, i] <- as.character(bio[, i])
       }
     }
+  } else {
+    if (file.exists(input))
+      bio <- as.data.frame(suppressWarnings(data.table::fread(input, colClasses = c("Release.date" = "character"))),
+                           stringsAsFactors = FALSE)
+    else
+      stopAndReport("Could not find a '", input, "' file in the working directory.")
   }
 
   if (any(link <- duplicated(colnames(bio))))
@@ -1045,19 +1045,19 @@ loadDetections <- function(start.time = NULL, stop.time = NULL, tz, force = FALS
       load("detections/actel.detections.RData")
     else
       load("actel.detections.RData")
-    if (force) {
+    if (force) { # nocov start
       decision <- "Y"
-    } else { # nocov start
+    } else {
       appendTo("Screen", paste0("M: The detections have been processed on ", actel.detections$timestamp, ".\n   If the input detection files were not changed, it is safe to use these again."))
       decision <- userInput("   Reuse processed detections?(y/n) ", choices = c("y", "n"), hash = "# reuse detections?")
-    } # nocov end
+    }
     if (decision == "y"){
       appendTo(c("Screen","Report"), paste0("M: Using detections previously compiled on ", actel.detections$timestamp, "..."))
       detections <- actel.detections$detections
       attributes(detections$Timestamp)$tzone <- "UTC"
       detections <- convertTimes(input = detections, start.time = start.time, stop.time = stop.time, tz = tz)
       recompile <- FALSE
-    } else {  # nocov start
+    } else {
       appendTo("Screen", "M: Reprocessing the detections.")
     } # nocov end
     rm(actel.detections)
@@ -1625,7 +1625,7 @@ createStandards <- function(detections, spatial, deployments, discard.orphans = 
   appendTo(c("Screen", "Report"), "M: Matching detections with deployment periods.")
   
   if (interactive())
-    pb <- txtProgressBar(min = 0, max = nrow(detections), style = 3, width = 60)
+    pb <- txtProgressBar(min = 0, max = nrow(detections), style = 3, width = 60) # nocov
   counter <- 0
   
   for (i in 1:length(deployments)) {
@@ -1653,7 +1653,7 @@ createStandards <- function(detections, spatial, deployments, discard.orphans = 
       if (any(the.error <- is.na(detections$Standard.name[receiver.link]))) {
         rows.to.remove <- detections[receiver.link, which = TRUE][the.error]
         if (interactive())
-          message("")
+          message("") # nocov
         if (!discard.orphans) {
           appendTo(c("Screen", "Report"), paste0("Error: ", sum(the.error), " detections for receiver ", names(deployments)[i], " do not fall within deployment periods."))
           message("")
@@ -1672,18 +1672,18 @@ createStandards <- function(detections, spatial, deployments, discard.orphans = 
             }
 
             if (decision == "a")
-              stopAndReport("Stopping analysis per user command.")
+              stopAndReport("Stopping analysis per user command.") # nocov
             
             if (decision == "b") {
               detections <- detections[-rows.to.remove]
               restart <- FALSE
             }
 
-            if (decision == "c") {
+            if (decision == "c") { # nocov start
               detections <- detections[-rows.to.remove]
               discard.orphans <- TRUE
               restart <- FALSE
-            }
+            } # nocov end
 
             if (decision == "d") { # nocov start
               file.name <- userInput("Please specify a file name (leave empty to abort saving): ", hash = "# save receiver orphans to this file")
@@ -1725,14 +1725,14 @@ createStandards <- function(detections, spatial, deployments, discard.orphans = 
       }
     }
     if (interactive())
-      setTxtProgressBar(pb, counter)
+      setTxtProgressBar(pb, counter) # nocov
     flush.console()
   }
 
-  if (interactive()) {
+  if (interactive()) { # nocov start
     setTxtProgressBar(pb, nrow(detections))
     close(pb)
-  }
+  } # nocov end
 
   appendTo(c("Screen", "Report"), paste0("M: Number of ALS: ", length(deployments), " (of which ", length(empty.receivers), " had no detections)"))
   
