@@ -226,6 +226,9 @@ plotSensors <- function(input, tag, sensor, title = tag, xlab, ylab, pcol, psize
   if (is.na(match(tag, names(input$valid.detections))))
     stop("Could not find tag '", tag, "' in the input.", call. = FALSE)
 
+  if (length(lcol) > 1)
+    stop("Please provide only one value for 'lcol'.", call. = FALSE)
+  
   detections <- input$valid.detections[[tag]]
   spatial <- input$spatial
 
@@ -253,7 +256,7 @@ plotSensors <- function(input, tag, sensor, title = tag, xlab, ylab, pcol, psize
 
   # renaming arrays if relevant
   if (!missing(array.alias)) {
-    if (colour.by == "section") {
+    if (colour.by == "array") {
       link <- match(names(array.alias), levels(detections$Array))
       if (any(is.na(link)))
         warning("Could not find ", ifelse(sum(is.na(link) == 1), "array ", "arrays "), names(array.alias)[is.na(link)], " in the study's arrays.", call. = FALSE, immediate. = TRUE)
