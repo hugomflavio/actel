@@ -17,8 +17,11 @@ test_that("loadDot stops if file is badly formatted or missing", {
 })
 
 test_that("loadDot stops if contents of file do not match spatial", {
-	expect_error(loadDot(string = "A1--A2--A3--A4--A5--A6\n", spatial = example.spatial, disregard.parallels = TRUE, preload = TRUE),
-"Not all arrays listed in the spatial input are present in the dot input. Double-check that the array names in the dot string match the array names in the spatial input.", fixed = TRUE)
+	expect_error(loadDot(string = "A1--A2--A3--A4--A5--A6\n", spatial = example.spatial, disregard.parallels = TRUE, preloading = TRUE),
+"Not all arrays listed in the spatial input are present in the dot input. Double-check that the array names in the dot string match the array names in the spatial input.\n       Missing arrays: A0, A7, A8, A9", fixed = TRUE)
+
+	expect_error(loadDot(string = "A0--A1--A2--A3--A20--A4--A5--A6--A7--A8--A9\n", spatial = example.spatial, disregard.parallels = TRUE, preloading = TRUE),
+"Not all arrays listed in the dot input are present in the spatial input. The dot input should only contain arrays that are listed in spatial.\n       Alien arrays: A20", fixed = TRUE)
 
 	sink("spatial.dot")
 	cat("A1--A2--A3--A4--A5--A6\n")

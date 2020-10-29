@@ -94,6 +94,12 @@ test_that("loadDeployments output is exactly as expected", {
 	file.remove("deployments.csv")
 })
 
+test_that("loadDeployments converts factors to character", {
+	xdep <- example.deployments
+	xdep$Station.name <- as.factor(xdep$Station.name)
+	output <- loadDeployments(input = xdep, tz = "Europe/Copenhagen")
+	expect_equal(typeof(output$Station.name), "character")	
+})
 
 setwd(tests.home)
 

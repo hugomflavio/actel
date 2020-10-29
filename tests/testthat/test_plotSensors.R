@@ -29,3 +29,20 @@ test_that("plotSensors is working", {
 	expect_warning(plotSensors(xresults, tag = "R64K-4451"),
 		"Not all rows with sensor data contain a sensor unit! Plotting unknown data separately.", fixed = TRUE)
 })
+
+test_that("array.alias and colour.by play nicely together", {
+	expect_warning(plotSensors(example.results, tag = "R64K-4451", array.alias = c("A0" = "Dummy"), colour.by = "section"),
+		"array.alias can only be used when colour.by = 'array'. Ignoring array.alias.", fixed = TRUE)
+	tryCatch(plotSensors(example.results, tag = "R64K-4451", colour.by = "section"),
+		warning = function(w) stop("A warning was issued where it should not had been!"))
+})
+
+
+test_that("lcol and pcol are working", {
+	expect_warning(plotSensors(example.results, tag = "R64K-4451", pcol = "blue"),
+		"Not enough colours supplied in 'pcol' (1 supplied and 10 needed). Reusing colours.", fixed = TRUE)
+	tryCatch(plotSensors(example.results, tag = "R64K-4451", pcol = gg_colour_hue(10)),
+		warning = function(w) stop("A warning was issued where it should not had been!"))
+	expect_error(plotSensors(example.results, tag = "R64K-4451", lcol = gg_colour_hue(10)),
+		"Please provide only one value for 'lcol'.", fixed = TRUE)
+})

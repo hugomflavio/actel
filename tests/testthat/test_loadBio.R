@@ -187,6 +187,15 @@ test_that("loadBio can handle multi-sensor tags.", {
 	file.remove("biometrics.csv")
 })
 
+test_that("loadBio converts factors to character", {
+	xbio <- example.biometrics
+	xbio$temp <- "dummy text"
+	xbio$temp <- as.factor(xbio$temp)
+	output <- loadBio(xbio, tz = "Europe/Copenhagen")
+	expect_equal(typeof(output$temp), "character")	
+	# note: The Release.site and Group columns are converted into a factor within loadBio
+})
+
 
 setwd(tests.home)
 
