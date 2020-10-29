@@ -94,13 +94,13 @@ In the spatial input, the expected first arrays of the release sites should matc
 	spatial$Array[18] <- "Invalid"
 	write.csv(spatial, "spatial.csv", row.names = FALSE)
 	expect_error(loadSpatial(),
-		"The term 'Invalid' is reserved for internal calculations. Do not name any arrays as 'Invalid'.", fixed = TRUE)
+		"The term 'Invalid' is reserved for internal calculations. Do not name any sections or arrays as 'Invalid'.", fixed = TRUE)
 
 	spatial <- example.spatial
 	spatial$Array[18] <- "Total"
 	write.csv(spatial, "spatial.csv", row.names = FALSE)
 	expect_error(loadSpatial(),
-		"The term 'Total' is reserved for internal calculations. Do not name any arrays as 'Total'.", fixed = TRUE)
+		"The term 'Total' is reserved for internal calculations. Do not name any sections or arrays as 'Total'.", fixed = TRUE)
 
 	spatial <- example.spatial
 	spatial$Section <- as.character(spatial$Section)

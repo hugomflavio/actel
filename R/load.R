@@ -785,9 +785,9 @@ loadSpatial <- function(input = "spatial.csv", section.order = NULL){
   if (any(grepl("^Total$", input$Array)))
     stopAndReport("The term 'Total' is reserved for internal calculations. Do not name any sections or arrays as 'Total'.")
   if (any(grepl("^Invalid$", input$Array)))
-    stopAndReport("The term 'Invalid' is reserved for internal calculations. Do not name any arrays as 'Invalid'.")
+    stopAndReport("The term 'Invalid' is reserved for internal calculations. Do not name any sections or arrays as 'Invalid'.")
   if (any(grepl("^Unknown$", input$Array)))
-    stopAndReport("The term 'Unknown' is reserved for internal calculations. Do not name any arrays as 'Unknown'.")
+    stopAndReport("The term 'Unknown' is reserved for internal calculations. Do not name any sections or arrays as 'Unknown'.")
   # check array name length
   aux <- unlist(strsplit(input$Array, "|", fixed = TRUE))
   if (any(nchar(as.character(aux)) > 6))

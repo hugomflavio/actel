@@ -1,8 +1,8 @@
 skip_on_cran()
 
 test_that("plotLive failsafes kick in", {
-	expect_error(plotLive("a"), "Could not recognise the input as an actel results object.", fixed = TRUE)
-	expect_error(plotLive(list("a")), "Could not recognise the input as an actel results object.", fixed = TRUE)
+	expect_error(plotLive("a"), "Could not recognise the input as an actel results or preload object.", fixed = TRUE)
+	expect_error(plotLive(list("a")), "Could not recognise the input as an actel results or preload object.", fixed = TRUE)
 	expect_error(plotLive(example.results, arrays = c("a" = "b")), "'arrays' was set but not all contents match array names in the study area.", fixed = TRUE)
 })
 
