@@ -71,7 +71,6 @@ userInput <- function(question, choices, tag, hash) {
       appendTo("UD", paste(decision))
 
   } else { # nocov end
-
     if (any(choices == "n"))
       output <- "n"
     if (any(choices == "b"))
