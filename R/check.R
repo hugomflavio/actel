@@ -1041,8 +1041,8 @@ checkTagsInUnknownReceivers <- function(detections.list, deployments, spatial) {
           detections.list[[i]]$Array[link] <- "Unknown"
           levels(detections.list[[i]]$Section) <- c(levels(detections.list[[i]]$Section), "Unknown")
           detections.list[[i]]$Section[link] <- "Unknown"
-          processed.unknowns <- c(processed.unknowns, new.unknowns)
-          included <- c(included, new.unknowns)
+          processed.unknowns <- c(processed.unknowns, as.character(new.unknowns))
+          included <- c(included, as.character(new.unknowns))
         }
         
         if (decision == "e") {
@@ -1051,8 +1051,8 @@ checkTagsInUnknownReceivers <- function(detections.list, deployments, spatial) {
         
         if (exclude.all.unknowns || decision == "d") {
           detections.list[[i]] <- detections.list[[i]][is.na(match(receivers, new.unknowns)), ] # keep the ones that are not unknown
-          processed.unknowns <- c(processed.unknowns, new.unknowns)
-          excluded <- c(excluded, new.unknowns)
+          processed.unknowns <- c(processed.unknowns, as.character(new.unknowns))
+          excluded <- c(excluded, as.character(new.unknowns))
         }
         rm(decision)
       }
