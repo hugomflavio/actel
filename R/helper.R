@@ -543,16 +543,16 @@ deleteHelpers <- function() {
 emergencyBreak <- function(the.function.call) { # nocov start
   appendTo("Report", "\nA fatal exception occurred, stopping the process!\nFound a bug? Report it here: https://github.com/hugomflavio/actel/issues\n\n-------------------")
   if (file.exists(paste0(tempdir(), "/temp_comments.txt")))
-    appendTo("Report", paste0("User comments:\n-------------------\n", gsub("\t", ": ", gsub("\r", "", readr::read_file(paste0(tempdir(), "/temp_comments.txt")))), "-------------------")) # nocov
+    appendTo("Report", paste0("User comments:\n-------------------\n", gsub("\t", ": ", gsub("\r", "", readr::read_file(paste0(tempdir(), "/temp_comments.txt")))), "-------------------"))
 
   if (file.exists(paste0(tempdir(), "/temp_UD.txt")))
-    appendTo("Report", paste0("User interventions:\n-------------------\n", gsub("\r", "", readr::read_file(paste0(tempdir(), "/temp_UD.txt"))), "-------------------")) # nocov
+    appendTo("Report", paste0("User interventions:\n-------------------\n", gsub("\r", "", readr::read_file(paste0(tempdir(), "/temp_UD.txt"))), "-------------------"))
 
   appendTo("Report", paste0("Function call:\n-------------------\n", the.function.call, "\n-------------------"))
 
   message("\nM: The analysis errored. You can recover latest the job log (including your comments and decisions) by running recoverLog().")
   
-  if (getOption("actel.debug", default = FALSE)) { # nocov start
+  if (getOption("actel.debug", default = FALSE)) {
     file.copy(paste0(tempdir(), "/temp_log.txt"), paste0(tempdir(), "/latest_actel_error_log.txt"))
   } else {
     file.rename(paste0(tempdir(), "/temp_log.txt"), paste0(tempdir(), "/latest_actel_error_log.txt"))
