@@ -427,8 +427,12 @@ graphicalInvalidate <- function(detections, moves, tag, trigger) { # nocov start
       message("M: Saving detection-level changes and refreshing event table."); flush.console()
   }
 
-  link <- createEventRanges(which(!graphical_valid))
-  appendTo("UD", paste0("# From the GUI, these events are invalid: ", paste(link, collapse = " ")))
+  if (any(!graphical_valid)) {
+    link <- createEventRanges(which(!graphical_valid))
+    appendTo("UD", paste0("# From the GUI, these events are invalid: ", paste(link, collapse = " ")))
+  } else {
+    appendTo("UD", "# From the GUI, no events were considered invalid")
+  }
   return(moves)
 } # nocov end
 
@@ -695,8 +699,12 @@ graphicalInvalidateDetections <- function(detections, displayed.moves, all.moves
                                detections = detections, 
                                event = event)
 
-  link <- createEventRanges(which(!graphical_valid))
-  appendTo("UD", paste0("# From the GUI, these events are invalid: ", paste(link, collapse = " ")))
+  if (any(!graphical_valid)) {
+    link <- createEventRanges(which(!graphical_valid))
+    appendTo("UD", paste0("# From the GUI, these events are invalid: ", paste(link, collapse = " ")))
+  } else {
+    appendTo("UD", "# From the GUI, no events were considered invalid")
+  }
   return(all.moves)
 } # nocov end
 
