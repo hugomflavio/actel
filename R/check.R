@@ -132,8 +132,12 @@ checkArguments <- function(dp, tz, minimum.detections, max.interval, speed.metho
   if (jump.error < 1)
     stopAndReport("'jump.error' must not be lower than 1.")
 
-  if (jump.error < jump.warning)
-    stopAndReport("'jump.error' must not be lower than 'jump.warning'.")
+  if (jump.error < jump.warning) {
+    if (jump.warning != 2) # i.e. it is not the default jump.warning
+      stopAndReport("'jump.error' must not be lower than 'jump.warning'.")
+    else
+      jump.warning <- jump.error
+  }
 
   if (!is.null(inactive.warning) && !is.numeric(inactive.warning))
     stopAndReport("'inactive.warning' must be numeric.")
