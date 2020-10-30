@@ -96,7 +96,7 @@ For example:
 
 ```{r, echo=FALSE, results='asis'}
 biometrics <- data.frame(
-  Release.date=c("2018-02-01 10:05:00", "2018-02-01 10:15:00", "2018-02-01 10:15:00"),
+  Release.date = c("2018-02-01 10:05:00", "2018-02-01 10:15:00", "2018-02-01 10:15:00"),
   Signal = c("501", "502|503", "504|505|506"),
   Sensor.unit = c("T", "T|D", "T|D|A"),
   Length.mm = c(150, 160, 170),
