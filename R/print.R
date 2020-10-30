@@ -631,14 +631,15 @@ knitr::kable(intra.array.CJS[[',i ,']]$absolutes)
 #' @keywords internal
 #'
 printIndividuals <- function(detections.list, movements, valid.movements, spatial, 
-  status.df = NULL, rsp.info, type = c("stations", "arrays"), extension = "png") {
+  status.df = NULL, rsp.info, type = c("auto", "stations", "arrays"), extension = "png") {
   # NOTE: The NULL variables below are actually column names used by ggplot.
   # This definition is just to prevent the package check from issuing a note due unknown variables.
   Timestamp <- NULL
   Standard.name <- NULL
   Array <- NULL
   Station <- NULL
-
+  type <- match.arg(type)
+  
   fake.results <- list(detections = detections.list,
                 movements = movements,
                 valid.movements = valid.movements,
@@ -652,6 +653,13 @@ printIndividuals <- function(detections.list, movements, valid.movements, spatia
     pb <- txtProgressBar(min = 0, max = length(detections.list), style = 3, width = 60) # nocov
   counter <- 0
   individual.plots <- ""
+
+  if (type == "auto") {
+    if (nrow(spatial$stations) > 40 | length(unique(spatial$stations$Array)) > 14)
+      type <- "arrays"
+    else
+      type <- "stations"
+  }
 
   capture <- lapply(names(detections.list), function(tag) {
     counter <<- counter + 1
@@ -686,7 +694,7 @@ printIndividuals <- function(detections.list, movements, valid.movements, spatia
         the.width <- 4
       }
     }
-    if (length(to.check) >= 29) {
+    if (length(to.check) > 29) {
       if (counter %% 2 == 0) {
         p <- p + ggplot2::guides(colour = ggplot2::guide_legend(ncol = 3))
         the.width <- 7.5
@@ -1399,11 +1407,12 @@ printLastArray <- function(status.df) {
 #'
 #' @return A string of file locations in rmd syntax, to be included in printRmd
 #'
-printSensorData <- function(detections, spatial, rsp.info, type = c("stations", "arrays"), extension = "png") {
+printSensorData <- function(detections, spatial, rsp.info, type = c("auto", "stations", "arrays"), extension = "png") {
   individual.plots <- NULL
   Timestamp <- NULL
   Sensor.Value <- NULL
   Sensor.Unit <- NULL
+  type <- match.arg(type)
 
   appendTo(c("Screen", "Report"), "M: Printing sensor values for tags with sensor data.")
 
@@ -1418,6 +1427,13 @@ printSensorData <- function(detections, spatial, rsp.info, type = c("stations", 
   counter <- 0
   n.plots <- 0
   individual.plots <- ""
+
+  if (type == "auto") {
+    if (nrow(spatial$stations) > 40 | length(unique(spatial$stations$Array)) > 14)
+      type <- "arrays"
+    else
+      type <- "stations"
+  }
 
   capture <- lapply(names(detections), function(tag) {
     counter <<- counter + 1
@@ -1447,7 +1463,7 @@ printSensorData <- function(detections, spatial, rsp.info, type = c("stations", 
           the.width <- 4.2
         }
       }
-      if (length(to.check) >= 29) {
+      if (length(to.check) > 29) {
         if (counter %% 2 == 0) {
           p <- p + ggplot2::guides(colour = ggplot2::guide_legend(ncol = 3))
           the.width <- 7.5

@@ -44,7 +44,7 @@ NULL
 #'
 checkArguments <- function(dp, tz, minimum.detections, max.interval, speed.method = c("last to first", "last to last"),
   speed.warning, speed.error, start.time, stop.time, report, auto.open, save.detections, jump.warning, jump.error,
-  inactive.warning, inactive.error, exclude.tags, override, print.releases, plot.detections.by = c("stations", "arrays"),
+  inactive.warning, inactive.error, exclude.tags, override, print.releases, plot.detections.by = c("auto", "stations", "arrays"),
   if.last.skip.section = NULL, replicates = NULL, section.minimum = NULL, section.order = NULL, timestep = c("days", "hours")) {
   appendTo("debug", "Running checkArguments.")
 

@@ -33,7 +33,7 @@ migration(
   GUI = c("needed", "always", "never"),
   save.tables.locally = FALSE,
   print.releases = TRUE,
-  plot.detections.by = c("stations", "arrays")
+  plot.detections.by = c("auto", "stations", "arrays")
 )
 }
 \arguments{
@@ -153,7 +153,8 @@ in R's temporary folder?}
 study area diagrams?}
 
 \item{plot.detections.by}{The type of y axis desired for the individual
-detection plots. One of "stations" (default) or "arrays".}
+detection plots. While the argument defaults to "auto", it can be hard-set
+to one of "stations" or "arrays".}
 }
 \value{
 A list containing:

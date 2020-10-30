@@ -147,7 +147,7 @@ migration <- function(
   GUI = c("needed", "always", "never"),
   save.tables.locally = FALSE,
   print.releases = TRUE,
-  plot.detections.by = c("stations", "arrays"))
+  plot.detections.by = c("auto", "stations", "arrays"))
 {
 
 # clean up any lost helpers
@@ -819,7 +819,7 @@ printMigrationRmd <- function(override.fragment, biometric.fragment, section.ove
     sensor.fragment <- paste0("### Sensor plots
 
 Note:
-  : You can choose to paint the values by section by setting `plot.detections.by = 'arrays'` during the analysis.
+  : The colouring in these plots will follow that of the individual detection plots, which can be modified using `plot.detections.by`.
   : The data used for these graphics is stored in the `valid.detections` object.
   : You can replicate these graphics and edit them as needed using the `plotSensors()` function.
 

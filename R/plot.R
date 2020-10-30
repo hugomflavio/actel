@@ -637,7 +637,7 @@ plotMoves <- function(input, tags, title, xlab, ylab, col, array.alias, show.rel
 #'
 #' @export
 #'
-plotDetections <- function(input, tag, type = c("stations", "arrays"), title, xlab, ylab, col, array.alias, frame.warning = TRUE) {
+plotDetections <- function(input, tag, type = c("auto", "stations", "arrays"), title, xlab, ylab, col, array.alias, frame.warning = TRUE) {
   # NOTE: The NULL variables below are actually column names used by ggplot.
   # This definition is just to prevent the package check from issuing a note due unknown variables.
   Timestamp <- NULL
@@ -684,6 +684,13 @@ plotDetections <- function(input, tag, type = c("stations", "arrays"), title, xl
 
   # Y axis order
   spatial <- input$spatial
+  if (type == "auto") {
+    if (nrow(spatial$stations) > 40 | length(unique(spatial$stations$Array)) > 12)
+      type <- "arrays"
+    else
+      type <- "stations"
+  }
+
   if (type == "stations") {
     link <- match(spatial$stations$Array, c(unlist(spatial$array.order), "Unknown"))
     names(link) <- 1:length(link)

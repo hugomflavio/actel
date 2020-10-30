@@ -51,7 +51,8 @@
 #' @param override A vector of signals for which the user intends to manually
 #'  define which movement events are valid and invalid.
 #' @param plot.detections.by The type of y axis desired for the individual
-#'  detection plots. One of "stations" (default) or "arrays".
+#'  detection plots. While the argument defaults to "auto", it can be hard-set 
+#'  to one of "stations" or "arrays".
 #' @param print.releases Logical: Should the release sites be printed in the
 #'  study area diagrams?
 #' @param report Logical. Should an HTML report be created at the end of the
@@ -151,7 +152,7 @@ explore <- function(
   GUI = c("needed", "always", "never"),
   save.tables.locally = FALSE,
   print.releases = TRUE,
-  plot.detections.by = c("stations", "arrays")) 
+  plot.detections.by = c("auto", "stations", "arrays")) 
 {
 
 # clean up any lost helpers
@@ -601,7 +602,7 @@ printExploreRmd <- function(override.fragment, biometric.fragment, individual.pl
     sensor.fragment <- paste0("### Sensor plots
 
 Note:
-  : You can choose to paint the values by section by setting `plot.detections.by = 'arrays'` during the analysis.
+  : The colouring in these plots will follow that of the individual detection plots, which can be modified using `plot.detections.by`.
   : The data used for these graphics is stored in the `valid.detections` object.
   : You can replicate these graphics and edit them as needed using the `plotSensors()` function.
 

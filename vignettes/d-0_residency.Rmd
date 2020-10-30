@@ -56,7 +56,8 @@ residency(tz, section.order = NULL, success.arrays = NULL, max.interval = 60, mi
   speed.warning = NULL, speed.error = NULL, jump.warning = 2, jump.error = 3, inactive.warning = NULL,
   inactive.error = NULL, exclude.tags = NULL, override = NULL, report = FALSE, auto.open = TRUE,
   discard.orphans = FALSE, save.detections = FALSE, section.minimum = 2, timestep = c("days", "hours"),
-  replicates = NULL, GUI = c("needed", "always", "never"), plot.detections.by = c("stations", "arrays"))
+  replicates = NULL, GUI = c("needed", "always", "never"), save.tables.locally = FALSE, 
+  plot.detections.by = c("stations", "arrays"))
 ```
 
 Below are listed the new arguments, which do not exist in explore. If you cannot find a description of an argument here, [have a look at the explore() page](b-0_explore.html#general-arguments).

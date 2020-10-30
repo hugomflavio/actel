@@ -11,7 +11,7 @@ printIndividuals(
   spatial,
   status.df = NULL,
   rsp.info,
-  type = c("stations", "arrays"),
+  type = c("auto", "stations", "arrays"),
   extension = "png"
 )
 }

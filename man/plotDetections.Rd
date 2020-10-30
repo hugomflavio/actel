@@ -7,7 +7,7 @@
 plotDetections(
   input,
   tag,
-  type = c("stations", "arrays"),
+  type = c("auto", "stations", "arrays"),
   title,
   xlab,
   ylab,

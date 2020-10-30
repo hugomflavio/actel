@@ -63,7 +63,7 @@ explore(tz, max.interval = 60, minimum.detections = 2, start.time = NULL, stop.t
   speed.error = NULL, jump.warning = 2, jump.error = 3, inactive.warning = NULL, 
   inactive.error = NULL, exclude.tags = NULL, override = NULL, report = FALSE, 
   auto.open = TRUE, discard.orphans = FALSE, discard.first = NULL, discard.orphans = FALSE, 
-  save.detections = FALSE, GUI = c("needed", "always", "never"), 
+  save.detections = FALSE, GUI = c("needed", "always", "never"), save.tables.locally = FALSE,
   plot.detections.by = c("stations", "arrays"))
 ```
 
@@ -262,10 +262,13 @@ actel comes with a graphical interface intended to allow users to deal with very
 
 If you cannot run the GUI on your computer and are faced with a very long table, do not worry! actel has a fall-back system, where the table is saved to a temporary file, which you can open in an external program such as Microsoft Excel of LibreOffice Calc. Have a look at the movements table there, let R know what you want to do, close the file and the analysis will continue automatically. This option requires a bit more work, but at least you can still complete your analysis :)
 
+### save.tables.locally
+
+If actel is unable to access the GUI, long tables will be saved to temporary files (as mentioned above). By default, these tables are saved into R's temporary directory. However, in some cases (particularly in MacOS), this temporary folder can be hard to find. You can set `save.tables.locally = TRUE` to have temporary tables saved in your current work directory, rather than the temporary folder. These temporary tables will be deleted once they are no longer required.
+
 ### plot.detections.by
 
-By default, the detections are plotted using the standard station names. However, when you are working with many stations, this can make the detection plots particularly hard to disentangle. As such, you can set `plot.detections.by = 'arrays'` to use the study area's arrays as the y axis.
-
+By default, actel decides wether to plot the detections by station or by array, depending on the number of stations and arrays present in the study area. However, you can force a specific Y axis by setting `plot.detections.by` to either 'stations' or 'arrays'. Note that this will also affect the sensor data plots, as they are coloured consitently with the detection plots.
 
 ### All done!
 

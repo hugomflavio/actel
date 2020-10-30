@@ -24,7 +24,7 @@ checkArguments(
   exclude.tags,
   override,
   print.releases,
-  plot.detections.by = c("stations", "arrays"),
+  plot.detections.by = c("auto", "stations", "arrays"),
   if.last.skip.section = NULL,
   replicates = NULL,
   section.minimum = NULL,
@@ -111,7 +111,8 @@ define which movement events are valid and invalid.}
 study area diagrams?}
 
 \item{plot.detections.by}{The type of y axis desired for the individual
-detection plots. One of "stations" (default) or "arrays".}
+detection plots. While the argument defaults to "auto", it can be hard-set
+to one of "stations" or "arrays".}
 
 \item{if.last.skip.section}{Logical: Should a tag detected at the last array
 of a given section be considered to have disappeared in the next section?}
