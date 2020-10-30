@@ -1,15 +1,15 @@
-citHeader("To cite actel in publications please use:")
+citHeader("To cite actel in publications, please use:")
 
 citEntry(
   entry    = "Article",
   title    = "{actel}: Standardised analysis of acoustic telemetry data from animals moving through receiver arrays",
   author   = c(person("Hugo", "Fl\\'{a}vio"), person("Henrik", "Baktoft")),
   journal  = "Methods in Ecology and Evolution",
-  year     = "2020",
+  year     = "In press",
 #  volume   = ,
 #  number   = ,
 #  pages    = ,
   url      = "doi.org/10.1111/2041-210X.13503",
   doi      = "10.1111/2041-210X.13503",
-  textVersion = "Flávio, H. and Baktoft, H. (2020) actel: Standardised analysis of acoustic telemetry data from animals moving through receiver arrays. Methods in Ecology and evolution. doi: 10.1111/2041-210X.13503"
+  textVersion = "Flávio, H. and Baktoft, H. (In press) actel: Standardised analysis of acoustic telemetry data from animals moving through receiver arrays. Methods in Ecology and evolution. doi: 10.1111/2041-210X.13503"
 )

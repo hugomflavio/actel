@@ -31,6 +31,7 @@ Enhancements:
   * New `plotLive()` function allows the user to plot the periods during which each array was active. The option 'show.stations' can be used to plot each individual station live time as well.
   * Group warnings if more than four of the same type of warnings shows up for any given tag.
   * The argument `plot.detections.by` now defaults to 'auto', so actel can try to optimize space use in the detection plots.
+  * Included citation information for the recently accepted paper describing actel.
 
 ## actel 1.1.1
 
