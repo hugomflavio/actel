@@ -268,7 +268,7 @@ If actel is unable to access the GUI, long tables will be saved to temporary fil
 
 ### plot.detections.by
 
-By default, actel decides wether to plot the detections by station or by array, depending on the number of stations and arrays present in the study area. However, you can force a specific Y axis by setting `plot.detections.by` to either 'stations' or 'arrays'. Note that this will also affect the sensor data plots, as they are coloured consitently with the detection plots.
+By default, actel decides whether to plot the detections by station or by array, depending on the number of stations and arrays present in the study area. However, you can force a specific Y axis by setting `plot.detections.by` to either 'stations' or 'arrays'. Note that this will also affect the sensor data plots, as they are coloured consistently with the detection plots.
 
 ### All done!
 

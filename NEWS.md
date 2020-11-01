@@ -2,7 +2,7 @@
 
 Find out the main highlights of each update.
 
-## Development
+## 1.2.0
 
 Fixes:
   * Prevent warning during printing of the progression flowchart, related to overlapping array names (that could also lead to an actual error).

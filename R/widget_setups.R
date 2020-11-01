@@ -40,12 +40,12 @@ eventsTabbedWidget <- function(tag, displayed.moves, all.moves, detections, trig
 
   message("M: Please wait while the GUI loads."); flush.console()
 
-  w <- gWidgets2::gwindow(paste0("Valid events for tag  ", tag, " (", sum(!all.moves$Valid), " invalid event(s) omitted)"),
+  moves.window <- gWidgets2::gwindow(paste0("Valid events for tag  ", tag, " (", sum(!all.moves$Valid), " invalid event(s) omitted)"),
                           width = 900, height = 500, visible = FALSE)
 
-  on.exit({if(gWidgets2::isExtant(w)) gWidgets2::dispose(w)}, add = TRUE)
+  on.exit({if(gWidgets2::isExtant(moves.window)) gWidgets2::dispose(moves.window)}, add = TRUE)
 
-  g <- gWidgets2::ggroup(horizontal = FALSE, container = w)
+  g <- gWidgets2::ggroup(horizontal = FALSE, container = moves.window)
   hdr <- gWidgets2::glayout(container = g)
   hdr[1, 1] <- gWidgets2::glabel("<b>Warning message:</b>", markup = TRUE)
   hdr[1, 2, expand = TRUE] <- ""
@@ -166,15 +166,17 @@ eventsTabbedWidget <- function(tag, displayed.moves, all.moves, detections, trig
         to   <- match(displayed.moves$Last.time[event], as.character(detections$Timestamp))
         sub.det <- detections[from:to, ]
 
+        gWidgets2::visible(moves.window) <- FALSE
         all.moves <<- graphicalInvalidateDetections(detections = sub.det, 
                                                     displayed.moves = displayed.moves, 
                                                     all.moves = all.moves, 
                                                     event = event, 
                                                     tag = tag,
                                                     silent = TRUE)
+
         graphical_valid <<- all.moves$Valid
         restart <<- TRUE
-        gWidgets2::dispose(w)
+        gWidgets2::dispose(moves.window)
       }
     }
     btns[1, 6] <- gWidgets2::gbutton(text = "Expand event", handler = expand_event_function, action = NULL)
@@ -210,7 +212,7 @@ eventsTabbedWidget <- function(tag, displayed.moves, all.moves, detections, trig
 
     confirm_function <- function(h, ...) {
       gWidgets2::dispose(confirm)
-      gWidgets2::dispose(w)
+      gWidgets2::dispose(moves.window)
     }
     confirm_btns[1, 1, expand = TRUE] <- gWidgets2::gbutton(text = "Confirm", handler = confirm_function, action = NULL)
 
@@ -222,12 +224,12 @@ eventsTabbedWidget <- function(tag, displayed.moves, all.moves, detections, trig
   btns[2, 6] <- gWidgets2::gbutton(text = "Submit and close", handler = close_function, action = NULL)
 
   gWidgets2::dispose(placeholder)
-  gWidgets2::visible(w) <- TRUE
+  gWidgets2::visible(moves.window) <- TRUE
 
   if (first.time)
     message("M: Make any necessary edits in the external visualization window and submit the result to continue the analysis.\nNote: You can use Ctrl and Shift to select multiple events, and Ctrl+A to select all events at once."); flush.console()
 
-  while (gWidgets2::isExtant(w)) {}
+  while (gWidgets2::isExtant(moves.window)) {}
 
   if (is.null(graphical_valid)) {
     appendTo(c("Screen", "Warning", "Report"), "External visualization window was closed before result submission. Assuming no changes are to be made.")
@@ -262,12 +264,12 @@ eventsSingleWidget <- function(tag, displayed.moves, all.moves, detections, trig
 
   message("M: Please wait while the GUI loads."); flush.console()
 
-  w <- gWidgets2::gwindow(paste0("Valid events for tag  ", tag, " (", sum(!all.moves$Valid), " invalid event(s) omitted)"),
+  moves.window <- gWidgets2::gwindow(paste0("Valid events for tag  ", tag, " (", sum(!all.moves$Valid), " invalid event(s) omitted)"),
                           width = 900, height = 500, visible = FALSE)
 
-  on.exit({if(gWidgets2::isExtant(w)) gWidgets2::dispose(w)}, add = TRUE)
+  on.exit({if(gWidgets2::isExtant(moves.window)) gWidgets2::dispose(moves.window)}, add = TRUE)
 
-  g <- gWidgets2::ggroup(horizontal = FALSE, container = w)
+  g <- gWidgets2::ggroup(horizontal = FALSE, container = moves.window)
   hdr <- gWidgets2::glayout(container = g)
   hdr[1, 1] <- gWidgets2::glabel("<b>Warning message:</b>", markup = TRUE)
   hdr[1, 2, expand = TRUE] <- ""
@@ -345,15 +347,17 @@ eventsSingleWidget <- function(tag, displayed.moves, all.moves, detections, trig
         to   <- match(displayed.moves$Last.time[event], as.character(detections$Timestamp))
         sub.det <- detections[from:to, ]
  
+        gWidgets2::visible(moves.window) <- FALSE
         all.moves <<- graphicalInvalidateDetections(detections = sub.det, 
                                                     displayed.moves = displayed.moves, 
                                                     all.moves = all.moves, 
                                                     event = event, 
                                                     tag = tag,
                                                     silent = TRUE)
+
         graphical_valid <<- all.moves$Valid
         restart <<- TRUE
-        gWidgets2::dispose(w)
+        gWidgets2::dispose(moves.window)
       }
     }
     btns[1, 5] <- gWidgets2::gbutton(text = "Expand event", handler = expand_event_function)
@@ -388,7 +392,7 @@ eventsSingleWidget <- function(tag, displayed.moves, all.moves, detections, trig
 
     confirm_function <- function(h, ...) {
       gWidgets2::dispose(confirm)
-      gWidgets2::dispose(w)
+      gWidgets2::dispose(moves.window)
     }
     confirm_btns[1, 1, expand = TRUE] <- gWidgets2::gbutton(text = "Confirm", handler = confirm_function, action = NULL)
 
@@ -400,12 +404,12 @@ eventsSingleWidget <- function(tag, displayed.moves, all.moves, detections, trig
   btns[2, 5] <- gWidgets2::gbutton(text = "Submit and close", handler = close_function, action = NULL)
 
   gWidgets2::dispose(placeholder)
-  gWidgets2::visible(w) <- TRUE
+  gWidgets2::visible(moves.window) <- TRUE
 
   if (first.time)
     message("M: Make any necessary edits in the external visualization window and submit the result to continue the analysis.\nNote: You can use Ctrl and Shift to select multiple events, and Ctrl+A to select all events at once."); flush.console()
 
-  while (gWidgets2::isExtant(w)) {}
+  while (gWidgets2::isExtant(moves.window)) {}
 
   if (is.null(graphical_valid)) {
     appendTo(c("Screen", "Warning", "Report"), "External visualization window was closed before result submission. Assuming no changes are to be made.")
