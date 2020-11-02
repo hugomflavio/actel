@@ -50,3 +50,4 @@ Old maintainer(s):
 
 > checking package dependencies ... NOTE
   Package suggested but not available for checking: ‘gWidgets2RGtk2’
+  
