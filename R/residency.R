@@ -1436,13 +1436,22 @@ resRatios <- function(res, timestep = c("days", "hours"), tz) {
     # cat("\n", counter, "\n")
     res.range <- seq(from = round.POSIXt(x$First.time[1] - (num.step / 2), units = timestep),
       to =  round.POSIXt(x$Last.time[nrow(x)] - (num.step / 2), units = timestep), by = num.step)
+
+    # If the period starts in daylight saving time: Standardize so the break points are in "normal" time
+    if (as.POSIXlt(res.range[1])$isdst == 1) {
+      res.range <- res.range + 3600
+      # If this readjustment causes the first time to fall off, add one day before.
+      if (x$First.time[1] < res.range[1])
+        res.range <- c(res.range[1] - (3600 * 24), res.range)
+    }
+
     res.list <- lapply(res.range, function(d) {
       # cat(as.character(d), "\n")
       findSecondsPerSection(res = x, frame = d, the.range = range(res.range), num.step = num.step)
     })
     if (interactive())
       setTxtProgressBar(pb, counter) # nocov
-    resRatiosIndOut(input = res.list, slots = round.POSIXt(res.range, units = timestep), tz = tz)
+    resRatiosIndOut(input = res.list, slots = res.range, tz = tz)
   })
   if (interactive())
     close(pb) # nocov
@@ -1620,20 +1629,24 @@ resPositions <- function(ratios, timestep = c("days", "hours")) {
     first.time <<- c(first.time, x$Timeslot[1])
     last.time <<- c(last.time, x$Timeslot[nrow(x)])
   })
-  # --
+
   res.range <- seq(from = min(first.time), to = max(last.time), by = num.step)
-  attributes(res.range)$tzone <- attributes(ratios[[1]]$Timeslot)$tzone
-  
+  # attributes(res.range)$tzone <- attributes(ratios[[1]]$Timeslot)$tzone # I don't think this line is needed
+
   output <- matrix(ncol = length(ratios) + 1, nrow = length(res.range))
   rownames(output) <- 1:length(res.range)
   colnames(output) <- c("Timeslot", names(ratios))
   output <- as.data.frame(output)
+
   output$Timeslot <- res.range
-  
+
   capture <- lapply(names(ratios), function(i) {
+    # cat(i, "\n"); flush.console()
+
     link <- match.POSIXt(ratios[[i]]$Timeslot, output$Timeslot)
     if (any(is.na(link)))
-      stop("Something went wrong when creating the recipient for the global ratios.")
+      stop("Something went wrong when creating the recipient for the global ratios. Contact the developer.")
+    
     output[link, i] <<- ratios[[i]]$Most.time
   })
 

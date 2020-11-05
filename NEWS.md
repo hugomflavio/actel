@@ -4,6 +4,9 @@ Find out the main highlights of each update.
 
 ## Development
 
+Fixes:
+  * Prevent crash in residency if the overall data period starts in winter time but the data for a given fish starts in summer time.
+
 Enhancements:
   * Verify that deployments do not end before they start.
 
