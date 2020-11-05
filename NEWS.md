@@ -2,6 +2,12 @@
 
 Find out the main highlights of each update.
 
+## Development
+
+Enhancements:
+  * Verify that deployments do not end before they start.
+
+
 ## actel 1.2.0
 
 Fixes:

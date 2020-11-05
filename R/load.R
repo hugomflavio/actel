@@ -702,6 +702,9 @@ loadDeployments <- function(input, tz){
     stopAndReport("Could not recognise the data in the 'Stop' column as POSIX-compatible timestamps. Please double-check the deployments.")
   }
 
+  if (any(link <- input$Start > input$Stop)) {
+    stopAndReport("Some deployment periods end before they have started! Please fix this before continuing.\n       Troublesome rows: ", paste(which(link), collapse = ", "))
+  }
   input$Receiver <- as.character(input$Receiver)
   input$Receiver <- sapply(input$Receiver, function(x) tail(unlist(strsplit(x, "-")), 1))
   input <- input[order(input$Start), ]
