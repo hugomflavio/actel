@@ -226,7 +226,7 @@ dataToList <- function(source){
 #' @export
 #'
 extractSignals <- function(input) {
-  as.numeric(unlist(lapply(input, function(x) tail(unlist(strsplit(as.character(x), "-")), 1))))
+  unlist(lapply(input, function(x) tail(unlist(strsplit(as.character(x), "-")), 1)))
 }
 
 #' Extract Code Spaces from transmitter names
