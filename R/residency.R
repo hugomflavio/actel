@@ -1437,12 +1437,15 @@ resRatios <- function(res, timestep = c("days", "hours"), tz) {
     res.range <- seq(from = round.POSIXt(x$First.time[1] - (num.step / 2), units = timestep),
       to =  round.POSIXt(x$Last.time[nrow(x)] - (num.step / 2), units = timestep), by = num.step)
 
-    # If the period starts in daylight saving time: Standardize so the break points are in "normal" time
-    if (as.POSIXlt(res.range[1])$isdst == 1) {
+    # If a daily period starts in daylight saving time and timestep =? da: Standardize so the break points are in "normal" time
+    if (timestep == "days" && as.POSIXlt(res.range[1])$isdst == 1) {
       res.range <- res.range + 3600
-      # If this readjustment causes the first time to fall off, add one day before.
+      # If readjustment causes the first time to fall off, add one day before.
       if (x$First.time[1] < res.range[1])
         res.range <- c(res.range[1] - (3600 * 24), res.range)
+      # If readjustment causes last day to be empty, remove last day.
+      if (x$Last.time[nrow(x)] < res.range[length(res.range)])
+        res.range <- res.range[-length(res.range)]
     }
 
     res.list <- lapply(res.range, function(d) {
@@ -1631,7 +1634,7 @@ resPositions <- function(ratios, timestep = c("days", "hours")) {
   })
 
   res.range <- seq(from = min(first.time), to = max(last.time), by = num.step)
-  # attributes(res.range)$tzone <- attributes(ratios[[1]]$Timeslot)$tzone # I don't think this line is needed
+  attributes(res.range)$tzone <- attributes(ratios[[1]]$Timeslot)$tzone # I don't think this line is needed # Edit: Yes it is.
 
   output <- matrix(ncol = length(ratios) + 1, nrow = length(res.range))
   rownames(output) <- 1:length(res.range)

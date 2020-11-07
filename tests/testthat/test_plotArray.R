@@ -21,6 +21,8 @@ test_that("plotArray works properly", {
 
 	tryCatch(plotArray(example.results, arrays = c("A1", "A2"), cumulative = TRUE),
 	warning = function(w) stop("plotArray threw an unexpected warning!\n", w))
+
+	expect_is("The real tests are above, this is just to prevent test_that from complaining", "character")
 })
 
 if (is.na(oldtz)) Sys.unsetenv("TZ") else Sys.setenv(TZ = oldtz)

@@ -30,4 +30,6 @@ test_that("plotMoves works properly", {
 
 	tryCatch(plotMoves(example.results, tags = "R64K-4451", array.alias = c("A1", "test")),
 	warning = function(w) stop("plotMoves threw an unexpected warning!\n", w))
+
+	expect_is("The real tests are above, this is just to prevent test_that from complaining", "character")
 })

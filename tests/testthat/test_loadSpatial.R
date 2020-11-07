@@ -55,8 +55,10 @@ test_that("loadSpatial responds correctly if data is missing or badly formatted"
 		"Long array names detected. To improve graphic rendering, consider keeping array names under six characters.", fixed = TRUE)
 
 	write.csv(spatial, "spatial.csv", row.names = FALSE)
-	expect_message(output <- loadSpatial(),
-		"M: Replacing spaces with '_' in array names to prevent function failure.", fixed = TRUE)
+	expect_warning(
+		expect_message(output <- loadSpatial(),
+			"M: Replacing spaces with '_' in array names to prevent function failure.", fixed = TRUE),
+		"Long array names detected. To improve graphic rendering, consider keeping array names under six characters.", fixed = TRUE)
 	expect_equal(output$Array[1], "River_0_a")
 
 	write.csv(example.spatial[, -match("Type", colnames(example.spatial))], "spatial.csv", row.names = FALSE)

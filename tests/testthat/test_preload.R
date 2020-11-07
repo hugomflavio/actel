@@ -29,8 +29,10 @@ Additionally, data must to be compiled during the current R session.", fixed = T
 Additionally, data must to be compiled during the current R session.", fixed = TRUE)
 })
 
-d <- preload(biometrics = bio, deployments = deployments, spatial = spatial, detections = detections,
-	dot = dot, tz = "Europe/Copenhagen")
+expect_warning(d <- preload(biometrics = bio, deployments = deployments, spatial = spatial, detections = detections,
+														dot = dot, tz = "Europe/Copenhagen"),
+	"No detections were found for receiver(s) 132907", fixed = TRUE)
+
 test_that("checkArguments complains if preload is used together with tz", {
 	expect_warning(explore(datapack = d, tz = "Europe/Copenhagen"),
 		"Argument 'tz' was set but a datapack was provided. Disregarding set arguments.", fixed = TRUE)
@@ -44,9 +46,9 @@ test_that("checkArguments stops if wrong override is provided with preload", {
 })
 
 test_that("explore with preload yields the same results as with traditional loading", {
-	results <- explore(datapack = d)
+	results <- suppressWarnings(explore(datapack = d))
 
-	results2 <- explore(tz = "Europe/Copenhagen")
+	results2 <- suppressWarnings(explore(tz = "Europe/Copenhagen"))
 
 	for (i in 1:length(results$valid.movements)) {
 		expect_equal(results$movements[[i]], results2$movements[[i]])
@@ -79,11 +81,12 @@ test_that("migration and residency don't start if datapack is incompatible", {
 # n
 
 test_that("migration and residency with preload yield the same results as with traditional loading", {
-	d2 <- preload(biometrics = bio, deployments = deployments, spatial = spatial, detections = detections,
-		tz = "Europe/Copenhagen")
+	expect_warning(d2 <- preload(biometrics = bio, deployments = deployments, spatial = spatial, detections = detections,
+															 tz = "Europe/Copenhagen"),
+		"No detections were found for receiver(s) 132907", fixed = TRUE)
 
-	results <- migration(datapack = d2)
-	results2 <- migration(tz = "Europe/Copenhagen")
+	results <- suppressWarnings(migration(datapack = d2))
+	results2 <- suppressWarnings(migration(tz = "Europe/Copenhagen"))
 
 	expect_equal(extractSignals(names(results$valid.movements)), extractSignals(names(results2$valid.movements)))
 	expect_equal(results$status.df[, -1], results2$status.df[, -1])
@@ -93,8 +96,8 @@ test_that("migration and residency with preload yield the same results as with t
 	}
 
 
-	results <- residency(datapack = d2)
-	results2 <- residency(tz = "Europe/Copenhagen")
+	results <- suppressWarnings(residency(datapack = d2))
+	results2 <- suppressWarnings(residency(tz = "Europe/Copenhagen"))
 
 	for (i in 1:length(results$valid.movements)) {
 		expect_equal(results$movements[[i]], results2$movements[[i]])
@@ -127,36 +130,38 @@ test_that("tz and exclude.tags stops are working", {
 })
 
 test_that("dot stop is working", {
-	expect_error(preload(biometrics = bio, deployments = deployments, spatial = spatial,
-		detections = detections, tz = "Europe/Copenhagen", dot = 1),
+	expect_error(
+		expect_warning(preload(biometrics = bio, deployments = deployments, spatial = spatial,
+																				detections = detections, tz = "Europe/Copenhagen", dot = 1),
+		"No detections were found for receiver(s) 132907", fixed = TRUE),
 	"'dot' was set but could not recognised as a string. Please prepare a dot string and include it in the dot argument.
 You can use readDot to check the quality of your dot string.", fixed = TRUE)
 })
 
 test_that("start.time and stop.time are working fine in preload", {
-	expect_message(preload(biometrics = bio, deployments = deployments, spatial = spatial,
-		detections = detections, tz = "Europe/Copenhagen", start.time = "2018-05-01 00:00"),
+	expect_message(suppressWarnings(preload(biometrics = bio, deployments = deployments, spatial = spatial,
+																					detections = detections, tz = "Europe/Copenhagen", start.time = "2018-05-01 00:00")),
 	"M: Discarding detection data previous to 2018-05-01 00:00 per user command (9866 detections discarded).", fixed = TRUE)
 
-	expect_message(preload(biometrics = bio, deployments = deployments, spatial = spatial,
-		detections = detections, tz = "Europe/Copenhagen", stop.time = "2018-05-08 00:00"),
+	expect_message(suppressWarnings(preload(biometrics = bio, deployments = deployments, spatial = spatial,
+																					detections = detections, tz = "Europe/Copenhagen", stop.time = "2018-05-08 00:00")),
 		"M: Discarding detection data posterior to 2018-05-08 00:00 per user command (544 detections discarded).", fixed = TRUE)
 
-	expect_message(preload(biometrics = bio, deployments = deployments, spatial = spatial,
+	expect_message(suppressWarnings(preload(biometrics = bio, deployments = deployments, spatial = spatial,
 		detections = detections, tz = "Europe/Copenhagen", start.time = "2018-05-01 00:00",
-		stop.time = "2018-05-08 00:00"),
+		stop.time = "2018-05-08 00:00")),
 		"M: Data time range: 2018-05-01 00:04:30 to 2018-05-07 23:59:47 (Europe/Copenhagen).", fixed = TRUE)
 })
 
 write.csv(example.distances, "distances.csv")
 
 test_that("distances are correctly handled with preload", {
-	d2 <- preload(biometrics = bio, deployments = deployments, spatial = spatial, detections = detections,
-		dot = dot, distances = example.distances, tz = "Europe/Copenhagen")
+	d2 <- supressWarnings(preload(biometrics = bio, deployments = deployments, spatial = spatial, detections = detections,
+		dot = dot, distances = example.distances, tz = "Europe/Copenhagen"))
 
-	results <- explore(datapack = d2)
+	results <- suppressWarnings(explore(datapack = d2))
 
-	results2 <- explore(tz = "Europe/Copenhagen")
+	results2 <- suppressWarnings(explore(tz = "Europe/Copenhagen"))
 
 	for (i in 1:length(results$valid.movements)) {
 		expect_equal(results$movements[[i]], results2$movements[[i]])
@@ -176,20 +181,20 @@ test_that("distances are correctly handled with preload", {
 
 test_that("preload stops if mandatory columns are missing or have NAs", {
 	x <- detections[, -1]
-	expect_error(preload(biometrics = bio, deployments = deployments, spatial = spatial, detections = x,
-			dot = dot, distances = example.distances, tz = "Europe/Copenhagen"),
+	expect_error(suppressWarnings(preload(biometrics = bio, deployments = deployments, spatial = spatial, detections = x,
+			dot = dot, distances = example.distances, tz = "Europe/Copenhagen")),
 	"The following mandatory columns are missing in the detections: Timestamp", fixed = TRUE)
 
 	x <- detections[, -match("Signal", colnames(detections))]
-	expect_error(preload(biometrics = bio, deployments = deployments, spatial = spatial, detections = x,
-			dot = dot, distances = example.distances, tz = "Europe/Copenhagen"),
+	expect_error(suppressWarnings(preload(biometrics = bio, deployments = deployments, spatial = spatial, detections = x,
+			dot = dot, distances = example.distances, tz = "Europe/Copenhagen")),
 	"The following mandatory columns are missing in the detections: Signal
 The functions extractSignals and extractCodeSpaces can be used to break transmitter codes apart.", fixed = TRUE)
 
 	x <- detections
 	x[1, 1] <- NA
-	expect_error(preload(biometrics = bio, deployments = deployments, spatial = spatial, detections = x,
-			dot = dot, distances = example.distances, tz = "Europe/Copenhagen"),
+	expect_error(suppressWarnings(preload(biometrics = bio, deployments = deployments, spatial = spatial, detections = x,
+			dot = dot, distances = example.distances, tz = "Europe/Copenhagen")),
 	"There is missing data in the following mandatory columns of the detections: Timestamp", fixed = TRUE)
 })
 
@@ -211,8 +216,8 @@ test_that("Data conversion warnings and errors kick in", {
 
 	d <- detections
 	d$Receiver <- "a"
-	expect_error(preload(biometrics = bio, deployments = deployments, spatial = spatial, detections = d,
-			dot = dot, distances = example.distances, tz = "Europe/Copenhagen"),
+	expect_error(suppressWarnings(preload(biometrics = bio, deployments = deployments, spatial = spatial, detections = d,
+			dot = dot, distances = example.distances, tz = "Europe/Copenhagen")),
 	"Extracting the serial numbers failed. Aborting.", fixed = TRUE)
 
 	d <- detections
@@ -223,8 +228,8 @@ test_that("Data conversion warnings and errors kick in", {
 
 	d <- detections
 	d$Sensor.Value <- "b"
-	expect_error(preload(biometrics = bio, deployments = deployments, spatial = spatial, detections = d,
-			dot = dot, distances = example.distances, tz = "Europe/Copenhagen"),
+	expect_error(suppressWarnings(preload(biometrics = bio, deployments = deployments, spatial = spatial, detections = d,
+			dot = dot, distances = example.distances, tz = "Europe/Copenhagen")),
 	"Attempting to convert the 'Sensor.Value' to numeric failed. Aborting.", fixed = TRUE)
 
 	d <- detections
@@ -235,8 +240,8 @@ test_that("Data conversion warnings and errors kick in", {
 
 	d <- detections
 	d$Timestamp <- "b"
-	expect_error(preload(biometrics = bio, deployments = deployments, spatial = spatial, detections = d,
-			dot = dot, distances = example.distances, tz = "Europe/Copenhagen"),
+	expect_error(suppressWarnings(preload(biometrics = bio, deployments = deployments, spatial = spatial, detections = d,
+			dot = dot, distances = example.distances, tz = "Europe/Copenhagen")),
 	"Converting the timestamps failed. Aborting.", fixed = TRUE)
 
 	d <- detections

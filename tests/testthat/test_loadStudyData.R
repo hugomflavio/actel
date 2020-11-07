@@ -12,7 +12,6 @@ test_that("loadStudyData contains all the required elements", {
 	expect_warning(output <- loadStudyData(tz = "Europe/Copenhagen", override = NULL, start.time = NULL, stop.time = NULL,
 	  exclude.tags = NULL, disregard.parallels = TRUE),
 		"No detections were found for receiver(s) 132907.", fixed = TRUE)
-	file.remove("detections/actel.detections.RData")
 	expect_equal(names(output), c('bio', 'deployments', 'spatial', 'dot', 'arrays', 'dotmat', 'dist.mat', 'detections.list', 'paths'))
 })
 
@@ -29,7 +28,6 @@ test_that("loadStudyData recognizes both 'study.dot' and 'study.txt' files.", {
 	expect_message(suppressWarnings(loadStudyData(tz = "Europe/Copenhagen", override = NULL, start.time = NULL, stop.time = NULL,
 	  exclude.tags = NULL, disregard.parallels = TRUE)),
 		"M: A 'spatial.dot' file was detected, activating multi-branch analysis.", fixed = TRUE)
-	file.remove("detections/actel.detections.RData")
 	file.remove("spatial.dot")
 	
 	sink("spatial.txt")
@@ -38,7 +36,6 @@ test_that("loadStudyData recognizes both 'study.dot' and 'study.txt' files.", {
 	expect_message(suppressWarnings(loadStudyData(tz = "Europe/Copenhagen", override = NULL, start.time = NULL, stop.time = NULL,
 	  exclude.tags = NULL, disregard.parallels = TRUE)),
 		"M: A 'spatial.txt' file was detected, activating multi-branch analysis.", fixed = TRUE)
-	file.remove("detections/actel.detections.RData")
 	file.remove("spatial.txt")
 })
 

@@ -38,7 +38,6 @@ test_that("migration stops when any argument does not make sense", {
 
 	expect_error(suppressWarnings(migration(tz = 'Europe/Copenhagen', report = TRUE, GUI = "never", replicates = list(test = "a"))),
 		"Some of the array names listed in the 'replicates' argument do not match the study's arrays.", fixed = TRUE)
-	file.remove("detections/actel.detections.RData")
 
 	expect_error(migration(tz = 'Europe/Copenhagen', section.order = c("A", "A", "Fjord", "Sea"), GUI = "never"),
 		"Some section names are duplicated in the 'section.order' argument. Please include each section only once.", fixed = TRUE)
@@ -124,8 +123,6 @@ test_that("advEfficiency can calculate efficiency from release and group overvie
 	colnames(check) <- c("50%","90%")
 	expect_equal(output, check)
 })
-
-rm(output)
 
 test_that("migration is able to run speed and inactiveness checks.", {
 	skip_on_cran()

@@ -55,6 +55,7 @@ test_that("plotTimes can handle lots of datasets", {
 		f = times[[1]], g = times[[1]], h = times[[1]], i = times[[1]], j = times[[1]])
 
 	tryCatch(plotTimes(times = xtimes), warning = function(w) stop("plotTimes threw an unexpected warning"))	
+	expect_is("The real test is above, this is just to prevent test_that from complaining", "character")
 })
 
 test_that("plotTimes returns no errors on actual data, plus saves files", {

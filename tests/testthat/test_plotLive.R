@@ -8,27 +8,30 @@ test_that("plotLive failsafes kick in", {
 
 test_that("plotLive works with actel results", {
 	tryCatch(plotLive(example.results), warning = function(w) stop("a warning was issued where it should not had been!"))
+	expect_is("The real test is above, this is just to prevent test_that from complaining", "character")
 })
 
 test_that("plotLive works with preload datasets", {
-	x <- preload(biometrics = example.biometrics, spatial = example.spatial, deployments = example.deployments, 
-							 detections = example.detections, tz = "Europe/Copenhagen")
+	suppressWarnings(x <- preload(biometrics = example.biometrics, spatial = example.spatial, deployments = example.deployments, 
+							 									detections = example.detections, tz = "Europe/Copenhagen"))
 	tryCatch(plotLive(x), warning = function(w) stop("a warning was issued where it should not had been!"))
 })
 
 test_that("plotLive works with unknown receivers", {
 	xspatial <- example.spatial[-3, ]
-	x <- preload(biometrics = example.biometrics, spatial = xspatial, deployments = example.deployments, 
-							 detections = example.detections, tz = "Europe/Copenhagen")
+	suppressWarnings(x <- preload(biometrics = example.biometrics, spatial = xspatial, deployments = example.deployments, 
+							 									detections = example.detections, tz = "Europe/Copenhagen"))
 	expect_warning(plotLive(x), "This dataset contains unknown stations. These stations will not be plotted.", fixed = TRUE)
 })
 
 test_that("show.stations argument works smoothly", {
 	tryCatch(plotLive(example.results, show.stations = TRUE), warning = function(w) stop("a warning was issued where it should not had been!"))
+	expect_is("The real test is above, this is just to prevent test_that from complaining", "character")
 })
 
 test_that("arrays argument works smoothly", {
 	tryCatch(plotLive(example.results, arrays = "A3", show.stations = TRUE), warning = function(w) stop("a warning was issued where it should not had been!"))
+	expect_is("The real test is above, this is just to prevent test_that from complaining", "character")
 })
 
 test_that("col argument works smoothly", {

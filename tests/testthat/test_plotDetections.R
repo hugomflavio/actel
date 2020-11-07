@@ -14,7 +14,7 @@ test_that("plotDetections is working", {
 })
 
 test_that("array aliases are running fine", {
-	p <- plotDetections(example.results, tag = "R64K-4451", array.alias = c(River0 = "test"))
+	p <- plotDetections(example.results, tag = "R64K-4451", array.alias = c(A0 = "test"))
 	expect_that(p, is_a("ggplot"))
 	expect_warning(plotDetections(example.results, tag = "R64K-4451", array.alias = c(wrong_name = "test")),
 		"Could not find array wrong_name in the study's arrays.", fixed = TRUE)

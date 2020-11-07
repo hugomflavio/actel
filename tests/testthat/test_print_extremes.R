@@ -128,6 +128,7 @@ test_that("printSurvivalGraphic can handle sections with 0 survivors", {
 	x <- example.results$section.overview
 	x[1, 5:6] <- 0
 	tryCatch(printSurvivalGraphic(x), warning = function(w) stop("Warning in printSurvivalGraphic: w"))
+	expect_is("The real test is above, this is just to prevent test_that from complaining", "character")
 })
 
 
