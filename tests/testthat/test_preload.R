@@ -77,8 +77,6 @@ test_that("migration and residency don't start if datapack is incompatible", {
 	expect_error(results <- residency(datapack = d),
 		"To run residency(), please assign the arrays to their sections using a 'Section' column in the spatial input.", fixed = TRUE)
 })
-# n
-# n
 
 test_that("migration and residency with preload yield the same results as with traditional loading", {
 	expect_warning(d2 <- preload(biometrics = bio, deployments = deployments, spatial = spatial, detections = detections,
@@ -156,7 +154,7 @@ test_that("start.time and stop.time are working fine in preload", {
 write.csv(example.distances, "distances.csv")
 
 test_that("distances are correctly handled with preload", {
-	d2 <- supressWarnings(preload(biometrics = bio, deployments = deployments, spatial = spatial, detections = detections,
+	d2 <- suppressWarnings(preload(biometrics = bio, deployments = deployments, spatial = spatial, detections = detections,
 		dot = dot, distances = example.distances, tz = "Europe/Copenhagen"))
 
 	results <- suppressWarnings(explore(datapack = d2))
@@ -199,12 +197,15 @@ The functions extractSignals and extractCodeSpaces can be used to break transmit
 })
 
 test_that("Data conversion warnings and errors kick in", {
-	expect_warning(preload(biometrics = bio, deployments = deployments, spatial = spatial, detections = detections,
+	d <- detections
+	d$Signal <- as.character(d$Signal)
+	expect_warning(preload(biometrics = bio, deployments = deployments, spatial = spatial, detections = d,
 			dot = dot, distances = example.distances, tz = "Europe/Copenhagen"),
 	"The 'Signal' column in the detections is not of type integer. Attempting to convert.", fixed = TRUE)
 
-
-	expect_warning(preload(biometrics = bio, deployments = deployments, spatial = spatial, detections = detections,
+	d <- detections
+	d$Receiver <- as.character(d$Receiver)
+	expect_warning(preload(biometrics = bio, deployments = deployments, spatial = spatial, detections = d,
 			dot = dot, distances = example.distances, tz = "Europe/Copenhagen"),
 	"The 'Receiver' column in the detections is not of type integer. Attempting to convert.", fixed = TRUE)
 

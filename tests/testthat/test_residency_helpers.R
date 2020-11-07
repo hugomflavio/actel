@@ -147,10 +147,10 @@ test_that("resRatios works as expected", {
 test_that("resPositions works as expected.", {
   res.positions.day <<- resPositions(ratios = time.ratios.day, timestep = "days")
 
-  expect_equal(as.character(res.positions.day$Timeslot), c('2018-04-18', '2018-04-19', '2018-04-20',
-  	'2018-04-21', '2018-04-22', '2018-04-23', '2018-04-24', '2018-04-25', '2018-04-26',
-  	'2018-04-27', '2018-04-28', '2018-04-29', '2018-04-30', '2018-05-01', '2018-05-02',
-  	'2018-05-03', '2018-05-04', '2018-05-05', '2018-05-06'))
+  expect_equal(as.character(res.positions.day$Timeslot), c('2018-04-18 01:00:00', '2018-04-19 01:00:00', '2018-04-20 01:00:00',
+  	'2018-04-21 01:00:00', '2018-04-22 01:00:00', '2018-04-23 01:00:00', '2018-04-24 01:00:00', '2018-04-25 01:00:00', '2018-04-26 01:00:00',
+  	'2018-04-27 01:00:00', '2018-04-28 01:00:00', '2018-04-29 01:00:00', '2018-04-30 01:00:00', '2018-05-01 01:00:00', '2018-05-02 01:00:00',
+  	'2018-05-03 01:00:00', '2018-05-04 01:00:00', '2018-05-05 01:00:00', '2018-05-06 01:00:00'))
   expect_equal(as.vector(res.positions.day[, 2]), time.ratios.day[[1]]$Most.time)
   expect_equal(as.vector(res.positions.day[, 3]), c(NA, NA, time.ratios.day[[2]]$Most.time, NA, NA, NA, NA))
 
