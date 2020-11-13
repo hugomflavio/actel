@@ -97,3 +97,10 @@ After installing, you should read the package vignettes (i.e. the manual), which
 
 
 <sup>* interactive code (i.e. code that expects user input) cannot be tested automatically using codecov and, as such, was excluded from the codecov scope.</sup>
+
+ <br/> 
+
+**Disclaimer:** Any bugs found in the dream-realm will not be fixed due to lack of reproducibility!
+
+<sup>Wondering why this is here? see the replies to [this tweet :)](https://twitter.com/bonnie_ahr/status/1327234755608326146) </sup>
+
