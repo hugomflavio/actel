@@ -5,6 +5,10 @@ Sys.setenv(TZ = 'UTC')
 tests.home <- getwd()
 setwd(tempdir())
 
+if (dir.exists("detections")) {
+	warning("there was a detections folder already?")
+	unlink("detections", recursive = TRUE)
+}
 dir.create("detections")
 aux <- split(example.detections, example.detections$Receiver)
 for (i in names(aux)[1:3]) {

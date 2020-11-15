@@ -8,6 +8,7 @@ checkInactiveness(
   movements,
   tag,
   detections,
+  n,
   inactive.warning,
   inactive.error,
   dist.mat,
@@ -21,6 +22,8 @@ checkInactiveness(
 \item{tag}{The tag being analysed.}
 
 \item{detections}{The detections data.frame for a specific tag.}
+
+\item{n}{A string indicating the overall progress.}
 
 \item{inactive.warning}{If a tag spends a number of days equal or greater
 than \code{inactive.error} in a given array at the tail of the respective

@@ -12,7 +12,8 @@ checkImpassables(
   detections,
   dotmat,
   GUI,
-  save.tables.locally
+  save.tables.locally,
+  n
 )
 }
 \arguments{
@@ -35,6 +36,8 @@ when the possibility to invalidate events emerges. If "never", a graphical
 interface is never invoked. In this case, if the table to be displayed does
 not fit in R's console, a temporary file will be saved and the user will be
 prompted to open and examine that file. Defaults to "needed".}
+
+\item{n}{A string indicating the overall progress.}
 }
 \value{
 A list of movements with updated 'Valid' columns

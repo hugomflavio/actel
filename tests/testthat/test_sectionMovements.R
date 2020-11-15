@@ -68,14 +68,14 @@ test_that("checkLinearity throws warning only if movements are not ordered", {
   xspatial$array.order <- spatial$array.order[3:1]
   aux <- sectionMovements(movements = moves[[1]], spatial = xspatial, valid.dist = attributes(dist.mat)$valid)
 
-	expect_warning(checkLinearity(secmoves = aux, tag = "test", spatial = xspatial, arrays = arrays, GUI = "never"),
-		"Inter-section backwards movements were detected for tag test and the last events are not ordered!", fixed = TRUE)
+	expect_warning(checkLinearity(secmoves = aux, tag = "test", spatial = xspatial, arrays = arrays, GUI = "never", n = "(1/1)"),
+		"Inter-section backwards movements were detected for tag test (1/1) and the last events are not ordered!", fixed = TRUE)
 
 	xmoves <- moves[[1]]
 	xmoves$Array[4] <- "A9"
 	aux <- sectionMovements(movements = xmoves, spatial = spatial, valid.dist = FALSE)
-	expect_warning(output <- checkLinearity(secmoves = aux, tag = "test", spatial = spatial, arrays = arrays, GUI = "never"),
-		"Inter-section backwards movements were detected for tag test.", fixed = TRUE)
+	expect_warning(output <- checkLinearity(secmoves = aux, tag = "test", spatial = spatial, arrays = arrays, GUI = "never", n = "(1/1)"),
+		"Inter-section backwards movements were detected for tag test (1/1).", fixed = TRUE)
 	expect_equal(output$Valid, c(TRUE, TRUE, TRUE, TRUE, TRUE))
 })
 # n
@@ -100,8 +100,8 @@ test_that("checkSMovesN throws warning only if movements are not ordered", {
   tryCatch(checkSMovesN(secmoves = aux, tag = "test", section.minimum = 1, GUI = "never"),
     warning = function(w) stop("A warning was issued where it should not have been."))
 
-	expect_warning(checkSMovesN(secmoves = aux, tag = "test", section.minimum = 15, GUI = "never"),
-		"Section movements with less than 15 detections are present for tag test.", fixed = TRUE)
+	expect_warning(checkSMovesN(secmoves = aux, tag = "test", section.minimum = 15, GUI = "never", n = "(1/1)"),
+		"Section movements with less than 15 detections are present for tag test (1/1).", fixed = TRUE)
 })
 # n
 

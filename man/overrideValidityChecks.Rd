@@ -4,7 +4,7 @@
 \alias{overrideValidityChecks}
 \title{Skips all validity checks for a tag and allows the user to freely invalidate events}
 \usage{
-overrideValidityChecks(moves, detections, tag, GUI, save.tables.locally)
+overrideValidityChecks(moves, detections, tag, GUI, save.tables.locally, n)
 }
 \arguments{
 \item{moves}{The complete movements table for a specific tag.}
@@ -24,6 +24,8 @@ prompted to open and examine that file. Defaults to "needed".}
 \item{save.tables.locally}{Logical: If a table must be temporarily stored into a file
 for user inspection, should it be saved in the current working directory, or
 in R's temporary folder?}
+
+\item{n}{A string indicating the overall progress.}
 }
 \value{
 A data frame containing the movements for the target tag

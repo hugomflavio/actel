@@ -33,6 +33,8 @@ prompted to open and examine that file. Defaults to "needed".}
 
 \item{movements}{The movements table for a specific tag.}
 
+\item{n}{A string indicating the overall progress.}
+
 \item{release}{The release location of the animal.}
 
 \item{secmoves}{the section movements list.}

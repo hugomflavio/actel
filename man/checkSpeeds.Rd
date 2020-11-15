@@ -12,7 +12,8 @@ checkSpeeds(
   speed.warning,
   speed.error,
   GUI,
-  save.tables.locally
+  save.tables.locally,
+  n
 )
 }
 \arguments{
@@ -43,6 +44,8 @@ prompted to open and examine that file. Defaults to "needed".}
 \item{save.tables.locally}{Logical: If a table must be temporarily stored into a file
 for user inspection, should it be saved in the current working directory, or
 in R's temporary folder?}
+
+\item{n}{A string indicating the overall progress.}
 }
 \value{
 A list of movements with updated 'Valid' columns

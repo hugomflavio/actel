@@ -334,35 +334,37 @@ explore <- function(
 
   movements <- lapply(seq_along(movements), function(i) {
     tag <- names(movements)[i]
+    counter <- paste0("(", i, "/", length(movements), ")")
+
     appendTo("debug", paste0("debug: Checking movement quality for tag ", tag,"."))
 
     if (is.na(match(extractSignals(tag), override))) {
-      output <- checkMinimumN(movements = movements[[tag]], tag = tag, minimum.detections = minimum.detections)
+      output <- checkMinimumN(movements = movements[[tag]], tag = tag, minimum.detections = minimum.detections, n = counter)
 
-      output <- checkImpassables(movements = output, tag = tag, bio = bio, detections = detections.list[[tag]], 
+      output <- checkImpassables(movements = output, tag = tag, bio = bio, detections = detections.list[[tag]], n = counter, 
                                  spatial = spatial, dotmat = dotmat, GUI = GUI, save.tables.locally = save.tables.locally)
 
       output <- checkJumpDistance(movements = output, bio = bio, tag = tag, dotmat = dotmat, paths = paths, arrays = arrays,
-                                  spatial = spatial, jump.warning = jump.warning, jump.error = jump.error, GUI = GUI,
+                                  spatial = spatial, jump.warning = jump.warning, jump.error = jump.error, GUI = GUI, n = counter,
                                   detections = detections.list[[tag]], save.tables.locally = save.tables.locally)
 
       if (do.checkSpeeds) {
         temp.valid.movements <- simplifyMovements(movements = output, tag = tag, bio = bio, discard.first = discard.first,
                                                   speed.method = speed.method, dist.mat = dist.mat)
-        output <- checkSpeeds(movements = output, tag = tag, detections = detections.list[[tag]], 
+        output <- checkSpeeds(movements = output, tag = tag, detections = detections.list[[tag]], n = counter, 
                               valid.movements = temp.valid.movements, speed.warning = speed.warning, 
                               speed.error = speed.error, GUI = GUI, save.tables.locally = save.tables.locally)
         rm(temp.valid.movements)
       }
 
       if (do.checkInactiveness) {
-        output <- checkInactiveness(movements = output, tag = tag, detections = detections.list[[tag]],
+        output <- checkInactiveness(movements = output, tag = tag, detections = detections.list[[tag]], n = counter,
                                     inactive.warning = inactive.warning, inactive.error = inactive.error,
                                     dist.mat = dist.mat, GUI = GUI, save.tables.locally = save.tables.locally)
       }  
     } else { # nocov start
       output <- overrideValidityChecks(moves = movements[[tag]], tag = tag, detections = detections.list[[tag]], 
-                                       GUI = GUI, save.tables.locally = save.tables.locally)
+                                       GUI = GUI, save.tables.locally = save.tables.locally, n = counter)
     } # nocov end
     return(output)
   })

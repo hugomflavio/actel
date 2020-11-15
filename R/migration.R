@@ -382,37 +382,39 @@ migration <- function(
 
   movements <- lapply(seq_along(movements), function(i) {
     tag <- names(movements)[i]
+    counter <- paste0("(", i, "/", length(movements), ")")
+
     appendTo("debug", paste0("debug: Checking movement quality for tag ", tag,"."))
 
     if (is.na(match(extractSignals(tag), override))) {
-      output <- checkMinimumN(movements = movements[[tag]], tag = tag, minimum.detections = minimum.detections)
+      output <- checkMinimumN(movements = movements[[tag]], tag = tag, minimum.detections = minimum.detections, n = counter)
 
       output <- checkUpstream(movements = output, tag = tag, detections = detections.list[[tag]], spatial = spatial,
-                              bio = bio, arrays = arrays, GUI = GUI, save.tables.locally = save.tables.locally)
+                              bio = bio, arrays = arrays, GUI = GUI, save.tables.locally = save.tables.locally, n = counter)
 
-      output <- checkImpassables(movements = output, tag = tag, bio = bio, detections = detections.list[[tag]], 
+      output <- checkImpassables(movements = output, tag = tag, bio = bio, detections = detections.list[[tag]], n = counter, 
                                  spatial = spatial, dotmat = dotmat, GUI = GUI, save.tables.locally = save.tables.locally)
 
       output <- checkJumpDistance(movements = output, bio = bio, tag = tag, dotmat = dotmat, paths = paths, arrays = arrays,
                                   spatial = spatial, jump.warning = jump.warning, jump.error = jump.error, GUI = GUI,
-                                  detections = detections.list[[tag]], save.tables.locally = save.tables.locally)
+                                  detections = detections.list[[tag]], save.tables.locally = save.tables.locally, n = counter)
 
       if (do.checkSpeeds) {
         temp.valid.movements <- simplifyMovements(movements = output, tag = tag, bio = bio, discard.first = discard.first,
                                                   speed.method = speed.method, dist.mat = dist.mat)
         output <- checkSpeeds(movements = output, tag = tag, valid.movements = temp.valid.movements, 
-                              detections = detections.list[[tag]], speed.warning = speed.warning, 
+                              detections = detections.list[[tag]], speed.warning = speed.warning, n = counter, 
                               speed.error = speed.error, GUI = GUI, save.tables.locally = save.tables.locally)
         rm(temp.valid.movements)
       }
 
       if (do.checkInactiveness) {
-        output <- checkInactiveness(movements = output, tag = tag, detections = detections.list[[tag]],
+        output <- checkInactiveness(movements = output, tag = tag, detections = detections.list[[tag]], n = counter,
                                     inactive.warning = inactive.warning, inactive.error = inactive.error,
                                     dist.mat = dist.mat, GUI = GUI, save.tables.locally = save.tables.locally)
       }
     } else {
-      output <- overrideValidityChecks(moves = movements[[tag]], detections = detections.list[[tag]], # nocov
+      output <- overrideValidityChecks(moves = movements[[tag]], detections = detections.list[[tag]], n = counter, # nocov
                                        tag = tag, GUI = GUI, save.tables.locally = save.tables.locally) # nocov
     }
     return(output)
@@ -426,11 +428,13 @@ migration <- function(
 
   section.movements <- lapply(seq_along(movements), function(i) {
     tag <- names(movements)[i]
+    counter <- paste0("(", i, "/", length(movements), ")")
     appendTo("debug", paste0("debug: Compiling section movements for tag ", tag,"."))
+
     aux <- sectionMovements(movements = movements[[i]], spatial = spatial, valid.dist = attributes(dist.mat)$valid)
     if (!is.null(aux)) {
       output <- checkLinearity(secmoves = aux, tag = tag, spatial = spatial, arrays = arrays, 
-                               GUI = GUI, save.tables.locally = save.tables.locally)
+                               GUI = GUI, save.tables.locally = save.tables.locally, n = counter)
       return(output)
     } else {
       return(NULL)

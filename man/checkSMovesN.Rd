@@ -4,7 +4,7 @@
 \alias{checkSMovesN}
 \title{Verify number of detections in section movements}
 \usage{
-checkSMovesN(secmoves, tag, section.minimum, GUI, save.tables.locally)
+checkSMovesN(secmoves, tag, section.minimum, GUI, save.tables.locally, n)
 }
 \arguments{
 \item{secmoves}{the section movements list.}
@@ -25,6 +25,8 @@ prompted to open and examine that file. Defaults to "needed".}
 \item{save.tables.locally}{Logical: If a table must be temporarily stored into a file
 for user inspection, should it be saved in the current working directory, or
 in R's temporary folder?}
+
+\item{n}{A string indicating the overall progress.}
 }
 \value{
 A list of section movements with updated 'Valid' columns

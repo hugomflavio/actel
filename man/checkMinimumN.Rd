@@ -4,7 +4,7 @@
 \alias{checkMinimumN}
 \title{Check that the tag have enough detections to be valid}
 \usage{
-checkMinimumN(movements, minimum.detections, tag)
+checkMinimumN(movements, minimum.detections, tag, n)
 }
 \arguments{
 \item{movements}{The movements table for a specific tag.}
@@ -15,6 +15,8 @@ period for it to be considered true detections and not random noise.
 Defaults to 2.}
 
 \item{tag}{The tag being analysed.}
+
+\item{n}{A string indicating the overall progress.}
 }
 \value{
 A data frame containing the movements with valid/invalid notes
