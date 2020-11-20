@@ -74,6 +74,7 @@ jobs:
         run: |
           remotes::install_deps(dependencies = TRUE)
           remotes::install_cran("rcmdcheck")
+          remotes::install_cran("covr")
         shell: Rscript {0}
 
       - name: Check
@@ -81,6 +82,16 @@ jobs:
           file.remove("depends.Rds")
           rcmdcheck::rcmdcheck(args = "--no-manual", error_on = "warning", check_dir = "check")
         shell: Rscript {0}
+
+      - name: Run codecov
+        if: runner.os == 'Linux'
+        run: |
+          covr::codecov()
+        shell: Rscript {0}
+
+      - name: Upload coverage to Codecov
+        if: runner.os == 'Linux'
+        uses: codecov/codecov-action@v1
 
       - name: Upload check results
         if: failure()
