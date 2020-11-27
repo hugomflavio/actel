@@ -36,7 +36,7 @@ checkJumpDistance(
 \item{dotmat}{The matrix of distances between arrays.}
 
 \item{jump.warning}{If a tag crosses a number of arrays equal or greater
-than \code{jump.error} without being detected, a warning is issued. If left
+than \code{jump.warning} without being detected, a warning is issued. If left
 NULL (default), no warnings are issued.}
 
 \item{jump.error}{If a tag crosses a number of arrays equal or greater than

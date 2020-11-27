@@ -69,7 +69,7 @@ NULL (default), no warnings are issued.}
 If left NULL (default), user intervention is never suggested.}
 
 \item{jump.warning}{If a tag crosses a number of arrays equal or greater
-than \code{jump.error} without being detected, a warning is issued. If left
+than \code{jump.warning} without being detected, a warning is issued. If left
 NULL (default), no warnings are issued.}
 
 \item{jump.error}{If a tag crosses a number of arrays equal or greater than
@@ -77,7 +77,7 @@ NULL (default), no warnings are issued.}
 If left NULL (default), user intervention is never suggested.}
 
 \item{inactive.warning}{If a tag spends a number of days equal or greater
-than \code{inactive.error} in a given array at the tail of the respective
+than \code{inactive.warning} in a given array at the tail of the respective
 detections, a warning is issued. If left NULL (default), no warnings are
 issued.}
 

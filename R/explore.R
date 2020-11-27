@@ -33,14 +33,14 @@
 #'  detections, user intervention is suggested. If left NULL (default), user
 #' intervention is never suggested.
 #' @param inactive.warning If a tag spends a number of days equal or greater
-#'  than \code{inactive.error} in a given array at the tail of the respective
+#'  than \code{inactive.warning} in a given array at the tail of the respective
 #'  detections, a warning is issued. If left NULL (default), no warnings are
 #'  issued.
 #' @param jump.error If a tag crosses a number of arrays equal or greater than
 #'  \code{jump.error} without being detected, user intervention is suggested.
 #'  If left NULL (default), user intervention is never suggested.
 #' @param jump.warning If a tag crosses a number of arrays equal or greater
-#'  than \code{jump.error} without being detected, a warning is issued. If left
+#'  than \code{jump.warning} without being detected, a warning is issued. If left
 #'  NULL (default), no warnings are issued.
 #' @param max.interval The number of minutes that must pass between detections
 #'  for a new event to be created. Defaults to 60.
