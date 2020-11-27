@@ -496,7 +496,9 @@ explore <- function(
 # ------------------
 
 # print html report
+  trigger.report.error.message <- TRUE
   if (report) {
+    on.exit({if (trigger.report.error.message) message("M: Producing the report failed. If you have saved a copy of the results, you can reload them using dataToList().")}, add = TRUE)
     if (file.exists(reportname <- "actel_explore_report.html")) {
       continue <- TRUE
       index <- 1
@@ -536,6 +538,7 @@ explore <- function(
       browseURL(reportname)
     } # nocov end
   }
+  trigger.report.error.message <- FALSE
 # ------------------
 
   jobname <- paste0(gsub(" |:", ".", as.character(Sys.time())), ".actel.log.txt")
