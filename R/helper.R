@@ -645,7 +645,7 @@ recoverLog <- function(file, overwrite = FALSE) {
 #' @export
 #'
 timesToCircular <- function(x, by.group = FALSE) {
-  if (is.null(dim(x)) | ncol(x) < 3 | !all(sapply(x[, 3:ncol(x)], function(i) any(class(i) == "POSIXt"))))
+  if (is.null(dim(x)) || ncol(x) < 3 || !all(sapply(x[, 3:ncol(x)], function(i) any(class(i) == "POSIXt"))))
     stop("timesToCircular only works on data frames where the second column is a grouping structure and columns three and onwards are timestamps.", call. = FALSE)
 
   output <- list()
