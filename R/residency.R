@@ -397,7 +397,8 @@ residency <- function(
     appendTo("debug", paste0("debug: Compiling section movements for tag ", tag,"."))
 
     aux <- sectionMovements(movements = movements[[i]], spatial = spatial, valid.dist = attributes(dist.mat)$valid)
-    output <- checkSMovesN(secmoves = aux, tag = tag, section.minimum = section.minimum, GUI = GUI, n = counter)
+    output <- checkSMovesN(secmoves = aux, tag = tag, section.minimum = section.minimum, GUI = GUI, 
+                           save.tables.locally = save.tables.locally, n = counter)
     return(output)
   })
   names(section.movements) <- names(movements)
