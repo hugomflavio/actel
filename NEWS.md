@@ -7,6 +7,7 @@ Find out the main highlights of each update.
 Fixes:
   * Prevent crash in residency if the overall data period starts in winter time but the data for a given fish starts in summer time.
   * Prevent crash in residency caused by missing "save.tables.locally" argument.
+  * Fix bug related to wrong type of detections object in preload().
 
 Enhancements:
   * Verify that deployments do not end before they start.

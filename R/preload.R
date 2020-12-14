@@ -289,5 +289,8 @@ preloadDetections <- function(input, tz, start.time = NULL, stop.time = NULL) {
 
   input$Transmitter <- as.factor(paste(input$CodeSpace, input$Signal, sep = "-"))
 
+  # Convert object to data.table for compatibility with downtream functions.
+  input <- data.table::as.data.table(input)
+
   return(input)
 }
