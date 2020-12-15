@@ -11,6 +11,7 @@ Fixes:
 
 Enhancements:
   * Verify that deployments do not end before they start.
+  * Improve verification of station and array names, to avoid troublesome characters slipping through and potentially crashing the analyses.
 
 
 ## actel 1.2.0

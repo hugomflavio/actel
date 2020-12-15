@@ -259,10 +259,10 @@ readDot <- function (input = NULL, string = NULL, silent = FALSE) {
       warning("Replacing spaces with '_' in the node names.", immediate. = TRUE, call. = FALSE)
     paths <- gsub(" ", "_", paths)
   }
-  if (any(grepl("\\\\|/|:|\\*|\\?|\\\"|<(?!-)|(?<!-)>", paths, perl = TRUE))) {
+  if (any(grepl("\\\\|/|:|\\*|\\?|\\\"|<(?!-)|(?<!-)>|\\\'", paths, perl = TRUE))) {
     if (!silent)
-      warning("Troublesome characters found in the node names (\\/:*?\"<>). Replacing these with '_'.", immediate. = TRUE, call. = FALSE)
-    paths <- gsub("\\\\|/|:|\\*|\\?|\\\"|<(?!-)|(?<!-)>", "_", paths, perl = TRUE)
+      warning("Troublesome characters found in the node names (\\/:*?\"<>\'). Replacing these with '_'.", immediate. = TRUE, call. = FALSE)
+    paths <- gsub("\\\\|/|:|\\*|\\?|\\\"|<(?!-)|(?<!-)>|\\\'", "_", paths, perl = TRUE)
   }
   nodes <- strsplit(paths,"[<-][->]")
   recipient <- data.frame(
@@ -683,6 +683,11 @@ loadDeployments <- function(input, tz){
       ifelse(sum(is.na(link)) > 1, "' are", "' is"),
       " missing in the deployments."))
   }
+
+  # replace any weird characters in station names
+  if (any(grepl("\\\\|/|:|\\*|\\?|\\\"|<|>|\\\'", input$Station.name)))
+    input$Station.name <- gsub("\\\\|/|:|\\*|\\?|\\\"|<|>|\\\'", "_", input$Station.name)
+
   if (any(!grepl("^[1-2][0-9][0-9][0-9]-[0-1][0-9]-[0-3][0-9][ |T|t][0-2][0-9]:[0-5][0-9]", input$Start))) {
     stopAndReport("Not all values in the 'Start' column appear to be in a 'yyyy-mm-dd hh:mm' format (seconds are optional). Please double-check the deployments.")
   }
@@ -764,6 +769,11 @@ loadSpatial <- function(input = "spatial.csv", section.order = NULL){
     if (any(link <- table(input$Station.name) > 1)) {
       stopAndReport("The 'Station.name' column in the spatial input must not have duplicated values.\nStations appearing more than once: ", paste(names(table(input$Station.name))[link], collapse = ", "), "")
     }
+    # Check that stations do not contain weird characters
+    if (any(grepl("\\\\|/|:|\\*|\\?|\\\"|<|>|\\\'", input$Station.name))) {
+      appendTo(c("Screen", "Warning", "Report"), "Troublesome characters found in the station names (\\/:*?\"<>\'). Replacing these with '_' to prevent function failure.")
+      input$Station.name <- gsub("\\\\|/|:|\\*|\\?|\\\"|<|>|\\\'", "_", input$Station.name)
+    }
   }
   # Check missing Array column
   if (!any(grepl("^Array$", colnames(input)))) {
@@ -777,9 +787,9 @@ loadSpatial <- function(input = "spatial.csv", section.order = NULL){
     appendTo("Screen", "M: Replacing spaces with '_' in array names to prevent function failure.")
     input$Array <- gsub(" ", "_", input$Array)
   }
-  if (any(grepl("\\\\|/|:|\\*|\\?|\\\"|<|>", input$Array))) {
-    appendTo(c("Screen", "Warning", "Report"), "Troublesome characters found in the array names (\\/:*?\"<>). Replacing these with '_' to prevent function failure.")
-    input$Array <- gsub("\\\\|/|:|\\*|\\?|\\\"|<|>", "_", input$Array)
+  if (any(grepl("\\\\|/|:|\\*|\\?|\\\"|<|>|\\\'", input$Array))) {
+    appendTo(c("Screen", "Warning", "Report"), "Troublesome characters found in the array names (\\/:*?\"<>\'). Replacing these with '_' to prevent function failure.")
+    input$Array <- gsub("\\\\|/|:|\\*|\\?|\\\"|<|>|\\\'", "_", input$Array)
   }
 
   # check reserved array names
@@ -979,6 +989,11 @@ loadBio <- function(input, tz){
     bio$Release.site <- "unspecified"
   } else {
     bio$Release.site <- gsub(" ", "_", bio$Release.site)
+  
+    # replace any weird characters in station names
+    if (any(grepl("\\\\|/|:|\\*|\\?|\\\"|<|>|\\\'", bio$Release.site)))
+      bio$Release.site <- gsub("\\\\|/|:|\\*|\\?|\\\"|<|>|\\\'", "_", bio$Release.site)
+  
     bio$Release.site <- factor(bio$Release.site)
     if (any(link <- is.na(bio$Release.site) | bio$Release.site == "")) {
       appendTo(c("Screen","Report","Warning"),"Some animals contain no release site information. You may want to double-check the data.\n   Filling the blanks with 'unspecified'.")
@@ -1660,7 +1675,10 @@ createStandards <- function(detections, spatial, deployments, discard.orphans = 
         if (!discard.orphans) {
           appendTo(c("Screen", "Report"), paste0("Error: ", sum(the.error), " detections for receiver ", names(deployments)[i], " do not fall within deployment periods."))
           message("")
-          message(paste0(capture.output(print(detections[receiver.link, ][the.error, !c("Transmitter", "Valid", "Standard.name", "Array", "Section", "Source.file")])), collapse = "\n"))
+          if (any(colnames(detections) == "Source.file"))
+            message(paste0(capture.output(print(detections[receiver.link, ][the.error, !c("Transmitter", "Valid", "Standard.name", "Array", "Section", "Source.file")])), collapse = "\n"))
+          else
+            message(paste0(capture.output(print(detections[receiver.link, ][the.error, !c("Transmitter", "Valid", "Standard.name", "Array", "Section")])), collapse = "\n"))
           message("")
           message("Possible options:\n   a) Stop and double-check the data (recommended)\n   b) Discard orphan detections in this instance.\n   c) Discard orphan detections for all instances.\n   d) Save orphan detections to a file and re-open dialogue.")
           
@@ -1798,7 +1816,7 @@ transformSpatial <- function(spatial, bio, arrays, dotmat, first.array = NULL) {
       if (any(link <- is.na(match(B, A)))) {
         appendTo(c("Report", "Warning"), "There is a mismatch between the release sites reported and the release locations for the animals.")
         stopAndReport("The following release sites were listed in the biometrics.csv file but are not part of the release sites listed in the spatial.csv file: ",
-          paste(sort(B[link]), collapse = ", "), "\nPlease include the missing release sites in the spatial.csv file.", call. = FALSE)
+          paste(sort(B[link]), collapse = ", "), "\nPlease include the missing release sites in the spatial.csv file.")
       } else {
         from.row <- spatial$Type == "Release"
         from.col <- colnames(spatial)[!grepl("^Receiver$", colnames(spatial)) & !grepl("^Section$", colnames(spatial))]
