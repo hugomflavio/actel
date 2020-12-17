@@ -825,7 +825,7 @@ output:
 
 ### Summary
 
-Target folder: ', stringr::str_extract(pattern = '(?<=Target folder: )[^\r]*', string = report), '
+Target folder: ', stringr::str_extract(pattern = '(?<=Target folder: )[^\r|^\n]*', string = report), '
 
 Timestamp: **', stringr::str_extract(pattern = '(?<=Timestamp: )[^\r|^\n]*', string = report), '**
 
