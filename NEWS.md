@@ -10,6 +10,10 @@ Fixes:
   * Fix bug related to wrong type of detections object in preload().
   * Fix bad formating of the summary section in reports produced in Linux OS's.
 
+Changes:
+  * The argument `plot.detections.by` in functions explore, migration and residency has been renamed to `detections.y.axis`.
+  * The argument `type` in the function plotDetections has been renamed to `y.axis`.
+
 Enhancements:
   * Verify that deployments do not end before they start.
   * Improve verification of station and array names, to avoid troublesome characters slipping through and potentially crashing the analyses.

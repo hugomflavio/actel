@@ -133,8 +133,13 @@ residency <- function(
   GUI = c("needed", "always", "never"),
   save.tables.locally = FALSE,
   print.releases = TRUE,
-  plot.detections.by = c("auto", "stations", "arrays"))
+  plot.detections.by,
+  detections.y.axis = c("auto", "stations", "arrays"))
 {
+
+# check deprecated argument
+  if (!missing(plot.detections.by))
+    stop("'plot.detections.by' has been deprecated. Please use 'detections.y.axis' instead.", call. = FALSE)
 
 # clean up any lost helpers
   deleteHelpers()
@@ -178,7 +183,7 @@ residency <- function(
                         replicates = replicates,
                         section.minimum = section.minimum,
                         section.order = section.order,
-                        plot.detections.by = plot.detections.by,
+                        detections.y.axis = detections.y.axis,
                         timestep = timestep)
 
   speed.method <- aux$speed.method
@@ -186,7 +191,7 @@ residency <- function(
   speed.error <- aux$speed.error
   inactive.warning <- aux$inactive.warning
   inactive.error <- aux$inactive.error
-  plot.detections.by <- aux$plot.detections.by
+  detections.y.axis <- aux$detections.y.axis
   timestep <- aux$timestep
   rm(aux)
 
@@ -221,7 +226,7 @@ residency <- function(
     ", GUI = '", GUI, "'",
     ", save.tables.locally = ", ifelse(save.tables.locally, "TRUE", "FALSE"),
     ", print.releases = ", ifelse(print.releases, "TRUE", "FALSE"),
-    ", plot.detections.by = '", plot.detections.by, "'",
+    ", detections.y.axis = '", detections.y.axis, "'",
     ")")
 
   appendTo("debug", the.function.call)
@@ -586,7 +591,7 @@ residency <- function(
                                                    spatial = spatial,
                                                    status.df = status.df,
                                                    rsp.info = rsp.info,
-                                                   type = plot.detections.by)
+                                                   y.axis = detections.y.axis)
 
     array.circular.plots <- printCircular(times = timesToCircular(array.times),
                                           bio = bio,
@@ -622,7 +627,7 @@ residency <- function(
       sensor.plots <- printSensorData(detections = valid.detections, 
                                       spatial = spatial,
                                       rsp.info = rsp.info, 
-                                      type = plot.detections.by)
+                                      colour.by = detections.y.axis)
     } else {
       sensor.plots <- NULL
     }
@@ -679,7 +684,7 @@ residency <- function(
                       valid.detections = valid.detections,
                       last.seen = last.seen,
                       last.seen.graph.size = last.seen.graph.size,
-                      plot.detections.by = plot.detections.by)
+                      detections.y.axis = detections.y.axis)
 
     appendTo("debug", "debug: Converting report to html")
     rmarkdown::render(input = paste0(tempdir(), "/actel_report_auxiliary_files/actel_residency_report.Rmd"),
@@ -769,7 +774,7 @@ printResidencyRmd <- function(
   valid.detections,
   last.seen,
   last.seen.graph.size,
-  plot.detections.by)
+  detections.y.axis)
 {
 
   work.path <- paste0(tempdir(), "/actel_report_auxiliary_files/")
@@ -783,7 +788,7 @@ printResidencyRmd <- function(
     sensor.fragment <- paste0("### Sensor plots
 
 Note:
-  : The colouring in these plots will follow that of the individual detection plots, which can be modified using `plot.detections.by`.
+  : The colouring in these plots will follow that of the individual detection plots, which can be modified using `detections.y.axis`.
   : The data used for these graphics is stored in the `valid.detections` object.
   : You can replicate these graphics and edit them as needed using the `plotSensors()` function.
 
@@ -988,12 +993,12 @@ Note:
 ### Individual detection plots
 
 Note:  
-  : You can choose to plot detections by station or by array using the `plot.detections.by` argument.
-  : The detections are coloured by ', ifelse(plot.detections.by == "stations", 'array', 'section'), '. The vertical black dashed line shows the release time. The full dark-grey line shows the movement events considered valid, while the dashed dark-grey line shows the movement events considered invalid.
-', ifelse(plot.detections.by == "stations", '  : The movement event lines move straight between the first and last station of each event (i.e. in-between detections will not be individually linked by the line).\n', ''),
+  : You can choose to plot detections by station or by array using the `detections.y.axis` argument.
+  : The detections are coloured by ', ifelse(detections.y.axis == "stations", 'array', 'section'), '. The vertical black dashed line shows the release time. The full dark-grey line shows the movement events considered valid, while the dashed dark-grey line shows the movement events considered invalid.
+', ifelse(detections.y.axis == "stations", '  : The movement event lines move straight between the first and last station of each event (i.e. in-between detections will not be individually linked by the line).\n', ''),
 '  : Manually **edited** tags are highlighted with **yellow** graphic borders.
   : Manually **overridden** tags are highlighted with **red** graphic borders.
-  : The ', ifelse(plot.detections.by == "stations", 'stations', 'arrays'), ' have been aligned by ', ifelse(plot.detections.by == "stations", 'array', 'section'), ', following the order provided ', ifelse(plot.detections.by == "stations", '', 'either '), 'in the spatial input', ifelse(plot.detections.by == "stations", '.', ' or the `section.order` argument.'), '
+  : The ', ifelse(detections.y.axis == "stations", 'stations', 'arrays'), ' have been aligned by ', ifelse(detections.y.axis == "stations", 'array', 'section'), ', following the order provided ', ifelse(detections.y.axis == "stations", '', 'either '), 'in the spatial input', ifelse(detections.y.axis == "stations", '.', ' or the `section.order` argument.'), '
   : You can replicate these graphics and edit them as needed using the `plotDetections()` function.
   : You can also see the movement events of multiple tags simultaneously using the `plotMoves()` function.
   : The data used in these graphics is stored in the `detections` and `movements` objects (and respective valid counterparts).

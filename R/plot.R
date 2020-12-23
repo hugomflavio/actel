@@ -611,7 +611,8 @@ plotMoves <- function(input, tags, title, xlab, ylab, col, array.alias, show.rel
 #'
 #' @param input The results of an actel analysis (either explore, migration or residency).
 #' @param tag The transmitter to be plotted.
-#' @param type The type of y axis desired. One of "stations" (default) or "arrays".
+#' @param type DEPRECATED. Please use the argument y.axis instead.
+#' @param y.axis The type of y axis desired. One of "stations" (default) or "arrays".
 #' @param title An optional title for the plot. If left empty, a default title will be added.
 #' @param xlab,ylab Optional axis names for the plot. If left empty, default axis names will be added.
 #' @param col An optional colour scheme for the detections. If left empty, default colours will be added.
@@ -645,7 +646,7 @@ plotMoves <- function(input, tags, title, xlab, ylab, col, array.alias, show.rel
 #'
 #' @export
 #'
-plotDetections <- function(input, tag, type = c("auto", "stations", "arrays"), title, 
+plotDetections <- function(input, tag, type, y.axis = c("auto", "stations", "arrays"), title, 
   xlab, ylab, col, array.alias, section.alias, frame.warning = TRUE, x.label.format,
   only.valid = FALSE, like.migration = TRUE) {
   # NOTE: The NULL variables below are actually column names used by ggplot.
@@ -655,7 +656,11 @@ plotDetections <- function(input, tag, type = c("auto", "stations", "arrays"), t
   plot.y <- NULL
   Colour <- NULL
 
-  type <- match.arg(type)
+# check deprecated argument
+  if (!missing(type))
+    stop("'type' has been deprecated. please use 'y.axis' instead.", call. = FALSE)
+
+  y.axis <- match.arg(y.axis)
 
   cbPalette <- c("#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7", "#999999")
   names(cbPalette) <- c("Orange", "Blue", "Green", "Yellow", "Darkblue", "Darkorange", "Pink", "Grey")
@@ -693,12 +698,12 @@ plotDetections <- function(input, tag, type = c("auto", "stations", "arrays"), t
     like.migration <- FALSE
   }
 
-  # decide array type, if needed
-  if (type == "auto") {
+  # decide y.axis type, if needed
+  if (y.axis == "auto") {
     if (nrow(spatial$stations) > 40 | length(unique(spatial$stations$Array)) > 12)
-      type <- "arrays"
+      y.axis <- "arrays"
     else
-      type <- "stations"
+      y.axis <- "stations"
   }
   
   # renaming arrays if relevant
@@ -758,7 +763,7 @@ plotDetections <- function(input, tag, type = c("auto", "stations", "arrays"), t
   }
 
   # Determine y order
-  if (type == "stations") {
+  if (y.axis == "stations") {
     link <- match(spatial$stations$Array, array.order$Array)
     names(link) <- 1:length(link)
     link <- sort(link)
@@ -772,16 +777,16 @@ plotDetections <- function(input, tag, type = c("auto", "stations", "arrays"), t
   }
 
   # assign y values
-  if (type == "stations")
+  if (y.axis == "stations")
     detections$plot.y <- factor(detections$Standard.name, levels = y.order)    
   else
     detections$plot.y <- factor(detections$Array, levels = y.order)
 
   # detection colour column
-  if (type == "stations") {
+  if (y.axis == "stations") {
     detections$Colour <- detections$Array
     if (!missing(section.alias))
-       warning("section.alias is irrelevant when type = 'stations'. Ignoring section.alias.", immediate. = TRUE, call. = FALSE)
+       warning("section.alias is irrelevant when y.axis = 'stations'. Ignoring section.alias.", immediate. = TRUE, call. = FALSE)
   } else {   
     aux <- lapply(seq_along(array.order$Array), function(i) {
       x <- match(detections$plot.y, array.order$Array[i])
@@ -859,7 +864,7 @@ plotDetections <- function(input, tag, type = c("auto", "stations", "arrays"), t
   # movements lines
   if (!is.null(movements) & !only.valid) {
     add.movements <- TRUE
-    if (type == "stations") {
+    if (y.axis == "stations") {
       all.moves.line <- data.frame(
         plot.y = as.vector(t(movements[, c("First.station", "Last.station")])),
         Timestamp = as.vector(t(movements[, c("First.time", "Last.time")])))
@@ -877,7 +882,7 @@ plotDetections <- function(input, tag, type = c("auto", "stations", "arrays"), t
   add.valid.movements <- FALSE
   if (!is.null(valid.movements)) {
     add.valid.movements <- TRUE
-    if (type == "stations") {
+    if (y.axis == "stations") {
       simple.moves.line <- data.frame(
         plot.y = as.vector(t(valid.movements[, c("First.station", "Last.station")])),
         Timestamp = as.vector(t(valid.movements[, c("First.time", "Last.time")])))
@@ -953,7 +958,7 @@ plotDetections <- function(input, tag, type = c("auto", "stations", "arrays"), t
   else
     p <- p + ggplot2::scale_x_datetime(limits = c(first.time, last.time), date_labels = x.label.format)
   # Paint
-  p <- p + ggplot2::scale_color_manual(values = col, drop = FALSE, name = ifelse(type == "stations", "Array", "Section"))
+  p <- p + ggplot2::scale_color_manual(values = col, drop = FALSE, name = ifelse(y.axis == "stations", "Array", "Section"))
   # Plot points
   p <- p + ggplot2::geom_point()
   # Show all Y axis values
@@ -961,7 +966,7 @@ plotDetections <- function(input, tag, type = c("auto", "stations", "arrays"), t
   # Caption and title
   p <- p + ggplot2::guides(colour = ggplot2::guide_legend(reverse = TRUE))
   if (missing(ylab)) {
-    if (type == "stations")
+    if (y.axis == "stations")
       ylab <- "Station Standard Name"
     else
       ylab <- "Array"

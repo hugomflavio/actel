@@ -631,14 +631,14 @@ knitr::kable(intra.array.CJS[[',i ,']]$absolutes)
 #' @keywords internal
 #'
 printIndividuals <- function(detections.list, movements, valid.movements, spatial, 
-  status.df = NULL, rsp.info, type = c("auto", "stations", "arrays"), extension = "png") {
+  status.df = NULL, rsp.info, y.axis = c("auto", "stations", "arrays"), extension = "png") {
   # NOTE: The NULL variables below are actually column names used by ggplot.
   # This definition is just to prevent the package check from issuing a note due unknown variables.
   Timestamp <- NULL
   Standard.name <- NULL
   Array <- NULL
   Station <- NULL
-  type <- match.arg(type)
+  y.axis <- match.arg(y.axis)
   
   fake.results <- list(detections = detections.list,
                 movements = movements,
@@ -654,20 +654,20 @@ printIndividuals <- function(detections.list, movements, valid.movements, spatia
   counter <- 0
   individual.plots <- ""
 
-  if (type == "auto") {
+  if (y.axis == "auto") {
     if (nrow(spatial$stations) > 40 | length(unique(spatial$stations$Array)) > 14)
-      type <- "arrays"
+      y.axis <- "arrays"
     else
-      type <- "stations"
+      y.axis <- "stations"
   }
 
   capture <- lapply(names(detections.list), function(tag) {
     counter <<- counter + 1
 
-    p <- plotDetections(input = fake.results, tag = tag, type = type)
+    p <- plotDetections(input = fake.results, tag = tag, y.axis = y.axis)
 
     # decide height
-    if (type == "stations")
+    if (y.axis == "stations")
       to.check <- levels(detections.list[[tag]]$Standard.name)
     else
       to.check <- levels(detections.list[[tag]]$Array)
@@ -680,7 +680,7 @@ printIndividuals <- function(detections.list, movements, valid.movements, spatia
     # default width:
     the.width <- 5
     # Adjustments depending on number of legend valudes
-    if (type == "stations")
+    if (y.axis == "stations")
       to.check <- levels(detections.list[[tag]]$Array)
     else
       to.check <- names(spatial$array.order)
@@ -1407,12 +1407,12 @@ printLastArray <- function(status.df) {
 #'
 #' @return A string of file locations in rmd syntax, to be included in printRmd
 #'
-printSensorData <- function(detections, spatial, rsp.info, type = c("auto", "stations", "arrays"), extension = "png") {
+printSensorData <- function(detections, spatial, rsp.info, colour.by = c("auto", "stations", "arrays"), extension = "png") {
   individual.plots <- NULL
   Timestamp <- NULL
   Sensor.Value <- NULL
   Sensor.Unit <- NULL
-  type <- match.arg(type)
+  colour.by <- match.arg(colour.by)
 
   appendTo(c("Screen", "Report"), "M: Printing sensor values for tags with sensor data.")
 
@@ -1428,18 +1428,18 @@ printSensorData <- function(detections, spatial, rsp.info, type = c("auto", "sta
   n.plots <- 0
   individual.plots <- ""
 
-  if (type == "auto") {
+  if (colour.by == "auto") {
     if (nrow(spatial$stations) > 40 | length(unique(spatial$stations$Array)) > 14)
-      type <- "arrays"
+      colour.by <- "arrays"
     else
-      type <- "stations"
+      colour.by <- "stations"
   }
 
   capture <- lapply(names(detections), function(tag) {
     counter <<- counter + 1
     if (any(!is.na(detections[[tag]]$Sensor.Value))) {
       p <- plotSensors(input = fake.results, tag = tag, verbose = getOption("actel.debug", default = FALSE),
-        colour.by = ifelse(type == "stations", "array", "section"))
+        colour.by = ifelse(colour.by == "stations", "array", "section"))
 
       if (length(unique(detections[[tag]]$Sensor.Unit)) > 2)
         the.height <- 4 + ((length(unique(detections[[tag]]$Sensor.Unit)) - 2) * 2)
@@ -1449,7 +1449,7 @@ printSensorData <- function(detections, spatial, rsp.info, type = c("auto", "sta
       # default width:
       the.width <- 5
       # Adjustments depending on number of legend valudes
-      if (type == "stations")
+      if (colour.by == "stations")
         to.check <- levels(detections[[tag]]$Array)
       else
         to.check <- names(spatial$array.order)
