@@ -8,7 +8,7 @@ printSensorData(
   detections,
   spatial,
   rsp.info,
-  type = c("auto", "stations", "arrays"),
+  colour.by = c("auto", "stations", "arrays"),
   extension = "png"
 )
 }

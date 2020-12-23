@@ -20,7 +20,7 @@ printResidencyRmd(
   valid.detections,
   last.seen,
   last.seen.graph.size,
-  plot.detections.by
+  detections.y.axis
 )
 }
 \arguments{

@@ -50,7 +50,7 @@ Plot array live times
 # Using the example results that come with actel
 plotLive(example.results)
 
-# Because plotSensors returns a ggplot object, you can store
+# Because plotLive returns a ggplot object, you can store
 # it and edit it manually, e.g.:
 library(ggplot2)
 p <- plotLive(example.results)

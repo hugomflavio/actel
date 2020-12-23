@@ -33,7 +33,8 @@ migration(
   GUI = c("needed", "always", "never"),
   save.tables.locally = FALSE,
   print.releases = TRUE,
-  plot.detections.by = c("auto", "stations", "arrays")
+  plot.detections.by,
+  detections.y.axis = c("auto", "stations", "arrays")
 )
 }
 \arguments{
@@ -152,7 +153,9 @@ in R's temporary folder?}
 \item{print.releases}{Logical: Should the release sites be printed in the
 study area diagrams?}
 
-\item{plot.detections.by}{The type of y axis desired for the individual
+\item{plot.detections.by}{DEPRECATED. Please use the argument detections.y.axis instead.}
+
+\item{detections.y.axis}{The type of y axis desired for the individual
 detection plots. While the argument defaults to "auto", it can be hard-set
 to one of "stations" or "arrays".}
 }

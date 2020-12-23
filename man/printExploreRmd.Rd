@@ -14,7 +14,7 @@ printExploreRmd(
   deployments,
   detections,
   valid.detections,
-  plot.detections.by
+  detections.y.axis
 )
 }
 \arguments{

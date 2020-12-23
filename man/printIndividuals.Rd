@@ -11,7 +11,7 @@ printIndividuals(
   spatial,
   status.df = NULL,
   rsp.info,
-  type = c("auto", "stations", "arrays"),
+  y.axis = c("auto", "stations", "arrays"),
   extension = "png"
 )
 }
@@ -24,7 +24,7 @@ printIndividuals(
 
 \item{status.df}{The main results table.}
 
-\item{type}{The type of y axis desired. One of "stations" (default) or "arrays".}
+\item{y.axis}{The type of y axis desired. One of "stations" (default) or "arrays".}
 
 \item{extension}{the format of the generated graphics}
 }

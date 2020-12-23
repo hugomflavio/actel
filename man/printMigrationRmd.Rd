@@ -19,7 +19,7 @@ printMigrationRmd(
   deployments,
   valid.detections,
   detections,
-  plot.detections.by
+  detections.y.axis
 )
 }
 \arguments{

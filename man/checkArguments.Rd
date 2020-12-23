@@ -110,9 +110,7 @@ define which movement events are valid and invalid.}
 \item{print.releases}{Logical: Should the release sites be printed in the
 study area diagrams?}
 
-\item{plot.detections.by}{The type of y axis desired for the individual
-detection plots. While the argument defaults to "auto", it can be hard-set
-to one of "stations" or "arrays".}
+\item{plot.detections.by}{DEPRECATED. Please use the argument detections.y.axis instead.}
 
 \item{if.last.skip.section}{Logical: Should a tag detected at the last array
 of a given section be considered to have disappeared in the next section?}

@@ -7,7 +7,8 @@
 plotDetections(
   input,
   tag,
-  type = c("auto", "stations", "arrays"),
+  type,
+  y.axis = c("auto", "stations", "arrays"),
   title,
   xlab,
   ylab,
@@ -25,7 +26,9 @@ plotDetections(
 
 \item{tag}{The transmitter to be plotted.}
 
-\item{type}{The type of y axis desired. One of "stations" (default) or "arrays".}
+\item{type}{DEPRECATED. Please use the argument y.axis instead.}
+
+\item{y.axis}{The type of y axis desired. One of "stations" (default) or "arrays".}
 
 \item{title}{An optional title for the plot. If left empty, a default title will be added.}
 
