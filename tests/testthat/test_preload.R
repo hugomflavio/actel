@@ -71,10 +71,10 @@ test_that("migration and residency don't start if datapack is incompatible", {
 	expect_warning(d <- preload(biometrics = bio, deployments = deployments, spatial = xspatial, detections = detections, tz = "Europe/Copenhagen"),
 		"The spatial input does not contain a 'Section' column. This input is only valid for explore() analyses.", fixed = TRUE)
 
-	expect_error(results <- migration(datapack = d),
+	expect_error(results <- migration(datapack = d, GUI = "never"),
 		"To run migration(), please assign the arrays to their sections using a 'Section' column in the spatial input.", fixed = TRUE)
 
-	expect_error(results <- residency(datapack = d),
+	expect_error(results <- residency(datapack = d, GUI = "never"),
 		"To run residency(), please assign the arrays to their sections using a 'Section' column in the spatial input.", fixed = TRUE)
 })
 

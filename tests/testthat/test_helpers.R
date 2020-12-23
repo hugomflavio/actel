@@ -121,10 +121,33 @@ test_that("recoverLog works as expected", {
 	if (file.exists("latest_actel_error_log.txt"))
 		file.remove("latest_actel_error_log.txt")
 	expect_error(recoverLog(), "No crash logs found")
-	tryCatch(explore(tz = "Europe/Copenhagen"), error = function(e) message("This was crashed on purpose"))
+
+	sink("latest_actel_error_log.txt")
+cat("Actel R package report.
+Version: 1.2.0.9022
+
+Target folder: C:/Users/hdmfla/AppData/Local/Temp/Rtmp2tLEAI
+Timestamp: 2020-12-23 12:30:55
+Function: explore()
+
+M: Importing data. This process may take a while.
+Error: Could not find a 'biometrics.csv' file in the working directory.
+
+A fatal exception occurred, stopping the process!
+Found a bug? Report it here: https://github.com/hugomflavio/actel/issues
+
+-------------------
+Function call:
+-------------------
+explore(tz = 'Europe/Copenhagen', datapack = NULL, max.interval = 60, minimum.detections = 2, start.time = NULL, stop.time = NULL, speed.method = c('last to first'), speed.warning = NULL, speed.error = NULL, jump.warning = 2, jump.error = 3, inactive.warning = NULL, inactive.error = NULL, exclude.tags = NULL, override = NULL, report = FALSE, discard.orphans = FALSE, discard.first = NULL, auto.open = TRUE, save.detections = FALSE, GUI = 'needed', save.tables.locally = 'FALSE, print.releases = TRUE, plot.detections.by = 'auto')
+-------------------
+", fill = TRUE)	
+	sink()
 	expect_error(recoverLog(), "Please state the name of the output file")	
 	recoverLog("test.txt")
 	expect_true(file.exists("test.txt"))
+	file.remove("test.txt")
+	file.remove("latest_actel_error_log.txt")
 })
 
 setwd(tests.home)

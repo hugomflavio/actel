@@ -103,7 +103,7 @@ test_that("explore stops when any argument does not make sense", {
 	expect_warning(explore(tz = "Europe/Copenhagen", exclude.tags = "ABC-DEF", report = FALSE, GUI = "never"),
 		"The user asked for tag 'ABC-DEF' to be excluded from the analysis, but this tag is not present in the detections.", fixed = TRUE)
 
-	expect_error(explore(tz = "Europe/Copenhagen", override = 1),
+	expect_error(explore(tz = "Europe/Copenhagen", override = 1, GUI = "never"),
 		"Some tag signals listed in 'override' (1) are not listed in the biometrics file.", fixed = TRUE)
 	
 	expect_error(explore(tz = "Europe/Copenhagen", override = "ABC-DEF", report = FALSE, GUI = "never"),

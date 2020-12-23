@@ -754,11 +754,8 @@ plotDetections <- function(input, tag, type, y.axis = c("auto", "stations", "arr
   }
 
   # Include invalid, if needed
-  if (type == "stations") {
-    if (any(levels(detections$Array) == "Unknown"))
-      levels(detections$Array)[levels(detections$Array) == "Unknown"] = "Invalid"
-    else
-      levels(detections$Array) <- c(levels(detections$Array), "Invalid")
+  if (y.axis == "stations" && (any(levels(detections$Array) == "Unknown") | any(!detections$Valid)) ) {
+    levels(detections$Array)[levels(detections$Array) == "Unknown"] <- "Invalid"
     array.order <- rbind(array.order, c("Invalid", "Invalid"))
   }
 
@@ -853,8 +850,8 @@ plotDetections <- function(input, tag, type, y.axis = c("auto", "stations", "arr
         warning("Not enough colours supplied in 'col' (", length(col)," supplied and ", (length(levels(detections$Colour)) - 1), " needed). Reusing colours.", immediate. = TRUE, call. = FALSE)
       else
         warning("Not enough colours supplied in 'col' (", length(col)," supplied and ", (length(levels(detections$Colour))), " needed). Reusing colours.", immediate. = TRUE, call. = FALSE)
-      col <- rep(col, length.out = (length(levels(detections$Colour))))
     }
+    col <- rep(col, length.out = length(levels(detections$Colour)))
   }
 
   # create invalid colour, if needed
