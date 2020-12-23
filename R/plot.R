@@ -18,7 +18,7 @@
 #' # Using the example results that come with actel
 #' plotLive(example.results)
 #'
-#' # Because plotSensors returns a ggplot object, you can store
+#' # Because plotLive returns a ggplot object, you can store
 #' # it and edit it manually, e.g.:
 #' library(ggplot2)
 #' p <- plotLive(example.results)
@@ -130,7 +130,7 @@ plotLive <- function(input, arrays, show.stations = FALSE, array.size = 2, stati
   }
   st.col <- darken(col, 0.6)
 
-  # assing colours
+  # assign colours
   link <- match(pd$Section, names(spatial$array.order))
   pd$col <- sapply(1:nrow(pd), function(i) {
     if (pd$Array[i] == pd$Y[i])
