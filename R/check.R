@@ -45,7 +45,7 @@ NULL
 #'
 checkArguments <- function(dp, tz, minimum.detections, max.interval, speed.method = c("last to first", "last to last"),
   speed.warning, speed.error, start.time, stop.time, report, auto.open, save.detections, jump.warning, jump.error,
-  inactive.warning, inactive.error, exclude.tags, override, print.releases, plot.detections.by = c("auto", "stations", "arrays"),
+  inactive.warning, inactive.error, exclude.tags, override, print.releases, detections.y.axis = c("auto", "stations", "arrays"),
   if.last.skip.section = NULL, replicates = NULL, section.minimum = NULL, section.order = NULL, timestep = c("days", "hours")) {
   appendTo("debug", "Running checkArguments.")
 
@@ -170,9 +170,9 @@ checkArguments <- function(dp, tz, minimum.detections, max.interval, speed.metho
   if (!is.logical(print.releases))
     stopAndReport("'print.releases' must be logical.")
 
-  if (!is.character(plot.detections.by))
-    stopAndReport("'plot.detections.by' should be one of 'stations' or 'arrays'")
-  plot.detections.by <- match.arg(plot.detections.by)
+  if (!is.character(detections.y.axis))
+    stopAndReport("'detections.y.axis' should be one of 'stations' or 'arrays'")
+  detections.y.axis <- match.arg(detections.y.axis)
 
   if (!is.character(timestep))
     stopAndReport("'timestep' should be one of 'days' or 'hours'")
@@ -206,7 +206,7 @@ checkArguments <- function(dp, tz, minimum.detections, max.interval, speed.metho
               speed.error = speed.error,
               inactive.warning = inactive.warning,
               inactive.error = inactive.error,
-              plot.detections.by = plot.detections.by,
+              detections.y.axis = detections.y.axis,
               timestep = timestep))
 }
 
