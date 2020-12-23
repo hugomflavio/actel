@@ -58,7 +58,7 @@ migration(tz, section.order = NULL, success.arrays = NULL, max.interval = 60, mi
   inactive.warning = NULL, inactive.error = NULL, exclude.tags = NULL, override = NULL, report = FALSE,
   auto.open = TRUE, discard.orphans = FALSE, save.detections = FALSE, if.last.skip.section = TRUE, 
   replicates = NULL, disregard.parallels = TRUE, GUI = c("needed", "always", "never"),
-  save.tables.locally = FALSE, plot.detections.by = c("stations", "arrays"))
+  save.tables.locally = FALSE, detections.y.axis = c("stations", "arrays"))
 ```
 
 Below are listed only new arguments that do not exist in [explore](b-0_explore.html#general-arguments). 

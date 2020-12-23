@@ -52,6 +52,7 @@ Here you will find some additional examples of things you can do using the outpu
 1. [Simultaneous and cumulative presence at one or more arrays](#simultaneous-and-cumulative-presence-at-one-or-more-arrays)
 1. [Plotting individual residency for individual tags](#plotting-individual-residency-for-individual-tags)
 1. [Plotting global (and group) residency!](#plotting-global-and-group-residency)
+1. [Plotting array live times](#plotting-array-live-times)
 1. [What would you like to see here?](#what-would-you-like-to-see-here)
 
 ## Calculating utilization distribution areas and space-use overlaps
@@ -399,6 +400,23 @@ plotRatios(results, sections = c("River", "River-Fjord", "Fjord"), type = "perce
 
 ```
 
+
+## Plotting array live times
+
+There are multiple reasons why some arrays could be offline during parts of the study. Perhaps a receiver was lost, or the location became inaccessible. actel accounts for array downtimes when calculating array jumps, and you can see those downtimes too using the function plotLive().
+
+This function is very straight foward, and works both on the output of one of the main analyses, or on the output of preload().
+
+E.g.:
+
+```r
+# assuming 'results' is the output of an actel analysis
+plotLive(results)
+
+# You can also specify which arrays should be displayed, if individual stations should show
+# up or not, and customise aesthetics:
+plotLive(results, array = "A1", show.stations = FALSE, array.size = 3)
+```
 
 ## What would you like to see here?
 

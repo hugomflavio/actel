@@ -64,7 +64,7 @@ explore(tz, max.interval = 60, minimum.detections = 2, start.time = NULL, stop.t
   inactive.error = NULL, exclude.tags = NULL, override = NULL, report = FALSE, 
   auto.open = TRUE, discard.orphans = FALSE, discard.first = NULL, discard.orphans = FALSE, 
   save.detections = FALSE, GUI = c("needed", "always", "never"), save.tables.locally = FALSE,
-  plot.detections.by = c("stations", "arrays"))
+  detections.y.axis = c("stations", "arrays"))
 ```
 
 ### tz
@@ -266,9 +266,9 @@ If you cannot run the GUI on your computer and are faced with a very long table,
 
 If actel is unable to access the GUI, long tables will be saved to temporary files (as mentioned above). By default, these tables are saved into R's temporary directory. However, in some cases (particularly in MacOS), this temporary folder can be hard to find. You can set `save.tables.locally = TRUE` to have temporary tables saved in your current work directory, rather than the temporary folder. These temporary tables will be deleted once they are no longer required.
 
-### plot.detections.by
+### detections.y.axis
 
-By default, actel decides whether to plot the detections by station or by array, depending on the number of stations and arrays present in the study area. However, you can force a specific Y axis by setting `plot.detections.by` to either 'stations' or 'arrays'. Note that this will also affect the sensor data plots, as they are coloured consistently with the detection plots.
+By default, actel decides whether to plot the detections by station or by array, depending on the number of stations and arrays present in the study area. However, you can force a specific Y axis by setting `detections.y.axis` to either 'stations' or 'arrays'. Note that this will also affect the sensor data plots, as they are coloured consistently with the detection plots.
 
 ### All done!
 
