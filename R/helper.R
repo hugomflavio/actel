@@ -776,12 +776,12 @@ loadShape <- function(path = ".", shape, size, spatial = "spatial.csv",
     if (check.spatial) {
       if (any(is.na(xy <- match(c(coord.x, coord.y), colnames(spatial))))) {
         if (all(is.na(xy))) {
-          warning("Could not find columns '", coord.x,"' and '", coord.y,"' in the spatial data frame. Skipping range check.", call. = FALSE, immediate. = TRUE)
+          warning("Could not find columns '", coord.x, "' and '", coord.y, "' in the spatial data frame. Skipping range check.", call. = FALSE, immediate. = TRUE)
         } else {
           if (is.na(xy[1]))
-            warning("Could not find column '", coord.x,"' in the spatial data frame. Skipping range check.", call. = FALSE, immediate. = TRUE)
+            warning("Could not find column '", coord.x, "' in the spatial data frame. Skipping range check.", call. = FALSE, immediate. = TRUE)
           else
-            warning("Could not find column '", coord.y,"' in the spatial data frame. Skipping range check.", call. = FALSE, immediate. = TRUE)
+            warning("Could not find column '", coord.y, "' in the spatial data frame. Skipping range check.", call. = FALSE, immediate. = TRUE)
         }
         spatial <- NULL
       }
@@ -804,7 +804,7 @@ loadShape <- function(path = ".", shape, size, spatial = "spatial.csv",
   } else {
     stop("'shape' must be a .shp file.\n", call. = FALSE)
   }
-
+  
   # extend ranges with the buffer
   if (!is.null(buffer)) {
     if (length(buffer) == 1){
