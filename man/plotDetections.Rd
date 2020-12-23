@@ -13,7 +13,11 @@ plotDetections(
   ylab,
   col,
   array.alias,
-  frame.warning = TRUE
+  section.alias,
+  frame.warning = TRUE,
+  x.label.format,
+  only.valid = FALSE,
+  like.migration = TRUE
 )
 }
 \arguments{
@@ -32,8 +36,20 @@ plotDetections(
 \item{array.alias}{A named vector of format c("old_array_name" = "new_array_name") to replace
 default array names with user defined ones.}
 
+\item{section.alias}{A named vector of format c("old_section_name" = "new_section_name") to replace
+default section names with user defined ones.}
+
 \item{frame.warning}{Logical. By default, actel highlights manually changed or overridden tags in yellow
 and red plot frames, respectively. Set to FALSE to deactivate this behaviour.}
+
+\item{x.label.format}{A character string giving a date-time format for the x labels.
+If missing, ggplot's default labels are used.}
+
+\item{only.valid}{Logical. Should only valid detections be printed?}
+
+\item{like.migration}{Logical. For plots originating from migration analyses, should the additional
+grey vertical bars be included? Defaults to TRUE, and only has a visible effect if the input stems from
+a migration analysis.}
 }
 \value{
 A ggplot object.
