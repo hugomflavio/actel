@@ -86,6 +86,8 @@ if (any(missing.packages)) {
 
 			expect_error(loadShape(shape = "test.txt", size = 10, buffer = 100),
 			"'shape' must be a .shp file.", fixed = TRUE)
+
+			file.remove("test.txt")
 		})
 
 		test_that("transitionLayer is working properly", {
@@ -117,10 +119,14 @@ will artificially add water space around the shape file.", fixed = TRUE)
 			expect_error(distancesMatrix(t.layer = "test"),
 				"Could not recognise 't.layer' as a TransitionLayer object. Make sure to compile it using the function transitionLayer.\n", fixed = TRUE)
 
+			write.table(1, "test.txt")
+
 			expect_error(distancesMatrix(t.layer =  t.layer,
 		  		coord.x = "x.32632", coord.y = "y.32632", starters = "test.txt", actel = FALSE),
 				"'starters' must be a data frame.", fixed = TRUE)
 
+			file.remove("test.txt")
+			
 			expect_warning(distancesMatrix(t.layer =  t.layer,
 		  		coord.x = "x.32632", coord.y = "y.32632", starters = "test", id.col = "test", actel = TRUE),
 			"starters' or 'targets' were set but will be ignored because 'actel' is set to TRUE. Set 'actel' to FALSE to use the 'starters' and 'targets' arguments.", fixed = TRUE)

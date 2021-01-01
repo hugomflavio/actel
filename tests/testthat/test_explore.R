@@ -118,8 +118,8 @@ test_that("explore stops when any argument does not make sense", {
 	expect_error(explore(tz = "Europe/Copenhagen", GUI = "abc"),
 		"'arg' should be one of ", fixed = TRUE)
 
-	expect_error(explore(tz = "Europe/Copenhagen", plot.detections.by = 1, GUI = "never"),
-		"'plot.detections.by' should be one of 'stations' or 'arrays'", fixed = TRUE)
+	expect_error(explore(tz = "Europe/Copenhagen", detections.y.axis = 1, GUI = "never"),
+		"'detections.y.axis' should be one of 'stations' or 'arrays'", fixed = TRUE)
   
   aux <- c(
     length(suppressWarnings(packageDescription("gWidgets2"))),
