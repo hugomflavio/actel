@@ -685,7 +685,8 @@ plotDetections <- function(input, tag, type, y.axis = c("auto", "stations", "arr
   spatial <- input$spatial
 
   array.order <- data.frame(Section = unlist(lapply(names(spatial$array.order), function(x) rep(x, length(spatial$array.order[[x]])))),
-                            Array = unlist(spatial$array.order))
+                            Array = unlist(spatial$array.order),
+                            stringsAsFactors = FALSE)
 
   # vertical start dash
   start.line <- as.POSIXct(input$rsp.info$bio$Release.date[which(input$rsp.info$bio$Transmitter == tag)], tz = tz)
@@ -864,11 +865,13 @@ plotDetections <- function(input, tag, type, y.axis = c("auto", "stations", "arr
     if (y.axis == "stations") {
       all.moves.line <- data.frame(
         plot.y = as.vector(t(movements[, c("First.station", "Last.station")])),
-        Timestamp = as.vector(t(movements[, c("First.time", "Last.time")])))
+        Timestamp = as.vector(t(movements[, c("First.time", "Last.time")])),
+        stringsAsFactors = FALSE)
     } else {
       all.moves.line <- data.frame(
         plot.y = rep(movements$Array, each = 2),
-        Timestamp = as.vector(t(movements[, c("First.time", "Last.time")])))
+        Timestamp = as.vector(t(movements[, c("First.time", "Last.time")])),
+        stringsAsFactors = FALSE)
     }
     all.moves.line$plot.y <- factor(all.moves.line$plot.y, levels = levels(detections$plot.y))
     all.moves.line$Timestamp <- as.POSIXct(all.moves.line$Timestamp, tz = tz)
@@ -882,11 +885,13 @@ plotDetections <- function(input, tag, type, y.axis = c("auto", "stations", "arr
     if (y.axis == "stations") {
       simple.moves.line <- data.frame(
         plot.y = as.vector(t(valid.movements[, c("First.station", "Last.station")])),
-        Timestamp = as.vector(t(valid.movements[, c("First.time", "Last.time")])))
+        Timestamp = as.vector(t(valid.movements[, c("First.time", "Last.time")])),
+        stringsAsFactors = FALSE)
     } else {
       simple.moves.line <- data.frame(
         plot.y = rep(valid.movements$Array, each = 2),
-        Timestamp = as.vector(t(valid.movements[, c("First.time", "Last.time")])))
+        Timestamp = as.vector(t(valid.movements[, c("First.time", "Last.time")])),
+        stringsAsFactors = FALSE)
     }
     simple.moves.line$plot.y <- factor(simple.moves.line$plot.y, levels = levels(detections$plot.y))
     simple.moves.line$Timestamp <- as.POSIXct(simple.moves.line$Timestamp, tz = tz)
