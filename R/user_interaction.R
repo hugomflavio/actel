@@ -331,9 +331,9 @@ invalidateEvents <- function(displayed.moves, all.moves, detections, tag, GUI, s
               appendTo(c("Screen", "Report"), paste0("M: ", length(the.rows), " movement event(s) from tag ", tag," were rendered invalid per user command."))
             
             if (colnames(all.moves)[1] == "Section")
-              text.to.display <- "Would you like to render any more movement event invalid?(y/n/comment) "
+              text.to.display <- "Would you like to render any more movement events invalid?(y/n/comment) "
             else
-              text.to.display <- "Would you like to render any more movement event invalid, or expand an event?(y/n/comment) "
+              text.to.display <- "Would you like to render any more movement events invalid, or expand an event?(y/n/comment) "
 
             decision <- userInput(text.to.display,
                                   choices = c("y", "n", "comment"), tag = tag, hash = "# invalidate more?")

@@ -560,11 +560,17 @@ checkImpassables <- function(movements, tag, bio, spatial, detections, dotmat, G
   release <- unlist(strsplit(with(spatial, release.sites[release.sites$Standard.name == release, "Array"]), "|", fixed = TRUE))
 
   restart <- TRUE
+  first.time <- TRUE
   while (restart) {
     restart <- FALSE
     warning.counter <- 0
     the.warning <- NULL
     valid.moves <- movements[(Valid)]
+    if (!first.time) {
+      message("------------------------------------")
+      appendTo(c("Screen", "Warning"), "The last interaction did not solve the impassable problem! See remaining problems below.\n         You can also press ESC to abort the current run and alter your spatial.txt file.")
+      message("------------------------------------")
+    }
     # check release movement
     if (sum(movements$Valid) > 0) {
       if(all(is.na(dotmat[as.character(release), as.character(valid.moves$Array[1])]))) {
@@ -608,6 +614,7 @@ checkImpassables <- function(movements, tag, bio, spatial, detections, dotmat, G
                                       trigger = the.warning, GUI = GUI, force = TRUE, 
                                       save.tables.locally = save.tables.locally)
         restart <- TRUE
+        first.time <- FALSE
       } else { # nocov end
         stop("Preventing analysis from entering interactive mode in a non-interactive session.")
       }
