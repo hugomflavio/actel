@@ -1241,6 +1241,7 @@ checkDupSignals <- function(input, bio){
   appendTo("debug", "Running checkDupSignals.")
   tag.list <- extractSignals(names(input))
   signal_check <- suppressWarnings(as.numeric(unlist(strsplit(as.character(bio$Signal), "|", fixed = TRUE))))
+  signal_check <- signal_check[is.na(bio$CodeSpace)]
   failsafe <- match(tag.list, signal_check)
   if (any(table(failsafe) > 1)) {
     t1 <- cbind(names(input), signal_check[failsafe])
