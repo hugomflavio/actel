@@ -2,7 +2,7 @@
 
 Find out the main highlights of each update.
 
-## Development
+## actel 1.2.1
 
 Fixes:
   * Prevent crash in residency if the overall data period starts in winter time but the data for a given fish starts in summer time.
