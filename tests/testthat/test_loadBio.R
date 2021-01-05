@@ -182,8 +182,8 @@ test_that("loadBio can handle multi-sensor tags.", {
 	xbio$Signal[1] <- "4453|4454"
 	xbio$Sensor.unit <- NA
 	write.csv(xbio, "biometrics.csv", row.names = FALSE)
-	expect_message(bio <- loadBio("biometrics.csv", tz = "Europe/Copenhagen"),
-		"M: Multi-sensor tags detected. These tags will be referred to by their lowest signal value.", fixed = TRUE)
+	expect_error(bio <- loadBio("biometrics.csv", tz = "Europe/Copenhagen"),
+		"The number of provided sensor units and signals do not match for 56 row(s) of the biometrics.", fixed = TRUE)
 	file.remove("biometrics.csv")
 })
 

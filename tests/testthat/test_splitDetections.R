@@ -5,10 +5,9 @@ Sys.setenv(TZ = 'UTC')
 tests.home <- getwd()
 setwd(tempdir())
 
-if (dir.exists("detections")) {
-	warning("there was a detections folder already?")
+if (dir.exists("detections"))
 	unlink("detections", recursive = TRUE)
-}
+
 dir.create("detections")
 aux <- split(example.detections, example.detections$Receiver)
 for (i in names(aux)[1:3]) {
@@ -63,40 +62,15 @@ test_that("splitDetections can handle multi-sensor tags", {
 	expect_equal(unique(output$detections.list[[1]]$Signal), c(4454, 4453))
 	expect_equal(names(output$detections.list)[1], "R64K-4453")
 
-	xbio$Sensor.unit <- ""
-	expect_warning(output <- splitDetections(detections = detections, bio = xbio),
-		"The number of sensor units provided does not match the number of signals emitted ('' < '4453|4454').\n         Aborting sensor unit attribution.", fixed = TRUE)
-	expect_true(all(output$detections.list[[1]]$Sensor.Unit == "Temp"))
-	expect_true(all(output$detections.list[[2]]$Sensor.Unit == "Temp"))
-
-	xbio$Sensor.unit[1] <- "A|B|C"
-	expect_warning(output <- splitDetections(detections = detections, bio = xbio),
-		"The number of sensor units provided does not match the number of signals emitted ('A|B|C' > '4453|4454').\n         Aborting sensor unit attribution.", fixed = TRUE)
-	expect_true(all(output$detections.list[[1]]$Sensor.Unit == "Temp"))
-	expect_true(all(output$detections.list[[2]]$Sensor.Unit == "Temp"))
-
+	xbio$Sensor.unit <- NA
 	xbio$Sensor.unit[1] <- "A|B"
+	xbio$Sensor.unit[3] <- "A"
 	tryCatch(output <- splitDetections(detections = detections, bio = xbio), warning = function(w) stop("A warning was produced where it should not have been.", call = FALSE))
 	expect_equal(as.vector(with(output$detections.list[[1]], table(Signal, Sensor.Unit))), c(14, 0, 0, 24))
 	expect_equal(unique(output$detections.list[[1]]$Sensor.Unit), c("B", "A"))
 	expect_true(all(output$detections.list[[2]]$Sensor.Unit == "Temp"))
-
-	xbio$Sensor.unit[2] <- "A|B"
-	expect_warning(output <- splitDetections(detections = detections, bio = xbio),
-		"The tag with signal 4456 appears to have more than one sensor unit ('A|B'). Could there be an error in the input data?", fixed = TRUE)
-	expect_equal(unique(output$detections.list[[2]]$Sensor.Unit), "A|B")
-	
-	xbio$Sensor.unit[2] <- "A"
-	tryCatch(output <- splitDetections(detections = detections, bio = xbio), warning = function(w) stop("A warning was produced where it should not have been.", call = FALSE))
-	expect_equal(as.vector(with(output$detections.list[[1]], table(Signal, Sensor.Unit))), c(14, 0, 0, 24))
-	expect_equal(unique(output$detections.list[[1]]$Sensor.Unit), c("B", "A"))
-	expect_equal(unique(output$detections.list[[2]]$Sensor.Unit), "A")
-	expect_true(all(output$detections.list[[3]]$Sensor.Unit == "Temp"))
+	expect_equal(unique(output$detections.list[[3]]$Sensor.Unit), "A")
 })
-# n
-# n
-# n
-# n
 # n
 # n
 
