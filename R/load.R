@@ -1222,7 +1222,8 @@ compileDetections <- function(path = "detections", start.time = NULL, stop.time 
   output$Receiver <- as.factor(output$Receiver)
   output$CodeSpace <- as.factor(output$CodeSpace)
   # Convert codespaces
-  output <- convertCodes(input = output)
+  if (getOption("actel.auto.convert.codespaces", default = TRUE))
+    output <- convertCodes(input = output)
 
   # Compile transmitters
   output$Transmitter <- as.factor(paste(output$CodeSpace, output$Signal, sep = "-"))

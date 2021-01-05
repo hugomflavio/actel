@@ -57,7 +57,8 @@ Your biometrics file should look similar to this:
 ```{r, echo=FALSE, results='asis'}
 biometrics <- data.frame(
   Release.date = c("2018-02-01 10:05:00", "2018-02-01 10:10:00", "2018-02-01 10:15:00"),
-  Serial.nr = c("12340001", "A12-3456-1001", "19340301"),
+  Serial.nr = c("12340001", "A69-1105-1001", "19340301"),
+  Code.space = c("R64K", "A69-1105", "R64K"),
   Signal = c(1, 1001, 301),
   Length.mm = c(150, 160, 170),
   Weight.g = c(40, 60, 50),
@@ -75,6 +76,12 @@ Release.date
 
 Signal 
   : Corresponds to the code emitted by your tags. If you are unsure as to what signals are, you should ask the tag manufacturer more about the differences between code spaces and signals.
+
+
+Note:
+  : If you do not include a "Code.space" column, actel will pick the code space that appears in the detections. If you want to be really sure that you are really picking your transmitter (i.e. a given signal in a given code space), make sure to include the code space as well.
+  : Code spaces may have different names for different manufacturers. Currently, actel will convert the following name spaces automatically, unless the `preload()` function is being used: "A69-1008" to "R256", "A69-1206" to "R94K", "A69-1105" to "S256" and "A69-1303" to "R64K". To deactivate this automatic conversion, set `options(actel.auto.convert.codespaces = FALSE)`.
+
 
 The **Group** and **Release.site** columns are also important but, if you only have one group or one release site, actel can generate these columns for you. If this happens, you will receive a message:
 
