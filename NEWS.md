@@ -11,12 +11,13 @@ Fixes:
   * Fix bad formatting of the summary section in reports produced in Linux OS's.
 
 Changes:
-  * The argument `plot.detections.by` in functions explore, migration and residency has been renamed to `detections.y.axis`.
-  * The argument `type` in the function plotDetections has been renamed to `y.axis`.
+  * The argument `plot.detections.by` in functions explore(), migration() and residency() has been renamed to `detections.y.axis`.
+  * The argument `type` in the function plotDetections() has been renamed to `y.axis`.
 
 Enhancements:
   * Verify that deployments do not end before they start.
   * Improve verification of station and array names, to avoid troublesome characters slipping through and potentially crashing the analyses.
+  * The function plotDetections() has been expanded with the following arguments: `section.alias`, `x.label.format`, `only.valid` and `like.migration`.
 
 
 ## actel 1.2.0
