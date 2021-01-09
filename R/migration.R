@@ -516,7 +516,7 @@ migration <- function(
     release_nodes$Array <- spatial$release.sites$Array[match(release_nodes$Release.site, spatial$release.sites$Standard.name)]
     release_nodes$Combined <- paste(release_nodes[, 1], release_nodes[, 2], sep = ".")
 
-    overall.CJS <- assembleArrayCJS(mat = the.matrices, CJS = CJS.list, arrays = arrays, releases = release_nodes)
+    overall.CJS <- assembleArrayCJS(mat = the.matrices, CJS = CJS.list, arrays = arrays, releases = release_nodes, silent = FALSE)
 
     if (!is.null(replicates)) {
       intra.array.matrices <- getDualMatrices(replicates = replicates, CJS = overall.CJS, spatial = spatial, detections.list = valid.detections)
