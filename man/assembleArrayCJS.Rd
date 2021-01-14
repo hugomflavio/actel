@@ -4,7 +4,7 @@
 \alias{assembleArrayCJS}
 \title{Combine the individual CJS's of each array into a single table}
 \usage{
-assembleArrayCJS(mat, CJS, arrays, releases)
+assembleArrayCJS(mat, CJS, arrays, releases, silent = TRUE)
 }
 \arguments{
 \item{mat}{The presence/absence matrices.}
@@ -12,6 +12,8 @@ assembleArrayCJS(mat, CJS, arrays, releases)
 \item{CJS}{A list of CJS calculated for each array}
 
 \item{arrays}{A list containing information for each array.}
+
+\item{silent}{Logical: Should messages be printed? This argument is mainly intended for function calls running within actel's analyses.}
 }
 \value{
 A list containing the CJS absolute numbers and efficiency estimates

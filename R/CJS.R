@@ -226,7 +226,7 @@ breakMatricesByArray <- function(m, arrays, type = c("peers", "all"), verbose = 
 #'
 #' @keywords internal
 #'
-assembleArrayCJS <- function(mat, CJS, arrays, releases) {
+assembleArrayCJS <- function(mat, CJS, arrays, releases, silent = TRUE) {
   appendTo("debug", "Running assembleArrayCJS.")
   # Compile final objects
   absolutes <- matrix(nrow = 5, ncol = length(arrays))
@@ -263,8 +263,11 @@ assembleArrayCJS <- function(mat, CJS, arrays, releases) {
   fix.peers <- is.na(efficiency)
   for (i in 1:length(arrays)) {
     if (fix.zero[i]) {
-      # fix estimated for arrays with 0 efficiency.
-      absolutes["estimated", i] <- sum(absolutes["estimated", arrays[[i]]$before])
+      # fix estimated for arrays with 0 efficiency. # if any of the before is NA, this will be NA too.
+      if (!silent)
+        appendTo(c("Screen", "Report", "Warning"), paste0("Array '", names(arrays)[i], "' has 0 efficiency. Attempting to round estimated based on peers, if possible."))
+      if (!is.null(arrays[[i]]$before))
+        absolutes["estimated", i] <- sum(absolutes["estimated", arrays[[i]]$before])
     }
     if (fix.peers[i]) {
       # fix absolutes for arrays with no peers

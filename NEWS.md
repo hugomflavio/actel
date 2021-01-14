@@ -2,6 +2,11 @@
 
 Find out the main highlights of each update.
 
+## Development
+
+Fixes:
+  * Prevent crash in migration if an array has 0 efficiency and there are no arrays coming before it.
+
 ## actel 1.2.1
 
 Fixes:
