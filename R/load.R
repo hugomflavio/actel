@@ -234,7 +234,7 @@ readDot <- function (input = NULL, string = NULL, silent = FALSE) {
       stop("Could not find a '", input, "' file in the working directory.")
     lines <- readLines(input)
   } else {
-    lines <- unlist(strsplit(string, "\n|\t"))
+    lines <- unlist(strsplit(string, "\n|\t|\r\n"))
   }
   paths <- lines[grepl("[<-][->]", lines)]
   if (length(paths) == 0)
@@ -949,12 +949,20 @@ loadBio <- function(input, tz){
     stopAndReport("Could not recognise the data in the 'Release.date' column as POSIX-compatible timestamps. Please double-check the biometrics.")
   }
 
-  if (!any(grepl("^Signal$", colnames(bio)))){
+  if (!any(grepl("^Signal$", colnames(bio)))) {
     stopAndReport("The biometrics must contain an 'Signal' column.")
   }
 
   if (any(is.na(bio$Signal))) {
     stopAndReport("Some animals have no 'Signal' information. Please double-check the biometrics.")
+  }
+
+  if (any(grepl("^Code.space$", colnames(bio)))) {
+    appendTo(c("Screen", "Report"), "M: A Code.space column was found in the biometrics. Activating code space matching with the detections.")
+    if (any(is.na(bio$Code.space)) | any(bio$Code.space == "")) {
+      appendTo(c("Screen", "Report", "Warning"), "Not all signals have an associated code space. Using standard matching mode for those signals.")
+      bio$Code.space[bio$Code.space == ""] <- NA
+    }
   }
 
   if (any(grepl("|", bio$Signal, fixed = TRUE))) {
@@ -981,8 +989,25 @@ loadBio <- function(input, tz){
     }
   }
 
-  if (!expect_integer & !any(grepl("^Sensor.unit$", colnames(bio))))
-    appendTo(c("Screen", "Warning"), "Tags with multiple sensors are listed in the biometrics, but a 'Sensor.unit' column could not be found. Skipping sensor unit assignment.")
+  if (!expect_integer) { 
+    if(!any(grepl("^Sensor.unit$", colnames(bio)))) {
+      appendTo(c("Screen", "Warning"), "Tags with multiple sensors are listed in the biometrics, but a 'Sensor.unit' column could not be found. Skipping sensor unit assignment.")
+    } else {
+      bio$Sensor.unit <- as.character(bio$Sensor.unit) #failsafe in case all values are numeric, or NA.
+
+      A <- sapply(strsplit(bio$Signal, "|", fixed = TRUE), length)
+      pre_B <- strsplit(bio$Sensor.unit, "|", fixed = TRUE)
+      B <- sapply(pre_B, length)
+      B[sapply(pre_B, is.na)] <- 0
+
+      if (any(A != B))
+        stopAndReport("The number of provided sensor units and signals do not match for ", 
+          ifelse(sum(A != B) <= 10,
+                 paste0("row(s) ", paste0(which(A != B), collapse = ", ")), 
+                 paste0(sum(A != B), " row(s)")),
+          " of the biometrics.")
+    }
+  }
 
   if (!any(grepl("^Release.site$", colnames(bio)))) {
     appendTo("Screen", "M: No Release site has been indicated in the biometrics. Creating a 'Release.site' column to avoid function failure. Filling with 'unspecified'.")
@@ -1003,7 +1028,7 @@ loadBio <- function(input, tz){
     }
   }
   if (!any(grepl("^Group$", colnames(bio)))) {
-    appendTo("Screen", paste0("M: No 'Group' column found in the biometrics. Assigning all animals to group 'All'."))
+    appendTo(c("Screen", "Report"), paste0("M: No 'Group' column found in the biometrics. Assigning all animals to group 'All'."))
     bio$Group <- "All"
     bio$Group <- as.factor(bio$Group)
   } else {
@@ -1197,7 +1222,8 @@ compileDetections <- function(path = "detections", start.time = NULL, stop.time 
   output$Receiver <- as.factor(output$Receiver)
   output$CodeSpace <- as.factor(output$CodeSpace)
   # Convert codespaces
-  output <- convertCodes(input = output)
+  if (getOption("actel.auto.convert.codespaces", default = TRUE))
+    output <- convertCodes(input = output)
 
   # Compile transmitters
   output$Transmitter <- as.factor(paste(output$CodeSpace, output$Signal, sep = "-"))
@@ -1486,84 +1512,109 @@ splitDetections <- function(detections, bio, exclude.tags = NULL) {
   my.list <- excludeTags(input = my.list, exclude.tags = exclude.tags)
 
   checkNoDetections(input = my.list, bio = bio)
-  checkDupSignals(input = my.list, bio = bio)
+
+  if (!any(colnames(bio) == "Code.space") || any(is.na(bio$Code.space)))
+    checkDupSignals(input = my.list, bio = bio)
 
   appendTo("debug", "Debug: Creating 'trimmed.list'.")
 
-  # Find signal matches, including for double-signal tags
-  detected_signals <- extractSignals(names(my.list))
-  target_signals_list <- lapply(strsplit(as.character(bio$Signal), "|", fixed = TRUE), as.numeric)
-  aux <- lapply(1:length(target_signals_list), function(i) {
-    output <- rep(NA_integer_, length(detected_signals))
-    output[detected_signals %in% target_signals_list[[i]]] <- i
-    return(output)
-  })
-  signal_match <- combine(aux) # detected_signals that are part of the target_signals_list
+  # this dataframe serves as an index to the tags detected
+  detected <- data.frame(Code.space = extractCodeSpaces(names(my.list)),
+                         Signal = extractSignals(names(my.list)))
 
-  # Combine tables for multi-signal tags and transfer sensor units
-  if (any(table(signal_match) > 1)) {
-    to.combine <- names(which(table(signal_match) > 1))
-    for (i in to.combine) {
-      unordered_indexes <- which(signal_match %in% i)
-      if (any(grepl("^Sensor.unit$", colnames(bio)))) {
-        sensor_units <- unlist(strsplit(bio$Sensor.unit[as.numeric(i)], "|", fixed = TRUE))
-        if (length(sensor_units) != length(unordered_indexes)) {
-          appendTo(c("Screen", "Warning", "Report"),
-            paste0("The number of sensor units provided does not match the number of signals emitted ('",
-              bio$Sensor.unit[as.numeric(i)], "' ",
-              ifelse(length(sensor_units) > length(unordered_indexes), ">", "<"), " '",
-              bio$Signal[as.numeric(i)], "').\n         Aborting sensor unit attribution."))
+  # and this one as an index for the target tags
+  if (any(grepl("^Code.space$", colnames(bio))))
+    bio_aux <- bio[, c("Code.space", "Signal")]
+  else
+    bio_aux <- data.frame(Code.space = NA,
+                    Signal = bio$Signal)
+
+  bio_aux$Signal_expanded <- lapply(strsplit(as.character(bio$Signal), "|", fixed = TRUE), as.numeric)
+
+  if (any(grepl("^Sensor.unit$", colnames(bio))))
+    bio_aux$Sensor.unit_expanded <- strsplit(as.character(bio$Sensor.unit), "|", fixed = TRUE)
+  else
+    bio_aux$Sensor.unit_expanded <- NA
+
+  # to store the names as the lapply goes
+  trimmed_list_names <- c()
+
+  trimmed_list <- lapply(1:nrow(bio_aux), function(i) {
+    # cat(i, "\n")
+    
+    # create/reset variable to store the codespace
+    the_codespace <- c()
+
+    # This sapply grabs all entries that match the target signal(s) and code space (if relevant)    
+    list_matches <- sapply(bio_aux$Signal_expanded[[i]], function(j) {
+      signal_link <- detected$Signal == j
+      
+      if (sum(signal_link) == 0)
+        return(NA)
+      
+      if (sum(signal_link) > 1) # this should never happen because duplicated signals with no codespaces are handled by checkDupSignals
+        stopAndReport("Something went wrong when splitting the detections. This should not have happened. Contact the developer. (1)")
+    
+      if (is.na(bio_aux$Code.space[i])) {
+        the_codespace <<- unique(detected$Code.space[which(signal_link)])
+        return(which(signal_link))
+      } else {
+        codespace_link <- detected$Code.space[which(signal_link)] == bio_aux$Code.space[i]
+        if (sum(codespace_link) > 1) # Even if there are multiple codespaces, only one should fit the requested
+          stopAndReport("Something went wrong when splitting the detections. This should not have happened. Contact the developer. (2)")
+
+        if (sum(codespace_link) == 0) {
+          appendTo(c("Screen", "Report", "Warning"), 
+            paste0("Signal ", j, " was found in the detections, but its code space does not match the required ('", 
+              bio_aux$Code.space[i],"' != '", paste0(unique(detected$Code.space[which(signal_link)]), collapse = "', '"), 
+              "').\n         Are you sure the code space was written correctly? Discarding detections from alien code space(s)."))
+          return(NA)
         } else {
-          for (j in 1:length(sensor_units)) {
-            my.list[[unordered_indexes[j]]]$Sensor.Unit <- rep(sensor_units[j], nrow(my.list[[unordered_indexes[j]]]))
+          the_codespace <<- bio_aux$Code.space[i]
+          return(which(signal_link)[which(codespace_link)])
+        }
+      }
+    })
+
+    if (all(is.na(list_matches))) { # if the tag was not found, return empty
+      return(NULL)
+    } else { # otherwise, prepare tag name and include sensor units if present
+      trimmed_list_names <<- c(trimmed_list_names, paste0(the_codespace, "-", min(bio_aux$Signal_expanded[[i]])))
+      output <- my.list[list_matches]
+      if (any(grepl("^Sensor.unit$", colnames(bio)))) {
+        for (j in 1:length(output)) {
+          sensor_index <- match(extractSignals(names(output)[j]), bio_aux$Signal_expanded[[i]])
+          if (!is.na(bio_aux$Sensor.unit_expanded[[i]][sensor_index])) {
+            output[[j]]$Sensor.Unit <- rep(bio_aux$Sensor.unit_expanded[[i]][sensor_index], nrow(output[[j]]))
           }
         }
       }
-      indexes <- unordered_indexes[order(unordered_indexes)]
-      aux <- data.table::rbindlist(my.list[indexes])
-      aux <- aux[order(aux$Timestamp), ]
-      my.list[[indexes[1]]] <- aux
+      output <- data.table::rbindlist(output) # merge is required for multiple signal tags
+      output <- output[order(output$Timestamp), ]
+      return(output)
     }
-  }
+  })
+
+  # remove empty entries and then name the list
+  trimmed_list <- trimmed_list[!sapply(trimmed_list, is.null)]
+  names(trimmed_list) <- trimmed_list_names
 
   # Transfer transmitter names to bio
   lowest_target_signals <- sapply(bio$Signal, function(i) {
     min(as.numeric(unlist(strsplit(as.character(i), "|", fixed = TRUE))))
   })
-  link <- match(lowest_target_signals, detected_signals) # locations of the lowest_target_signals in the detected_signals
-  bio$Transmitter <- names(my.list)[link]
-
-  # extract target detections (keep only lowest signals per tag, reuse link from above)
-  trimmed.list <- my.list[na.exclude(link)]
-
-  # include sensor units for single signal tags, if relevant
-  if (any(grepl("^Sensor.unit$", colnames(bio)))) {
-    link <- match(extractSignals(names(trimmed.list)), bio$Signal)
-    aux <- names(trimmed.list)
-    trimmed.list <- lapply(1:length(link), function(i) {
-      output <- trimmed.list[[i]]
-      if (!is.na(link[i])) {
-        if (grepl("|", bio$Sensor.unit[link[i]], fixed = TRUE)) {
-          appendTo(c("Screen", "Warning", "Report"),
-            paste0("The tag with signal ", bio$Signal[link[i]],
-              " appears to have more than one sensor unit ('", bio$Sensor.unit[link[i]],
-              "'). Could there be an error in the input data?"))
-        }
-        if (!is.na(bio$Sensor.unit[link[i]]) & bio$Sensor.unit[link[i]] != "")
-          output$Sensor.Unit <- rep(bio$Sensor.unit[link[i]], nrow(output))
-      }
-      return(output)
-    })
-    names(trimmed.list) <- aux
-  }
+  link <- match(lowest_target_signals, extractSignals(names(trimmed_list))) # locations of the lowest_target_signals in the detected_signals
+  bio$Transmitter <- names(trimmed_list)[link]
 
   # Collect stray summary
-  if (any(is.na(signal_match))) {
-    collectStrays(input = my.list[is.na(signal_match)])
+  valid_tags <- as.character(unlist(lapply(trimmed_list, function(x) unique(x$Transmitter))))
+  stray_tags <- !names(my.list) %in% valid_tags
+  if (any(stray_tags)) {
+    collectStrays(input = my.list[stray_tags])
   }
   storeStrays()
 
-  return(list(detections.list = trimmed.list, bio = bio))
+  return(list(detections.list = trimmed_list, bio = bio))
 }
 
 #' Collect summary information on the tags detected but that are not part of the study.
