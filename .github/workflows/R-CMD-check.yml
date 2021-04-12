@@ -68,7 +68,7 @@ jobs:
       - name: Install system dependencies on macOS
         if: runner.os == 'macOS'
         run: |
-          brew cask install xquartz
+          brew install --cask xquartz
 
       - name: Install dependencies
         run: |
