@@ -234,7 +234,7 @@ readDot <- function (input = NULL, string = NULL, silent = FALSE) {
       stop("Could not find a '", input, "' file in the working directory.")
     lines <- readLines(input)
   } else {
-    lines <- unlist(strsplit(string, "\n|\t|\r\n"))
+    lines <- unlist(strsplit(string, "\n|\t"))
   }
   paths <- lines[grepl("[<-][->]", lines)]
   if (length(paths) == 0)
