@@ -800,29 +800,32 @@ printCircular <- function(times, bio, suffix = NULL){
 
     vertical.mar <- b + 2
    
-    {grDevices::svg(paste0(work.path, "times_", names(times)[i], suffix, ".svg"), 
-                    height = 5, width = 5, bg = "transparent")
-    
-    par(mar = c(b, (b + 2) / 2, 2, (b + 2) / 2), xpd = TRUE) # bottom, left, top, right
+    # The try call prevents the report from crashing down in the presence of unknown errors.
+    try(
+        {grDevices::svg(paste0(work.path, "times_", names(times)[i], suffix, ".svg"), 
+                        height = 5, width = 5, bg = "transparent")
+        
+        par(mar = c(b, (b + 2) / 2, 2, (b + 2) / 2), xpd = TRUE) # bottom, left, top, right
 
-    copyOfCirclePlotRad(main = names(times)[i], shrink = 1.05, xlab = "", ylab = "")
+        copyOfCirclePlotRad(main = names(times)[i], shrink = 1.05, xlab = "", ylab = "")
 
-    params <- myRoseDiag(trim.times, bins = 24, radii.scale = "linear",
-      prop = prop, tcl.text = -0.1, tol = 0.05, col = colours.to.use, border = "black")
+        params <- myRoseDiag(trim.times, bins = 24, radii.scale = "linear",
+          prop = prop, tcl.text = -0.1, tol = 0.05, col = colours.to.use, border = "black")
 
-    roseMean(trim.times, col = scales::alpha(params$col, 1), mean.length = c(0.07, -0.07), mean.lwd = 6,
-      box.range = "std.error", fill = "white", horizontal.border = "black", 
-      vertical.border = scales::alpha(sapply(params$col, darken), 1), box.size = c(1.015, 0.985), 
-      edge.length = c(0.025, -0.025), edge.lwd = 2)
+        roseMean(trim.times, col = scales::alpha(params$col, 1), mean.length = c(0.07, -0.07), mean.lwd = 6,
+          box.range = "std.error", fill = "white", horizontal.border = "black", 
+          vertical.border = scales::alpha(sapply(params$col, darken), 1), box.size = c(1.015, 0.985), 
+          edge.length = c(0.025, -0.025), edge.lwd = 2)
 
-    ringsRel(plot.params = params, border = "black", ring.text = TRUE,
-      ring.text.pos = 0.07, rings.lty = "f5", ring.text.cex = 0.8)
+        ringsRel(plot.params = params, border = "black", ring.text = TRUE,
+          ring.text.pos = 0.07, rings.lty = "f5", ring.text.cex = 0.8)
 
-    legend(x = xlegend, y = ylegend, xjust = xjust, ncol = ncol,
-      legend = paste(names(trim.times), " (", unlist(lapply(trim.times, function(x) sum(!is.na(x)))), ")", sep =""),
-      fill = params$col, bty = "n", x.intersp = 0.3, cex = 0.8)
+        legend(x = xlegend, y = ylegend, xjust = xjust, ncol = ncol,
+          legend = paste(names(trim.times), " (", unlist(lapply(trim.times, function(x) sum(!is.na(x)))), ")", sep =""),
+          fill = params$col, bty = "n", x.intersp = 0.3, cex = 0.8)
 
-    grDevices::dev.off()}
+        grDevices::dev.off()},
+      silent = TRUE)
 
     if (i %% 2 == 0) {
       if (file.exists(paste0(work.path, "times_", names(times)[i], suffix, ".svg")))

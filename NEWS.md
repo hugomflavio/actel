@@ -7,6 +7,7 @@ Find out the main highlights of each update.
 Fixes:
   * Prevent crash in migration if an array has 0 efficiency and there are no arrays coming before it.
   * Prevent crash if the dot file/string line breaks are coded as `\r\n`.
+  * Prevent crash while printing circular plots for the reports on Macs where the svg engines are not working.
 
 Enhancements:
   * New "Code.spaces" column in the biometrics allows the user to specificy the code space of the target tags.
