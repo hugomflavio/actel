@@ -311,7 +311,9 @@ plotSensors <- function(input, tag, sensor, title = tag, xlab, ylab, pcol, psize
 #' @param title An optional title for the plot.
 #' @param xlab,ylab Optional axis names for the plot. If left empty, default axis names will be added.
 #' @param lwd The line width, only relevant for line plots.
-#' @param col The colour of the line or bars. Defaults to blue.
+#' @param col The colour of the lines or bars.
+#' @param by.group Logical: Should the data be presented separately for each group?
+#' @param y.style The style of the y axis. Either "absolute", for the number of animals that arrive in each day, or "relative", for the proportion of animals over the total number of animals that arrived.
 #' @param type The type of plot to be drawn. By default, a line is plotted if cumulative = TRUE, and bars are plotted otherwise.
 #' @param timestep The time resolution for the grouping of the results. Defaults to "days", but can be set to "hours" and "mins" (at the expense of computing time).
 #' @param cumulative Logical. If TRUE, a cumulative plot of arrivals is drawn, otherwise the number of tags simultaneously present at the array(s) is drawn.
@@ -333,13 +335,19 @@ plotSensors <- function(input, tag, sensor, title = tag, xlab, ylab, pcol, psize
 #' 
 #' @export
 #' 
-plotArray <- function(input, arrays, title, xlab, ylab, lwd = 1, col = "#56B4E9", 
+plotArray <- function(input, arrays, title, xlab, ylab, lwd = 1, col, by.group = TRUE, y.style = c("absolute", "relative"),
   type = c("default", "bars", "lines"), timestep = c("days", "hours", "mins"), cumulative = FALSE) {
+  
+  cbPalette <- c("#56B4E9", "#E69F00", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7", "#999999")
+  names(cbPalette) <- c("Blue", "Orange", "Green", "Yellow", "Darkblue", "Darkorange", "Pink", "Grey")
+
   x <- NULL
   y <- NULL
+  Group <- NULL
 
   timestep <- match.arg(timestep)
   type <- match.arg(type)
+  y.style <- match.arg(y.style)
 
   if (type == "default") {
     if (cumulative)
@@ -357,7 +365,32 @@ plotArray <- function(input, arrays, title, xlab, ylab, lwd = 1, col = "#56B4E9"
   if (any(link <- is.na(match(arrays, names(input$arrays)))))
     stop("Could not find array(s) '", paste(arrays[link], collapse = "', '"), "' in the study area.", call. = FALSE)
 
+  n.groups <- length(unique(input$status.df$Group))
+  
+  if (missing(col)) {
+    if (by.group) {
+      if (n.groups < 8)
+        col <- cbPalette[1:n.groups]
+      else
+        col <- gg_colour_hue(n.groups)
+      names(col) <- unique(input$status.df$Group)
+    } else {
+      col <- cbPalette[1]
+      names(col) <- "All"
+    }
+  } else {
+    if (by.group) {
+      if (length(col) != n.groups)
+        stop("The number of colours provided does not match the number of groups in the analysis.", call. = FALSE)
+      names(col) <- unique(input$status.df$Group)      
+    } else {
+      col <- col[1]
+      names(col) <- "All"
+    }
+  }
+
   array.string <- paste0("^", arrays, "$", collapse = "|")
+
   # choose title
   if (missing(title)) {
     if (cumulative)
@@ -368,8 +401,8 @@ plotArray <- function(input, arrays, title, xlab, ylab, lwd = 1, col = "#56B4E9"
 
   # extract information
   first.time <- as.POSIXct(NA)[-1]
-  last.time <- as.POSIXct(NA)[-1]
-  
+  last.time <- as.POSIXct(NA)[-1]  
+
   plot.list <- lapply(names(input$valid.movements), function(tag) {
     # cat(tag, "\n")
     moves <- as.data.frame(input$valid.movements[[tag]])
@@ -385,13 +418,7 @@ plotArray <- function(input, arrays, title, xlab, ylab, lwd = 1, col = "#56B4E9"
       return(NULL)
     }
   })
-
-  attributes(first.time)$tzone <- input$rsp.info$tz
-  attributes(last.time)$tzone <- input$rsp.info$tz
-
-  if (is.null(first.time) | is.null(last.time))
-    stop("Not enough valid data to draw a plot. Aborting.", call. = FALSE)
-
+  names(plot.list) <- names(input$valid.movements)
   plot.list <- plot.list[!sapply(plot.list, is.null)]
 
   if (cumulative)
@@ -410,46 +437,126 @@ plotArray <- function(input, arrays, title, xlab, ylab, lwd = 1, col = "#56B4E9"
   if (timestep == "mins")
     seconds <- 60
 
+  attributes(first.time)$tzone <- input$rsp.info$tz
+  attributes(last.time)$tzone <- input$rsp.info$tz
+
   timerange <- seq(from = first.time, to = last.time, by = seconds)  
 
-  plotdata <- data.frame(x = timerange, y = rep(0, length(timerange)))
+  if (is.null(first.time) | is.null(last.time))
+    stop("Not enough valid data to draw a plot. Aborting.", call. = FALSE)
 
-  capture <- lapply(plot.list, function(x) {
-    to.add <- rep(0, nrow(plotdata))
-    if (cumulative) {
-      arrived.here <- which(x$First.time[1] == timerange)
-      to.add[arrived.here:length(to.add)] <- 1
-    } else {
-      arrived.here <- sapply(x$First.time, function(i) which(i == timerange))
-      left.here <- sapply(x$Last.time, function(i) which(i == timerange))
-      for(i in 1:length(arrived.here))
-        to.add[arrived.here[i]:left.here[i]] <- 1
+  if (by.group) {
+    link <- match(names(plot.list), input$status.df$Transmitter)
+    group.names <- input$status.df$Group[link]
+  
+    plotdata <- lapply(unique(group.names), function (the.group) {
+      trimmed.list <- plot.list[group.names == the.group]
+      aux <- data.frame(x = timerange)
+      aux[, as.character(the.group)] <- 0
+
+      capture <- lapply(trimmed.list, function(x) {
+        to.add <- rep(0, nrow(aux))
+        if (cumulative) {
+          arrived.here <- which(x$First.time[1] == timerange)
+          to.add[arrived.here:length(to.add)] <- 1
+        } else {
+          arrived.here <- sapply(x$First.time, function(i) which(i == timerange))
+          left.here <- sapply(x$Last.time, function(i) which(i == timerange))
+          for (i in 1:length(arrived.here))
+            to.add[arrived.here[i]:left.here[i]] <- 1
+        }
+        aux[, as.character(the.group)] <<- aux[, as.character(the.group)] + to.add
+      })
+
+      if (y.style == "relative") {
+        if (cumulative)
+          aux[, as.character(the.group)] <- aux[, as.character(the.group)] / max(aux[, as.character(the.group)])
+        else
+          aux[, as.character(the.group)] <- aux[, as.character(the.group)] / sum(aux[, as.character(the.group)])
+      }
+
+      return(aux)
+    })
+
+    names(plotdata) <- unique(group.names)
+
+  } else {
+    plotdata <- data.frame(x = timerange, All = rep(0, length(timerange)))
+
+    capture <- lapply(plot.list, function(x) {
+      to.add <- rep(0, nrow(plotdata))
+      if (cumulative) {
+        arrived.here <- which(x$First.time[1] == timerange)
+        to.add[arrived.here:length(to.add)] <- 1
+      } else {
+        arrived.here <- sapply(x$First.time, function(i) which(i == timerange))
+        left.here <- sapply(x$Last.time, function(i) which(i == timerange))
+        for(i in 1:length(arrived.here))
+          to.add[arrived.here[i]:left.here[i]] <- 1
+      }
+      plotdata$All <<- plotdata$All + to.add
+    })
+
+    if (y.style == "relative") {
+      if (cumulative)
+        plotdata$All <- plotdata$All / max(plotdata$All)
+      else
+        plotdata$All <- plotdata$All / sum(plotdata$All)
     }
-    plotdata$y <<- plotdata$y + to.add
-  })
+
+    plotdata <- list(All = plotdata)
+  }
 
   if (type == "lines") {
-    aux1 <- plotdata
-    aux1$x <- aux1$x - (seconds / 2)
-    aux1$index <- seq(from = 1, to = nrow(aux1) * 2 - 1, by = 2)
+    recipient <- lapply(plotdata, function(x) {
+      aux1 <- x
+      aux1$x <- aux1$x - (seconds / 2)
+      aux1$index <- seq(from = 1, to = nrow(aux1) * 2 - 1, by = 2)
 
-    aux2 <- plotdata
-    aux2$x <- aux2$x + (seconds / 2)
-    aux2$index <- seq(from = 2, to = nrow(aux2) * 2, by = 2)
+      aux2 <- x
+      aux2$x <- aux2$x + (seconds / 2)
+      aux2$index <- seq(from = 2, to = nrow(aux2) * 2, by = 2)
 
-    plotdata <- rbind(aux1, aux2)
-    plotdata <- plotdata[order(plotdata$index), ]
+      x <- rbind(aux1, aux2)
+
+      x <- x[order(x$index), ]
+
+      output <- reshape2::melt(x, id.vars = c("x", "index"), variable.name = "Group", value.name = "y")
+
+      return(output)
+    })
+  } else {
+    recipient <- lapply(plotdata, function(x) {
+      x$Group <- colnames(x)[2]
+      colnames(x)[2] <- "y"
+      return(x)
+    })
+  }
+    
+  plotdata <- data.table::rbindlist(recipient)
+
+  if (missing(xlab))
+    xlab <- paste("tz:", input$rsp.info$tz)
+
+  if (missing(ylab)) {
+    if (y.style == "absolute")
+      ylab <- "Arrivals (n)"
+    else
+      ylab <- "Arrivals (proportion)"
   }
 
-  p <- ggplot2::ggplot(data = plotdata, ggplot2::aes(x = x, y = y))
+  p <- ggplot2::ggplot(data = plotdata, ggplot2::aes(x = x, y = y, col = Group, fill = Group))
   if (type == "bars") {
-    p <- p + ggplot2::geom_bar(stat = "identity", fill = col)
+    p <- p + ggplot2::geom_bar(stat = "identity", position = ggplot2::position_dodge2(preserve = "single", padding = 0))
     p <- p + ggplot2::scale_y_continuous(expand = c(0, 0, 0.05, 0))
+    p <- p + ggplot2::scale_fill_manual(values = col)
   }
-  if (type == "lines")
-    p <- p + ggplot2::geom_path(size = lwd, col = col)
+  if (type == "lines") {
+    p <- p + ggplot2::geom_path(size = lwd)
+    p <- p + ggplot2::scale_colour_manual(values = col)
+  }
   p <- p + ggplot2::theme_bw()
-  p <- p + ggplot2::labs(title = title, x = ifelse(missing(xlab), paste("tz:", input$rsp.info$tz), xlab), y = ifelse(missing(ylab), "n", ylab))
+  p <- p + ggplot2::labs(title = title, x = xlab, y = ylab)
   return(p)
 }
 

@@ -11,7 +11,9 @@ plotArray(
   xlab,
   ylab,
   lwd = 1,
-  col = "#56B4E9",
+  col,
+  by.group = TRUE,
+  y.style = c("absolute", "relative"),
   type = c("default", "bars", "lines"),
   timestep = c("days", "hours", "mins"),
   cumulative = FALSE
@@ -28,7 +30,11 @@ plotArray(
 
 \item{lwd}{The line width, only relevant for line plots.}
 
-\item{col}{The colour of the line or bars. Defaults to blue.}
+\item{col}{The colour of the lines or bars.}
+
+\item{by.group}{Logical: Should the data be presented separately for each group?}
+
+\item{y.style}{The style of the y axis. Either "absolute", for the number of animals that arrive in each day, or "relative", for the proportion of animals over the total number of animals that arrived.}
 
 \item{type}{The type of plot to be drawn. By default, a line is plotted if cumulative = TRUE, and bars are plotted otherwise.}
 

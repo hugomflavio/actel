@@ -10,7 +10,8 @@ Fixes:
   * Prevent crash while printing circular plots for the reports on Macs where the svg engines are not working.
 
 Enhancements:
-  * New "Code.spaces" column in the biometrics allows the user to specificy the code space of the target tags.
+  * New `Code.spaces` column in the biometrics allows the user to specificy the code space of the target tags.
+  * New arguments in plotArray(): `by.group` and `y.style`. See function documentation for more details.
 
 ## actel 1.2.1
 
