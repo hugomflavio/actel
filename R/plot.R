@@ -399,7 +399,7 @@ plotArray <- function(input, arrays, title, xlab, ylab, lwd = 1, col, by.group =
       title <- paste(paste(arrays, collapse = "|"), "- Simultaneous presence")
   }
 
-  # extract information
+  # extract information as well as time ranges
   first.time <- as.POSIXct(NA)[-1]
   last.time <- as.POSIXct(NA)[-1]  
 
@@ -421,6 +421,9 @@ plotArray <- function(input, arrays, title, xlab, ylab, lwd = 1, col, by.group =
   names(plot.list) <- names(input$valid.movements)
   plot.list <- plot.list[!sapply(plot.list, is.null)]
 
+  attributes(first.time)$tzone <- input$rsp.info$tz
+  attributes(last.time)$tzone <- input$rsp.info$tz
+
   if (cumulative)
     last.time <- round.POSIXt(max(first.time), units = timestep)
   else
@@ -437,9 +440,6 @@ plotArray <- function(input, arrays, title, xlab, ylab, lwd = 1, col, by.group =
   if (timestep == "mins")
     seconds <- 60
 
-  attributes(first.time)$tzone <- input$rsp.info$tz
-  attributes(last.time)$tzone <- input$rsp.info$tz
-
   timerange <- seq(from = first.time, to = last.time, by = seconds)  
 
   if (is.null(first.time) | is.null(last.time))
@@ -454,7 +454,9 @@ plotArray <- function(input, arrays, title, xlab, ylab, lwd = 1, col, by.group =
       aux <- data.frame(x = timerange)
       aux[, as.character(the.group)] <- 0
 
+      # counter <- 1
       capture <- lapply(trimmed.list, function(x) {
+        # cat(counter, "\n"); counter <<- counter + 1
         to.add <- rep(0, nrow(aux))
         if (cumulative) {
           arrived.here <- which(x$First.time[1] == timerange)
@@ -545,14 +547,15 @@ plotArray <- function(input, arrays, title, xlab, ylab, lwd = 1, col, by.group =
       ylab <- "Arrivals (proportion)"
   }
 
-  p <- ggplot2::ggplot(data = plotdata, ggplot2::aes(x = x, y = y, col = Group, fill = Group))
+  p <- ggplot2::ggplot(data = plotdata, ggplot2::aes(x = x, y = y))
   if (type == "bars") {
-    p <- p + ggplot2::geom_bar(stat = "identity", position = ggplot2::position_dodge2(preserve = "single", padding = 0))
+    p <- p + ggplot2::geom_bar(stat = "identity", position = ggplot2::position_dodge2(preserve = "single", padding = 0),
+                               ggplot2::aes(fill = Group))
     p <- p + ggplot2::scale_y_continuous(expand = c(0, 0, 0.05, 0))
     p <- p + ggplot2::scale_fill_manual(values = col)
   }
   if (type == "lines") {
-    p <- p + ggplot2::geom_path(size = lwd)
+    p <- p + ggplot2::geom_path(size = lwd, ggplot2::aes(col = Group))
     p <- p + ggplot2::scale_colour_manual(values = col)
   }
   p <- p + ggplot2::theme_bw()

@@ -16,10 +16,10 @@ test_that("plotArray works properly", {
 	tryCatch(plotArray(example.results, arrays = "A1", timestep = "hours"),
 	warning = function(w) stop("plotArray threw an unexpected warning!\n", w))
 
-	tryCatch(plotArray(example.results, arrays = "A1", timestep = "mins"),
+	tryCatch(plotArray(example.results, arrays = "A1", timestep = "hours", cumulative = TRUE, y.style = "relative"),
 	warning = function(w) stop("plotArray threw an unexpected warning!\n", w))
 
-	tryCatch(plotArray(example.results, arrays = c("A1", "A2"), cumulative = TRUE),
+	tryCatch(plotArray(example.results, arrays = c("A1", "A2"), cumulative = TRUE, by.group = FALSE),
 	warning = function(w) stop("plotArray threw an unexpected warning!\n", w))
 
 	expect_is("The real tests are above, this is just to prevent test_that from complaining", "character")
