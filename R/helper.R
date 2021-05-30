@@ -594,7 +594,10 @@ recoverLog <- function(file, overwrite = FALSE) {
     stop("No crash logs found.", call. = FALSE)
 
   if (missing(file))
-    stop("Please state the name of the output file", call. = FALSE)
+    stop("Please state the name of the output file using the 'file' argument", call. = FALSE)
+
+  if (!is.character(file) | length(file) != 1)
+    stop("'file' must be a single character string.", call. = FALSE)
 
   if (!grepl(".txt$", file))
     file <- paste0(file, ".txt")
