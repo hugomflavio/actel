@@ -560,12 +560,12 @@ plotArray <- function(input, arrays, title, xlab, ylab, lwd = 1, col, by.group =
 
   if (missing(ylab)) {
     if (y.style == "absolute") {
-      if (cumulative & ladder.type == "arrival")
+      if (cumulative & ladder.type == "departure")
         ylab <- "Departures (n)"
       else
         ylab <- "Arrivals (n)"
     } else {
-      if (cumulative & ladder.type == "arrival")
+      if (cumulative & ladder.type == "departure")
         ylab <- "Departures (proportion)"
       else
         ylab <- "Arrivals (proportion)"
