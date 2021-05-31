@@ -16,7 +16,8 @@ plotArray(
   y.style = c("absolute", "relative"),
   type = c("default", "bars", "lines"),
   timestep = c("days", "hours", "mins"),
-  cumulative = FALSE
+  cumulative = FALSE,
+  ladder.type = c("arrival", "departure")
 )
 }
 \arguments{
@@ -41,6 +42,8 @@ plotArray(
 \item{timestep}{The time resolution for the grouping of the results. Defaults to "days", but can be set to "hours" and "mins" (at the expense of computing time).}
 
 \item{cumulative}{Logical. If TRUE, a cumulative plot of arrivals is drawn, otherwise the number of tags simultaneously present at the array(s) is drawn.}
+
+\item{ladder.type}{Type of cumulative plot to show. "arrival" to plot the moments of arrival, or "departure" to plot the moments of departure. Not applicable for non-cumulative plots.}
 }
 \value{
 A ggplot object.

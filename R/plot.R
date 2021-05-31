@@ -317,6 +317,7 @@ plotSensors <- function(input, tag, sensor, title = tag, xlab, ylab, pcol, psize
 #' @param type The type of plot to be drawn. By default, a line is plotted if cumulative = TRUE, and bars are plotted otherwise.
 #' @param timestep The time resolution for the grouping of the results. Defaults to "days", but can be set to "hours" and "mins" (at the expense of computing time).
 #' @param cumulative Logical. If TRUE, a cumulative plot of arrivals is drawn, otherwise the number of tags simultaneously present at the array(s) is drawn.
+#' @param ladder.type Type of cumulative plot to show. "arrival" to plot the moments of arrival, or "departure" to plot the moments of departure. Not applicable for non-cumulative plots.
 #'
 #' @return A ggplot object.
 #'
@@ -336,7 +337,7 @@ plotSensors <- function(input, tag, sensor, title = tag, xlab, ylab, pcol, psize
 #' @export
 #' 
 plotArray <- function(input, arrays, title, xlab, ylab, lwd = 1, col, by.group = TRUE, y.style = c("absolute", "relative"),
-  type = c("default", "bars", "lines"), timestep = c("days", "hours", "mins"), cumulative = FALSE) {
+  type = c("default", "bars", "lines"), timestep = c("days", "hours", "mins"), cumulative = FALSE, ladder.type = c("arrival", "departure")) {
   
   cbPalette <- c("#56B4E9", "#E69F00", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7", "#999999")
   names(cbPalette) <- c("Blue", "Orange", "Green", "Yellow", "Darkblue", "Darkorange", "Pink", "Grey")
@@ -348,6 +349,11 @@ plotArray <- function(input, arrays, title, xlab, ylab, lwd = 1, col, by.group =
   timestep <- match.arg(timestep)
   type <- match.arg(type)
   y.style <- match.arg(y.style)
+
+  if (!missing(ladder.type) & !cumulative)
+    warning("'ladder.type' was set, but cumulative = FALSE. Ignoring ladder.type.", immediate. = TRUE, call. = FALSE)
+
+  ladder.type <- match.arg(ladder.type)
 
   if (type == "default") {
     if (cumulative)
@@ -393,8 +399,12 @@ plotArray <- function(input, arrays, title, xlab, ylab, lwd = 1, col, by.group =
 
   # choose title
   if (missing(title)) {
-    if (cumulative)
-      title <- paste(paste(arrays, collapse = "|"), "- Cumulative arrivals")
+    if (cumulative) {
+      if (ladder.type == "arrival")
+        title <- paste(paste(arrays, collapse = "|"), "- Cumulative arrivals")
+      else
+        title <- paste(paste(arrays, collapse = "|"), "- Cumulative departures")        
+    }
     else
       title <- paste(paste(arrays, collapse = "|"), "- Simultaneous presence")
   }
@@ -459,13 +469,18 @@ plotArray <- function(input, arrays, title, xlab, ylab, lwd = 1, col, by.group =
         # cat(counter, "\n"); counter <<- counter + 1
         to.add <- rep(0, nrow(aux))
         if (cumulative) {
-          arrived.here <- which(x$First.time[1] == timerange)
-          to.add[arrived.here:length(to.add)] <- 1
+          if (ladder.type == "arrival")
+            start.here <- which(x$First.time[1] == timerange)
+          else
+            start.here <- which(x$Last.time[1] == timerange)
+
+          to.add[start.here:length(to.add)] <- 1
         } else {
-          arrived.here <- sapply(x$First.time, function(i) which(i == timerange))
-          left.here <- sapply(x$Last.time, function(i) which(i == timerange))
-          for (i in 1:length(arrived.here))
-            to.add[arrived.here[i]:left.here[i]] <- 1
+          start.here <- sapply(x$First.time, function(i) which(i == timerange))
+          stop.here <- sapply(x$Last.time, function(i) which(i == timerange))
+
+          for (i in 1:length(start.here))
+            to.add[start.here[i]:stop.here[i]] <- 1
         }
         aux[, as.character(the.group)] <<- aux[, as.character(the.group)] + to.add
       })
@@ -488,13 +503,16 @@ plotArray <- function(input, arrays, title, xlab, ylab, lwd = 1, col, by.group =
     capture <- lapply(plot.list, function(x) {
       to.add <- rep(0, nrow(plotdata))
       if (cumulative) {
-        arrived.here <- which(x$First.time[1] == timerange)
-        to.add[arrived.here:length(to.add)] <- 1
+          if (ladder.type == "arrival")
+            start.here <- which(x$First.time[1] == timerange)
+          else
+            start.here <- which(x$Last.time[1] == timerange)
+        to.add[start.here:length(to.add)] <- 1
       } else {
-        arrived.here <- sapply(x$First.time, function(i) which(i == timerange))
-        left.here <- sapply(x$Last.time, function(i) which(i == timerange))
-        for(i in 1:length(arrived.here))
-          to.add[arrived.here[i]:left.here[i]] <- 1
+        start.here <- sapply(x$First.time, function(i) which(i == timerange))
+        stop.here <- sapply(x$Last.time, function(i) which(i == timerange))
+        for(i in 1:length(start.here))
+          to.add[start.here[i]:stop.here[i]] <- 1
       }
       plotdata$All <<- plotdata$All + to.add
     })
