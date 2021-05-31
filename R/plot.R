@@ -559,10 +559,17 @@ plotArray <- function(input, arrays, title, xlab, ylab, lwd = 1, col, by.group =
     xlab <- paste("tz:", input$rsp.info$tz)
 
   if (missing(ylab)) {
-    if (y.style == "absolute")
-      ylab <- "Arrivals (n)"
-    else
-      ylab <- "Arrivals (proportion)"
+    if (y.style == "absolute") {
+      if (cumulative & ladder.type == "arrival")
+        ylab <- "Departures (n)"
+      else
+        ylab <- "Arrivals (n)"
+    } else {
+      if (cumulative & ladder.type == "arrival")
+        ylab <- "Departures (proportion)"
+      else
+        ylab <- "Arrivals (proportion)"
+    }
   }
 
   p <- ggplot2::ggplot(data = plotdata, ggplot2::aes(x = x, y = y))
