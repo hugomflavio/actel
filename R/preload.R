@@ -257,7 +257,7 @@ preloadDetections <- function(input, tz, start.time = NULL, stop.time = NULL) {
 	}
 
 	if (!inherits(input$Timestamp, "POSIXct")) {
-		appendTo(c("Screen", "Report"), "M: Converting detection timestamps to POSIX objects")
+		appendTo(c("Screen", "Report"), "M: Converting detection timestamps to POSIX objects.")
 		input$Timestamp <- fasttime::fastPOSIXct(input$Timestamp, tz = "UTC")
     if (any(is.na(input$Timestamp)))
       stop("Converting the timestamps failed. Aborting.", call. = FALSE)

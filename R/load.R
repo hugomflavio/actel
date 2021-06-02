@@ -1552,10 +1552,10 @@ splitDetections <- function(detections, bio, exclude.tags = NULL) {
       if (sum(signal_link) == 0)
         return(NA)
       
-      if (sum(signal_link) > 1) # this should never happen because duplicated signals with no codespaces are handled by checkDupSignals
-        stopAndReport("Something went wrong when splitting the detections. This should not have happened. Contact the developer. (1)")
-    
       if (is.na(bio_aux$Code.space[i])) {
+        if (sum(signal_link) > 1) # this should never happen because duplicated signals with no codespaces are handled by checkDupSignals
+          stopAndReport("Something went wrong when splitting the detections. This should not have happened. Contact the developer. (1)")
+    
         the_codespace <<- unique(detected$Code.space[which(signal_link)])
         return(which(signal_link))
       } else {
