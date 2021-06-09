@@ -38,10 +38,10 @@
 #'  issued.
 #' @param jump.error If a tag crosses a number of arrays equal or greater than
 #'  \code{jump.error} without being detected, user intervention is suggested.
-#'  If left NULL (default), user intervention is never suggested.
+#'  Defaults to 3. To disable user intervention suggestions, set to Inf.
 #' @param jump.warning If a tag crosses a number of arrays equal or greater
-#'  than \code{jump.warning} without being detected, a warning is issued. If left
-#'  NULL (default), no warnings are issued.
+#'  than \code{jump.warning} without being detected, a warning is issued. Defaults
+#'  to 2. To disable jump warnings, set to Inf.
 #' @param max.interval The number of minutes that must pass between detections
 #'  for a new event to be created. Defaults to 60.
 #' @param minimum.detections For tags with only one movement event, defines the

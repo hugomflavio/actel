@@ -36,12 +36,12 @@ checkJumpDistance(
 \item{dotmat}{The matrix of distances between arrays.}
 
 \item{jump.warning}{If a tag crosses a number of arrays equal or greater
-than \code{jump.warning} without being detected, a warning is issued. If left
-NULL (default), no warnings are issued.}
+than \code{jump.warning} without being detected, a warning is issued. Defaults
+to 2. To disable jump warnings, set to Inf.}
 
 \item{jump.error}{If a tag crosses a number of arrays equal or greater than
 \code{jump.error} without being detected, user intervention is suggested.
-If left NULL (default), user intervention is never suggested.}
+Defaults to 3. To disable user intervention suggestions, set to Inf.}
 
 \item{GUI}{One of "needed", "always" or "never". If "needed", a new window is
 opened to inspect the movements only if the movements table is too big to be
