@@ -419,10 +419,18 @@ plotArray <- function(input, arrays, title, xlab, ylab, lwd = 1, col, by.group =
     output <- moves[grepl(array.string, moves$Array), ]
 
     if (nrow(output) > 0) {
-      first.time <<- c(first.time, output$First.time[1])
+      output$First.time <- as.POSIXct(round.POSIXt(output$First.time, units = timestep))
+      output$Last.time <- as.POSIXct(round.POSIXt(output$Last.time, units = timestep))
+
+      # If the period starts in daylight saving time: Standardize so the break points are in "normal" time
+      if (as.POSIXlt(output$First.time[1])$isdst == 1)
+        output$First.time <- output$First.time + 3600
+
+      if (as.POSIXlt(output$Last.time[1])$isdst == 1)
+        output$Last.time <- output$Last.time + 3600
+      
       last.time <<- c(last.time, output$Last.time[nrow(output)])
-      output$First.time <- round.POSIXt(output$First.time, units = timestep)
-      output$Last.time <- round.POSIXt(output$Last.time, units = timestep)
+      first.time <<- c(first.time, output$First.time[1])
       return(output)
     } else {
       return(NULL)
@@ -435,11 +443,11 @@ plotArray <- function(input, arrays, title, xlab, ylab, lwd = 1, col, by.group =
   attributes(last.time)$tzone <- input$rsp.info$tz
 
   if (cumulative)
-    last.time <- round.POSIXt(max(first.time), units = timestep)
+    last.time <- max(first.time)
   else
-    last.time <- round.POSIXt(max(last.time), units = timestep)
+    last.time <- max(last.time)
 
-  first.time <- round.POSIXt(min(first.time), units = timestep)
+  first.time <- min(first.time)
   
   if (timestep == "days")
     seconds <- 3600 * 24
@@ -459,7 +467,9 @@ plotArray <- function(input, arrays, title, xlab, ylab, lwd = 1, col, by.group =
     link <- match(names(plot.list), input$status.df$Transmitter)
     group.names <- input$status.df$Group[link]
   
-    plotdata <- lapply(unique(group.names), function (the.group) {
+    plotdata <- lapply(unique(group.names), function(the.group) {
+      # cat("Group: ", as.character(the.group), "\n")
+
       trimmed.list <- plot.list[group.names == the.group]
       aux <- data.frame(x = timerange)
       aux[, as.character(the.group)] <- 0
@@ -467,6 +477,7 @@ plotArray <- function(input, arrays, title, xlab, ylab, lwd = 1, col, by.group =
       # counter <- 1
       capture <- lapply(trimmed.list, function(x) {
         # cat(counter, "\n"); counter <<- counter + 1
+
         to.add <- rep(0, nrow(aux))
         if (cumulative) {
           if (ladder.type == "arrival")
