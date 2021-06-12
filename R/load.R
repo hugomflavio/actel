@@ -981,9 +981,16 @@ loadBio <- function(input, tz){
     }
   }
 
-  if (expect_integer & any(link <- table(bio$Signal) > 1)) {
-    stopAndReport(ifelse(sum(link) > 1, "Signals ", "Signal "), paste(names(table(bio$Signal))[link], collapse = ", "), ifelse(sum(link) > 1," are ", " is "), "duplicated in the biometrics.")
+  if (expect_integer) {
+    if (any(colnames(bio) == "Code.space")) {
+      aux <- paste(bio$Code.space, "-", bio$Signal)
+      if (any(link <- table(aux) > 1))
+        stopAndReport(ifelse(sum(link) > 1, "Tag ", "Tags "), paste(aux[link], collapse = ", "), ifelse(sum(link) > 1," are ", " is "), "duplicated in the biometrics.")
+    } else {
+      if (any(link <- table(bio$Signal) > 1))
+        stopAndReport(ifelse(sum(link) > 1, "Signals ", "Signal "), paste(names(table(bio$Signal))[link], collapse = ", "), ifelse(sum(link) > 1," are ", " is "), "duplicated in the biometrics.")
   } else {
+    # I need to make a combination of signals and respective codespaces for this case
     if (any(link <- table(signal_check) > 1)) {
       stopAndReport(ifelse(sum(link) > 1, "Signals ", "Signal "), paste(names(table(signal_check))[link], collapse = ", "), ifelse(sum(link) > 1," are ", " is "), "duplicated in the biometrics.")
     }
