@@ -475,15 +475,16 @@ roundDown <- function(input, to = 10) {
 #' @keywords internal
 #'
 appendTo <- function(recipient, line, tag) {
+  recipient <- tolower(recipient)
   for (i in recipient) {
-    if (i == "Screen") {
+    if (i == "screen") {
       if (any(recipient == "Warning"))
         warning(line, immediate. = TRUE, call. = FALSE)
       else
         message(line)
       flush.console()
     }
-    if (i == "Report") {
+    if (i == "report") {
       if (any(recipient == "Warning")) {
         write(paste("Warning:", line),
           file = paste(tempdir(), "temp_log.txt", sep = "/"),
@@ -494,17 +495,17 @@ appendTo <- function(recipient, line, tag) {
           append = file.exists(paste(tempdir(), "temp_log.txt", sep = "/")))
       }
     }
-    if (i == "Warning") {
+    if (i == "warning") {
       write(paste("Warning:", line),
         file = paste(tempdir(), "temp_warnings.txt", sep = "/"),
         append = file.exists(paste(tempdir(), "temp_warnings.txt", sep = "/")))
     }
-    if (i == "UD") { # nocov start
+    if (i == "ud") { # nocov start
       write(line,
         file = paste(tempdir(), "temp_UD.txt", sep = "/"),
         append = file.exists(paste(tempdir(), "temp_UD.txt", sep = "/")))
     } # nocov end
-    if (i == "Comment") {
+    if (i == "comment") {
       write(paste(tag, line, sep = "\t"),
         file = paste(tempdir(), "temp_comments.txt", sep = "/"),
         append = file.exists(paste(tempdir(), "temp_comments.txt", sep = "/")))
