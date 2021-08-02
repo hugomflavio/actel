@@ -281,13 +281,12 @@ std.error.circular <- function(x, na.rm = TRUE, silent = FALSE){
 #'
 decimalTime <- function(input, unit = c("h", "m", "s")) {
   unit <- match.arg(unit)
-  .converter <- function(input, unit) {
-    x = as.character(input)
-    x = as.numeric(unlist(strsplit(x, ":")))
+  .converter <- function(x, unit) {
+    x <- as.numeric(unlist(strsplit(x, ":")))
     if (length(x) == 2)
-      x = x[1] + x[2]/60
+      x <- x[1] + x[2]/60
     if (length(x) == 3)
-      x = x[1] + x[2]/60 + x[3]/3600
+      x <- x[1] + x[2]/60 + x[3]/3600
     if (unit == "h")
       return(x)
     if (unit == "m")
@@ -298,11 +297,11 @@ decimalTime <- function(input, unit = c("h", "m", "s")) {
   if (missing(input))
     stop("Input appears to be empty.")
   if (length(input) == 1) {
-    output <- .converter(input, unit = unit)
+    output <- .converter(as.character(input), unit = unit)
     names(output) <- input
   }
   if (length(input) > 1)
-    output <- sapply(input, function(i) .converter(i, unit = unit))
+    output <- sapply(as.character(input), function(i) .converter(i, unit = unit))
   return(output)
 }
 
