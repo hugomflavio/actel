@@ -1238,20 +1238,27 @@ copyOfRosediagRad <- function (x, zero, rotation, bins, upper, radii.scale, prop
 #' @keywords internal
 #'
 printSectionTimes <- function(section.times, bio, detections) {
-  Date <- NULL
-  Group <- NULL
+  Date <- Group <- NULL
+  
   cbPalette <- c("#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7", "#999999")
   names(cbPalette) <- c("Orange", "Blue", "Green", "Yellow", "Darkblue", "Darkorange", "Pink", "Grey")
+  
   time.range <- c(min(bio$Release.date), max(do.call(c, lapply(detections, function(x) x$Timestamp))))
   dayrange <- as.Date(time.range)
   dayrange[1] <- dayrange[1] - 1
   dayrange[2] <- dayrange[2] + 1
+
   capture.output <- lapply(names(section.times), function(i) {
+    # cat(i, '\n')
     plotdata <- suppressMessages(reshape2::melt(section.times[[i]]))
     plotdata <- plotdata[complete.cases(plotdata), ]
+  
     link <- match(plotdata$Transmitter, bio$Transmitter)
     plotdata$Group <- bio$Group[link]
+    plotdata$Group <- droplevels(plotdata$Group)
+  
     plotdata$Date <- as.Date(substring(as.character(plotdata$value), 1, 10))
+  
     p <- ggplot2::ggplot(data = plotdata, ggplot2::aes(x = Date, fill = Group))
     p <- p + ggplot2::geom_bar(width = 0.9)
     p <- p + ggplot2::theme_bw()
@@ -1259,9 +1266,11 @@ printSectionTimes <- function(section.times, bio, detections) {
     p <- p + ggplot2::scale_y_continuous(expand = c(0, 0, 0.05, 0))
     p <- p + ggplot2::scale_x_date(limits = dayrange)
     p <- p + ggplot2::labs(x = "", y = "n")
+  
     if (length(unique(plotdata$Group)) <= 8) {
       p <- p + ggplot2::scale_fill_manual(values = as.vector(cbPalette)[1:length(unique(plotdata$Group))], drop = FALSE)
     }
+  
     ggplot2::ggsave(paste0(tempdir(), "/actel_report_auxiliary_files/", i,"_days.png"), width = 10, height = length(unique(plotdata$variable)) * 2)
   })
 }
