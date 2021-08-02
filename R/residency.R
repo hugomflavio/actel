@@ -1137,6 +1137,7 @@ sink()
 #' @keywords internal
 #'
 assembleResidency <- function(secmoves, movements, spatial) {
+  appendTo("debug", "Running assembleResidency")
   Last.array <- NULL
   Last.time <- NULL
   Valid <- NULL
@@ -1240,7 +1241,7 @@ assembleResidency <- function(secmoves, movements, spatial) {
 #' @keywords internal
 #'
 res_assembleOutput <- function(res.df, bio, spatial, tz) {
-  appendTo("debug", "Merging 'bio' and 'res.df'.")
+  appendTo("debug", "Running res_assembleOutput")
   status.df <- merge(bio, res.df, by = "Transmitter", all = TRUE)
 
   sections <- names(spatial$array.order)
@@ -1296,6 +1297,7 @@ res_assembleOutput <- function(res.df, bio, spatial, tz) {
 #' @keywords internal
 #'
 res_efficiency <- function(arrmoves, bio, spatial, arrays, paths, dotmat) {
+  appendTo("debug", "Running res_efficiency")
   values.per.tag <- lapply(names(arrmoves), function(tag) {
     # cat(tag, "\n")
       first.array <- firstArrayFailure(tag = tag, bio = bio, spatial = spatial, first.array = arrmoves[[tag]]$Array[1], paths = paths, dotmat = dotmat)
@@ -1355,6 +1357,7 @@ res_efficiency <- function(arrmoves, bio, spatial, arrays, paths, dotmat) {
 #' @keywords internal
 #'
 firstArrayFailure <- function(tag, bio, spatial, first.array, paths, dotmat) {
+  appendTo("debug", "Running firstArrayFailure")
   release <- as.character(bio$Release.site[na.as.false(bio$Transmitter == tag)])
   aux <- as.character(with(spatial, release.sites[release.sites$Standard.name == release, "Array"]))
   release.arrays <- unlist(strsplit(aux, "|", fixed = TRUE))
@@ -1403,6 +1406,7 @@ firstArrayFailure <- function(tag, bio, spatial, first.array, paths, dotmat) {
 #' @keywords internal
 #'
 getResidency <- function(movements, spatial){
+  appendTo("debug", "Running getResidency")
   output <- lapply(movements, function(x) {
       recipient <- as.data.frame(x)[, c("Section", "First.time", "Last.time")]
       recipient$Index <- (1:nrow(recipient) * 2) - 1
@@ -1447,6 +1451,7 @@ getResidency <- function(movements, spatial){
 #' @keywords internal
 #'
 resRatios <- function(res, timestep = c("days", "hours"), tz) {
+  appendTo("debug", "Running resRatios")
   timestep <- match.arg(timestep)
   num.step <- ifelse(timestep == "days", 86400, 3600)
   counter <- 0
@@ -1495,6 +1500,7 @@ resRatios <- function(res, timestep = c("days", "hours"), tz) {
 #' @keywords internal
 #'
 findSecondsPerSection <- function(res, frame, the.range, num.step) {
+  appendTo("debug", "Running findSecondsPerSection")
   aux <- c()
   candidate.events <- which(res$First.time <= frame + num.step)
   potential.events <- which(res$First.time[candidate.events] >= frame)
@@ -1603,6 +1609,7 @@ findSecondsPerSection <- function(res, frame, the.range, num.step) {
 #' @keywords internal
 #'
 resRatiosIndOut <- function(input, slots, tz) {
+  appendTo("debug", "Running resRatiosIndOut")
   # sort out all column names
   the.cols <- sort(unique(unlist(lapply(input, names))))
   the.cols <- the.cols[-match("Changes", the.cols)]
@@ -1642,6 +1649,7 @@ resRatiosIndOut <- function(input, slots, tz) {
 #' @keywords internal
 #'
 resPositions <- function(ratios, timestep = c("days", "hours")) {
+  appendTo("debug", "Running resPositions")
   timestep <- match.arg(timestep)
   num.step <- ifelse(timestep == "days", 86400, 3600)
 
@@ -1690,6 +1698,7 @@ resPositions <- function(ratios, timestep = c("days", "hours")) {
 #' @keywords internal
 #'
 vectorsIntoTables <- function(input, columns) {
+  appendTo("debug", "Running vectorsIntoTables")
   counter <- 0
   output <- lapply(input, function(x) {
     counter <<- counter + 1
@@ -1722,6 +1731,7 @@ vectorsIntoTables <- function(input, columns) {
 #' @keywords internal
 #'
 globalRatios <- function(positions, section.order) {
+  appendTo("debug", "Running globalRatios")
   aux <- apply(positions, 1, function(x) as.data.frame(t(as.matrix(table(x[-1])))))
   the.cols <- sort(unique(unlist(lapply(aux, names))))
   the.tables <- vectorsIntoTables(input = aux, columns = the.cols)
