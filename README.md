@@ -95,3 +95,31 @@ After installing, you should read the package vignettes (i.e. the manual), which
 
 
 <sup>* interactive code (i.e. code that expects user input) cannot be tested automatically using codecov and, as such, was excluded from the codecov scope.</sup>
+
+
+
+## Papers using or relating to actel
+
+**2021**
+
+- Flávio, H., & Baktoft, H. (2021). actel: Standardised analysis of acoustic telemetry data from animals moving through receiver arrays. Methods in Ecology and Evolution, 12(1), 196–203. https://doi.org/10.1111/2041-210X.13503
+
+- Flávio, H., Caballero, P., Jepsen, N., & Aarestrup, K. (2021). Atlantic salmon living on the edge: Smolt behaviour and survival during seaward migration in River Minho. Ecology of Freshwater Fish, 30(1), 61–72. https://doi.org/10.1111/eff.12564
+
+- Niella, Y., Smoothey, A. F., Taylor, M. D., Peddemors, V. M., & Harcourt, R. (2021). Environmental Drivers of Fine-Scale Predator and Prey Spatial Dynamics in Sydney Harbour, Australia, and Adjacent Coastal Waters. Estuaries and Coasts. https://doi.org/10.1007/s12237-021-01020-2
+
+- Nordli, E. (2021). The behaviour of anadromous Arctic charr during their first marine migration [Master thesis, Arctic University of Norway]. https://munin.uit.no/handle/10037/21752
+
+- Winter, E. R. (2021). The movement ecology of common bream _Abramis brama_ in a highly connected wetland using acoustic telemetry. [Doctoral thesis, Bournemouth University]. http://eprints.bournemouth.ac.uk/35141/
+
+- Winter, E. R., Hindes, A. M., Lane, S., & Britton, J. R. (2021a). Movements of common bream _Abramis brama_ in a highly connected, lowland wetland reveal sub-populations with diverse migration strategies. Freshwater Biology, 66(7), 1410–1422. https://doi.org/10.1111/fwb.13726
+
+- Winter, E. R., Hindes, A. M., Lane, S., & Britton, J. R. (2021b). Acoustic telemetry reveals strong spatial preferences and mixing during successive spawning periods in a partially migratory common bream population. Aquatic Sciences, 83(3), 52. https://doi.org/10.1007/s00027-021-00804-9
+
+
+**2020**
+
+- Flávio, H., Kennedy, R., Ensing, D., Jepsen, N., & Aarestrup, K. (2020). Marine mortality in the river? Atlantic salmon smolts under high predation pressure in the last kilometres of a river monitored for stock assessment. Fisheries Management and Ecology, 27(1), 92–101. https://doi.org/10.1111/fme.12405
+
+- Niella, Y., Flávio, H., Smoothey, A. F., Aarestrup, K., Taylor, M. D., Peddemors, V. M., & Harcourt, R. (2020). Refined Shortest Paths (RSP): Incorporation of topography in space use estimation from node-based telemetry data. Methods in Ecology and Evolution, 11(12), 1733–1742. https://doi.org/10.1111/2041-210X.13484
+
