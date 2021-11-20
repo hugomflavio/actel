@@ -269,6 +269,8 @@ movementTimes <- function(movements, type = c("array", "section")){
 speedReleaseToFirst <- function(tag, bio, movements, dist.mat, speed.method){
   appendTo("debug", "Running speedReleaseToFirst.")
   the.row <- match(tag, bio$Transmitter)
+  if (is.na(the.row) | length(the.row) != 1)
+    stopAndReport('This error should never happen. Contact the developer. [tag not in bio$Transmitter, or match is not unique]')
   origin.time <- bio[the.row, "Release.date"]
   origin.place <- as.character(bio[the.row, "Release.site"])
   if (origin.time <= movements$First.time[1]) {
