@@ -41,8 +41,10 @@ test_that("checkArguments complains if preload is used together with tz", {
 # n
 
 test_that("checkArguments stops if wrong override is provided with preload", {
-	expect_error(explore(datapack = d, override = 1234),
-		"Some tag signals listed in 'override' (1234) are not listed in the biometrics data", fixed = TRUE)
+	expect_error(
+		expect_warning(explore(datapack = d, override = 1234),
+			"Override is numeric (i.e. the code space has not been included). Will attempt to identify tags to be excluded based on signal alone.", fixed = TRUE),
+		"Some tags listed in 'override' (1234) are not listed in the biometrics data", fixed = TRUE)
 })
 
 test_that("explore with preload yields the same results as with traditional loading", {

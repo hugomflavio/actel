@@ -76,7 +76,6 @@ test_that("assembleMatrices works as expected", {
 
 	capture <- lapply(1:2, function(i) {
 		lapply(1:2, function(j) {
-			rownames(aux_assembleMatrixes[[i]][[j]]) <- as.character(rownames(aux_assembleMatrixes[[i]][[j]]))
 			expect_equal(output[[i]][[j]], aux_assembleMatrixes[[i]][[j]])
 		})
 	})
@@ -107,7 +106,6 @@ test_that("breakMatricesByArray works as expected.", {
 
 	capture <- lapply(1:2, function(i) {
 		lapply(1:2, function(j) {
-			rownames(aux_breakMatricesByArray[[i]][[j]]) <- as.character(rownames(aux_breakMatricesByArray[[i]][[j]]))
 			expect_equal(output[[i]][[j]], aux_breakMatricesByArray[[i]][[j]])
 		})
 	})

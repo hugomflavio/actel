@@ -25,14 +25,14 @@ test_that("splitDetections' output is as expected", {
 	output <- splitDetections(detections = detections, bio = bio)
 	expect_equal(output$detections[[1]], detections[detections$Transmitter == names(output$detections)[1], ])
 	expect_true(any(grepl("Transmitter", colnames(output$bio))))
-	expect_equal(length(output$detections), sum(!is.na(output$bio$Transmitter)))
+	expect_equal(length(output$detections), 54)
 })
 
 test_that("splitDetections excludes tags as requested.", {
 	expect_message(output <- splitDetections(detections = detections, bio = bio, exclude.tags = "R64K-4451"),
-		"Excluding tag(s) R64K-4451 from the analysis per used command (detections removed: 18, respectively)", fixed = TRUE)
+		"M: Excluding tag(s) R64K-4451 from the analysis per used command (detections removed: 18)", fixed = TRUE)
 	expect_true(all(!grepl("R64K-4451", names(output$detections))))
-	expect_true(is.na(output$bio$Transmitter[bio$Signal == 4451]))
+	expect_true(output$bio$Transmitter[bio$Signal == 4451] == 'Unknown-4451')
 })
 # n
 

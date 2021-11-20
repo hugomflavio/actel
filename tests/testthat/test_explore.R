@@ -98,16 +98,15 @@ test_that("explore stops when any argument does not make sense", {
 		"'inactive.error' must not be lower than 'inactive.warning'", fixed = TRUE)
 	
 	expect_error(explore(tz = "Europe/Copenhagen", exclude.tags = 1),
-		"Not all contents in 'exclude.tags' could be recognized as tags (i.e. 'codespace-signal'). Valid examples: 'R64K-1234', A69-1303-1234'", fixed = TRUE)
+		"Not all contents in 'exclude.tags' could be recognized as tags (i.e. 'codespace-signal'). Valid examples: 'R64K-1234', 'A69-1303-1234'", fixed = TRUE)
 	
 	expect_warning(explore(tz = "Europe/Copenhagen", exclude.tags = "ABC-DEF", report = FALSE, GUI = "never"),
 		"The user asked for tag 'ABC-DEF' to be excluded from the analysis, but this tag is not present in the detections.", fixed = TRUE)
 
-	expect_error(explore(tz = "Europe/Copenhagen", override = 1, GUI = "never"),
-		"Some tag signals listed in 'override' (1) are not listed in the biometrics file.", fixed = TRUE)
-	
-	expect_error(explore(tz = "Europe/Copenhagen", override = "ABC-DEF", report = FALSE, GUI = "never"),
-		"'override' must be numeric. Please include only the tag signals in the 'override' argument.", fixed = TRUE)
+	expect_error(
+		expect_warning(explore(tz = "Europe/Copenhagen", override = 1, GUI = "never"),
+			"Override is numeric (i.e. the code space has not been included). Will attempt to identify tags to be excluded based on signal alone.", fixed = TRUE),
+		"Some tags listed in 'override' (1) are not listed in the biometrics file.", fixed = TRUE)
 	
 	expect_warning(explore(tz = "Europe/Copenhagen", override = 4450, report = FALSE, GUI = "never"),
 		"Override has been triggered for tag 4450 but this signal was not detected.", fixed = TRUE)
