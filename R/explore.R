@@ -282,14 +282,16 @@ explore <- function(
 # -------------------------------------
 
 # Process the data
-
+  # exclude head of detections, if requested
   if (!is.null(discard.first) && discard.first > 0)
     detections.list <- discardFirst(input = detections.list, bio, trim = discard.first)
 
+  # group detections into array movements
   appendTo(c("Screen", "Report"), "M: Creating movement records for the valid tags.")
   movements <- groupMovements(detections.list = detections.list, bio = bio, spatial = spatial,
     speed.method = speed.method, max.interval = max.interval, tz = tz, dist.mat = dist.mat)
 
+  # calculate time/speed sinse release
   if (is.null(discard.first)) {
     aux <- names(movements)
     movements <- lapply(names(movements), function(tag) {
@@ -322,13 +324,14 @@ explore <- function(
       appendTo(c("Report", "Screen", "Warning"), "Running inactiveness checks without a distance matrix. Performance may be limited.")
     do.checkInactiveness <- TRUE
   }
+
+  movement.names <- names(movements) # this will be used further down to reinstate the names in the movements list.
+
   # clean override based on movements
   if (is.numeric(override))
     trigger_override_warning <- any(link <- !override %in% extractSignals(movement.names))
   else
     trigger_override_warning <- any(link <- !override %in% movement.names)
-
-  movement.names <- names(movements)
 
   if (trigger_override_warning) {
     appendTo(c("Screen", "Warning", "Report"), paste0("Override has been triggered for ",

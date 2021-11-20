@@ -923,6 +923,7 @@ loadBio <- function(input, tz){
   if (missing(tz))
     stop("'tz' is missing.")
 
+  # compatibility with preload()
   if (is.character(input))
     preloaded <- FALSE
   else
@@ -979,6 +980,7 @@ loadBio <- function(input, tz){
     stopAndReport('Not all tags have an associated code space. Please specify the code space of every tag.')
   }
 
+  # activate multi-sensor versatility.
   if (any(grepl("|", bio$Signal, fixed = TRUE))) {
     appendTo(c("Screen", "Report"), "M: Multi-sensor tags detected. These tags will be referred to by their lowest signal value.")
     expect_integer <- FALSE
@@ -986,6 +988,7 @@ loadBio <- function(input, tz){
     expect_integer <- TRUE
   }
 
+  # examine signal quality
   if (expect_integer & !inherits(bio$Signal, "integer")) {
     stopAndReport("Could not recognise the data in the 'Signal' column as integers. Please double-check the biometrics.")
   } else {
@@ -995,6 +998,7 @@ loadBio <- function(input, tz){
     }
   }
 
+  # check that tags are not duplicated
   if (expect_integer) {
     if (any(colnames(bio) == "Code.space")) {
       aux <- paste(bio$Code.space, "-", bio$Signal)
@@ -1020,6 +1024,7 @@ loadBio <- function(input, tz){
     }
   }
 
+  # check sensor names
   if (!expect_integer) { 
     if(!any(grepl("^Sensor.unit$", colnames(bio)))) {
       appendTo(c("Screen", "Warning"), "Tags with multiple sensors are listed in the biometrics, but a 'Sensor.unit' column could not be found. Skipping sensor unit assignment.")
@@ -1041,6 +1046,7 @@ loadBio <- function(input, tz){
     }
   }
 
+  # Release site quality checking/creation
   if (!any(grepl("^Release.site$", colnames(bio)))) {
     appendTo("Screen", "M: No Release site has been indicated in the biometrics. Creating a 'Release.site' column to avoid function failure. Filling with 'unspecified'.")
     bio$Release.site <- "unspecified"
@@ -1059,6 +1065,8 @@ loadBio <- function(input, tz){
       bio$Release.site <- droplevels(bio$Release.site)
     }
   }
+
+  # Group quality checking/creation
   if (!any(grepl("^Group$", colnames(bio)))) {
     appendTo(c("Screen", "Report"), paste0("M: No 'Group' column found in the biometrics. Assigning all animals to group 'All'."))
     bio$Group <- "All"
@@ -1088,6 +1096,7 @@ loadBio <- function(input, tz){
   if (any(nchar(as.character(bio$Group)) > 6))
     appendTo(c("Screen", "Report", "Warning"), "Long group names detected. To improve graphic rendering, consider keeping group names under six characters.")
 
+  # order table by signal before handing it over
   bio <- bio[order(bio$Signal),]
   return(bio)
 }
@@ -1560,15 +1569,16 @@ splitDetections <- function(detections, bio, exclude.tags = NULL) {
     bio_aux <- data.frame(Code.space = NA,
                     Signal = bio$Signal)
 
+  # break down the signals for multi-signal tags
   bio_aux$Signal_expanded <- lapply(strsplit(as.character(bio$Signal), "|", fixed = TRUE), as.numeric)
 
+  # include sensor units, if relevant
   if (any(grepl("^Sensor.unit$", colnames(bio))))
     bio_aux$Sensor.unit_expanded <- strsplit(as.character(bio$Sensor.unit), "|", fixed = TRUE)
   else
     bio_aux$Sensor.unit_expanded <- NA
 
-  # to store the names as the lapply goes
-  trimmed_list_names <- c()
+  trimmed_list_names <- c() # to store the names as the lapply goes
 
   trimmed_list <- lapply(1:nrow(bio_aux), function(i) {
     # cat(i, "\n")
@@ -1607,6 +1617,7 @@ splitDetections <- function(detections, bio, exclude.tags = NULL) {
       }
     })
 
+    # compile the detections list
     if (all(is.na(list_matches))) { # if the tag was not found, return empty
       return(NULL)
     } else { # otherwise, prepare tag name and include sensor units if present

@@ -337,13 +337,14 @@ residency <- function(
       appendTo(c("Report", "Screen", "Warning"), "Running inactiveness checks without a distance matrix. Performance may be limited.")
     do.checkInactiveness <- TRUE
   }
+
+  movement.names <- names(movements) # this will be used further down to reinstate the names in the movements list.
+
   # clean override based on movements
   if (is.numeric(override))
     trigger_override_warning <- any(link <- !override %in% extractSignals(movement.names))
   else
     trigger_override_warning <- any(link <- !override %in% movement.names)
-
-  movement.names <- names(movements)
 
   if (trigger_override_warning) {
     appendTo(c("Screen", "Warning", "Report"), paste0("Override has been triggered for ",
