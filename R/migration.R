@@ -703,7 +703,10 @@ migration <- function(
   if (file.exists(paste(tempdir(), "temp_UD.txt", sep = "/")))
     appendTo("Report", paste0("User interventions:\n-------------------\n", gsub("\r", "", readr::read_file(paste(tempdir(), "temp_UD.txt", sep = "/"))), "-------------------")) # nocov
 
-  appendTo("Report", paste0("Function call:\n-------------------\n", the.function.call, "\n-------------------"))
+  if (!is.null(datapack))
+    appendTo("Report", paste0("Preload function call:\n-------------------\n", attributes(datapack)$function_call, "\n-------------------"))
+
+  appendTo("Report", paste0("Migration function call:\n-------------------\n", the.function.call, "\n-------------------"))
 # ------------------
 
 # print html report

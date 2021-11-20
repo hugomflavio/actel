@@ -16,6 +16,7 @@ Changes:
 Enhancements:
   * New `Code.spaces` column in the biometrics allows the user to specificy the code space of the target tags.
   * New arguments in plotArray(): `by.group` and `y.style`. See function documentation for more details.
+  * Include preload() log in reports where preloaded data is used.
 
 ## actel 1.2.1
 

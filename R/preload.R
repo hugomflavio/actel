@@ -50,7 +50,7 @@
 #'  \item \code{tz}: The time zone of the study area
 #' }
 #'
-preload <- function(biometrics, spatial, deployments, detections, dot, distances, tz,
+preload <- function(biometrics, spatial, deployments, detections, dot = NULL, distances = NULL, tz,
   start.time = NULL, stop.time = NULL, section.order = NULL, exclude.tags = NULL,
   disregard.parallels = FALSE, discard.orphans = FALSE) {
 
@@ -63,6 +63,25 @@ preload <- function(biometrics, spatial, deployments, detections, dot, distances
     on.exit(save(list = ls(), file = paste0(tempdir(), "/actel.preload.debug.RData")), add = TRUE)
     message("!!!--- Debug mode has been activated ---!!!")
   } # nocov end
+# ------------------------
+
+# Store function call
+  the.function.call <- paste0("preload(biometrics = ", deparse(substitute(biometrics)),
+    ", spatial = ", deparse(substitute(spatial)),
+		", deployments = ", deparse(substitute(deployments)),
+		", detections = ", deparse(substitute(detections)),
+		", dot = ", ifelse(is.null(dot), "NULL", deparse(substitute(dot))),
+		", distances = ", ifelse(is.null(distances), "NULL", deparse(substitute(distances))),
+		", tz = '", tz, "'",
+    ", start.time = ", ifelse(is.null(start.time), "NULL", paste0("'", start.time, "'")),
+    ", stop.time = ", ifelse(is.null(stop.time), "NULL", paste0("'", stop.time, "'")),
+		", section.order = ", ifelse(is.null(section.order), "NULL", paste0("c('", paste(section.order, collapse = "', '"), "')")),
+    ", exclude.tags = ", ifelse(is.null(exclude.tags), "NULL", paste0("c('", paste(exclude.tags, collapse = "', '"), "')")),
+    ", disregard.parallels = ", ifelse(disregard.parallels, "TRUE", "FALSE"),
+    ", discard.orphans = ", ifelse(discard.orphans, "TRUE", "FALSE"),
+    ")")
+
+  appendTo("debug", the.function.call)
 # ------------------------
 
   if (is.na(match(tz, OlsonNames())))
@@ -90,7 +109,7 @@ preload <- function(biometrics, spatial, deployments, detections, dot, distances
   detections <- preloadDetections(input = detections, tz = tz, start.time = start.time, stop.time = stop.time)
   detections <- checkDupDetections(input = detections)
 
-  if (missing(dot)) {
+  if (is.null(dot)) {
     n <- length(unique(spatial$Array[spatial$Type == "Hydrophone"]))
     if (n > 1) {
       fakedot <- paste(unique(spatial$Array[spatial$Type == "Hydrophone"]), collapse = "--")
@@ -132,7 +151,7 @@ preload <- function(biometrics, spatial, deployments, detections, dot, distances
   arrays <- arrays[link]
   rm(link)
 
-  if (missing(distances)) {
+  if (is.null(distances)) {
   	dist.mat <- NA
     attributes(dist.mat)$valid <- FALSE
   } else {
@@ -179,7 +198,7 @@ preload <- function(biometrics, spatial, deployments, detections, dot, distances
 
   # carbon copy report messages
   attributes(output)$loading_messages <- readLines(paste0(tempdir(), "/temp_log.txt"))
-
+  attributes(output)$function_call <- the.function.call
 	return(output)
 }
 
