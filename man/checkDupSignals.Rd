@@ -9,9 +9,7 @@ checkDupSignals(input, bio)
 \arguments{
 \item{input}{list of detections}
 
-\item{bio}{A table with the tags and biometrics of the studied animals.}
-
-\item{tag.list}{list of the target signals}
+\item{bio}{the biometrics table}
 }
 \value{
 No return value, called for side effects.
