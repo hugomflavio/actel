@@ -478,14 +478,14 @@ appendTo <- function(recipient, line, tag) {
   recipient <- tolower(recipient)
   for (i in recipient) {
     if (i == "screen") {
-      if (any(recipient == "Warning"))
+      if (any(recipient == "warning"))
         warning(line, immediate. = TRUE, call. = FALSE)
       else
         message(line)
       flush.console()
     }
     if (i == "report") {
-      if (any(recipient == "Warning")) {
+      if (any(recipient == "warning")) {
         write(paste("Warning:", line),
           file = paste(tempdir(), "temp_log.txt", sep = "/"),
           append = file.exists(paste(tempdir(), "temp_log.txt", sep = "/")))
