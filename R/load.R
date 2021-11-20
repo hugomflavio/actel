@@ -2012,7 +2012,7 @@ excludeTags <- function(input, exclude.tags){
     }
     if (!all(!logical_link)) {
       link <- link[!is.na(link)]
-      appendTo(c("Screen", "Report"), paste0("M: Excluding tag(s) ", paste(exclude.tags[logical_link], collapse = ", "), " from the analysis per used command (detections removed: ", paste(unlist(lapply(input[link], nrow)), collapse = ", "), ", respectively)."))
+      appendTo(c("Screen", "Report"), paste0("M: Excluding tag(s) ", paste(exclude.tags[logical_link], collapse = ", "), " from the analysis per used command (detections removed: ", paste(unlist(lapply(input[link], nrow)), collapse = ", "), ifelse(length(input[link]) > 1, ", respectively).", ").")))
       collectStrays(input = input[link])
       return(input[-link])
     } else {
