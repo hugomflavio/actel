@@ -123,3 +123,5 @@ After installing, you should read the package vignettes (i.e. the manual), which
 
 - Niella, Y., Flávio, H., Smoothey, A. F., Aarestrup, K., Taylor, M. D., Peddemors, V. M., & Harcourt, R. (2020). Refined Shortest Paths (RSP): Incorporation of topography in space use estimation from node-based telemetry data. Methods in Ecology and Evolution, 11(12), 1733–1742. https://doi.org/10.1111/2041-210X.13484
 
+
+Is your paper not here? Let me know!
