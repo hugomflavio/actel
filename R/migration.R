@@ -147,13 +147,8 @@ migration <- function(
   GUI = c("needed", "always", "never"),
   save.tables.locally = FALSE,
   print.releases = TRUE,
-  plot.detections.by,
   detections.y.axis = c("auto", "stations", "arrays"))
 {
-
-# check deprecated argument
-  if (!missing(plot.detections.by))
-    stop("'plot.detections.by' has been deprecated. Please use 'detections.y.axis' instead.", call. = FALSE)
 
 # clean up any lost helpers
   deleteHelpers()

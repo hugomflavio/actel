@@ -53,7 +53,6 @@
 #' @param detections.y.axis The type of y axis desired for the individual
 #'  detection plots. While the argument defaults to "auto", it can be hard-set 
 #'  to one of "stations" or "arrays".
-#' @param plot.detections.by DEPRECATED. Please use the argument detections.y.axis instead.
 #' @param print.releases Logical: Should the release sites be printed in the
 #'  study area diagrams?
 #' @param report Logical. Should an HTML report be created at the end of the
@@ -153,13 +152,8 @@ explore <- function(
   GUI = c("needed", "always", "never"),
   save.tables.locally = FALSE,
   print.releases = TRUE,
-  plot.detections.by,
   detections.y.axis = c("auto", "stations", "arrays")) 
 {
-
-# check deprecated argument
-  if (!missing(plot.detections.by))
-    stop("'plot.detections.by' has been deprecated. Please use 'detections.y.axis' instead.", call. = FALSE)
 
 # clean up any lost helpers
   deleteHelpers()
