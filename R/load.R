@@ -36,10 +36,25 @@ loadStudyData <- function(tz, override = NULL, start.time, stop.time, save.detec
 
   # Check that all the overridden tags are part of the study
   if (!is.null(override)) {
-    lowest_signals <- sapply(bio$Signal, function(i) min(as.numeric(unlist(strsplit(as.character(i), "|", fixed = TRUE)))))
-    if (any(link <- is.na(match(override, lowest_signals))))
-      stopAndReport("Some tag signals listed in 'override' (", paste0(override[link], collapse = ", "), ") are not listed in the biometrics file.")
+    if (is.numeric(override)) {
+
+      # Legacy signal-only override compatibility
+      lowest_signals <- sapply(bio$Signal, function(i) min(as.numeric(unlist(strsplit(as.character(i), "|", fixed = TRUE)))))
+      
+      if (any(table(lowest_signals[lowest_signals %in% override]) > 1))
+        stopAndReport('Override is numeric but there are multiple tags that match the overridden signal. Use codespace-signal overrides instead.')
+
+      if (any(link <- is.na(match(override, lowest_signals))))
+        stopAndReport("Some tags listed in 'override' (", paste0(override[link], collapse = ", "), ") are not listed in the biometrics file.")
+    } 
+    else {
+      # new override based on full tag
+      if (any(link <- is.na(match(override, bio$Transmitter))))
+        stopAndReport("Some tags listed in 'override' (", paste0(override[link], collapse = ", "), ") are not listed in the biometrics file.")
+
+    }
   }
+
   deployments <- loadDeployments(input = "deployments.csv", tz = tz)
   checkDeploymentTimes(input = deployments) # check that receivers are not deployed before being retrieved
   
@@ -957,12 +972,11 @@ loadBio <- function(input, tz){
     stopAndReport("Some animals have no 'Signal' information. Please double-check the biometrics.")
   }
 
-  if (any(grepl("^Code.space$", colnames(bio)))) {
-    appendTo(c("Screen", "Report"), "M: A Code.space column was found in the biometrics. Activating code space matching with the detections.")
-    if (any(is.na(bio$Code.space)) | any(bio$Code.space == "")) {
-      appendTo(c("Screen", "Report", "Warning"), "Not all signals have an associated code space. Using standard matching mode for those signals.")
-      bio$Code.space[bio$Code.space == ""] <- NA
-    }
+  if (!any(grepl("^Code.space$", colnames(bio)))) {
+    appendTo(c("Screen", "Report"), "M: No Code.space column was found in the biometrics. Assigning code spaces based on detections.")
+  } else {
+      if (any(is.na(bio$Code.space)) | any(bio$Code.space == ""))
+    stopAndReport('Not all tags have an associated code space. Please specify the code space of every tag.')
   }
 
   if (any(grepl("|", bio$Signal, fixed = TRUE))) {
@@ -985,21 +999,32 @@ loadBio <- function(input, tz){
     if (any(colnames(bio) == "Code.space")) {
       aux <- paste(bio$Code.space, "-", bio$Signal)
       if (any(link <- table(aux) > 1))
-        stopAndReport(ifelse(sum(link) > 1, "Tag ", "Tags "), paste(aux[link], collapse = ", "), ifelse(sum(link) > 1," are ", " is "), "duplicated in the biometrics.")
+        stopAndReport(ifelse(sum(link) > 1, "Tags ", "Tag "), paste(aux[link], collapse = ", "), ifelse(sum(link) > 1," are ", " is "), "duplicated in the biometrics.")
     } else {
       if (any(link <- table(bio$Signal) > 1))
         stopAndReport(ifelse(sum(link) > 1, "Signals ", "Signal "), paste(names(table(bio$Signal))[link], collapse = ", "), ifelse(sum(link) > 1," are ", " is "), "duplicated in the biometrics.")
-  } else {
-    # I need to make a combination of signals and respective codespaces for this case
-    if (any(link <- table(signal_check) > 1)) {
-      stopAndReport(ifelse(sum(link) > 1, "Signals ", "Signal "), paste(names(table(signal_check))[link], collapse = ", "), ifelse(sum(link) > 1," are ", " is "), "duplicated in the biometrics.")
+    }
+  } 
+  else {
+    if (any(colnames(bio) == "Code.space")) {
+      aux <- unlist(apply(bio, 1, function(x) {
+                            paste0(x['Code.space'], '-', splitSignals(x['Signal']))
+                           }))
+      if (any(link <- table(aux) > 1))
+        stopAndReport(ifelse(sum(link) > 1, "Tags ", "Tag "), paste(aux[link], collapse = ", "), ifelse(sum(link) > 1," are ", " is "), "duplicated in the biometrics.")
+    }
+    else {
+      aux <- unlist(sapply(bio$Signal, splitSignals))
+      if (any(link <- table(aux) > 1))
+        stopAndReport(ifelse(sum(link) > 1, "Signals ", "Signal "), paste(aux[link], collapse = ", "), ifelse(sum(link) > 1," are ", " is "), "duplicated in the biometrics.")
     }
   }
 
   if (!expect_integer) { 
     if(!any(grepl("^Sensor.unit$", colnames(bio)))) {
       appendTo(c("Screen", "Warning"), "Tags with multiple sensors are listed in the biometrics, but a 'Sensor.unit' column could not be found. Skipping sensor unit assignment.")
-    } else {
+    } 
+    else {
       bio$Sensor.unit <- as.character(bio$Sensor.unit) #failsafe in case all values are numeric, or NA.
 
       A <- sapply(strsplit(bio$Signal, "|", fixed = TRUE), length)
@@ -1520,8 +1545,7 @@ splitDetections <- function(detections, bio, exclude.tags = NULL) {
 
   checkNoDetections(input = my.list, bio = bio)
 
-  if (!any(colnames(bio) == "Code.space") || any(is.na(bio$Code.space)))
-    checkDupSignals(input = my.list, bio = bio)
+  checkDupSignals(input = my.list, bio = bio)
 
   appendTo("debug", "Debug: Creating 'trimmed.list'.")
 
@@ -1577,7 +1601,7 @@ splitDetections <- function(detections, bio, exclude.tags = NULL) {
               "').\n         Are you sure the code space was written correctly? Discarding detections from alien code space(s)."))
           return(NA)
         } else {
-          the_codespace <<- bio_aux$Code.space[i]
+          the_codespace <<- detected$Code.space[which(signal_link)][codespace_link]
           return(which(signal_link)[which(codespace_link)])
         }
       }
@@ -1596,22 +1620,43 @@ splitDetections <- function(detections, bio, exclude.tags = NULL) {
           }
         }
       }
-      output <- data.table::rbindlist(output) # merge is required for multiple signal tags
-      output <- output[order(output$Timestamp), ]
+      output <- data.table::rbindlist(output) # merge is required for multiple-signal tags
+      output <- output[order(output$Timestamp), ] # order by time before delivering
       return(output)
     }
   })
 
-  # remove empty entries and then name the list
+  # remove empty entries and then name the list components
   trimmed_list <- trimmed_list[!sapply(trimmed_list, is.null)]
   names(trimmed_list) <- trimmed_list_names
 
-  # Transfer transmitter names to bio
-  lowest_target_signals <- sapply(bio$Signal, function(i) {
-    min(as.numeric(unlist(strsplit(as.character(i), "|", fixed = TRUE))))
+  # Extract transmitter names (to store in bio)
+  transmitter_names <- sapply(1:nrow(bio), function(i) {
+    the_signal <- bio$Signal[i]
+    the_codespace <- bio$Code.space[i] # returns NULL if column is missing
+
+    lowest_signal <- min(as.numeric(unlist(strsplit(as.character(the_signal), "|", fixed = TRUE))))
+
+    if (is.null(the_codespace)) {
+      link <- match(lowest_signal, extractSignals(names(trimmed_list))) # locations of the lowest_signal in the detected signals
+      if (is.na(link))
+        output <- paste0('Unknown-', lowest_signal)
+      else
+        output <- names(trimmed_list)[link]
+    }
+    else {
+      link <- match(paste0(the_codespace, '-', the_signal), names(trimmed_list)) # like above but using full tag codes.
+      if (is.na(link))
+        output <- paste0(the_codespace, '-', lowest_signal)
+      else
+        output <- names(trimmed_list)[link]
+    }
+
+    return(output)
   })
-  link <- match(lowest_target_signals, extractSignals(names(trimmed_list))) # locations of the lowest_target_signals in the detected_signals
-  bio$Transmitter <- names(trimmed_list)[link]
+
+  # Transfer transmitter names to bio
+  bio$Transmitter <- transmitter_names
 
   # Collect stray summary
   valid_tags <- as.character(unlist(lapply(trimmed_list, function(x) unique(x$Transmitter))))

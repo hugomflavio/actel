@@ -328,23 +328,33 @@ explore <- function(
       appendTo(c("Report", "Screen", "Warning"), "Running inactiveness checks without a distance matrix. Performance may be limited.")
     do.checkInactiveness <- TRUE
   }
+  # clean override based on movements
+  if (is.numeric(override))
+    trigger_override_warning <- any(link <- !override %in% extractSignals(movement.names))
+  else
+    trigger_override_warning <- any(link <- !override %in% movement.names)
 
   movement.names <- names(movements)
 
-  if (any(link <- !override %in% extractSignals(movement.names))) {
+  if (trigger_override_warning) {
     appendTo(c("Screen", "Warning", "Report"), paste0("Override has been triggered for ",
       ifelse(sum(link) == 1, "tag ", "tags "), paste(override[link], collapse = ", "), " but ",
       ifelse(sum(link) == 1, "this signal was", "these signals were"), " not detected."))
     override <- override[!link]
   }
 
+  # convert numeric override to full tag override to prevent problems downstream
+  if (is.numeric(override))
+    override <- movement.names[match(override, extractSignals(movement.names))]
+
+  # Check movement quality
   movements <- lapply(seq_along(movements), function(i) {
     tag <- names(movements)[i]
     counter <- paste0("(", i, "/", length(movements), ")")
 
     appendTo("debug", paste0("debug: Checking movement quality for tag ", tag,"."))
 
-    if (is.na(match(extractSignals(tag), override))) {
+    if (is.na(match(tag, override))) {
       output <- checkMinimumN(movements = movements[[tag]], tag = tag, minimum.detections = minimum.detections, n = counter)
 
       output <- checkImpassables(movements = output, tag = tag, bio = bio, detections = detections.list[[tag]], n = counter, 

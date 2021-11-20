@@ -294,27 +294,40 @@ assembleMatrices <- function(spatial, movements, status.df, arrays, paths, dotma
   temp <- efficiencyMatrix(movements = movements, arrays = arrays, paths = paths, dotmat = dotmat)
   appendTo("debug", "Running assembleMatrices.")
   output <- lapply(temp, function(x) {
-    # sort the rows by the same order as status.df
+    # include transmitters that were never detected
     x <- includeMissing(x = x, status.df = status.df)
-    lowest_signals <- sapply(as.character(status.df$Signal), function(i) min(as.numeric(unlist(strsplit(i, "|", fixed = TRUE)))))
-    link <- sapply(lowest_signals, function(i) grep(paste0("^", i, "$"), rownames(x)))
+    
+    # sort the rows by the same order as status.df (I think these two lines are not needed, but leaving them in just in case)
+    link <- sapply(status.df$Transmitter, function(i) grep(paste0("^", i, "$"), rownames(x)))
     x <- x[link, ]
+
     # split by group*release site combinations
     aux <- split(x, paste0(status.df$Group, ".", status.df$Release.site))
+
     # Re-order
     the.order <- c()
     for (i in unique(status.df$Group)) {
       the.order <- c(the.order, paste0(i, ".", unique(spatial$release.sites$Standard.name)))
     }
     aux <- aux[order(match(names(aux), the.order))]
-    # If the release sites start in different arrays
-    unique.release.arrays <- unique(unlist(sapply(spatial$release.sites$Array, function(x) unlist(strsplit(x, "|", fixed = TRUE)))))
+
+    unique.release.arrays <- unique( # only keep each name once
+                              unlist( # turn output into a string
+                                sapply(spatial$release.sites$Array, function(x) {
+                                    unlist(strsplit(x, "|", fixed = TRUE)) # break arrays by '|'
+                                  })
+                                )
+                              )
+
+    # If the release sites start in different arrays, trim the matrices as needed
     if (length(unique.release.arrays) > 1) {
-      for(i in 1:length(aux)){
-        r <- sapply(spatial$release.sites$Standard.name, function(x) grepl(x, names(aux)[i]))
-        if(sum(r) > 1)
+      for(i in 1:length(aux)){ # for each matrix, find the corresponding release site.
+        the_release_site <- sapply(spatial$release.sites$Standard.name, function(x) grepl(paste0(".", x, "$"), names(aux)[i])) 
+        if(sum(the_release_site) > 1) # if there is more than one matching release site, stop.
           stop("Multiple release sites match the matrix name. Make sure that the release sites' names are not contained within the animal groups or within themselves.\n")
-        the.col <- min(which(grepl(spatial$release.sites$Array[r], colnames(aux[[i]]))))
+        # else, find which is the first column to keep. This is tricky for multi-branch sites...
+        the.col <- min(which(grepl(spatial$release.sites$Array[the_release_site], colnames(aux[[i]]))))
+        # then keep only the relevant columns
         aux[[i]] <- aux[[i]][, c(1, the.col:ncol(aux[[i]]))]
       }
     }
@@ -590,7 +603,7 @@ efficiencyMatrix <- function(movements, arrays, paths, dotmat) {
   appendTo("debug", "Starting efficiencyMatrix.")
   max.ef <- as.data.frame(matrix(ncol = length(arrays) + 1, nrow = length(movements)))
   colnames(max.ef) <- c("Release", names(arrays))
-  rownames(max.ef) <- extractSignals(names(movements))
+  rownames(max.ef) <- names(movements)
   max.ef[is.na(max.ef)] = 0
   max.ef$Release = 1
   min.ef <- max.ef
@@ -608,8 +621,8 @@ efficiencyMatrix <- function(movements, arrays, paths, dotmat) {
         if (!is.null(aux))
           max.aux[match(aux, names(max.aux))] <- 1
       }
-      max.ef[extractSignals(tag), ] <<- max.aux
-      min.ef[extractSignals(tag), ] <<- min.aux
+      max.ef[tag, ] <<- max.aux
+      min.ef[tag, ] <<- min.aux
     }
   })
   return(list(maxmat = max.ef, minmat = min.ef))
@@ -709,16 +722,9 @@ blameArrays <- function(from, to, paths) {
 #'
 includeMissing <- function(x, status.df){
   appendTo("debug", "Running includeMissing.")
-  aux <- as.character(status.df[
-    -match(rownames(x),
-      sapply(as.character(status.df$Signal),
-        function(i) min(as.numeric(unlist(strsplit(i, "|", fixed = TRUE)))))
-      ), "Signal"])
-  include <- as.character(sapply(aux, function(i) {
-    min(as.numeric(unlist(strsplit(i, "|", fixed = TRUE))))
-  }))
-  x[include, ] <- 0
-  x[include, 1] <- 1
+  missing_transmitters <- status.df$Transmitter[!status.df$Transmitter %in% rownames(x)]
+  x[missing_transmitters, ] <- 0
+  x[missing_transmitters, 1] <- 1
   return(x)
 }
 

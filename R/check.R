@@ -162,10 +162,11 @@ checkArguments <- function(dp, tz, minimum.detections, max.interval, speed.metho
     inactive.error <- Inf
 
   if (is.null(dp) && !is.null(exclude.tags) && any(!grepl("-", exclude.tags, fixed = TRUE)))
-    stopAndReport("Not all contents in 'exclude.tags' could be recognized as tags (i.e. 'codespace-signal'). Valid examples: 'R64K-1234', A69-1303-1234'")
+    stopAndReport("Not all contents in 'exclude.tags' could be recognized as tags (i.e. 'codespace-signal'). Valid examples: 'R64K-1234', 'A69-1303-1234'")
 
-  if (!is.null(override) && !is.numeric(override))
-    stopAndReport("'override' must be numeric. Please include only the tag signals in the 'override' argument.")
+  if (!is.null(override) && is.numeric(override)) {
+    appendTo(c('report', 'screen', 'warning'), 'Override is numeric (i.e. the code space has not been included). Will attempt to identify tags to be excluded based on signal alone.')
+  }
 
   if (!is.logical(print.releases))
     stopAndReport("'print.releases' must be logical.")
@@ -180,9 +181,10 @@ checkArguments <- function(dp, tz, minimum.detections, max.interval, speed.metho
 
   # Check that all the overridden tags are part of the study
   if (!is.null(dp) && !is.null(override)) {
-    lowest_signals <- sapply(dp$bio$Signal, function(i) min(as.numeric(unlist(strsplit(as.character(i), "|", fixed = TRUE)))))
+    
+    lowest_signals <- sapply(dp$bio$Signal, lowestSignal)
     if (any(link <- is.na(match(override, lowest_signals))))
-      stopAndReport("Some tag signals listed in 'override' (", paste0(override[link], collapse = ", "), ") are not listed in the biometrics data.")
+      stopAndReport("Some tags listed in 'override' (", paste0(override[link], collapse = ", "), ") are not listed in the biometrics data.")
   }
 
   # NON-explore checks
@@ -1220,9 +1222,11 @@ checkDetectionsBeforeRelease <- function(input, bio, discard.orphans = FALSE){
 #'
 checkNoDetections <- function(input, bio){
   appendTo("debug", "Running checkNoDetections.")
-  tag.list <- extractSignals(names(input))
-  signal_check <- suppressWarnings(as.numeric(unlist(strsplit(as.character(bio$Signal), "|", fixed = TRUE))))
-  link <- match(signal_check, tag.list)
+  if ('Code.space' %in% colnames(bio))
+    link <- match(paste0(bio$Code.space, '-', lowestSignal(bio$Signal)), names(input))
+  else
+    link <- match(lowestSignal(bio$Signal), extractSignals(names(input)))
+
   if (all(is.na(link)))
     stopAndReport("No detections were found in the input data which matched the target signals.\n")
 }
@@ -1230,8 +1234,7 @@ checkNoDetections <- function(input, bio){
 #' Check if there are duplicated signals in the detected tags.
 #'
 #' @param input list of detections
-#' @param tag.list list of the target signals
-#' @inheritParams check_args
+#' @param bio the biometrics table
 #'
 #' @return No return value, called for side effects.
 #'
@@ -1239,26 +1242,34 @@ checkNoDetections <- function(input, bio){
 #'
 checkDupSignals <- function(input, bio){
   appendTo("debug", "Running checkDupSignals.")
-  tag.list <- extractSignals(names(input))
-  signal_check <- suppressWarnings(as.numeric(unlist(strsplit(as.character(bio$Signal), "|", fixed = TRUE))))
-  if (any(colnames(bio) == "Code.space"))
-    signal_check <- signal_check[is.na(bio$Code.space)]
-  failsafe <- match(tag.list, signal_check)
-  if (any(table(failsafe) > 1)) {
-    t1 <- cbind(names(input), signal_check[failsafe])
-    t2 <- t1[complete.cases(t1), ]
-    t3 <- table(t2[, 1], t2[, 2])
-    rm(t1, t2)
-    dupsig <- data.frame(Signal = colnames(t3)[apply(t3, 2, sum) > 1], Tags = NA, stringsAsFactors = FALSE)
-    for (i in seq_len(nrow(dupsig))) {
-      dupsig$Tags[i] <- paste(row.names(t3)[t3[, dupsig$Signal[i]] == 1], collapse = ", ")
+  
+  if (any(colnames(bio) == "Code.space")) {
+    appendTo('debug', 'Debug: Skipping checkDupSignals as there is a codespace column')
+  }
+  else {  
+    signals <- extractSignals(names(input))
+    expected <- suppressWarnings(as.numeric(unlist(strsplit(as.character(bio$Signal), "|", fixed = TRUE))))
+    to.check <- match(signals, expected)
+    if (any(table(to.check) > 1)) {
+        bind_list_with_expected <- cbind(names(input), expected[to.check])
+        remove_non_detected <- bind_list_with_expected[complete.cases(bind_list_with_expected), ]
+        table_the_signals <- table(remove_non_detected[, 1], remove_non_detected[, 2])
+
+        dupsig <- data.frame(Signal = colnames(table_the_signals)[apply(table_the_signals, 
+            2, sum) > 1], Tags = NA, stringsAsFactors = FALSE)
+        for (i in seq_len(nrow(dupsig))) {
+            dupsig$Tags[i] <- paste(row.names(table_the_signals)[table_the_signals[, dupsig$Signal[i]] == 1], collapse = ", ")
+        }
+
+        rest.of.message <- NULL
+        for (i in seq_len(nrow(dupsig))) {
+            rest.of.message <- paste0(rest.of.message, "\n   Signal ", 
+                                      dupsig$Signal[i], " was found on tags ", 
+                                      dupsig$Tags[i], ".")
+        }
+
+        stopAndReport("One or more signals match more than one tag in the detections! Showing relevant signals/tags.", 
+            rest.of.message)
     }
-    rm(t3)
-    rest.of.message <- NULL
-    for (i in seq_len(nrow(dupsig))) {
-      rest.of.message <- paste0(rest.of.message, "\n   Signal ", dupsig$Signal[i], " was found on tags ", dupsig$Tags[i], ".")
-    }
-    stopAndReport("One or more signals match more than one tag in the detections! Showing relevant signals/tags.", rest.of.message)
   }
 }
-

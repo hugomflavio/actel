@@ -1266,3 +1266,42 @@ completeMatrix <- function(x){
   }
   return(x)
 }
+
+
+#' cleanly extract lowest signal from signals string
+#' 
+#' @param x
+#' 
+#' @return a vector of lowest signals
+#' 
+#' @keywords internal
+#' 
+lowestSignal <- function(x) {
+  sapply(as.character(x), function(i) 
+    min(
+      as.numeric(
+        unlist(
+          strsplit(i, 
+            "|", 
+            fixed = TRUE)
+          )
+        )
+      )
+    )
+}
+
+#' Split signals from multi-signal input
+#' 
+#' @param x
+#' 
+#' @return a list of split signals
+#' 
+#' @keywords internal
+#' 
+#' 
+splitSignals <- function(x) {
+  if(length(x) != 1)
+    stop('splitSignals can only split one input at a time')
+  as.numeric(unlist(strsplit(as.character(x), "|", fixed = TRUE)))
+}
+
