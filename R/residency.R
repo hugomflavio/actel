@@ -470,7 +470,7 @@ residency <- function(
     the.transmitters <- bio$Transmitter[bio$Group == i]
     if (all(is.na(the.transmitters))) {
       appendTo(c('screen', 'warning', 'report'),
-        paste0('Group ', as.character(i), 'has no detections. Skipping ratio calculations.'))
+        paste0('Group ', as.character(i), ' has no detections. Skipping ratio calculations.'))
       return(NULL)
     } 
     else {
