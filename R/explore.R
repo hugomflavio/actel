@@ -132,7 +132,9 @@ explore <- function(
   tz = NULL,
   datapack = NULL,
   max.interval = 60,
-  minimum.detections = 2,
+  minimum.detections,
+  min.total.detections = 2,
+  min.per.event = 1,
   start.time = NULL,
   stop.time = NULL,
   speed.method = c("last to first", "last to last"),
@@ -155,6 +157,10 @@ explore <- function(
   detections.y.axis = c("auto", "stations", "arrays")) 
 {
 
+# check deprecated argument
+  if (!missing(minimum.detections))
+    stop("'minimum.detections' has been deprecated. Please use 'min.total.detections' and 'min.per.event' instead.", call. = FALSE)
+
 # clean up any lost helpers
   deleteHelpers()
   if (file.exists(paste0(tempdir(), "/actel_debug_file.txt")))
@@ -175,9 +181,14 @@ explore <- function(
     checkToken(token = attributes(datapack)$actel.token,
                timestamp = attributes(datapack)$timestamp)
 
+  if (length(min.per.event) > 1)
+    appendTo(c('screen', 'warning', 'report'),
+      'explore() only has array movements but two values were set for min.per.event. Disregarding second value.')
+  
   aux <- checkArguments(dp = datapack,
                         tz = tz,
-                        minimum.detections = minimum.detections,
+                        min.total.detections = min.total.detections,
+                        min.per.event = min.per.event,
                         max.interval = max.interval,
                         speed.method = speed.method,
                         speed.warning = speed.warning,
@@ -195,7 +206,8 @@ explore <- function(
                         override = override,
                         print.releases = print.releases,
                         detections.y.axis = detections.y.axis)
-  
+
+  min.per.event <- aux$min.per.event
   speed.method <- aux$speed.method
   speed.warning <- aux$speed.warning
   speed.error <- aux$speed.error
@@ -211,7 +223,8 @@ explore <- function(
   the.function.call <- paste0("explore(tz = ", ifelse(is.null(tz), "NULL", paste0("'", tz, "'")),
     ", datapack = ", ifelse(is.null(datapack), "NULL", deparse(substitute(datapack))),
     ", max.interval = ", max.interval,
-    ", minimum.detections = ", minimum.detections,
+    ", min.total.detections = ", min.total.detections,
+    ", min.per.event = ", paste0("c('", min.per.event, "')"),
     ", start.time = ", ifelse(is.null(start.time), "NULL", paste0("'", start.time, "'")),
     ", stop.time = ", ifelse(is.null(stop.time), "NULL", paste0("'", stop.time, "'")),
     ", speed.method = ", paste0("c('", speed.method, "')"),
@@ -352,7 +365,8 @@ explore <- function(
     appendTo("debug", paste0("debug: Checking movement quality for tag ", tag,"."))
 
     if (is.na(match(tag, override))) {
-      output <- checkMinimumN(movements = movements[[tag]], tag = tag, minimum.detections = minimum.detections, n = counter)
+      output <- checkMinimumN(movements = movements[[tag]], tag = tag, min.total.detections = min.total.detections,
+                               min.per.event = min.per.event[1], n = counter)
 
       output <- checkImpassables(movements = output, tag = tag, bio = bio, detections = detections.list[[tag]], n = counter, 
                                  spatial = spatial, dotmat = dotmat, GUI = GUI, save.tables.locally = save.tables.locally)

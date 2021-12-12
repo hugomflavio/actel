@@ -110,7 +110,9 @@ residency <- function(
   section.order = NULL,
   datapack = NULL,
   max.interval = 60,
-  minimum.detections = 2,
+  minimum.detections,
+  min.total.detections = 2,
+  min.per.event = 1,
   start.time = NULL,
   stop.time = NULL,
   speed.method = c("last to first", "last to last"),
@@ -136,6 +138,10 @@ residency <- function(
   detections.y.axis = c("auto", "stations", "arrays"))
 {
 
+# check deprecated argument
+  if (!missing(minimum.detections))
+    stop("'minimum.detections' has been deprecated. Please use 'min.total.detections' and 'min.per.event' instead.", call. = FALSE)
+
 # clean up any lost helpers
   deleteHelpers()
   if (file.exists(paste0(tempdir(), "/actel_debug_file.txt")))
@@ -158,7 +164,8 @@ residency <- function(
 
   aux <- checkArguments(dp = datapack,
                         tz = tz,
-                        minimum.detections = minimum.detections,
+                        min.total.detections = min.total.detections,
+                        min.per.event = min.per.event,
                         max.interval = max.interval,
                         speed.method = speed.method,
                         speed.warning = speed.warning,
@@ -181,6 +188,7 @@ residency <- function(
                         detections.y.axis = detections.y.axis,
                         timestep = timestep)
 
+  min.per.event <- aux$min.per.event
   speed.method <- aux$speed.method
   speed.warning <- aux$speed.warning
   speed.error <- aux$speed.error
@@ -198,7 +206,8 @@ residency <- function(
     ", section.order = ", ifelse(is.null(section.order), "NULL", paste0("c('", paste(section.order, collapse = "', '"), "')")),
     ", datapack = ", ifelse(is.null(datapack), "NULL", deparse(substitute(datapack))),
     ", max.interval = ", max.interval,
-    ", minimum.detections = ", minimum.detections,
+    ", min.total.detections = ", min.total.detections,
+    ", min.per.event = ", paste0("c('", min.per.event, "')"),
     ", start.time = ", ifelse(is.null(start.time), "NULL", paste0("'", start.time, "'")),
     ", stop.time = ", ifelse(is.null(stop.time), "NULL", paste0("'", stop.time, "'")),
     ", speed.method = ", paste0("c('", speed.method, "')"),
@@ -364,7 +373,8 @@ residency <- function(
     appendTo("debug", paste0("debug: Checking movement quality for tag ", tag,"."))
 
     if (is.na(match(tag, override))) {
-      output <- checkMinimumN(movements = movements[[tag]], tag = tag, minimum.detections = minimum.detections, n = counter)
+      output <- checkMinimumN(movements = movements[[tag]], tag = tag, min.total.detections = min.total.detections,
+                               min.per.event = min.per.event[1], n = counter)
 
       output <- checkImpassables(movements = output, tag = tag, bio = bio, detections = detections.list[[tag]], n = counter, 
                                  spatial = spatial, dotmat = dotmat, GUI = GUI, save.tables.locally = save.tables.locally)
@@ -407,6 +417,10 @@ residency <- function(
     appendTo("debug", paste0("debug: Compiling section movements for tag ", tag,"."))
 
     aux <- sectionMovements(movements = movements[[i]], spatial = spatial, valid.dist = attributes(dist.mat)$valid)
+    
+    aux <- checkMinimumN(movements = aux, tag = tag, min.total.detections = 0, # don't run the minimum total detections check here.
+                         min.per.event = min.per.event[2], n = counter)
+ 
     output <- checkSMovesN(secmoves = aux, tag = tag, section.minimum = section.minimum, GUI = GUI, 
                            save.tables.locally = save.tables.locally, n = counter)
     return(output)
