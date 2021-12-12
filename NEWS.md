@@ -13,6 +13,7 @@ Fixes:
 Changes:
   * Removed deprecated argument `plot.detections.by`.
   * `minimum.detections` has been replaced by `min.total.detections` and `min.per.event`.
+  * `section.minimum` has been replaced by `section.warning` and `section.error`.
 
 Enhancements:
   * New `Code.spaces` column in the biometrics allows the user to specificy the code space of the target tags.

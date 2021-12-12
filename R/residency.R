@@ -129,7 +129,9 @@ residency <- function(
   discard.orphans = FALSE,
   discard.first = NULL,
   save.detections = FALSE,
-  section.minimum = 2,
+  section.warning = 1,
+  section.error = 1,
+  section.minimum,
   timestep = c("days", "hours"),
   replicates = NULL,
   GUI = c("needed", "always", "never"),
@@ -141,6 +143,9 @@ residency <- function(
 # check deprecated argument
   if (!missing(minimum.detections))
     stop("'minimum.detections' has been deprecated. Please use 'min.total.detections' and 'min.per.event' instead.", call. = FALSE)
+
+  if (!missing(section.minimum))
+    stop("'section.minimum' has been deprecated. Please use 'section.warning' and 'section.error' instead.", call. = FALSE)
 
 # clean up any lost helpers
   deleteHelpers()
@@ -183,7 +188,8 @@ residency <- function(
                         override = override,
                         print.releases = print.releases,
                         replicates = replicates,
-                        section.minimum = section.minimum,
+                        section.warning = section.warning,
+                        section.error = section.error,
                         section.order = section.order,
                         detections.y.axis = detections.y.axis,
                         timestep = timestep)
@@ -196,6 +202,8 @@ residency <- function(
   inactive.error <- aux$inactive.error
   detections.y.axis <- aux$detections.y.axis
   timestep <- aux$timestep
+  section.warning <- aux$section.warning
+  section.error <- aux$section.error
   rm(aux)
 
   GUI <- checkGUI(GUI, save.tables.locally)
@@ -223,7 +231,8 @@ residency <- function(
     ", discard.orphans = ", ifelse(discard.orphans, "TRUE", "FALSE"),
     ", discard.first = ", ifelse(is.null(discard.first), "NULL", discard.first),
     ", save.detections = ", ifelse(save.detections, "TRUE", "FALSE"),
-    ", section.minimum = ", section.minimum,
+    ", section.warning = ", section.warning,
+    ", section.error = ", section.error,
     ", timestep = '", timestep, "'",
     ", replicates = ", ifelse(is.null(replicates),"NULL", paste0("list(", paste(sapply(1:length(replicates), function(i) paste0("'", names(replicates)[i], "' = c('", paste(replicates[[i]], collapse = "', '"), "')")), collapse = ", "), ")")),
     ", inactive.error = ", ifelse(is.null(inactive.error), "NULL", inactive.error),
@@ -420,8 +429,8 @@ residency <- function(
     
     aux <- checkMinimumN(movements = aux, tag = tag, min.total.detections = 0, # don't run the minimum total detections check here.
                          min.per.event = min.per.event[2], n = counter)
- 
-    output <- checkSMovesN(secmoves = aux, tag = tag, section.minimum = section.minimum, GUI = GUI, 
+
+    output <- checkSMovesN(secmoves = aux, tag = tag, section.warning = section.warning, section.error = section.error, GUI = GUI, 
                            save.tables.locally = save.tables.locally, n = counter)
     return(output)
   })
