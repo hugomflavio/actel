@@ -37,7 +37,7 @@ checkJumpDistance(
 
 \item{jump.warning}{If a tag crosses a number of arrays equal or greater
 than \code{jump.warning} without being detected, a warning is issued. Defaults
-to 2. To disable jump warnings, set to Inf.}
+to 2. To disable jump warnings, set to Inf. Must be equal to or lower than \code{jump.error}.}
 
 \item{jump.error}{If a tag crosses a number of arrays equal or greater than
 \code{jump.error} without being detected, user intervention is suggested.

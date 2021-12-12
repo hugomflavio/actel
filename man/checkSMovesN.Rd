@@ -4,15 +4,28 @@
 \alias{checkSMovesN}
 \title{Verify number of detections in section movements}
 \usage{
-checkSMovesN(secmoves, tag, section.minimum, GUI, save.tables.locally, n)
+checkSMovesN(
+  secmoves,
+  tag,
+  section.warning,
+  section.error,
+  GUI,
+  save.tables.locally,
+  n
+)
 }
 \arguments{
 \item{secmoves}{the section movements list.}
 
 \item{tag}{The tag being analysed.}
 
-\item{section.minimum}{If a tag has less than \code{section.minimum}
-consecutive detections in a section, a warning is issued. Defaults to 2.}
+\item{section.warning}{If a tag has section movement events with less or equal to
+\code{section.warning} detections, a warning is issued. Defaults to 1.
+To disable section warnings, set to 0. Must be equal to or greater than \code{section.error}.}
+
+\item{section.error}{If a tag has section movement events with less or equal to
+\code{section.error} detections, user intervention is suggested.
+Defaults to 1. To disable user intervention suggestions, set to 0.}
 
 \item{GUI}{One of "needed", "always" or "never". If "needed", a new window is
 opened to inspect the movements only if the movements table is too big to be

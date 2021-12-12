@@ -9,7 +9,9 @@ residency(
   section.order = NULL,
   datapack = NULL,
   max.interval = 60,
-  minimum.detections = 2,
+  minimum.detections,
+  min.total.detections = 2,
+  min.per.event = 1,
   start.time = NULL,
   stop.time = NULL,
   speed.method = c("last to first", "last to last"),
@@ -26,7 +28,9 @@ residency(
   discard.orphans = FALSE,
   discard.first = NULL,
   save.detections = FALSE,
-  section.minimum = 2,
+  section.warning = 1,
+  section.error = 1,
+  section.minimum,
   timestep = c("days", "hours"),
   replicates = NULL,
   GUI = c("needed", "always", "never"),
@@ -48,10 +52,17 @@ May be used to run actel analyses based on R objects, rather than input files.}
 \item{max.interval}{The number of minutes that must pass between detections
 for a new event to be created. Defaults to 60.}
 
-\item{minimum.detections}{For tags with only one movement event, defines the
-minimum number of times a tag must have been recorded during the study
-period for it to be considered true detections and not random noise.
-Defaults to 2.}
+\item{minimum.detections}{DEPRECATED. Please use the arguments min.total.detections
+and min.per.event instead.}
+
+\item{min.total.detections}{Minimum number of times a tag must have
+been detected during the study period for the detections to be considered true
+and not just random noise. Defaults to 2.}
+
+\item{min.per.event}{Minimum number of detections an event must have to be
+deemed valid. For analyses with both array and section events, a vector of
+two values can be provided. If only one value is provided, the same threshold
+applies for both types of events. Defaults to 1.}
 
 \item{start.time}{Detection data prior to the timestamp set in
 \code{start.time} (in YYYY-MM-DD HH:MM:SS format) is not considered during
@@ -69,7 +80,7 @@ last detection on the target array to perform the calculations.}
 
 \item{speed.warning}{If a tag moves at a speed equal or greater than
 \code{speed.warning} (in metres per second), a warning is issued. If left
-NULL (default), no warnings are issued.}
+NULL (default), no warnings are issued. Must be equal to or lower than \code{speed.error}}
 
 \item{speed.error}{If a tag moves at a speed equal or greater than
 \code{speed.error} (in metres per second), user intervention is suggested.
@@ -77,7 +88,7 @@ If left NULL (default), user intervention is never suggested.}
 
 \item{jump.warning}{If a tag crosses a number of arrays equal or greater
 than \code{jump.warning} without being detected, a warning is issued. Defaults
-to 2. To disable jump warnings, set to Inf.}
+to 2. To disable jump warnings, set to Inf. Must be equal to or lower than \code{jump.error}.}
 
 \item{jump.error}{If a tag crosses a number of arrays equal or greater than
 \code{jump.error} without being detected, user intervention is suggested.
@@ -86,7 +97,7 @@ Defaults to 3. To disable user intervention suggestions, set to Inf.}
 \item{inactive.warning}{If a tag spends a number of days equal or greater
 than \code{inactive.warning} in a given array at the tail of the respective
 detections, a warning is issued. If left NULL (default), no warnings are
-issued.}
+issued. Must be equal to or lower than \code{innactive.error}.}
 
 \item{inactive.error}{If a tag spends a number of days equal or greater than
 \code{inactive.error} in a given array at the tail of the respective
@@ -122,8 +133,15 @@ the release-to-first-detection calculations.}
 \item{save.detections}{Logical: Should the processed detections be saved for
 future runs?}
 
-\item{section.minimum}{If a tag has less than \code{section.minimum}
-consecutive detections in a section, a warning is issued. Defaults to 2.}
+\item{section.warning}{If a tag has section movement events with less or equal to
+\code{section.warning} detections, a warning is issued. Defaults to 1.
+To disable section warnings, set to 0. Must be equal to or greater than \code{section.error}.}
+
+\item{section.error}{If a tag has section movement events with less or equal to
+\code{section.error} detections, user intervention is suggested.
+Defaults to 1. To disable user intervention suggestions, set to 0.}
+
+\item{section.minimum}{DEPRECATED: Please use section.warning and section.error instead.}
 
 \item{timestep}{The resolution desired for the residency calculations.
 One of "days" (default) or "hours".}

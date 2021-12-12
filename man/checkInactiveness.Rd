@@ -28,7 +28,7 @@ checkInactiveness(
 \item{inactive.warning}{If a tag spends a number of days equal or greater
 than \code{inactive.warning} in a given array at the tail of the respective
 detections, a warning is issued. If left NULL (default), no warnings are
-issued.}
+issued. Must be equal to or lower than \code{innactive.error}.}
 
 \item{inactive.error}{If a tag spends a number of days equal or greater than
 \code{inactive.error} in a given array at the tail of the respective

@@ -7,8 +7,13 @@
 #' and other residency-focused variables, this is the analysis you are looking
 #' for!
 #'
-#' @param section.minimum If a tag has less than \code{section.minimum}
-#'  consecutive detections in a section, a warning is issued. Defaults to 2.
+#' @param section.minimum DEPRECATED: Please use section.warning and section.error instead.
+#' @param section.error If a tag has section movement events with less or equal to
+#'  \code{section.error} detections, user intervention is suggested.
+#'  Defaults to 1. To disable user intervention suggestions, set to 0.
+#' @param section.warning If a tag has section movement events with less or equal to
+#'  \code{section.warning} detections, a warning is issued. Defaults to 1. 
+#'  To disable section warnings, set to 0. Must be equal to or greater than \code{section.error}.
 #' @param timestep The resolution desired for the residency calculations.
 #'  One of "days" (default) or "hours".
 #' @inheritParams migration

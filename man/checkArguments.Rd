@@ -7,7 +7,8 @@
 checkArguments(
   dp,
   tz,
-  minimum.detections,
+  min.total.detections,
+  min.per.event,
   max.interval,
   speed.method = c("last to first", "last to last"),
   speed.warning,
@@ -27,7 +28,8 @@ checkArguments(
   detections.y.axis = c("auto", "stations", "arrays"),
   if.last.skip.section = NULL,
   replicates = NULL,
-  section.minimum = NULL,
+  section.warning,
+  section.error,
   section.order = NULL,
   timestep = c("days", "hours")
 )
@@ -38,10 +40,14 @@ checkArguments(
 \item{tz}{The time zone of the study area. Must match one of the values
 present in \code{\link[base]{timezones}}.}
 
-\item{minimum.detections}{For tags with only one movement event, defines the
-minimum number of times a tag must have been recorded during the study
-period for it to be considered true detections and not random noise.
-Defaults to 2.}
+\item{min.total.detections}{Minimum number of times a tag must have
+been detected during the study period for the detections to be considered true
+and not just random noise. Defaults to 2.}
+
+\item{min.per.event}{Minimum number of detections an event must have to be
+deemed valid. For analyses with both array and section events, a vector of
+two values can be provided. If only one value is provided, the same threshold
+applies for both types of events. Defaults to 1.}
 
 \item{max.interval}{The number of minutes that must pass between detections
 for a new event to be created. Defaults to 60.}
@@ -54,7 +60,7 @@ last detection on the target array to perform the calculations.}
 
 \item{speed.warning}{If a tag moves at a speed equal or greater than
 \code{speed.warning} (in metres per second), a warning is issued. If left
-NULL (default), no warnings are issued.}
+NULL (default), no warnings are issued. Must be equal to or lower than \code{speed.error}}
 
 \item{speed.error}{If a tag moves at a speed equal or greater than
 \code{speed.error} (in metres per second), user intervention is suggested.
@@ -83,7 +89,7 @@ future runs?}
 
 \item{jump.warning}{If a tag crosses a number of arrays equal or greater
 than \code{jump.warning} without being detected, a warning is issued. Defaults
-to 2. To disable jump warnings, set to Inf.}
+to 2. To disable jump warnings, set to Inf. Must be equal to or lower than \code{jump.error}.}
 
 \item{jump.error}{If a tag crosses a number of arrays equal or greater than
 \code{jump.error} without being detected, user intervention is suggested.
@@ -92,7 +98,7 @@ Defaults to 3. To disable user intervention suggestions, set to Inf.}
 \item{inactive.warning}{If a tag spends a number of days equal or greater
 than \code{inactive.warning} in a given array at the tail of the respective
 detections, a warning is issued. If left NULL (default), no warnings are
-issued.}
+issued. Must be equal to or lower than \code{innactive.error}.}
 
 \item{inactive.error}{If a tag spends a number of days equal or greater than
 \code{inactive.error} in a given array at the tail of the respective
@@ -121,8 +127,13 @@ of a given section be considered to have disappeared in the next section?}
 efficiency is to be calculated: The standard names of the stations to be
 used as a replicate. See the vignettes for more details.}
 
-\item{section.minimum}{If a tag has less than \code{section.minimum}
-consecutive detections in a section, a warning is issued. Defaults to 2.}
+\item{section.warning}{If a tag has section movement events with less or equal to
+\code{section.warning} detections, a warning is issued. Defaults to 1.
+To disable section warnings, set to 0. Must be equal to or greater than \code{section.error}.}
+
+\item{section.error}{If a tag has section movement events with less or equal to
+\code{section.error} detections, user intervention is suggested.
+Defaults to 1. To disable user intervention suggestions, set to 0.}
 
 \item{section.order}{A vector containing the order by which sections should
 be aligned in the results.}

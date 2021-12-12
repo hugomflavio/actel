@@ -2,17 +2,22 @@
 % Please edit documentation in R/check.R
 \name{checkMinimumN}
 \alias{checkMinimumN}
-\title{Check that the tag have enough detections to be valid}
+\title{Check the number of detections (total and per event) of a given tag. Works
+for both array and section movements.}
 \usage{
-checkMinimumN(movements, minimum.detections, tag, n)
+checkMinimumN(movements, min.total.detections, min.per.event, tag, n)
 }
 \arguments{
 \item{movements}{The movements table for a specific tag.}
 
-\item{minimum.detections}{For tags with only one movement event, defines the
-minimum number of times a tag must have been recorded during the study
-period for it to be considered true detections and not random noise.
-Defaults to 2.}
+\item{min.total.detections}{Minimum number of times a tag must have
+been detected during the study period for the detections to be considered true
+and not just random noise. Defaults to 2.}
+
+\item{min.per.event}{Minimum number of detections an event must have to be
+deemed valid. For analyses with both array and section events, a vector of
+two values can be provided. If only one value is provided, the same threshold
+applies for both types of events. Defaults to 1.}
 
 \item{tag}{The tag being analysed.}
 
@@ -22,6 +27,7 @@ Defaults to 2.}
 A data frame containing the movements with valid/invalid notes
 }
 \description{
-Check that the tag have enough detections to be valid
+Check the number of detections (total and per event) of a given tag. Works
+for both array and section movements.
 }
 \keyword{internal}

@@ -27,7 +27,7 @@ checkSpeeds(
 
 \item{speed.warning}{If a tag moves at a speed equal or greater than
 \code{speed.warning} (in metres per second), a warning is issued. If left
-NULL (default), no warnings are issued.}
+NULL (default), no warnings are issued. Must be equal to or lower than \code{speed.error}}
 
 \item{speed.error}{If a tag moves at a speed equal or greater than
 \code{speed.error} (in metres per second), user intervention is suggested.
