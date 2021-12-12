@@ -232,6 +232,7 @@ checkArguments <- function(dp, tz, min.total.detections, min.per.event, max.inte
               speed.method = speed.method,
               speed.warning = speed.warning,
               speed.error = speed.error,
+              jump.warning = jump.warning,
               inactive.warning = inactive.warning,
               inactive.error = inactive.error,
               detections.y.axis = detections.y.axis,
