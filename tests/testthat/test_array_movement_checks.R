@@ -33,23 +33,41 @@ test_that("checkMinimumN reacts as expected", {
 	xmoves <- moves
 	xmoves[[1]] <- xmoves[[1]][1, ]
 	xmoves[[1]]$Detections <- 1
-  expect_warning(output <- checkMinimumN(movements = xmoves[[1]], tag = "test", minimum.detections = 2, n = "(1/1)"),
-  	"Tag test (1/1) only has one movement event (A1) with 1 detections. Considered invalid.", fixed = TRUE)
+  expect_warning(output <- checkMinimumN(movements = xmoves[[1]], tag = "test", min.total.detections = 2, min.per.event = 2, n = "(1/1)"),
+  	"Tag test (1/1) has less than 2 detections in total. Discarding this tag.", fixed = TRUE)
+  expect_warning(output <- checkMinimumN(movements = xmoves[[1]], tag = "test", min.total.detections = 1, min.per.event = 2, n = "(1/1)"),
+    "Tag test (1/1) has array movement events with less than 2 detections. Invalidating those events.", fixed = TRUE)
   expect_false(output$Valid)
-  output <- checkMinimumN(movements = xmoves[[2]], tag = "test", minimum.detections = 2)
+  output <- checkMinimumN(movements = xmoves[[2]], tag = "test", min.total.detections = 1, min.per.event = 1)
   expect_true(all(output$Valid))
 })
 
 if (interactive()) {
-  warning("The test below will fail in an interactive session. Run the checkImpassables function manually and feed the input commented below the test")
+  # ONLY RUN THIS PART IF YOU CAN MANUALLY CONTROL THE CONSOLE INPUT. USE THE VALUES PROVIDED BELOW
+  xdotmat <- dotmat
+  xdotmat["A7", "A8"] <- NA
+  expect_warning(output <- checkImpassables(movements = moves[[1]], tag = "R64K-4451", bio = bio, 
+      spatial = spatial, dotmat = xdotmat, GUI = "never", n = "(1/1)"),
+    "Tag R64K-4451 (1/1) made an impassable jump in events 16 to 17: It is not possible to go from array A7 to A8.", fixed = TRUE)
+  # 17
+  # y
+  # n
+  expect_warning(output <- checkImpassables(movements = moves[[1]], tag = "R64K-4451", bio = bio, 
+      spatial = spatial, dotmat = xdotmat, GUI = "never", n = "(1/1)"),
+"The last interaction did not solve the impassable problem! See remaining problems below.
+         You can also press ESC to abort the current run and alter your spatial.txt file.", fixed = TRUE)
+  # 17
+  # y
+  # n
+
 } else {
   test_that("checkImpassables reacts as expected", {
    	xdotmat <- dotmat
    	xdotmat["A7", "A8"] <- NA
       expect_error(
       	expect_warning(output <- checkImpassables(movements = moves[[1]], tag = "R64K-4451", bio = bio, 
-          spatial = spatial, dotmat = xdotmat, GUI = "never", n = "(1/1)"),
-      		"Tag R64K-4451 (1/1) made an impassable jump: It is not possible to go from array A1 to A2.", fixed = TRUE), 	
+            spatial = spatial, dotmat = xdotmat, GUI = "never", n = "(1/1)"),
+      		"Tag R64K-4451 (1/1) made an impassable jump in events 16 to 17: It is not possible to go from array A7 to A8.", fixed = TRUE), 	
     		"Preventing analysis from entering interactive mode in a non-interactive session.", fixed = TRUE)
   })
   # 17

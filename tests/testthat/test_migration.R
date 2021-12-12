@@ -144,6 +144,9 @@ test_that("migration is able to run speed and inactiveness checks.", {
 	 'intra.array.matrices','matrices', 'movements', 'overall.CJS', 'release.overview', 'rsp.info', 'section.movements',
 	  'section.overview', 'spatial', 'status.df', 'times', 'valid.detections', 'valid.movements')))))
 })
+# n
+# n
+# n
 
 # Throw in a fake report just to test the number appending code
 write(1, file = "actel_migration_report.html")
@@ -157,6 +160,9 @@ test_that("migration can handle multiple expected first arrays", {
 		report = TRUE, success.arrays = "A9", GUI = "never")),
 		"Multiple possible first arrays detected for release site 'RS1'.", fixed = TRUE)
 })
+# n
+# n
+# n
 
 # Throw in a fake results object just to test the number appending code
 a = 1
@@ -178,7 +184,15 @@ test_that("migration can handle multi-sensor data", {
 	write.csv(xbio, "biometrics.csv", row.names = FALSE)
 	output <- suppressWarnings(migration(tz = 'Europe/Copenhagen', GUI = "never"))
 	write.csv(example.biometrics, "biometrics.csv", row.names = FALSE)
+	expect_true(TRUE) # dummy test just so it is not marked as empty.
 })
+# n
+# n
+# n
+# n
+# n
+# n
+# n
 
 setwd("..")
 unlink("exampleWorkspace", recursive = TRUE)

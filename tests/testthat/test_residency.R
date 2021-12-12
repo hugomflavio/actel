@@ -8,13 +8,6 @@ exampleWorkspace("exampleWorkspace")
 setwd("exampleWorkspace")
 write.csv(example.distances, "distances.csv")
 
-test_that("residency stops when any argument does not make sense", {
-	skip_on_cran()
-	expect_error(residency(tz = 'Europe/Copenhagen', report = TRUE, GUI = "never", section.minimum = "a"),
-		"'section.minimum' must be numeric", fixed = TRUE)
-})
-
-
 test_that("residency results contains all the expected elements.", {
 	output <- suppressWarnings(residency(tz = 'Europe/Copenhagen', report = FALSE, GUI = "never"))
 
@@ -81,6 +74,8 @@ test_that("residency can handle multiple release sites.", {
 
 	output <- suppressWarnings(residency(tz = 'Europe/Copenhagen', jump.warning = 1,
 		report = TRUE, GUI = "never", speed.warning = 1000000, inactive.warning = 1000000, replicates = list(A9 = c("St.16", "St.17"))))
+
+	expect_true(TRUE) # dummy test so it doesn't count as skipped.
 })
 # n
 # n
@@ -121,6 +116,8 @@ test_that("residency can handle multi-sensor data", {
 	xbio$Signal[1] <- "4453|4454"
 	write.csv(xbio, "biometrics.csv", row.names = FALSE)
 	output <- suppressWarnings(residency(tz = 'Europe/Copenhagen', GUI = "never"))
+
+	expect_true(TRUE) # dummy test so it doesn't count as skipped.
 })
 # n
 # n

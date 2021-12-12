@@ -97,13 +97,12 @@ test_that("updateValidity correctly transfers invalid events.", {
 test_that("checkSMovesN throws warning only if movements are not ordered", {
 	aux <- sectionMovements(movements = moves[[1]], spatial = spatial, valid.dist = attributes(dist.mat)$valid)
 
-  tryCatch(checkSMovesN(secmoves = aux, tag = "test", section.minimum = 1, GUI = "never"),
+  tryCatch(checkSMovesN(secmoves = aux, tag = "test", section.warning = 1, section.error = 1, GUI = "never"),
     warning = function(w) stop("A warning was issued where it should not have been."))
 
-	expect_warning(checkSMovesN(secmoves = aux, tag = "test", section.minimum = 15, GUI = "never", n = "(1/1)"),
-		"Section movements with less than 15 detections are present for tag test (1/1).", fixed = TRUE)
+	expect_warning(checkSMovesN(secmoves = aux, tag = "test", section.warning = 15, section.error = 0, GUI = "never", n = "(1/1)"),
+		"Section movements with 15 or less detections are present for tag test (1/1).", fixed = TRUE)
 })
-# n
 
 setwd("..")
 unlink("exampleWorkspace", recursive = TRUE)

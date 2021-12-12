@@ -25,14 +25,14 @@ test_that("explore stops when any argument does not make sense", {
 	expect_error(explore(tz = "Europe/Copenhagen", max.interval = -1),
 		"'max.interval' must be positive.", fixed = TRUE)
 	
-	expect_error(explore(tz = "Europe/Copenhagen", minimum.detections = "a"),
-		"'minimum.detections' must be numeric.", fixed = TRUE)
+	expect_error(explore(tz = "Europe/Copenhagen", min.total.detections = "a"),
+		"'min.total.detections' must be numeric.", fixed = TRUE)
 	
-	expect_error(explore(tz = "Europe/Copenhagen", minimum.detections = "1"),
-		"'minimum.detections' must be numeric.", fixed = TRUE)
+	expect_error(explore(tz = "Europe/Copenhagen", min.total.detections = "1"),
+		"'min.total.detections' must be numeric.", fixed = TRUE)
 	
-	expect_error(explore(tz = "Europe/Copenhagen", minimum.detections = -1),
-		"'minimum.detections' must be positive.", fixed = TRUE)
+	expect_error(explore(tz = "Europe/Copenhagen", min.total.detections = -1),
+		"'min.total.detections' must be positive.", fixed = TRUE)
 	
 	expect_error(explore(tz = "Europe/Copenhagen", start.time = 1234),
 		"'start.time' must be in 'yyyy-mm-dd hh:mm:ss' format.", fixed = TRUE)
@@ -152,8 +152,6 @@ test_that("explore stops when any argument does not make sense", {
 # n
 # n
 # n
-# n
-# n
 
 test_that("explore results contains all the expected elements.", {
 	output <- suppressWarnings(explore(tz = 'Europe/Copenhagen', report = FALSE, GUI = "never"))
@@ -166,7 +164,6 @@ test_that("explore results contains all the expected elements.", {
 })
 # n
 # n
-# n
 
 test_that("explore is able to run speed and inactiveness checks.", {
 	output <- suppressWarnings(explore(tz = 'Europe/Copenhagen', report = FALSE, GUI = "never", speed.error = 1000000, inactive.error = 1000000))
@@ -177,10 +174,6 @@ test_that("explore is able to run speed and inactiveness checks.", {
 	expect_false(any(is.na(match(names(output), c('bio', 'detections', 'valid.detections', 'spatial', 'deployments', 'arrays',
     'movements', 'valid.movements', 'times', 'rsp.info')))))
 })
-# n
-# n
-# n
-# n
 # n
 # n
 # n
@@ -199,6 +192,7 @@ test_that("explore can handle multi-sensor data", {
 	xbio$Signal[1] <- "4453|4454"
 	write.csv(xbio, "biometrics.csv", row.names = FALSE)
 	output <- suppressWarnings(explore(tz = 'Europe/Copenhagen', GUI = "never"))
+	expect_true(TRUE) # Dummy test just so it is not considered skipped
 })
 # n
 # n
@@ -220,7 +214,6 @@ test_that("the discard.first argument is working properly", {
 	expect_true(is.na(output$valid.movements[[1]]$Time.travelling[1]))
 	expect_true(is.na(output$valid.movements[[1]]$Average.speed.m.s[1]))
 })
-# n
 # n
 # n
 
