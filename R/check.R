@@ -43,11 +43,13 @@ NULL
 #'
 #' @return updated parameters
 #'
-checkArguments <- function(dp, tz, minimum.detections, max.interval, speed.method = c("last to first", "last to last"),
+checkArguments <- function(dp, tz, min.total.detections, min.per.event, max.interval, speed.method = c("last to first", "last to last"),
   speed.warning, speed.error, start.time, stop.time, report, auto.open, save.detections, jump.warning, jump.error,
   inactive.warning, inactive.error, exclude.tags, override, print.releases, detections.y.axis = c("auto", "stations", "arrays"),
-  if.last.skip.section = NULL, replicates = NULL, section.minimum = NULL, section.order = NULL, timestep = c("days", "hours")) {
+  if.last.skip.section = NULL, replicates = NULL, section.warning, section.error, section.order = NULL, timestep = c("days", "hours")) {
   appendTo("debug", "Running checkArguments.")
+
+  # Note: Checks only relevant for migration() or residency() are listed at the bottom!
 
   no.dp.args <- c("tz", "section.order", "start.time", "stop.time", "save.detections", "exclude.tags")
   link <- c(!is.null(tz), 
@@ -66,11 +68,20 @@ checkArguments <- function(dp, tz, minimum.detections, max.interval, speed.metho
   if (is.null(dp) && is.na(match(tz, OlsonNames())))
     stopAndReport("'tz' could not be recognized as a timezone. Check available timezones with OlsonNames()")
 
-  if (!is.numeric(minimum.detections))
-    stopAndReport("'minimum.detections' must be numeric.")
+  if (!is.numeric(min.total.detections))
+    stopAndReport("'min.total.detections' must be numeric.")
 
-  if (minimum.detections <= 0)
-    stopAndReport("'minimum.detections' must be positive.")
+  if (!is.numeric(min.per.event))
+    stopAndReport("'min.per.event' must be numeric.")
+
+  if (min.total.detections <= 0)
+    stopAndReport("'min.total.detections' must be positive.")
+
+  if (any(min.per.event <= 0))
+    stopAndReport("'min.per.event' must be positive.")
+
+  if (length(min.per.event) == 1)
+    min.per.event <- rep(min.per.event, 2)
 
   if (!is.numeric(max.interval))
     stopAndReport("'max.interval' must be numeric.")
@@ -200,15 +211,32 @@ checkArguments <- function(dp, tz, minimum.detections, max.interval, speed.metho
   if (!is.null(replicates) && length(names(replicates)) != length(replicates))
     stopAndReport("All list elements within 'replicates' must be named (i.e. list(Array = 'St.1') rather than list('St.1')).")
 
-  if (!is.null(section.minimum) && !is.numeric(section.minimum))
-    stopAndReport("'section.minimum' must be numeric.")
+  # only run these in residency calls.
+  if (!missing(section.warning)) {
+    if (section.error > section.warning)
+      stopAndReport("'section.error' must not be higher than 'section.warning'.")
 
-  return(list(speed.method = speed.method,
+    if (min.per.event[2] > section.error)
+      appendTo(c('screen', 'warning', 'report'), "The minimum number of detections per valid section event is higher than 'section.warning'. Section warnings will never occur.")
+
+    if (min.per.event[2] > section.error)
+      appendTo(c('screen', 'warning', 'report'), "The minimum number of detections per valid section event is higher than 'section.error'. Section errors will never occur.")
+  } else {
+    # placeholder values so that explore and migration don't crash when attempting
+    # to export below. These two variables are only used by residency.
+    section.error <- 0
+    section.warning <- 0
+  }
+
+  return(list(min.per.event = min.per.event,
+              speed.method = speed.method,
               speed.warning = speed.warning,
               speed.error = speed.error,
               inactive.warning = inactive.warning,
               inactive.error = inactive.error,
               detections.y.axis = detections.y.axis,
+              section.warning = section.warning,
+              section.error = section.error,
               timestep = timestep))
 }
 
@@ -381,7 +409,8 @@ checkDupDetections <- function(input) {
 }
 
 
-#' Check that the tag have enough detections to be valid
+#' Check the number of detections (total and per event) of a given tag. Works
+#' for both array and section movements.
 #'
 #' @inheritParams check_args
 #' @inheritParams explore
@@ -390,11 +419,16 @@ checkDupDetections <- function(input) {
 #'
 #' @keywords internal
 #'
-checkMinimumN <- function(movements, minimum.detections, tag, n) {
-  appendTo("debug", "Running checkMinimumN.")  
-  if (nrow(movements) == 1 && movements$Detections < minimum.detections) {
-    appendTo(c("Screen", "Report", "Warning"), paste0("Tag ", tag, " ", n, " only has one movement event (", movements$Array, ") with ", movements$Detections, " detections. Considered invalid."))
-    movements$Valid <- FALSE
+checkMinimumN <- function(movements, min.total.detections, min.per.event, tag, n) {
+  appendTo("debug", "Running checkMinimumN")
+  if (sum(movements$Detections) < min.total.detections) {
+    appendTo(c("screen", "report", "warning"), paste0("Tag ", tag, " ", n, " has less than ", min.total.detections," detections in total. Discarding this tag."))
+    movements$Valid <- FALSE # invalidate the tag
+  }
+  if (any(movements$Valid) & any(movements$Detections < min.per.event)) {
+    if (any(colnames(movements) == 'Array'))
+      appendTo(c("screen", "report", "warning"), paste0("Tag ", tag, " ", n, " has ", tolower(colnames(movements)[1]), " movement events with less than ", min.per.event, " detections. Invalidating those events."))
+    movements$Valid[movements$Detections < min.per.event] <- FALSE
   }
   return(movements)
 }
@@ -634,14 +668,19 @@ checkImpassables <- function(movements, tag, bio, spatial, detections, dotmat, G
 #'
 #' @keywords internal
 #'
-checkSMovesN <- function(secmoves, tag, section.minimum, GUI, save.tables.locally, n) {
+checkSMovesN <- function(secmoves, tag, section.warning, section.error, GUI, save.tables.locally, n) {
   appendTo("debug", "Running checkSMovesN.")
-  if (any(link <- secmoves$Detections < section.minimum)) {
-    appendTo(c("Screen", "Report", "Warning"), the.warning <- paste0("Section movements with less than ", section.minimum, " detections are present for tag ", tag, " ", n, "."))
-    if (interactive())
-      secmoves <- tableInteraction(moves = secmoves, tag = tag, trigger = the.warning, # nocov
-                                   GUI = GUI, save.tables.locally = save.tables.locally) # nocov
+
+  if (any(secmoves$Detections <= section.warning & secmoves$Valid)) {
+    the.warning <- paste0("Section movements with ", section.warning, " or less detections are present for tag ", tag, " ", n, ".")
+    appendTo(c("Screen", "Report", "Warning"), the.warning)
   }
+
+  if (any(secmoves$Detections <= section.error & secmoves$Valid)) {
+    secmoves <- tableInteraction(moves = secmoves, tag = tag, trigger = the.warning, # nocov
+                                 GUI = GUI, save.tables.locally = save.tables.locally) # nocov
+  }
+
   return(secmoves)
 }
 
@@ -656,9 +695,12 @@ checkSMovesN <- function(secmoves, tag, section.minimum, GUI, save.tables.locall
 #'
 checkLinearity <- function(secmoves, tag, spatial, arrays, GUI, save.tables.locally, n) {
   appendTo("debug", "Running checkLinearity.")
+
+  valid.secmoves <- secmoves[secmoves$Valid, ]
+
   sections <- names(spatial$array.order)
-  back.check <- match(secmoves$Section, sections)
-  turn.check <- rev(match(sections, rev(secmoves$Section))) # captures the last event of each section. Note, the values count from the END of the events
+  back.check <- match(valid.secmoves$Section, sections)
+  turn.check <- rev(match(sections, rev(valid.secmoves$Section))) # captures the last event of each section. Note, the values count from the END of the events
   if (is.unsorted(back.check)) {
       if (is.unsorted(turn.check, na.rm = TRUE))
         appendTo(c("Screen", "Report", "Warning"), the.warning <- paste0("Inter-section backwards movements were detected for tag ", tag, " ", n, " and the last events are not ordered!"))
