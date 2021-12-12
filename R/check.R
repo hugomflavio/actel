@@ -192,10 +192,16 @@ checkArguments <- function(dp, tz, min.total.detections, min.per.event, max.inte
 
   # Check that all the overridden tags are part of the study
   if (!is.null(dp) && !is.null(override)) {
-    
-    lowest_signals <- sapply(dp$bio$Signal, lowestSignal)
-    if (any(link <- is.na(match(override, lowest_signals))))
-      stopAndReport("Some tags listed in 'override' (", paste0(override[link], collapse = ", "), ") are not listed in the biometrics data.")
+    if (is.numeric(override)) {
+      lowest_signals <- sapply(dp$bio$Signal, lowestSignal)
+      if (any(link <- is.na(match(override, dp$bio$Signal)))) {
+        stopAndReport("Some tags listed in 'override' (", paste0(override[link], collapse = ", "), ") are not listed in the biometrics data.")
+      }
+    } else {
+      if (any(link <- is.na(match(override, dp$bio$Transmitter)))) {
+        stopAndReport("Some tags listed in 'override' (", paste0(override[link], collapse = ", "), ") are not listed in the biometrics data.")
+      }
+    }
   }
 
   # NON-explore checks
