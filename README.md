@@ -100,6 +100,11 @@ After installing, you should read the package vignettes (i.e. the manual), which
 
 ## Papers using or relating to actel
 
+**2022**
+
+Hewitt, D. E., Niella, Y., Johnson, D. D., Suthers, I. M., & Taylor, M. D. (2022). Crabs Go With the Flow: Declining Conductivity and Cooler Temperatures Trigger Spawning Migrations for Female Giant Mud Crabs (<i>Scylla serrata</i>) in Subtropical Estuaries. Estuaries and Coasts. https://doi.org/10.1007/s12237-022-01061-1
+
+
 **2021**
 
 - Flávio, H., & Baktoft, H. (2021). actel: Standardised analysis of acoustic telemetry data from animals moving through receiver arrays. Methods in Ecology and Evolution, 12(1), 196–203. https://doi.org/10.1111/2041-210X.13503
