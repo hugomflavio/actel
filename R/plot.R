@@ -1833,7 +1833,12 @@ plotRatios <- function(input, group, sections, type = c("absolutes", "percentage
     } else {
       if (type == "absolutes") {
         aux <- lapply(names(input$group.ratios), function(i) {
+          # cat(i, '\n')
           x <- input$group.ratios[[i]]$absolutes
+
+          if (any(link <- is.na(match(sections, colnames(x)))))
+            x[, sections[link]] <- 0
+          
           x <- x[, c(1, match(sections, colnames(x)))]
           if (ncol(x) > 2)
             x$n <- apply(x[, -1], 1, sum)

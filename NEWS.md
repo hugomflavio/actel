@@ -9,6 +9,7 @@ Fixes:
   * Prevent crash if the dot file/string line breaks are coded as `\r\n`.
   * Prevent crash while printing circular plots for the reports on Macs where the svg engines are not working.
   * Prevent crash in residency() if one group has no valid detections at all.
+  * Fix bug in plotRatios() brought up in issue [#77](https://github.com/hugomflavio/actel/issues/77) which would occur when the user specified a section for which not all groups were detected.
 
 Changes:
   * Removed deprecated argument `plot.detections.by`.
