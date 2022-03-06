@@ -8,12 +8,8 @@ test_that("plotRatios' failsafes kick in when needed", {
 	expect_error(plotRatios(list("a")), "Could not recognise the input as an actel results object.", fixed = TRUE)
 	expect_error(plotRatios(example.results),
 		"plotRatios can only be used with residency results.", fixed = TRUE)
-	expect_error(plotRatios(example.residency.results, sections = "River", group = "A"),
-		"Please use only one of 'group' or 'sections' at a time.", fixed = TRUE)
-	expect_error(plotRatios(example.residency.results, group = c("A", "B")),
-		"Please select only one group.", fixed = TRUE)
 	expect_error(plotRatios(example.residency.results, group = 1),
-		"Could not find group '1' in the input.", fixed = TRUE)
+		"Could not find group(s) '1' in the input.", fixed = TRUE)
 	expect_error(plotRatios(example.residency.results, sections = 1),
 		"Section '1' does not exist, or no tags have ever been assigned to it.", fixed = TRUE)
 })

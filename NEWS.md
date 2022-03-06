@@ -20,6 +20,7 @@ Enhancements:
   * New `Code.spaces` column in the biometrics allows the user to specificy the code space of the target tags.
   * New arguments in plotArray(): `by.group` and `y.style`. See function documentation for more details.
   * Include preload() log in reports where preloaded data is used.
+  * plotRatios() can now subset multiple groups and sections simultaneously. The user can also decide to either colour the plot by group or by section using the new `col.by` argument (issue [#77](https://github.com/hugomflavio/actel/issues/77))).
 
 ## actel 1.2.1
 
