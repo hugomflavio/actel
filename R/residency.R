@@ -623,6 +623,7 @@ residency <- function(
                       detections = valid.detections)
 
     printGlobalRatios(global.ratios = global.ratios,
+                      group.ratios = group.ratios,
                       time.ratios = time.ratios,
                       spatial = spatial,
                       rsp.info = rsp.info)

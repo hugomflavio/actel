@@ -1278,6 +1278,7 @@ printSectionTimes <- function(section.times, bio, detections) {
 #' print the distribution of tags per location
 #'
 #' @param global.ratios the global ratios
+#' @param group.ratios the global ratios
 #' @param time.ratios the daily ratios
 #' @inheritParams migration
 #'
@@ -1285,7 +1286,7 @@ printSectionTimes <- function(section.times, bio, detections) {
 #'
 #' @keywords internal
 #'
-printGlobalRatios <- function(global.ratios, time.ratios, spatial, rsp.info) {
+printGlobalRatios <- function(global.ratios, group.ratios, time.ratios, spatial, rsp.info) {
   Timeslot <- NULL
   Location <- NULL
   n <- NULL
@@ -1296,6 +1297,7 @@ printGlobalRatios <- function(global.ratios, time.ratios, spatial, rsp.info) {
                 spatial = spatial,
                 rsp.info = rsp.info,
                 time.ratios = time.ratios,
+                group.ratios = group.ratios,
                 global.ratios = global.ratios)
 
   p <- plotRatios(input = fake.results, type = "absolutes")
