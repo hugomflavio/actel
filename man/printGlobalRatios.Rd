@@ -4,10 +4,12 @@
 \alias{printGlobalRatios}
 \title{print the distribution of tags per location}
 \usage{
-printGlobalRatios(global.ratios, time.ratios, spatial, rsp.info)
+printGlobalRatios(global.ratios, group.ratios, time.ratios, spatial, rsp.info)
 }
 \arguments{
 \item{global.ratios}{the global ratios}
+
+\item{group.ratios}{the global ratios}
 
 \item{time.ratios}{the daily ratios}
 }

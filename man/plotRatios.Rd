@@ -6,19 +6,20 @@
 \usage{
 plotRatios(
   input,
-  group,
+  groups,
   sections,
   type = c("absolutes", "percentages"),
   title,
   xlab,
   ylab,
-  col
+  col,
+  col.by = c("default", "section", "group")
 )
 }
 \arguments{
 \item{input}{The results of an actel analysis (either explore, migration or residency).}
 
-\item{group}{An optional argument to plot only the data corresponding to one group.}
+\item{groups}{An optional argument to plot only the data corresponding to some groups.}
 
 \item{sections}{An optional argument to plot the residency of the multiple groups for a specific subset of sections.}
 
@@ -29,6 +30,9 @@ plotRatios(
 \item{xlab, ylab}{Optional axis names for the plot. If left empty, default axis names will be added.}
 
 \item{col}{An optional colour scheme for the detections. If left empty, default colours will be added.}
+
+\item{col.by}{Colour scheme to use. One of 'section' or 'group'. By default, plots are coloured by section if all
+sections are displayed, and by group if only a subset of the sections is required using the argument \code{sections}.}
 }
 \value{
 A ggplot object.
@@ -55,7 +59,7 @@ plotRatios(example.residency.results)
 # Because plotRatios returns a ggplot object, you can store
 # it and edit it manually, e.g.:
 library(ggplot2)
-p <- plotRatios(example.residency.results, group = "A")
+p <- plotRatios(example.residency.results, groups = "A")
 p <- p + xlab("changed the x axis label a posteriori")
 p
 
