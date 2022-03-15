@@ -1204,20 +1204,32 @@ assembleResidency <- function(secmoves, movements, spatial) {
       recipient <- rep(NA, ncol(res.df))
       names(recipient) <- colnames(res.df)
       recipient <- t(as.data.frame(recipient))
+    
       total.time <- apply(aux[[i]][, c("First.time", "Last.time")], 1, function(x) difftime(x[2], x[1], units = "secs"))
       recipient[1, paste0("Total.time.", names(aux)[i])] <- sum(total.time)
-      recipient[1, paste0("Times.entered.", names(aux)[i])] <- nrow(aux[[i]])
-      entry.time <- mean(circular::circular(decimalTime(substr(aux[[i]]$First.time, start = 12, stop = 20)), units = "hours", template = "clock24"))
-      if (entry.time < 0)
-        entry.time <- 24 + entry.time
-      recipient[1, paste0("Average.entry.", names(aux)[i])] <- minuteTime(entry.time, format = "h", seconds = FALSE)
-      leave.time <- mean(circular::circular(decimalTime(substr(aux[[i]]$Last.time, start = 12, stop = 20)), units = "hours", template = "clock24"))
       recipient[1, paste0("Average.time.", names(aux)[i])] <- mean(total.time)
-      if (leave.time < 0)
-        leave.time <- 24 + leave.time
-      recipient[1, paste0("Average.departure.", names(aux)[i])] <- minuteTime(leave.time, format = "h", seconds = FALSE)
+      recipient[1, paste0("Times.entered.", names(aux)[i])] <- nrow(aux[[i]])
+    
+      entry.time <- mean(circular::circular(decimalTime(format(aux[[i]]$First.time, "%H:%M:%S")), units = "hours", template = "clock24"))
+      if (!is.na(entry.time)) {
+        if (entry.time < 0)
+          entry.time <- 24 + entry.time
+        recipient[1, paste0("Average.entry.", names(aux)[i])] <- minuteTime(entry.time, format = "h", seconds = FALSE)
+      } else { # failsafe in case the timestamps happen to be exactly simetrical. Yes, it happened...
+        recipient[1, paste0("Average.entry.", names(aux)[i])] <- NA
+      }
+
+      leave.time <- mean(circular::circular(decimalTime(format(aux[[i]]$Last.time, "%H:%M:%S")), units = "hours", template = "clock24"))
+      if (!is.na(leave.time)) {
+        if (leave.time < 0)
+          leave.time <- 24 + leave.time
+        recipient[1, paste0("Average.departure.", names(aux)[i])] <- minuteTime(leave.time, format = "h", seconds = FALSE)
+      } else { # failsafe in case the timestamps happen to be exactly simetrical. Yes, it happened...
+        recipient[1, paste0("Average.departure.", names(aux)[i])] <- NA
+      }
       return(recipient)
     })
+
     recipient <- as.data.frame(combine(recipient), stringsAsFactors = FALSE)
     # convert Total.times to numeric and replace NAs
     the.cols <- which(grepl("Times.entered", colnames(recipient)))
@@ -1501,7 +1513,7 @@ resRatios <- function(res, timestep = c("days", "hours"), tz) {
     res.range <- seq(from = round.POSIXt(x$First.time[1] - (num.step / 2), units = timestep),
       to =  round.POSIXt(x$Last.time[nrow(x)] - (num.step / 2), units = timestep), by = num.step)
 
-    # If a daily period starts in daylight saving time and timestep =? da: Standardize so the break points are in "normal" time
+    # If a daily period starts in daylight saving time and timestep == days: Standardize so the break points are in "normal" time
     if (timestep == "days" && as.POSIXlt(res.range[1])$isdst == 1) {
       res.range <- res.range + 3600
       # If readjustment causes the first time to fall off, add one day before.
@@ -1518,7 +1530,7 @@ resRatios <- function(res, timestep = c("days", "hours"), tz) {
     })
     if (interactive())
       setTxtProgressBar(pb, counter) # nocov
-    resRatiosIndOut(input = res.list, slots = res.range, tz = tz)
+    resRatiosIndOut(input = res.list, slots = res.range, tz = tz, tag = names(res)[counter])
   })
   if (interactive())
     close(pb) # nocov
@@ -1646,7 +1658,7 @@ findSecondsPerSection <- function(res, frame, the.range, num.step) {
 #'
 #' @keywords internal
 #'
-resRatiosIndOut <- function(input, slots, tz) {
+resRatiosIndOut <- function(input, slots, tz, tag) {
   appendTo("debug", "Running resRatiosIndOut")
   # sort out all column names
   the.cols <- sort(unique(unlist(lapply(input, names))))
@@ -1665,16 +1677,46 @@ resRatiosIndOut <- function(input, slots, tz) {
     output <- as.data.frame(data.table::rbindlist(days.tables, idcol = "Timeslot"))
     output$Timeslot <- as.POSIXct(slots, tz = tz)
   }
+  # Turn NA values into 0's (including proportion columns, for now)
   output[is.na(output)] <- 0
+  # find proportion columns
   aux <- which(grepl("^p", colnames(output)))
   aux <- aux[!is.na(match(colnames(output)[aux - 1], sub("p", "", colnames(output)[aux])))]
-  if (length(aux) == 1)
-    output[, aux] <- apply(output[, aux - 1, drop = FALSE], 1, function(x) x / sum(x))
-  else
-    output[, aux] <- t(apply(output[, aux - 1, drop = FALSE], 1, function(x) x / sum(x)))
-  the.zone <- apply(output[, aux, drop = FALSE], 1, function(x) which(x == max(x)))
+
+  # convert absolute values (positioned at columns aux - 1) into proportion values
+  if (length(aux) == 1) {
+    output[, aux] <- apply(output[, aux - 1, drop = FALSE], 1, function(x) {
+      if (sum(x) > 0)
+        return(x / sum(x))
+      else
+        return(x) # we want to return 0's and all the values of x are 0's. Only happens if the fish's last detection is exactly at the start of a timeslot.
+    })
+  } else {
+    output[, aux] <- t(apply(output[, aux - 1, drop = FALSE], 1, function(x) {
+      if (sum(x) > 0)
+        return(x / sum(x))
+      else
+        return(x) # we want to return 0's and all the values of x are 0's. Only happens if the fish's last detection is exactly at the start of a timeslot.
+      }))
+  }
+
+  # find out in which zone the fish spent the most time
+  issue.warning <- TRUE
+  the.zone <- apply(output[, aux, drop = FALSE], 1, function(x) {
+    if (sum(x == max(x)) > 1 & issue.warning) {
+      message('') # to break from the progress bar
+      appendTo(c('report', 'warning', 'screen'), paste0('In at least one timeslot, tag ', tag, ' spent an equal ammount of time in two or more sections. Assigning the animal to the first section listed.'))
+      issue.warning <<- FALSE
+    }
+    return(which(x == max(x))[1])
+  })
+
+  # assign section name
   output$Most.time <- colnames(output)[aux - 1][the.zone]
+  
+  # finally, round the proportions to a more sensible format
   output[, aux] <- round(output[, aux, drop = FALSE], 3)
+
   return(output)
 }
 

@@ -4,7 +4,7 @@
 \alias{resRatiosIndOut}
 \title{compile output of dailyRatios}
 \usage{
-resRatiosIndOut(input, slots, tz)
+resRatiosIndOut(input, slots, tz, tag)
 }
 \arguments{
 \item{input}{a list containing the output of findSecondsPerSection for each day}

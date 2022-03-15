@@ -319,7 +319,7 @@ sectionMovements <- function(movements, spatial, valid.dist) {
   else
     return(NULL)
 
-
+  # determine section of each array movement
   aux <- lapply(seq_along(spatial$array.order), function(i) {
     arrays <- spatial$array.order[[i]]
     x <- rep(NA_character_, nrow(vm))
@@ -327,7 +327,10 @@ sectionMovements <- function(movements, spatial, valid.dist) {
     return(x)
   })
 
+  # combine object above into single vector
   event.index <- combine(aux)
+  
+  # determine in which array movements the tag changed section
   aux <- rle(event.index)
   last.events <- cumsum(aux$lengths)
   first.events <- c(1, last.events[-length(last.events)] + 1)
