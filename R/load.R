@@ -1026,22 +1026,36 @@ loadBio <- function(input, tz){
 
   # check sensor names
   if (!expect_integer) { 
-    if(!any(grepl("^Sensor.unit$", colnames(bio)))) {
+    if (!any(grepl("^Sensor.unit$", colnames(bio)))) {
       appendTo(c("Screen", "Warning"), "Tags with multiple sensors are listed in the biometrics, but a 'Sensor.unit' column could not be found. Skipping sensor unit assignment.")
     } 
     else {
-      bio$Sensor.unit <- as.character(bio$Sensor.unit) #failsafe in case all values are numeric, or NA.
+      bio$Sensor.unit <- as.character(bio$Sensor.unit) # failsafe in case all values are numeric, or NA.
+      bio$Sensor.unit[bio$Sensor.unit == ''] <- NA_character_
 
-      A <- sapply(strsplit(bio$Signal, "|", fixed = TRUE), length)
-      pre_B <- strsplit(bio$Sensor.unit, "|", fixed = TRUE)
-      B <- sapply(pre_B, length)
-      B[sapply(pre_B, is.na)] <- 0
+      if (any(link <- na.as.false(startsWith(bio$Sensor.unit, '|'))))
+        appendTo(c('screen', 'warning'), paste0("The Sensor.unit information in ",
+          ifelse(sum(link) <= 10,
+                 paste0("row(s) ", paste0(which(link), collapse = ", ")), 
+                 paste0(sum(link), " row(s)")),
+          " of the biometrics starts with a '|' character. Could you have forgotten to include a sensor unit?"))
 
-      if (any(A != B))
-        stopAndReport("The number of provided sensor units and signals do not match for ", 
-          ifelse(sum(A != B) <= 10,
-                 paste0("row(s) ", paste0(which(A != B), collapse = ", ")), 
-                 paste0(sum(A != B), " row(s)")),
+      if (any(link <- na.as.false(endsWith(bio$Sensor.unit, '|'))))
+        appendTo(c('screen', 'warning'), paste0("The Sensor.unit information in ",
+          ifelse(sum(link) <= 10,
+                 paste0("row(s) ", paste0(which(link), collapse = ", ")), 
+                 paste0(sum(link), " row(s)")),
+          " of the biometrics ends with a '|' character. Could you have forgotten to include a sensor unit?"))
+
+      signals_per_tag <- sapply(strsplit(bio$Signal, "|", fixed = TRUE), length) # number of signals per tag
+      aux <- strsplit(bio$Sensor.unit, "|", fixed = TRUE)
+      sensors_per_tag <- sapply(aux, length)
+
+      if (any(link <- signals_per_tag != sensors_per_tag))
+        stopAndReport("The number of provided sensor units does not match the number of signals for ", 
+          ifelse(sum(link) <= 10,
+                 paste0("row(s) ", paste0(which(link), collapse = ", ")), 
+                 paste0(sum(link), " row(s)")),
           " of the biometrics.")
     }
   }
@@ -1623,9 +1637,13 @@ splitDetections <- function(detections, bio, exclude.tags = NULL) {
     } else { # otherwise, prepare tag name and include sensor units if present
       trimmed_list_names <<- c(trimmed_list_names, paste0(the_codespace, "-", min(bio_aux$Signal_expanded[[i]])))
       output <- my.list[list_matches]
+
+      # Find Sensor.unit column in the biometrics
       if (any(grepl("^Sensor.unit$", colnames(bio)))) {
+        # Replace sensor units...
         for (j in 1:length(output)) {
           sensor_index <- match(extractSignals(names(output)[j]), bio_aux$Signal_expanded[[i]])
+          # but only if the the sensor unit provided is not NA
           if (!is.na(bio_aux$Sensor.unit_expanded[[i]][sensor_index])) {
             output[[j]]$Sensor.Unit <- rep(bio_aux$Sensor.unit_expanded[[i]][sensor_index], nrow(output[[j]]))
           }

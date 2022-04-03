@@ -183,7 +183,7 @@ test_that("loadBio can handle multi-sensor tags.", {
 	xbio$Sensor.unit <- NA
 	write.csv(xbio, "biometrics.csv", row.names = FALSE)
 	expect_error(bio <- loadBio("biometrics.csv", tz = "Europe/Copenhagen"),
-		"The number of provided sensor units and signals do not match for 56 row(s) of the biometrics.", fixed = TRUE)
+		"The number of provided sensor units does not match the number of signals for row(s) 1 of the biometrics.", fixed = TRUE)
 	file.remove("biometrics.csv")
 })
 
