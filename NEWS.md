@@ -12,6 +12,7 @@ Fixes:
   * Fix bug in plotRatios() brought up in issue [#77](https://github.com/hugomflavio/actel/issues/77) which would occur when the user specified a section for which not all groups were detected.
   * Prevent crashes in residency() when the data has an unusually high percentage of exact-time detections (e.g. midnight).
   * Prevent crash if only some tags have multiple sensors and Sensor.unit is only included for those tags.
+  * Prevent crash if the study area/population is so large that it clashes with ggplot's size limit failsafes.
 
 Changes:
   * Removed deprecated argument `plot.detections.by`.

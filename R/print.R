@@ -431,7 +431,7 @@ printDotplots <- function(status.df, valid.dist) {
   p <- p + ggplot2::facet_grid(. ~ variable, scales = "free_x")
   p <- p + ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 45, vjust = 1, hjust = 1))
   p <- p + ggplot2::labs(x = "", y = "")
-  ggplot2::ggsave(paste0(tempdir(), "/actel_report_auxiliary_files/dotplots.png"), width = 6, height = (1.3 + 0.115 * (nrow(t2) - 1)))
+  ggplot2::ggsave(paste0(tempdir(), "/actel_report_auxiliary_files/dotplots.png"), width = 6, height = (1.3 + 0.115 * (nrow(t2) - 1)), limitsize = FALSE)
   appendTo("debug", "Terminating printDotplots.")
 }
 
@@ -483,7 +483,7 @@ printSurvivalGraphic <- function(section.overview) {
   p <- p + ggplot2::scale_y_continuous(limits = c(0, 1), expand = c(0, 0, 0.05, 0))
   p <- p + ggplot2::labs(x = "", y = "Survival")
   the.width <- max(2, sum(grepl("Disap.", colnames(section.overview))) * nrow(section.overview))
-  ggplot2::ggsave(paste0(tempdir(), "/actel_report_auxiliary_files/survival.png"), width = the.width, height = 4)
+  ggplot2::ggsave(paste0(tempdir(), "/actel_report_auxiliary_files/survival.png"), width = the.width, height = 4, limitsize = FALSE)
   appendTo("debug", "Terminating printSurvivalGraphic.")
 }
 
@@ -704,7 +704,7 @@ printIndividuals <- function(detections.list, movements, valid.movements, spatia
       }
     }
     # Save
-    ggplot2::ggsave(paste0(tempdir(), "/actel_report_auxiliary_files/", tag, ".", extension), width = the.width, height = the.height)  # better to save in png to avoid point overlapping issues
+    ggplot2::ggsave(paste0(tempdir(), "/actel_report_auxiliary_files/", tag, ".", extension), width = the.width, height = the.height, limitsize = FALSE)  # better to save in png to avoid point overlapping issues
 
     if (counter %% 2 == 0) {
       individual.plots <<- paste0(individual.plots, "![](", tempdir(), "/actel_report_auxiliary_files/", tag, ".", extension, "){ width=", the.width * 10, "% }\n")
@@ -1271,7 +1271,7 @@ printSectionTimes <- function(section.times, bio, detections) {
       p <- p + ggplot2::scale_fill_manual(values = as.vector(cbPalette)[1:length(unique(plotdata$Group))], drop = FALSE)
     }
   
-    ggplot2::ggsave(paste0(tempdir(), "/actel_report_auxiliary_files/", i,"_days.png"), width = 10, height = length(unique(plotdata$variable)) * 2)
+    ggplot2::ggsave(paste0(tempdir(), "/actel_report_auxiliary_files/", i,"_days.png"), width = 10, height = length(unique(plotdata$variable)) * 2, limitsize = FALSE)
   })
 }
 
@@ -1377,7 +1377,7 @@ printLastSection <- function(input, spatial) {
   p <- p + ggplot2::labs(x = "", y = "n")
   p <- p + ggplot2::scale_y_continuous(expand = c(0, 0, 0.05, 0))
   the.width <- max(2, (ncol(input) - 1) * nrow(input) * 0.7)
-  ggplot2::ggsave(paste0(tempdir(), "/actel_report_auxiliary_files/last_section.png"), width = the.width, height = 4)
+  ggplot2::ggsave(paste0(tempdir(), "/actel_report_auxiliary_files/last_section.png"), width = the.width, height = 4, limitsize = FALSE)
 }
 
 #' Print a simple barplot with the number of tags last seen at each section
@@ -1409,7 +1409,7 @@ printLastArray <- function(status.df) {
   p <- p + ggplot2::coord_flip()
   p <- p + ggplot2::guides(fill = ggplot2::guide_legend(reverse = TRUE))
   the.height <- max(2, ((length(levels(status.df$Very.last.array)) - 1) * 0.5))
-  ggplot2::ggsave(paste0(tempdir(), "/actel_report_auxiliary_files/last_arrays.png"), width = 6, height = the.height)
+  ggplot2::ggsave(paste0(tempdir(), "/actel_report_auxiliary_files/last_arrays.png"), width = 6, height = the.height, limitsize = FALSE)
 }
 
 #' Print sensor data for each individual tag
@@ -1488,7 +1488,7 @@ printSensorData <- function(detections, spatial, rsp.info, colour.by = c("auto",
       }
 
       # Save
-      ggplot2::ggsave(paste0(tempdir(), "/actel_report_auxiliary_files/", tag, "_sensors.", extension), width = the.width, height = the.height)  # better to save in png to avoid point overlapping issues
+      ggplot2::ggsave(paste0(tempdir(), "/actel_report_auxiliary_files/", tag, "_sensors.", extension), width = the.width, height = the.height, limitsize = FALSE)  # better to save in png to avoid point overlapping issues
 
       n.plots <- n.plots + 1
       if (n.plots %% 2 == 0) {
