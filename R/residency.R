@@ -495,16 +495,15 @@ residency <- function(
   global.ratios <- globalRatios(positions = time.positions, section.order = names(spatial$array.order))
 
   group.ratios <- lapply(unique(bio$Group), function(i) {
-    # cat(as.character(i), '\n')
+    cat(as.character(i), '\n')
     the.transmitters <- bio$Transmitter[bio$Group == i]
-    if (all(is.na(the.transmitters))) {
+    link <- match(the.transmitters, colnames(time.positions))
+    if (all(is.na(link))) {
       appendTo(c('screen', 'warning', 'report'),
         paste0('Group ', as.character(i), ' has no detections. Skipping ratio calculations.'))
       return(NULL)
     } 
     else {
-      the.transmitters <- the.transmitters[!is.na(the.transmitters)]
-      link <- match(the.transmitters, colnames(time.positions))
       link <- link[!is.na(link)]
       trim.positions <- time.positions[, c(1, link)]
       attributes(trim.positions)$timestep <- attributes(time.positions)$timestep
