@@ -13,6 +13,7 @@ Fixes:
   * Prevent crashes in residency() when the data has an unusually high percentage of exact-time detections (e.g. midnight).
   * Prevent crash if only some tags have multiple sensors and Sensor.unit is only included for those tags.
   * Prevent crash if the study area/population is so large that it clashes with ggplot's size limit failsafes.
+  * Fix message overflow reported in issue [#78](https://github.com/hugomflavio/actel/issues/78).
 
 Changes:
   * Removed deprecated argument `plot.detections.by`.

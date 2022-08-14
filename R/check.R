@@ -1000,16 +1000,23 @@ checkDeploymentStations <- function(input, spatial) {
   aux <- spatial[spatial$Type == "Hydrophone", ]
   link <- match(unique(input$Station.name), aux$Station.name)
   if (any(is.na(link))) {
-    appendTo(c("Screen", "Report", "Warning"), paste0("", ifelse(sum(is.na(link)) > 1, "Stations", "Station"), " '", paste(unique(input$Station.name)[is.na(link)], collapse = "', '"), "' ", ifelse(sum(is.na(link)) > 1, "are", "is"), " listed in the deployments but ", ifelse(sum(is.na(link)) > 1, "are", "is"), " not part of the study's stations. Discarding deployments at unknown stations."))
+    appendTo(c("Screen", "Report", "Warning"), 
+      paste0("The following station", ifelse(sum(is.na(link)) > 1, "s are", " is"), 
+        " listed in the deployments but ",
+        ifelse(sum(is.na(link)) > 1, "are", "is"), 
+        " not part of the study's stations: '", 
+        paste(unique(input$Station.name)[is.na(link)], collapse = "', '"), 
+        "'\nDiscarding deployments at unknown stations."))
     to.remove <- match(input$Station.name, unique(input$Station.name)[is.na(link)])
     input <- input[is.na(to.remove), ]
   }
   link <- match(aux$Station.name, unique(input$Station.name))
   if (any(is.na(link))) {
-    stopAndReport(paste0(ifelse(sum(is.na(link)) > 1, "Stations '", "Station '"),
+    stopAndReport(paste0("The following station", 
+      ifelse(sum(is.na(link)) > 1, "s are", " is"),
+      "listed in the spatial file but no receivers were ever deployed there: '",
       paste(aux$Station.name[is.na(link)], collapse = "', '"),
-      ifelse(sum(is.na(link)) > 1, "' are", "' is"),
-      " listed in the spatial file but no receivers were ever deployed there.\n"))
+      "\n"))
   }
   input$Standard.name <- aux$Standard.name[match(input$Station.name, aux$Station.name)]
   input$Array <- aux$Array[match(input$Station.name, aux$Station.name)]
