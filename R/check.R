@@ -1014,9 +1014,9 @@ checkDeploymentStations <- function(input, spatial) {
   if (any(is.na(link))) {
     stopAndReport(paste0("The following station", 
       ifelse(sum(is.na(link)) > 1, "s are", " is"),
-      "listed in the spatial file but no receivers were ever deployed there: '",
+      " listed in the spatial file but no receivers were ever deployed there: '",
       paste(aux$Station.name[is.na(link)], collapse = "', '"),
-      "\n"))
+      "'\n"))
   }
   input$Standard.name <- aux$Standard.name[match(input$Station.name, aux$Station.name)]
   input$Array <- aux$Array[match(input$Station.name, aux$Station.name)]

@@ -81,8 +81,8 @@ test_that("checkDeployments kicks in if deployment periods overlap", {
   spatial <- loadSpatial(input = "spatial.csv")
   expect_warning(
   	expect_error(checkDeploymentStations(input = deployments, spatial = spatial),
-  		"Station 'Station 1' is listed in the spatial file but no receivers were ever deployed there.", fixed = TRUE),
-  "Station 'test' is listed in the deployments but is not part of the study's stations. Discarding deployments at unknown stations.", fixed = TRUE)
+  		"The following station is listed in the spatial file but no receivers were ever deployed there: 'Station 1'\n", fixed = TRUE),
+  "The following station is listed in the deployments but is not part of the study's stations: 'test'", fixed = TRUE)
 	file.remove("deployments.csv")
 	file.remove("spatial.csv")
 })
