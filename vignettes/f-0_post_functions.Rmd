@@ -420,7 +420,7 @@ plotLive(results, array = "A1", show.stations = FALSE, array.size = 3)
 
 ## What would you like to see here?
 
-actel is a work in progress. Is there any anything you would like to do or see in your data that is missing? Have you though of any cool function for actel? [Get in touch!](mailto:hdmfla@aqua.dtu.dk)
+actel is a work in progress. Is there any anything you would like to do or see in your data that is missing? Have you thought of any cool function for actel? Get in touch! Run `maintainer('actel')` in R to find my latest contact information :)
 
 I hope you enjoy using actel!
 
