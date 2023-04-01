@@ -1,0 +1,14 @@
+---
+title: "actel-website"
+author: "Hugo Flávio"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{actel-website}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+## The actel manual has moved elsewhere!
+
+Hi! The vignettes were growing too big to be packaged together with the code on CRAN. As such, the whole manual has been moved to a dedicated website. Please visit it here: https://hugomflavio.github.io/actel-website/index.html
