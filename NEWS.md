@@ -16,6 +16,7 @@ Fixes:
   * Fix message overflow reported in issue [#78](https://github.com/hugomflavio/actel/issues/78).
 
 Changes:
+  * Moved package vignettes to https://hugomflavio.github.io/actel-website/index.html.
   * Removed deprecated argument `plot.detections.by`.
   * `minimum.detections` has been replaced by `min.total.detections` and `min.per.event`.
   * `section.minimum` has been replaced by `section.warning` and `section.error`.
