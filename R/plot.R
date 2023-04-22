@@ -150,11 +150,11 @@ plotLive <- function(input, arrays, show.stations = FALSE, array.size = 2, stati
   p <- p + ggplot2::geom_path()
   
   a <- pd[pd$Array == pd$Y, ]
-  p <- p + ggplot2::geom_path(data = a, ggplot2::aes(col = Section), size = a$Size)
+  p <- p + ggplot2::geom_path(data = a, ggplot2::aes(col = Section), linewidth = a$Size)
   
   if (show.stations) {
     s <- pd[pd$Array != pd$Y, ]
-    p <- p + ggplot2::geom_path(data = s, col = s$col, size = s$Size)
+    p <- p + ggplot2::geom_path(data = s, col = s$col, linewidth = s$Size)
   }
 
   if (show.caps)
@@ -295,7 +295,7 @@ plotSensors <- function(input, tag, sensor, title = tag, xlab, ylab, pcol, psize
   detections <- detections[detections$Sensor.Unit %in% sensor, ]
 
   p <- ggplot2::ggplot(data = detections, ggplot2::aes(x = Timestamp, y = Sensor.Value, by = Sensor.Unit))
-  p <- p + ggplot2::geom_line(col = lcol, size = lsize)
+  p <- p + ggplot2::geom_line(col = lcol, linewidth = lsize)
   p <- p + ggplot2::geom_point(size = psize, ggplot2::aes(colour = Colour))
   p <- p + ggplot2::scale_color_manual(values = pcol, drop = FALSE, name = ifelse(colour.by == "array", "Array", "Section"))
   p <- p + ggplot2::labs(title = title, x = ifelse(missing(xlab), paste("tz:", input$rsp.info$tz), xlab), y = ifelse(missing(ylab), "Sensor value", ylab))
@@ -591,7 +591,7 @@ plotArray <- function(input, arrays, title, xlab, ylab, lwd = 1, col, by.group =
     p <- p + ggplot2::scale_fill_manual(values = col)
   }
   if (type == "lines") {
-    p <- p + ggplot2::geom_path(size = lwd, ggplot2::aes(col = Group))
+    p <- p + ggplot2::geom_path(linewidth = lwd, ggplot2::aes(col = Group))
     p <- p + ggplot2::scale_colour_manual(values = col)
   }
   p <- p + ggplot2::theme_bw()
@@ -738,7 +738,7 @@ plotMoves <- function(input, tags, title, xlab, ylab, col, array.alias, show.rel
 
   p <- ggplot2::ggplot(data = plotdata, ggplot2::aes(x = date, y = array, colour = tag))
   p <- p + ggplot2::geom_line(ggplot2::aes(group = tag))
-  p <- p + ggplot2::geom_line(ggplot2::aes(group = interaction(tag, event)), size = 2)
+  p <- p + ggplot2::geom_line(ggplot2::aes(group = interaction(tag, event)), linewidth = 2)
   p <- p + ggplot2::geom_point(data = final.points)
   p <- p + ggplot2::theme_bw()
   p <- p + ggplot2::scale_y_discrete(drop = FALSE)   # Show all Y axis values
@@ -1064,9 +1064,9 @@ plotDetections <- function(input, tag, type, y.axis = c("auto", "stations", "arr
   if ((frame.warning & add.movements) && attributes(movements)$p.type == "Overridden") {
     p <- p + ggplot2::theme(
       panel.background = ggplot2::element_rect(fill = "white"),
-      panel.border = ggplot2::element_rect(fill = NA, colour = "#ef3b32" , size = 2),
-      panel.grid.major = ggplot2::element_line(size = 0.5, linetype = 'solid', colour = "#ffd8d6"),
-      panel.grid.minor = ggplot2::element_line(size = 0.25, linetype = 'solid', colour = "#ffd8d6"),
+      panel.border = ggplot2::element_rect(fill = NA, colour = "#ef3b32" , linewidth = 2),
+      panel.grid.major = ggplot2::element_line(linewidth = 0.5, linetype = 'solid', colour = "#ffd8d6"),
+      panel.grid.minor = ggplot2::element_line(linewidth = 0.25, linetype = 'solid', colour = "#ffd8d6"),
       legend.key = ggplot2::element_rect(fill = "white", colour = "white"),
       )
     default.cols <- FALSE
@@ -1074,9 +1074,9 @@ plotDetections <- function(input, tag, type, y.axis = c("auto", "stations", "arr
   if ((frame.warning & add.movements) && attributes(movements)$p.type == "Manual") {
      p <- p + ggplot2::theme(
       panel.background = ggplot2::element_rect(fill = "white"),
-      panel.border = ggplot2::element_rect(fill = NA, colour = "#ffd016" , size = 2),
-      panel.grid.major = ggplot2::element_line(size = 0.5, linetype = 'solid', colour = "#f2e4b8"),
-      panel.grid.minor = ggplot2::element_line(size = 0.25, linetype = 'solid', colour = "#f2e4b8"),
+      panel.border = ggplot2::element_rect(fill = NA, colour = "#ffd016" , linewidth = 2),
+      panel.grid.major = ggplot2::element_line(linewidth = 0.5, linetype = 'solid', colour = "#f2e4b8"),
+      panel.grid.minor = ggplot2::element_line(linewidth = 0.25, linetype = 'solid', colour = "#f2e4b8"),
       legend.key = ggplot2::element_rect(fill = "white", colour = "white"),
       )
     default.cols <- FALSE
