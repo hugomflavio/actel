@@ -101,6 +101,26 @@ After installing, you should read the package vignettes (i.e. the manual), which
 
 ## Papers using or relating to actel
 
+**2023**
+
+- Davey, J., Clarke, T. M., Niella, Y., Dennis, J. D., & Huveneers, C. (2023). Seasonal variation in space use and residency of the southern eagle ray _Myliobatis tenuicaudatus_ in a temperate ecosystem. Marine Ecology Progress Series, 705, 77–94. https://doi.org/10.3354/meps14232
+
+- Davies, P., Britton, J. R., Castro-Santos, T., Crundwell, C., Dodd, J. R., Nunn, A. D., Velterop, R., & Bolland, J. D. (2023). Tracking anadromous fish over successive freshwater migrations reveals the influence of tagging effect, previous success and abiotic factors on upstream passage over barriers. Canadian Journal of Fisheries and Aquatic Sciences. https://doi.org/10.1139/cjfas-2022-0196
+
+- Dhellemmes, F., Aspillaga, E., Rittweg, T., Alós, J., Möller, P., & Arlinghaus, R. (2023). Body size scaling of space use in coastal pike (_Esox lucius_) in brackish lagoons of the southern Baltic Sea. Fisheries Research, 260, 106560. https://doi.org/10.1016/j.fishres.2022.106560
+
+- Flink, H., Tibblin, P., Hall, M., Hellström, G., & Nordahl, O. (2023). Variation among bays in spatiotemporal aggregation of Baltic Sea pike highlights management complexity. Fisheries Research, 259, 106579. https://doi.org/10.1016/j.fishres.2022.106579
+
+- Huisman, J. B. J., Höhne, L., Hanel, R., Kuipers, H., Schollema, P. P., & Nagelkerke, L. (2023). Factors influencing the downstream passage of European silver eels (_Anguilla anguilla_) through a tidal sluice. Journal of Fish Biology, (in press). https://doi.org/10.1111/jfb.15398
+
+- Kraft, S., Gandra, M., Lennox, R. J., Mourier, J., Winkler, A. C., & Abecasis, D. (2023). Residency and space use estimation methods based on passive acoustic telemetry data. Movement Ecology, 11(1), 12. https://doi.org/10.1186/s40462-022-00364-z
+
+- Nordli, E., Strøm, J., Bøhn, T., Thorstad, E., Serra-Llinares, R., Nilsen, R., & Bjørn, P. (2023). Behaviour and habitat use of first-time migrant Arctic charr: Novel insights from a subarctic marine area. Marine Ecology Progress Series, 709, 77–90. https://doi.org/10.3354/meps14279
+
+- O’Connor, B. (2023). Linking spatial stream network modeling and telemetry data to investigate thermal habitat use by adult arctic grayling [Master of Science, University of Northern British Columbia]. https://doi.org/10.24124/2023/59378
+
+
+
 **2022**
 
 - Edwards, M. L., McCallister, M., Brewster, L. R., Bangley, C. W., Curtis, T. H., Ogburn, M. B., & Ajemian, M. J. (2022). Multi-year assessment of immature bull shark <i>Carcharhinus leucas</i> residency and activity spaces in an expansive estuarine nursery. Marine Ecology Progress Series, 695, 125–138. https://doi.org/10.3354/meps14113
@@ -108,6 +128,8 @@ After installing, you should read the package vignettes (i.e. the manual), which
 - Hewitt, D. E., Niella, Y., Johnson, D. D., Suthers, I. M., & Taylor, M. D. (2022). Crabs Go With the Flow: Declining Conductivity and Cooler Temperatures Trigger Spawning Migrations for Female Giant Mud Crabs (<i>Scylla serrata</i>) in Subtropical Estuaries. Estuaries and Coasts. https://doi.org/10.1007/s12237-022-01061-1
 
 - Hollins, J., Pettitt-Wade, H., Gallagher, C. P., Lea, E. V., Loseto, L. L., & Hussey, N. E. (2022). Distinct freshwater migratory pathways in Arctic char (<i>Salvelinus alpinus</i>) coincide with separate patterns of marine spatial habitat-use across a large coastal landscape. Canadian Journal of Fisheries and Aquatic Sciences. https://doi.org/10.1139/cjfas-2021-0291
+
+- Thorkildsen, T. B. (2022). Anadromous Arctic charr: Mapping of migration and habitat use in Isfjorden, Svalbard [Master thesis, Norwegian University of Life Sciences, Ås]. https://nmbu.brage.unit.no/nmbu-xmlui/handle/11250/3018496
 
 - Thorstensen, M. J., Vandervelde, C. A., Bugg, W. S., Michaleski, S., Vo, L., Mackey, T. E., Lawrence, M. J., & Jeffries, K. M. (2022). Non-Lethal Sampling Supports Integrative Movement Research in Freshwater Fish. Frontiers in Genetics, 13. https://www.frontiersin.org/articles/10.3389/fgene.2022.795355
 
