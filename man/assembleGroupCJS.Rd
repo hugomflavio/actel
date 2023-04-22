@@ -7,8 +7,6 @@
 assembleGroupCJS(mat, CJS, arrays, releases, intra.CJS = NULL)
 }
 \arguments{
-\item{mat}{The presence/absence matrices.}
-
 \item{CJS}{A list of CJS calculated for each group x array combinations}
 
 \item{arrays}{A list containing information for each array.}

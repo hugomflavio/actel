@@ -7,8 +7,6 @@
 mbGroupCJS(mat, status.df, fixed.efficiency = NULL)
 }
 \arguments{
-\item{mat}{The presence/absence matrices.}
-
 \item{status.df}{The main results table.}
 
 \item{fixed.efficiency}{A vector of fixed efficiency estimates [0, 1]. \code{length(fixed.efficiency)} must match \code{ncol(input)}.}

@@ -7,8 +7,6 @@
 efficiencyMatrix(movements, arrays, paths, dotmat)
 }
 \arguments{
-\item{movements}{The movements table.}
-
 \item{arrays}{A list containing information for each array.}
 
 \item{paths}{A list containing the shortest paths between arrays with distance > 1.}

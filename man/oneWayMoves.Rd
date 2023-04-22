@@ -7,8 +7,6 @@
 oneWayMoves(movements, arrays)
 }
 \arguments{
-\item{movements}{The movements table.}
-
 \item{arrays}{A list containing information for each array.}
 }
 \value{

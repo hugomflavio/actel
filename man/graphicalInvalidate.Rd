@@ -9,8 +9,6 @@ graphicalInvalidate(detections, moves, tag, trigger)
 \arguments{
 \item{detections}{The detections data.frame for a specific tag.}
 
-\item{moves}{The complete movements table for a specific tag.}
-
 \item{tag}{The tag being analysed.}
 
 \item{trigger}{The message/warning that triggered the interaction}

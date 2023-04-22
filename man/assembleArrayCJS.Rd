@@ -7,8 +7,6 @@
 assembleArrayCJS(mat, CJS, arrays, releases, silent = TRUE)
 }
 \arguments{
-\item{mat}{The presence/absence matrices.}
-
 \item{CJS}{A list of CJS calculated for each array}
 
 \item{arrays}{A list containing information for each array.}

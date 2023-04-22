@@ -7,8 +7,6 @@
 overrideValidityChecks(moves, detections, tag, GUI, save.tables.locally, n)
 }
 \arguments{
-\item{moves}{The complete movements table for a specific tag.}
-
 \item{detections}{The detections data.frame for a specific tag.}
 
 \item{tag}{The tag being analysed.}

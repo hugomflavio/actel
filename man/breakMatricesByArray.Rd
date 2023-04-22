@@ -7,8 +7,6 @@
 breakMatricesByArray(m, arrays, type = c("peers", "all"), verbose = TRUE)
 }
 \arguments{
-\item{m}{The presence/absence matrices.}
-
 \item{arrays}{A list containing information for each array.}
 
 \item{type}{The type of arrays to be matched}

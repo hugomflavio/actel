@@ -18,8 +18,6 @@ graphicalInvalidateDetections(
 
 \item{displayed.moves}{The valid movements table for a specific tag.}
 
-\item{all.moves}{The complete movements table for a specific tag.}
-
 \item{event}{The event selected for expansion.}
 
 \item{tag}{The tag being analysed.}

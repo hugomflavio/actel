@@ -9,8 +9,6 @@ assembleMatrices(spatial, movements, status.df, arrays, paths, dotmat)
 \arguments{
 \item{spatial}{The spatial data frame.}
 
-\item{movements}{The movements table.}
-
 \item{status.df}{The main results table.}
 
 \item{arrays}{A list containing information for each array.}

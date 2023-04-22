@@ -9,8 +9,6 @@ invalidateDetections(displayed.moves, all.moves, detections, tag, event)
 \arguments{
 \item{displayed.moves}{The valid movements table for a specific tag.}
 
-\item{all.moves}{The complete movements table for a specific tag.}
-
 \item{detections}{The detections data.frame for a specific tag.}
 
 \item{tag}{The tag being analysed.}
