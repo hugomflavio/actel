@@ -13,7 +13,7 @@ License: GPL-3
 Encoding: UTF-8
 LazyData: true
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.1.2
+RoxygenNote: 7.2.3
 Language: en-GB
 Depends: R (>= 3.6)
 Imports:
@@ -40,12 +40,12 @@ Suggests:
     raster,
     gdistance,
     sp,
-    tools,
-    rgdal,
+    terra,
     testthat,
     RGtk2,
     gWidgets2RGtk2,
     gWidgets2    
 VignetteBuilder: knitr
-URL: https://github.com/hugomflavio/actel
+URL: https://github.com/hugomflavio/actel,
+    https://hugomflavio.github.io/actel/
 BugReports: https://github.com/hugomflavio/actel/issues
