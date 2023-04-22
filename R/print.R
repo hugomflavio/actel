@@ -1070,11 +1070,16 @@ roseMean <- function(input, col = c("cornflowerblue", "chartreuse3", "deeppink")
   mean.length = c(0.0125, -0.0125), mean.lwd = 4, box.range = c("none", "std.error", "sd"), 
   fill = "white", horizontal.border = "black", vertical.border = "black",
   box.size = c(1.015, 0.985), edge.length = c(0.025, -0.025), edge.lwd = 2){
+
   box.range <- match.arg(box.range)
+  
   if(is.matrix(input) | is.data.frame(input)){
+    # the different series in the input must be broken into individual
+    # list elements to play nicely with the code below.
     plotdata <- list()
-    for(i in 1:ncol(input)) 
+    for(i in 1:ncol(input)) {
       plotdata[[i]] <- input[,i]
+    }
     names(plotdata) <- colnames(input)
   } else {
     if (is.list(input)){
@@ -1082,31 +1087,53 @@ roseMean <- function(input, col = c("cornflowerblue", "chartreuse3", "deeppink")
         stop("Input is a list but not all elements in the list are circular objects.\n")
       plotdata <- input
     } else {
+      # this is the case where a vector was provided
       plotdata <- list(input)
     }
   }
+
   if (!exists("plotdata"))
     stop("Input must be a list of circular objects, a data.frame, a matrix or a vector.\n")
+  
+  # expand colour and fill to match the number of data series to be plotted
   col <- rep(col, length.out = length(plotdata))
   fill <- rep(fill, length.out = length(plotdata))
+  # same as above but for borders
   horizontal.border <- rep(horizontal.border, length.out = length(plotdata))
   vertical.border <- rep(vertical.border, length.out = length(plotdata))
+
+  # now start plogging, one at a time
   for (i in 1:length(plotdata)) {
+    # calculate a circular mean first (needed for the if-statement below)
     m <- circular::mean.circular(plotdata[[i]], na.rm = TRUE)
+   
+    # start by plotting the desired ranges, if one was requested
     if(box.range != "none"){
       if(box.range == "std.error")
         range <- std.error.circular(plotdata[[i]], silent = TRUE)
       if(box.range == "sd")
         range <- circular::sd.circular(plotdata[[i]])
-      zero <- attr(plotdata[[i]], "circularp")$zero # extracted from the circular data
+
+      # extract the location of the zero from the circular data
+      zero <- attr(plotdata[[i]], "circularp")$zero
+
+      # calculate the placement of the range borders
       left <- as.numeric(circular::conversion.circular((m - range), units = "radians")) * -1
       right <- as.numeric(circular::conversion.circular((m + range), units = "radians")) * -1
+
+      # convert to x and y coordinates
       xx <- c(box.size[1] * cos(seq(left, right, length = 1000) + zero), rev(box.size[2] * cos(seq(left, right, length = 1000) + zero)))
       yy <- c(box.size[1] * sin(seq(left, right, length = 1000) + zero), rev(box.size[2] * sin(seq(left, right, length = 1000) + zero)))
+      
+      # plot the range box
       polygon(xx, yy, col = fill[i], border = horizontal.border[i])
+
+      # plot the range borders
       circular::lines.circular(c(m + range, m + range), edge.length, lwd = edge.lwd, col = vertical.border[i])
       circular::lines.circular(c(m - range, m - range), edge.length, lwd = edge.lwd, col = vertical.border[i])
     }
+
+    # plot the thick mean in the middle
     circular::lines.circular(c(m, m), mean.length, lwd = mean.lwd, col = col[i], lend = 1)
   }
 }
