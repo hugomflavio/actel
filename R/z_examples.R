@@ -115,7 +115,8 @@ Once finished, explore the html report and the object 'results' for the output."
 #'
 #' @keywords internal
 #'
-"example.spatial"
+#' @name example.spatial
+NULL
 
 #' Example biometric data
 #'
@@ -135,7 +136,8 @@ Once finished, explore the html report and the object 'results' for the output."
 #'
 #' @keywords internal
 #'
-"example.biometrics"
+#' @name example.biometrics
+NULL
 
 #' Example detection data
 #'
@@ -154,7 +156,8 @@ Once finished, explore the html report and the object 'results' for the output."
 #'
 #' @keywords internal
 #'
-"example.detections"
+#' @name example.detections
+NULL
 
 #' Example deployment data
 #'
@@ -171,7 +174,8 @@ Once finished, explore the html report and the object 'results' for the output."
 #'
 #' @keywords internal
 #'
-"example.deployments"
+#' @name example.deployments
+NULL
 
 #' Example distances matrix
 #'
@@ -182,8 +186,8 @@ Once finished, explore the html report and the object 'results' for the output."
 #'
 #' @keywords internal
 #'
-"example.distances"
-
+#' @name example.distances
+NULL
 
 #' Example migration results
 #'
@@ -196,7 +200,7 @@ Once finished, explore the html report and the object 'results' for the output."
 #'
 #' @keywords internal
 #'
-"example.results"
+'example.results'
 
 #' Example residency results
 #'
@@ -207,4 +211,4 @@ Once finished, explore the html report and the object 'results' for the output."
 #'
 #' @keywords internal
 #'
-"additional.residency.results"
+'additional.residency.results'
