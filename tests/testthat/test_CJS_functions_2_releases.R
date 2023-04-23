@@ -8,7 +8,7 @@ Sys.setenv(TZ = 'UTC')
 
 tests.home <- getwd()
 setwd(tempdir())
-exampleWorkspace("exampleWorkspace")
+exampleWorkspace("exampleWorkspace", force = TRUE)
 setwd("exampleWorkspace")
 
 xbio <- example.biometrics
@@ -148,7 +148,7 @@ Sys.setenv(TZ = 'UTC')
 
 tests.home <- getwd()
 setwd(tempdir())
-exampleWorkspace("exampleWorkspace")
+exampleWorkspace("exampleWorkspace", force = TRUE)
 setwd("exampleWorkspace")
 
 xbio <- example.biometrics

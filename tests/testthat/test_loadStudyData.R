@@ -5,7 +5,7 @@ Sys.setenv(TZ = 'UTC')
 tests.home <- getwd()
 setwd(tempdir())
 
-exampleWorkspace("exampleWorkspace")
+exampleWorkspace("exampleWorkspace", force = TRUE)
 setwd("exampleWorkspace")
 
 test_that("loadStudyData contains all the required elements", {

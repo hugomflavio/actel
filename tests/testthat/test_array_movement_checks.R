@@ -4,7 +4,7 @@ Sys.setenv(TZ = 'UTC')
 
 tests.home <- getwd()
 setwd(tempdir())
-exampleWorkspace("exampleWorkspace")
+exampleWorkspace("exampleWorkspace", force = TRUE)
 setwd("exampleWorkspace")
 write.csv(example.distances, "distances.csv")
 

@@ -8,7 +8,7 @@ test_that("blankWorkspace deploys necessary files", {
 	expect_true(file.exists("actel_workspace/deployments.csv"))
 	expect_true(file.exists("actel_workspace/spatial.csv"))
 	expect_true(dir.exists("actel_workspace/detections"))
-	blankWorkspace("test_name")
+	blankWorkspace("test_name", force = TRUE)
 	expect_true(dir.exists("test_name"))
 	unlink("actel_workspace", recursive = TRUE)
 	unlink("test_name", recursive = TRUE)

@@ -7,7 +7,7 @@ if (dir.exists("actel_report_auxiliary_files"))
 
 dir.create("actel_report_auxiliary_files")
 
-exampleWorkspace("exampleWorkspace")
+exampleWorkspace("exampleWorkspace", force = TRUE)
 setwd("exampleWorkspace")
 write.csv(example.distances, "distances.csv")
 
