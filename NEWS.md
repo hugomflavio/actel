@@ -186,7 +186,7 @@ Changes:
   * createMatrix and completeMatrix now work with R objects rather than files. The user must manually save the function output to a 'distances.csv' file to include it in the next analysis.
   * The possible values of speed.method have been changed to 'last to first' and 'last to last', for a more logical interpretation of the results. The explore vignette has been updated accordingly.
   * Separated part of `transitionLayer` into a preceding function `loadShape`.
-  * `exampleWorkspace` and `blankWorkspace` now require a target directory.
+  * `exampleWorkspace` and `createWorkspace` now require a target directory.
 
 Enhancements:
   * Perform early quality checks on the content of 'sections' before advancing with migration and residency analysis.
