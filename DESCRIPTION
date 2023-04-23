@@ -47,5 +47,5 @@ Suggests:
     gWidgets2    
 VignetteBuilder: knitr
 URL: https://github.com/hugomflavio/actel,
-    https://hugomflavio.github.io/actel/
+    https://hugomflavio.github.io/actel-website/
 BugReports: https://github.com/hugomflavio/actel/issues
