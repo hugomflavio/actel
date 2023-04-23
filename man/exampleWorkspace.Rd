@@ -4,7 +4,7 @@
 \alias{exampleWorkspace}
 \title{Deploy Example Data}
 \usage{
-exampleWorkspace(dir)
+exampleWorkspace(dir, force = FALSE)
 }
 \arguments{
 \item{dir}{The name of the target directory. Will be created if not present.}

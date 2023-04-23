@@ -83,7 +83,7 @@ for!
 
 \seealso{
 \code{\link{explore}}, \code{\link{migration}}, \code{\link{residency}},
-\code{\link{exampleWorkspace}}, \code{\link{createWorkspace}}
+\code{\link{exampleWorkspace}}, \code{\link{blankWorkspace}}
 }
 \author{
 \strong{Maintainer}: Hugo Flávio \email{hflavio@wlu.ca} (\href{https://orcid.org/0000-0002-5174-1197}{ORCID})

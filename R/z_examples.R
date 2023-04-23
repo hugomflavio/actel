@@ -1,7 +1,6 @@
-#' Create a Default Workspace
-#'
-#' Produces template files and folders required to run the \code{\link{explore}},
-#' \code{\link{migration}} and \code{\link{residency}} functions.
+#' Deprecated function.
+#' 
+#' Use blankWorkspace instead.
 #'
 #' @param dir The name of the target directory. Will be created if not present.
 #'
@@ -16,12 +15,42 @@
 #'
 #' @export
 #'
-createWorkspace <- function(dir) {
+createWorkspace <- function(dir, force = FALSE) {
+  .Deprecated("blankWorkspace")
+  blankWorkspace(dir = dir, force = force)
+}
+
+#' Create a Blank Workspace
+#'
+#' Produces template files and folders required to run the \code{\link{explore}},
+#' \code{\link{migration}} and \code{\link{residency}} functions.
+#'
+#' @param dir The name of the target directory. Will be created if not present.
+#'
+#' @examples
+#' \donttest{
+#' # running blankWorkspace deploys template
+#' # files to a directory specified by the user
+#' blankWorkspace(paste0(tempdir(), "/createWorkspace_example"))
+#' }
+#'
+#' @return No return value, called for side effects
+#'
+#' @export
+#'
+blankWorkspace <- function(dir, force = FALSE) {
   if (missing(dir))
     stop("Please specify a target directory", call. = FALSE)
 
-  if (!dir.exists(dir))
+  if (!dir.exists(dir)) {
     dir.create(dir)
+  } else {
+    if (force)
+      warning("The specified directory already exists, but force = TRUE. Deploying template files. Data loss may occur.", call. = FALSE, immediate. = TRUE)
+    else
+      stop("The specified directory already exists! Stopping to avoid accidental data loss. To continue regardless, run again with force = TRUE.", call. = FALSE)
+  }
+
 
   spatial <- data.frame(
     Station.name = c("Example station1", "Example station2", "Example station3", "Example release1", "Example release2"),
@@ -52,14 +81,15 @@ createWorkspace <- function(dir) {
 
   if (!dir.exists(paste(dir, "detections", sep ="/")))
     dir.create(paste(dir, "detections", sep ="/"))
-  message(paste0("M: Workspace files created in folder '", dir,"'."))
+
+  message(paste0("M: Template files created in folder '", dir,"'."))
 }
 
 #' Deploy Example Data
 #'
 #' Creates a ready-to-run workspace with example data.
 #'
-#' @inheritParams createWorkspace
+#' @inheritParams blankWorkspace
 #'
 #' @examples
 #' \donttest{
@@ -71,12 +101,19 @@ createWorkspace <- function(dir) {
 #'
 #' @export
 #'
-exampleWorkspace <- function(dir) {
+exampleWorkspace <- function(dir, force = FALSE) {
   if (missing(dir))
-    stop("Please specify a target directory", call. = FALSE)
+    stop("Please specify a target directory.", call. = FALSE)
 
-  if (!dir.exists(dir))
+  if (!dir.exists(dir)) {
     dir.create(dir)
+  } else {
+    if (force)
+      warning("The specified directory already exists, but force = TRUE. Deploying example files. Data loss may occur.", call. = FALSE, immediate. = TRUE)
+    else
+      stop("The specified directory already exists! Stopping to avoid accidental data loss. To continue regardless, run again with force = TRUE.", call. = FALSE)
+  }
+
 
   write.csv(example.spatial, paste(dir, "spatial.csv", sep ="/"), row.names = FALSE)
   write.csv(example.biometrics, paste(dir, "biometrics.csv", sep ="/"), row.names = FALSE)

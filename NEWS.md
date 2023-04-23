@@ -16,12 +16,15 @@ Fixes:
   * Fix message overflow reported in issue [#78](https://github.com/hugomflavio/actel/issues/78).
 
 Changes:
+  * Renamed `createWorkspace()` to `blankWorkspace()` following cases of confusion regarding function purpose. Closes [#80](https://github.com/hugomflavio/actel/issues/80)
+  * Removed dependency from package RGDAL; updated distance calculations code accordingly.
   * Moved package vignettes to https://hugomflavio.github.io/actel-website/index.html.
   * Removed deprecated argument `plot.detections.by`.
   * `minimum.detections` has been replaced by `min.total.detections` and `min.per.event`.
   * `section.minimum` has been replaced by `section.warning` and `section.error`.
 
 Enhancements:
+  * Added new `force` argument to `blankWorkspace()` and `exampleWorkspace()`.
   * New `Code.space` column in the biometrics allows the user to specificy the code space of the target tags.
   * New arguments in plotArray(): `by.group` and `y.style`. See function documentation for more details.
   * Include preload() log in reports where preloaded data is used.
@@ -183,7 +186,7 @@ Changes:
   * createMatrix and completeMatrix now work with R objects rather than files. The user must manually save the function output to a 'distances.csv' file to include it in the next analysis.
   * The possible values of speed.method have been changed to 'last to first' and 'last to last', for a more logical interpretation of the results. The explore vignette has been updated accordingly.
   * Separated part of `transitionLayer` into a preceding function `loadShape`.
-  * `exampleWorkspace` and `createWorkspace` now require a target directory.
+  * `exampleWorkspace` and `blankWorkspace` now require a target directory.
 
 Enhancements:
   * Perform early quality checks on the content of 'sections' before advancing with migration and residency analysis.

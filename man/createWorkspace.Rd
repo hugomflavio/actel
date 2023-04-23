@@ -2,9 +2,9 @@
 % Please edit documentation in R/z_examples.R
 \name{createWorkspace}
 \alias{createWorkspace}
-\title{Create a Default Workspace}
+\title{Deprecated function.}
 \usage{
-createWorkspace(dir)
+createWorkspace(dir, force = FALSE)
 }
 \arguments{
 \item{dir}{The name of the target directory. Will be created if not present.}
@@ -13,8 +13,7 @@ createWorkspace(dir)
 No return value, called for side effects
 }
 \description{
-Produces template files and folders required to run the \code{\link{explore}},
-\code{\link{migration}} and \code{\link{residency}} functions.
+Use blankWorkspace instead.
 }
 \examples{
 \donttest{

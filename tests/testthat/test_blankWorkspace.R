@@ -1,14 +1,14 @@
 tests.home <- getwd()
 setwd(tempdir())
-test_that("createWorkspace deploys necessary files", {
-	createWorkspace("actel_workspace")
+test_that("blankWorkspace deploys necessary files", {
+	blankWorkspace("actel_workspace", force = TRUE)
 	expect_true(dir.exists("actel_workspace"))
 	expect_true(file.exists("actel_workspace/spatial.csv"))
 	expect_true(file.exists("actel_workspace/biometrics.csv"))
 	expect_true(file.exists("actel_workspace/deployments.csv"))
 	expect_true(file.exists("actel_workspace/spatial.csv"))
 	expect_true(dir.exists("actel_workspace/detections"))
-	createWorkspace("test_name")
+	blankWorkspace("test_name")
 	expect_true(dir.exists("test_name"))
 	unlink("actel_workspace", recursive = TRUE)
 	unlink("test_name", recursive = TRUE)

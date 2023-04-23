@@ -79,7 +79,7 @@
 #'
 #'
 #' @seealso \code{\link{explore}}, \code{\link{migration}}, \code{\link{residency}},
-#' \code{\link{exampleWorkspace}}, \code{\link{createWorkspace}}
+#' \code{\link{exampleWorkspace}}, \code{\link{blankWorkspace}}
 #'
 #' @importFrom circular sd.circular mean.circular var.circular
 #' @import stats
