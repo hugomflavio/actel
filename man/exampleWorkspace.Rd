@@ -8,6 +8,8 @@ exampleWorkspace(dir, force = FALSE)
 }
 \arguments{
 \item{dir}{The name of the target directory. Will be created if not present.}
+
+\item{force}{logical. Defaults to FALSE. Prevents deploying files in a directory that already exists without explicit permission.}
 }
 \value{
 No return value, called for side effects.

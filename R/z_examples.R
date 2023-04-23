@@ -2,7 +2,7 @@
 #' 
 #' Use blankWorkspace instead.
 #'
-#' @param dir The name of the target directory. Will be created if not present.
+#' @inheritParams blankWorkspace
 #'
 #' @examples
 #' \donttest{
@@ -26,6 +26,7 @@ createWorkspace <- function(dir, force = FALSE) {
 #' \code{\link{migration}} and \code{\link{residency}} functions.
 #'
 #' @param dir The name of the target directory. Will be created if not present.
+#' @param force logical. Defaults to FALSE. Prevents deploying files in a directory that already exists without explicit permission.
 #'
 #' @examples
 #' \donttest{
