@@ -22,7 +22,7 @@ Produces template files and folders required to run the \code{\link{explore}},
 \donttest{
 # running blankWorkspace deploys template
 # files to a directory specified by the user
-blankWorkspace(paste0(tempdir(), "/createWorkspace_example"))
+blankWorkspace(paste0(tempdir(), "/blankWorkspace_example"))
 }
 
 }

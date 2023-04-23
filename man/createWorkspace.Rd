@@ -19,9 +19,7 @@ Use blankWorkspace instead.
 }
 \examples{
 \donttest{
-# running createWorkspace deploys template
-# files to a directory specified by the user
-createWorkspace(paste0(tempdir(), "/createWorkspace_example"))
+# createWorkspace is deprecated. Use blankWorkspace instead.
 }
 
 }

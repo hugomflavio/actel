@@ -6,9 +6,7 @@
 #'
 #' @examples
 #' \donttest{
-#' # running createWorkspace deploys template
-#' # files to a directory specified by the user
-#' createWorkspace(paste0(tempdir(), "/createWorkspace_example"))
+#' # createWorkspace is deprecated. Use blankWorkspace instead.
 #' }
 #'
 #' @return No return value, called for side effects
@@ -32,7 +30,7 @@ createWorkspace <- function(dir, force = FALSE) {
 #' \donttest{
 #' # running blankWorkspace deploys template
 #' # files to a directory specified by the user
-#' blankWorkspace(paste0(tempdir(), "/createWorkspace_example"))
+#' blankWorkspace(paste0(tempdir(), "/blankWorkspace_example"))
 #' }
 #'
 #' @return No return value, called for side effects
