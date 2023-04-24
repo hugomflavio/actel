@@ -26,10 +26,10 @@
 #' setwd(tempdir())
 #'
 #' # Deploy the example workspace
-#' exampleWorkspace("exampleWorkspace")
+#' exampleWorkspace("residency_example")
 #'
 #' # Move your R session into the example workspace
-#' setwd("exampleWorkspace")
+#' setwd("residency_example")
 #'
 #' # run the residency analysis. Ensure the tz argument
 #' # matches the time zone of the study area and that the

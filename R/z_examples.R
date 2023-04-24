@@ -93,7 +93,7 @@ blankWorkspace <- function(dir, force = FALSE) {
 #' @examples
 #' \donttest{
 #' # deploy a minimal dataset to try actel!
-#' exampleWorkspace(paste0(tempdir(), "/exampleWorkspace"))
+#' exampleWorkspace(paste0(tempdir(), "/exampleWorkspace_example"))
 #' }
 #'
 #' @return No return value, called for side effects.

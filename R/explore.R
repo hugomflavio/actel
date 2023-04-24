@@ -96,10 +96,10 @@
 #' setwd(tempdir())
 #'
 #' # Deploy the example workspace
-#' exampleWorkspace("exampleWorkspace")
+#' exampleWorkspace("explore_example")
 #'
 #' # Move your R session into the example workspace
-#' setwd("exampleWorkspace")
+#' setwd("explore_example")
 #'
 #' # run the explore analysis. Ensure the tz argument
 #' # matches the time zone of the study area. For the
