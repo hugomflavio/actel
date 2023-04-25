@@ -24,6 +24,7 @@ Changes:
   * `section.minimum` has been replaced by `section.warning` and `section.error`.
 
 Enhancements:
+  * Change the behaviour of `recoverLog()` so it attemnts to save the log to `actel_job_log.txt` if a `file` argument is not provided.
   * Added new `force` argument to `blankWorkspace()` and `exampleWorkspace()`.
   * New `Code.space` column in the biometrics allows the user to specificy the code space of the target tags.
   * New arguments in plotArray(): `by.group` and `y.style`. See function documentation for more details.
