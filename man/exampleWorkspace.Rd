@@ -20,7 +20,7 @@ Creates a ready-to-run workspace with example data.
 \examples{
 \donttest{
 # deploy a minimal dataset to try actel!
-exampleWorkspace(paste0(tempdir(), "/exampleWorkspace"))
+exampleWorkspace(paste0(tempdir(), "/exampleWorkspace_example"))
 }
 
 }

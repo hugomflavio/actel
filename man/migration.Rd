@@ -249,10 +249,10 @@ old.wd <- getwd()
 setwd(tempdir())
 
 # Deploy the example workspace
-exampleWorkspace("exampleWorkspace")
+exampleWorkspace("migration_example")
 
 # Move your R session into the example workspace
-setwd("exampleWorkspace")
+setwd("migration_example")
 
 # run the migration analysis. Ensure the tz argument
 # matches the time zone of the study area and that the
