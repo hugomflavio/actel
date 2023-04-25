@@ -596,8 +596,10 @@ recoverLog <- function(file, overwrite = FALSE) {
   if (!file.exists(paste0(tempdir(), "/latest_actel_error_log.txt")))
     stop("No crash logs found.", call. = FALSE)
 
-  if (missing(file))
-    stop("Please state the name of the output file using the 'file' argument", call. = FALSE)
+  if (missing(file)) {
+    warning("'file' argument is missing. Attempting to save log to 'actel_job_log.txt'. To specify a different target, use the 'file' argument.", immediate. = TRUE, call. = FALSE)
+    file <- "actel_job_log.txt"
+  }
 
   if (!is.character(file) | length(file) != 1)
     stop("'file' must be a single character string.", call. = FALSE)
