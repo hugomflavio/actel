@@ -143,9 +143,13 @@ explore(tz = 'Europe/Copenhagen', datapack = NULL, max.interval = 60, minimum.de
 -------------------
 ", fill = TRUE)	
 	sink()
-	expect_error(recoverLog(), "Please state the name of the output file")	
+	expect_warning(recoverLog(), "'file' argument is missing. Attempting to save log to 'actel_job_log.txt'. To specify a different target, use the 'file' argument.")	
+	expect_true(file.exists("actel_job_log.txt"))
+
 	recoverLog("test.txt")
 	expect_true(file.exists("test.txt"))
+
+	file.remove("actel_job_log.txt")
 	file.remove("test.txt")
 	file.remove("latest_actel_error_log.txt")
 })
