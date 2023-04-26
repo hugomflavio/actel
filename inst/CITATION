@@ -1,7 +1,7 @@
 citHeader("To cite actel in publications, please use:")
 
-citEntry(
-  entry    = "Article",
+bibentry(
+  bibtype    = "Article",
   title    = "{actel}: Standardised analysis of acoustic telemetry data from animals moving through receiver arrays",
   author   = c(person("Hugo", "Fl\\'{a}vio"), person("Henrik", "Baktoft")),
   journal  = "Methods in Ecology and Evolution",
