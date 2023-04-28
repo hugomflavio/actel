@@ -38,6 +38,7 @@ Imports:
     utils
 Suggests: 
     gdistance,
+    gWidgets2,
     gWidgets2tcltk,
     raster,
     sp,
