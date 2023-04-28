@@ -104,8 +104,14 @@ tableInteraction <- function(moves, detections, tag, trigger, GUI, force = FALSE
 
   if (popup) {
     output <- graphicalInvalidate(moves = moves, detections = detections, tag = tag, trigger = trigger)
-    decision <- userInput(paste0("Would you like to leave a comment for tag ", tag, "?(comment/n) "), 
-                          choices = c("comment", "n"), hash = paste0("# comment ", tag, "?"))
+    decision <- userInput(paste0("Would you like to leave a comment for tag ", tag, "?(y/n) "), 
+                          choices = c("y", "n"),
+                          hash = paste0("# comment ", tag, "?"))
+    if (decision == "y") {
+      appendTo("UD", paste("comment # on", tag))
+      appendTo(c("UD", "Comment"), readline(paste0("New comment on tag ", tag, ": ")), tag)
+      appendTo("Screen", "M: Comment successfully stored. Continuing analysis.")
+    }
   } else {
     # check if table can be printed on console
     if (colnames(moves)[1] == "Section")
