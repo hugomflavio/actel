@@ -287,38 +287,9 @@ checkGUI <- function(GUI = c("needed", "always", "never"), save.tables.locally) 
   
   GUI <- match.arg(GUI)
   
-  if (GUI != "never") {
-    aux <- c(
-      length(suppressWarnings(packageDescription("gWidgets2"))),
-      length(suppressWarnings(packageDescription("gWidgets2RGtk2"))),
-      length(suppressWarnings(packageDescription("RGtk2"))))
-    missing.packages <- sapply(aux, function(x) x == 1)
-    if (any(missing.packages)) {
-      appendTo(c("Screen", "Warning"),
-        paste0("GUI is set to '", GUI, "' but ",
-          ifelse(sum(missing.packages) == 1, "package '", "packages '"),
-          paste(c("gWidgets2", "gWidgets2RGtk2", "RGtk2")[missing.packages], collapse = "', '"),
-          ifelse(sum(missing.packages) == 1, "' is", "' are"),
-          " not available. Please install ",
-          ifelse(sum(missing.packages) == 1, "it", "them"),
-          " if you intend to run GUI.\n         Disabling GUI (i.e. GUI = 'never') for the current run."))
-      GUI <- "never"
-    } else {
-      if (.Platform$OS.type == "windows") {
-        dllpath <- Sys.getenv("RGTK2_GTK2_PATH")
-        if (!nzchar(dllpath))
-          dllpath <- file.path(file.path(system.file(package = "RGtk2"), "gtk", .Platform$r_arch), "bin")
-        dll <- try(library.dynam("RGtk2", "RGtk2", sub("/RGtk2", "", find.package("RGtk2")), DLLpath = dllpath), silent = TRUE)
-      } else {
-       dll <- try(library.dynam("RGtk2", "RGtk2", sub("/RGtk2", "", find.package("RGtk2"))), silent = TRUE)
-      }
-      if (is.character(dll)) {
-       appendTo(c("Screen", "Warning"),
-        paste0("GUI is set to '", GUI,
-        "' but loading of RGtk2 dll failed. Please run e.g. gWidgets2::gtext() to trigger the installation of RGtk2's dll and then restart R.\n         Disabling GUI (i.e. GUI = 'never') for the current run."))
-       GUI <- "never"
-      }
-    }
+  if (GUI != "never" && length(suppressWarnings(packageDescription("gWidgets2tcltk"))) == 1) {
+    appendTo(c("Screen", "Warning"), paste0("GUI is set to '", GUI, "' but package 'gWidgets2tcltk' is not available. Please install it if you intend to run GUI.\n         Disabling GUI (i.e. GUI = 'never') for the current run."))
+    GUI <- "never"
   }
 
   if (GUI == "never" & save.tables.locally & file.exists("actel_inspect_movements.csv"))

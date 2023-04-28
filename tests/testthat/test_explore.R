@@ -120,20 +120,10 @@ test_that("explore stops when any argument does not make sense", {
 	expect_error(explore(tz = "Europe/Copenhagen", detections.y.axis = 1, GUI = "never"),
 		"'detections.y.axis' should be one of 'stations' or 'arrays'", fixed = TRUE)
   
-  aux <- c(
-    length(suppressWarnings(packageDescription("gWidgets2"))),
-    length(suppressWarnings(packageDescription("gWidgets2RGtk2"))),
-    length(suppressWarnings(packageDescription("RGtk2"))))
-  missing.packages <- sapply(aux, function(x) x == 1)
-  if (any(missing.packages)) {
+  if (length(suppressWarnings(packageDescription("gWidgets2tcltk"))) == 1) {
 		expect_warning(explore(tz = "Europe/Copenhagen", report = FALSE),
-      paste0("GUI is set to 'needed' but ",
-        ifelse(sum(missing.packages) == 1, "package '", "packages '"),
-        paste(c("gWidgets2", "gWidgets2RGtk2", "RGtk2")[missing.packages], collapse = "', '"),
-        ifelse(sum(missing.packages) == 1, "' is", "' are"),
-        " not available. Please install ",
-        ifelse(sum(missing.packages) == 1, "it", "them"),
-        " if you intend to run GUI.\n         Disabling GUI (i.e. GUI = 'never') for the current run."), fixed = TRUE)
+      paste0("GUI is set to 'needed' but package 'gWidgets2tcltk' is not available. Please install it if you intend to run GUI.\n         Disabling GUI (i.e. GUI = 'never') for the current run."),
+      fixed = TRUE)
   }
 
 	expect_error(explore(tz = "Europe/Copenhagen", report = "a"),

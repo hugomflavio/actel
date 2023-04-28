@@ -16,6 +16,7 @@ Fixes:
   * Fix message overflow reported in issue [#78](https://github.com/hugomflavio/actel/issues/78).
 
 Changes:
+  * Changed the inner mechanics of the graphical widgets from RGtk2 to tcltk, as RGtk2 is now gone from CRAN. Should not affect user experience.
   * Renamed `createWorkspace()` to `blankWorkspace()` following cases of confusion regarding function purpose. Closes [#80](https://github.com/hugomflavio/actel/issues/80)
   * Removed dependency from package RGDAL; updated distance calculations code accordingly.
   * Moved package vignettes to https://hugomflavio.github.io/actel-website/index.html.

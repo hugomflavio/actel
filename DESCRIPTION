@@ -23,8 +23,8 @@ Imports:
     DiagrammeRsvg,
     fasttime,
     ggplot2,
-    svglite,
     graphics,
+    grDevices,
     knitr,
     readr,
     reshape2,
@@ -32,19 +32,17 @@ Imports:
     rsvg,
     scales,
     stats,
-    stringr,
     stringi,
-    grDevices,
+    stringr,
+    svglite,
     utils
 Suggests: 
-    raster,
     gdistance,
+    gWidgets2tcltk,
+    raster,
     sp,
     terra,
-    testthat,
-    RGtk2,
-    gWidgets2RGtk2,
-    gWidgets2    
+    testthat
 VignetteBuilder: knitr
 URL: https://github.com/hugomflavio/actel,
     https://hugomflavio.github.io/actel-website/
