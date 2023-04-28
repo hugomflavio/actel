@@ -26,6 +26,9 @@ jobs:
           - {os: ubuntu-latest,   r: 'devel', http-user-agent: 'release'}
           - {os: macos-latest,   r: 'release'}
 
+    before_install:
+    - export DISPLAY=:99.0
+
     env:
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
       R_KEEP_PKG_SOURCE: yes
@@ -34,6 +37,7 @@ jobs:
       _R_CHECK_FORCE_SUGGESTS_: false
 
     steps:
+
       - uses: actions/checkout@v3
 
       - uses: r-lib/actions/setup-pandoc@v2
