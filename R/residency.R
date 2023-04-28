@@ -1310,8 +1310,9 @@ res_assembleOutput <- function(res.df, bio, spatial, tz) {
   status.df$Release.date <- as.POSIXct(status.df$Release.date, tz = tz)
   status.df$Very.last.time <- as.POSIXct(status.df$Very.last.time, tz = tz)
 
-  if (file.exists("temp_comments.txt")) { # nocov start
-    temp <- read.table("temp_comments.txt", header = FALSE, sep = "\t")
+  appendTo("debug", "Appending comments.")
+  if (file.exists(paste0(tempdir(), "/temp_comments.txt"))) { # nocov start
+    temp <- read.table(paste0(tempdir(), "/temp_comments.txt"), header = FALSE, sep = "\t")
     status.df[, "Comments"] <- NA_character_
     for (i in seq_len(nrow(temp))) {
       link <- match(temp[i, 1], status.df$Transmitter)

@@ -5,6 +5,7 @@ Find out the main highlights of each update.
 ## Development
 
 Fixes:
+  * Fix comments not being appended to status.df in the residency() analysis.
   * Fix minor bug where comments could not be saved after interacting with the graphical interface.
   * Prevent crash in migration if an array has 0 efficiency and there are no arrays coming before it.
   * Prevent crash if the dot file/string line breaks are coded as `\r\n`.

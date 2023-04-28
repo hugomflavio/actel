@@ -1440,7 +1440,7 @@ assembleOutput <- function(timetable, bio, spatial, dist.mat, tz) {
   appendTo("debug", "Appending comments.")
   if (file.exists(paste0(tempdir(), "/temp_comments.txt"))) { # nocov start
     temp <- read.table(paste0(tempdir(), "/temp_comments.txt"), header = FALSE, sep = "\t")
-    status.df[, "Comments"] <- NA
+    status.df[, "Comments"] <- NA_character_
     for (i in seq_len(nrow(temp))) {
       link <- match(temp[i, 1], status.df$Transmitter)
       if (is.na(status.df$Comments[link])) {
