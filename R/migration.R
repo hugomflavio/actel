@@ -222,7 +222,7 @@ migration <- function(
     ", success.arrays = ", ifelse(is.null(success.arrays), "NULL", paste0("c('", paste(success.arrays, collapse = "', '"), "')")),
     ", max.interval = ", max.interval,
     ", min.total.detections = ", min.total.detections,
-    ", min.per.event = ", paste0("c('", min.per.event, "')"),
+    ", min.per.event = ", paste0("c(", paste(min.per.event, collapse = ", "), ")"),
     ", start.time = ", ifelse(is.null(start.time), "NULL", paste0("'", start.time, "'")),
     ", stop.time = ", ifelse(is.null(stop.time), "NULL", paste0("'", stop.time, "'")),
     ", speed.method = '", speed.method, "'",

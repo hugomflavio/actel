@@ -186,7 +186,7 @@ explore <- function(
     checkToken(token = attributes(datapack)$actel.token,
                timestamp = attributes(datapack)$timestamp)
 
-  if (length(min.per.event) > 1)
+  if (length(min.per.event) > 1) 
     appendTo(c('screen', 'warning', 'report'),
       'explore() only has array movements but two values were set for min.per.event. Disregarding second value.')
   
@@ -212,7 +212,7 @@ explore <- function(
                         print.releases = print.releases,
                         detections.y.axis = detections.y.axis)
 
-  min.per.event <- aux$min.per.event
+  min.per.event <- aux$min.per.event[1]
   speed.method <- aux$speed.method
   speed.warning <- aux$speed.warning
   speed.error <- aux$speed.error
@@ -230,7 +230,7 @@ explore <- function(
     ", datapack = ", ifelse(is.null(datapack), "NULL", deparse(substitute(datapack))),
     ", max.interval = ", max.interval,
     ", min.total.detections = ", min.total.detections,
-    ", min.per.event = ", paste0("c('", min.per.event, "')"),
+    ", min.per.event = ", min.per.event,
     ", start.time = ", ifelse(is.null(start.time), "NULL", paste0("'", start.time, "'")),
     ", stop.time = ", ifelse(is.null(stop.time), "NULL", paste0("'", stop.time, "'")),
     ", speed.method = ", paste0("c('", speed.method, "')"),
