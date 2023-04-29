@@ -36,8 +36,6 @@ jobs:
     steps:
 
       - uses: actions/checkout@v3
-        with:
-          before_install: export DISPLAY=:99.0
 
       - uses: r-lib/actions/setup-pandoc@v2
 
@@ -51,6 +49,7 @@ jobs:
         with:
           cashe-version: 1
           extra-packages: any::rcmdcheck
+          dependencies: '"hard"'
           needs: check
 
       - uses: r-lib/actions/check-r-package@v2
