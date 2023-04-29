@@ -49,7 +49,7 @@ jobs:
         with:
           cashe-version: 1
           dependencies: '"hard"'
-          extra-packages: any::rcmdcheck, testthat
+          extra-packages: any::rcmdcheck, any::testthat
           needs: check
 
       - uses: r-lib/actions/check-r-package@v2
