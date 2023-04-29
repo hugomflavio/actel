@@ -48,8 +48,8 @@ jobs:
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
           cashe-version: 1
-          extra-packages: any::rcmdcheck
           dependencies: '"hard"'
+          extra-packages: any::rcmdcheck, testthat
           needs: check
 
       - uses: r-lib/actions/check-r-package@v2
