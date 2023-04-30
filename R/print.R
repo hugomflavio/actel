@@ -725,10 +725,10 @@ printIndividuals <- function(detections.list, movements, valid.movements, spatia
       individual.plots <<- paste0(individual.plots, "![](", tempdir(), "/actel_report_auxiliary_files/", tag, ".", extension, "){ width=", the.width * 10, "% }")
     }
     if (interactive())
-      setTxtProgressBar(pb, counter)
+      setTxtProgressBar(pb, counter) # nocov
   })
   if (interactive())
-    close(pb)
+    close(pb) # nocov
 
   appendTo("debug", "Finished printIndividuals")
 

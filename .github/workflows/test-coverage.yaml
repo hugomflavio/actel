@@ -24,7 +24,7 @@ jobs:
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
           dependencies: '"hard"'
-          extra-packages: any::covr, any::testthat
+          extra-packages: any::covr, any::testthat, any::terra, any::sp, any::raster
           needs: coverage
 
       - name: Test coverage

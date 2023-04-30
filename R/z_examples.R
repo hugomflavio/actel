@@ -13,10 +13,10 @@
 #'
 #' @export
 #'
-createWorkspace <- function(dir, force = FALSE) {
+createWorkspace <- function(dir, force = FALSE) { # nocov start
   .Deprecated("blankWorkspace")
   blankWorkspace(dir = dir, force = force)
-}
+} # nocov end
 
 #' Create a Blank Workspace
 #'
@@ -39,7 +39,7 @@ createWorkspace <- function(dir, force = FALSE) {
 #'
 blankWorkspace <- function(dir, force = FALSE) {
   if (missing(dir))
-    stop("Please specify a target directory", call. = FALSE)
+    stop("Please specify a target directory.", call. = FALSE)
 
   if (!dir.exists(dir)) {
     dir.create(dir)
