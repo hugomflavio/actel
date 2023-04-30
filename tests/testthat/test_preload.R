@@ -288,12 +288,14 @@ test_that("preload does not flop if timestamps and/or codespaces are not charact
 })
 
 test_that("preload works even if Sensor.Value/Sensor.Unit is missing", {
-	xdetections <- detections[-c("Sensor.Value"), ]
+	xdetections <- detections
+	xdetections$Sensor.Value <- NULL
 	expect_warning(preload(biometrics = bio, deployments = deployments, spatial = spatial, detections = xdetections,
 															dot = dot, tz = "Europe/Copenhagen"),
 		"Could not find a 'Sensor.Value' column in the detections. Filling one with NA.", fixed = TRUE)
 
-	xdetections <- detections[-c("Sensor.Unit"), ]
+	xdetections <- detections
+	xdetections$Sensor.Unit <- NULL
 	expect_warning(preload(biometrics = bio, deployments = deployments, spatial = spatial, detections = xdetections,
 															dot = dot, tz = "Europe/Copenhagen"),
 		"Could not find a 'Sensor.Unit' column in the detections. Filling one with NA.", fixed = TRUE)
