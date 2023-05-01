@@ -18,7 +18,7 @@ spatial <- loadSpatial()
 file.remove("spatial.csv")
 
 fakedot <- paste(unique(spatial$Array[spatial$Type == "Hydrophone"]), collapse = "--")
-recipient <- loadDot(string = fakedot, spatial = spatial, disregard.parallels = disregard.parallels)
+recipient <- loadDot(string = fakedot, spatial = spatial, disregard.parallels = TRUE)
 dot <- recipient$dot
 arrays <- recipient$arrays
 dotmat <- recipient$dotmat
