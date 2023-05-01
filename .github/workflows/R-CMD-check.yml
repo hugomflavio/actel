@@ -49,7 +49,7 @@ jobs:
         with:
           cashe-version: 1
           dependencies: '"hard"'
-          extra-packages: any::rcmdcheck, any::testthat
+          extra-packages: any::covr, any::testthat, any::terra, any::sp, any::raster, any::gdistance
           needs: check
 
       - name: Install system dependencies on macOS
