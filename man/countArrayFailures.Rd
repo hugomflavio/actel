@@ -10,8 +10,6 @@ countArrayFailures(moves, paths, dotmat)
 \item{moves}{the valid array movements}
 
 \item{paths}{a list containing the shortest paths between arrays with distance > 1}
-
-\item{dotmat}{A dot distance matrix}
 }
 \value{
 NULL if no arrays failed, or a list containing information on the arrays that failed

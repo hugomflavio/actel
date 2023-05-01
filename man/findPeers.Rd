@@ -4,12 +4,19 @@
 \alias{findPeers}
 \title{Find efficiency peers for each array}
 \usage{
-findPeers(input, dotmat, type = c("before", "after"), disregard.parallels)
+findPeers(
+  array,
+  array.list,
+  peer.direction = c("before", "after"),
+  disregard.parallels
+)
 }
 \arguments{
-\item{input}{An array list}
+\item{array}{The array for which to find peers}
 
-\item{type}{The type of peers to be found ("before" or "after")}
+\item{array.list}{An array list}
+
+\item{peer.direction}{The direction of peers to be found ("before" or "after")}
 }
 \value{
 The array list with efficiency peers.

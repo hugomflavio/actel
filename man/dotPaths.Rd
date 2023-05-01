@@ -4,12 +4,10 @@
 \alias{dotPaths}
 \title{Find arrays valid for efficiency calculation}
 \usage{
-dotPaths(input, dotmat, disregard.parallels)
+dotPaths(input, disregard.parallels)
 }
 \arguments{
 \item{input}{A dot list}
-
-\item{dotmat}{A dot distance matrix}
 
 \item{disregard.parallels}{Logical:  Should the presence of parallel arrays
 invalidate potential efficiency peers? See the vignettes for more details.}

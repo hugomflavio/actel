@@ -4,12 +4,14 @@
 \alias{findDirectChains}
 \title{Find all arrays linked to an array in a given direction}
 \usage{
-findDirectChains(input, dotmat, type = c("before", "after"))
+findDirectChains(array, array.list, direction = c("before", "after"))
 }
 \arguments{
-\item{input}{An array list}
+\item{array}{The array for which to find peers}
 
-\item{type}{The direction in which to expand the chain ("before" or "after")}
+\item{array.list}{An array list}
+
+\item{direction}{The direction in which to expand the chain ("before" or "after")}
 }
 \value{
 The array list with all linked arrays.

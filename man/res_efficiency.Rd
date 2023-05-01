@@ -14,8 +14,6 @@ res_efficiency(arrmoves, bio, spatial, arrays, paths, dotmat)
 \item{arrays}{a list containing information for each array}
 
 \item{paths}{a list containing the shortest paths between arrays with distance > 1}
-
-\item{dotmat}{A dot distance matrix}
 }
 \value{
 A list containing:

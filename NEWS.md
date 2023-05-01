@@ -5,6 +5,7 @@ Find out the main highlights of each update.
 ## Development
 
 Fixes:
+  * Fix actel missing some efficiency peers as per issue [#72](https://github.com/hugomflavio/actel/issues/72).
   * Fix comments not being appended to status.df in the residency() analysis.
   * Fix minor bug where comments could not be saved after interacting with the graphical interface.
   * Prevent crash in migration if an array has 0 efficiency and there are no arrays coming before it.

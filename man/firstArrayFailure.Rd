@@ -16,8 +16,6 @@ firstArrayFailure(tag, bio, spatial, first.array, paths, dotmat)
 \item{first.array}{The array of the first valid movement}
 
 \item{paths}{a list containing the shortest paths between arrays with distance > 1}
-
-\item{dotmat}{A dot distance matrix}
 }
 \value{
 NULL if no arrays failed, or a list of arrays that failed.

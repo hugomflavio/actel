@@ -544,7 +544,7 @@ findPeers <- function(array, array.list, peer.direction = c("before", "after"), 
 
 #' Find all arrays linked to an array in a given direction
 #'
-#' @inheritparams findPeers
+#' @inheritParams findPeers
 #' @param direction The direction in which to expand the chain ("before" or "after")
 #'
 #' @return The array list with all linked arrays.
