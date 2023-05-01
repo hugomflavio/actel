@@ -325,8 +325,13 @@ test_that("loadDot handles parallel arrays properly", {
 	cat("A1--A3--A4\n")
 	cat("A2--A3--A2\n")
 	sink()
+
 	output <- loadDot(input = "spatial.txt", spatial = example.spatial,
 		disregard.parallels = TRUE)	
+
+	output2 <- loadDot(input = "spatial.txt", spatial = example.spatial,
+		disregard.parallels = FALSE)	
+
 	file.remove("spatial.txt")
 
 	expect_equal(names(output), c("dot", "arrays", "dotmat", "paths"))
@@ -339,10 +344,27 @@ test_that("loadDot handles parallel arrays properly", {
 	expect_equal(output$arrays$A2$parallel, "A3")
 	expect_equal(output$arrays$A1$parallel, NULL)
 
-	# check peers
-	expect_equal(output$arrays$A2$after.peers, NULL)
-	expect_equal(output$arrays$A3$after.peers, NULL)		
-	expect_equal(output$arrays$A1$after.peers, c('A2', 'A3', 'A4', 'A5', 'A6', 'A7', 'A8', 'A9'))
+	# check peers with disregard.parallels = TRUE
+	expect_equal(output$arrays$A0$after.peers, paste0("A", 1:9))
+	expect_equal(output$arrays$A2$after.peers, paste0("A", 4:9))
+	expect_equal(output$arrays$A3$after.peers, paste0("A", 4:9))
+	expect_equal(output$arrays$A5$after.peers, paste0("A", 6:9))
+
+	expect_equal(output$arrays$A0$before.peers, NULL)
+	expect_equal(output$arrays$A2$before.peers, paste0("A", 1:0))
+	expect_equal(output$arrays$A3$before.peers, paste0("A", 1:0))
+	expect_equal(output$arrays$A5$before.peers, paste0("A", c(4, 2, 3, 1, 0)))
+
+	# check peers with disregard.parallels = TRUE
+	expect_equal(output2$arrays$A0$after.peers, paste0("A", 1:9))
+	expect_equal(output2$arrays$A2$after.peers, NULL)
+	expect_equal(output2$arrays$A3$after.peers, NULL)
+	expect_equal(output2$arrays$A5$after.peers, paste0("A", 6:9))
+
+	expect_equal(output2$arrays$A0$before.peers, NULL)
+	expect_equal(output2$arrays$A2$before.peers, NULL)
+	expect_equal(output2$arrays$A3$before.peers, NULL)
+	expect_equal(output2$arrays$A5$before.peers, paste0("A", c(4, 2, 3, 1, 0)))
 })
 
 
@@ -374,9 +396,10 @@ River5 -- River6
 River6 -- River5
 River6 -- River3
 River3 -- River6")
+	
 	mat <- dotMatrix(input = dot)
 	arrays <- dotList(input = dot, spatial = xspatial)
-	arrays <- dotPaths(input = arrays, dotmat = mat, disregard.parallels = TRUE)
+	arrays <- dotPaths(input = arrays, disregard.parallels = TRUE)
 	# ONLY RUN THIS TO RESET REFERENCE
 	# aux_dotPaths_complex_text_disregard_parallels_true <- arrays
 	# save(aux_dotPaths_complex_text_disregard_parallels_true, file = paste0(tests.home, "/aux_dotPaths_complex_text_disregard_parallels_true.RData"))
@@ -384,7 +407,7 @@ River3 -- River6")
 	expect_equal(arrays, aux_dotPaths_complex_text_disregard_parallels_true)
 
 	arrays <- dotList(input = dot, spatial = xspatial)
-	arrays <- dotPaths(input = arrays, dotmat = mat, disregard.parallels = FALSE)
+	arrays <- dotPaths(input = arrays, disregard.parallels = FALSE)
 	# ONLY RUN THIS TO RESET REFERENCE
 	# aux_dotPaths_complex_text_disregard_parallels_false <- arrays
 	# save(aux_dotPaths_complex_text_disregard_parallels_false, file = paste0(tests.home, "/aux_dotPaths_complex_text_disregard_parallels_false.RData"))

@@ -203,7 +203,7 @@ loadDot <- function(string = NULL, input = NULL, spatial, disregard.parallels, p
     }
   }
   arrays <- dotList(input = dot, spatial = spatial)
-  arrays <- dotPaths(input = arrays, dotmat = mat, disregard.parallels = disregard.parallels)
+  arrays <- dotPaths(input = arrays, disregard.parallels = disregard.parallels)
   shortest.paths <- findShortestChains(input = arrays)
   return(list(dot = dot, arrays = arrays, dotmat = mat, paths = shortest.paths))
 }
@@ -359,6 +359,8 @@ dotMatrix <- function(input) {
 #'
 dotList <- function(input, spatial) {
   appendTo("debug", "Running dotList.")
+
+  # if there are sections, determine which connections are at the edge between sections
   if (any(grepl("^Section$", colnames(spatial)))) {
     sections <- levels(spatial$Section)
     input$SectionA <- rep(NA_character_, nrow(input))
@@ -372,7 +374,7 @@ dotList <- function(input, spatial) {
   }
 
   arrays <- list()
-  for (a in unique(c(t(input[, c(1, 3)])))) {
+  for (a in unique(c(t(input[, c(1, 3)])))) { # go through each unique array
     auxA <- input[input$A == a, ]
     auxA <- auxA[auxA$to != "<-", ]
     auxB <- input[input$B == a, ]
@@ -401,119 +403,172 @@ dotList <- function(input, spatial) {
 #' Find arrays valid for efficiency calculation
 #'
 #' @param input A dot list
-#' @param dotmat A dot distance matrix
 #' @inheritParams migration
 #'
 #' @return A list of the all array paths between each pair of arrays.
 #'
 #' @keywords internal
 #'
-dotPaths <- function(input, dotmat, disregard.parallels) {
+dotPaths <- function(input, disregard.parallels) {
   appendTo("debug", "Running dotPaths.")
-  recipient <- findPeers(input = input, dotmat = dotmat, type = "before", disregard.parallels = disregard.parallels)
-  recipient <- findDirectChains(input = recipient, dotmat = dotmat,  type = "before")
-  recipient <- findPeers(input = recipient, dotmat = dotmat,  type = "after", disregard.parallels = disregard.parallels)
-  recipient <- findDirectChains(input = recipient, dotmat = dotmat,  type = "after")
-  return(recipient)
+
+  for (direction in (c("before", "after"))) {
+    capture <- lapply(names(input), function(a) {
+      input[[a]][[paste0(direction, ".peers")]] <<- findPeers(array = a, array.list = input, peer.direction = direction, disregard.parallels = disregard.parallels)
+      recipient <- findDirectChains(array = a, array.list = input, direction = direction)
+      input[[a]][[paste0("all.", direction)]] <<- recipient[[1]]
+      input[[a]][[paste0("all.", direction, ".and.par")]] <<- recipient[[2]]
+    })
+  }
+
+  return(input)
 }
 
 #' Find efficiency peers for each array
 #'
-#' @param input An array list
-#' @param type The type of peers to be found ("before" or "after")
+#' @param array The array for which to find peers
+#' @param array.list An array list
+#' @param peer.direction The direction of peers to be found ("before" or "after")
 #'
 #' @return The array list with efficiency peers.
 #'
 #' @keywords internal
 #'
-findPeers <- function(input, dotmat, type = c("before", "after"), disregard.parallels) {
-  type <- match.arg(type)
-  opposite <- ifelse(type == "before", "after", "before")
-  for (a in names(input)) {
-    peers <- NULL
-    to.check <- input[[a]][[type]]
-    while (!is.null(to.check)) {
-      new.check <- NULL
-      for (b in to.check) {
-        # IF A and B are adjacent
-        if (dotmat[a, b] == 1) {
-          # IF there are no third-party paths leading to B
-          if (length(input[[b]][[opposite]]) == 1) {
-            # IF B has no parallels or parallels are being discarded
-            if (is.null(input[[b]]$parallel) || disregard.parallels) {
-              if (is.null(peers) || all(!grepl(paste0("^", b, "$"), peers))) {
-                peers <- c(peers, b)
-                new.check <- c(new.check, input[[b]][[type]])
-              }
-            # IF B has parallels
-            } else {
-              # Find out which arrays lead to the parallels
-              leading.to.parallels <- unique(unlist(sapply(input[[b]]$parallel, function(x) input[[x]][[opposite]])))
-              # as this is a distance 1 case, verify that only array A leads to the parallels.
-              if (all(!is.na(match(leading.to.parallels, a)))) {
-                peers <- c(peers, b)
-                new.check <- c(new.check, input[[b]][[type]])
-              }
-            }
-          }
-        }
-        # If B is far away, check that the paths leading to B are in the valid peers list
-        if (dotmat[a, b] > 1 && all(!is.na(match(input[[b]][[opposite]], peers)))) {
-          # IF B has no parallel arrays, or disregard parallels is set to TRUE
-          if (is.null(input[[b]]$parallel) || disregard.parallels) {
-            if (is.null(peers) || all(!grepl(paste0("^", b, "$"), peers))) {
-              peers <- c(peers, b)
-              new.check <- c(new.check, input[[b]][[type]])
-            }
-            # IF B has paralles
+findPeers <- function(array, array.list, peer.direction = c("before", "after"), disregard.parallels) {
+  peer.direction <- match.arg(peer.direction)
+  opposite.direction <- ifelse(peer.direction == "before", "after", "before")
+
+  if (length(array) > 1)
+    stopAndReport("'array' must be of length 1. This error should never happen. Contact developer.") # nocov
+
+  if (!(array %in% names(array.list)))
+    stopAndReport("Requested array does not exist in the array list (findPeers). This error should never happen. Contact developer.") # nocov
+
+    usable.peers <- c() # start with nothing
+    check.results <- c(TRUE, FALSE) # placeholder just to trigger the start of the while loop
+    # round <- 0 # debug counter
+
+    # cat("Array", array, "-", peer.direction, "peers\n") # debug and testing
+    
+    while (any(check.results) & !all(check.results)) {
+        # round <- round + 1 # debug counter
+        # cat("Round", round, "\n") # debug and testing
+
+        # Check every array that is not the one we're examining and that has not been deemed a peer yet.
+        to.check <- names(array.list)[!(names(array.list) %in% c(array, usable.peers))]
+        # cat("Checking:", to.check, "\n") # debug and testing
+                        
+        check.results <- sapply(to.check, function(x) {
+          # only relevant to test if array x is a valid peer if it connects with anything in the opposite direction.
+          # e.g. if I have A -- B -- C, A cannot be the "after" peer of anyone, because nothing comes "before" it.
+          no.connections <- length(array.list[[x]][[opposite.direction]]) == 0
+
+          if (no.connections)
+            return(FALSE) # not worth continuing
+
+          # There are two types of parallels that can cause trouble:
+          # 1) parallels in the array for which we are determining peers (object "array")
+          # 2) parallels in the array we're trying to determine as a valid peer (object "x")
+          # 
+          # Type 1 is only an issue if we want to ignore parallel arrays (i.e. disregard.parallels = TRUE) and
+          # the array "array" is right next to the array "x". That will affect the first two components of the check:
+          if (disregard.parallels & array %in% array.list[[x]][[opposite.direction]]) {
+            # For array x to be a valid peer of the array we're determining peers for (object "array"), 
+            # the max number of connections to array x can only be the sum of the peers we already know 
+            # about, the array "array", and any parallels of the array "array".
+            too.many.connections <- length(array.list[[x]][[opposite.direction]]) > sum(length(usable.peers), length(array.list[[array]]$parallel), 1)
+            # Additionally, all the connections to array x must be either the array "array", a parallel
+            # of the array "array" that shares all connections with array "array", or an array that has 
+            # already been determined as a valid peer.
+            valid.parallels <- sapply(array.list[[array]]$parallel, function(parallel) {
+              all(array.list[[parallel]][[opposite.direction]] %in% array.list[[array]][[opposite.direction]])
+            })
+            all.connections.are.valid.peers <- all(array.list[[x]][[opposite.direction]] %in% c(array, names(valid.parallels)[valid.parallels], usable.peers))
           } else {
-            # Find out which arrays lead to the parallels
-            leading.to.parallels <- unique(unlist(sapply(input[[b]]$parallel, function(x) input[[x]][[opposite]])))
-            # as this is a distance >1 case, verify that all arrays leading to the parallels are contained in the peers
-            if (all(!is.na(match(leading.to.parallels, peers)))) {
-              peers <- c(peers, b)
-              new.check <- c(new.check, input[[b]][[type]])
-            }
+            # In a situation where either disregard.parallels = FALSE, or the array we're determining
+            # peers for (object "array") is not directly next to the array we are currently analysing
+            # (object "x"), then the nax number of connections to array x can only be the sum of the
+            # peers we already know about plus the array "array".
+            too.many.connections <- length(array.list[[x]][[opposite.direction]]) > sum(length(usable.peers), 1)
+            # Additionally, all the connections to array x must be either the array "array", or an 
+            # array that has already been determined as a valid peer. Note that parallels are not allowed here,
+            # even if disregard.parallels = TRUE. If this ever becomes a point of confusion, find the
+            # drawings in issue #72.
+            all.connections.are.valid.peers <- all(array.list[[x]][[opposite.direction]] %in% c(array, usable.peers))
           }
+
+          if (too.many.connections | !all.connections.are.valid.peers)
+            return(FALSE) # not worth continuing
+
+          # Type 2 is only relevant if disregard.parallels = FALSE. Here, we have to confirm if the
+          # arrays that are parallel to array "x" do not have any third-party connections that are not,
+          # in themselves, a valid peer of array "array". E.g. if we have:
+          # A -- B -- C -- D
+          # B -- E -- D
+          # C -- E -- C
+          # F -- E
+          # E.g. if array "array" is B, in the two checks above, array C will emerge as a potential peer
+          # for B. If we disregard parallels, than that is indeed the case. However, if we do not disregard
+          # parallels, then array E (a parallel of C) will cause array C to be invalidated, due to the 
+          # connection coming from array F. This wouldn't had been a problem if F were a valid peer 
+          # of "B" (e.g. if B -- F).
+          if (disregard.parallels) {
+            parallels.are.not.an.issue <- TRUE
+          } else {
+            # So, if disregard.parallels = FALSE, and array x has parallels, we 
+            # need to go find which arrays lead to the parallels of array x
+            leading.to.parallels <- unique(unlist(sapply(array.list[[x]]$parallel, function(parallel) array.list[[parallel]][[opposite.direction]])))
+            # Finally, we verify that only valid peers of array "array" lead to the parallels listed above.
+            parallels.are.not.an.issue <- all(leading.to.parallels %in% c(array, usable.peers))
+          }
+
+          # final decision
+          if (parallels.are.not.an.issue)
+            return(TRUE) # array "x" is a valid peer of array "array"
+          else
+            return(FALSE) # array "x" is _not_ a valid peer of array "array" (yet)
+        })
+
+        # cat("Check results:", check.results, "\n") # debug and testing
+
+        # store the new peers together with the rest, and restart the loop.
+        # loop will stop once no new peers are found.
+        if (any(check.results)) {
+          usable.peers <- c(usable.peers, to.check[check.results])
         }
-      }
-      to.check <- unique(new.check)
+        # cat("Usable peers at end of round:", usable.peers, "\n") # debug and testing
     }
-    input[[a]][[paste0(type, ".peers")]] <- unique(peers)
-  }
-  return(input)
+    # cat("-----------------------\n") # debug and testing
+    return(usable.peers)
 }
 
 #' Find all arrays linked to an array in a given direction
 #'
-#' @param input An array list
-#' @param type The direction in which to expand the chain ("before" or "after")
+#' @inheritparams findPeers
+#' @param direction The direction in which to expand the chain ("before" or "after")
 #'
 #' @return The array list with all linked arrays.
 #'
 #' @keywords internal
 #'
-findDirectChains <- function(input, dotmat, type = c("before", "after")) {
-  type <- match.arg(type)
-  for(a in names(input)) {
-    chain <- NULL
-    parallel.aux <- input[[a]]$parallel
-    to.check <- input[[a]][[type]]
-    while (!is.null(to.check)) {
-      new.check <- NULL
-      for (b in to.check) {
-          if (is.null(chain) || all(!grepl(paste0("^", b, "$"), chain))) {
-            chain <- c(chain, b)
-            parallel.aux <- c(parallel.aux, input[[b]]$parallel)
-            new.check <- c(new.check, input[[b]][[type]])
-          }
-        to.check <- unique(new.check)
-      }
+findDirectChains <- function(array, array.list, direction = c("before", "after")) {
+  direction <- match.arg(direction)
+  chain <- NULL
+  parallel.aux <- array.list[[array]]$parallel
+  to.check <- array.list[[array]][[direction]]
+  while (!is.null(to.check)) {
+    new.check <- NULL
+    for (b in to.check) {
+        if (is.null(chain) || all(!grepl(paste0("^", b, "$"), chain))) {
+          chain <- c(chain, b)
+          parallel.aux <- c(parallel.aux, array.list[[b]]$parallel)
+          new.check <- c(new.check, array.list[[b]][[direction]])
+        }
+      to.check <- unique(new.check)
     }
-    input[[a]][[paste0("all.", type)]] <- unique(chain)
-    input[[a]][[paste0("all.", type, ".and.par")]] <- unique(c(chain, parallel.aux))
   }
-  return(input)
+  output <- list(chain = unique(chain), unique(c(chain, parallel.aux)))
+  return(output)
 }
 
 #' Find the shortest paths between arrays
