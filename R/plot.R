@@ -1301,11 +1301,11 @@ plotTimes <- function(times, night = NULL, col, alpha = 0.8, title = "", mean.da
     if (missing(ylegend)) {
       if (ncol > 1)
         warning("Plotting the legend in the corner but ncol > 1. This will likely lead to bad results.", immediate. = TRUE, call. = FALSE)
-      if (roundUp(length(times)/ ncol, 1) > 2) {
+      if (ceiling(length(times)/ ncol) > 2) {
         if (!missing(file) && (grepl(".png$", file) | grepl(".tiff", file)))
-          ylegend <- -0.97 + (0.06 * (roundUp(length(times) / ncol, 1) - 2))
+          ylegend <- -0.97 + (0.06 * (ceiling(length(times) / ncol) - 2))
         if (missing(file) || (grepl(".svg$", file) | grepl(".pdf", file)))
-          ylegend <- -0.97 + (0.08 * (roundUp(length(times) / ncol, 1) - 2))
+          ylegend <- -0.97 + (0.08 * (ceiling(length(times) / ncol) - 2))
       } else {
         ylegend <- -0.97      
       }
@@ -1342,7 +1342,7 @@ plotTimes <- function(times, night = NULL, col, alpha = 0.8, title = "", mean.da
       xlegend <- 1.3
   }
 
-  prop <- roundDown(1 / max(unlist(lapply(times, function(x) table(roundUp(x, to = 1)) / sum(!is.na(x))))), to = 1)
+  prop <- floor(1 / max(unlist(lapply(times, function(x) table(ceiling(x)) / sum(!is.na(x))))))
 
   if (!missing(file))
     area.prop <- width/height
@@ -1352,7 +1352,7 @@ plotTimes <- function(times, night = NULL, col, alpha = 0.8, title = "", mean.da
   if (legend.pos == "corner")
     b <- 1
   else
-    b <- (roundUp(length(times) / ncol, 1))
+    b <- (ceiling(length(times) / ncol))
 
   vertical.mar <- b + 2
   horizontal.mar <- vertical.mar * area.prop

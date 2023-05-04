@@ -78,15 +78,6 @@ test_that("combine works as expected.", {
 	expect_equal(combine(list(A = c(NA, 1, NA), B = c(2, NA, 2))), c(2, 1, 2))
 })
 
-test_that("roundUp works as expected.", {
-	expect_equal(roundUp(153), 160)
-	expect_equal(roundUp(15.3, to = 1), 16)
-	expect_equal(roundUp(15.3, to = 2), 16)
-	expect_equal(roundUp(14.2, to = 1), 15)
-	expect_equal(roundUp(14.1, to = 2), 16)
-	expect_equal(roundUp(list(A = 1:5, B = 10.3:13.3), to = 1), list(A = 1:5, B = 11:14))
-})
-
 test_that("appendTo stores comments.", {
 	appendTo("Comment", "test comment", "Test tag")
 	expect_true(file.exists("temp_comments.txt"))

@@ -431,40 +431,6 @@ combine <- function(input) {
   return(output)
 }
 
-#' Forcefully round a number up
-#'
-#' Forces the rounding of the input to the next higher rounded value.
-#'
-#' @param input The value to be rounded.
-#' @param to The level of rounding to be applied (i.e. to=10 will round 14.2 to 20; to=1 will round i to 15).
-#'
-#' @return A numeric value or string.
-#'
-#' @keywords internal
-#'
-roundUp <- function(input, to = 10) {
-  if (inherits(input, "list"))
-    lapply(input, function(input) to * (input %/% to + as.logical(input %% to)))
-  else
-    to * (input %/% to + as.logical(input %% to))
-}
-
-#' Forcefully round a number down
-#'
-#' Forces the rounding of the input to the next lower rounded value.
-#'
-#' @param input The value to be rounded.
-#' @param to The level of rounding to be applied (i.e. to=10 will round 14.8 to 10; to=1 will round i to 14).
-#'
-#' @return A numeric value or string.
-#'
-#' @keywords internal
-#'
-roundDown <- function(input, to = 10) {
-  to * (input%/%to)
-}
-
-
 #' Append to ...
 #'
 #' Appends a note/comment to the specified recipient, which in turn corresponds to a temporary helper file.

@@ -809,12 +809,12 @@ printCircular <- function(times, bio, suffix = NULL){
       ncol <- 1
     }
 
-    prop <- roundDown(1 / max(unlist(lapply(trim.times, function(x) table(roundUp(x, to = 1)) / sum(!is.na(x))))), to = 1)
+    prop <- floor(1 / max(unlist(lapply(trim.times, function(x) table(ceiling(x)) / sum(!is.na(x))))))
 
     if (legend.pos == "corner")
       b <- 1
     else
-      b <- (roundUp(length(colours.to.use) / ncol, 1))
+      b <- (ceiling(length(colours.to.use) / ncol))
 
     vertical.mar <- b + 2
    

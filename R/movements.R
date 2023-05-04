@@ -28,7 +28,7 @@ NULL
 groupMovements <- function(detections.list, bio, spatial, speed.method, max.interval, tz, dist.mat) {
   appendTo("debug", "Running groupMovements.")
   trigger.unknown <- FALSE
-  round.points <- roundDown(seq(from = length(detections.list)/10, to = length(detections.list), length.out = 10), to = 1)
+  round.points <- floor(seq(from = length(detections.list)/10, to = length(detections.list), length.out = 10))
   counter <- 1
   {
     if (interactive())
