@@ -796,17 +796,18 @@ printCircular <- function(times, bio, suffix = NULL){
       ylegend <- -1.15
       xlegend <- 0
       xjust <- 0.5
+      number.of.columns <- 1
       if (length(colours.to.use) > 2)
-        ncol <- 2
+        number.of.columns <- 2
       if (length(colours.to.use) > 6)
-        ncol <- 3
+        number.of.columns <- 3
       if (length(colours.to.use) > 9 & !any(nchar(names(colours.to.use)) > 9))
-        ncol <- 4
+        number.of.columns <- 4
     } else {
       ylegend <- -0.97 + (0.08 * (length(colours.to.use) - 2))
       xlegend <- -1.3
       xjust <- 0
-      ncol <- 1
+      number.of.columns <- 1
     }
 
     prop <- floor(1 / max(unlist(lapply(trim.times, function(x) table(ceiling(x)) / sum(!is.na(x))))))
@@ -814,7 +815,7 @@ printCircular <- function(times, bio, suffix = NULL){
     if (legend.pos == "corner")
       b <- 1
     else
-      b <- (ceiling(length(colours.to.use) / ncol))
+      b <- (ceiling(length(colours.to.use) / number.of.columns))
 
     vertical.mar <- b + 2
    
@@ -838,7 +839,7 @@ printCircular <- function(times, bio, suffix = NULL){
         ringsRel(plot.params = params, border = "black", ring.text = TRUE,
           ring.text.pos = 0.07, rings.lty = "f5", ring.text.cex = 0.8)
 
-        legend(x = xlegend, y = ylegend, xjust = xjust, ncol = ncol,
+        legend(x = xlegend, y = ylegend, xjust = xjust, ncol = number.of.columns,
           legend = paste(names(trim.times), " (", unlist(lapply(trim.times, function(x) sum(!is.na(x)))), ")", sep =""),
           fill = params$col, bty = "n", x.intersp = 0.3, cex = 0.8)
 
