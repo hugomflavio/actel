@@ -1462,7 +1462,7 @@ printLastSection <- function(input, spatial) {
   p <- p + ggplot2::labs(x = "", y = "n")
   p <- p + ggplot2::scale_y_continuous(expand = c(0, 0, 0.05, 0))
   p <- p + ggplot2::facet_wrap(. ~ Group, ncol = number.of.columns)
-  p <- p + ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 90, vjust = 0.5, hjust=1))
+  p <- p + ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 90, vjust = 0.5, hjust = 1))
   
   ggplot2::ggsave(paste0(tempdir(), "/actel_report_auxiliary_files/last_section.png"), units = "px", width = 1800, height = ceiling(the.height), limitsize = FALSE)
 
