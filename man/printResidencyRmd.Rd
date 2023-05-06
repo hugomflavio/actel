@@ -19,7 +19,6 @@ printResidencyRmd(
   detections,
   valid.detections,
   last.seen,
-  last.seen.graph.size,
   detections.y.axis
 )
 }
