@@ -1649,8 +1649,10 @@ splitDetections <- function(detections, bio, exclude.tags = NULL) {
 
   trimmed_list_names <- c() # to store the names as the lapply goes
 
+  appendTo("Screen", "M: Extracting relevant detections...")
+
   trimmed_list <- lapply(1:nrow(bio_aux), function(i) {
-    # cat(i, "\n")
+    # cat(i, "\r")
     
     # create/reset variable to store the codespace
     the_codespace <- c()
@@ -1714,15 +1716,23 @@ splitDetections <- function(detections, bio, exclude.tags = NULL) {
   trimmed_list <- trimmed_list[!sapply(trimmed_list, is.null)]
   names(trimmed_list) <- trimmed_list_names
 
+  appendTo("debug", "Debug: Creating transmitter codes.")
+
+  # store output of extractSignals before running sapply loop
+  # to massively save on processing time.
+  trimmed_list_signals <- extractSignals(names(trimmed_list))
+
   # Extract transmitter names (to store in bio)
   transmitter_names <- sapply(1:nrow(bio), function(i) {
+    # cat(i, "\r")
+
     the_signal <- bio$Signal[i]
     the_codespace <- bio$Code.space[i] # returns NULL if column is missing
 
     lowest_signal <- min(as.numeric(unlist(strsplit(as.character(the_signal), "|", fixed = TRUE))))
 
     if (is.null(the_codespace)) {
-      link <- match(lowest_signal, extractSignals(names(trimmed_list))) # locations of the lowest_signal in the detected signals
+      link <- match(lowest_signal, trimmed_list_signals) # locations of the lowest_signal in the detected signals
       if (is.na(link))
         output <- paste0('Unknown-', lowest_signal)
       else
@@ -1741,6 +1751,8 @@ splitDetections <- function(detections, bio, exclude.tags = NULL) {
 
   # Transfer transmitter names to bio
   bio$Transmitter <- transmitter_names
+
+  appendTo("debug", "Debug: Collecting stray information.")
 
   # Collect stray summary
   valid_tags <- as.character(unlist(lapply(trimmed_list, function(x) unique(x$Transmitter))))
