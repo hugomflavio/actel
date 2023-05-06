@@ -330,7 +330,7 @@ checkDupDetections <- function(input) {
   if (any(dups)) {
     appendTo(c("Screen", "Report", "Warning"), paste0(sum(dups), " duplicated detection", ifelse(sum(dups) == 1, " was", "s were"), " found. Could an input file be duplicated?"))
     message("")
-    message("Screen", "Possible options:\n   a) Stop and double-check the data\n   b) Remove duplicated detections\n   c) Continue without changes\n   d) Save duplicated detections to a file and re-open dialogue.")
+    message("Possible options:\n   a) Stop and double-check the data\n   b) Remove duplicated detections\n   c) Continue without changes\n   d) Save duplicated detections to a file and re-open dialogue.")
     message("")
     restart <- TRUE
     while (restart) {
