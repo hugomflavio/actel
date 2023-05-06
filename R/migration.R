@@ -642,8 +642,10 @@ migration <- function(
 # ------------
 
 # Print graphics
+  trigger.report.error.message <- TRUE
   if (report) {
     appendTo(c("Screen", "Report"), "M: Producing the report.")
+    on.exit({if (trigger.report.error.message) message("M: Producing the report failed. If you have saved a copy of the results, you can reload them using dataToList().")}, add = TRUE)
 
     if (dir.exists(paste0(tempdir(), "/actel_report_auxiliary_files")))
       unlink(paste0(tempdir(), "/actel_report_auxiliary_files"), recursive = TRUE)
@@ -706,12 +708,10 @@ migration <- function(
       sensor.plots <- NULL
     }
   }
-
-  appendTo("Report", "M: Process finished successfully.")
 # ---------------
 
 # wrap up the txt report
-  appendTo("Report", "\n-------------------")
+  appendTo("Report", "M: Analysis completed!\n\n-------------------")
   
   if (file.exists(paste(tempdir(), "temp_comments.txt", sep = "/")))
     appendTo("Report", paste0("User comments:\n-------------------\n", gsub("\t", ": ", gsub("\r", "", readr::read_file(paste(tempdir(), "temp_comments.txt", sep = "/")))), "-------------------")) # nocov
@@ -726,9 +726,7 @@ migration <- function(
 # ------------------
 
 # print html report
-  trigger.report.error.message <- TRUE
   if (report) {
-    on.exit({if (trigger.report.error.message) message("M: Producing the report failed. If you have saved a copy of the results, you can reload them using dataToList().")}, add = TRUE)
     if (file.exists(reportname <- "actel_migration_report.html")) {
       continue <- TRUE
       index <- 1
@@ -789,10 +787,6 @@ migration <- function(
     file.copy(paste(tempdir(), "temp_log.txt", sep = "/"), jobname)
   } # nocov end
 
-  appendTo("Screen", "M: Process finished successfully.")
-
-  finished.unexpectedly <- FALSE
-
   output <- list(detections = detections,
                  valid.detections = valid.detections,
                  spatial = spatial,
@@ -814,6 +808,9 @@ migration <- function(
 
   if (attributes(dist.mat)$valid)
     output$dist.mat <- dist.mat
+
+  appendTo("Screen", "M: Analysis completed!")
+  finished.unexpectedly <- FALSE
 
   return(output)
 }
