@@ -662,9 +662,6 @@ residency <- function(
     printLastSection(input = last.seen,
                      spatial = spatial)
 
-    if (nrow(last.seen) > 3)
-      last.seen.graph.size <- "width=90%" else last.seen.graph.size <- "height=4in"
-
     if (any(sapply(valid.detections, function(x) any(!is.na(x$Sensor.Value))))) {
       sensor.plots <- printSensorData(detections = valid.detections, 
                                       spatial = spatial,
@@ -728,7 +725,6 @@ residency <- function(
                       detections = detections,
                       valid.detections = valid.detections,
                       last.seen = last.seen,
-                      last.seen.graph.size = last.seen.graph.size,
                       detections.y.axis = detections.y.axis)
 
     appendTo("debug", "debug: Converting report to html")
@@ -818,7 +814,6 @@ printResidencyRmd <- function(
   detections,
   valid.detections,
   last.seen,
-  last.seen.graph.size,
   detections.y.axis)
 {
 
@@ -947,7 +942,7 @@ Note:
 ', paste(knitr::kable(last.seen), collapse = "\n"), '
 
 <center>
-![](', work.path, 'last_section.png){ ',last.seen.graph.size ,' }
+![](', work.path, 'last_section.png){width=90%}
 </center>
 
 
