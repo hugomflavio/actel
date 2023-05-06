@@ -1420,24 +1420,51 @@ printIndividualResidency <- function(ratios, global.ratios, spatial, rsp.info) {
 #'
 printLastSection <- function(input, spatial) {
   appendTo("debug", "Starting printLastSection")
-
   Section <- NULL
   n <- NULL
+
   cbPalette <- c("#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7", "#999999")
   names(cbPalette) <- c("Orange", "Blue", "Green", "Yellow", "Darkblue", "Darkorange", "Pink", "Grey")
+  
   input$Group <- rownames(input)
   plotdata <- suppressMessages(reshape2::melt(input))
   colnames(plotdata) <- c("Group", "Section", "n")
   plotdata$Section <- factor(gsub("Disap. in |Disap. at ", "", plotdata$Section), 
                              levels = c(names(spatial$array.order), "Release"))
+
+  if (length(levels(plotdata$Section)) < 5)
+    number.of.columns <- 4
+
+  if (length(levels(plotdata$Section)) >= 5)
+    number.of.columns <- 3
+
+  if (length(levels(plotdata$Section)) >= 10)
+    number.of.columns <- 2
+
+  if (length(levels(plotdata$Section)) >= 20)
+    number.of.columns <- 1
+
+  number.of.rows <- ceiling(length(unique(plotdata$Group)) / number.of.columns)
+
+  # 900px per row (300px per inch on my computer)
+  if (number.of.rows <= 2)
+    the.height <- 900 * number.of.rows
+  else
+    the.height <- 900 * log(number.of.rows, base = 1.5)
+
+  # 20 px per x-axis label character
+  longest.section.name <- max(nchar(as.character(plotdata$Section)))
+  the.height <- the.height + 20 * longest.section.name
+
   p <- ggplot2::ggplot(plotdata, ggplot2::aes(x = Section, y = n))
   p <- p + ggplot2::geom_bar(stat = "identity", fill = cbPalette[[2]], colour = "transparent")
-  p <- p + ggplot2::facet_grid(. ~ Group)
   p <- p + ggplot2::theme_bw()
   p <- p + ggplot2::labs(x = "", y = "n")
   p <- p + ggplot2::scale_y_continuous(expand = c(0, 0, 0.05, 0))
-  the.width <- max(2, (ncol(input) - 1) * nrow(input) * 0.7)
-  ggplot2::ggsave(paste0(tempdir(), "/actel_report_auxiliary_files/last_section.png"), width = the.width, height = 4, limitsize = FALSE)
+  p <- p + ggplot2::facet_wrap(. ~ Group, ncol = number.of.columns)
+  p <- p + ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 90, vjust = 0.5, hjust=1))
+  
+  ggplot2::ggsave(paste0(tempdir(), "/actel_report_auxiliary_files/last_section.png"), units = "px", width = 1800, height = ceiling(the.height), limitsize = FALSE)
 
   appendTo("debug", "Finished printLastSection")
 }

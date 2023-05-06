@@ -5,6 +5,7 @@ Find out the main highlights of each update.
 ## Development
 
 Fixes:
+  * Fix printLastSection crash for very large datasets.
   * Fix printCircular crash if there are six or more groups but only one is present at the array.
   * Fix actel missing some efficiency peers as per issue [#72](https://github.com/hugomflavio/actel/issues/72).
   * Fix comments not being appended to status.df in the residency() analysis.
