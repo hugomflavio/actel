@@ -5,17 +5,17 @@ Find out the main highlights of each update.
 ## Development
 
 Fixes:
-  * Fix printLastSection crash for very large datasets.
-  * Fix printCircular crash if there are six or more groups but only one is present at the array.
+  * Fix `printLastSection()` crash for very large datasets.
+  * Fix `printCircular()` crash if there are six or more groups but only one is present at the array.
   * Fix actel missing some efficiency peers as per issue [#72](https://github.com/hugomflavio/actel/issues/72).
-  * Fix comments not being appended to status.df in the residency() analysis.
+  * Fix comments not being appended to status.df in the `residency()` analysis.
   * Fix minor bug where comments could not be saved after interacting with the graphical interface.
-  * Prevent crash in migration if an array has 0 efficiency and there are no arrays coming before it.
+  * Prevent crash in `migration()` if an array has 0 efficiency and there are no arrays coming before it.
   * Prevent crash if the dot file/string line breaks are coded as `\r\n`.
   * Prevent crash while printing circular plots for the reports on Macs where the svg engines are not working.
-  * Prevent crash in residency() if one group has no valid detections at all.
-  * Fix bug in plotRatios() brought up in issue [#77](https://github.com/hugomflavio/actel/issues/77) which would occur when the user specified a section for which not all groups were detected.
-  * Prevent crashes in residency() when the data has an unusually high percentage of exact-time detections (e.g. midnight).
+  * Prevent crash in `residency()` if one group has no valid detections at all.
+  * Fix bug in `plotRatios()` brought up in issue [#77](https://github.com/hugomflavio/actel/issues/77) which would occur when the user specified a section for which not all groups were detected.
+  * Prevent crashes in `residency()` when the data has an unusually high percentage of exact-time detections (e.g. midnight).
   * Prevent crash if only some tags have multiple sensors and Sensor.unit is only included for those tags.
   * Prevent crash if the study area/population is so large that it clashes with ggplot's size limit failsafes.
   * Fix message overflow reported in issue [#78](https://github.com/hugomflavio/actel/issues/78).
@@ -33,9 +33,9 @@ Enhancements:
   * Change the behaviour of `recoverLog()` so it attempts to save the log to `actel_job_log.txt` if a `file` argument is not provided.
   * Added new `force` argument to `blankWorkspace()` and `exampleWorkspace()`.
   * New `Code.space` column in the biometrics allows the user to specificy the code space of the target tags.
-  * New arguments in plotArray(): `by.group` and `y.style`. See function documentation for more details.
-  * Include preload() log in reports where preloaded data is used.
-  * plotRatios() can now subset multiple groups and sections simultaneously. The user can also decide to either colour the plot by group or by section using the new `col.by` argument (issue [#77](https://github.com/hugomflavio/actel/issues/77))).
+  * New arguments in `plotArray()`: `by.group` and `y.style`. See function documentation for more details.
+  * Include `preload()` log in reports where preloaded data is used.
+  * `plotRatios()` can now subset multiple groups and sections simultaneously. The user can also decide to either colour the plot by group or by section using the new `col.by` argument (issue [#77](https://github.com/hugomflavio/actel/issues/77))).
 
 ## actel 1.2.1
 
