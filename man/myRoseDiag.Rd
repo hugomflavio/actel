@@ -34,12 +34,7 @@ myRoseDiag(
   xlab = "",
   ylab = "",
   add = TRUE,
-  control.circle = circular::circle.control(),
-  rings = c("none", "absolute", "relative"),
-  rings.lty = 2,
-  ring.text = FALSE,
-  ring.text.pos = -0.04,
-  ring.text.cex = 1
+  control.circle = circular::circle.control()
 )
 }
 \arguments{
@@ -94,16 +89,6 @@ myRoseDiag(
 \item{add}{add the rose diag to an existing plot.}
 
 \item{control.circle}{parameters passed to plot.default in order to draw the circle. The function circle.control is used to set the parameters.}
-
-\item{rings}{logical: if TRUE, inner rings are displayed for visual reference}
-
-\item{rings.lty}{line type of the rings, See help on par.}
-
-\item{ring.text}{logical: if notes should be displayed.}
-
-\item{ring.text.pos}{The position of the rings' text. Ignored if ring.text is set to FALSE.}
-
-\item{ring.text.cex}{The size of the ring's text. Ignored if ring.text is set to FALSE.}
 }
 \value{
 A list with the zero, rotation and next.points values, to be parsed to an overlaying graphic.

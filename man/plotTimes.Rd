@@ -7,6 +7,7 @@
 plotTimes(
   times,
   night = NULL,
+  circular.scale = c("area", "linear"),
   col,
   alpha = 0.8,
   title = "",
@@ -31,6 +32,9 @@ plotTimes(
 \item{times}{A list of of time vectors (each vector will be plotted as a series).}
 
 \item{night}{A vector of two times defining the start and stop of the night period (in HH:MM format).}
+
+\item{circular.scale}{Allows the user to decide between using an area-adjusted scale ("area"), or a linear scale ("linear").
+Defaults to "area", which better represents the proportion differences in the dataset.}
 
 \item{col}{A vector of colour names to paint each time series (colours will be added transparency).}
 
