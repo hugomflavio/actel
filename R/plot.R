@@ -1132,6 +1132,8 @@ plotDetections <- function(input, tag, type, y.axis = c("auto", "stations", "arr
 #'
 #' @param times A list of of time vectors (each vector will be plotted as a series).
 #' @param night A vector of two times defining the start and stop of the night period (in HH:MM format).
+#' @param circular.scale Allows the user to decide between using an area-adjusted scale ("area"), or a linear scale ("linear").
+#'  Defaults to "area", which better represents the proportion differences in the dataset.
 #' @param col A vector of colour names to paint each time series (colours will be added transparency).
 #' @param alpha A value between 0 and 1 for the opacity of each layer (defaults to 0.8).
 #' @param title A title for the plot.
@@ -1173,13 +1175,20 @@ plotDetections <- function(input, tag, type, y.axis = c("auto", "stations", "arr
 #'
 #' @export
 #'
-plotTimes <- function(times, night = NULL, col, alpha = 0.8, title = "", mean.dash = TRUE,
+plotTimes <- function(times, night = NULL, circular.scale = c("area", "linear"), col, alpha = 0.8, title = "", mean.dash = TRUE,
   mean.range = TRUE, mean.range.darken.factor = 1.4, rings = TRUE, file, width, height, bg = "transparent", ncol, 
   legend.pos = c("auto", "corner", "bottom"), ylegend, xlegend, xjust = c("auto", "centre", "left", "right"), 
   expand = 0.95, cex = 1){
 
   legend.pos <- match.arg(legend.pos)
   xjust <- match.arg(xjust)
+  circular.scale <- match.arg(circular.scale)
+
+  # convert user-friendly circular.scale to internal radii.scale
+  if (circular.scale == "area")
+    radii.scale <- "sqrt"
+  else
+    radii.scale <- "linear"
 
   if (!inherits(times, "list"))
     stop("'times' must be a list.", call. = FALSE)
@@ -1370,7 +1379,7 @@ plotTimes <- function(times, night = NULL, col, alpha = 0.8, title = "", mean.da
       limits = c(1, 0), fill = scales::alpha("grey", 0.3), border = "transparent")
   }
 
-  params <- myRoseDiag(times, bins = 24, radii.scale = "linear",
+  params <- myRoseDiag(times, bins = 24, radii.scale = radii.scale,
     prop = prop, tcl.text = -0.1, tol = 0.05, col = colours, border = "black")
 
   if (mean.dash) {
@@ -1391,6 +1400,9 @@ plotTimes <- function(times, night = NULL, col, alpha = 0.8, title = "", mean.da
 
   if(!missing(file))
     message("M: Plot saved to ", file)
+
+  # graphics device is turned off by on.exit set up 
+  # right after the device was opened.
 }
 
 #' Calculate beta estimations for efficiency

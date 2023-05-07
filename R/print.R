@@ -754,6 +754,19 @@ printCircular <- function(times, bio, suffix = NULL){
   cbPalette <- c("#56B4E9", "#c0ff3e", "#E69F00", "#F0E442", "#0072B2", "#D55E00", "#CC79A7", "#999999")
   circular.plots <- ""
 
+  circular.scale <- getOption("actel.circular.scale", default = "area")
+
+  if (!(circular.scale %in% c("area", "linear"))) {
+    appendTo(c("Screen", "Warning"), "Option actel.circular.scale was set but value is not recognized (accepted values: 'area', 'linear'). Defaulting back to 'area'.")
+    radii.scale <- "sqrt"
+  } else {
+    if (circular.scale == "area") {
+      radii.scale <- "sqrt"
+    } else {
+      radii.scale <- "linear"
+    }
+  }
+
   work.path <- paste0(tempdir(), "/actel_report_auxiliary_files/")
 
   # failsafe in case SVG printing fails
@@ -828,7 +841,7 @@ printCircular <- function(times, bio, suffix = NULL){
 
         copyOfCirclePlotRad(main = names(times)[i], shrink = 1.05, xlab = "", ylab = "")
 
-        params <- myRoseDiag(trim.times, bins = 24, radii.scale = "linear",
+        params <- myRoseDiag(trim.times, bins = 24, radii.scale = radii.scale,
           prop = prop, tcl.text = -0.1, tol = 0.05, col = colours.to.use, border = "black")
 
         roseMean(trim.times, col = scales::alpha(params$col, 1), mean.length = c(0.07, -0.07), mean.lwd = 6,
@@ -926,11 +939,6 @@ circularSection <- function(from, to, units = "hours", template = "clock24", lim
 #' @param main,sub,xlab,ylab title, subtitle, x label and y label of the plot.
 #' @param add add the rose diag to an existing plot.
 #' @param control.circle parameters passed to plot.default in order to draw the circle. The function circle.control is used to set the parameters.
-#' @param rings logical: if TRUE, inner rings are displayed for visual reference
-#' @param rings.lty line type of the rings, See help on par.
-#' @param ring.text logical: if notes should be displayed.
-#' @param ring.text.pos The position of the rings' text. Ignored if ring.text is set to FALSE.
-#' @param ring.text.cex The size of the ring's text. Ignored if ring.text is set to FALSE.
 #'
 #' @return A list with the zero, rotation and next.points values, to be parsed to an overlaying graphic.
 #'
@@ -942,9 +950,7 @@ myRoseDiag <- function (x, pch = 16, cex = 1, axes = TRUE, shrink = 1, bins = 24
   tol = 0.04, uin = NULL, xlim = c(-1, 1), ylim = c(-1, 1),
   prop = 1, digits = 2, plot.info = NULL, units = NULL, template = NULL,
   zero = NULL, rotation = NULL, main = NULL, sub = NULL, xlab = "",
-  ylab = "", add = TRUE, control.circle = circular::circle.control(), rings = c("none", "absolute", "relative"),
-  rings.lty = 2, ring.text = FALSE, ring.text.pos = -0.04, ring.text.cex = 1) {
-  rings <- match.arg(rings)
+  ylab = "", add = TRUE, control.circle = circular::circle.control()) {
   radii.scale <- match.arg(radii.scale)
 
   if (is.list(x)) {
@@ -1044,6 +1050,10 @@ myRoseDiag <- function (x, pch = 16, cex = 1, axes = TRUE, shrink = 1, bins = 24
 #' For more details about the circular package, visit its homepage at \url{https://github.com/cran/circular}
 #'
 #' @inheritParams myRoseDiag
+#' @param rings.lty line type of the rings, See help on par.
+#' @param ring.text logical: if notes should be displayed.
+#' @param ring.text.pos The position of the rings' text. Ignored if ring.text is set to FALSE.
+#' @param ring.text.cex The size of the ring's text. Ignored if ring.text is set to FALSE.
 #'
 #' @return No return value, adds to an existing plot.
 #'
@@ -1257,7 +1267,7 @@ copyOfRosediagRad <- function (x, zero, rotation, bins, upper, radii.scale, prop
     if (rotation == "clock")
         rel.freq <- rev(rel.freq)
     if (radii.scale == "sqrt") {
-        radius <- sqrt(rel.freq) * prop
+        radius <- sqrt(rel.freq * prop)
     }
     else {
         radius <- rel.freq * prop
