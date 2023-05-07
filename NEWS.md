@@ -30,6 +30,7 @@ Changes:
   * `section.minimum` has been replaced by `section.warning` and `section.error`.
 
 Enhancements:
+  * Improve handling of manually set `jump.warning` and `jump.error` arguments when the set values don't respect the `jump.warning <= jump.error` rule.
   * Change the behaviour of `recoverLog()` so it attempts to save the log to `actel_job_log.txt` if a `file` argument is not provided.
   * Added new `force` argument to `blankWorkspace()` and `exampleWorkspace()`.
   * New `Code.space` column in the biometrics allows the user to specificy the code space of the target tags.

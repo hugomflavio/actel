@@ -145,10 +145,17 @@ checkArguments <- function(dp, tz, min.total.detections, min.per.event, max.inte
     stopAndReport("'jump.error' must not be lower than 1.")
 
   if (jump.error < jump.warning) {
-    if (jump.warning != 2) # i.e. it is not the default jump.warning
-      stopAndReport("'jump.error' must not be lower than 'jump.warning'.")
-    else
+    if (jump.warning == 2) { # this happens if someone changed jump error but didn't set jump warning.
+      appendTo(c("screen", "warning"), "Adjusting default 'jump.warning' to match set 'jump.error'.")
       jump.warning <- jump.error
+    } else {
+      if (jump.error == 3) { # this happens if someone changed jump warning but didn't change jump error.
+        appendTo(c("screen", "warning"), "Adjusting default 'jump.error' to match set 'jump.warning'.")
+        jump.error <- jump.warning
+      } else { # this happens if someone set both jump warning and jump error. In this case, stop and let the user decide.
+        stopAndReport("'jump.error' must not be lower than 'jump.warning'.")
+      }
+    }
   }
 
   if (!is.null(inactive.warning) && !is.numeric(inactive.warning))
@@ -239,6 +246,7 @@ checkArguments <- function(dp, tz, min.total.detections, min.per.event, max.inte
               speed.warning = speed.warning,
               speed.error = speed.error,
               jump.warning = jump.warning,
+              jump.error = jump.error,
               inactive.warning = inactive.warning,
               inactive.error = inactive.error,
               detections.y.axis = detections.y.axis,
@@ -1223,11 +1231,11 @@ checkDetectionsBeforeRelease <- function(input, bio, discard.orphans = FALSE){
           }
         }
         if (all(to.remove)) {
-          appendTo(c("Screen", "Report"), paste0("ALL detections from tag ", names(input)[link[i]], " were removed per user command."))
+          appendTo(c("Screen", "Report"), paste0("M: ALL detections from tag ", names(input)[link[i]], " removed per user command."))
           remove.tag <- c(remove.tag, link[i])
         } else {
           input[[link[i]]] <- input[[link[i]]][!to.remove, ]
-          appendTo(c("Screen", "Report"), paste0("M: ", sum(to.remove), " detections from tag ", names(input)[link[i]], " were removed per user command."))
+          appendTo(c("Screen", "Report"), paste0("M: ", sum(to.remove), " detection(s) from tag ", names(input)[link[i]], " removed per user command."))
         }
       }
     }
