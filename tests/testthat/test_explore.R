@@ -78,7 +78,13 @@ test_that("explore stops when any argument does not make sense", {
 	
 	expect_error(explore(tz = "Europe/Copenhagen", jump.error = -1),
 		"'jump.error' must not be lower than 1.", fixed = TRUE)
+
+	expect_warning(explore(tz = "Europe/Copenhagen", jump.warning = 10),
+		"Adjusting default 'jump.error' to match set 'jump.warning'.", fixed = TRUE)
 	
+	expect_warning(explore(tz = "Europe/Copenhagen", jump.error = 1),
+		"Adjusting default 'jump.warning' to match set 'jump.error'.", fixed = TRUE)
+
 	expect_error(explore(tz = "Europe/Copenhagen", jump.error = 1, jump.warning = 10),
 		"'jump.error' must not be lower than 'jump.warning'", fixed = TRUE)
 	
@@ -138,6 +144,13 @@ test_that("explore stops when any argument does not make sense", {
 	expect_error(explore(tz = "Europe/Copenhagen", GUI = "never", print.releases = "a"),
 		"'print.releases' must be logical.", fixed = TRUE)
 })
+# n
+# n
+# n
+# n
+# n
+# n
+# n
 # n
 # n
 # n

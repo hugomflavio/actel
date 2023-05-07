@@ -62,6 +62,9 @@ test_that("plotTimes returns no errors on actual data, plus saves files", {
 	tryCatch(plotTimes(times = times, night = c("20:00", "06:00"), col = c("blue", "red"), title = "This is a test!"),
 		warning = function(w) stop("A warning was issued where it should not have been."))
 
+	tryCatch(plotTimes(times = times, night = c("20:00", "06:00"), col = c("blue", "red"), circular.scale = "linear", title = "This is a test!"),
+		warning = function(w) stop("A warning was issued where it should not have been."))
+
 	tryCatch(plotTimes(times = times, night = c("20:00", "06:00"), title = "This is a test!"),
 		warning = function(w) stop("A warning was issued where it should not have been."))
 
