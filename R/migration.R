@@ -411,7 +411,7 @@ migration <- function(
       output <- checkMinimumN(movements = movements[[tag]], tag = tag, min.total.detections = min.total.detections,
                                min.per.event = min.per.event[1], n = counter)
 
-      output <- checkUpstream(movements = output, tag = tag, detections = detections.list[[tag]], spatial = spatial,
+      output <- checkFirstDetBackFromRelease(movements = output, tag = tag, detections = detections.list[[tag]], spatial = spatial,
                               bio = bio, arrays = arrays, GUI = GUI, save.tables.locally = save.tables.locally, n = counter)
 
       output <- checkImpassables(movements = output, tag = tag, bio = bio, detections = detections.list[[tag]], n = counter, 

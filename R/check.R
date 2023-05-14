@@ -748,8 +748,8 @@ checkReport <- function(report){
 #'
 #' @keywords internal
 #'
-checkUpstream <- function(movements, tag, bio, detections, arrays, spatial, GUI, save.tables.locally, n) {
-  appendTo("debug", "Running checkUpstream.")
+checkFirstDetBackFromRelease <- function(movements, tag, bio, detections, arrays, spatial, GUI, save.tables.locally, n) {
+  appendTo("debug", "Running checkFirstDetBackFromRelease.")
   # NOTE: The NULL variables below are actually column names used by data.table.
   # This definition is just to prevent the package check from issuing a note due unknown variables.
   Valid <- NULL
