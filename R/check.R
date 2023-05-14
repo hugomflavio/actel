@@ -226,8 +226,19 @@ checkArguments <- function(dp, tz, min.total.detections, min.per.event, max.inte
 
   # only run these in residency calls.
   if (!missing(section.warning)) {
-    if (section.error > section.warning)
-      stopAndReport("'section.error' must not be higher than 'section.warning'.")
+    if (section.error > section.warning) {
+      if (section.warning == 1) { # this happens if someone changed section error but didn't set section warning.
+        appendTo(c("screen", "warning"), "Adjusting default 'section.warning' to match set 'section.error'.")
+        section.warning <- section.error
+      } else {
+        if (section.error == 1) { # this happens if someone changed section warning but didn't change section error.
+          appendTo(c("screen", "warning"), "Adjusting default 'section.error' to match set 'section.warning'.")
+          section.error <- section.warning
+        } else { # this happens if someone set both section warning and section error. In this case, stop and let the user decide.
+          stopAndReport("'section.error' must not be lower than 'section.warning'.")
+        }
+      }
+    }
 
     if (min.per.event[2] > section.error)
       appendTo(c('screen', 'warning', 'report'), "The minimum number of detections per valid section event is higher than 'section.warning'. Section warnings will never occur.")

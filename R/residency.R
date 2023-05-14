@@ -496,7 +496,7 @@ residency <- function(
   global.ratios <- globalRatios(positions = time.positions, section.order = names(spatial$array.order))
 
   group.ratios <- lapply(unique(bio$Group), function(i) {
-    cat(as.character(i), '\n')
+    # cat(as.character(i), '\n')
     the.transmitters <- bio$Transmitter[bio$Group == i]
     link <- match(the.transmitters, colnames(time.positions))
     if (all(is.na(link))) {

@@ -30,6 +30,7 @@ Changes:
   * `section.minimum` has been replaced by `section.warning` and `section.error`.
 
 Enhancements:
+  * Improve handling of manually set `section.warning` and `section.error` arguments when the set values don't respect the `section.warning >= section.error` rule.
   * Implement area-based scales for circular plots. To obtain reports with the legacy linear circular scale, users can still run `options(actel.circular.scale = "linear")` before running analyses. `plotTimes()` received a new argument `circular.scale`.
   * Improve handling of manually set `jump.warning` and `jump.error` arguments when the set values don't respect the `jump.warning <= jump.error` rule.
   * Change the behaviour of `recoverLog()` so it attempts to save the log to `actel_job_log.txt` if a `file` argument is not provided.
