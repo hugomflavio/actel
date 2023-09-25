@@ -421,6 +421,10 @@ migration <- function(
                                   spatial = spatial, jump.warning = jump.warning, jump.error = jump.error, GUI = GUI,
                                   detections = detections.list[[tag]], save.tables.locally = save.tables.locally, n = counter)
 
+      output <- checkLinearity(movements = output, bio = bio, tag = tag, arrays = arrays, spatial = spatial, 
+                               backwards.warning = backwards.warning, backwards.error = backwards.error, GUI = GUI,
+                               detections = detections.list[[tag]], save.tables.locally = save.tables.locally, n = counter)
+
       if (do.checkSpeeds) {
         temp.valid.movements <- simplifyMovements(movements = output, tag = tag, bio = bio, discard.first = discard.first,
                                                   speed.method = speed.method, dist.mat = dist.mat)
