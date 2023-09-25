@@ -99,9 +99,11 @@ After installing, you should read the package vignettes (i.e. the manual), which
 
 
 
-## Papers using or relating to actel
+## Works using or relating to actel
 
-**2023**
+**2023** (13)
+
+- Becker, A., Fielder, D. S., Lowry, M. B., & Taylor, M. D. (2023). Suitability of saltmarsh creeks as release locations for stocked Mulloway (Argyrosomus japonicus). Estuarine, Coastal and Shelf Science, 108455. https://doi.org/10.1016/j.ecss.2023.108455
 
 - Davey, J., Clarke, T. M., Niella, Y., Dennis, J. D., & Huveneers, C. (2023). Seasonal variation in space use and residency of the southern eagle ray _Myliobatis tenuicaudatus_ in a temperate ecosystem. Marine Ecology Progress Series, 705, 77–94. https://doi.org/10.3354/meps14232
 
@@ -109,19 +111,26 @@ After installing, you should read the package vignettes (i.e. the manual), which
 
 - Dhellemmes, F., Aspillaga, E., Rittweg, T., Alós, J., Möller, P., & Arlinghaus, R. (2023). Body size scaling of space use in coastal pike (_Esox lucius_) in brackish lagoons of the southern Baltic Sea. Fisheries Research, 260, 106560. https://doi.org/10.1016/j.fishres.2022.106560
 
+- Dhellemmes, F., Aspillaga, E., & Monk, C. T. (2023). ATfiltR: A solution for managing and filtering detections from passive acoustic telemetry data. MethodsX, 10, 102222. https://doi.org/10.1016/j.mex.2023.102222
+
 - Flink, H., Tibblin, P., Hall, M., Hellström, G., & Nordahl, O. (2023). Variation among bays in spatiotemporal aggregation of Baltic Sea pike highlights management complexity. Fisheries Research, 259, 106579. https://doi.org/10.1016/j.fishres.2022.106579
+
+- Höhne, L., Freese, M., Pohlmann, J.-D., Diekmann, M., Fladung, E., Huisman, J. B. J., Hanel, R., & Marohn, L. (2023). Overestimating management progress—Modelled vs. Monitored silver eel escapement in a North Sea draining river. ICES Journal of Marine Science, fsad122. https://doi.org/10.1093/icesjms/fsad122
 
 - Huisman, J. B. J., Höhne, L., Hanel, R., Kuipers, H., Schollema, P. P., & Nagelkerke, L. (2023). Factors influencing the downstream passage of European silver eels (_Anguilla anguilla_) through a tidal sluice. Journal of Fish Biology, (in press). https://doi.org/10.1111/jfb.15398
 
 - Kraft, S., Gandra, M., Lennox, R. J., Mourier, J., Winkler, A. C., & Abecasis, D. (2023). Residency and space use estimation methods based on passive acoustic telemetry data. Movement Ecology, 11(1), 12. https://doi.org/10.1186/s40462-022-00364-z
 
+- Kressler, M. M., Dall, S. R. X., & Sherley, R. B. (2023). A framework for studying ecological energy in the contemporary marine environment. ICES Journal of Marine Science, 80(6), 1580–1593. https://doi.org/10.1093/icesjms/fsad082
+
 - Nordli, E., Strøm, J., Bøhn, T., Thorstad, E., Serra-Llinares, R., Nilsen, R., & Bjørn, P. (2023). Behaviour and habitat use of first-time migrant Arctic charr: Novel insights from a subarctic marine area. Marine Ecology Progress Series, 709, 77–90. https://doi.org/10.3354/meps14279
 
 - O’Connor, B. (2023). Linking spatial stream network modeling and telemetry data to investigate thermal habitat use by adult arctic grayling [Master of Science, University of Northern British Columbia]. https://doi.org/10.24124/2023/59378
 
+- van Leeuwen, C. H. A., de Leeuw, J. J., van Keeken, O. A., Volwater, J. J. J., Seljee, F., van Aalderen, R., van Emmerik, W. A. M., & Bakker, E. S. (2023). Multispecies fish tracking across newly created shallow and deep habitats in a forward-restored lake. Movement Ecology, 11(1), 43. https://doi.org/10.1186/s40462-023-00405-1
 
 
-**2022**
+**2022** (5)
 
 - Edwards, M. L., McCallister, M., Brewster, L. R., Bangley, C. W., Curtis, T. H., Ogburn, M. B., & Ajemian, M. J. (2022). Multi-year assessment of immature bull shark <i>Carcharhinus leucas</i> residency and activity spaces in an expansive estuarine nursery. Marine Ecology Progress Series, 695, 125–138. https://doi.org/10.3354/meps14113
 
@@ -134,7 +143,7 @@ After installing, you should read the package vignettes (i.e. the manual), which
 - Thorstensen, M. J., Vandervelde, C. A., Bugg, W. S., Michaleski, S., Vo, L., Mackey, T. E., Lawrence, M. J., & Jeffries, K. M. (2022). Non-Lethal Sampling Supports Integrative Movement Research in Freshwater Fish. Frontiers in Genetics, 13. https://www.frontiersin.org/articles/10.3389/fgene.2022.795355
 
 
-**2021**
+**2021** (7)
 
 - Flávio, H., & Baktoft, H. (2021). actel: Standardised analysis of acoustic telemetry data from animals moving through receiver arrays. Methods in Ecology and Evolution, 12(1), 196–203. https://doi.org/10.1111/2041-210X.13503
 
@@ -151,7 +160,7 @@ After installing, you should read the package vignettes (i.e. the manual), which
 - Winter, E. R., Hindes, A. M., Lane, S., & Britton, J. R. (2021b). Acoustic telemetry reveals strong spatial preferences and mixing during successive spawning periods in a partially migratory common bream population. Aquatic Sciences, 83(3), 52. https://doi.org/10.1007/s00027-021-00804-9
 
 
-**2020**
+**2020** (2)
 
 - Flávio, H., Kennedy, R., Ensing, D., Jepsen, N., & Aarestrup, K. (2020). Marine mortality in the river? Atlantic salmon smolts under high predation pressure in the last kilometres of a river monitored for stock assessment. Fisheries Management and Ecology, 27(1), 92–101. https://doi.org/10.1111/fme.12405
 
