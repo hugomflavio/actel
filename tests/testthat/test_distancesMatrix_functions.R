@@ -69,10 +69,10 @@ if (any(missing.packages)) {
 			"'buffer' values cannot be negative.", fixed = TRUE)
 			
 			tryCatch(loadShape(shape = shape.path, size = 10, buffer = 100),
-				warning = function(w) stop("A warning was issued where it should not have been."))
+				warning = function(w) stop(paste("A warning was issued where it should not have been. This was the warning:", w)))
 			
 			tryCatch(base.raster <<- loadShape(shape = paste0(tests.home, "/aux_transitionLayer.shp"), size = 10, buffer = c(50, 100, 200, 250)),
-				warning = function(w) stop("A warning was issued where it should not have been."))
+				warning = function(w) stop(paste("A warning was issued where it should not have been. This was the warning:", w)))
 		})
 
 		test_that("loadShape stops if shape is not present or is not .shp", {
@@ -92,7 +92,7 @@ if (any(missing.packages)) {
 
 		test_that("transitionLayer is working properly", {
 			tryCatch(t.layer <- transitionLayer(base.raster),
-				warning = function(w) stop("A warning was issued where it should not have been."))
+				warning = function(w) stop(paste("A warning was issued where it should not have been. This was the warning:", w)))
 			expect_equal(as.character(class(t.layer)), "TransitionLayer")
 		})
 
