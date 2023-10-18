@@ -1319,3 +1319,70 @@ checkDupSignals <- function(input, bio){
     }
   }
 }
+
+#' warn users if they are about to run into an unfixed bug.
+#' 
+#' @return No return value, called for side effects.
+#'
+#' @keywords internal
+#'
+checkIssue79 <- function(arrays, spatial) {
+
+  output <- lapply(names(arrays), function(i) {
+    link <- match(i, spatial$stations$Array)
+    this.section <- as.character(unique(spatial$stations$Section[link]))
+
+    link <- match(arrays[[i]]$before, spatial$stations$Array)
+    before <- as.character(unique(spatial$stations$Section[link]))
+
+    if (length(before) > 0) {
+      before <- data.frame(
+        Section = this.section,
+        Neighbour = before,
+        type = "Before")
+    } else {
+      before <- NULL
+    }
+
+    link <- match(arrays[[i]]$after, spatial$stations$Array)
+    after <- as.character(unique(spatial$stations$Section[link]))
+
+    if (length(after) > 0) {
+      after <- data.frame(
+        Section = this.section,
+        Neighbour = after,
+        type = "After")
+    } else {
+      after <- NULL
+    }
+    
+    return(rbind(before, after))
+  })
+
+  x <- do.call(rbind, output)
+  x <- x[apply(x, 1, function(i) i[1] != i[2]), ]
+  x$tmp <- paste(x[,1], x[,2], x[,3])
+  x[!duplicated(x$tmp), ]
+  x$tmp <- NULL
+
+  link <- aggregate(x$type, list(x$Section), function(i) any(duplicated(i)))$x
+
+  if (any(link)) {
+    if (getOption("actel.bypass_issue_79", default = FALSE)) {
+        appendTo(c("Screen", "warning", "report"), "This study area seems to trigger issue 79. However, you have activated the bypass, so the analysis will continue.")     
+    } else {
+stopAndReport(
+"READ CAREFULLY
+
+It seems your study area contains parallel sections. actel is currently incapable of comprehending parallel sections during migration. This bug (issue 79) was brought to light in version 1.2.1, but a fix has not been found yet. This bug is easy to circumvent: you must make sure that the study area sections are sequential. Otherwise, the survival values per section could become compromised. If you wish to read more about this issue (when it appears, what it causes, and how to avoid it), please visit https://hugomflavio.github.io/actel-website/issue_79.html
+
+If you really want to run your analysis as is, or if you think this error came up unnecessarily, you can force the analysis by running the following command and restarting the analysis:
+
+options(actel.bypass_issue_79 = TRUE)
+
+If this issue impacts you and you want to help me fix it, feel free to reach out.
+
+")
+    }
+  }
+}

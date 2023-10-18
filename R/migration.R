@@ -293,6 +293,7 @@ migration <- function(
   dist.mat <- study.data$dist.mat
   attributes(dist.mat)$speed.method <- speed.method
   detections.list <- study.data$detections.list
+
 # -------------------------------------
 
 # Final quality checks
@@ -337,6 +338,10 @@ migration <- function(
       ifelse(sum(link) > 1, "these arrays are", "this array is"), " not part of the study arrays.")
     }
   }
+
+  # CHECK ISSUE 79
+  checkIssue79(arrays, spatial)
+
 # -------------------------------------
 
 # Discard early detections, if required
