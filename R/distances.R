@@ -1,9 +1,9 @@
 #' Load shapefile and convert to a raster object.
 #'
-#' loadShape can also perform early quality checks on the shape file, to ensure it is compatible
+#' shapeToRaster can also perform early quality checks on the shape file, to ensure it is compatible
 #' with the remaining study data. To activate these, set the names of the columns in the spatial.csv
 #' file that contain the x and y coordinates of the stations using coord.x and coord.y. By default,
-#' loadShape looks for a spatial.csv file in the current working directory, but this can be
+#' shapeToRaster looks for a spatial.csv file in the current working directory, but this can be
 #' personalized using the spatial argument.
 #'
 #' It is highly recommended to read the manual page regarding distances matrices before running this function.
@@ -42,11 +42,11 @@
 #'   example.shape <- paste0(system.file(package = "actel")[1], "/example_shapefile.shp")
 #'
 #'   # import the shape file
-#'   x <- loadShape(shape = example.shape, size = 20)
+#'   x <- shapeToRaster(shape = example.shape, size = 20)
 #'
 #'   # have a look at the resulting raster,
 #'   # where the blank spaces are the land areas
-#'   raster::plot(x)
+#'   terra::plot(x)
 #' }
 #' rm(aux, missing.packages)
 #' }
@@ -54,9 +54,9 @@
 #'
 #' @export
 #'
-loadShape <- function(shape, size, spatial = "spatial.csv",
+shapeToRaster <- function(shape, size, spatial = "spatial.csv",
   coord.x = NULL, coord.y = NULL, buffer = NULL, type = c("land", "water")){
-  # initial checks on package presence
+  # initial check on package presence
   aux <- c(
     length(suppressWarnings(packageDescription("raster"))),
     length(suppressWarnings(packageDescription("gdistance"))),
@@ -239,16 +239,42 @@ loadShape <- function(shape, size, spatial = "spatial.csv",
 }
 
 
+#' !!!DEPRECATED!!! 
+#' 
+#' Please use shapeToRaster instead.
+#' 
+#' @inheritParams shapeToRaster
+#'
+#' @examples
+#' \donttest{
+#'  message("This function is deprecated, please use shapeToRaster instead.")
+#' }
+#' 
+#' @return A raster object.
+#'
+#' @export
+#'
+loadShape <- function(shape, size, spatial = "spatial.csv",
+  coord.x = NULL, coord.y = NULL, buffer = NULL, type = c("land", "water")) {
+
+  warning("loadShape is deprecated. Please use shapeToRaster instead. This function will stop working once the next version of actel is released.")
+  output <- shapeToRaster(shape = shape, size = size, spatial = spatial,
+                          coord.x = coord.x, coord.y = coord.y, buffer = buffer, type = type)
+
+  return(output)
+}
+
+
 #' Calculate Transition Layer
 #'
-#' Using a previously imported shape file that has been converted to a raster (see \code{\link{loadShape}}),
+#' Using a previously imported shape file that has been converted to a raster (see \code{\link{shapeToRaster}}),
 #' Prepares a TransitionLayer object to be used in distance
 #' estimations (see \code{\link{distancesMatrix}}). Adapted from Grant Adams' script "distance to closest mpa".
 #'
 #' It is highly recommended to read the manual page regarding distances matrices before running this function.
 #' You can find it here: \href{https://hugomflavio.github.io/actel-website/manual-distances.html}{https://hugomflavio.github.io/actel-website/manual-distances.html}
 #'
-#' @param x A water raster; for example the output of \code{\link{loadShape}}
+#' @param x A water raster; for example the output of \code{\link{shapeToRaster}}
 #' @param directions The number of directions considered for every movement situation during cost
 #'  calculation. See the manual page linked above for more details.
 #'
@@ -273,7 +299,7 @@ loadShape <- function(shape, size, spatial = "spatial.csv",
 #'   example.shape <- paste0(system.file(package = "actel")[1], "/example_shapefile.shp")
 #'
 #'   # import the shape file
-#'   x <- loadShape(shape = example.shape, size = 20)
+#'   x <- shapeToRaster(shape = example.shape, size = 20)
 #'
 #'   # Build the transition layer
 #'   t.layer <- transitionLayer(x)
@@ -306,7 +332,8 @@ transitionLayer <- function(x, directions = c(16, 8, 4)){
 
   #### The transition layer will be used as the shape for calculating least-cost distance
   message("M: Constructing the transition layer. This process may take several minutes depending on the study area size and chosen pixel size."); flush.console()
-  transition.layer <- gdistance::transition(1 / raster::raster(x), transitionFunction = mean, directions = as.numeric(directions))
+
+  transition.layer <- gdistance::transition(raster::raster(x), transitionFunction = mean, directions = as.numeric(directions))
   transition.layer <- gdistance::geoCorrection(transition.layer, type = "c") # correct for shape distortion, as well as for diagonal connections between grid cells
   return(transition.layer)
 }
@@ -357,7 +384,7 @@ transitionLayer <- function(x, directions = c(16, 8, 4)){
 #'
 #'   # import the shape file and use the spatial.csv
 #'   # to check the extents.
-#'   x <- loadShape(shape = paste0(aux, "/example_shapefile.shp"),
+#'   x <- shapeToRaster(shape = paste0(aux, "/example_shapefile.shp"),
 #'     coord.x = "x", coord.y = "y", size = 20)
 #'
 #'   raster::plot(x)
@@ -462,14 +489,21 @@ distancesMatrix <- function(t.layer, starters = NULL, targets = starters,
     col.rename <- FALSE
   }
 
-  #### Process the "from" coordinates (this would be the starters ".csv" file)
+
+  #### Create starters and targets spatial dataframes
   sp::coordinates(starters) <- ~ longitude + latitude # converts the file to a spatialPoints object
   raster::crs(starters) <- raster::crs(t.layer) # sets the crs
   
-  #### Process the "to" coordinates (this would be the targets ".csv" file)
   sp::coordinates(targets) <- ~ longitude + latitude # converts the file to a spatialPoints object
   raster::crs(targets) <- raster::crs(t.layer)
-  
+
+  # NOTE: THE LINES ABOVE COULD BE CHANGED ONCE gdistance'S 
+  # FUNCTIONS START LIKING SF OBJECTS LAYER
+  # starters <- sf::st_as_sf(starters, coords = c("longitude","latitude"), crs = ...)
+  # targets <- sf::st_as_sf(targets, coords = c("longitude","latitude"), crs = ...)
+  # NOTE: currently, transition layer objects are not 
+  # responding correctly to crs requests (e.g. sf::st_crs)
+
   #### Calculate a matrix of distances to each object
   dist.mat <- data.frame(gdistance::costDistance(t.layer, starters, targets))
   if (any(dist.mat == Inf)) {

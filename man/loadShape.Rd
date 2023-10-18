@@ -2,7 +2,7 @@
 % Please edit documentation in R/distances.R
 \name{loadShape}
 \alias{loadShape}
-\title{Load shapefile and convert to a raster object.}
+\title{!!!DEPRECATED!!!}
 \usage{
 loadShape(
   shape,
@@ -36,43 +36,11 @@ coordinate system.}
 A raster object.
 }
 \description{
-loadShape can also perform early quality checks on the shape file, to ensure it is compatible
-with the remaining study data. To activate these, set the names of the columns in the spatial.csv
-file that contain the x and y coordinates of the stations using coord.x and coord.y. By default,
-loadShape looks for a spatial.csv file in the current working directory, but this can be
-personalized using the spatial argument.
-}
-\details{
-It is highly recommended to read the manual page regarding distances matrices before running this function.
-You can find it here: \href{https://hugomflavio.github.io/actel-website/manual-distances.html}{https://hugomflavio.github.io/actel-website/manual-distances.html}
+Please use shapeToRaster instead.
 }
 \examples{
 \donttest{
-# check if R can run the distance functions
-aux <- c(
-  length(suppressWarnings(packageDescription("raster"))),
-  length(suppressWarnings(packageDescription("gdistance"))),
-  length(suppressWarnings(packageDescription("sp"))),
-  length(suppressWarnings(packageDescription("terra"))))
-
-missing.packages <- sapply(aux, function(x) x == 1)
-
-if (any(missing.packages)) {
-  message("Sorry, this function requires packages '",
-    paste(c("raster", "gdistance", "sp", "terra")[missing.packages], collapse = "', '"),
-    "' to operate. Please install ", ifelse(sum(missing.packages) > 1, "them", "it"),
-    " before proceeding.")
-} else {
-  # Fetch actel's example shapefile
-  example.shape <- paste0(system.file(package = "actel")[1], "/example_shapefile.shp")
-
-  # import the shape file
-  x <- loadShape(shape = example.shape, size = 20)
-
-  # have a look at the resulting raster,
-  # where the blank spaces are the land areas
-  raster::plot(x)
+ message("This function is deprecated, please use shapeToRaster instead.")
 }
-rm(aux, missing.packages)
-}
+
 }

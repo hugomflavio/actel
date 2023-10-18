@@ -42,6 +42,7 @@ Suggests:
     gWidgets2tcltk,
     raster,
     sp,
+    sf,
     terra,
     testthat
 VignetteBuilder: knitr

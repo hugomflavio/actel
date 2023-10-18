@@ -7,7 +7,7 @@
 transitionLayer(x, directions = c(16, 8, 4))
 }
 \arguments{
-\item{x}{A water raster; for example the output of \code{\link{loadShape}}}
+\item{x}{A water raster; for example the output of \code{\link{shapeToRaster}}}
 
 \item{directions}{The number of directions considered for every movement situation during cost
 calculation. See the manual page linked above for more details.}
@@ -16,7 +16,7 @@ calculation. See the manual page linked above for more details.}
 A TransitionLayer object.
 }
 \description{
-Using a previously imported shape file that has been converted to a raster (see \code{\link{loadShape}}),
+Using a previously imported shape file that has been converted to a raster (see \code{\link{shapeToRaster}}),
 Prepares a TransitionLayer object to be used in distance
 estimations (see \code{\link{distancesMatrix}}). Adapted from Grant Adams' script "distance to closest mpa".
 }
@@ -45,7 +45,7 @@ if (any(missing.packages)) {
   example.shape <- paste0(system.file(package = "actel")[1], "/example_shapefile.shp")
 
   # import the shape file
-  x <- loadShape(shape = example.shape, size = 20)
+  x <- shapeToRaster(shape = example.shape, size = 20)
 
   # Build the transition layer
   t.layer <- transitionLayer(x)

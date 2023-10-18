@@ -69,7 +69,7 @@ if (any(missing.packages)) {
 
   # import the shape file and use the spatial.csv
   # to check the extents.
-  x <- loadShape(shape = paste0(aux, "/example_shapefile.shp"),
+  x <- shapeToRaster(shape = paste0(aux, "/example_shapefile.shp"),
     coord.x = "x", coord.y = "y", size = 20)
 
   raster::plot(x)
