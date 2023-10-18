@@ -30,7 +30,7 @@ printExploreRmd(
 
 \item{detections}{All the detections used in the study}
 
-\item{valid.detectiosn}{The valid detections used in the study}
+\item{valid.detections}{The valid detections used in the study}
 }
 \value{
 No return value, called for side effects.

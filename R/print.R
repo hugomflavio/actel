@@ -1481,9 +1481,6 @@ printLastSection <- function(input, spatial) {
 
 #' Print a simple barplot with the number of tags last seen at each section
 #'
-#' @param input a table with the last seen data
-#' @param sections the order of the sections
-#'
 #' @return No return value, called to plot and save graphic.
 #'
 #' @keywords internal

@@ -2,7 +2,7 @@
 % Please edit documentation in R/distances.R
 \name{loadShape}
 \alias{loadShape}
-\title{!!!DEPRECATED!!!}
+\title{DEPRECATED}
 \usage{
 loadShape(
   shape,

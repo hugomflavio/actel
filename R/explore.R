@@ -621,7 +621,7 @@ explore <- function(
 #' @param circular.plots Rmarkdown string specifying the name of the circular plots.
 #' @param sensor.plots Rmarkdown string specifying the name of the sensor plots.
 #' @param detections All the detections used in the study
-#' @param valid.detectiosn The valid detections used in the study
+#' @param valid.detections The valid detections used in the study
 #' @inheritParams loadDetections
 #'
 #' @return No return value, called for side effects.

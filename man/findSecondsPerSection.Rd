@@ -12,8 +12,6 @@ findSecondsPerSection(res, frame, the.range, num.step)
 \item{the.range}{the first and last start.time for the specific tag}
 
 \item{num.step}{the size of the block}
-
-\item{start.time}{the start time of the period being analysed (a Date object)}
 }
 \value{
 A data frame containing the number of seconds spent at each location for a specific timeframe

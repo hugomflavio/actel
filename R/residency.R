@@ -1538,7 +1538,6 @@ resRatios <- function(res, timestep = c("days", "hours"), tz) {
 #' Calculate number of seconds at each location per day
 #'
 #' @inheritParams resRatios
-#' @param start.time the start time of the period being analysed (a Date object)
 #' @param the.range the first and last start.time for the specific tag
 #' @param num.step the size of the block
 #'

@@ -1768,7 +1768,6 @@ splitDetections <- function(detections, bio, exclude.tags = NULL) {
 #' Collect summary information on the tags detected but that are not part of the study.
 #'
 #' @param input list of detections for the tags to be excluded.
-#' @param restart logical: if TRUE, remove file 'temp_strays.csv' from the working directory.
 #'
 #' @return No return value, called for side effects.
 #'
@@ -1973,7 +1972,6 @@ createStandards <- function(detections, spatial, deployments, discard.orphans = 
 #'
 #' Creates a list containing multiple spatial elements required throughout the analyses
 #'
-#' @param file an input file with spatial data.
 #' @param first.array Either NULL or the top level array in the study area.
 #' @inheritParams splitDetections
 #' @inheritParams explore

@@ -239,7 +239,7 @@ shapeToRaster <- function(shape, size, spatial = "spatial.csv",
 }
 
 
-#' !!!DEPRECATED!!! 
+#' DEPRECATED
 #' 
 #' Please use shapeToRaster instead.
 #' 
@@ -257,7 +257,9 @@ shapeToRaster <- function(shape, size, spatial = "spatial.csv",
 loadShape <- function(shape, size, spatial = "spatial.csv",
   coord.x = NULL, coord.y = NULL, buffer = NULL, type = c("land", "water")) {
 
-  warning("loadShape is deprecated. Please use shapeToRaster instead. This function will stop working once the next version of actel is released.")
+  .Deprecated(shapeToRaster, package=NULL, "loadShape is deprecated. Please use shapeToRaster instead. This function will stop working once the next version of actel is released.",
+              old = as.character(sys.call(sys.parent()))[1L])
+
   output <- shapeToRaster(shape = shape, size = size, spatial = spatial,
                           coord.x = coord.x, coord.y = coord.y, buffer = buffer, type = type)
 

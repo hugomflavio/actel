@@ -10,8 +10,6 @@ transformSpatial(spatial, bio, arrays, dotmat, first.array = NULL)
 \item{bio}{A table with the tags and biometrics of the studied animals.}
 
 \item{first.array}{Either NULL or the top level array in the study area.}
-
-\item{file}{an input file with spatial data.}
 }
 \value{
 The stations, release sites and array order.

@@ -8,8 +8,6 @@ collectStrays(input)
 }
 \arguments{
 \item{input}{list of detections for the tags to be excluded.}
-
-\item{restart}{logical: if TRUE, remove file 'temp_strays.csv' from the working directory.}
 }
 \value{
 No return value, called for side effects.
