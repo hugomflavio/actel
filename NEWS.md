@@ -2,7 +2,7 @@
 
 Find out the main highlights of each update.
 
-## Development
+## actel 1.3.0
 
 Fixes:
   * Fix `printLastSection()` crash for very large datasets.
@@ -35,7 +35,7 @@ Enhancements:
   * Improve handling of manually set `jump.warning` and `jump.error` arguments when the set values don't respect the `jump.warning <= jump.error` rule.
   * Change the behaviour of `recoverLog()` so it attempts to save the log to `actel_job_log.txt` if a `file` argument is not provided.
   * Added new `force` argument to `blankWorkspace()` and `exampleWorkspace()`.
-  * New `Code.space` column in the biometrics allows the user to specificy the code space of the target tags.
+  * New `Code.space` column in the biometrics allows the user to specify the code space of the target tags.
   * New arguments in `plotArray()`: `by.group` and `y.style`. See function documentation for more details.
   * Include `preload()` log in reports where preloaded data is used.
   * `plotRatios()` can now subset multiple groups and sections simultaneously. The user can also decide to either colour the plot by group or by section using the new `col.by` argument (issue [#77](https://github.com/hugomflavio/actel/issues/77))).
