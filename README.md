@@ -6,7 +6,7 @@ Jump to [**installation instructions**](#installing-actel)
 [![CRAN\_Status\_Badge](https://www.r-pkg.org/badges/version/actel)](https://cran.r-project.org/package=actel)
 [![CRAN RStudio mirror downloads](https://cranlogs.r-pkg.org/badges/actel)](https://cran.r-project.org/package=actel)
 
-[![codecov](https://codecov.io/github/hugomflavio/actel/branch/master/graphs/badge.svg)](https://codecov.io/github/hugomflavio/actel)<sup> of non-interactive code*</sup>
+[![codecov](https://codecov.io/github/hugomflavio/actel/branch/master/graphs/badge.svg)](https://app.codecov.io/github/hugomflavio/actel)<sup> of non-interactive code*</sup>
 
 Read the [latest news here!](https://github.com/hugomflavio/actel/blob/master/NEWS.md#news)
 
@@ -70,7 +70,7 @@ Here are some examples:
 
 ## Installing actel 
 
-**CRAN version: 1.2.1**
+**CRAN version: 1.3.0**
 
 actel is available on CRAN. To install the latest stable version, simply run:
 
@@ -86,9 +86,7 @@ If you would like to install the [latest updates](https://github.com/hugomflavio
 
 **Have a look at the manual:**
 
-After installing, you should read the package vignettes (i.e. the manual), which can be found by running:
-
-    browseVignettes("actel")
+After installing, you should read the manual, which can now be found in [actel's website](https://hugomflavio.github.io/actel-website/index.html).
 
 **Note:**
 

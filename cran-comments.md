@@ -5,6 +5,9 @@
   directly, it is a necessary "suggested" package of ggplot2, and I want 
   to ensure that it is installed.
 
+* On resubmission: Fixed url that had been moved permanently
+  as per the incoming checks.
+
 
 ## Test environments
 
