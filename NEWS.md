@@ -2,6 +2,11 @@
 
 Find out the main highlights of each update.
 
+## Development
+
+Fixes:
+  * Fix warning bug when reporting duplicated signals in the presence of dual-signal tags.
+
 ## actel 1.3.0
 
 Fixes:
