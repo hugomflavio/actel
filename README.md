@@ -99,7 +99,12 @@ After installing, you should read the manual, which can now be found in [actel's
 
 ## Works using or relating to actel
 
-**2023** (13)
+**2024** (1)
+
+- Waters, C., Cotter, D., O’Neill, R., Drumm, A., Cooney, J., Bond, N., Rogan, G., & Maoiléidigh, N. Ó. (2024). The use of predator tags to explain reversal movement patterns in Atlantic salmon smolts (_Salmo salar_ L.). Journal of Fish Biology. https://doi.org/10.1111/jfb.15658
+
+
+**2023** (15)
 
 - Becker, A., Fielder, D. S., Lowry, M. B., & Taylor, M. D. (2023). Suitability of saltmarsh creeks as release locations for stocked Mulloway (Argyrosomus japonicus). Estuarine, Coastal and Shelf Science, 108455. https://doi.org/10.1016/j.ecss.2023.108455
 
@@ -110,6 +115,8 @@ After installing, you should read the manual, which can now be found in [actel's
 - Dhellemmes, F., Aspillaga, E., Rittweg, T., Alós, J., Möller, P., & Arlinghaus, R. (2023). Body size scaling of space use in coastal pike (_Esox lucius_) in brackish lagoons of the southern Baltic Sea. Fisheries Research, 260, 106560. https://doi.org/10.1016/j.fishres.2022.106560
 
 - Dhellemmes, F., Aspillaga, E., & Monk, C. T. (2023). ATfiltR: A solution for managing and filtering detections from passive acoustic telemetry data. MethodsX, 10, 102222. https://doi.org/10.1016/j.mex.2023.102222
+
+- English, G., Wilson, B. M., Lawrence, M. J., Black, M., Hawkes, J. P., Hardie, D. C., Daniels, J. M., Carr, J. W., Rycroft, C., Crossin, G. T., Whoriskey, F., den Heyer, C. E., Bordeleau, X., McKindsey, C. W., & Trudel, M. (2023). Determining early marine survival and predation by endothermic predators on acoustically-tagged Atlantic salmon (<i>Salmo salar</i>) post-smolts. Canadian Journal of Fisheries and Aquatic Sciences. https://doi.org/10.1139/cjfas-2023-0206
 
 - Flink, H., Tibblin, P., Hall, M., Hellström, G., & Nordahl, O. (2023). Variation among bays in spatiotemporal aggregation of Baltic Sea pike highlights management complexity. Fisheries Research, 259, 106579. https://doi.org/10.1016/j.fishres.2022.106579
 
@@ -124,6 +131,8 @@ After installing, you should read the manual, which can now be found in [actel's
 - Nordli, E., Strøm, J., Bøhn, T., Thorstad, E., Serra-Llinares, R., Nilsen, R., & Bjørn, P. (2023). Behaviour and habitat use of first-time migrant Arctic charr: Novel insights from a subarctic marine area. Marine Ecology Progress Series, 709, 77–90. https://doi.org/10.3354/meps14279
 
 - O’Connor, B. (2023). Linking spatial stream network modeling and telemetry data to investigate thermal habitat use by adult arctic grayling [Master of Science, University of Northern British Columbia]. https://doi.org/10.24124/2023/59378
+
+- Stoot, L. J., Butler, G. L., Niella, Y., Doran, G. S., Thiem, J. D., Taylor, M. D., & Baumgartner, L. J. (2023). Environmental Effects on the Seasonal Distribution of an Estuarine Species _Neoarius graeffei_ in Northern New South Wales, Australia. Estuaries and Coasts. https://doi.org/10.1007/s12237-023-01269-9
 
 - van Leeuwen, C. H. A., de Leeuw, J. J., van Keeken, O. A., Volwater, J. J. J., Seljee, F., van Aalderen, R., van Emmerik, W. A. M., & Bakker, E. S. (2023). Multispecies fish tracking across newly created shallow and deep habitats in a forward-restored lake. Movement Ecology, 11(1), 43. https://doi.org/10.1186/s40462-023-00405-1
 
