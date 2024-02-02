@@ -85,7 +85,7 @@ preload <- function(biometrics, spatial, deployments, detections, dot = NULL, di
 # ------------------------
 
   if (is.na(match(tz, OlsonNames())))
-    stop("'tz' could not be recognized as a timezone. Check available timezones with OlsonNames()\n", call. = FALSE)
+    stop("'tz' could not be recognized as a time zone. Check available time zones with OlsonNames()\n", call. = FALSE)
 
   if (!is.null(exclude.tags) && any(!grepl("-", exclude.tags, fixed = TRUE)))
     stop("Not all contents in 'exclude.tags' could be recognized as tags (i.e. 'codespace-signal'). Valid examples: 'R64K-1234', A69-1303-1234'\n", call. = FALSE)
@@ -247,9 +247,6 @@ preloadDetections <- function(input, tz, start.time = NULL, stop.time = NULL) {
 		input$Receiver <- aux
 	}
 
-  if (!is.character(input$Timestamp))
-    input$Timestamp <- as.character(input$Timestamp)
-
   if (!is.character(input$CodeSpace))
     input$CodeSpace <- as.character(input$CodeSpace)
 
@@ -275,26 +272,42 @@ preloadDetections <- function(input, tz, start.time = NULL, stop.time = NULL) {
 			warning = function(w) stop("Attempting to convert the 'Sensor.Value' to numeric failed. Aborting.", call. = FALSE))
 	}
 
+
 	if (!inherits(input$Timestamp, "POSIXct")) {
 		appendTo(c("Screen", "Report"), "M: Converting detection timestamps to POSIX objects.")
-		input$Timestamp <- fasttime::fastPOSIXct(input$Timestamp, tz = "UTC")
+      if (!is.character(input$Timestamp))
+        input$Timestamp <- as.character(input$Timestamp)
+		
+    input$Timestamp <- fasttime::fastPOSIXct(input$Timestamp, tz = "UTC")
+
     if (any(is.na(input$Timestamp)))
       stop("Converting the timestamps failed. Aborting.", call. = FALSE)
-	}
+	  
+    attributes(input$Timestamp)$tzone <- tz
+	} else {
+    if (attributes(input$Timestamp)$tz != "UTC") {
+      if (attributes(input$Timestamp)$tz != tz) {
+        stopAndReport("Detections provided in POSIX format but not in UTC and time zone does not match tz argument (", attributes(input$Timestamp)$tz, " != ", tz, ")! Stopping to avoid erroneous output.")
+      } else {
+        appendTo(c("Screen", "Report"), "M: Detection timestamps are already POSIX and time zone already matches tz argument. Skipping time zone matching.")
+      }
+    } else {
+      attributes(input$Timestamp)$tzone <- tz
+    }
+  }
 
-	attributes(input$Timestamp)$tzone <- tz
 
   input <- input[order(input$Timestamp), ]
 
   if (!is.null(start.time)){
     onr <- nrow(input)
     input <- input[input$Timestamp >= as.POSIXct(start.time, tz = tz), ]
-    appendTo(c("Screen", "Report"), paste0("M: Discarding detection data previous to ",start.time," per user command (", onr - nrow(input), " detections discarded)."))
+    appendTo(c("Screen", "Report"), paste0("M: Discarding detection data previous to ",start.time ," per user command (", onr - nrow(input), " detections discarded)."))
   }
   if (!is.null(stop.time)){
     onr <- nrow(input)
     input <- input[input$Timestamp <= as.POSIXct(stop.time, tz = tz), ]
-    appendTo(c("Screen", "Report"), paste0("M: Discarding detection data posterior to ",stop.time," per user command (", onr - nrow(input), " detections discarded)."))
+    appendTo(c("Screen", "Report"), paste0("M: Discarding detection data posterior to ",stop.time ," per user command (", onr - nrow(input), " detections discarded)."))
   }
 
 	if (any(grepl("^Valid$", colnames(input)))) {

@@ -125,7 +125,7 @@ test_that("migration and residency with preload yield the same results as with t
 # n
 
 test_that("tz and exclude.tags stops are working", {
-	expect_error(preload(tz = "test"), "'tz' could not be recognized as a timezone. Check available timezones with OlsonNames()", fixed = TRUE)
+	expect_error(preload(tz = "test"), "'tz' could not be recognized as a time zone. Check available time zones with OlsonNames()", fixed = TRUE)
 
 	expect_error(preload(tz = "Europe/Copenhagen", exclude.tags = "test"),
 		"Not all contents in 'exclude.tags' could be recognized as tags (i.e. 'codespace-signal'). Valid examples: 'R64K-1234', A69-1303-1234'", fixed = TRUE)

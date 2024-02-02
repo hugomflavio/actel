@@ -66,7 +66,7 @@ checkArguments <- function(dp, tz, min.total.detections, min.per.event, max.inte
     stopAndReport('argument "tz" is missing, with no default')
 
   if (is.null(dp) && is.na(match(tz, OlsonNames())))
-    stopAndReport("'tz' could not be recognized as a timezone. Check available timezones with OlsonNames()")
+    stopAndReport("'tz' could not be recognized as a time zone. Check available time zones with OlsonNames()")
 
   if (!is.numeric(min.total.detections))
     stopAndReport("'min.total.detections' must be numeric.")

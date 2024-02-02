@@ -11,10 +11,10 @@ write.csv(example.distances, "distances.csv")
 
 test_that("explore stops when any argument does not make sense", {
 	expect_error(explore(tz = 1),
-		"'tz' could not be recognized as a timezone. Check available timezones with OlsonNames()", fixed = TRUE)
+		"'tz' could not be recognized as a time zone. Check available time zones with OlsonNames()", fixed = TRUE)
 	
 	expect_error(explore(tz = "abc"),
-		"'tz' could not be recognized as a timezone. Check available timezones with OlsonNames()", fixed = TRUE)
+		"'tz' could not be recognized as a time zone. Check available time zones with OlsonNames()", fixed = TRUE)
 	
 	expect_error(explore(tz = "Europe/Copenhagen", max.interval = "a"),
 		"'max.interval' must be numeric.", fixed = TRUE)

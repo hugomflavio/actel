@@ -722,19 +722,26 @@ loadDeployments <- function(input, tz){
 
   appendTo("debug","Running loadDeployments.")
 
-  if (is.character(input)) {
-    if (file.exists(input))
-      input <- suppressWarnings(as.data.frame(data.table::fread(input, colClasses = c("Start" = "character", "Stop" = "character")),
-               stringsAsFactors = FALSE))
-    else
-      stopAndReport("Could not find a '", input, "' file in the working directory.")
-  } else {
+  # compatibility with preload()
+  if (is.character(input))
+    preloaded <- FALSE
+  else
+    preloaded <- TRUE
+
+  if (preloaded) {
     input <- as.data.frame(input)
     to.convert <- which(sapply(input, class) == "factor")
     if (length(to.convert) > 0) {
       for(i in to.convert) {
         input[, i] <- as.character(input[, i])
       }
+    }
+  } else {
+    if (file.exists(input)) {
+      input <- suppressWarnings(as.data.frame(data.table::fread(input, colClasses = c("Start" = "character", "Stop" = "character")),
+               stringsAsFactors = FALSE))
+    } else {
+      stopAndReport("Could not find a '", input, "' file in the working directory.")
     }
   }
 
@@ -758,28 +765,43 @@ loadDeployments <- function(input, tz){
   if (any(grepl("\\\\|/|:|\\*|\\?|\\\"|<|>|\\\'", input$Station.name)))
     input$Station.name <- gsub("\\\\|/|:|\\*|\\?|\\\"|<|>|\\\'", "_", input$Station.name)
 
-  if (any(!grepl("^[1-2][0-9][0-9][0-9]-[0-1][0-9]-[0-3][0-9][ |T|t][0-2][0-9]:[0-5][0-9]", input$Start))) {
-    stopAndReport("Not all values in the 'Start' column appear to be in a 'yyyy-mm-dd hh:mm' format (seconds are optional). Please double-check the deployments.")
-  }
-  if (any(!grepl("^[1-2][0-9][0-9][0-9]-[0-1][0-9]-[0-3][0-9][ |T|t][0-2][0-9]:[0-5][0-9]", input$Stop))) {
-    stopAndReport("Not all values in the 'Stop' column appear to be in a 'yyyy-mm-dd hh:mm' format (seconds are optional). Please double-check the deployments.")
-  }
+  if (preloaded & inherits(input$Start, "POSIXct") & inherits(input$Stop, "POSIXct")) {
+    appendTo(c("Screen", "Report"), "M: Preloaded deployment times are already in POSIX format. Skipping timestamp format checks.")
+    
+    if (attributes(input$Start)$tz != attributes(input$Stop)$tz)
+      stopAndReport("Deployment Start and Stop times are not in the same time zone (", attributes(input$Start)$tz, " != ", attributes(input$Stop)$tz, ")! Please double-check the deployments.")
 
-  timestamp_formats  <- c("%Y-%m-%d %H:%M:%OS", "%Y-%m-%dT%H:%M:%OS",
-                          "%Y-%m-%d %H:%M", "%Y-%m-%dT%H:%M",
-                          "%Y-%m-%d")
+    if (attributes(input$Start)$tz != tz | attributes(input$Stop)$tz != tz)
+      appendTo(c("Screen", "Report", "Warning"), paste0("Potential mismatch between deployments time zone (", attributes(input$Start)$tz, ") and 'tz' argument (", tz, ")! This could cause unwanted timelapses!"))
 
-  if (inherits(try(input$Start <- as.POSIXct(input$Start, tz = tz, tryFormats = timestamp_formats), silent = TRUE),"try-error")){
-    stopAndReport("Could not recognise the data in the 'Start' column as POSIX-compatible timestamps. Please double-check the deployments.")
-  }
+  } else {
+    timestamp_formats  <- c("%Y-%m-%d %H:%M:%OS", "%Y-%m-%dT%H:%M:%OS",
+                            "%Y-%m-%d %H:%M", "%Y-%m-%dT%H:%M",
+                            "%Y-%m-%d")
 
-  if (inherits(try(input$Stop <- as.POSIXct(input$Stop, tz = tz, tryFormats = timestamp_formats), silent = TRUE),"try-error")){
-    stopAndReport("Could not recognise the data in the 'Stop' column as POSIX-compatible timestamps. Please double-check the deployments.")
+    if (!inherits(input$Start, "POSIXct")) {
+      if (any(!grepl("^[1-2][0-9][0-9][0-9]-[0-1][0-9]-[0-3][0-9][ |T|t][0-2][0-9]:[0-5][0-9]", input$Start))) {
+        stopAndReport("Not all values in the 'Start' column appear to be in a 'yyyy-mm-dd hh:mm' format (seconds are optional). Please double-check the deployments.")
+      }
+      if (inherits(try(input$Start <- as.POSIXct(input$Start, tz = tz, tryFormats = timestamp_formats), silent = TRUE),"try-error")){
+        stopAndReport("Could not recognise the data in the 'Start' column as POSIX-compatible timestamps. Please double-check the deployments.")
+      }
+    }
+
+    if (!inherits(input$Stop, "POSIXct")) {
+      if (any(!grepl("^[1-2][0-9][0-9][0-9]-[0-1][0-9]-[0-3][0-9][ |T|t][0-2][0-9]:[0-5][0-9]", input$Stop))) {
+        stopAndReport("Not all values in the 'Stop' column appear to be in a 'yyyy-mm-dd hh:mm' format (seconds are optional). Please double-check the deployments.")
+      }
+      if (inherits(try(input$Stop <- as.POSIXct(input$Stop, tz = tz, tryFormats = timestamp_formats), silent = TRUE),"try-error")){
+        stopAndReport("Could not recognise the data in the 'Stop' column as POSIX-compatible timestamps. Please double-check the deployments.")
+      }
+    }
   }
 
   if (any(link <- input$Start > input$Stop)) {
     stopAndReport("Some deployment periods end before they have started! Please fix this before continuing.\n       Troublesome rows: ", paste(which(link), collapse = ", "))
   }
+
   input$Receiver <- as.character(input$Receiver)
   input$Receiver <- sapply(input$Receiver, function(x) tail(unlist(strsplit(x, "-")), 1))
   input <- input[order(input$Start), ]
@@ -1008,16 +1030,23 @@ loadBio <- function(input, tz){
     stopAndReport("The biometrics must contain an 'Release.date' column.")
   }
 
-  if (any(!grepl("^[1-2][0-9][0-9][0-9]-[0-1][0-9]-[0-3][0-9][ |T|t][0-2][0-9]:[0-5][0-9]", bio$Release.date))) {
-    stopAndReport("Not all values in the 'Release.date' column appear to be in a 'yyyy-mm-dd hh:mm' format (seconds are optional). Please double-check the biometrics.")
-  }
+  if (preloaded & inherits(bio$Release.date, "POSIXct")) {
+    appendTo(c("Screen", "Report"), "M: Preloaded Release dates are already in POSIX format. Skipping timestamp format checks.")
+    if (attributes(bio$Release.date)$tz != tz) {
+      appendTo(c("Screen", "Report", "Warning"), paste0("Potential mismatch between release dates time zone (", attributes(bio$Release.date)$tz, ") and 'tz' argument (", tz, ")! This could cause unwanted timelapses!"))
+    }
+  } else {
+    if (any(!grepl("^[1-2][0-9][0-9][0-9]-[0-1][0-9]-[0-3][0-9][ |T|t][0-2][0-9]:[0-5][0-9]", bio$Release.date))) {
+      stopAndReport("Not all values in the 'Release.date' column appear to be in a 'yyyy-mm-dd hh:mm' format (seconds are optional). Please double-check the biometrics.")
+    }
 
-  timestamp_formats  <- c("%Y-%m-%d %H:%M:%OS", "%Y-%m-%dT%H:%M:%OS",
-                          "%Y-%m-%d %H:%M", "%Y-%m-%dT%H:%M",
-                          "%Y-%m-%d")
+    timestamp_formats  <- c("%Y-%m-%d %H:%M:%OS", "%Y-%m-%dT%H:%M:%OS",
+                            "%Y-%m-%d %H:%M", "%Y-%m-%dT%H:%M",
+                            "%Y-%m-%d")
 
-  if (inherits(try(bio$Release.date <- as.POSIXct(bio$Release.date, tz = tz, tryFormats = timestamp_formats), silent = TRUE),"try-error")){
-    stopAndReport("Could not recognise the data in the 'Release.date' column as POSIX-compatible timestamps. Please double-check the biometrics.")
+    if (inherits(try(bio$Release.date <- as.POSIXct(bio$Release.date, tz = tz, tryFormats = timestamp_formats), silent = TRUE),"try-error")){
+      stopAndReport("Could not recognise the data in the 'Release.date' column as POSIX-compatible timestamps. Please double-check the biometrics.")
+    }
   }
 
   if (!any(grepl("^Signal$", colnames(bio)))) {

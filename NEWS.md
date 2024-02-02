@@ -7,6 +7,9 @@ Find out the main highlights of each update.
 Fixes:
   * Fix warning bug when reporting duplicated signals in the presence of dual-signal tags.
 
+Enhancements:
+  * Improve timestamp handling when importing data through `preload()` (issue [#72](https://github.com/hugomflavio/actel/issues/94)).
+
 ## actel 1.3.0
 
 Fixes:
