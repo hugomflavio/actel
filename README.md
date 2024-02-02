@@ -10,6 +10,8 @@ Jump to [**installation instructions**](#installing-actel)
 
 Read the [latest news here!](https://github.com/hugomflavio/actel/blob/master/NEWS.md#news)
 
+NOTE: actel now has a dedicated [website!](https://hugomflavio.github.io/actel-website/)
+
 ## Overview
 
 If you are using acoustic telemetry to track animals as they move inside a study area or as they migrate somewhere, actel is the package for you. 
