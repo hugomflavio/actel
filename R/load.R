@@ -872,7 +872,7 @@ loadSpatial <- function(input = "spatial.csv", section.order = NULL){
     stopAndReport("The spatial input must contain an 'Array' column.")
   }
   # check missing data in the arrays
-  if (any(is.na(input$Array)))
+  if (any(is.na(input$Array)) | any(input$Array == ""))
     stopAndReport("Some rows do not contain 'Array' information in the spatial input. Please double-check the input files.")
   # check spaces in the array names
   if (any(grepl(" ", input$Array))) {

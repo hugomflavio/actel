@@ -6,9 +6,10 @@ Find out the main highlights of each update.
 
 Fixes:
   * Fix warning bug when reporting duplicated signals in the presence of dual-signal tags.
+  * Gracefully stop in the presence of "" array names (issue [#95](https://github.com/hugomflavio/actel/issues/95)).
 
 Enhancements:
-  * Improve timestamp handling when importing data through `preload()` (issue [#72](https://github.com/hugomflavio/actel/issues/94)).
+  * Improve timestamp handling when importing data through `preload()` (issue [#94](https://github.com/hugomflavio/actel/issues/94)).
 
 ## actel 1.3.0
 
