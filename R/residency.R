@@ -1228,7 +1228,7 @@ assembleResidency <- function(secmoves, movements, spatial) {
 
     recipient <- as.data.frame(combine(recipient), stringsAsFactors = FALSE)
     # convert Total.times to numeric and replace NAs
-    the.cols <- which(grepl("Times.entered", colnames(recipient)))
+    the.cols <- which(grepl("Times\\.entered", colnames(recipient)))
     recipient[, the.cols] <- as.numeric(recipient[, the.cols])
     recipient[, the.cols[which(is.na(recipient[, the.cols]))]] <- 0
     # --

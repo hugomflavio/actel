@@ -840,7 +840,7 @@ plotDetections <- function(input, tag, type, y.axis = c("auto", "stations", "arr
   # grey dashes (for migration only)
   if (input$rsp.info$analysis.type == "migration" & like.migration) {
     status.df <- input$status.df
-    relevant.line <- status.df[which(status.df$Transmitter == tag), (grepl("First.arrived", colnames(status.df)) | grepl("Last.left", colnames(status.df)))]
+    relevant.line <- status.df[which(status.df$Transmitter == tag), (grepl("First\\.arrived", colnames(status.df)) | grepl("Last\\.left", colnames(status.df)))]
   } else {
     like.migration <- FALSE
   }
@@ -1243,7 +1243,7 @@ plotTimes <- function(times, night = NULL, circular.scale = c("area", "linear"),
   }
 
   if (!missing(file)) {
-    if (grepl(".svg$", file) | grepl(".pdf$", file)) {
+    if (grepl("\\.svg$", file) | grepl("\\.pdf$", file)) {
       if (cex != 1)
         message("M: When saving vectorial plots, it is recommended to refine the 'width' and 'height', rather than the 'cex'.")
       if (missing(height))
@@ -1257,7 +1257,7 @@ plotTimes <- function(times, night = NULL, circular.scale = c("area", "linear"),
       file <- gsub("\\\\|/|:|\\*|\\?|\\\"|<|>|\\|", "_", file)
     }
 
-    if (grepl(".png$", file) | grepl(".tiff$", file)) {
+    if (grepl("\\.png$", file) | grepl("\\.tiff$", file)) {
       if (missing(height))
         height <- 500
       if (missing(width))
@@ -1265,19 +1265,19 @@ plotTimes <- function(times, night = NULL, circular.scale = c("area", "linear"),
     }
 
     unk.ext <- TRUE
-    if (unk.ext && grepl(".svg$", file)) {
+    if (unk.ext && grepl("\\.svg$", file)) {
       grDevices::svg(file, height = height, width = width, bg = bg)
       unk.ext <- FALSE
     }
-    if (unk.ext && grepl(".pdf$", file)) {
+    if (unk.ext && grepl("\\.pdf$", file)) {
       grDevices::pdf(file, height = height, width = width, bg = bg)
       unk.ext <- FALSE
     }
-    if (unk.ext && grepl(".png$", file)) {
+    if (unk.ext && grepl("\\.png$", file)) {
       grDevices::png(file, height = height, width = width,  bg = bg)
       unk.ext <- FALSE
     }
-    if (unk.ext && grepl(".tiff$", file)) {
+    if (unk.ext && grepl("\\.tiff$", file)) {
       grDevices::tiff(file, height = height, width = width, bg = bg)
       unk.ext <- FALSE
     }
@@ -1311,9 +1311,9 @@ plotTimes <- function(times, night = NULL, circular.scale = c("area", "linear"),
       if (ncol > 1)
         warning("Plotting the legend in the corner but ncol > 1. This will likely lead to bad results.", immediate. = TRUE, call. = FALSE)
       if (ceiling(length(times)/ ncol) > 2) {
-        if (!missing(file) && (grepl(".png$", file) | grepl(".tiff", file)))
+        if (!missing(file) && (grepl("\\.png$", file) | grepl("\\.tiff", file)))
           ylegend <- -0.97 + (0.06 * (ceiling(length(times) / ncol) - 2))
-        if (missing(file) || (grepl(".svg$", file) | grepl(".pdf", file)))
+        if (missing(file) || (grepl("\\.svg$", file) | grepl("\\.pdf", file)))
           ylegend <- -0.97 + (0.08 * (ceiling(length(times) / ncol) - 2))
       } else {
         ylegend <- -0.97      

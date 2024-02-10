@@ -32,7 +32,7 @@ getDualMatrices <- function(replicates, CJS = NULL, spatial, detections.list) {
   for(i in 1:length(replicates)) {
     continue <- TRUE
     if (!is.null(CJS)) {
-      if (any(grepl("^max.efficiency$", names(CJS))))
+      if (any(grepl("^max\\.efficiency$", names(CJS))))
         already.calculated <- !is.na(CJS$max.efficiency[names(replicates)[i]])
       else
         already.calculated <- !is.na(CJS$efficiency[names(replicates)[i]])
@@ -334,7 +334,7 @@ assembleMatrices <- function(spatial, movements, status.df, arrays, paths, dotma
     # If the release sites start in different arrays, trim the matrices as needed
     if (length(unique.release.arrays) > 1) {
       for(i in 1:length(aux)){ # for each matrix, find the corresponding release site.
-        the_release_site <- sapply(spatial$release.sites$Standard.name, function(x) grepl(paste0(".", x, "$"), names(aux)[i])) 
+        the_release_site <- sapply(spatial$release.sites$Standard.name, function(x) grepl(paste0("\\.", x, "$"), names(aux)[i])) 
         if(sum(the_release_site) > 1) # if there is more than one matching release site, stop.
           stop("Multiple release sites match the matrix name. Make sure that the release sites' names are not contained within the animal groups or within themselves.\n")
         # else, find which is the first column to keep. This is tricky for multi-branch sites...

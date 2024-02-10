@@ -1238,7 +1238,7 @@ assembleTimetable <- function(secmoves, valid.moves, all.moves, spatial, arrays,
   }
   recipient <- c(recipient, "Very.last.array", "Very.last.time", "Status", "Valid.detections", "Valid.events", "Invalid.detections", "Invalid.events", "Backwards.movements", "Max.cons.back.moves", "P.type")
   if (attributes(dist.mat)$valid && speed.method == "last to last")
-    recipient <- recipient[!grepl("Average.speed.in",recipient)]
+    recipient <- recipient[!grepl("Average\\.speed\\.in", recipient)]
 
   timetable <- matrix(nrow = length(secmoves), ncol = length(recipient))
   timetable <- as.data.frame(timetable)
@@ -1285,14 +1285,14 @@ assembleTimetable <- function(secmoves, valid.moves, all.moves, spatial, arrays,
     recipient <- as.data.frame(combine(recipient), stringsAsFactors = FALSE)
 
     # convert numbers to numeric and replace NAs where relevant
-    the.cols <- which(grepl("Times.entered.", colnames(recipient)))
+    the.cols <- which(grepl("Times\\.entered\\.", colnames(recipient)))
     recipient[, the.cols] <- as.numeric(recipient[, the.cols])
     recipient[, the.cols[which(is.na(recipient[, the.cols]))]] <- 0
 
-    the.cols <- which(grepl("Average.speed.to.", colnames(recipient)))
+    the.cols <- which(grepl("Average\\.speed\\.to\\.", colnames(recipient)))
     recipient[, the.cols] <- as.numeric(recipient[, the.cols])
 
-    the.cols <- which(grepl("Average.speed.in.", colnames(recipient)))
+    the.cols <- which(grepl("Average\\.speed\\.in\\.", colnames(recipient)))
     recipient[, the.cols] <- as.numeric(recipient[, the.cols])
     # --
 

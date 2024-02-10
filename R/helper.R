@@ -570,7 +570,7 @@ recoverLog <- function(file, overwrite = FALSE) {
   if (!is.character(file) | length(file) != 1)
     stop("'file' must be a single character string.", call. = FALSE)
 
-  if (!grepl(".txt$", file))
+  if (!grepl("\\.txt$", file))
     file <- paste0(file, ".txt")
 
   if (file.exists(file) & !overwrite)

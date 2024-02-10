@@ -193,10 +193,6 @@ checkArguments <- function(dp, tz, min.total.detections, min.per.event, max.inte
     stopAndReport("'detections.y.axis' should be one of 'stations' or 'arrays'")
   detections.y.axis <- match.arg(detections.y.axis)
 
-  if (!is.character(timestep))
-    stopAndReport("'timestep' should be one of 'days' or 'hours'")
-  timestep <- match.arg(timestep)
-
   # Check that all the overridden tags are part of the study
   if (!is.null(dp) && !is.null(override)) {
     if (is.numeric(override)) {
@@ -212,6 +208,10 @@ checkArguments <- function(dp, tz, min.total.detections, min.per.event, max.inte
   }
 
   # NON-explore checks
+  if (!is.character(timestep))
+    stopAndReport("'timestep' should be one of 'days' or 'hours'")
+  timestep <- match.arg(timestep)
+
   if (!is.null(section.order) && any(table(section.order) > 1))
     stopAndReport("Some section names are duplicated in the 'section.order' argument. Please include each section only once.")
 

@@ -250,18 +250,18 @@ preloadDetections <- function(input, tz, start.time = NULL, stop.time = NULL) {
   if (!is.character(input$CodeSpace))
     input$CodeSpace <- as.character(input$CodeSpace)
 
-	if (length(the.col <- grep("^[S|s]ensor.[U|u]nit$", colnames(input))) > 0)
+	if (length(the.col <- grep("^[S|s]ensor\\.[U|u]nit$", colnames(input))) > 0)
 		colnames(input)[the.col] <- "Sensor.Unit"
 
-	if (length(the.col <- grep("^[S|s]ensor.[V|v]alue$", colnames(input))) > 0)
+	if (length(the.col <- grep("^[S|s]ensor\\.[V|v]alue$", colnames(input))) > 0)
 		colnames(input)[the.col] <- "Sensor.Value"
 	
-	if (!any(grepl("^Sensor.Value$", colnames(input)))) {
+	if (!any(grepl("^Sensor\\.Value$", colnames(input)))) {
 		appendTo(c("Screen", "Warning", "Report"), "Could not find a 'Sensor.Value' column in the detections. Filling one with NA.")
 		input$Sensor.Value <- NA_real_
 	}
 
-	if (!any(grepl("^Sensor.Unit$", colnames(input)))) {
+	if (!any(grepl("^Sensor\\.Unit$", colnames(input)))) {
 		appendTo(c("Screen", "Warning", "Report"), "Could not find a 'Sensor.Unit' column in the detections. Filling one with NA.")
 		input$Sensor.Unit <- NA_character_
 	}

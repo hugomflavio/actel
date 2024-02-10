@@ -854,7 +854,7 @@ loadSpatial <- function(input = "spatial.csv", section.order = NULL){
   if (!is.na(link <- match("Station.Name", colnames(input))))
     colnames(input)[link] <- "Station.name"
   # Check missing Station.name
-  if (!any(grepl("^Station.name$", colnames(input)))) {
+  if (!any(grepl("^Station\\.name$", colnames(input)))) {
     stopAndReport("The spatial input must contain a 'Station.name' column.")
   } else {
     # Check all station names are unique
@@ -1026,7 +1026,7 @@ loadBio <- function(input, tz){
     stopAndReport("The following columns are duplicated in the biometrics: '",
       paste(unique(colnames(bio)[link]), sep = "', '"), "'.")
 
-  if (!any(grepl("^Release.date$", colnames(bio)))) {
+  if (!any(grepl("^Release\\.date$", colnames(bio)))) {
     stopAndReport("The biometrics must contain an 'Release.date' column.")
   }
 
@@ -1057,7 +1057,7 @@ loadBio <- function(input, tz){
     stopAndReport("Some animals have no 'Signal' information. Please double-check the biometrics.")
   }
 
-  if (!any(grepl("^Code.space$", colnames(bio)))) {
+  if (!any(grepl("^Code\\.space$", colnames(bio)))) {
     appendTo(c("Screen", "Report"), "M: No Code.space column was found in the biometrics. Assigning code spaces based on detections.")
   } else {
       if (any(is.na(bio$Code.space)) | any(bio$Code.space == ""))
@@ -1112,7 +1112,7 @@ loadBio <- function(input, tz){
 
   # check sensor names
   if (!expect_integer) { 
-    if (!any(grepl("^Sensor.unit$", colnames(bio)))) {
+    if (!any(grepl("^Sensor\\.unit$", colnames(bio)))) {
       appendTo(c("Screen", "Warning"), "Tags with multiple sensors are listed in the biometrics, but a 'Sensor.unit' column could not be found. Skipping sensor unit assignment.")
     } 
     else {
@@ -1147,7 +1147,7 @@ loadBio <- function(input, tz){
   }
 
   # Release site quality checking/creation
-  if (!any(grepl("^Release.site$", colnames(bio)))) {
+  if (!any(grepl("^Release\\.site$", colnames(bio)))) {
     appendTo("Screen", "M: No Release site has been indicated in the biometrics. Creating a 'Release.site' column to avoid function failure. Filling with 'unspecified'.")
     bio$Release.site <- "unspecified"
   } else {
@@ -1326,7 +1326,7 @@ compileDetections <- function(path = "detections", start.time = NULL, stop.time 
             })
           unknown.file <- FALSE
         }
-        if (unknown.file && all(!is.na(match(c("Transmitter", "Receiver"), colnames(aux)))) & any(grepl("^Date.and.Time", colnames(aux)))) {
+        if (unknown.file && all(!is.na(match(c("Transmitter", "Receiver"), colnames(aux)))) & any(grepl("^Date\\.and\\.Time", colnames(aux)))) {
           appendTo("debug", paste0("File '", i, "' matches a Vemco log."))
           output <- tryCatch(processVemcoFile(input = aux), error = function(e) {
               stopAndReport("Something went wrong when processing file '", i, "'. If you are absolutely sure this file is ok, contact the developer.\nOriginal error:", sub("^Error:", "", e))
@@ -1437,7 +1437,7 @@ processThelmaOldFile <- function(input) {
   appendTo("debug", "Running processThelmaOldFile.")
   input <- as.data.frame(input, stringsAsFactors = FALSE)
   output <- data.table(
-    Timestamp = fasttime::fastPOSIXct(sapply(as.character(input[, grep("^Date.and.Time", colnames(input))]), function(x) gsub("Z", "", gsub("T", " ", x))), tz = "UTC"),
+    Timestamp = fasttime::fastPOSIXct(sapply(as.character(input[, grep("^Date\\.and\\.Time", colnames(input))]), function(x) gsub("Z", "", gsub("T", " ", x))), tz = "UTC"),
     Receiver = input$`TBR Serial Number`,
     CodeSpace = input$CodeType,
     Signal = input$Id,
@@ -1473,7 +1473,7 @@ processThelmaNewFile <- function(input) {
   appendTo("debug", "Running processThelmaNewFile.")
   input <- as.data.frame(input, stringsAsFactors = FALSE)
   output <- data.table(
-    Timestamp = fasttime::fastPOSIXct(sapply(as.character(input[, grep("^Date.and.Time", colnames(input))]), function(x) gsub("Z", "", gsub("T", " ", x))), tz = "UTC"),
+    Timestamp = fasttime::fastPOSIXct(sapply(as.character(input[, grep("^Date\\.and\\.Time", colnames(input))]), function(x) gsub("Z", "", gsub("T", " ", x))), tz = "UTC"),
     Receiver = input$Receiver,
     CodeSpace = sapply(input$Protocol, function(x) unlist(strsplit(x, "-", fixed = TRUE))[1]),
     Signal = input$ID,
@@ -1513,9 +1513,9 @@ processVemcoFile <- function(input) {
   input[, "Signal"] <- unlist(lapply(transmitter_aux, function(x) x[3])) # extract only signal
   input[, "Receiver"] <- sapply(input$Receiver, function(x) tail(unlist(strsplit(x, "-")), 1)) # extract only the serial
 
-  colnames(input)[grep("^Date.and.Time", colnames(input))] <- c("Timestamp")
+  colnames(input)[grep("^Date\\.and\\.Time", colnames(input))] <- c("Timestamp")
   colnames(input) <- gsub(" ", ".", colnames(input))
-  if (any(grepl("^Sensor.Value$", colnames(input)))) {
+  if (any(grepl("^Sensor\\.Value$", colnames(input)))) {
     input <- input[, c("Timestamp", "Receiver", "CodeSpace", "Signal", "Sensor.Value", "Sensor.Unit")]
   } else {
     input <- input[, c("Timestamp", "Receiver", "CodeSpace", "Signal")]
@@ -1663,7 +1663,7 @@ splitDetections <- function(detections, bio, exclude.tags = NULL) {
                          Signal = extractSignals(names(my.list)))
 
   # and this one as an index for the target tags
-  if (any(grepl("^Code.space$", colnames(bio))))
+  if (any(grepl("^Code\\.space$", colnames(bio))))
     bio_aux <- bio[, c("Code.space", "Signal")]
   else
     bio_aux <- data.frame(Code.space = NA,
@@ -1673,7 +1673,7 @@ splitDetections <- function(detections, bio, exclude.tags = NULL) {
   bio_aux$Signal_expanded <- lapply(strsplit(as.character(bio$Signal), "|", fixed = TRUE), as.numeric)
 
   # include sensor units, if relevant
-  if (any(grepl("^Sensor.unit$", colnames(bio))))
+  if (any(grepl("^Sensor\\.unit$", colnames(bio))))
     bio_aux$Sensor.unit_expanded <- strsplit(as.character(bio$Sensor.unit), "|", fixed = TRUE)
   else
     bio_aux$Sensor.unit_expanded <- NA
@@ -1727,7 +1727,7 @@ splitDetections <- function(detections, bio, exclude.tags = NULL) {
       output <- my.list[list_matches]
 
       # Find Sensor.unit column in the biometrics
-      if (any(grepl("^Sensor.unit$", colnames(bio)))) {
+      if (any(grepl("^Sensor\\.unit$", colnames(bio)))) {
         # Replace sensor units...
         for (j in 1:length(output)) {
           sensor_index <- match(extractSignals(names(output)[j]), bio_aux$Signal_expanded[[i]])

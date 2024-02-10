@@ -393,22 +393,22 @@ printDotplots <- function(status.df, valid.dist) {
   Transmitter <- NULL
 
   appendTo("debug", "Starting printDotplots")
-  t1 <- status.df[status.df$Valid.detections > 0, c("Transmitter", "Valid.detections", colnames(status.df)[grepl("Average.time.until", colnames(status.df)) | grepl("Average.speed.to", colnames(status.df)) | grepl("Total.time.in",
+  t1 <- status.df[status.df$Valid.detections > 0, c("Transmitter", "Valid.detections", colnames(status.df)[grepl("Average\\.time\\.until", colnames(status.df)) | grepl("Average\\.speed\\.to", colnames(status.df)) | grepl("Total\\.time\\.in",
     colnames(status.df))])]
   t1 <- t1[, apply(t1, 2, function(x) !all(is.na(x)))]
   t1$Transmitter <- factor(t1$Transmitter, levels = rev(t1$Transmitter))
   link <- unlist(sapply(colnames(t1), function(x) attributes(t1[,x])$units))
   colnames(t1)[match(names(link), colnames(t1))] <- paste0(names(link), "\n(", link, ")")
-  colnames(t1)[grepl("Average.speed.to", colnames(t1))] <- paste0(colnames(t1)[grepl("Average.speed.to", colnames(t1))], "\n(m/s)")
+  colnames(t1)[grepl("Average.speed.to", colnames(t1))] <- paste0(colnames(t1)[grepl("Average\\.speed\\.to", colnames(t1))], "\n(m/s)")
   colnames(t1)[2] <- "Detections\n(n)"
   if (valid.dist) {
-    t2 <- t1[, !grepl("Average.time.until", colnames(t1))]
+    t2 <- t1[, !grepl("Average\\.time\\.until", colnames(t1))]
   } else {
-    t2 <- t1[, !grepl("Average.speed.to", colnames(t1))]
+    t2 <- t1[, !grepl("Average\\.speed\\.to", colnames(t1))]
   }
-  colnames(t2) <- sub("Total.time.i", "I", colnames(t2))
-  colnames(t2) <- sub("Average.time.until", "To", colnames(t2))
-  colnames(t2) <- sub("Average.speed.t", "T", colnames(t2))
+  colnames(t2) <- sub("Total\\.time\\.i", "I", colnames(t2))
+  colnames(t2) <- sub("Average\\.time\\.until", "To", colnames(t2))
+  colnames(t2) <- sub("Average\\.speed\\.t", "T", colnames(t2))
   PlotData <- suppressWarnings(suppressMessages(reshape2::melt(t2)))
   PlotData$Colour <- "#ba009e" # purple, for bugs
   for (j in colnames(t2)[-1]) {
@@ -488,7 +488,7 @@ printSurvivalGraphic <- function(section.overview) {
   p <- p + ggplot2::theme_bw()
   p <- p + ggplot2::scale_y_continuous(limits = c(0, 1), expand = c(0, 0, 0.05, 0))
   p <- p + ggplot2::labs(x = "", y = "Survival")
-  the.width <- max(2, sum(grepl("Disap.", colnames(section.overview))) * nrow(section.overview))
+  the.width <- max(2, sum(grepl("Disap\\.", colnames(section.overview))) * nrow(section.overview))
   ggplot2::ggsave(paste0(tempdir(), "/actel_report_auxiliary_files/survival.png"), width = the.width, height = 4, limitsize = FALSE)
   appendTo("debug", "Finished printSurvivalGraphic")
 }
