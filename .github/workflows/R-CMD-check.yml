@@ -47,7 +47,7 @@ jobs:
 
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
-          cashe-version: 2
+          cache-version: 1
           dependencies: '"hard"'
           extra-packages: any::covr, any::testthat, any::terra, any::sp, any::raster, any::gdistance, any::rcmdcheck
           needs: check
