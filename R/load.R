@@ -1472,10 +1472,24 @@ processThelmaOldFile <- function(input) {
 processThelmaNewFile <- function(input) {
   appendTo("debug", "Running processThelmaNewFile.")
   input <- as.data.frame(input, stringsAsFactors = FALSE)
+
+  # leave the dots as wildcards as data table does not replace spaces with dots
+  time_col <- grep("^Date.and.Time", colnames(input))
+  time_vec <- fasttime::fastPOSIXct(
+    sapply(
+      as.character(input[, time_col]),
+      function(x) gsub("Z", "", gsub("T", " ", x))
+    ),
+    tz = "UTC"
+  )
+
+  codespace_vec <- sapply(input$Protocol,
+                          function(x) unlist(strsplit(x, "-", fixed = TRUE))[1])
+  
   output <- data.table(
-    Timestamp = fasttime::fastPOSIXct(sapply(as.character(input[, grep("^Date\\.and\\.Time", colnames(input))]), function(x) gsub("Z", "", gsub("T", " ", x))), tz = "UTC"),
+    Timestamp = time_vec,
     Receiver = input$Receiver,
-    CodeSpace = sapply(input$Protocol, function(x) unlist(strsplit(x, "-", fixed = TRUE))[1]),
+    CodeSpace = codespace_vec,
     Signal = input$ID,
     Sensor.Value = input$Data,
     Sensor.Unit = rep(NA_character_, nrow(input)))
