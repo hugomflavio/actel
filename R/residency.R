@@ -120,7 +120,7 @@ residency <- function(
   min.per.event = 1,
   start.time = NULL,
   stop.time = NULL,
-  speed.method = c("last to first", "last to last"),
+  speed.method = c("last to first", "last to last", "first to first"),
   speed.warning = NULL,
   speed.error = NULL,
   jump.warning = 2,

@@ -183,21 +183,38 @@ movementSpeeds <- function(movements, speed.method, dist.mat) {
   appendTo("debug", "Running movementSpeeds.")
   movements$Average.speed.m.s[1] <- NA
   if (nrow(movements) > 1) {
+    # run through every row, matching to the previous row
     capture <- lapply(2:nrow(movements), function(i) {
-      if (movements$Array[i] != movements$Array[i - 1] & all(!grep("^Unknown$", movements$Array[(i - 1):i]))) {
-        if (speed.method == "last to first"){
-          a.sec <- as.vector(difftime(movements$First.time[i], movements$Last.time[i - 1], units = "secs"))
-          my.dist <- dist.mat[movements$First.station[i], gsub(" ", ".", movements$Last.station[i - 1])]
+      changed_array <- movements$Array[i] != movements$Array[i - 1]
+      neither_unknown <- all(!grep("^Unknown$", movements$Array[(i - 1):i]))
+      
+      if (changed_array & neither_unknown) {
+        if (grepl("^first", speed.method)) {
+          time_start <- movements$First.time[i - 1]
+          station_start <- movements$First.station[i - 1]
+        } else {
+          time_start <- movements$Last.time[i - 1]
+          station_start <- movements$Last.station[i - 1]
         }
-        if (speed.method == "last to last"){
-          a.sec <- as.vector(difftime(movements$Last.time[i], movements$Last.time[i - 1], units = "secs"))
-          my.dist <- dist.mat[movements$Last.station[i], gsub(" ", ".", movements$Last.station[i - 1])]
+
+        if (grepl("first$", speed.method)) {
+          time_end <- movements$First.time[i]
+          station_end <- gsub(" ", ".", movements$First.station[i])
+          # the gsub is just to match the column name in the distances matrix
+        } else {
+          time_end <- movements$Last.time[i]
+          station_end <- gsub(" ", ".", movements$Last.station[i])
+          # same as above
         }
-        movements$Average.speed.m.s[i] <<- round(my.dist/a.sec, 6)
-        rm(a.sec, my.dist)
+
+        time_spent <- as.vector(difftime(time_end, time_start, units = "secs"))
+        dist_went <- dist.mat[station_start, station_end]
+
+        movements$Average.speed.m.s[i] <<- round(dist_went/time_spent, 6)
       } else {
         movements$Average.speed.m.s[i] <<- NA_real_
       }
+      return(NULL) # we don't care about the lapply output. See <<- above.
     })
   }
   return(movements)
@@ -217,7 +234,7 @@ movementTimes <- function(movements, type = c("array", "section")){
   type = match.arg(type)
   time.in <- paste0("Time.in.", type)
   appendTo("debug", "Running movementTimes.")
-  # Time travelling
+  # Time traveling
   if (nrow(movements) > 1) {
     aux <- data.frame(
       First.time = movements$First.time[-1],
@@ -285,16 +302,21 @@ speedReleaseToFirst <- function(tag, bio, movements, dist.mat, speed.method){
       s <- paste0("0", s)
     movements$Time.travelling[1] <- paste(h, m, s, sep = ":")
     if (attributes(dist.mat)$valid & movements$Array[1] != "Unknown") {
-      if (speed.method == "last to first") {
-        a.sec <- as.vector(difftime(movements$First.time[1], origin.time, units = "secs"))
-        my.dist <- dist.mat[movements$First.station[1], origin.place]
-        movements$Average.speed.m.s[1] <- round(my.dist/a.sec, 6)
+
+      if (grepl("first$", speed.method)) {
+        time_end <- movements$First.time[1]
+        station_end <- gsub(" ", ".", movements$First.station[1])
+        # the gsub is just to match the column name in the distances matrix
+      } else {
+        time_end <- movements$Last.time[1]
+        station_end <- gsub(" ", ".", movements$Last.station[1])
+        # same as above
       }
-      if (speed.method == "last to last") {
-        a.sec <- as.vector(difftime(movements$Last.time[1], origin.time, units = "secs"))
-        my.dist <- dist.mat[movements$Last.station[1], origin.place]
-        movements$Average.speed.m.s[1] <- round(my.dist/a.sec, 6)
-      }
+
+      time_spent <- as.vector(difftime(time_end, origin.time, units = "secs"))
+      dist_went <- dist.mat[origin.place, station_end]
+
+      movements$Average.speed.m.s[1] <- round(dist_went/time_spent, 6)
     }
   } else {
     movements$Time.travelling[1] <- NA
@@ -377,7 +399,7 @@ sectionMovements <- function(movements, spatial, valid.dist) {
       stringsAsFactors = FALSE
       )
   }
-  output <- as.data.table(movementTimes(movements = recipient, type = "section"))
+  output <- data.table::as.data.table(movementTimes(movements = recipient, type = "section"))
   attributes(output)$p.type <- attributes(movements)$p.type
   return(output)
 }

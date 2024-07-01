@@ -8,6 +8,12 @@ exampleWorkspace("exampleWorkspace", force = TRUE)
 setwd("exampleWorkspace")
 write.csv(example.distances, "distances.csv")
 
+test_that("residency stops when any argument does not make sense", {
+	expect_error(residency(tz = 'Europe/Copenhagen', timestep = 1),
+		"'timestep' should be one of 'days' or 'hours'", fixed = TRUE)
+})
+
+
 test_that("residency results contains all the expected elements.", {
 	output <- suppressWarnings(residency(tz = 'Europe/Copenhagen', report = FALSE, GUI = "never"))
 

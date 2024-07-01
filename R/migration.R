@@ -129,7 +129,7 @@ migration <- function(
   min.per.event = 1,
   start.time = NULL,
   stop.time = NULL,
-  speed.method = c("last to first", "last to last"),
+  speed.method = c("last to first", "last to last", "first to first"),
   speed.warning = NULL,
   speed.error = NULL,
   jump.warning = 2,
@@ -1195,24 +1195,53 @@ assembleTimetable <- function(secmoves, valid.moves, all.moves, spatial, arrays,
       the.row <- match(tag, bio$Transmitter)
       origin.time <- bio[the.row, "Release.date"]
       origin.place <- as.character(bio[the.row, "Release.site"])
+      
       if (origin.time <= aux$First.time[1]) {
-        a.sec <- as.vector(difftime(aux$First.time[1], origin.time, units = "secs"))
-        my.dist <- dist.mat[aux$First.station[1], origin.place]
-        aux$Speed.until[1] <- round(my.dist/a.sec, 6)
+
+        if (grepl("first$", speed.method)) {
+          time_end <- aux$First.time[1]
+          station_end <- gsub(" ", ".", aux$First.station[1])
+          # the gsub is just to match the column name in the distances matrix
+        } else {
+          time_end <- aux$Last.time[1]
+          station_end <- gsub(" ", ".", aux$Last.station[1])
+          # same as above
+        }
+
+        time_spent <- as.vector(difftime(time_end, origin.time, units = "secs"))
+        dist_went <- dist.mat[origin.place, station_end]
+
+        aux$Speed.until[1] <- round(dist_went/time_spent, 6)
+
       }
+
 
       if (nrow(aux) > 1) {
         capture <- lapply(2:nrow(aux), function(i) {
-          if (speed.method == "last to first"){
-            a.sec <- as.vector(difftime(aux$First.time[i], aux$Last.time[i - 1], units = "secs"))
-            my.dist <- dist.mat[aux$First.station[i], gsub(" ", ".", aux$Last.station[i - 1])]
+
+          if (grepl("^first", speed.method)) {
+            time_start <- aux$First.time[i - 1]
+            station_start <- aux$First.station[i - 1]
+          } else {
+            time_start <- aux$Last.time[i - 1]
+            station_start <- aux$Last.station[i - 1]
           }
-          if (speed.method == "last to last"){
-            a.sec <- as.vector(difftime(aux$Last.time[i], aux$Last.time[i - 1], units = "secs"))
-            my.dist <- dist.mat[aux$Last.station[i], gsub(" ", ".", aux$Last.station[i - 1])]
+
+          if (grepl("first$", speed.method)) {
+            time_end <- aux$First.time[i]
+            station_end <- gsub(" ", ".", aux$First.station[i])
+            # the gsub is just to match the column name in the distances matrix
+          } else {
+            time_end <- aux$Last.time[i]
+            station_end <- gsub(" ", ".", aux$Last.station[i])
+            # same as above
           }
-          aux$Speed.until[i] <<- round(my.dist/a.sec, 6)
-          rm(a.sec, my.dist)
+
+          time_spent <- as.vector(difftime(time_end, time_start, units = "secs"))
+          dist_went <- dist.mat[station_start, station_end]
+
+          aux$Speed.until[i] <<- round(dist_went/time_spent, 6)
+          return(NULL) # we don't care about this lapply output. See <<- above.
         })
       }
       return(aux)

@@ -39,8 +39,10 @@ present in \code{\link[base]{timezones}}.}
 \item{speed.method}{Can take two forms: 'last to first' or 'last to last'.
 If 'last to first' (default), the last detection on the previous array is matched
 to the first detection on the target array to perform the calculations.
-If 'last to last', the last detection on ´the previous array is matched to the
-last detection on the target array to perform the calculations.}
+If 'last to last', the last detection on the previous array is matched to the
+last detection on the target array to perform the calculations.
+If 'first to first', the first detection on the previous array is matched to the
+first detection on the target array to perform the calculations.}
 
 \item{if.last.skip.section}{Logical: Should a tag detected at the last array
 of a given section be considered to have disappeared in the next section?}

@@ -11,6 +11,7 @@ Fixes:
 Enhancements:
   * Improve timestamp handling when importing data through `preload()` (issue [#94](https://github.com/hugomflavio/actel/issues/94)).
   * Improve column name checks to avoid accidentally matching anything to the dot wildcard.
+  * Add new "first to first" method to speed calculations (issue [#94](https://github.com/hugomflavio/actel/issues/96))
 
 ## actel 1.3.0
 

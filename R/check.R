@@ -43,7 +43,7 @@ NULL
 #'
 #' @return updated parameters
 #'
-checkArguments <- function(dp, tz, min.total.detections, min.per.event, max.interval, speed.method = c("last to first", "last to last"),
+checkArguments <- function(dp, tz, min.total.detections, min.per.event, max.interval, speed.method = c("last to first", "last to last", "first to first"),
   speed.warning, speed.error, start.time, stop.time, report, auto.open, save.detections, jump.warning, jump.error,
   inactive.warning, inactive.error, exclude.tags, override, print.releases, detections.y.axis = c("auto", "stations", "arrays"),
   if.last.skip.section = NULL, replicates = NULL, section.warning, section.error, section.order = NULL, timestep = c("days", "hours")) {
@@ -93,7 +93,7 @@ checkArguments <- function(dp, tz, min.total.detections, min.per.event, max.inte
     appendTo(c("Screen", "Warning"), "Setting 'max.interval' to less than 10 minutes is not recommended!\n         This can lead to the creation of an immense number of movement events,\n         which will be hardly manageable if any quality check is triggered.")
 
   if (!is.character(speed.method))
-    stopAndReport("'speed.method' should be one of 'last to first' or 'last to last'.")
+    stopAndReport("'speed.method' should be one of 'last to first', 'last to last', or 'first to first'.")
   speed.method <- match.arg(speed.method)
 
   if (!is.null(speed.warning) && !is.numeric(speed.warning))

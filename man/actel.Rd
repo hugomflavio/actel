@@ -2,8 +2,8 @@
 % Please edit documentation in R/actel.R
 \docType{package}
 \name{actel}
-\alias{actel}
 \alias{actel-package}
+\alias{actel}
 \title{actel: Acoustic Telemetry Data Analysis}
 \description{
 actel is designed for studies where animals tagged with acoustic tags are expected
