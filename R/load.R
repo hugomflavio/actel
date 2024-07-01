@@ -1333,6 +1333,13 @@ compileDetections <- function(path = "detections", start.time = NULL, stop.time 
             })
           unknown.file <- FALSE
         }
+        if (unknown.file && all(!is.na(match(c("Device Time (UTC)", "Full ID", "Serial Number"), colnames(aux))))) {
+          appendTo("debug", paste0("File '", i, "' matches an Innovasea log."))
+          output <- tryCatch(processInnovaseaFile(input = aux), error = function(e) {
+              stopAndReport("Something went wrong when processing file '", i, "'. If you are absolutely sure this file is ok, contact the developer.\nOriginal error:", sub("^Error:", "", e))
+            })
+          unknown.file <- FALSE
+        }
         if (unknown.file) {
           appendTo(c("Screen", "Report", "Warning"),
             paste0("File '", i, "' does not match to any of the supported hydrophone file formats!\n         If your file corresponds to a hydrophone log and actel did not recognize it, please get in contact through www.github.com/hugomflavio/actel/issues/new"))
@@ -1536,6 +1543,43 @@ processVemcoFile <- function(input) {
     input$Sensor.Value <- rep(NA_real_, nrow(input))
     input$Sensor.Unit <- rep(NA_character_, nrow(input))
   }
+  input$Timestamp <- fasttime::fastPOSIXct(as.character(input$Timestamp), tz = "UTC")
+  
+  if (any(is.na(input$Timestamp)))
+    stop("Importing timestamps failed", call. = FALSE)
+  if (any(is.na(input$Receiver)))
+    stop("Importing receivers failed", call. = FALSE)
+  if (any(is.na(input$Signal)))
+    stop("Importing code space failed", call. = FALSE)
+  if (any(is.na(input$Receiver)))
+    stop("Importing signals failed", call. = FALSE)
+  return(input)
+}
+
+#' Innovasea files
+#'
+#' Processes Innovasea ALS files
+#'
+#' @param input the detections data frame.
+#'
+#' @return A data frame of standardized detections from the input file.
+#'
+#' @keywords internal
+#'
+processInnovaseaFile <- function(input) {
+  appendTo("Debug", "Running processInnovaseaFile.")
+
+  colnames(input) <- gsub(" ", ".", colnames(input))
+
+  transmitter_aux <- strsplit(input$Full.ID, "-", fixed = TRUE)
+  input$CodeSpace <- unlist(lapply(transmitter_aux, function(x) paste(x[1:2], collapse = "-"))) # Rejoin code space
+  input$Signal <- unlist(lapply(transmitter_aux, function(x) x[3])) # extract only signal
+  input$Receiver <- input$Serial.Number
+  input$Timestamp <- input$`Device.Time.(UTC)`
+  input$Sensor.Value <- input$Raw.Data
+  input$Sensor.Unit <- rep(NA_character_, nrow(input))
+
+  input <- input[, c("Timestamp", "Receiver", "CodeSpace", "Signal", "Sensor.Value", "Sensor.Unit")]
   input$Timestamp <- fasttime::fastPOSIXct(as.character(input$Timestamp), tz = "UTC")
   
   if (any(is.na(input$Timestamp)))

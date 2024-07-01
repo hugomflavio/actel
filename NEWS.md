@@ -11,7 +11,8 @@ Fixes:
 Enhancements:
   * Improve timestamp handling when importing data through `preload()` (issue [#94](https://github.com/hugomflavio/actel/issues/94)).
   * Improve column name checks to avoid accidentally matching anything to the dot wildcard.
-  * Add new "first to first" method to speed calculations (issue [#94](https://github.com/hugomflavio/actel/issues/96))
+  * Add new "first to first" method to speed calculations (issue [#96](https://github.com/hugomflavio/actel/issues/96))
+  * New `processInnovaseaFile()` function to handle updated innovasea detection file format (issue [#97](https://github.com/hugomflavio/actel/issues/97)).
 
 ## actel 1.3.0
 
