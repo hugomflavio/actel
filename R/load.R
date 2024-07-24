@@ -1326,7 +1326,7 @@ compileDetections <- function(path = "detections", start.time = NULL, stop.time 
             })
           unknown.file <- FALSE
         }
-        if (unknown.file && all(!is.na(match(c("Transmitter", "Receiver"), colnames(aux)))) & any(grepl("^Date\\.and\\.Time", colnames(aux)))) {
+        if (unknown.file && all(!is.na(match(c("Transmitter", "Receiver"), colnames(aux)))) & any(grepl("^Date.and.Time", colnames(aux)))) {
           appendTo("debug", paste0("File '", i, "' matches a Vemco log."))
           output <- tryCatch(processVemcoFile(input = aux), error = function(e) {
               stopAndReport("Something went wrong when processing file '", i, "'. If you are absolutely sure this file is ok, contact the developer.\nOriginal error:", sub("^Error:", "", e))
@@ -1534,7 +1534,7 @@ processVemcoFile <- function(input) {
   input[, "Signal"] <- unlist(lapply(transmitter_aux, function(x) x[3])) # extract only signal
   input[, "Receiver"] <- sapply(input$Receiver, function(x) tail(unlist(strsplit(x, "-")), 1)) # extract only the serial
 
-  colnames(input)[grep("^Date\\.and\\.Time", colnames(input))] <- c("Timestamp")
+  colnames(input)[grep("^Date.and.Time", colnames(input))] <- c("Timestamp")
   colnames(input) <- gsub(" ", ".", colnames(input))
   if (any(grepl("^Sensor\\.Value$", colnames(input)))) {
     input <- input[, c("Timestamp", "Receiver", "CodeSpace", "Signal", "Sensor.Value", "Sensor.Unit")]
