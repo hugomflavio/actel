@@ -903,6 +903,9 @@ plotDetections <- function(input, tag, type, y.axis = c("auto", "stations", "arr
   # Include invalid, if needed
   if (y.axis == "stations" && (any(levels(detections$Array) == "Unknown") | any(!detections$Valid)) ) {
     levels(detections$Array)[levels(detections$Array) == "Unknown"] <- "Invalid"
+    if (!(any(levels(detections$Array) == "Invalid"))) {
+      levels(detections$Array) <- c(levels(detections$Array), "Invalid")
+    }
     array.order <- rbind(array.order, c("Invalid", "Invalid"))
   }
 
