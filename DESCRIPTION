@@ -1,7 +1,7 @@
 Package: actel
 Title: Acoustic Telemetry Data Analysis
 Version: 1.3.0.9007
-Authors@R: person("Hugo", "Flávio", role = c("aut", "cre"), email = "hflavio@wlu.ca", comment = c(ORCID = "0000-0002-5174-1197"))
+Authors@R: person("Hugo", "Flávio", role = c("aut", "cre"), email = "hflavio@dal.ca", comment = c(ORCID = "0000-0002-5174-1197"))
 Description: Designed for studies where animals tagged with acoustic tags are expected
     to move through receiver arrays. This package combines the advantages of automatic sorting and checking 
     of animal movements with the possibility for user intervention on tags that deviate from expected 
