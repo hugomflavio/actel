@@ -7,6 +7,7 @@ Find out the main highlights of each update.
 Fixes:
   * Fix warning bug when reporting duplicated signals in the presence of dual-signal tags.
   * Gracefully stop in the presence of "" array names (issue [#95](https://github.com/hugomflavio/actel/issues/95)).
+  * Fix minor aesthetic bug that would cause invalid detections to show up as NA in the captions of individual detection plots.
 
 Enhancements:
   * Improve timestamp handling when importing data through `preload()` (issue [#94](https://github.com/hugomflavio/actel/issues/94)).
