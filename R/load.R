@@ -1299,11 +1299,11 @@ compileDetections <- function(path = "detections", start.time = NULL,
 
   # known header formats
   header_formats <- list(
-    std_header = c("Timestamp", "CodeSpace", "Receiver", "Signal"),
-    thelma_old_header = c("CodeType", "TBR Serial Number", "Id"),
-    thelma_new_header = c("Protocol", "Receiver", "ID"),
-    vemco_header = c("Transmitter", "Receiver", "Date.and.Time"),
-    innovasea_header = c("Device Time (UTC)", "Full ID", "Serial Number"))
+    std = c("Timestamp", "CodeSpace", "Receiver", "Signal"),
+    thelma_old = c("CodeType", "TBR Serial Number", "Id"),
+    thelma_new = c("Protocol", "Receiver", "ID"),
+    vemco = c("Transmitter", "Receiver", "Date.and.Time"),
+    innovasea = c("Device Time (UTC)", "Full ID", "Serial Number"))
 
   # Prepare the detection files
   data.files <- lapply(file.list, function(i) {
