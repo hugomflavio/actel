@@ -329,9 +329,12 @@ preloadDetections <- function(input, tz, start.time = NULL, stop.time = NULL) {
 				return(NULL) })
 
 		if (is.null(aux)) {
-			input$Receiver <- extractSignals(input$Receiver) # this works for extracting only the receiver numbers too
-			aux <- tryCatch(as.integer(input$Receiver),
-				warning = function(w) stop("Extracting the serial numbers failed. Aborting.", call. = FALSE))
+      # extractSignals works for extracting only the receiver numbers too
+			aux <- tryCatch(extractSignals(input$Receiver),
+				warning = function(w) {
+          stop("Extracting the serial numbers failed. Aborting.",
+            call. = FALSE)
+        })
 		}
 		input$Receiver <- aux
 	}
