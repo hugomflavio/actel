@@ -17,8 +17,8 @@ test_that("dataToList is working", {
 })
 
 test_that("extractSignals is working", {
-	expect_equal(extractSignals(input = "A-B-123"), "123")
-	expect_equal(extractSignals(input = "ABV-023"), "023")	
+	expect_equal(extractSignals(input = "A-B-123"), 123)
+	expect_equal(extractSignals(input = "ABV-023"), 23)
 })
 
 test_that("extractCodeSpaces is working", {
