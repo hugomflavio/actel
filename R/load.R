@@ -1522,10 +1522,10 @@ processStandardFile <- function(input) {
   if (any(is.na(output$Receiver))) {
     stop("Importing receivers failed", call. = FALSE)
   }
-  if (any(is.na(output$Signal))) {
+  if (any(is.na(output$CodeSpace))) {
     stop("Importing code space failed", call. = FALSE)
   }
-  if (any(is.na(output$Receiver))) {
+  if (any(is.na(output$Signal))) {
     stop("Importing signals failed", call. = FALSE)
   }
   return(output)
@@ -1570,10 +1570,10 @@ processThelmaOldFile <- function(input) {
   if (any(is.na(output$Receiver))) {
     stop("Importing receivers failed", call. = FALSE)
   }
-  if (any(is.na(output$Signal))) {
+  if (any(is.na(output$CodeSpace))) {
     stop("Importing code space failed", call. = FALSE)
   }
-  if (any(is.na(output$Receiver))) {
+  if (any(is.na(output$Signal))) {
     stop("Importing signals failed", call. = FALSE)
   }
   return(output)
@@ -1621,10 +1621,10 @@ processThelmaNewFile <- function(input) {
   if (any(is.na(output$Receiver))) {
     stop("Importing receivers failed", call. = FALSE)
   }
-  if (any(is.na(output$Signal))) {
+  if (any(is.na(output$CodeSpace))) {
     stop("Importing code space failed", call. = FALSE)
   }
-  if (any(is.na(output$Receiver))) {
+  if (any(is.na(output$Signal))) {
     stop("Importing signals failed", call. = FALSE)
   }
   return(output)
@@ -1668,10 +1668,10 @@ processVemcoFile <- function(input) {
   if (any(is.na(input$Receiver))) {
     stop("Importing receivers failed", call. = FALSE)
   }
-  if (any(is.na(input$Signal))) {
+  if (any(is.na(input$CodeSpace))) {
     stop("Importing code space failed", call. = FALSE)
   }
-  if (any(is.na(input$Receiver))) {
+  if (any(is.na(input$Signal))) {
     stop("Importing signals failed", call. = FALSE)
   }
   return(input)
@@ -1715,10 +1715,10 @@ processInnovaseaFile <- function(input) {
   if (any(is.na(input$Receiver))) {
     stop("Importing receivers failed", call. = FALSE)
   }
-  if (any(is.na(input$Signal))) {
+  if (any(is.na(input$CodeSpace))) {
     stop("Importing code space failed", call. = FALSE)
   }
-  if (any(is.na(input$Receiver))) {
+  if (any(is.na(input$Signal))) {
     stop("Importing signals failed", call. = FALSE)
   }
   return(input)
