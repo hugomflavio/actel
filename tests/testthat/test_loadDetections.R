@@ -96,8 +96,7 @@ test_that("loadDetections can handle the presence of a detections folder and det
 test_that("loadDetectons can handle random/empty files", {
 	write.csv("abc", "detections/bad_file.csv", row.names = FALSE)
 	expect_warning(loadDetections(start.time = NULL, stop.time = NULL, tz = "Europe/Copenhagen", force = FALSE),
-		"File 'detections/bad_file.csv' could not be recognized as a valid detections table (ncol < 3), skipping processing. Are you sure it is a comma separated file?", fixed = TRUE)
-
+"File 'detections/bad_file.csv' does not match to any of the supported hydrophone file formats!\n         If your file corresponds to a hydrophone log and actel did not recognize it, please get in contact through www.github.com/hugomflavio/actel/issues/new", fixed = TRUE)
 	sink("detections/bad_file.csv")
 	cat("'abc','def','ghi'\n1,2,3\n")
 	sink()
@@ -151,7 +150,7 @@ aux <- split(example.detections, example.detections$Receiver)
 for (i in names(aux)[1:3]) {
   write.csv(aux[[i]], paste0("detections/", i, ".csv"), row.names = FALSE)
 }
-  write.csv(aux[[3]], paste0("detections/test.csv"), row.names = FALSE)
+write.csv(aux[[3]], paste0("detections/test.csv"), row.names = FALSE)
 
 test_that("checkDupDetections kicks in if needed.", {
 	detections <- loadDetections(start.time = "2018-04-15 00:00:00", tz = "Europe/Copenhagen", force = FALSE)
