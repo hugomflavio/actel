@@ -264,7 +264,6 @@ test_that("preload stops if user-defined section order has duplicates", {
 	"Some section names are duplicated in the 'section.order' argument. Please include each section only once.", fixed = TRUE)
 })
 
-
 test_that("preload can handle spatial objects with one array only", {
 	xdeployments <- deployments[deployments$Station == "Station 1", ]
 	xspatial <- spatial[c(2, 18), ]
@@ -302,8 +301,6 @@ test_that("preload works even if Sensor.Value/Sensor.Unit is missing", {
 															dot = dot, tz = "Europe/Copenhagen"),
 		"Could not find a 'Sensor.Unit' column in the detections. Filling one with NA.", fixed = TRUE)
 })
-
-
 
 setwd("..")
 unlink("exampleWorkspace", recursive = TRUE)
