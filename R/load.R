@@ -1247,9 +1247,10 @@ loadDetections <- function(start.time = NULL, stop.time = NULL, tz, force = FALS
     rm(actel.detections)
   }
 
-  if (recompile)
+  if (recompile) {
     detections <- compileDetections(path = "detections", start.time = start.time,
       stop.time = stop.time, tz = tz, save.detections = save.detections, record.source = record.source)
+  }
 
   detections$Valid <- TRUE
   return(detections)
@@ -1270,92 +1271,170 @@ loadDetections <- function(start.time = NULL, stop.time = NULL, tz, force = FALS
 #'
 #' @keywords internal
 #'
-compileDetections <- function(path = "detections", start.time = NULL, stop.time = NULL, 
-  tz, save.detections = FALSE, record.source = FALSE) {
+compileDetections <- function(path = "detections", start.time = NULL, 
+    stop.time = NULL, tz, save.detections = FALSE, record.source = FALSE) {
   appendTo("Screen", "M: Compiling detections...")
   # Find the detection files
   if (file_test("-d", path)) {
-    file.list <- list.files(path = path, pattern = "*.csv", full.names = TRUE)
-    if (length(file.list) == 0)
+    file.list <- list.files(path = path, 
+      pattern = "*(\\.[cC][sS][vV]|\\.[vV][rR][lL])", 
+      full.names = TRUE)
+    if (length(file.list) == 0) {
       stopAndReport("A 'detections' folder is present but appears to be empty.")
+    }
   } else {
-    if (file.exists("detections.csv"))
+    if (file.exists("detections.csv")) {
       file.list <- "detections.csv"
-    else
-      stopAndReport("Could not find a 'detections' folder nor a 'detections.csv' file.")
+    } else {
+      stopAndReport("Could not find a 'detections' folder ",
+                    "nor a 'detections.csv' file.")
+    }
   }
-  if (file_test("-d", path) & file.exists("detections.csv"))
-    appendTo(c("Screen", "Warning", "Report"), "Both a 'detections' folder and a 'detections.csv' file are present in the current directory.\n   Loading ONLY the files present in the 'detections' folder.")
+  if (file_test("-d", path) & file.exists("detections.csv")) {
+    appendTo(c("Screen", "Warning", "Report"), 
+      paste0("Both a 'detections' folder and a 'detections.csv' file are ",
+        "present in the current directory.\n",
+        "   Loading ONLY the files present in the 'detections' folder."))
+  }
+
+  # known header formats
+  header_formats <- list(
+    std_header = c("Timestamp", "CodeSpace", "Receiver", "Signal"),
+    thelma_old_header = c("CodeType", "TBR Serial Number", "Id"),
+    thelma_new_header = c("Protocol", "Receiver", "ID"),
+    vemco_header = c("Transmitter", "Receiver", "Date.and.Time"),
+    innovasea_header = c("Device Time (UTC)", "Full ID", "Serial Number"))
+
   # Prepare the detection files
   data.files <- lapply(file.list, function(i) {
     appendTo("debug", paste0("Importing file '", i, "'."))
-    aux <- data.table::fread(i, fill = TRUE, sep = ",", showProgress = FALSE)
-    if (ncol(aux) < 3) {
-      appendTo(c("Screen", "Warning", "Report"), paste0("File '", i, "' could not be recognized as a valid detections table (ncol < 3), skipping processing. Are you sure it is a comma separated file?"))
+
+    file_extension <- stringr::str_extract(i, "(?<=\\.).*$")
+
+    if (grepl("[vV][rR][lL]", file_extension)) {
+      appendTo(c("Screen", "Report", "Warning"),
+        paste0("File '", i, "' is in VRL (Vemco Receiver Log) format, which ",
+          "actel can't currently process. To include this file in your ",
+          "analyses, you must convert it to CSV format. That can be done ",
+          "using Innovasea's software, or the vrl2csv() function of the ",
+          "glatos package."))
       flush.console()
       return(NULL)
-    } else {
+    }
+
+    file_header <- readLines(i, 1)
+  
+    # find the header format that matches the current file
+    file_match <- sapply(header_formats,
+      function(fingerprint) {
+        all(sapply(fingerprint,
+          function(i) {grepl(i, file_header)}))
+      })
+
+    # if no matches were found, then warn the 
+    # user that the file won't be processed.
+    if (all(!file_match)) {
+      appendTo(c("Screen", "Report", "Warning"),
+        paste0("File '", i, "' does not match to any of the supported ",
+          "hydrophone file formats!\n         If your file corresponds ",
+          "to a hydrophone log and actel did not recognize it, please get ",
+          "in contact through www.github.com/hugomflavio/actel/issues/new"))
+      flush.console()
+      return(NULL) # stops this lapply iteration - nothing to do here.
+    }
+
+    # if more than one match is found, let the user know,
+    # and pick the earliest match in the list
+    if (sum(file_match) > 1) {
+      appendTo(c("Screen", "Report"),
+        paste0("File '", i, "' matches more than one file format (matches: ",
+          paste0(names(file_match)[file_match], collapse = ", "), "). ",
+          "Picking the first matching type (", names(file_match)[file_match][1],
+          "). If this causes issues, get in contact through ",
+          "www.github.com/hugomflavio/actel/issues/new"))
+      flush.console()
+    }
+
+    # this code works both for the cases where there is only one match
+    # and where we want to pick the first of many.
+    file_type <- names(file_match)[file_match][1]
+
+    # preliminary load and check of CSV logs
+    if (file_type %in% 
+      c("std", "thelma_new", "thelma_old", "vemco", "innovasea")) {
+      aux <- data.table::fread(i, fill = TRUE, sep = ",", showProgress = FALSE)
       if(nrow(aux) == 0){
-        appendTo(c("Screen", "Report"), paste0("File '", i, "' is empty, skipping processing."))
+        appendTo(c("Screen", "Report"), 
+          paste0("File '", i, "' is empty, skipping processing."))
         flush.console()
-        return(NULL)
-      } else {
-        unknown.file <- TRUE
-        if (unknown.file && all(!is.na(match(c("Timestamp", "CodeSpace", "Receiver", "Signal"), colnames(aux))))) {
-          appendTo("debug", paste0("File '", i, "' matches a Standard log."))
-          if (!is.numeric(aux$Receiver))
-            stopAndReport("The file '", i, "' was recognized as a standard detections file, but the 'Receiver' column is not numeric.\nPlease include only the receiver serial numbers in the 'Receiver' column.")
-          if (!is.numeric(aux$Signal))
-            stopAndReport("The file '", i, "' was recognized as a standard detections file, but the 'Signal' column is not numeric.\nPlease include only the tag signals in the 'Signal' column.")
-          output <- tryCatch(processStandardFile(input = aux), error = function(e) {
-              stopAndReport("Something went wrong when processing file '", i, "'. If you are absolutely sure this file is ok, contact the developer.\nOriginal error:", sub("^Error:", "", e))
-            })
-          unknown.file <- FALSE
-        }
-        if (unknown.file && all(!is.na(match(c("CodeType", "TBR Serial Number", "Id"), colnames(aux))))) {
-          appendTo("debug", paste0("File '", i, "' matches a Thelma log."))
-          output <- tryCatch(processThelmaOldFile(input = aux), error = function(e) {
-              stopAndReport("Something went wrong when processing file '", i, "'. If you are absolutely sure this file is ok, contact the developer.\nOriginal error:", sub("^Error:", "", e))
-            })
-          unknown.file <- FALSE
-        }
-        if (unknown.file && all(!is.na(match(c("Protocol", "Receiver", "ID"), colnames(aux))))) {
-          appendTo("debug", paste0("File '", i, "' matches a Thelma log."))
-          output <- tryCatch(processThelmaNewFile(input = aux), error = function(e) {
-              stopAndReport("Something went wrong when processing file '", i, "'. If you are absolutely sure this file is ok, contact the developer.\nOriginal error:", sub("^Error:", "", e))
-            })
-          unknown.file <- FALSE
-        }
-        if (unknown.file && all(!is.na(match(c("Transmitter", "Receiver"), colnames(aux)))) & any(grepl("^Date.and.Time", colnames(aux)))) {
-          appendTo("debug", paste0("File '", i, "' matches a Vemco log."))
-          output <- tryCatch(processVemcoFile(input = aux), error = function(e) {
-              stopAndReport("Something went wrong when processing file '", i, "'. If you are absolutely sure this file is ok, contact the developer.\nOriginal error:", sub("^Error:", "", e))
-            })
-          unknown.file <- FALSE
-        }
-        if (unknown.file && all(!is.na(match(c("Device Time (UTC)", "Full ID", "Serial Number"), colnames(aux))))) {
-          appendTo("debug", paste0("File '", i, "' matches an Innovasea log."))
-          output <- tryCatch(processInnovaseaFile(input = aux), error = function(e) {
-              stopAndReport("Something went wrong when processing file '", i, "'. If you are absolutely sure this file is ok, contact the developer.\nOriginal error:", sub("^Error:", "", e))
-            })
-          unknown.file <- FALSE
-        }
-        if (unknown.file) {
-          appendTo(c("Screen", "Report", "Warning"),
-            paste0("File '", i, "' does not match to any of the supported hydrophone file formats!\n         If your file corresponds to a hydrophone log and actel did not recognize it, please get in contact through www.github.com/hugomflavio/actel/issues/new"))
-          flush.console()
-          return(NULL)
-        }
-        if (record.source)
-          output$Source.file <- i
-        return(output)
+        return(NULL) # File is empty, skip to next file
       }
     }
+    if (file_type == "std") {
+      appendTo("debug", paste0("File '", i, "' matches a Standard log."))
+      output <- tryCatch(
+        processStandardFile(input = aux), 
+        error = function(e) {
+          stopAndReport("Something went wrong when processing file '", i,
+            "'. If you are absolutely sure this file is ok, contact the ",
+            "developer.\nOriginal error:", sub("^Error:", "", e))
+        })
+      unknown.file <- FALSE
+    }
+    if (file_type == "thelma_old") {
+      appendTo("debug", paste0("File '", i, "' matches a Thelma log."))
+      output <- tryCatch(
+        processThelmaOldFile(input = aux), error = function(e) {
+          stopAndReport("Something went wrong when processing file '", i,
+            "'. If you are absolutely sure this file is ok, contact the ",
+            "developer.\nOriginal error:", sub("^Error:", "", e))
+        })
+      unknown.file <- FALSE
+    }
+    if (file_type == "thelma_new") {
+      appendTo("debug", paste0("File '", i,
+        "' matches a Thelma log (old format)."))
+      output <- tryCatch(
+        processThelmaNewFile(input = aux), error = function(e) {
+          stopAndReport("Something went wrong when processing file '", i,
+          "'. If you are absolutely sure this file is ok, contact the ",
+          "developer.\nOriginal error:", sub("^Error:", "", e))
+        })
+      unknown.file <- FALSE
+    }
+    if (file_type == "vemco") {
+      appendTo("debug", paste0("File '", i, "' matches a Vemco log."))
+      output <- tryCatch(
+        processVemcoFile(input = aux), error = function(e) {
+          stopAndReport("Something went wrong when processing file '", i,
+            "'. If you are absolutely sure this file is ok, contact the ",
+            "developer.\nOriginal error:", sub("^Error:", "", e))
+        })
+      unknown.file <- FALSE
+    }
+    if (file_type == "innovasea") {
+      appendTo("debug", paste0("File '", i, "' matches an Innovasea log."))
+      output <- tryCatch(
+        processInnovaseaFile(input = aux), error = function(e) {
+          stopAndReport("Something went wrong when processing file '", i,
+          "'. If you are absolutely sure this file is ok, contact the ",
+          "developer.\nOriginal error:", sub("^Error:", "", e))
+        })
+      unknown.file <- FALSE
+    }
+
+    if (record.source) {
+      output$Source.file <- i
+    }
+    return(output)
   })
+
   names(data.files) <- file.list
   if (any(sapply(data.files, is.null))) {
     if (sum(sapply(data.files, is.null)) > 1) {
-      appendTo("Screen", paste("M:", sum(sapply(data.files, is.null)), "files were excluded from further analyses."))
+      appendTo("Screen", 
+        paste("M:", sum(sapply(data.files, is.null)), 
+              "files were excluded from further analyses."))
     } else {
       appendTo("Screen", "M: One file was excluded from further analyses.")
     }
@@ -1374,7 +1453,8 @@ compileDetections <- function(path = "detections", start.time = NULL, stop.time 
     output <- convertCodes(input = output)
 
   # Compile transmitters
-  output$Transmitter <- as.factor(paste(output$CodeSpace, output$Signal, sep = "-"))
+  output$Transmitter <- as.factor(
+    paste(output$CodeSpace, output$Signal, sep = "-"))
 
   # save detections in UTC
   actel.detections <- list(detections = output, timestamp = Sys.time())
@@ -1400,9 +1480,26 @@ compileDetections <- function(path = "detections", start.time = NULL, stop.time 
 #'
 processStandardFile <- function(input) {
   appendTo("debug", "Running processStandardFile.")
+
+  if (!is.numeric(input$Receiver)) {
+    stop("The 'Receiver' column is not numeric.\n",
+      "Please include only the receiver serial numbers in the ",
+      "'Receiver' column.", call. = FALSE)
+  }
+  if (!is.numeric(input$Signal)) {
+    stopAndReport("The 'Signal' column is not numeric.\n",
+      "Please include only the tag signals in the 'Signal' column.")
+  }
+
   input <- as.data.frame(input, stringsAsFactors = FALSE)
-  output <- data.table(
-    Timestamp = fasttime::fastPOSIXct(sapply(as.character(input$Timestamp), function(x) gsub("Z", "", gsub("T", " ", x))), tz = "UTC"),
+
+  time_vec <- fasttime::fastPOSIXct(
+    sapply(as.character(input$Timestamp), 
+           function(x) gsub("Z", "", gsub("T", " ", x))),
+    tz = "UTC")
+
+  output <- data.table::data.table(
+    Timestamp = time_vec, 
     Receiver = input$Receiver,
     CodeSpace = input$CodeSpace,
     Signal = input$Signal)
@@ -1419,14 +1516,18 @@ processStandardFile <- function(input) {
     output$Sensor.Unit <- NA_character_
 
   # final checks
-  if (any(is.na(output$Timestamp)))
+  if (any(is.na(output$Timestamp))) {
     stop("Importing timestamps failed", call. = FALSE)
-  if (any(is.na(output$Receiver)))
+  }
+  if (any(is.na(output$Receiver))) {
     stop("Importing receivers failed", call. = FALSE)
-  if (any(is.na(output$Signal)))
+  }
+  if (any(is.na(output$Signal))) {
     stop("Importing code space failed", call. = FALSE)
-  if (any(is.na(output$Receiver)))
+  }
+  if (any(is.na(output$Receiver))) {
     stop("Importing signals failed", call. = FALSE)
+  }
   return(output)
 }
 
@@ -1443,8 +1544,16 @@ processStandardFile <- function(input) {
 processThelmaOldFile <- function(input) {
   appendTo("debug", "Running processThelmaOldFile.")
   input <- as.data.frame(input, stringsAsFactors = FALSE)
-  output <- data.table(
-    Timestamp = fasttime::fastPOSIXct(sapply(as.character(input[, grep("^Date\\.and\\.Time", colnames(input))]), function(x) gsub("Z", "", gsub("T", " ", x))), tz = "UTC"),
+
+  # leave the dots as wildcards as data table does not replace spaces with dots
+  time_col <- grep("^Date.and.Time", colnames(input))
+  time_vec <- fasttime::fastPOSIXct(
+    sapply(as.character(input[, time_col]),
+      function(x) gsub("Z", "", gsub("T", " ", x))),
+    tz = "UTC")
+
+  output <- data.table::data.table(
+    Timestamp = time_vec,
     Receiver = input$`TBR Serial Number`,
     CodeSpace = input$CodeType,
     Signal = input$Id,
@@ -1455,14 +1564,18 @@ processThelmaOldFile <- function(input) {
   output$Sensor.Value[output$Sensor.Value == "-"] <- NA
   output$Sensor.Value <- as.numeric(output$Sensor.Value)
 
-  if (any(is.na(output$Timestamp)))
+  if (any(is.na(output$Timestamp))) {
     stop("Importing timestamps failed", call. = FALSE)
-  if (any(is.na(output$Receiver)))
+  }
+  if (any(is.na(output$Receiver))) {
     stop("Importing receivers failed", call. = FALSE)
-  if (any(is.na(output$Signal)))
+  }
+  if (any(is.na(output$Signal))) {
     stop("Importing code space failed", call. = FALSE)
-  if (any(is.na(output$Receiver)))
+  }
+  if (any(is.na(output$Receiver))) {
     stop("Importing signals failed", call. = FALSE)
+  }
   return(output)
 }
 
@@ -1483,17 +1596,14 @@ processThelmaNewFile <- function(input) {
   # leave the dots as wildcards as data table does not replace spaces with dots
   time_col <- grep("^Date.and.Time", colnames(input))
   time_vec <- fasttime::fastPOSIXct(
-    sapply(
-      as.character(input[, time_col]),
-      function(x) gsub("Z", "", gsub("T", " ", x))
-    ),
-    tz = "UTC"
-  )
+    sapply(as.character(input[, time_col]),
+      function(x) gsub("Z", "", gsub("T", " ", x))),
+    tz = "UTC")
 
   codespace_vec <- sapply(input$Protocol,
                           function(x) unlist(strsplit(x, "-", fixed = TRUE))[1])
   
-  output <- data.table(
+  output <- data.table::data.table(
     Timestamp = time_vec,
     Receiver = input$Receiver,
     CodeSpace = codespace_vec,
@@ -1505,14 +1615,18 @@ processThelmaNewFile <- function(input) {
   output$Sensor.Value[output$Sensor.Value == "-"] <- NA
   output$Sensor.Value <- as.numeric(output$Sensor.Value)
 
-  if (any(is.na(output$Timestamp)))
+  if (any(is.na(output$Timestamp))) {
     stop("Importing timestamps failed", call. = FALSE)
-  if (any(is.na(output$Receiver)))
+  }
+  if (any(is.na(output$Receiver))) {
     stop("Importing receivers failed", call. = FALSE)
-  if (any(is.na(output$Signal)))
+  }
+  if (any(is.na(output$Signal))) {
     stop("Importing code space failed", call. = FALSE)
-  if (any(is.na(output$Receiver)))
+  }
+  if (any(is.na(output$Receiver))) {
     stop("Importing signals failed", call. = FALSE)
+  }
   return(output)
 }
 
@@ -1530,29 +1644,36 @@ processVemcoFile <- function(input) {
   appendTo("Debug", "Running processVemcoFile.")
 
   transmitter_aux <- strsplit(input$Transmitter, "-", fixed = TRUE)
-  input[, "CodeSpace"] <- unlist(lapply(transmitter_aux, function(x) paste(x[1:2], collapse = "-"))) # Rejoin code space
-  input[, "Signal"] <- unlist(lapply(transmitter_aux, function(x) x[3])) # extract only signal
-  input[, "Receiver"] <- sapply(input$Receiver, function(x) tail(unlist(strsplit(x, "-")), 1)) # extract only the serial
+  input$CodeSpace <- extractCodeSpaces(input$Transmitter)
+  input$Signal <- extractSignals(input$Transmitter)
+  input$Receiver <- extractSignals(input$Receiver)
 
   colnames(input)[grep("^Date.and.Time", colnames(input))] <- c("Timestamp")
   colnames(input) <- gsub(" ", ".", colnames(input))
-  if (any(grepl("^Sensor\\.Value$", colnames(input)))) {
-    input <- input[, c("Timestamp", "Receiver", "CodeSpace", "Signal", "Sensor.Value", "Sensor.Unit")]
-  } else {
-    input <- input[, c("Timestamp", "Receiver", "CodeSpace", "Signal")]
+
+  if (!any(grepl("^Sensor\\.Value$", colnames(input)))) {
     input$Sensor.Value <- rep(NA_real_, nrow(input))
     input$Sensor.Unit <- rep(NA_character_, nrow(input))
   }
-  input$Timestamp <- fasttime::fastPOSIXct(as.character(input$Timestamp), tz = "UTC")
-  
-  if (any(is.na(input$Timestamp)))
+
+  std_cols <- c("Timestamp", "Receiver", "CodeSpace", 
+                "Signal", "Sensor.Value", "Sensor.Unit")
+  input <- input[, std_cols, with = FALSE]
+  input$Timestamp <- fasttime::fastPOSIXct(as.character(input$Timestamp), 
+                                           tz = "UTC")
+
+  if (any(is.na(input$Timestamp))) {
     stop("Importing timestamps failed", call. = FALSE)
-  if (any(is.na(input$Receiver)))
+  }
+  if (any(is.na(input$Receiver))) {
     stop("Importing receivers failed", call. = FALSE)
-  if (any(is.na(input$Signal)))
+  }
+  if (any(is.na(input$Signal))) {
     stop("Importing code space failed", call. = FALSE)
-  if (any(is.na(input$Receiver)))
+  }
+  if (any(is.na(input$Receiver))) {
     stop("Importing signals failed", call. = FALSE)
+  }
   return(input)
 }
 
@@ -1572,26 +1693,37 @@ processInnovaseaFile <- function(input) {
   colnames(input) <- gsub(" ", ".", colnames(input))
 
   transmitter_aux <- strsplit(input$Full.ID, "-", fixed = TRUE)
-  input$CodeSpace <- unlist(lapply(transmitter_aux, function(x) paste(x[1:2], collapse = "-"))) # Rejoin code space
-  input$Signal <- unlist(lapply(transmitter_aux, function(x) x[3])) # extract only signal
-  input$Receiver <- input$Serial.Number
-  input$Timestamp <- input$`Device.Time.(UTC)`
-  input$Sensor.Value <- input$Raw.Data
+  input$CodeSpace <- extractCodeSpaces(input$Full.ID)
+  input$Signal <- extractSignals(input$Full.ID)
+  
+  input <- data.table::setnames(input, 
+    c("Serial.Number", "Receiver"),
+    c("Device.Time.(UTC)", "Timestamp"),
+    c("Raw.Data", "Sensor.Value"))
+
   input$Sensor.Unit <- rep(NA_character_, nrow(input))
 
-  input <- input[, c("Timestamp", "Receiver", "CodeSpace", "Signal", "Sensor.Value", "Sensor.Unit")]
-  input$Timestamp <- fasttime::fastPOSIXct(as.character(input$Timestamp), tz = "UTC")
+  std_cols <- c("Timestamp", "Receiver", "CodeSpace", 
+                "Signal", "Sensor.Value", "Sensor.Unit")
+  input <- input[, std_cols, with = FALSE]
+  input$Timestamp <- fasttime::fastPOSIXct(as.character(input$Timestamp), 
+                                           tz = "UTC")
   
-  if (any(is.na(input$Timestamp)))
+  if (any(is.na(input$Timestamp))) {
     stop("Importing timestamps failed", call. = FALSE)
-  if (any(is.na(input$Receiver)))
+  }
+  if (any(is.na(input$Receiver))) {
     stop("Importing receivers failed", call. = FALSE)
-  if (any(is.na(input$Signal)))
+  }
+  if (any(is.na(input$Signal))) {
     stop("Importing code space failed", call. = FALSE)
-  if (any(is.na(input$Receiver)))
+  }
+  if (any(is.na(input$Receiver))) {
     stop("Importing signals failed", call. = FALSE)
+  }
   return(input)
 }
+
 
 #' Convert code spaces
 #'
