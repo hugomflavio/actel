@@ -229,7 +229,11 @@ dataToList <- function(source){
 #' @export
 #'
 extractSignals <- function(input) {
-  unlist(lapply(input, function(x) tail(unlist(strsplit(as.character(x), "-")), 1)))
+  output <- lapply(input, function(x) {
+    aux <- unlist(strsplit(as.character(x), "-"))
+    return(as.numeric(tail(aux, 1)))
+  })
+  return(unlist(output))
 }
 
 #' Extract Code Spaces from transmitter names
@@ -683,3 +687,132 @@ splitSignals <- function(x) {
   as.numeric(unlist(strsplit(as.character(x), "|", fixed = TRUE)))
 }
 
+
+#' Convert Lotek CMDA log to csv
+#' 
+#' Lotek CMDA logs are exported in TXT, and contain several chunks of
+#' of information. Importantly, the detections are saved in the timezone
+#' of the respective computer, as opposed to the more common UTC standard.
+#' Additionally, the date format also depends on the locale of the computer,
+#' and may therefore be incomprehensible for R without further assistance.
+#' 
+#' This function extracts the detections from the CMDA file, converts the
+#' dates to yyyy-mm-dd, binds the time to the date and resets it to UTC, and
+#' ultimately converts the dataframe into the standard format accepted by actel.
+#'
+#' @param file the file name.
+#' @param date_format the format used by the computer that generated the file
+#' @param tz the timezone of the computer that generated the file.
+#'
+#' @examples
+#' # create a dummy detections file to read
+#' dummy_file <- tempfile()
+#' sink(dummy_file)
+#' cat(
+#' "WHS FSK Receiver Data File
+#' 
+#' Receiver Configuration: 
+#' Working Frequency:  76 KHz
+#' Bit Rate:           2400 bps
+#' Code Type:          FSK
+#' Serial Number:      WHS3K-1234567
+#' Node ID:            10000
+#' 
+#' Decoded Tag Data:
+#' Date      Time             TOA       Tag ID    Type     Value     Power
+#' =======================================================================
+#' 04/09/24  22:50:03     0.43875        37910       P       9.1        12
+#' 08/21/24  12:45:18     0.99646        55606       M         0         1
+#' 08/23/24  15:01:04     0.76042        55778       P       0.0         2
+#' 
+#' Receiver Sensor Messages:
+#' Date      Time      Sensor   Temp     Press   Battery  Tilt-X  Tilt-Y  Tilt-Z
+#' =============================================================================
+#' 04/11/24  21:44:00  T / P    1534         0                                  
+#' 
+#' Receiver Setup Messages:
+#' Date      Time      Type                    Details                                                     
+#' =============================================================================
+#' 08/22/24  18:50:11  Change Logging Mode     New Mode: SETUP
+#' ")
+#' sink()
+#' 
+#' # now read it
+#' x <- convertLotekCDMAFile(dummy_file, date_format = "%m/%d/%y", 
+#'                           tz = "Europe/Copenhagen")
+#' 
+#' # the dummy file will be deleted automatically once you close this R session.
+#' 
+#' @return A data frame of standardized detections from the input file.
+#'
+#' @export
+#'
+convertLotekCDMAFile <- function(file, date_format, tz) {
+  file_raw <- readLines(file)
+  
+  serial_n <- file_raw[grep("^Serial Number:", file_raw)]
+  serial_n <- extractSignals(serial_n)
+  
+  code_type <- file_raw[grep("^Code Type:", file_raw)]
+  code_type <- sub("Code Type:\\s*", "", code_type)
+  if (code_type == "") {
+    code_type <- NA
+  }
+
+  det_start <- grep("=========", file_raw)[1]
+  det_end <- grep("Receiver Sensor Messages:", file_raw)[1] - 2
+  
+  det_names <- file_raw[det_start-1]
+  det_names <- sub("Tag ID", "Signal", det_names)
+  
+  output <- data.table::fread(file, fill = TRUE, 
+    skip = det_start,
+    nrows = det_end - det_start,
+    showProgress = FALSE,
+    header = FALSE)
+  colnames(output) <- unlist(strsplit(det_names, "\\s\\s*"))
+  output$CodeSpace <- code_type
+  output$Receiver <- as.numeric(serial_n)
+  output$Date <- as.Date(output$Date, format = date_format)
+  output$Timestamp <- paste(output$Date, output$Time)
+  output$Signal <- suppressWarnings(as.numeric(output$Signal))
+  # a more elegant warning is thrown at the end if NAs are formed here
+  
+  output <- data.table::setnames(output, 
+    c("Type", "Value"),
+    c("Sensor.Unit", "Sensor.Value"))
+
+  std_cols <- c("Timestamp", "Receiver", "CodeSpace", 
+                "Signal", "Sensor.Value", "Sensor.Unit")
+  output <- output[, std_cols, with = FALSE]
+  output$Timestamp <- fasttime::fastPOSIXct(as.character(output$Timestamp), 
+                                            tz = tz)
+
+  # final checks
+  if (any(is.na(output$Timestamp))) {
+    warning(
+      paste0("Some timestamp values are NA. This must be fixed before these ",
+      "detections are used in an actel analysis."),
+      call. = FALSE)
+  }
+  if (any(is.na(output$Receiver))) {
+    warning(
+      paste0("Some receiver serial number values are NA. This must be fixed ",
+        "before these detections are used in an actel analysis."),
+      call. = FALSE)
+  }
+  if (any(is.na(output$CodeSpace))) {
+    warning(
+      paste0("Some code space values are NA. This must be fixed before these ",
+      "detections are used in an actel analysis."),
+      call. = FALSE)
+  }
+  if (any(is.na(output$Signal))) {
+    warning(
+      paste0("Some signal values are NA. This must be fixed before these ",
+      "detections are used in an actel analysis."),
+      call. = FALSE)
+  }
+
+  return(output)
+}

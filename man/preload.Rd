@@ -31,7 +31,8 @@ preload(
 
 \item{dot}{A DOT string of the array configuration.}
 
-\item{distances}{A distances matrix between arrays. See \code{\link{distancesMatrix}}.}
+\item{distances}{A distances matrix between arrays.
+See \code{\link{distancesMatrix}}.}
 
 \item{tz}{The time zone of the study area. Must match one of the values
 present in \code{\link[base]{timezones}}.}
@@ -64,16 +65,20 @@ A dataset that can be used as an input for actel's main analyses.
 This dataset contains:
 \itemize{
 \item \code{bio}: The biometric data
-\item \code{sections}: The sections of the study area, if set using the argument sections (required to run residency and migration analyses)
+\item \code{sections}: The sections of the study area, if set using the
+argument sections (required to run residency and migration analyses)
 \item \code{deployments}: The deployment data
 \item \code{spatial}: The spatial data, split in stations and release sites.
 \item \code{dot}: A table of array connections.
 \item \code{arrays}: A list with the details of each array
-\item \code{dotmat}: A matrix of distances between arrays (in number of arrays).
+\item \code{dotmat}: A matrix of distances between arrays (in number of
+arrays).
 \item \code{dist.mat}: The distances matrix.
 \item \code{detections.list}: A processed list of detections for each tag.
-\item \code{paths}: A list of the possible paths between each pair of arrays.
-\item \code{disregard.parallels}: Logical: Should parallel arrays invalidate efficiency peers? (required to run residency and migration analyses)
+\item \code{paths}: A list of the possible paths between each pair of
+arrays.
+\item \code{disregard.parallels}: Logical: Should parallel arrays invalidate
+efficiency peers? (required to run residency and migration analyses)
 \item \code{tz}: The time zone of the study area
 }
 }

@@ -3,6 +3,7 @@
 export(advEfficiency)
 export(blankWorkspace)
 export(completeMatrix)
+export(convertLotekCDMAFile)
 export(createWorkspace)
 export(dataToList)
 export(distancesMatrix)
