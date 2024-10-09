@@ -688,21 +688,19 @@ splitSignals <- function(x) {
 }
 
 
-#' Convert Lotek CMDA log to csv
+#' Convert Lotek CDMA log to csv
 #' 
-#' Lotek CMDA logs are exported in TXT, and contain several chunks of
-#' of information. Importantly, the detections are saved in the timezone
-#' of the respective computer, as opposed to the more common UTC standard.
-#' Additionally, the date format also depends on the locale of the computer,
-#' and may therefore be incomprehensible for R without further assistance.
+#' Lotek CDMA logs are exported in TXT, and contain several chunks of
+#' of information. Importantly, the detections may be saved with a GMT offset,
+#' as opposed to the more common UTC standard.
+#' Additionally, the date format isn't the standard yyyy-mm-dd.
 #' 
-#' This function extracts the detections from the CMDA file, converts the
+#' This function extracts the detections from the CDMA file, converts the
 #' dates to yyyy-mm-dd, binds the time to the date and resets it to UTC, and
 #' ultimately converts the dataframe into the standard format accepted by actel.
 #'
 #' @param file the file name.
 #' @param date_format the format used by the computer that generated the file
-#' @param tz the timezone of the computer that generated the file.
 #'
 #' @examples
 #' # create a dummy detections file to read
@@ -717,6 +715,9 @@ splitSignals <- function(x) {
 #' Code Type:          FSK
 #' Serial Number:      WHS3K-1234567
 #' Node ID:            10000
+#' 
+#' Receiver Settings:
+#' GMT Correction:     00:00
 #' 
 #' Decoded Tag Data:
 #' Date      Time             TOA       Tag ID    Type     Value     Power
@@ -738,8 +739,7 @@ splitSignals <- function(x) {
 #' sink()
 #' 
 #' # now read it
-#' x <- convertLotekCDMAFile(dummy_file, date_format = "%m/%d/%y", 
-#'                           tz = "Europe/Copenhagen")
+#' x <- convertLotekCDMAFile(dummy_file)
 #' 
 #' # the dummy file will be deleted automatically once you close this R session.
 #' 
@@ -747,7 +747,7 @@ splitSignals <- function(x) {
 #'
 #' @export
 #'
-convertLotekCDMAFile <- function(file, date_format, tz) {
+convertLotekCDMAFile <- function(file, date_format = "%m/%d/%y") {
   file_raw <- readLines(file)
   
   serial_n <- file_raw[grep("^Serial Number:", file_raw)]
@@ -759,17 +759,23 @@ convertLotekCDMAFile <- function(file, date_format, tz) {
     code_type <- NA
   }
 
+  gmt_cor <- file_raw[grep("^GMT Correction:", file_raw)]
+  gmt_cor <- sub("GMT Correction:\\s*", "", gmt_cor)
+  gmt_cor <- decimalTime(gmt_cor)
+
   det_start <- grep("=========", file_raw)[1]
   det_end <- grep("Receiver Sensor Messages:", file_raw)[1] - 2
   
   det_names <- file_raw[det_start-1]
   det_names <- sub("Tag ID", "Signal", det_names)
-  
-  output <- data.table::fread(file, fill = TRUE, 
+
+  output <- readr::read_fwf(file, 
     skip = det_start,
-    nrows = det_end - det_start,
-    showProgress = FALSE,
-    header = FALSE)
+    n_max = det_end - det_start,
+    show_col_types = FALSE)
+  
+  output <- as.data.table(output)
+
   colnames(output) <- unlist(strsplit(det_names, "\\s\\s*"))
   output$CodeSpace <- code_type
   output$Receiver <- as.numeric(serial_n)
@@ -786,7 +792,8 @@ convertLotekCDMAFile <- function(file, date_format, tz) {
                 "Signal", "Sensor.Value", "Sensor.Unit")
   output <- output[, std_cols, with = FALSE]
   output$Timestamp <- fasttime::fastPOSIXct(as.character(output$Timestamp), 
-                                            tz = tz)
+                                            tz = "UTC")
+  output$Timestamp <- output$Timestamp - (gmt_cor * 3600)
 
   # final checks
   if (any(is.na(output$Timestamp))) {

@@ -2,29 +2,26 @@
 % Please edit documentation in R/helper.R
 \name{convertLotekCDMAFile}
 \alias{convertLotekCDMAFile}
-\title{Convert Lotek CMDA log to csv}
+\title{Convert Lotek CDMA log to csv}
 \usage{
-convertLotekCDMAFile(file, date_format, tz)
+convertLotekCDMAFile(file, date_format = "\%m/\%d/\%y")
 }
 \arguments{
 \item{file}{the file name.}
 
 \item{date_format}{the format used by the computer that generated the file}
-
-\item{tz}{the timezone of the computer that generated the file.}
 }
 \value{
 A data frame of standardized detections from the input file.
 }
 \description{
-Lotek CMDA logs are exported in TXT, and contain several chunks of
-of information. Importantly, the detections are saved in the timezone
-of the respective computer, as opposed to the more common UTC standard.
-Additionally, the date format also depends on the locale of the computer,
-and may therefore be incomprehensible for R without further assistance.
+Lotek CDMA logs are exported in TXT, and contain several chunks of
+of information. Importantly, the detections may be saved with a GMT offset,
+as opposed to the more common UTC standard.
+Additionally, the date format isn't the standard yyyy-mm-dd.
 }
 \details{
-This function extracts the detections from the CMDA file, converts the
+This function extracts the detections from the CDMA file, converts the
 dates to yyyy-mm-dd, binds the time to the date and resets it to UTC, and
 ultimately converts the dataframe into the standard format accepted by actel.
 }
@@ -41,6 +38,9 @@ Bit Rate:           2400 bps
 Code Type:          FSK
 Serial Number:      WHS3K-1234567
 Node ID:            10000
+
+Receiver Settings:
+GMT Correction:     00:00
 
 Decoded Tag Data:
 Date      Time             TOA       Tag ID    Type     Value     Power
@@ -62,8 +62,7 @@ Date      Time      Type                    Details
 sink()
 
 # now read it
-x <- convertLotekCDMAFile(dummy_file, date_format = "\%m/\%d/\%y", 
-                          tz = "Europe/Copenhagen")
+x <- convertLotekCDMAFile(dummy_file)
 
 # the dummy file will be deleted automatically once you close this R session.
 
