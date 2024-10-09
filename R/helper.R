@@ -691,10 +691,9 @@ splitSignals <- function(x) {
 #' Convert Lotek CMDA log to csv
 #' 
 #' Lotek CMDA logs are exported in TXT, and contain several chunks of
-#' of information. Importantly, the detections are saved in the timezone
-#' of the respective computer, as opposed to the more common UTC standard.
-#' Additionally, the date format also depends on the locale of the computer,
-#' and may therefore be incomprehensible for R without further assistance.
+#' of information. Importantly, the detections may be saved with a GMT offset,
+#' as opposed to the more common UTC standard.
+#' Additionally, the date format isn't the standard yyyy-mm-dd.
 #' 
 #' This function extracts the detections from the CMDA file, converts the
 #' dates to yyyy-mm-dd, binds the time to the date and resets it to UTC, and
@@ -702,7 +701,6 @@ splitSignals <- function(x) {
 #'
 #' @param file the file name.
 #' @param date_format the format used by the computer that generated the file
-#' @param tz the timezone of the computer that generated the file.
 #'
 #' @examples
 #' # create a dummy detections file to read

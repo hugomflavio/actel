@@ -10,18 +10,15 @@ convertLotekCDMAFile(file, date_format = "\%m/\%d/\%y")
 \item{file}{the file name.}
 
 \item{date_format}{the format used by the computer that generated the file}
-
-\item{tz}{the timezone of the computer that generated the file.}
 }
 \value{
 A data frame of standardized detections from the input file.
 }
 \description{
 Lotek CMDA logs are exported in TXT, and contain several chunks of
-of information. Importantly, the detections are saved in the timezone
-of the respective computer, as opposed to the more common UTC standard.
-Additionally, the date format also depends on the locale of the computer,
-and may therefore be incomprehensible for R without further assistance.
+of information. Importantly, the detections may be saved with a GMT offset,
+as opposed to the more common UTC standard.
+Additionally, the date format isn't the standard yyyy-mm-dd.
 }
 \details{
 This function extracts the detections from the CMDA file, converts the
