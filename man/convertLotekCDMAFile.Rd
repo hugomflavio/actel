@@ -4,7 +4,7 @@
 \alias{convertLotekCDMAFile}
 \title{Convert Lotek CMDA log to csv}
 \usage{
-convertLotekCDMAFile(file, date_format, tz)
+convertLotekCDMAFile(file, date_format = "\%m/\%d/\%y")
 }
 \arguments{
 \item{file}{the file name.}
@@ -41,6 +41,9 @@ Bit Rate:           2400 bps
 Code Type:          FSK
 Serial Number:      WHS3K-1234567
 Node ID:            10000
+
+Receiver Settings:
+GMT Correction:     00:00
 
 Decoded Tag Data:
 Date      Time             TOA       Tag ID    Type     Value     Power

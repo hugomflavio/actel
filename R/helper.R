@@ -718,6 +718,9 @@ splitSignals <- function(x) {
 #' Serial Number:      WHS3K-1234567
 #' Node ID:            10000
 #' 
+#' Receiver Settings:
+#' GMT Correction:     00:00
+#' 
 #' Decoded Tag Data:
 #' Date      Time             TOA       Tag ID    Type     Value     Power
 #' =======================================================================
@@ -747,7 +750,7 @@ splitSignals <- function(x) {
 #'
 #' @export
 #'
-convertLotekCDMAFile <- function(file, date_format, tz) {
+convertLotekCDMAFile <- function(file, date_format = "%m/%d/%y") {
   file_raw <- readLines(file)
   
   serial_n <- file_raw[grep("^Serial Number:", file_raw)]
@@ -759,17 +762,23 @@ convertLotekCDMAFile <- function(file, date_format, tz) {
     code_type <- NA
   }
 
+  gmt_cor <- file_raw[grep("^GMT Correction:", file_raw)]
+  gmt_cor <- sub("GMT Correction:\\s*", "", gmt_cor)
+  gmt_cor <- decimalTime(gmt_cor)
+
   det_start <- grep("=========", file_raw)[1]
   det_end <- grep("Receiver Sensor Messages:", file_raw)[1] - 2
   
   det_names <- file_raw[det_start-1]
   det_names <- sub("Tag ID", "Signal", det_names)
-  
-  output <- data.table::fread(file, fill = TRUE, 
+
+  output <- readr::read_fwf(file, 
     skip = det_start,
-    nrows = det_end - det_start,
-    showProgress = FALSE,
-    header = FALSE)
+    n_max = det_end - det_start,
+    show_col_types = FALSE)
+  
+  output <- as.data.table(output)
+
   colnames(output) <- unlist(strsplit(det_names, "\\s\\s*"))
   output$CodeSpace <- code_type
   output$Receiver <- as.numeric(serial_n)
@@ -786,7 +795,8 @@ convertLotekCDMAFile <- function(file, date_format, tz) {
                 "Signal", "Sensor.Value", "Sensor.Unit")
   output <- output[, std_cols, with = FALSE]
   output$Timestamp <- fasttime::fastPOSIXct(as.character(output$Timestamp), 
-                                            tz = tz)
+                                            tz = "UTC")
+  output$Timestamp <- output$Timestamp - (gmt_cor * 3600)
 
   # final checks
   if (any(is.na(output$Timestamp))) {

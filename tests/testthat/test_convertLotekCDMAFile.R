@@ -12,6 +12,9 @@ Code Type:          FSK
 Serial Number:      WHS3K-1234567
 Node ID:            10000
 
+Receiver Settings:
+GMT Correction:     00:00
+
 Decoded Tag Data:
 Date      Time             TOA       Tag ID    Type     Value     Power
 =======================================================================
@@ -32,8 +35,7 @@ Date      Time      Type                    Details
 sink()
 
 test_that("convertLotekCDMAfile can read lotek cdma log files", {
-	x <- convertLotekCDMAFile(dummy_file, date_format = "%m/%d/%y", 
-                 	          tz = "Europe/Copenhagen")
+	x <- convertLotekCDMAFile(dummy_file)
 	expect_is(x, "data.table")
 })
 
@@ -49,6 +51,9 @@ Bit Rate:           2400 bps
 Code Type:          FSK
 Serial Number:      WHS3K-1234567
 Node ID:            10000
+
+Receiver Settings:
+GMT Correction:     00:00
 
 Decoded Tag Data:
 Date      Time             TOA       Tag ID    Type     Value     Power
@@ -71,8 +76,7 @@ sink()
 
 test_that("convertLotekCDMAfile warns user if any timestamp is bad", {
 	expect_warning(
-		x <- convertLotekCDMAFile(dummy_file2, date_format = "%m/%d/%y", 
-        		                  tz = "Europe/Copenhagen"),
+		x <- convertLotekCDMAFile(dummy_file2),
         paste0("Some timestamp values are NA. This must be fixed before these ",
             "detections are used in an actel analysis."),
       fixed = TRUE)
@@ -93,6 +97,9 @@ Bit Rate:           2400 bps
 Code Type:          FSK
 Serial Number:      WHS3K-12b67
 Node ID:            10000
+
+Receiver Settings:
+GMT Correction:     00:00
 
 Decoded Tag Data:
 Date      Time             TOA       Tag ID    Type     Value     Power
@@ -115,8 +122,7 @@ sink()
 
 test_that("convertLotekCDMAfile warns user if any receiver serial is bad", {
 	expect_warning(
-		x <- convertLotekCDMAFile(dummy_file3, date_format = "%m/%d/%y", 
-        		                  tz = "Europe/Copenhagen"),
+		x <- convertLotekCDMAFile(dummy_file3),
         paste0("Some receiver serial number values are NA. This must be fixed ",
             "before these detections are used in an actel analysis."),
       fixed = TRUE)
@@ -136,6 +142,9 @@ Bit Rate:           2400 bps
 Code Type:           
 Serial Number:      WHS3K-1234567
 Node ID:            10000
+
+Receiver Settings:
+GMT Correction:     00:00
 
 Decoded Tag Data:
 Date      Time             TOA       Tag ID    Type     Value     Power
@@ -158,8 +167,7 @@ sink()
 
 test_that("convertLotekCDMAfile warns user if code space is bad", {
     expect_warning(
-        x <- convertLotekCDMAFile(dummy_file4, date_format = "%m/%d/%y", 
-                                  tz = "Europe/Copenhagen"),
+        x <- convertLotekCDMAFile(dummy_file4),
         paste0("Some code space values are NA. This must be fixed ",
             "before these detections are used in an actel analysis."),
       fixed = TRUE)
@@ -178,6 +186,9 @@ Bit Rate:           2400 bps
 Code Type:          FSK
 Serial Number:      WHS3K-1234567
 Node ID:            10000
+
+Receiver Settings:
+GMT Correction:     00:00
 
 Decoded Tag Data:
 Date      Time             TOA       Tag ID    Type     Value     Power
@@ -200,8 +211,7 @@ sink()
 
 test_that("convertLotekCDMAfile warns user if any signal is bad", {
     expect_warning(
-        x <- convertLotekCDMAFile(dummy_file5, date_format = "%m/%d/%y", 
-                                  tz = "Europe/Copenhagen"),
+        x <- convertLotekCDMAFile(dummy_file5),
         paste0("Some signal values are NA. This must be fixed before these ",
             "detections are used in an actel analysis."),
       fixed = TRUE)
