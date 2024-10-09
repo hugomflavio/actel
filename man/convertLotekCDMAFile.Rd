@@ -2,7 +2,7 @@
 % Please edit documentation in R/helper.R
 \name{convertLotekCDMAFile}
 \alias{convertLotekCDMAFile}
-\title{Convert Lotek CMDA log to csv}
+\title{Convert Lotek CDMA log to csv}
 \usage{
 convertLotekCDMAFile(file, date_format = "\%m/\%d/\%y")
 }
@@ -15,13 +15,13 @@ convertLotekCDMAFile(file, date_format = "\%m/\%d/\%y")
 A data frame of standardized detections from the input file.
 }
 \description{
-Lotek CMDA logs are exported in TXT, and contain several chunks of
+Lotek CDMA logs are exported in TXT, and contain several chunks of
 of information. Importantly, the detections may be saved with a GMT offset,
 as opposed to the more common UTC standard.
 Additionally, the date format isn't the standard yyyy-mm-dd.
 }
 \details{
-This function extracts the detections from the CMDA file, converts the
+This function extracts the detections from the CDMA file, converts the
 dates to yyyy-mm-dd, binds the time to the date and resets it to UTC, and
 ultimately converts the dataframe into the standard format accepted by actel.
 }

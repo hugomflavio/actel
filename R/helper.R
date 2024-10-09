@@ -688,14 +688,14 @@ splitSignals <- function(x) {
 }
 
 
-#' Convert Lotek CMDA log to csv
+#' Convert Lotek CDMA log to csv
 #' 
-#' Lotek CMDA logs are exported in TXT, and contain several chunks of
+#' Lotek CDMA logs are exported in TXT, and contain several chunks of
 #' of information. Importantly, the detections may be saved with a GMT offset,
 #' as opposed to the more common UTC standard.
 #' Additionally, the date format isn't the standard yyyy-mm-dd.
 #' 
-#' This function extracts the detections from the CMDA file, converts the
+#' This function extracts the detections from the CDMA file, converts the
 #' dates to yyyy-mm-dd, binds the time to the date and resets it to UTC, and
 #' ultimately converts the dataframe into the standard format accepted by actel.
 #'
