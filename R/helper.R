@@ -739,8 +739,7 @@ splitSignals <- function(x) {
 #' sink()
 #' 
 #' # now read it
-#' x <- convertLotekCDMAFile(dummy_file, date_format = "%m/%d/%y", 
-#'                           tz = "Europe/Copenhagen")
+#' x <- convertLotekCDMAFile(dummy_file)
 #' 
 #' # the dummy file will be deleted automatically once you close this R session.
 #' 
