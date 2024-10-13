@@ -419,12 +419,12 @@ checkDupDetections <- function(input) {
 checkMinimumN <- function(movements, min.total.detections, min.per.event, tag, n) {
   appendTo("debug", "Running checkMinimumN")
   if (sum(movements$Detections) < min.total.detections) {
-    appendTo(c("screen", "report", "warning"), paste0("Tag ", tag, " ", n, " has less than ", min.total.detections," detections in total. Discarding this tag."))
+    appendTo(c("screen", "report", "warning"), paste0("Tag ", tag, " ", n, " has fewer than ", min.total.detections," detections in total. Discarding this tag."))
     movements$Valid <- FALSE # invalidate the tag
   }
   if (any(movements$Valid) & any(movements$Detections < min.per.event)) {
     if (any(colnames(movements) == 'Array'))
-      appendTo(c("screen", "report", "warning"), paste0("Tag ", tag, " ", n, " has ", tolower(colnames(movements)[1]), " movement events with less than ", min.per.event, " detections. Invalidating those events."))
+      appendTo(c("screen", "report", "warning"), paste0("Tag ", tag, " ", n, " has ", tolower(colnames(movements)[1]), " movement events with fewer than ", min.per.event, " detections. Invalidating those events."))
     movements$Valid[movements$Detections < min.per.event] <- FALSE
   }
   return(movements)
@@ -555,7 +555,7 @@ checkInactiveness <- function(movements, tag, detections, n,
           n.detections <- sum(valid.moves$Detections[start_i:Stop])
           appendTo(c("Report", "Warning", "Screen"),
             the.warning <- paste0("Tag ", tag, " ", n, " was detected ", n.detections,
-              " times at three or less stations of array '", tail(breaks$values, 1),
+              " times at three or fewer stations of array '", tail(breaks$values, 1),
               "' (", paste(the.stations, collapse = ", "), ") over ", days.spent,
               " days and then disappeared. Could it be inactive?"))
           the.warning <- paste("Warning:", the.warning)
@@ -669,7 +669,7 @@ checkSMovesN <- function(secmoves, tag, section.warning, section.error, GUI, sav
   appendTo("debug", "Running checkSMovesN.")
 
   if (any(secmoves$Detections <= section.warning & secmoves$Valid)) {
-    the.warning <- paste0("Section movements with ", section.warning, " or less detections are present for tag ", tag, " ", n, ".")
+    the.warning <- paste0("Section movements with ", section.warning, " or fewer detections are present for tag ", tag, " ", n, ".")
     appendTo(c("Screen", "Report", "Warning"), the.warning)
   }
 
