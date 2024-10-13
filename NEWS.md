@@ -8,13 +8,14 @@ Fixes:
   * Fix warning bug when reporting duplicated signals in the presence of dual-signal tags.
   * Gracefully stop in the presence of "" array names (issue [#95](https://github.com/hugomflavio/actel/issues/95)).
   * Fix minor aesthetic bug that would cause invalid detections to show up as NA in the captions of individual detection plots.
+  * Fix crash when running migration analysis with only one array (issue [#113](https://github.com/hugomflavio/actel/issues/113)).
 
 Enhancements:
   * Improve timestamp handling when importing data through `preload()` (issue [#94](https://github.com/hugomflavio/actel/issues/94)).
   * Improve column name checks to avoid accidentally matching anything to the dot wildcard.
   * Add new "first to first" method to speed calculations (issue [#96](https://github.com/hugomflavio/actel/issues/96))
   * New `processInnovaseaFile()` function to handle updated innovasea detection file format (issue [#97](https://github.com/hugomflavio/actel/issues/97)).
-  * New `convertLotekCDMAFile()` function to prepare lotek txt logs for further analyses.
+  * New `convertLotekCDMAFile()` function to prepare lotek txt logs for further analyses (issue [#103](https://github.com/hugomflavio/actel/issues/103)).
 
 ## actel 1.3.0
 
