@@ -781,7 +781,11 @@ convertLotekCDMAFile <- function(file, date_format = "%m/%d/%y") {
   # Now that we have the detection lines, we need to work some magic to find
   # the right column widths. This is because read_fwf doesn't allow using the
   # first row as column names, but without knowing the widths of that first row,
-  # we'll run into the NA issue I mentioned above. So:
+  # we'll run into the NA issue I mentioned above. 
+  # All this can be probably be changed _if_ this issue is addressed:
+  # https://github.com/tidyverse/readr/issues/1393#issuecomment-2408682861
+  #
+  # So:
   # find out how fwf would read the headers
   head_fw <- readr::fwf_empty(I(det_lines[1]))
   # add the column names to head_fw
