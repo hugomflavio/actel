@@ -1808,10 +1808,12 @@ plotResidency <- function(input, tag, title, xlab, ylab, col) {
 #'
 #' @export
 #'
-plotRatios <- function(input, groups, sections, type = c("absolutes", "percentages"), 
-                       title, xlab, ylab, col, col.by = c("default", "section", "group")) {
+plotRatios <- function(input, groups, sections, 
+    type = c("absolutes", "percentages"), 
+    title, xlab, ylab, col, col.by = c("default", "section", "group")) {
   # NOTE: The NULL variables below are actually column names used by ggplot.
-  # This definition is just to prevent the package check from issuing a note due unknown variables.
+  # This definition is just to prevent the package check from issuing a 
+  # note due unknown variables.
   type <- match.arg(type)
   col.by <- match.arg(col.by)
   Timeslot <- NULL
@@ -1819,61 +1821,95 @@ plotRatios <- function(input, groups, sections, type = c("absolutes", "percentag
   Group <- NULL
   n <- NULL
 
-  cbPalette <- c("#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7", "#999999")
-  names(cbPalette) <- c("Orange", "Blue", "Green", "Yellow", "Darkblue", "Darkorange", "Pink", "Grey")
+  cbPalette <- c("#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", 
+                 "#D55E00", "#CC79A7", "#999999")
+  names(cbPalette) <- c("Orange", "Blue", "Green", "Yellow", "Darkblue", 
+                 "Darkorange", "Pink", "Grey")
 
-  if (!inherits(input, "list"))
-    stop("Could not recognise the input as an actel results object.", call. = FALSE)
+  if (!inherits(input, "list")) {
+    stop("Could not recognise the input as an actel results object.",
+      call. = FALSE)
+  }
 
-  if (is.null(input$valid.movements) | is.null(input$spatial) | is.null(input$rsp.info))
-    stop("Could not recognise the input as an actel results object.", call. = FALSE)
+  if (is.null(input$valid.movements) | is.null(input$spatial) |
+      is.null(input$rsp.info)) {
+    stop("Could not recognise the input as an actel results object.",
+      call. = FALSE)
+  }
 
-  if (input$rsp.info$analysis.type != "residency")
+  if (input$rsp.info$analysis.type != "residency") {
     stop("plotRatios can only be used with residency results.", call. = FALSE)
+  }
 
   if (col.by == 'default') {
-    if (missing(sections))
+    if (missing(sections)) {
       col.by <- 'section'
-    else
+    } else {
       col.by <- 'group'
+    }
   }
 
   if (missing(title)) {
     if (missing(groups)) {
-      if (missing(sections))
+      if (missing(sections)) {
         title <- "Global ratios"
-      else
-        title <- paste0("Ratios for section", ifelse(length(sections) > 1, "s ", " "), paste0(sections, collapse = ", "))
+      } else {
+        title <- paste0("Ratios for section", 
+          ifelse(length(sections) > 1, "s ", " "), 
+          paste0(sections, collapse = ", "))
+      }
     } else {
-      if (missing(sections))
-        title <- paste0("Ratios for group", ifelse(length(groups) > 1, "s ", " "), paste0(groups, collapse = ", "))
-      else
-        title <- paste0("Ratios for group", ifelse(length(groups) > 1, "s ", " "), paste0(groups, collapse = ", "), 
-          " in section", ifelse(length(sections) > 1, "s ", " "), paste0(sections, collapse = ", "))
+      if (missing(sections)) {
+        title <- paste0("Ratios for group", 
+          ifelse(length(groups) > 1, "s ", " "), 
+          paste0(groups, collapse = ", "))
+      } else {
+        title <- paste0("Ratios for group", 
+          ifelse(length(groups) > 1, "s ", " "), 
+          paste0(groups, collapse = ", "), 
+          " in section", ifelse(length(sections) > 1, "s ", " "), 
+          paste0(sections, collapse = ", "))
+      }
     }
   }
 
   if (!missing(groups)) {
-    if (any(link <- is.na(match(groups, names(input$group.ratios)))))
-      stop("Could not find group(s) '", paste(groups[link], collapse = "', '") , "' in the input.", call. = FALSE)
+    link <- is.na(match(groups, names(input$group.ratios)))
+    if (any(link)) {
+      stop("Could not find group(s) '", 
+        paste(groups[link], collapse = "', '") , 
+        "' in the input.", call. = FALSE)
+    }
   } else {
     groups <- names(input$group.ratios)
   }
 
   if (!missing(sections)) {
-    if (link <- any(is.na(match(sections, colnames(input$global.ratios$absolutes)))))
-      stop("Section", ifelse(sum(link) > 1, "s '", " '"), paste0(sections[link], collapse = "', '"),
-        ifelse(sum(link) > 1, "' do ", "' does "), "not exist, or no tags have ever been assigned to it.", call. = FALSE)
+    link <- any(is.na(match(sections, colnames(input$global.ratios$absolutes))))
+    if (link) {
+      stop("Section", ifelse(sum(link) > 1, "s '", " '"), 
+        paste0(sections[link], collapse = "', '"),
+        ifelse(sum(link) > 1, "' do ", "' does "), 
+        "not exist, or no tags have ever been assigned to it.", call. = FALSE)
+    }
   } else {
-    sections <- colnames(input$global.ratios[[1]])[-c(1, ncol(input$global.ratios[[1]]))]
+    not_these <- -c(1, ncol(input$global.ratios[[1]]))
+    sections <- colnames(input$global.ratios[[1]])[not_these]
   }
 
   aux <- lapply(groups, function(i) {
     # cat(i, '\n')
     x <- input$group.ratios[[i]]$absolutes
 
-    # create placeholder columns for sections where the
-    if (any(link <- is.na(match(sections, colnames(x))))) {
+    if (is.null(x)) {
+      # then this group was never detected at all. Skip it.
+      return(NULL)
+    }
+
+    # create placeholder columns for sections where the animals
+    # from this group were never detected.
+    link <- is.na(match(sections, colnames(x)))
+    if (any(link)) {
       x[, sections[link]] <- 0
       x <- x[, c('Timeslot', sections, 'Total')]
     }
@@ -1883,22 +1919,23 @@ plotRatios <- function(input, groups, sections, type = c("absolutes", "percentag
     x$Group <- i
 
     if (col.by == 'group') {
-      # If we want to colour by group, all the section by section info is irrelevant.
-      # make a new column with the sum per day, and discard the rest
-
-      if (ncol(x) > 3)
+      # If we want to colour by group, all the section by sectionm info is
+      # irrelevant. Make a new column with the sum per day, and discard the rest
+      if (ncol(x) > 3) {
         x$n <- apply(x[, -c(1, ncol(x))], 1, sum)
-      else
+      } else {
         colnames(x)[2] <- "n"
-
+      }
       return(x[, c("Timeslot", "Group", "n")])
-
     } else {
       # otherwise, save all the info
       return(x)
     }
   })
 
+  # remove groups that were never detected before continuing
+  aux <- aux[sapply(aux, length) > 0]
+  
   if (col.by == 'group') {
     the.ratios <- aux[[1]][, c('Timeslot', 'n')]
     colnames(the.ratios)[2] <- aux[[1]]$Group[1]
@@ -1915,7 +1952,10 @@ plotRatios <- function(input, groups, sections, type = c("absolutes", "percentag
     if (length(aux) > 1) {
       # collapse all groups by summing the cell values
       for (i in 2:length(aux)) {
-        the.ratios[, 2:(ncol(the.ratios))] <- the.ratios[, 2:(ncol(the.ratios))] + aux[[i]][, 2:(ncol(aux[[i]])-1)]
+        # should have commented these commands when I wrote them (:
+        a <- the.ratios[, 2:(ncol(the.ratios))]
+        b <- aux[[i]][, 2:(ncol(aux[[i]])-1)]
+        the.ratios[, 2:(ncol(the.ratios))] <- a + b
       }
       rm(i)
     }
@@ -1924,25 +1964,30 @@ plotRatios <- function(input, groups, sections, type = c("absolutes", "percentag
   if (type == 'percentages') {
     # calculate percentages per row
     for (r in 1:nrow(the.ratios)) {
-      if (!(sum(the.ratios[r, 2:(ncol(the.ratios))]) == 0))
-        the.ratios[r, 2:(ncol(the.ratios))] <- the.ratios[r, 2:(ncol(the.ratios))] / sum(the.ratios[r, 2:(ncol(the.ratios))])
+      if (!(sum(the.ratios[r, 2:(ncol(the.ratios))]) == 0)) {
+        # should have commented these commands when I wrote them (:
+        a <- the.ratios[r, 2:(ncol(the.ratios))]
+        b <- sum(the.ratios[r, 2:(ncol(the.ratios))])
+        the.ratios[r, 2:(ncol(the.ratios))] <- a / b
+      }
     }
     rm(r) 
   }
 
-  # return(the.ratios)
-
-  if (missing(xlab))
+  if (missing(xlab)) {
     xlab <- ""
-
-  if (missing(ylab)) {
-    if (type == "absolutes")
-      ylab <- "n"
-    else
-      ylab <- "% tags"
   }
 
-  plotdata <- suppressMessages(reshape2::melt(the.ratios, id.vars = c("Timeslot")))
+  if (missing(ylab)) {
+    if (type == "absolutes") {
+      ylab <- "n"
+    } else {
+      ylab <- "% tags"
+    }
+  }
+
+  plotdata <- suppressMessages(
+    reshape2::melt(the.ratios, id.vars = c("Timeslot")))
 
   if (col.by == 'group') {
     colnames(plotdata) <- c("Timeslot", "Group", "n")
@@ -1954,52 +1999,73 @@ plotRatios <- function(input, groups, sections, type = c("absolutes", "percentag
 
   if (missing(col)) {
     if (col.by == 'group') {
-      if (length(groups) <= 8)
+      if (length(groups) <= 8) {
         unique.colours <- as.vector(cbPalette)[1:length(groups)]
-      else
+      } else {
         unique.colours <- gg_colour_hue(length(groups))
+      }
     } else {
-      if (length(sections) <= 8)
+      if (length(sections) <= 8) {
         unique.colours <- as.vector(cbPalette)[1:(length(sections))]
-      else
+      } else {
         unique.colours <- gg_colour_hue(length(sections))
+      }
     }
   } else {
     if (col.by == 'group') {
-      if (length(col) < length(groups))
-        warning("Not enough colours supplied in 'col' (", length(col)," supplied and ", length(groups), " needed). Reusing colours.", immediate. = TRUE, call. = FALSE)
+      if (length(col) < length(groups)) {
+        warning("Not enough colours supplied in 'col' (", 
+          length(col)," supplied and ", length(groups), 
+          " needed). Reusing colours.", immediate. = TRUE, call. = FALSE)
+      }
       unique.colours <- rep(col, length.out = length(groups))
     } else {
-      if (length(col) < length(sections))
-        warning("Not enough colours supplied in 'col' (", length(col)," supplied and ", length(sections), " needed). Reusing colours.", immediate. = TRUE, call. = FALSE)
+      if (length(col) < length(sections)) {
+        warning("Not enough colours supplied in 'col' (",
+          length(col)," supplied and ", length(sections),
+          " needed). Reusing colours.", immediate. = TRUE, call. = FALSE)
+      }
       unique.colours <- rep(col, length.out = length(sections))
     }
   }
 
-  if (col.by == 'group')
-    p <- ggplot2::ggplot(data = plotdata, ggplot2::aes(x = Timeslot, y = n, fill = Group, col = Group))
-  else
-    p <- ggplot2::ggplot(data = plotdata, ggplot2::aes(x = Timeslot, y = n, fill = Location, col = Location))
+  if (col.by == 'group') {
+    p <- ggplot2::ggplot(data = plotdata, 
+      ggplot2::aes(x = Timeslot, y = n, fill = Group, col = Group))
+  } else {
+    p <- ggplot2::ggplot(data = plotdata, 
+      ggplot2::aes(x = Timeslot, y = n, fill = Location, col = Location))
+  }
 
-  p <- p + ggplot2::geom_bar(width = ifelse(attributes(input$global.ratios[[1]])$timestep == "days", 86400, 3600), stat = "identity")
+  if (attributes(input$global.ratios[[1]])$timestep == "days") {
+    bar_width <- 86400
+  } else {
+    bar_width <- 3600    
+  }
+
+  p <- p + ggplot2::geom_bar(width = bar_width, stat = "identity")
   p <- p + ggplot2::theme_bw()
 
   max.y <- max(with(plotdata, aggregate(n, list(Timeslot), sum))$x)
-  if (type == "absolutes")
-    p <- p + ggplot2::scale_y_continuous(limits = c(0,  max.y * 1.05), expand = c(0, 0))
-  else
-    p <- p + ggplot2::scale_y_continuous(limits = c(0,  max.y), expand = c(0, 0))
-
+  if (type == "absolutes") {
+    p <- p + ggplot2::scale_y_continuous(limits = c(0,  max.y * 1.05), 
+      expand = c(0, 0))
+  } else {
+    p <- p + ggplot2::scale_y_continuous(limits = c(0,  max.y),
+      expand = c(0, 0))
+  }
 
   p <- p + ggplot2::labs(title = title, x = xlab, y = ylab)
 
   p <- p + ggplot2::scale_fill_manual(values = unique.colours, drop = FALSE)
   p <- p + ggplot2::scale_colour_manual(values = unique.colours, drop = FALSE)
 
-  if (length(unique.colours) > 10 & length(unique.colours) <= 20)
+  if (length(unique.colours) > 10 & length(unique.colours) <= 20) {
     p <- p + ggplot2::guides(fill = ggplot2::guide_legend(ncol = 2))
-  if (length(unique.colours) > 20)
+  }
+  if (length(unique.colours) > 20) {
     p <- p + ggplot2::guides(fill = ggplot2::guide_legend(ncol = 3))
+  }
 
   return(p)
 }
