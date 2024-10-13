@@ -1328,6 +1328,11 @@ checkDupSignals <- function(input, bio){
 #'
 checkIssue79 <- function(arrays, spatial) {
 
+  if (length(arrays) < 3) {
+    # not enough arrays to have a problem
+    return()
+  }
+
   output <- lapply(names(arrays), function(i) {
     link <- match(i, spatial$stations$Array)
     this.section <- as.character(unique(spatial$stations$Section[link]))
