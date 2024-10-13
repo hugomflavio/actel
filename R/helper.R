@@ -763,31 +763,147 @@ convertLotekCDMAFile <- function(file, date_format = "%m/%d/%y") {
   gmt_cor <- sub("GMT Correction:\\s*", "", gmt_cor)
   gmt_cor <- decimalTime(gmt_cor)
 
+  # importing this file is not easy. We must extract the detection lines
+  # and the detection headers and then work with them. To find those lines:
   det_start <- grep("=========", file_raw)[1]
   det_end <- grep("Receiver Sensor Messages:", file_raw)[1] - 2
   
-  det_names <- file_raw[det_start-1]
-  det_names <- sub("Tag ID", "Signal", det_names)
-
-  output <- readr::read_fwf(file, 
-    skip = det_start,
-    n_max = det_end - det_start,
-    show_col_types = FALSE)
+  # To properly parse the columns, we must use the column names, otherwise the
+  # import will fail if any of the columns only has NAs in it. But we must
+  # remove the "===" row before working with it. We must also replace any single
+  # spaces in the column names with underscores.
+  det_lines <- file_raw[(det_start-1):det_end]
+  det_lines <- det_lines[-2] # <- the "=====" line
+  det_lines[1] <- stringr::str_replace_all(det_lines[1],
+                                           pattern = "(?<!\\s)\\s(?!\\s)", 
+                                           replacement = "_")
   
+  # Now that we have the detection lines, we need to work some magic to find
+  # the right column widths. This is because read_fwf doesn't allow using the
+  # first row as column names, but without knowing the widths of that first row,
+  # we'll run into the NA issue I mentioned above. 
+  # All this can be probably be changed _if_ this issue is addressed:
+  # https://github.com/tidyverse/readr/issues/1393#issuecomment-2408682861
+  #
+  # So:
+  # find out how fwf would read the headers
+  head_fw <- readr::fwf_empty(I(det_lines[1]))
+  # add the column names to head_fw
+  aux <- sub("Tag_ID[^ ]*", "Signal", det_lines[1])
+  head_fw$col_names <- unlist(strsplit(aux, "\\s+"))
+  # find out how fwf would read the table content
+  body_fw <- readr::fwf_empty(I(det_lines), skip = 1)
+  # now the fun part, compare the two and expand head_fw as needed.
+  # at the end of the foor loop below, head_fw will have the right
+  # column positions to import the detection lines correctly.
+
+  # the code below works for this example:
+  # head_fw:
+  #       1            2         3                4        5             6          7         8
+  # 0           13  17  21    27  31           44 4749         60   65      73  77    83   88   93
+  # |------------|   |---|     |---|            |--| |----------|    |-------|   |-----|    |----|
+  # |Serial_Number    Date      Time             TOA  Tag_ID[dec]     Tag_Type    Sensor     Power
+
+  # body_fw:
+  #       1              2         3            4             5            6       !!!          7    
+  # 0           13  17      2527      35   40     47       56  60        70 73               90 93
+  # |------------|   |-------| |-------|    |------|        |---|         |--|                |--|
+  # |WHS4K-1900132    03/25/24  12:22:25     0.19490         1132          PSK                 512
+
+  # Both combined:
+  #       1              2         3            4          5             6          7         8
+  # 0           13  17      2527      35   40     4749         60   65      73  77    83   88   93
+  # |------------|   |-------| |-------|    |------| |----------|    |-------|   |-----|    |----|
+  # |Serial_Number    Date      Time             TOA  Tag_ID[dec]     Tag_Type    Sensor     Power
+  # |WHS4K-1900132    03/25/24  12:22:25     0.19490         1132          PSK                 512
+
+  # i_b is set manually because some columns may be missing
+  # in body_fw, so we need to be able to make body_fw lag 
+  # behind in comparison to head_fw.
+  i_b <- 0
+  for (i_h in 1:length(head_fw$begin)) {
+    i_b <- i_b + 1
+    while (TRUE) {
+      if (head_fw$begin[i_h] < body_fw$begin[i_b]) {
+        if (is.na(head_fw$end[i_h])) {
+          # we've reached the end
+          break()
+        }
+        if (head_fw$end[i_h] <= body_fw$begin[i_b]) {
+          # if A starts and ends before/when b begins
+          # then this is a missing column, so for the 
+          # coming comparisons we must lag behind in b.
+          i_b <- i_b - 1
+          break()
+        } else {
+          # a starts earlier, which is fine.
+          if (head_fw$end[i_h] >= body_fw$end[i_b]) {
+            # a already encompasses b.
+            break()
+          } else {
+            # expand a to encompass b.
+            head_fw$end[i_h] <- body_fw$end[i_b]
+          }
+        }
+      }
+      if (head_fw$begin[i_h] == body_fw$begin[i_b]) {
+        if (is.na(head_fw$end[i_h])) {
+          # we've reached the end
+          break()
+        }
+        if (head_fw$end[i_h] == body_fw$end[i_b]) {
+          # a and b are the same.
+          break()
+        } else {
+          if (head_fw$begin[i_h + 1] >= body_fw$end[i_b]) {
+            head_fw$end[i_h] <- body_fw$end[i_b]
+          } else {
+            # should never happen?
+            stop("something went wrong, contact developer")
+          }
+        }
+      }
+      if (head_fw$begin[i_h] > body_fw$begin[i_b]) {
+        head_fw$begin[i_h] <- body_fw$begin[i_b]
+      }
+    }
+  }
+
+  # now that we know the fixed widths, we can import the data
+  output <- readr::read_fwf(I(det_lines),
+    col_positions = head_fw,
+    skip = 1, # skip the column headers to get the data types right.
+    show_col_types = FALSE)
+
+  # convert to data.table to stay compatible 
+  # with the rest of the import functions  
   output <- as.data.table(output)
 
-  colnames(output) <- unlist(strsplit(det_names, "\\s\\s*"))
+  # work on the columns we want to keep
   output$CodeSpace <- code_type
   output$Receiver <- as.numeric(serial_n)
   output$Date <- as.Date(output$Date, format = date_format)
   output$Timestamp <- paste(output$Date, output$Time)
   output$Signal <- suppressWarnings(as.numeric(output$Signal))
   # a more elegant warning is thrown at the end if NAs are formed here
-  
-  output <- data.table::setnames(output, 
-    c("Type", "Value"),
-    c("Sensor.Unit", "Sensor.Value"))
 
+  link <- matchl(colnames(output), c("Type", "Sensor"))
+  if (sum(link) > 1) {
+    stop("too many sensor type matches. contact developer")
+  }
+  if (sum(link) == 1) {
+    output$Sensor.Unit <- output[, which(link), with = FALSE]
+  } else {
+    output$Sensor.Unit <- NA
+  }
+
+  if ("Value" %in% colnames(output)) {
+    output$Sensor.Value <- output$Value
+  } else {
+    output$Sensor.Value <- NA
+  }
+
+  # extract the standard columns
   std_cols <- c("Timestamp", "Receiver", "CodeSpace", 
                 "Signal", "Sensor.Value", "Sensor.Unit")
   output <- output[, std_cols, with = FALSE]
