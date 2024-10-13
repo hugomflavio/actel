@@ -14,6 +14,7 @@ Enhancements:
   * Improve column name checks to avoid accidentally matching anything to the dot wildcard.
   * Add new "first to first" method to speed calculations (issue [#96](https://github.com/hugomflavio/actel/issues/96))
   * New `processInnovaseaFile()` function to handle updated innovasea detection file format (issue [#97](https://github.com/hugomflavio/actel/issues/97)).
+  * New `convertLotekCDMAFile()` function to prepare lotek txt logs for further analyses.
 
 ## actel 1.3.0
 
