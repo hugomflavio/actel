@@ -17,6 +17,7 @@ Enhancements:
   * Add new "first to first" method to speed calculations (issue [#96](https://github.com/hugomflavio/actel/issues/96))
   * New `processInnovaseaFile()` function to handle updated innovasea detection file format (issue [#97](https://github.com/hugomflavio/actel/issues/97)).
   * New `convertLotekCDMAFile()` function to prepare lotek txt logs for further analyses (issue [#103](https://github.com/hugomflavio/actel/issues/103)).
+  * New `plotDot()` function to help users inspect their spatial.txt files (issue [#55](https://github.com/hugomflavio/actel/issues/55)).
 
 ## actel 1.3.0
 

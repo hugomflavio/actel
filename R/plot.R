@@ -2069,3 +2069,197 @@ plotRatios <- function(input, groups, sections,
 
   return(p)
 }
+
+
+#' Plot DOT diagram
+#' 
+#' This function is useful for quickly checking if your spatial.txt file is
+#' properly set up. The spatial.txt file can be imported using [readDot()]
+#'
+#' @param dot a dot data frame, or a string of text that can be converted
+#'  to a dot data frame using [readDot()].
+#' @param spatial a data frame containing stations and respective coordinates.
+#'  Note: The mean coordinates for the stations of any given array will be used.
+#' @param coord.x,coord.y The names of the columns containing the x and y 
+#'  positions of the stations in the spatial data frame.
+#' @param expand A value to increase or decrease spacing between arrays.
+#'  Ignored if spatial is not provided.
+#' @param file Optional: A file name to export the plot. Must include the
+#'  file extension (one of png, pdf, or svg). E.g. "output.svg"
+#' @param fill A vector of colours to use. If spatial is provided and it
+#'  contains a "Section" column, ach section is assigned a colour. If not enough
+#'  colours are provided, the argument is ignored and a colour ramp is used.
+#' @param text_colour The colour for the array names. Defaults to "white".
+#'
+#' @examples
+#' # create dummy dot string
+#' x <- c(
+#' "A--B--C--D--E--F
+#' A--G--H--I--E
+#' H--C")
+#'
+#' my_dot <- readDot(string = x)
+#'
+#' # now we can plot it using plotDot:
+#' plotDot(my_dot)
+#' 
+#' # plotDot can also be called directly using the string of text:
+#' plotdot(x)
+#'
+#' @return No return value, called to either plot or save graphic.
+#'
+#' @export
+#'
+plotDot <- function(dot, spatial, coord.x, coord.y, expand = 1, file,
+    fill = c("#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00",
+      "#CC79A7"), text_colour = "white") {
+# requires:
+# DiagrammeR
+# DiagrammeRsvg
+# rsvg
+
+  if (!missing(file) && !grepl("png$|pdf$|svg$", file)) {
+    stop("Could not recognise file extension. ",
+      "Please chose a png, pdf or svg file format.", call = FALSE)
+  }
+
+  if (is.character(dot)) {
+    dot <- readDot(string = dot)
+  } else {
+    if (is.data.frame(dot)) {
+      if (ncol(dot) != 3 || any(!(dot[, 2] %in% c("--", "<-", "->")))) {
+        stop("Could not recognise the input contents as DOT ",
+          "formatted connections.", call. = FALSE)
+      }
+    } else {
+      stop("Could not recognize the input ",
+        "as a dataframe nor a dot string.", call. = FALSE)
+    }
+  }
+
+  unique.arrays <- unique(unlist(dot[, c(1,3)]))
+
+  diagram_nodes <- data.frame(
+    id = 1:length(unique(unlist(dot[, c(1, 3)]))),
+    label = unique(unlist(dot[, c(1, 3)])),
+    fillcolor = fill[1],
+    fontcolor = text_colour,
+    stringsAsFactors = FALSE)
+
+  if (!missing(spatial)) {
+    if (missing(coord.x) | missing(coord.y)) {
+      stop("spatial was provided, but coord.x and/or coord.y are missing.",
+        call. = FALSE)
+    }
+
+    if (!any(colnames(spatial) == coord.x)) {
+      stop("Could not find column '", coord.x, "' in spatial.", call. = FALSE)
+    }
+
+    if (!any(colnames(spatial) == coord.y)) {
+      stop("Could not find column '", coord.y, "' in spatial.", call. = FALSE)
+    }
+    
+    if (any(is.na(match(unique.arrays, unique(spatial$Array))))) {
+      stop("spatial was provided, but not all arrays specified ",
+        "in the dot exist in spatial.", call. = FALSE)
+    }
+
+    if (any(is.na(match(unique(spatial$Array), unique.arrays)))) {
+      warning("Not all arrays present in spatial were listed in dot.",
+        immediate. = TRUE, call. = FALSE)
+    }
+
+    xspatial <- spatial[!is.na(match(spatial$Array, unique.arrays)), ]
+
+    dot.coords <- aggregate(xspatial[, c(coord.x, coord.y)], 
+                            list(xspatial$Array), mean)
+    colnames(dot.coords) <- c("Array", "x", "y")
+
+    dot.coords$x <- dot.coords$x - min(dot.coords$x)
+    dot.coords$y <- dot.coords$y - min(dot.coords$y)
+    
+    # relocate dots based on relative spacing between coordinates
+    x_rel <- dot.coords$x / max(dot.coords$x)
+    y_rel <- dot.coords$y / max(dot.coords$y)
+    if (max(dot.coords$x)/max(dot.coords$y) >= 1) {
+      x_prop <- max(dot.coords$x) / max(dot.coords$y) * 10
+      y_prop <- 1 * 10
+    } else {
+      x_prop <- 1 * 10
+      y_prop <- max(dot.coords$y) / max(dot.coords$x) * 10
+    }
+    dot.coords$x <- x_rel * x_prop * expand
+    dot.coords$y <- y_rel * y_prop * expand
+
+    dot.coords <- dot.coords[match(dot.coords$Array, unique.arrays), ]
+
+    diagram_nodes$x <- round(dot.coords$x, 0)
+    diagram_nodes$y <- round(dot.coords$y, 0)
+
+    if ("Section" %in% colnames(spatial)) {
+      sections <- unique(spatial$Section)
+      if (length(sections) > 1) {
+        if (length(sections) > length(fill)) {
+          warning("Not enough colours defined. Using colour ramp instead.",
+            immediate. = TRUE, call. = FALSE)
+          fill <- gg_colour_hue(length(sections))
+        }
+
+        for (i in 1:length(sections)) {
+          arrays <- spatial$Array[spatial$Section %in% sections[i]]
+          link <- matchl(diagram_nodes$label, arrays)
+          diagram_nodes$fillcolor[link] <- fill[i]
+        }
+      }
+    }
+  }
+
+  # prepare edge data frame
+  if (nrow(dot) == 1) {
+    if (dot[1, 1] == dot[1, 3]) {
+      diagram_edges <- NULL
+      complete <- FALSE
+    } else {
+      diagram_edges <- apply(dot[, c(1, 3), drop = FALSE], 2, 
+                        function(x) {
+                          match(x, diagram_nodes$label)
+                        })
+      diagram_edges <- as.data.frame(t(diagram_edges))
+      complete <- TRUE
+    }
+  } else {
+    diagram_edges <- apply(dot[, c(1, 3), drop = FALSE], 2,
+                        function(x) {
+                          match(x, diagram_nodes$label)
+                        })
+    diagram_edges <- as.data.frame(diagram_edges)
+    complete <- TRUE
+  }
+  if (complete) {
+    colnames(diagram_edges) <- c("from", "to")
+
+    diagram_edges$rel <- "requires"
+    diagram_edges$dir <- "none"
+    diagram_edges$arrowhead <- "none"
+    diagram_edges$arrowtail <- "none"
+
+    diagram_edges$dir[dot$to != "--"] <- "both"
+    diagram_edges$arrowhead[dot$to == "->"] <- "normal"
+    diagram_edges$arrowtail[dot$to == "->"] <- "tee"
+    diagram_edges$arrowhead[dot$to == "<-"] <- "tee"
+    diagram_edges$arrowtail[dot$to == "<-"] <- "normal"
+  }
+
+  if (is.null(diagram_edges)) {
+    x <- DiagrammeR::create_graph(diagram_nodes)
+  } else {
+    x <- DiagrammeR::create_graph(diagram_nodes, diagram_edges)
+  }
+
+  if (missing(file)) {
+    return(DiagrammeR::render_graph(x))
+  } else {
+    DiagrammeR::export_graph(x, file_name = file)
+  }
+}
