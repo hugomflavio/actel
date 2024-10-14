@@ -34,9 +34,9 @@ test_that("checkMinimumN reacts as expected", {
 	xmoves[[1]] <- xmoves[[1]][1, ]
 	xmoves[[1]]$Detections <- 1
   expect_warning(output <- checkMinimumN(movements = xmoves[[1]], tag = "test", min.total.detections = 2, min.per.event = 2, n = "(1/1)"),
-  	"Tag test (1/1) has less than 2 detections in total. Discarding this tag.", fixed = TRUE)
+  	"Tag test (1/1) has fewer than 2 detections in total. Discarding this tag.", fixed = TRUE)
   expect_warning(output <- checkMinimumN(movements = xmoves[[1]], tag = "test", min.total.detections = 1, min.per.event = 2, n = "(1/1)"),
-    "Tag test (1/1) has array movement events with less than 2 detections. Invalidating those events.", fixed = TRUE)
+    "Tag test (1/1) has array movement events with fewer than 2 detections. Invalidating those events.", fixed = TRUE)
   expect_false(output$Valid)
   output <- checkMinimumN(movements = xmoves[[2]], tag = "test", min.total.detections = 1, min.per.event = 1)
   expect_true(all(output$Valid))
@@ -161,7 +161,7 @@ test_that("checkInactiveness reacts as expected.", {
   attributes(xdist)$valid <- FALSE
   expect_warning(output <- checkInactiveness(movements = xmoves, tag = "R64K-4451", detections = detections.list[[1]],
     inactive.warning = 1, inactive.error = Inf, dist.mat = xdist, GUI = "never", n = "(1/1)"),
-  "Tag R64K-4451 (1/1) was detected 292 times at three or less stations of array 'A7' (St.9, St.10, St.11) over 2.57 days and then disappeared. Could it be inactive?", fixed = TRUE)
+  "Tag R64K-4451 (1/1) was detected 292 times at three or fewer stations of array 'A7' (St.9, St.10, St.11) over 2.57 days and then disappeared. Could it be inactive?", fixed = TRUE)
   expect_equal(output, xmoves)
 
   # no warnings

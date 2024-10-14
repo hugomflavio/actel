@@ -101,7 +101,7 @@ test_that("checkSMovesN throws warning only if movements are not ordered", {
     warning = function(w) stop("A warning was issued where it should not have been."))
 
 	expect_warning(checkSMovesN(secmoves = aux, tag = "test", section.warning = 15, section.error = 0, GUI = "never", n = "(1/1)"),
-		"Section movements with 15 or less detections are present for tag test (1/1).", fixed = TRUE)
+		"Section movements with 15 or fewer detections are present for tag test (1/1).", fixed = TRUE)
 })
 
 setwd("..")
