@@ -1511,82 +1511,109 @@ getResidency <- function(movements, spatial){
 resRatios <- function(res, timestep = c("days", "hours"), tz) {
   appendTo("debug", "Running resRatios")
   timestep <- match.arg(timestep)
-  num.step <- ifelse(timestep == "days", 86400, 3600)
+  one_step <- ifelse(timestep == "days", 86400, 3600)
+  half_step <- one_step/2
   counter <- 0
-  if (interactive())
+  if (interactive()) {
     pb <- txtProgressBar(min = 0, max = length(res), style = 3, width = 60) # nocov
+  }
   output <- lapply(res, function(x) {
     counter <<- counter + 1
     # cat("\n", counter, "\n")
-    res.range <- seq(from = round.POSIXt(x$First.time[1] - (num.step / 2), units = timestep),
-      to =  round.POSIXt(x$Last.time[nrow(x)] - (num.step / 2), units = timestep), by = num.step)
+    res.range <- seq(
+      from = round.POSIXt(x$First.time[1] - half_step, units = timestep),
+      to =  round.POSIXt(x$Last.time[nrow(x)] - half_step, units = timestep),
+      by = one_step)
 
-    # If a daily period starts in daylight saving time and timestep == days: Standardize so the break points are in "normal" time
+    # If a daily period starts in daylight saving time and timestep == days:
+    # Standardize so the break points are in "normal" time
     if (timestep == "days" && as.POSIXlt(res.range[1])$isdst == 1) {
       res.range <- res.range + 3600
       # If readjustment causes the first time to fall off, add one day before.
-      if (x$First.time[1] < res.range[1])
+      if (x$First.time[1] < res.range[1]) {
         res.range <- c(res.range[1] - (3600 * 24), res.range)
+      }
       # If readjustment causes last day to be empty, remove last day.
-      if (x$Last.time[nrow(x)] < res.range[length(res.range)])
+      if (x$Last.time[nrow(x)] < res.range[length(res.range)]) {
         res.range <- res.range[-length(res.range)]
+      }
     }
 
     res.list <- lapply(res.range, function(d) {
       # cat(as.character(d), "\n")
-      findSecondsPerSection(res = x, frame = d, the.range = range(res.range), num.step = num.step)
+      findSecondsPerSection(res = x, frame = d,
+        the_range = range(res.range), one_step = one_step)
     })
-    if (interactive())
+    if (interactive()) {
       setTxtProgressBar(pb, counter) # nocov
-    resRatiosIndOut(input = res.list, slots = res.range, tz = tz, tag = names(res)[counter])
+    }
+    resRatiosIndOut(input = res.list, slots = res.range,
+      tz = tz, tag = names(res)[counter])
   })
-  if (interactive())
+  if (interactive()) {
     close(pb) # nocov
+  }
+
   attributes(output)$timestep <- timestep
+
   return(output)
 }
 
 #' Calculate number of seconds at each location per day
 #'
 #' @inheritParams resRatios
-#' @param the.range the first and last start.time for the specific tag
-#' @param num.step the size of the block
+#' @param the_range the first and last start.time for the specific tag
+#' @param one_step the size of the block
 #'
-#' @return A data frame containing the number of seconds spent at each location for a specific timeframe
+#' @return A data frame containing the number of seconds spent at each
+#'  location for a specific timeframe
 #'
 #' @keywords internal
 #'
-findSecondsPerSection <- function(res, frame, the.range, num.step) {
+findSecondsPerSection <- function(res, frame, the_range, one_step) {
   appendTo("debug", "Running findSecondsPerSection")
   aux <- c()
-  candidate.events <- which(res$First.time <= frame + num.step)
+  candidate.events <- which(res$First.time <= frame + one_step)
   potential.events <- which(res$First.time[candidate.events] >= frame)
-  # IF potential events returns 0, then the only valid event is the very last candidate
-  if (length(potential.events) == 0)
+  # IF potential events returns 0, then the only
+  # valid event is the very last candidate
+  if (length(potential.events) == 0) {
     e <- tail(candidate.events, 1)
-  else
+  } else {
     e <- potential.events
+  }
   # IF there is only one event
   if (length(e) == 1) {
     # and that event is the very first one
     if (e == 1) {
-      # Exception for if the tag was only detected one frame, calculates difference between event start and stop.
-      if (the.range[2] == the.range[1]) {
-        aux[length(aux) + 1] <- difftime(res$Last.time[e], res$First.time[e], units = "secs")
+      # Exception for if the tag was only detected one frame,
+      # calculates difference between event start and stop.
+      if (the_range[2] == the_range[1]) {
+        aux[length(aux) + 1] <- difftime(res$Last.time[e],
+                                         res$First.time[e],
+                                         units = "secs")
         names(aux)[length(aux)] <- res$Section[e]
         aux[length(aux) + 1] <- 0
         names(aux)[length(aux)] <- "Changes"
       } else {
-        # Exception for if the frame being analysed is the last frame, calculates difference between frane start and event stop.
-        if (frame == the.range[2]) {
-          aux[length(aux) + 1] <- difftime(res$Last.time[e], frame, units = "secs")
+        # Exception for if the frame being analysed is the last frame,
+        # calculates difference between frane start and event stop.
+        if (frame == the_range[2]) {
+          aux[length(aux) + 1] <- difftime(res$Last.time[e],
+                                           frame,
+                                           units = "secs")
           names(aux)[length(aux)] <- res$Section[e]
-        # Otherwise calculate difference between event start and frame end, and trim at a full frame.
+        # Otherwise calculate difference between event start and frame end,
+        # and trim at a full frame.
         } else {
-          aux[length(aux) + 1] <- min(num.step, as.numeric(difftime(frame + num.step, res$First.time[e], units = "secs")))
+          the_diff <- difftime(frame + one_step,
+                               res$First.time[e],
+                               units = "secs")
+          aux[length(aux) + 1] <- min(one_step, as.numeric(the_diff))
           names(aux)[length(aux)] <- res$Section[e]
         }
-        # Regardless of path, if length(e) == 1 and the event is the first one, the number of changes is 0
+        # Regardless of path, if length(e) == 1 and the event is
+        # the first one, the number of changes is 0
         aux[length(aux) + 1] <- 0
         names(aux)[length(aux)] <- "Changes"
       }
@@ -1594,25 +1621,36 @@ findSecondsPerSection <- function(res, frame, the.range, num.step) {
     } else {
       # If the frame of the event is previous to the frame itself
       if (res$First.time[e] < frame) {
-        # Exception for the last frame, calculates difference between frame start and event stop.
-        if (frame == the.range[2]) {
-          aux[length(aux) + 1] <- difftime(res$Last.time[e], frame, units = "secs")
+        # Exception for the last frame, calculates difference
+        # between frame start and event stop.
+        if (frame == the_range[2]) {
+          aux[length(aux) + 1] <- difftime(res$Last.time[e],
+                                           frame,
+                                           units = "secs")
           names(aux)[length(aux)] <- res$Section[e]
-        # otherwise, since there are no more 'e', the tag has stayed the whole frame in the event
+        # otherwise, since there are no more 'e', the tag has
+        # stayed the whole frame in the event
         } else {
-          aux[length(aux) + 1] <- num.step
+          aux[length(aux) + 1] <- one_step
           names(aux)[length(aux)] <- res$Section[e]
         }
-        # In either case above the tag spends the whole time in the event, so changes = 0
+        # In either case above the tag spends the whole time in the event,
+        # so changes = 0
         aux[length(aux) + 1] <- 0
         names(aux)[length(aux)] <- "Changes"
       # If the frame of the event is already in the frame itself
       } else {
-        # Start by storing the time spent in previous event (i.e. difference between frame start and event start)
-        aux[length(aux) + 1] <- difftime(res$First.time[e], frame, units = "secs")
+        # Start by storing the time spent in previous event
+        # (i.e. difference between frame start and event start)
+        aux[length(aux) + 1] <- difftime(res$First.time[e],
+                                         frame,
+                                         units = "secs")
         names(aux)[length(aux)] <- res$Section[e - 1]
-        # Then, since there are no more events, calculate difference between event start and frame end.
-        aux[length(aux) + 1] <- difftime(frame + num.step, res$First.time[e], units = "secs")
+        # Then, since there are no more events, calculate
+        # difference between event start and frame end.
+        aux[length(aux) + 1] <- difftime(frame + one_step,
+                                         res$First.time[e],
+                                         units = "secs")
         names(aux)[length(aux)] <- res$Section[e]
         # Since the frame is split in two events, there is 1 change
         aux[length(aux) + 1] <- 1
@@ -1623,32 +1661,44 @@ findSecondsPerSection <- function(res, frame, the.range, num.step) {
   } else {
     n <- length(e)
     # calculate difference between frame start and first time
-    aux[length(aux) + 1] <- difftime(res$First.time[e[1]], frame, units = "secs")
-    # Exception for if the frame being analysed is the first frame (in which case this fragment should be excluded at the end)
-    if (frame == the.range[1])
+    aux[length(aux) + 1] <- difftime(res$First.time[e[1]],
+                                     frame,
+                                     units = "secs")
+    # Exception for if the frame being analysed is the first frame
+    # (in which case this fragment should be excluded at the end)
+    if (frame == the_range[1]) {
       names(aux)[length(aux)] <- "TO.EXCLUDE"
-    else
+    } else {
       names(aux)[length(aux)] <- res$Section[e[1] - 1]
-    # For all events except the last, calculate the difference between first and last time of the event.
+    }
+    # For all events except the last, calculate the difference
+    # between first and last time of the event.
     for (i in e[-n]) {
-      aux[length(aux) + 1] <- difftime(res$Last.time[i], res$First.time[i], units = "secs")
+      aux[length(aux) + 1] <- difftime(res$Last.time[i],
+                                       res$First.time[i],
+                                       units = "secs")
       names(aux)[length(aux)] <- res$Section[i]
     }
     # For the very last frame
-    # exception for if the frame being analysed is the last frame, where the behaviour should be the same as the above
-    if (frame == the.range[2]) {
-      aux[length(aux) + 1] <- difftime(res$Last.time[e[n]], res$First.time[e[n]], units = "secs")
+    # exception for if the frame being analysed is the last frame,
+    # where the behaviour should be the same as the above
+    if (frame == the_range[2]) {
+      aux[length(aux) + 1] <- difftime(res$Last.time[e[n]],
+                                       res$First.time[e[n]],
+                                       units = "secs")
       names(aux)[length(aux)] <- res$Section[e[n]]
-    # otherwise, remove the seconds already accounted for to a full frame, and store the result
+    # otherwise, remove the seconds already accounted for to a full frame,
+    # and store the result
     } else {
-      aux[length(aux) + 1] <- 86400 - sum(as.vector(aux))
+      aux[length(aux) + 1] <- one_step - sum(as.vector(aux))
       names(aux)[length(aux)] <- res$Section[e[n]]
     }
     # The number of changes will be the number of events - 1
     aux[length(aux) + 1] <- length(e) - 1
     names(aux)[length(aux)] <- "Changes"
   }
-  # Conclude the exception started above, where the first fragment must be excluded
+  # Conclude the exception started above, where the
+  # first fragment must be excluded
   if (any(link <- names(aux) == "TO.EXCLUDE")) {
     aux <- aux[!link]
     aux["Changes"] <- aux["Changes"] - 1
@@ -1738,7 +1788,7 @@ resRatiosIndOut <- function(input, slots, tz, tag) {
 resPositions <- function(ratios, timestep = c("days", "hours")) {
   appendTo("debug", "Running resPositions")
   timestep <- match.arg(timestep)
-  num.step <- ifelse(timestep == "days", 86400, 3600)
+  one_step <- ifelse(timestep == "days", 86400, 3600)
 
   # extract first and last time
   first.time <- as.POSIXct(NA)[-1]
@@ -1749,7 +1799,7 @@ resPositions <- function(ratios, timestep = c("days", "hours")) {
     last.time <<- c(last.time, x$Timeslot[nrow(x)])
   })
 
-  res.range <- seq(from = min(first.time), to = max(last.time), by = num.step)
+  res.range <- seq(from = min(first.time), to = max(last.time), by = one_step)
   attributes(res.range)$tzone <- attributes(ratios[[1]]$Timeslot)$tzone # I don't think this line is needed # Edit: Yes it is.
 
   output <- matrix(ncol = length(ratios) + 1, nrow = length(res.range))
