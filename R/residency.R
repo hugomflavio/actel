@@ -1459,15 +1459,20 @@ getResidency <- function(movements, spatial){
       recipient$Index <- (1:nrow(recipient) * 2) - 1
       if (nrow(recipient) > 1) {
         to.add <- data.frame(
-          A = match(recipient$Section[-nrow(recipient)], names(spatial$array.order)),
+          A = match(recipient$Section[-nrow(recipient)], 
+                    names(spatial$array.order)),
           B = match(recipient$Section[-1], names(spatial$array.order)),
           First.time = recipient$Last.time[-nrow(recipient)],
           Last.time = recipient$First.time[-1])
         to.add$Section <- apply(to.add, 1, function(xi) {
           if (xi[1] < xi[2]) {
-            return(paste0(names(spatial$array.order)[as.numeric(xi[1])], "-", names(spatial$array.order)[as.numeric(xi[2])]))
+            return(paste0(
+              names(spatial$array.order)[as.numeric(xi[1])],
+              "-", names(spatial$array.order)[as.numeric(xi[2])]))
           } else
-            return(paste0(names(spatial$array.order)[as.numeric(xi[2])], "-", names(spatial$array.order)[as.numeric(xi[1])]))
+            return(paste0(
+              names(spatial$array.order)[as.numeric(xi[2])],
+              "-", names(spatial$array.order)[as.numeric(xi[1])]))
         })
         to.add <- to.add[, c("Section", "First.time", "Last.time")]
         to.add$Index <- 1:nrow(to.add) * 2
@@ -1476,13 +1481,19 @@ getResidency <- function(movements, spatial){
         output <- output[, -ncol(output)]
         row.names(output) <- 1:nrow(output)
       } else {
-        output <- recipient
+        output <- recipient[, c("Section", "First.time", "Last.time")]
       }
       return(output)
     })
-  inst.exception <- sapply(output, function(x) nrow(x) == 1 && x$First.time == x$Last.time)
+  inst.exception <- sapply(output, function(x) {
+    nrow(x) == 1 && x$First.time == x$Last.time
+  })
   if (any(inst.exception)) {
-    appendTo(c("Screen", "Report", "Warning"), paste("Valid detections for tag", paste(names(output)[inst.exception], collapse = ", "), "start and end on the same instant. Excluding them from residency analyses."))
+    appendTo(c("Screen", "Report", "Warning"), 
+      paste("Valid detections for tag",
+        paste(names(output)[inst.exception], collapse = ", "),
+        "start and end on the same instant. ",
+        "Excluding them from residency analyses."))
     output <- output[!inst.exception]
   }
   return(output)

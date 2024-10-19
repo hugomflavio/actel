@@ -10,6 +10,7 @@ Fixes:
   * Fix minor aesthetic bug that would cause invalid detections to show up as NA in the captions of individual detection plots.
   * Fix crash when running migration analysis with only one array (issue [#113](https://github.com/hugomflavio/actel/issues/113)).
   * Fix crash when running residency analysis and a group of animals is never detected (issue [#114](https://github.com/hugomflavio/actel/issues/114)).
+  * Remove "Index" column from residency list tables with one row (issue [#93](https://github.com/hugomflavio/actel/issues/93)).
 
 Enhancements:
   * Improve timestamp handling when importing data through `preload()` (issue [#94](https://github.com/hugomflavio/actel/issues/94)).
