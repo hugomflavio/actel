@@ -2104,7 +2104,7 @@ plotRatios <- function(input, groups, sections,
 #' plotDot(my_dot)
 #' 
 #' # plotDot can also be called directly using the string of text:
-#' plotdot(x)
+#' plotDot(x)
 #'
 #' @return No return value, called to either plot or save graphic.
 #'
