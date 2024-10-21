@@ -660,7 +660,11 @@ loadDistances <- function(input = "distances.csv", spatial) {
       dist.mat <- NULL
     }
   } else {
-    dist.mat <- as.matrix(input)
+    # Ensure the input is a data frame, 
+    # in case the user provided the data in a non-base format
+    # Some of the code downstream won't work with a matrix,  
+    # so the input can't be converted to a matrix right away
+    dist.mat <- as.data.frame(input)
   }
 
   if (!is.null(dist.mat)) {
@@ -705,6 +709,9 @@ loadDistances <- function(input = "distances.csv", spatial) {
     dist.mat <- NA
   }
   attributes(dist.mat)$valid <- !invalid.dist
+  
+  dist.mat <- as.matrix(dist.mat)
+  
   return(dist.mat)
 }
 
