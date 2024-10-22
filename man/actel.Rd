@@ -88,5 +88,10 @@ for!
 \author{
 \strong{Maintainer}: Hugo Flávio \email{hflavio@dal.ca} (\href{https://orcid.org/0000-0002-5174-1197}{ORCID})
 
+Other contributors:
+\itemize{
+  \item Devon Smith \email{smithd0@unbc.ca} (\href{https://orcid.org/0009-0005-3954-6355}{ORCID}) [contributor]
+}
+
 }
 \keyword{internal}
