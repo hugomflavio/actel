@@ -7,7 +7,7 @@
 loadDistances(input = "distances.csv", spatial)
 }
 \arguments{
-\item{input}{A matrix of distances, to be loaded rather than a file.}
+\item{input}{Either a path to a csv file containing a distances matrix, or an R object containing a distances matrix.}
 
 \item{spatial}{A list of spatial objects in the study area.}
 }
