@@ -12,6 +12,7 @@ Fixes:
   * Fix crash when running residency analysis and a group of animals is never detected (issue [#114](https://github.com/hugomflavio/actel/issues/114)).
   * Remove "Index" column from residency list tables with one row (issue [#93](https://github.com/hugomflavio/actel/issues/93)).
   * Fix silent bug causing `time.ratios` (residency analysis) to occasionally calculate exceedingly long times when using `timestep = hours` (issue [#89](https://github.com/hugomflavio/actel/issues/89)).
+  * Fixed `loadDistances()` issue where R objects were causing errors but .csv files were non-issue (issue [#134](https://github.com/hugomflavio/actel/issues/134)).
 
 Enhancements:
   * Improve timestamp handling when importing data through `preload()` (issue [#94](https://github.com/hugomflavio/actel/issues/94)).

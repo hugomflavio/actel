@@ -633,16 +633,19 @@ setSpatialStandards <- function(input){
   input$Standard.name <- as.character(input$Station.name)
   input$Standard.name <- gsub(" ", "_", input$Standard.name)
   link <- input$Type == "Hydrophone"
-  input$Standard.name[link] <- paste0("St.", seq_len(sum(input$Type == "Hydrophone")))
+  input$Standard.name[link] <- paste0("St.", 
+                                      seq_len(sum(input$Type == "Hydrophone")))
   return(input)
 }
 
 #' Load distances matrix
 #'
-#' @param input A matrix of distances, to be loaded rather than a file.
+#' @param input Either a path to a csv file containing a distances matrix, 
+#'  or an R object containing a distances matrix.
 #' @param spatial A list of spatial objects in the study area.
 #'
-#' @return A matrix of the distances (in metres) between stations (if a 'distances.csv' is present)
+#' @return A matrix of the distances (in metres) between stations 
+#'  (if a 'distances.csv' is present)
 #'
 #' @keywords internal
 #'
@@ -652,58 +655,114 @@ loadDistances <- function(input = "distances.csv", spatial) {
   invalid.dist <- TRUE
   if (is.character(input)) {
     if (file.exists(input)) {
-      appendTo(c("Screen", "Report"), paste0("M: File '", input, "' found, activating speed calculations."))
-      dist.mat <- read.csv(input, row.names = 1, check.names = FALSE)
-      if (ncol(dist.mat) == 1)
-        warning("Only one column was identified in '", input, "'. If this seems wrong, please make sure that the values are separated using commas.", immediate. = TRUE, call. = FALSE)
+      appendTo(c("Screen", 
+                 "Report"), 
+               paste0("M: File '", 
+                      input, "' found, activating speed calculations."))
+      dist.mat <- as.matrix(read.csv(input, row.names = 1, check.names = FALSE))
+      if (ncol(dist.mat) == 1) {
+        warning("Only one column was identified in '", 
+                input, "'. If this seems wrong,", 
+                " please make sure that the values are separated using commas.", 
+                immediate. = TRUE, 
+                call. = FALSE)
+        }
     } else {
       dist.mat <- NULL
     }
   } else {
+    # Ensure the input is a matrix, 
+    # in case the user provided the data in a non-base format
     dist.mat <- as.matrix(input)
-  }
+  } 
 
   if (!is.null(dist.mat)) {
     rownames(dist.mat) <- gsub(" ", "_", rownames(dist.mat))
     colnames(dist.mat) <- gsub(" ", "_", colnames(dist.mat))
     invalid.dist <- FALSE
-    if (nrow(dist.mat) != ncol(dist.mat)){
-      appendTo(c("Screen", "Report", "Warning"), "The distances matrix appears to be missing data (ncol != nrow). Deactivating speed calculations to avoid function failure.")
+    if (nrow(dist.mat) != ncol(dist.mat)) {
+      appendTo(c("Screen", 
+                 "Report", 
+                 "Warning"), 
+               paste0("The distances matrix appears to be missing data", 
+                      " (ncol != nrow). Deactivating speed calculations", 
+                      " to avoid function failure."))
       invalid.dist <- TRUE
     }
-    if (!invalid.dist && any(link <- is.na(match(rownames(dist.mat), colnames(dist.mat))))) {
-      appendTo(c("Screen", "Report", "Warning"), "The column and row names in the distances matrix do not match each other. Deactivating speed calculations to avoid function failure.")
-      message(paste0("   Row names missing in the columns: '", paste(rownames(dist.mat)[link], collapse = "', '"), "'."))
-      if (any(link <- is.na(match(colnames(dist.mat), rownames(dist.mat)))))
-        message(paste0("   Column names missing in the rows: '", paste(colnames(dist.mat)[link], collapse = "', '"), "'."))
-      invalid.dist <- TRUE
+    if (!invalid.dist) {
+      row_link <- is.na(match(rownames(dist.mat), colnames(dist.mat)))
+      col_link <- is.na(match(colnames(dist.mat), rownames(dist.mat)))
+      if (any(row_link) | any(col_link)) {
+        appendTo(c("Screen",
+                   "Report",
+                   "Warning"),
+              paste0("The column and row names in the distances matrix do not",
+                      " match each other. Deactivating speed calculations to",
+                        " avoid function failure."))
+        if (any(row_link)) {
+          message(paste0(" Row names missing in the columns: '",
+                         paste(rownames(dist.mat)[row_link],
+                               collapse = "', '"), "'."))
+        }
+        if (any(col_link)) {
+          message(paste0(" Column names missing in the rows: '",
+                         paste(colnames(dist.mat)[col_link],
+                               collapse = "', '"), "'."))
+        }
+        invalid.dist <- TRUE
+      }
     }
+
     # Failsafe for the case of unspecified release sites
     if (any(grepl("^unspecified$", spatial$release.sites$Standard.name))) {
-      dist.mat[nrow(dist.mat) + 1, ] <- NA
-      dist.mat[, ncol(dist.mat) + 1] <- NA
+      dist.mat <- rbind(dist.mat, NA)
+      dist.mat <- cbind(dist.mat, NA)
       colnames(dist.mat)[ncol(dist.mat)] <- "unspecified"
       rownames(dist.mat)[nrow(dist.mat)] <- "unspecified"
     }
-    if (!invalid.dist && sum(nrow(spatial$stations), nrow(spatial$release.sites)) != nrow(dist.mat)) {
-      appendTo(c("Screen", "Report", "Warning"), "The number of spatial points does not match the number of rows in the distances matrix. Deactivating speed calculations to avoid function failure.")
-      message("   Number of stations and release sites listed: ", sum(nrow(spatial$stations), nrow(spatial$release.sites)))
-      message("   Number of rows/columns in the distance matrix: ", nrow(dist.mat))
+    if (!invalid.dist && sum(nrow(spatial$stations),
+                             nrow(spatial$release.sites)) != nrow(dist.mat)) {
+      appendTo(c("Screen",
+                 "Report",
+                 "Warning"),
+               paste0("The number of spatial points does not match the number",
+                      " of rows in the distances matrix. Deactivating speed",
+                      " calculations to avoid function failure."))
+      message(" Number of stations and release sites listed: ",
+              sum(nrow(spatial$stations), nrow(spatial$release.sites)))
+      message(" Number of rows/columns in the distance matrix: ",
+              nrow(dist.mat))
       invalid.dist <- TRUE
     }
-    if (!invalid.dist && (any(!matchl(spatial$stations$Standard.name, colnames(dist.mat))) | any(!matchl(spatial$release.sites$Standard.name, colnames(dist.mat))))) {
-      appendTo(c("Screen", "Report", "Warning"), "Some stations and/or release sites are not present in the distances matrix. Deactivating speed calculations to avoid function failure.")
-      missing.releases <- spatial$release.sites$Standard.name[!matchl(spatial$release.sites$Standard.name, colnames(dist.mat))]
-      missing.stations <- spatial$stations$Standard.name[!matchl(spatial$stations$Standard.name, colnames(dist.mat))]
-      if (length(missing.releases) > 0)
-        message(paste0("   Release sites missing: '", paste(missing.releases, collapse = "', '")))
-      if (length(missing.stations) > 0)
-        message(paste0("   Stations missing: '", paste(missing.stations, collapse = "', '")))
-      invalid.dist <- TRUE
+    if (!invalid.dist) {
+      spatial_names <- c(spatial$stations$Standard.name,
+                         spatial$release.sites$Standard.name)
+      if (any(!matchl(spatial_names, colnames(dist.mat)))) {
+        appendTo(c("Screen",
+                   "Report",
+                   "Warning"),
+                 paste0("Some stations and/or release sites are not",
+                        " present in the distances matrix. Deactivating speed",
+                        " calculations to avoid function failure."))
+        link <- !matchl(spatial$release.sites$Standard.name, colnames(dist.mat))
+        missing.releases <- spatial$release.sites$Standard.name[link]
+        link <- !matchl(spatial$stations$Standard.name, colnames(dist.mat))
+        missing.stations <- spatial$stations$Standard.name[link]
+        if (length(missing.releases) > 0) {
+          message(paste0(" Release sites missing: '",
+                         paste(missing.releases, collapse = "', '")))
+        }
+        if (length(missing.stations) > 0) {
+          message(paste0(" Stations missing: '",
+                         paste(missing.stations, collapse = "', '")))
+        }
+        invalid.dist <- TRUE
+      }
     }
   } else {
     dist.mat <- NA
   }
+
   attributes(dist.mat)$valid <- !invalid.dist
   return(dist.mat)
 }
