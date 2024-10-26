@@ -2167,7 +2167,7 @@ plotDot <- function(dot, spatial, coord.x, coord.y,
     if (!any(colnames(spatial) == coord.y)) {
       stop("Could not find column '", coord.y, "' in spatial.", call. = FALSE)
     }
-    
+
     # Use only the hydrophone lines
     spatial <- spatial[spatial$Type == "Hydrophone", ]
     
@@ -2270,14 +2270,6 @@ plotDot <- function(dot, spatial, coord.x, coord.y,
     diagram_edges$arrowtail[dot$to == "->"] <- "tee"
     diagram_edges$arrowhead[dot$to == "<-"] <- "tee"
     diagram_edges$arrowtail[dot$to == "<-"] <- "normal"
-
-    diagram_edges$tooltip <- "test"
-    diagram_edges$minlen <- 1
-
-    # diagram_edges$tooltip <- paste(
-    #   diagram_nodes$label[diagram_edges$from],
-    #   "to",
-    #   diagram_nodes$label[diagram_edges$to])
   }
 
   if (is.null(diagram_edges)) {
