@@ -8,6 +8,7 @@ xspatial <- data.frame(
 	Array = c("A1", "A2", "B1", "B2", "B3", "C1", "C2"),
 	Section = factor(c("A", "A", "B", "B", "B", "C", "C"), 
 				levels = c("A", "B", "C")),
+	Type = "Hydrophone",
 	x = 1:7,
 	y = c(1,1,2,2,2,3,3))
 dot <- readDot(string = "A1->A2--B1--B2--B3--C1--C2")
@@ -52,6 +53,7 @@ test_that("plotDot warns if spatial has more arrays than dot", {
 		Array = c("A1", "A2", "B1", "B2", "B3", "C1", "C2", "C3"),
 		Section = factor(c("A", "A", "B", "B", "B", "C", "C", "C"), 
 					levels = c("A", "B", "C")),
+		Type = "Hydrophone",
 		x = 1:8,
 		y = c(1,1,2,2,2,3,3,3))
 
