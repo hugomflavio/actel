@@ -657,7 +657,10 @@ findPeers <- function(array, array.list,
             # For array x to be a valid peer of the array we're determining peers for (object "array"), 
             # the max number of connections to array x can only be the sum of the peers we already know 
             # about, the array "array", and any parallels of the array "array".
-            too.many.connections <- length(array.list[[x]][[opposite.direction]]) > sum(length(usable.peers), length(array.list[[array]]$parallel), 1)
+            n_opposites <- length(array.list[[x]][[opposite.direction]])
+            n_peers <- length(usable.peers)
+            n_par <- length(array.list[[array]]$parallel)
+            too.many.connections <- n_opposites > sum(n_peers, n_par, 1)
             # Additionally, all the connections to array x must be either the array "array", a parallel
             # of the array "array" that shares all connections with array "array", or an array that has 
             # already been determined as a valid peer.
