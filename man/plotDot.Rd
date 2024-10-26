@@ -9,6 +9,7 @@ plotDot(
   spatial,
   coord.x,
   coord.y,
+  placement = c("literal", "spaced"),
   expand = 1,
   file,
   fill = c("#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7"),
@@ -24,6 +25,12 @@ Note: The mean coordinates for the stations of any given array will be used.}
 
 \item{coord.x, coord.y}{The names of the columns containing the x and y
 positions of the stations in the spatial data frame.}
+
+\item{placement}{Two possible options: "literal" will place the nodes exactly
+at the average coordinates for the array (which may lead to varying degrees
+of overlap). "spaced" will adjust the position of the arrays so every node
+is fully visible, but the distances between arrays are no longer respected.
+Only relevant if used in combination with the spatial argument.}
 
 \item{expand}{A value to increase or decrease spacing between arrays.
 Ignored if spatial is not provided.}
