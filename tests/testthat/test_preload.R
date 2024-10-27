@@ -17,16 +17,25 @@ dot <- paste(unique(spatial$Array[spatial$Type == "Hydrophone"]), collapse = "--
 
 test_that("Correct error is triggered if datapack is not valid", {
 	expect_error(results <- explore(datapack = "a"),
-		"The datapack's token is invalid or missing. Please the function preload() to compile the input data.
-Additionally, data must to be compiled during the current R session.", fixed = TRUE)
+		paste0("The datapack's token is invalid or missing. Please use the",
+			   " function preload() to compile the input data.\nData must be",
+			   " compiled during the current R session to avoid",
+			   " complications."),
+		fixed = TRUE)
 
 	expect_error(results <- migration(datapack = "a"),
-		"The datapack's token is invalid or missing. Please the function preload() to compile the input data.
-Additionally, data must to be compiled during the current R session.", fixed = TRUE)
+		paste0("The datapack's token is invalid or missing. Please use the",
+			   " function preload() to compile the input data.\nData must be",
+			   " compiled during the current R session to avoid",
+			   " complications."),
+		fixed = TRUE)
 
 	expect_error(results <- residency(datapack = "a"),
-		"The datapack's token is invalid or missing. Please the function preload() to compile the input data.
-Additionally, data must to be compiled during the current R session.", fixed = TRUE)
+		paste0("The datapack's token is invalid or missing. Please use the",
+			   " function preload() to compile the input data.\nData must be",
+			   " compiled during the current R session to avoid",
+			   " complications."),
+		fixed = TRUE)
 })
 
 test_that("basic preload works as expected", {
