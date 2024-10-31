@@ -2082,6 +2082,11 @@ plotRatios <- function(input, groups, sections,
 #'  Note: The mean coordinates for the stations of any given array will be used.
 #' @param coord.x,coord.y The names of the columns containing the x and y 
 #'  positions of the stations in the spatial data frame.
+#' @param placement Two possible options: "literal" will place the nodes exactly
+#'  at the average coordinates for the array (which may lead to varying degrees
+#'  of overlap). "spaced" will adjust the position of the arrays so every node
+#'  is fully visible, but the distances between arrays are no longer respected.
+#'  Only relevant if used in combination with the spatial argument.
 #' @param expand A value to increase or decrease spacing between arrays.
 #'  Ignored if spatial is not provided.
 #' @param file Optional: A file name to export the plot. Must include the
@@ -2110,13 +2115,16 @@ plotRatios <- function(input, groups, sections,
 #'
 #' @export
 #'
-plotDot <- function(dot, spatial, coord.x, coord.y, expand = 1, file,
+plotDot <- function(dot, spatial, coord.x, coord.y, 
+    placement = c("literal", "spaced"), expand = 1, file,
     fill = c("#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00",
       "#CC79A7"), text_colour = "white") {
 # requires:
 # DiagrammeR
 # DiagrammeRsvg
 # rsvg
+
+  placement <- match.arg(placement)
 
   if (!missing(file) && !grepl("png$|pdf$|svg$", file)) {
     stop("Could not recognise file extension. ",
@@ -2137,7 +2145,7 @@ plotDot <- function(dot, spatial, coord.x, coord.y, expand = 1, file,
     }
   }
 
-  unique.arrays <- unique(unlist(dot[, c(1,3)]))
+  unique_arrays <- unique(unlist(dot[, c(1,3)]))
 
   diagram_nodes <- data.frame(
     id = 1:length(unique(unlist(dot[, c(1, 3)]))),
@@ -2151,7 +2159,7 @@ plotDot <- function(dot, spatial, coord.x, coord.y, expand = 1, file,
       stop("spatial was provided, but coord.x and/or coord.y are missing.",
         call. = FALSE)
     }
-
+    
     if (!any(colnames(spatial) == coord.x)) {
       stop("Could not find column '", coord.x, "' in spatial.", call. = FALSE)
     }
@@ -2159,43 +2167,56 @@ plotDot <- function(dot, spatial, coord.x, coord.y, expand = 1, file,
     if (!any(colnames(spatial) == coord.y)) {
       stop("Could not find column '", coord.y, "' in spatial.", call. = FALSE)
     }
+
+    # Use only the hydrophone lines
+    spatial <- spatial[spatial$Type == "Hydrophone", ]
     
-    if (any(is.na(match(unique.arrays, unique(spatial$Array))))) {
+    if (any(is.na(match(unique_arrays, unique(spatial$Array))))) {
       stop("spatial was provided, but not all arrays specified ",
         "in the dot exist in spatial.", call. = FALSE)
     }
 
-    if (any(is.na(match(unique(spatial$Array), unique.arrays)))) {
+    if (any(is.na(match(unique(spatial$Array), unique_arrays)))) {
       warning("Not all arrays present in spatial were listed in dot.",
         immediate. = TRUE, call. = FALSE)
     }
 
-    xspatial <- spatial[!is.na(match(spatial$Array, unique.arrays)), ]
+    xspatial <- spatial[!is.na(match(spatial$Array, unique_arrays)), ]
 
-    dot.coords <- aggregate(xspatial[, c(coord.x, coord.y)], 
+    dot_coords <- aggregate(xspatial[, c(coord.x, coord.y)], 
                             list(xspatial$Array), mean)
-    colnames(dot.coords) <- c("Array", "x", "y")
+    colnames(dot_coords) <- c("Array", "x", "y")
 
-    dot.coords$x <- dot.coords$x - min(dot.coords$x)
-    dot.coords$y <- dot.coords$y - min(dot.coords$y)
+    # make sure both are in the same row order, 
+    # to simplify transferring the data further down.
+    fix_row_order <- match(diagram_nodes$label, dot_coords$Array)
+    dot_coords <- dot_coords[fix_row_order, ]
+
+    # make coords start at 0 to simplify the plotting
+    dot_coords$x <- dot_coords$x - min(dot_coords$x)
+    dot_coords$y <- dot_coords$y - min(dot_coords$y)
     
-    # relocate dots based on relative spacing between coordinates
-    x_rel <- dot.coords$x / max(dot.coords$x)
-    y_rel <- dot.coords$y / max(dot.coords$y)
-    if (max(dot.coords$x)/max(dot.coords$y) >= 1) {
-      x_prop <- max(dot.coords$x) / max(dot.coords$y) * 10
-      y_prop <- 1 * 10
+    if (placement == "spaced") {
+      diagram_nodes$x[order(dot_coords$x)] <- (1:nrow(dot_coords) - 1) * expand
+      diagram_nodes$y[order(dot_coords$y)] <- (1:nrow(dot_coords) - 1) * expand
+
+      # jitter the points a bit
+      diagram_nodes$x <- diagram_nodes$x + runif(nrow(diagram_nodes), -0.2, 0.2)
+      diagram_nodes$y <- diagram_nodes$y + runif(nrow(diagram_nodes), -0.2, 0.2)
     } else {
-      x_prop <- 1 * 10
-      y_prop <- max(dot.coords$y) / max(dot.coords$x) * 10
+      # relocate dots based on relative spacing between coordinates
+      x_rel <- dot_coords$x / max(dot_coords$x)
+      y_rel <- dot_coords$y / max(dot_coords$y)
+      if (max(dot_coords$x)/max(dot_coords$y) >= 1) {
+        x_prop <- max(dot_coords$x) / max(dot_coords$y) * nrow(dot_coords)
+        y_prop <- 1 * nrow(dot_coords)
+      } else {
+        x_prop <- 1 * nrow(dot_coords)
+        y_prop <- max(dot_coords$y) / max(dot_coords$x) * nrow(dot_coords)
+      }
+      diagram_nodes$x <- x_rel * x_prop * expand
+      diagram_nodes$y <- y_rel * y_prop * expand
     }
-    dot.coords$x <- x_rel * x_prop * expand
-    dot.coords$y <- y_rel * y_prop * expand
-
-    dot.coords <- dot.coords[match(dot.coords$Array, unique.arrays), ]
-
-    diagram_nodes$x <- round(dot.coords$x, 0)
-    diagram_nodes$y <- round(dot.coords$y, 0)
 
     if ("Section" %in% colnames(spatial)) {
       sections <- unique(spatial$Section)
@@ -2219,14 +2240,14 @@ plotDot <- function(dot, spatial, coord.x, coord.y, expand = 1, file,
   if (nrow(dot) == 1) {
     if (dot[1, 1] == dot[1, 3]) {
       diagram_edges <- NULL
-      complete <- FALSE
+      add_line_details <- FALSE
     } else {
       diagram_edges <- apply(dot[, c(1, 3), drop = FALSE], 2, 
                         function(x) {
                           match(x, diagram_nodes$label)
                         })
       diagram_edges <- as.data.frame(t(diagram_edges))
-      complete <- TRUE
+      add_line_details <- TRUE
     }
   } else {
     diagram_edges <- apply(dot[, c(1, 3), drop = FALSE], 2,
@@ -2234,9 +2255,9 @@ plotDot <- function(dot, spatial, coord.x, coord.y, expand = 1, file,
                           match(x, diagram_nodes$label)
                         })
     diagram_edges <- as.data.frame(diagram_edges)
-    complete <- TRUE
+    add_line_details <- TRUE
   }
-  if (complete) {
+  if (add_line_details) {
     colnames(diagram_edges) <- c("from", "to")
 
     diagram_edges$rel <- "requires"

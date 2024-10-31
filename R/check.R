@@ -283,7 +283,7 @@ checkToken <- function(token, timestamp) {
   else
     x <- NULL
   if ((is.null(token) | is.null(timestamp) | is.null(x)) || !any(x$Token == token & x$Timestamp == timestamp))
-    stopAndReport("The datapack's token is invalid or missing. Please the function preload() to compile the input data.\nAdditionally, data must to be compiled during the current R session.")
+    stopAndReport("The datapack's token is invalid or missing. Please use the function preload() to compile the input data.\nData must be compiled during the current R session to avoid complications.")
 }
 
 
