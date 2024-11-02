@@ -52,9 +52,9 @@ checkArguments <- function(dp, tz, min.total.detections, min.per.event, max.inte
   # Note: Checks only relevant for migration() or residency() are listed at the bottom!
 
   no.dp.args <- c("tz", "section.order", "start.time", "stop.time", "save.detections", "exclude.tags")
-  link <- c(!is.null(tz), 
+  link <- c(!is.null(tz),
             !is.null(section.order),
-            !is.null(start.time), 
+            !is.null(start.time),
             !is.null(stop.time),
             !(is.logical(save.detections) && !save.detections), !is.null(exclude.tags))
 
@@ -303,9 +303,9 @@ checkGUI <- function(GUI = c("needed", "always", "never"), save.tables.locally) 
 
   if (!is.character(GUI))
     stopAndReport("'GUI' should be one of 'needed', 'always' or 'never'.")
-  
+
   GUI <- match.arg(GUI)
-  
+
   if (GUI != "never" && length(suppressWarnings(packageDescription("gWidgets2tcltk"))) == 1) {
     appendTo(c("Screen", "Warning"), paste0("GUI is set to '", GUI, "' but package 'gWidgets2tcltk' is not available. Please install it if you intend to run GUI.\n         Disabling GUI (i.e. GUI = 'never') for the current run."))
     GUI <- "never"
@@ -376,13 +376,13 @@ checkDupDetections <- function(input) {
           file.name <- paste0(file.name, ".csv")
         # prevent auto-overwrite
         if (file.exists(file.name)) {
-          aux <- userInput(paste0("File '", file.name, "' already exists. Overwrite contents?(y/n) "), 
-                           choices = c("y", "n"), 
+          aux <- userInput(paste0("File '", file.name, "' already exists. Overwrite contents?(y/n) "),
+                           choices = c("y", "n"),
                            hash = "# overwrite file with same name?")
           if (aux == "y")
             overwrite <- TRUE
           else
-            overwrite <- FALSE 
+            overwrite <- FALSE
         }
         else
           overwrite <- TRUE
@@ -440,7 +440,7 @@ checkMinimumN <- function(movements, min.total.detections, min.per.event, tag, n
 #'
 #' @keywords internal
 #'
-checkSpeeds <- function(movements, tag, detections, valid.movements, 
+checkSpeeds <- function(movements, tag, detections, valid.movements,
   speed.warning, speed.error, GUI, save.tables.locally, n) {
   appendTo("debug", "Running checkSpeeds.")
   the.warning <- NULL
@@ -481,7 +481,7 @@ checkSpeeds <- function(movements, tag, detections, valid.movements,
   }
   # Trigger user interaction
   if (any(na.as.false(vm$Average.speed.m.s >= speed.error))) { # nocov start
-    movements <- tableInteraction(moves = movements, tag = tag, detections = detections, 
+    movements <- tableInteraction(moves = movements, tag = tag, detections = detections,
                                   trigger = the.warning, GUI = GUI, save.tables.locally = save.tables.locally)
   } # nocov end
   return(movements)
@@ -567,7 +567,7 @@ checkInactiveness <- function(movements, tag, detections, n,
       # Trigger user interaction
       if (trigger.error) { # nocov start
         appendTo("Screen", error.message <- paste0("M: Tag ", tag, " ", n, " has been inactive for more than ", inactive.error," days. Inactiveness started on event ", start_i, " (", as.Date(valid.moves$First.time[start_i]),")."))
-        movements <- tableInteraction(moves = movements, tag = tag, detections = detections, 
+        movements <- tableInteraction(moves = movements, tag = tag, detections = detections,
                                       trigger = paste0(the.warning, "\n", error.message), GUI = GUI,
                                       save.tables.locally = save.tables.locally)
       } # nocov end
@@ -643,8 +643,8 @@ checkImpassables <- function(movements, tag, bio, spatial, detections, dotmat, G
       message("Please resolve this either by invalidating events or by adjusting your 'spatial.txt' file and restarting.")
       if (interactive()) { # nocov start
         the.warning <- paste(the.warning, "\nPlease resolve this either by invalidating events or by adjusting your 'spatial.txt' file and restarting.", collapse = "\n")
-        movements <- tableInteraction(moves = movements, tag = tag, detections = detections, 
-                                      trigger = the.warning, GUI = GUI, force = TRUE, 
+        movements <- tableInteraction(moves = movements, tag = tag, detections = detections,
+                                      trigger = the.warning, GUI = GUI, force = TRUE,
                                       save.tables.locally = save.tables.locally)
         restart <- TRUE
         first.time <- FALSE
@@ -704,7 +704,7 @@ checkLinearity <- function(secmoves, tag, spatial, arrays, GUI, save.tables.loca
       else
         appendTo(c("Screen", "Report", "Warning"), the.warning <- paste0("Inter-section backwards movements were detected for tag ", tag, " ", n, "."))
     if (interactive()) { # nocov start
-      secmoves <- tableInteraction(moves = secmoves, tag = tag, trigger = the.warning, 
+      secmoves <- tableInteraction(moves = secmoves, tag = tag, trigger = the.warning,
                                    GUI = GUI, force = FALSE, save.tables.locally = save.tables.locally)
     } # nocov end
   }
@@ -770,7 +770,7 @@ checkFirstDetBackFromRelease <- function(movements, tag, bio, detections, arrays
     appendTo(c("Screen", "Report", "Warning"), the.warning <- paste0("Tag ", tag, " ", n, " was detected in an array that is not after its release site! Opening relevant data for inspection.\nExpected first array: ", release))
     the.warning <- paste("Warning:", the.warning)
     if (interactive()) { # nocov start
-      movements <- tableInteraction(moves = movements, tag = tag, detections = detections, 
+      movements <- tableInteraction(moves = movements, tag = tag, detections = detections,
                                     trigger = the.warning, GUI = GUI, save.tables.locally = save.tables.locally)
     } # nocov end
   }
@@ -796,10 +796,10 @@ checkJumpDistance <- function(movements, tag, bio, detections, spatial, arrays,
   the.warning <- NULL
   warning.counter <- 0
   events.to.complain.about <- NULL
- 
+
   release <- as.character(bio$Release.site[na.as.false(bio$Transmitter == tag)])
   release <- unlist(strsplit(with(spatial, release.sites[release.sites$Standard.name == release, "Array"]), "|", fixed = TRUE))
-  release.time <- bio$Release.date[na.as.false(bio$Transmitter == tag)] 
+  release.time <- bio$Release.date[na.as.false(bio$Transmitter == tag)]
 
   if (any(movements$Valid)) {
     vm <- movements[(Valid)]
@@ -826,17 +826,17 @@ checkJumpDistance <- function(movements, tag, bio, detections, spatial, arrays,
             xarrays <- unlist(strsplit(p, " -> "))
             xarrays <- sapply(xarrays, function(a) {
               # if the movement ocurred before the start
-              v1 <- arrays[[a]]$live$Start > release.time & 
+              v1 <- arrays[[a]]$live$Start > release.time &
                     arrays[[a]]$live$Start > vm$First.time[1]
               # or after the stop
-              v2 <- arrays[[a]]$live$Stop < release.time & 
+              v2 <- arrays[[a]]$live$Stop < release.time &
                     arrays[[a]]$live$Stop < vm$First.time[1]
               # then that period does not qualify
               v3 <- !(v1 | v2)
               # and if any period qualifies, then the array was up during the movememnt
               any(v3)
             })
-            return(list(n = sum(xarrays) + 2, names = names(xarrays)[xarrays])) 
+            return(list(n = sum(xarrays) + 2, names = names(xarrays)[xarrays]))
             # +2 because the release site and the array that picked up the animal also
             # count as steps, so the minimal step size is two.
           })
@@ -853,7 +853,7 @@ checkJumpDistance <- function(movements, tag, bio, detections, spatial, arrays,
     if (release.steps > jump.warning) {
       # Trigger warning
       appendTo(c("Report", "Warning", "Screen"),
-        the.warning <- paste0("Tag ", tag, " ", n, " jumped through ", 
+        the.warning <- paste0("Tag ", tag, " ", n, " jumped through ",
           ifelse(say.at.least, "at least ", ""), release.steps - 1,
           ifelse(release.steps > 2, " arrays ", " array "),
           "from release to first valid event (Release -> ", vm$Array[1], ")."))
@@ -890,10 +890,10 @@ checkJumpDistance <- function(movements, tag, bio, detections, spatial, arrays,
             xarrays <- unlist(strsplit(p, " -> "))
             xarrays <- sapply(xarrays, function(a) {
               # if the movement ocurred before the start
-              v1 <- arrays[[a]]$live$Start > vm$Last.time[i] & 
+              v1 <- arrays[[a]]$live$Start > vm$Last.time[i] &
                     arrays[[a]]$live$Start > vm$First.time[i + 1]
               # or after the stop
-              v2 <- arrays[[a]]$live$Stop < vm$Last.time[i] & 
+              v2 <- arrays[[a]]$live$Stop < vm$Last.time[i] &
                     arrays[[a]]$live$Stop < vm$First.time[i + 1]
               # then that period does not qualify
               v3 <- !(v1 | v2)
@@ -913,7 +913,7 @@ checkJumpDistance <- function(movements, tag, bio, detections, spatial, arrays,
             if (warning.counter < 5) {
               # Trigger warning
               appendTo(c("Report", "Warning", "Screen"),
-                other.warning <- paste0("Tag ", tag, " ", n, " jumped through ",  
+                other.warning <- paste0("Tag ", tag, " ", n, " jumped through ",
                   ifelse(say.at.least, "at least ", ""), move.steps[i] - 1,
                   ifelse(move.steps[i] > 2, " arrays ", " array "),
                   "in valid events ", i, " -> ", i + 1, " (", names(move.steps)[i], ")."))
@@ -932,7 +932,7 @@ checkJumpDistance <- function(movements, tag, bio, detections, spatial, arrays,
         if (warning.counter >= 5) {
           message("")
           appendTo(c("Report", "Warning"), sub("Warning: ", "", final.warning))
-          link <- createEventRanges(events.to.complain.about)         
+          link <- createEventRanges(events.to.complain.about)
           appendTo(c("Screen", "Report"), event.list <- paste0("         Events that raised warnings: ", paste(link, collapse = ", ")))
           the.warning <- paste0(the.warning, "\n", final.warning, "\n", event.list)
         }
@@ -940,7 +940,7 @@ checkJumpDistance <- function(movements, tag, bio, detections, spatial, arrays,
     }
     # Trigger user interaction
     if (interactive() && trigger.error) { # nocov start
-      movements <- tableInteraction(moves = movements, tag = tag, detections = detections, 
+      movements <- tableInteraction(moves = movements, tag = tag, detections = detections,
                                     trigger = the.warning, GUI = GUI, save.tables.locally = save.tables.locally)
     } # nocov end
   }
@@ -990,19 +990,19 @@ checkDeploymentStations <- function(input, spatial) {
   aux <- spatial[spatial$Type == "Hydrophone", ]
   link <- match(unique(input$Station.name), aux$Station.name)
   if (any(is.na(link))) {
-    appendTo(c("Screen", "Report", "Warning"), 
-      paste0("The following station", ifelse(sum(is.na(link)) > 1, "s are", " is"), 
+    appendTo(c("Screen", "Report", "Warning"),
+      paste0("The following station", ifelse(sum(is.na(link)) > 1, "s are", " is"),
         " listed in the deployments but ",
-        ifelse(sum(is.na(link)) > 1, "are", "is"), 
-        " not part of the study's stations: '", 
-        paste(unique(input$Station.name)[is.na(link)], collapse = "', '"), 
+        ifelse(sum(is.na(link)) > 1, "are", "is"),
+        " not part of the study's stations: '",
+        paste(unique(input$Station.name)[is.na(link)], collapse = "', '"),
         "'\nDiscarding deployments at unknown stations."))
     to.remove <- match(input$Station.name, unique(input$Station.name)[is.na(link)])
     input <- input[is.na(to.remove), ]
   }
   link <- match(aux$Station.name, unique(input$Station.name))
   if (any(is.na(link))) {
-    stopAndReport(paste0("The following station", 
+    stopAndReport(paste0("The following station",
       ifelse(sum(is.na(link)) > 1, "s are", " is"),
       " listed in the spatial file but no receivers were ever deployed there: '",
       paste(aux$Station.name[is.na(link)], collapse = "', '"),
@@ -1027,9 +1027,9 @@ checkUnknownReceivers <- function(input) {
   unknown <- is.na(input$Standard.name)
   if (any(unknown)) {
     how.many <- length(unique(input$Receiver[unknown]))
-    appendTo(c("Screen", "Report", "Warning"), 
-      paste0("Detections from receiver", 
-        ifelse(how.many > 1, "s ", " "), 
+    appendTo(c("Screen", "Report", "Warning"),
+      paste0("Detections from receiver",
+        ifelse(how.many > 1, "s ", " "),
         paste(unique(input$Receiver[unknown]), collapse = ", "), " are present in the data, but ",
         ifelse(how.many > 1, "these receivers are", "this receiver is"),
         " not part of the study's stations. Double-check potential errors."))
@@ -1072,7 +1072,7 @@ checkTagsInUnknownReceivers <- function(detections.list, deployments, spatial) {
       receivers <- detections.list[[i]]$Receiver
       link <- is.na(match(receivers, deployed.receivers))
       new.unknowns <- unique(detections.list[[i]]$Receiver[link])
-      
+
       if (length(new.unknowns) > 0) {
         appendTo(c("Screen", "Report", "Warning"), paste0("Tag ", i, " was detected in one or more receivers that are not listed in the study area (receiver(s): ", paste(new.unknowns, collapse = ", "), ")!"))
         if (!include.all.unknowns & !exclude.all.unknowns) {
@@ -1089,7 +1089,7 @@ checkTagsInUnknownReceivers <- function(detections.list, deployments, spatial) {
         if (decision == "c") {
           include.all.unknowns <- TRUE # nocov
         }
-        
+
         if (include.all.unknowns || decision == "b") {
           recipient <- includeUnknownReceiver(spatial = spatial, deployments = deployments, unknown.receivers = new.unknowns)
           spatial <- recipient[[1]]
@@ -1104,11 +1104,11 @@ checkTagsInUnknownReceivers <- function(detections.list, deployments, spatial) {
           processed.unknowns <- c(processed.unknowns, as.character(new.unknowns))
           included <- c(included, as.character(new.unknowns))
         }
-        
+
         if (decision == "e") {
           exclude.all.unknowns <- TRUE # nocov
         }
-        
+
         if (exclude.all.unknowns || decision == "d") {
           detections.list[[i]] <- detections.list[[i]][is.na(match(receivers, new.unknowns)), ] # keep the ones that are not unknown
           processed.unknowns <- c(processed.unknowns, as.character(new.unknowns))
@@ -1123,7 +1123,7 @@ checkTagsInUnknownReceivers <- function(detections.list, deployments, spatial) {
   # append summary to spatial
   if (!is.null(included) | !is.null(excluded))
     spatial$unknowns <- list(included = included, excluded = excluded)
-  
+
   return(list(spatial = spatial, deployments = deployments, detections.list = detections.list))
 }
 
@@ -1188,17 +1188,17 @@ checkDetectionsBeforeRelease <- function(input, bio, discard.orphans = FALSE){
           appendTo("Screen", paste0("  First detection time: ", input[[link[i]]]$Timestamp[1]))
           appendTo("Screen", paste0("  Number of detections before release: ", sum(to.remove)))
           appendTo("Screen", "\nPossible options:\n   a) Stop and double-check the data (recommended)\n   b) Discard orphan detections in this instance.\n   c) Discard orphan detections for all instances.\n   d) Save orphan detections to a file and re-open dialogue.")
-          
+
           restart <- TRUE
           while (restart) {
-            decision <- userInput("Decision:(a/b/c/d/comment) ", 
+            decision <- userInput("Decision:(a/b/c/d/comment) ",
                                   choices = c("a", "b", "c", "d", "comment"),
-                                  tag = bio$Transmitter[i], 
+                                  tag = bio$Transmitter[i],
                                   hash = paste("# detections before release for tag", bio$Transmitter[i]))
-            
+
             if (decision == "a")
               stopAndReport("Function stopped by user command.") # nocov
-            
+
             if (decision == "b")
               restart <- FALSE
 
@@ -1217,13 +1217,13 @@ checkDetectionsBeforeRelease <- function(input, bio, discard.orphans = FALSE){
                 file.name <- paste0(file.name, ".csv")
               # prevent auto-overwrite
               if (file.exists(file.name)) {
-                aux <- userInput(paste0("File '", file.name, "' already exists. Overwrite contents?(y/n) "), 
-                                 choices = c("y", "n"), 
+                aux <- userInput(paste0("File '", file.name, "' already exists. Overwrite contents?(y/n) "),
+                                 choices = c("y", "n"),
                                  hash = "# overwrite file with same name?")
                 if (aux == "y")
                   overwrite <- TRUE
                 else
-                  overwrite <- FALSE 
+                  overwrite <- FALSE
               }
               else
                 overwrite <- TRUE
@@ -1288,11 +1288,11 @@ checkNoDetections <- function(input, bio){
 #'
 checkDupSignals <- function(input, bio){
   appendTo("debug", "Running checkDupSignals.")
-  
+
   if (any(colnames(bio) == "Code.space")) {
     appendTo('debug', 'Debug: Skipping checkDupSignals as there is a codespace column')
   }
-  else {  
+  else {
     signals <- extractSignals(names(input))
     expected <- suppressWarnings(as.numeric(unlist(strsplit(as.character(bio$Signal), "|", fixed = TRUE))))
     to.check <- match(signals, expected)
@@ -1301,7 +1301,7 @@ checkDupSignals <- function(input, bio){
         remove_non_detected <- bind_list_with_expected[complete.cases(bind_list_with_expected), ]
         table_the_signals <- table(remove_non_detected[, 1], remove_non_detected[, 2])
 
-        dupsig <- data.frame(Signal = colnames(table_the_signals)[apply(table_the_signals, 
+        dupsig <- data.frame(Signal = colnames(table_the_signals)[apply(table_the_signals,
             2, sum) > 1], Tags = NA, stringsAsFactors = FALSE)
         for (i in seq_len(nrow(dupsig))) {
             dupsig$Tags[i] <- paste(row.names(table_the_signals)[table_the_signals[, dupsig$Signal[i]] == 1], collapse = ", ")
@@ -1309,19 +1309,19 @@ checkDupSignals <- function(input, bio){
 
         rest.of.message <- NULL
         for (i in seq_len(nrow(dupsig))) {
-            rest.of.message <- paste0(rest.of.message, "\n   Signal ", 
-                                      dupsig$Signal[i], " was found on tags ", 
+            rest.of.message <- paste0(rest.of.message, "\n   Signal ",
+                                      dupsig$Signal[i], " was found on tags ",
                                       dupsig$Tags[i], ".")
         }
 
-        stopAndReport("One or more signals match more than one tag in the detections! Showing relevant signals/tags.", 
+        stopAndReport("One or more signals match more than one tag in the detections! Showing relevant signals/tags.",
             rest.of.message)
     }
   }
 }
 
 #' warn users if they are about to run into an unfixed bug.
-#' 
+#'
 #' @return No return value, called for side effects.
 #'
 #' @keywords internal
@@ -1360,7 +1360,7 @@ checkIssue79 <- function(arrays, spatial) {
     } else {
       after <- NULL
     }
-    
+
     return(rbind(before, after))
   })
 
@@ -1374,7 +1374,7 @@ checkIssue79 <- function(arrays, spatial) {
 
   if (any(link)) {
     if (getOption("actel.bypass_issue_79", default = FALSE)) {
-        appendTo(c("Screen", "warning", "report"), "This study area seems to trigger issue 79. However, you have activated the bypass, so the analysis will continue.")     
+        appendTo(c("Screen", "warning", "report"), "This study area seems to trigger issue 79. However, you have activated the bypass, so the analysis will continue.")
     } else {
 stopAndReport(
 "READ CAREFULLY

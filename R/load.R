@@ -6,27 +6,27 @@
 #' @return A list containing:
 #' \itemize{
 #'  \item \code{bio}: A data frame corresponding to 'biometrics.csv'
-#'  \item \code{sections}: A vector of the study area sections (or NULL in the 
+#'  \item \code{sections}: A vector of the study area sections (or NULL in the
 #'   case of the `explore` function)
 #'  \item \code{deployments}: A list corresponding to 'deployments.csv'
 #'  \item \code{spatial}: A list corresponding to 'spatial.csv'
 #'  \item \code{dot}: A data frame containing the connections between arrays
 #'  \item \code{arrays}: A list containing detailed information on the arrays
-#'  \item \code{dotmat}: A matrix of the distance (in number of arrays) between 
+#'  \item \code{dotmat}: A matrix of the distance (in number of arrays) between
 #'   pairs of arrays
-#'  \item \code{dist.mat}: A matrix of the distances (in metres) between 
+#'  \item \code{dist.mat}: A matrix of the distances (in metres) between
 #'   stations (if a 'distances.csv' is present)
-#'  \item \code{detections.list}: A list containing the detection data 
+#'  \item \code{detections.list}: A list containing the detection data
 #'   for each tag
-#'  \item \code{paths}: A list of the all array paths between each pair 
+#'  \item \code{paths}: A list of the all array paths between each pair
 #'   of arrays.
 #' }
 #'
 #' @keywords internal
 #'
-loadStudyData <- function(tz, override = NULL, start.time, 
+loadStudyData <- function(tz, override = NULL, start.time,
                           stop.time, save.detections = FALSE,
-                          section.order = NULL, exclude.tags, 
+                          section.order = NULL, exclude.tags,
                           disregard.parallels = TRUE, discard.orphans = FALSE) {
 
   loading.failed <- TRUE
@@ -42,19 +42,19 @@ loadStudyData <- function(tz, override = NULL, start.time,
       )
       on.exit(add = TRUE,
               if (loading.failed) {
-                save(list = ls(), 
+                save(list = ls(),
                      file = paste0(tempdir(), "/actel.load.debug.RData"))
               }
       )
     } # nocov end
   # ------------------------
 
-  appendTo(c("Screen", 
-             "Report"), 
+  appendTo(c("Screen",
+             "Report"),
            "M: Importing data. This process may take a while.")
   bio <- loadBio(input = "biometrics.csv", tz = tz)
-  appendTo(c("Screen", 
-             "Report"), 
+  appendTo(c("Screen",
+             "Report"),
            paste0("M: Number of target tags: ", nrow(bio), "."))
 
   # Check that all the overridden tags are part of the study
@@ -62,79 +62,79 @@ loadStudyData <- function(tz, override = NULL, start.time,
     if (is.numeric(override)) {
 
       # Legacy signal-only override compatibility
-      lowest_signals <- sapply(bio$Signal, 
-            function(i) { 
-              min(as.numeric(unlist(strsplit(as.character(i), 
+      lowest_signals <- sapply(bio$Signal,
+            function(i) {
+              min(as.numeric(unlist(strsplit(as.character(i),
               "|", fixed = TRUE))))
             }
           )
-      
+
       if (any(table(lowest_signals[lowest_signals %in% override]) > 1))
-        stopAndReport('Override is numeric but there are multiple tags', 
-                      'that match the overridden signal. Use codespace-signal', 
+        stopAndReport('Override is numeric but there are multiple tags',
+                      'that match the overridden signal. Use codespace-signal',
                       ' overrides instead.')
 
       if (any(link <- is.na(match(override, lowest_signals))))
-        stopAndReport("Some tags listed in 'override' (", 
-                      paste0(override[link], collapse = ", "), 
+        stopAndReport("Some tags listed in 'override' (",
+                      paste0(override[link], collapse = ", "),
                       ") are not listed in the biometrics file.")
-    } 
+    }
     else {
       # new override based on full tag
       if (any(link <- is.na(match(override, bio$Transmitter))))
-        stopAndReport("Some tags listed in 'override' (", 
-                      paste0(override[link], collapse = ", "), 
+        stopAndReport("Some tags listed in 'override' (",
+                      paste0(override[link], collapse = ", "),
                       ") are not listed in the biometrics file.")
 
     }
   }
 
   deployments <- loadDeployments(input = "deployments.csv", tz = tz)
-  
+
   # check that receivers are not deployed before being retrieved
-  checkDeploymentTimes(input = deployments) 
-  
+  checkDeploymentTimes(input = deployments)
+
   spatial <- loadSpatial(input = "spatial.csv", section.order = section.order)
 
-  # match Station.name in the deployments to Station.name in spatial, 
+  # match Station.name in the deployments to Station.name in spatial,
   # and vice-versa
-  deployments <- checkDeploymentStations(input = deployments, spatial = spatial) 
-  
-  # Prepare serial numbers to overwrite the serials in detections
-  deployments <- createUniqueSerials(input = deployments) 
+  deployments <- checkDeploymentStations(input = deployments, spatial = spatial)
 
-  detections <- loadDetections(start.time = start.time, stop.time = stop.time, 
-                               tz = tz, save.detections = save.detections, 
+  # Prepare serial numbers to overwrite the serials in detections
+  deployments <- createUniqueSerials(input = deployments)
+
+  detections <- loadDetections(start.time = start.time, stop.time = stop.time,
+                               tz = tz, save.detections = save.detections,
                                record.source = TRUE)
   detections <- checkDupDetections(input = detections)
 
   use.fakedot <- TRUE
   if (file.exists("spatial.dot")) {
-    appendTo(c("Screen", "Report"), 
+    appendTo(c("Screen", "Report"),
              paste0("M: A 'spatial.dot' file was detected",
                     ", activating multi-branch analysis."))
-    recipient <- loadDot(input = "spatial.dot", spatial = spatial, 
+    recipient <- loadDot(input = "spatial.dot", spatial = spatial,
                          disregard.parallels = disregard.parallels)
     use.fakedot <- FALSE
   }
   if (use.fakedot & file.exists("spatial.txt")) {
-    appendTo(c("Screen", "Report"), 
+    appendTo(c("Screen", "Report"),
              paste0("M: A 'spatial.txt' file was detected, activating",
                     " multi-branch analysis."))
-    recipient <- loadDot(input = "spatial.txt", spatial = spatial, 
+    recipient <- loadDot(input = "spatial.txt", spatial = spatial,
                          disregard.parallels = disregard.parallels)
     use.fakedot <- FALSE
   }
   if (use.fakedot) {
     n <- length(unique(spatial$Array[spatial$Type == "Hydrophone"]))
     if (n > 1) {
-      fakedot <- paste(unique(spatial$Array[spatial$Type == "Hydrophone"]), 
+      fakedot <- paste(unique(spatial$Array[spatial$Type == "Hydrophone"]),
                        collapse = "--")
     } else {
       aux <- unique(spatial$Array[spatial$Type == "Hydrophone"])
       fakedot <- paste(aux, "--", aux)
     }
-    recipient <- loadDot(string = fakedot, spatial = spatial, 
+    recipient <- loadDot(string = fakedot, spatial = spatial,
                          disregard.parallels = disregard.parallels)
   }
   dot <- recipient$dot
@@ -147,7 +147,7 @@ loadStudyData <- function(tz, override = NULL, start.time,
 
   rm(use.fakedot, recipient)
 
-  # Check if there is a logical first array in the study area, should a 
+  # Check if there is a logical first array in the study area, should a
   # replacement release site need to be created.
   if (sum(unlist(lapply(arrays, function(a) is.null(a$before)))) == 1) {
     link <- unlist(lapply(arrays, function(a) is.null(a$before)))
@@ -156,39 +156,39 @@ loadStudyData <- function(tz, override = NULL, start.time,
     first.array <- NULL
   }
   # Finish structuring the spatial file
-  spatial <- transformSpatial(spatial = spatial, bio = bio, arrays = arrays, 
-                              dotmat = dotmat, first.array = first.array) 
-  
-  # Get standardized station and receiver names, check for receivers 
+  spatial <- transformSpatial(spatial = spatial, bio = bio, arrays = arrays,
+                              dotmat = dotmat, first.array = first.array)
+
+  # Get standardized station and receiver names, check for receivers
   # with no detections
-  detections <- createStandards(detections = detections, spatial = spatial, 
-                                deployments = deployments, 
-                                discard.orphans = discard.orphans) 
-  
+  detections <- createStandards(detections = detections, spatial = spatial,
+                                deployments = deployments,
+                                discard.orphans = discard.orphans)
+
   # Check if there are detections from unknown receivers
-  checkUnknownReceivers(input = detections) 
-  
-  appendTo(c("Screen","Report"), 
-           paste0("M: Data time range: ", 
-                  as.character(head(detections$Timestamp, 1)), 
-                  " to ", as.character(tail(detections$Timestamp, 1)), 
+  checkUnknownReceivers(input = detections)
+
+  appendTo(c("Screen","Report"),
+           paste0("M: Data time range: ",
+                  as.character(head(detections$Timestamp, 1)),
+                  " to ", as.character(tail(detections$Timestamp, 1)),
                   " (", tz, ")."))
 
-  arrays <- liveArrayTimes(arrays = arrays, deployments = deployments, 
+  arrays <- liveArrayTimes(arrays = arrays, deployments = deployments,
                            spatial = spatial)
 
   # Reorder arrays object by spatial order
   link <- match(unlist(spatial$array.order), names(arrays))
-  arrays <- arrays[link] 
+  arrays <- arrays[link]
   rm(link)
-  
+
   # Load distances and check if they are valid
-  dist.mat <- loadDistances(spatial = spatial) 
-  
+  dist.mat <- loadDistances(spatial = spatial)
+
   # Split the detections by tag, store full transmitter names in bio
-  recipient <- splitDetections(detections = detections, bio = bio, 
-                               exclude.tags = exclude.tags) 
-  
+  recipient <- splitDetections(detections = detections, bio = bio,
+                               exclude.tags = exclude.tags)
+
   detections.list <- recipient$detections.list
   bio <- recipient$bio
   if (is.null(detections.list) | is.null(bio))
@@ -196,12 +196,12 @@ loadStudyData <- function(tz, override = NULL, start.time,
                   " (splitDetections). If this error persists,",
                   " contact the developer.") # nocov
   rm(recipient)
-  
+
   # Check if there is any data loss due to unknown receivers
-  recipient <- checkTagsInUnknownReceivers(detections.list = detections.list, 
+  recipient <- checkTagsInUnknownReceivers(detections.list = detections.list,
                                            deployments = deployments,
-                                           spatial = spatial) 
-  
+                                           spatial = spatial)
+
   spatial <- recipient$spatial
   deployments <- recipient$deployments
   detections.list <- recipient$detections.list
@@ -211,23 +211,23 @@ loadStudyData <- function(tz, override = NULL, start.time,
                   " contact the developer.") # nocov
   rm(recipient)
 
-  detections.list <- checkDetectionsBeforeRelease(input = detections.list, 
-                                              bio = bio, 
+  detections.list <- checkDetectionsBeforeRelease(input = detections.list,
+                                              bio = bio,
                                               discard.orphans = discard.orphans)
-  appendTo(c("Screen", 
-             "Report"), 
+  appendTo(c("Screen",
+             "Report"),
            "M: Data successfully imported!")
 
   loading.failed <- FALSE
 
-  return(list(bio = bio, 
-              deployments = deployments, 
-              spatial = spatial, 
+  return(list(bio = bio,
+              deployments = deployments,
+              spatial = spatial,
               dot = dot,
-              arrays = arrays, 
-              dotmat = dotmat, 
+              arrays = arrays,
+              dotmat = dotmat,
               dist.mat = dist.mat,
-              detections.list = detections.list, 
+              detections.list = detections.list,
               paths = paths))
 }
 
@@ -243,28 +243,28 @@ loadStudyData <- function(tz, override = NULL, start.time,
 #' \itemize{
 #'  \item \code{dot}: A data frame containing the connections between arrays
 #'  \item \code{arrays}: A list containing detailed information on the arrays
-#'  \item \code{dotmat}: A matrix of the distance (in number of arrays) 
+#'  \item \code{dotmat}: A matrix of the distance (in number of arrays)
 #'   between pairs of arrays
 #'  \item \code{paths}: A list of the all array paths between each pair of arrays.
 #' }
 #'
 #' @keywords internal
 #'
-loadDot <- function(string = NULL, input = NULL, spatial, 
+loadDot <- function(string = NULL, input = NULL, spatial,
                     disregard.parallels, preloading = FALSE) {
   appendTo("debug", "Running loadDot.")
   if (is.null(string) & is.null(input))
     stopAndReport("No dot file or dot string were specified.")
   if (is.null(string)) {
     tryCatch(dot <- readDot(input = input, silent = TRUE),
-      error = function(e) stopAndReport("The contents of the '", input, 
+      error = function(e) stopAndReport("The contents of the '", input,
                                         "' file could not be recognised",
                                         " by the readDot function."))
   } else {
     dot <- readDot(string = string, silent = TRUE)
   }
   mat <- dotMatrix(input = dot)
-  aux <- sapply(spatial$Array, 
+  aux <- sapply(spatial$Array,
                 function(x) {
                   unlist(strsplit(x, "|", fixed = TRUE))
                 }
@@ -281,13 +281,13 @@ loadDot <- function(string = NULL, input = NULL, spatial,
       if (file.exists("spatial.txt")) {
         stopAndReport("Not all the arrays listed in the spatial.csv",
                       " file are present in the spatial.txt.",
-                      "\n       Missing arrays: ", 
+                      "\n       Missing arrays: ",
                       paste(unique.arrays[link], collapse = ", "), "\n")
       }
       if (file.exists("spatial.dot")) {
         stopAndReport("Not all the arrays listed in the spatial.csv",
                       " file are present in the spatial.dot.",
-                      "\n       Missing arrays: ", 
+                      "\n       Missing arrays: ",
                       paste(unique.arrays[link], collapse = ", "), "\n")
       }
       if (!file.exists("spatial.txt") & !file.exists("spatial.dot")) {
@@ -302,21 +302,21 @@ loadDot <- function(string = NULL, input = NULL, spatial,
       stopAndReport(paste0("Not all arrays listed in the dot input are",
                            " present in the spatial input. The dot input",
                            " should only contain arrays that are listed in",
-                           " spatial.\n       Alien arrays: ", 
+                           " spatial.\n       Alien arrays: ",
                            paste(colnames(mat)[link], collapse = ", "), "\n"))
     } else {
       if (file.exists("spatial.txt")) {
         stopAndReport("Some arrays listed in the spatial.txt file",
                       " are not present in the spatial.csv file. The",
                       " dot input should only contain arrays that are",
-                      " listed in spatial.\n       Alien arrays: ", 
+                      " listed in spatial.\n       Alien arrays: ",
                       paste(colnames(mat)[link], collapse = ", "), "\n")
       }
       if (file.exists("spatial.dot")) {
         stopAndReport("Some arrays listed in the spatial.dot file are",
                       " not present in the spatial.csv file. The dot",
                       " input should only contain arrays that are",
-                      " listed in spatial.\n       Alien arrays: ", 
+                      " listed in spatial.\n       Alien arrays: ",
                       paste(colnames(mat)[link], collapse = ", "), "\n")
       }
       if (!file.exists("spatial.txt") & !file.exists("spatial.dot")) {
@@ -377,17 +377,17 @@ readDot <- function (input = NULL, string = NULL, silent = FALSE) {
   }
   paths <- lines[grepl("[<-][->]", lines)]
   if (length(paths) == 0) {
-    stop("Could not recognise the input contents as DOT formatted connections.", 
+    stop("Could not recognise the input contents as DOT formatted connections.",
          call. = FALSE)
   }
-  
+
   # if something looks like a badly formatted connector, complain and stop
   if (any(grepl("<<|>>|>-|-<|><|<>|<->", paths))) {
     stop("The input appears to have badly formatted connectors",
          " ('<<', '>>', '>-', '-<'', '><', '<>' or '<->'). Please fix",
          " these before continuing.", call. = FALSE)
   }
-  
+
   # there's probably a smarter way to do these, but hey, this works.
   paths <- gsub("[ ]*<-", "<-", paths)
   paths <- gsub("<-[ ]*", "<-", paths)
@@ -399,23 +399,23 @@ readDot <- function (input = NULL, string = NULL, silent = FALSE) {
   paths <- gsub("\\[label=[^\\]]","", paths)
   paths <- gsub("^[ ]*", "", paths)
   paths <- gsub("[ ]*$", "", paths)
-  
+
   # only spaces left now should be part of array names, and need to be replaced
   if (any(grepl(" ", paths))) {
     if (!silent) {
-      warning("Replacing spaces with '_' in the node names.", 
+      warning("Replacing spaces with '_' in the node names.",
               immediate. = TRUE, call. = FALSE)
       }
     paths <- gsub(" ", "_", paths)
   }
-  check <- grepl("\\\\|/|:|\\*|\\?|\\\"|<(?!-)|(?<!-)>|\\\'", 
+  check <- grepl("\\\\|/|:|\\*|\\?|\\\"|<(?!-)|(?<!-)>|\\\'",
                  paths, perl = TRUE)
   if (any(check)) {
     if (!silent) {
       warning("Troublesome characters found in the node names (\\/:*?\"<>\').",
               " Replacing these with '_'.", immediate. = TRUE, call. = FALSE)
       }
-    paths <- gsub("\\\\|/|:|\\*|\\?|\\\"|<(?!-)|(?<!-)>|\\\'", "_", 
+    paths <- gsub("\\\\|/|:|\\*|\\?|\\\"|<(?!-)|(?<!-)>|\\\'", "_",
                   paths, perl = TRUE)
   }
   nodes <- strsplit(paths,"[<-][->]")
@@ -426,12 +426,12 @@ readDot <- function (input = NULL, string = NULL, silent = FALSE) {
     stringsAsFactors = FALSE)
   for (i in 1:length(nodes)) {
     n <- length(nodes[[i]])
-    escaped_nodes <- gsub(pattern = "([[:punct:]])", 
+    escaped_nodes <- gsub(pattern = "([[:punct:]])",
                           replacement = "\\\\\\1", nodes[[i]])
     type <- gsub(paste0(escaped_nodes, collapse = "|"), "", paths[[i]])
     aux <- data.frame(
       A = nodes[[i]][1:(n - 1)],
-      to = sapply(seq(from = 1, to = nchar(type), by = 2), 
+      to = sapply(seq(from = 1, to = nchar(type), by = 2),
                   function(i) substr(type, i, i + 1)),
       B = nodes[[i]][2:n],
       stringsAsFactors = FALSE)
@@ -472,8 +472,8 @@ dotMatrix <- function(input) {
       for (B in nodes) {
         if (graph[A, B] == i) {
           # cat(B, "\n")
-          candidates <- rownames(graph) != B 
-          candidates <- candidates & rownames(graph) != A 
+          candidates <- rownames(graph) != B
+          candidates <- candidates & rownames(graph) != A
           candidates <- candidates & graph[B, ] == 1
           if (any(candidates)) {
             to.change <- names(candidates)[candidates]
@@ -506,7 +506,7 @@ dotMatrix <- function(input) {
 dotList <- function(input, spatial) {
   appendTo("debug", "Running dotList.")
 
-  # if there are sections, determine which connections are at the 
+  # if there are sections, determine which connections are at the
   # edge between sections
   if (any(grepl("^Section$", colnames(spatial)))) {
     sections <- levels(spatial$Section)
@@ -538,7 +538,7 @@ dotList <- function(input, spatial) {
     recipient <- list(
       neighbours = unique(c(auxA$B, auxB$A, names(parallel)[!is.na(parallel)])),
       before     = if (nrow(auxB) == 0) {
-                     NULL 
+                     NULL
                    } else {
                      unique(auxB$A)
                    },
@@ -579,12 +579,12 @@ dotPaths <- function(input, disregard.parallels) {
   for (direction in (c("before", "after"))) {
     capture <- lapply(names(input), function(a) {
       link <- paste0(direction, ".peers")
-      input[[a]][[link]] <<- findPeers(array = a, 
-                                       array.list = input, 
-                                       peer.direction = direction, 
+      input[[a]][[link]] <<- findPeers(array = a,
+                                       array.list = input,
+                                       peer.direction = direction,
                                        disregard.parallels = disregard.parallels)
-      recipient <- findDirectChains(array = a, 
-                                    array.list = input, 
+      recipient <- findDirectChains(array = a,
+                                    array.list = input,
                                     direction = direction)
       input[[a]][[paste0("all.", direction)]] <<- recipient[[1]]
       input[[a]][[paste0("all.", direction, ".and.par")]] <<- recipient[[2]]
@@ -604,8 +604,8 @@ dotPaths <- function(input, disregard.parallels) {
 #'
 #' @keywords internal
 #'
-findPeers <- function(array, array.list, 
-                      peer.direction = c("before", "after"), 
+findPeers <- function(array, array.list,
+                      peer.direction = c("before", "after"),
                       disregard.parallels) {
   peer.direction <- match.arg(peer.direction)
   opposite.direction <- ifelse(peer.direction == "before", "after", "before")
@@ -613,38 +613,38 @@ findPeers <- function(array, array.list,
   if (length(array) > 1) {
     stopAndReport("'array' must be of length 1. This error should never",
                   " happen. Contact developer.") # nocov
-  } 
+  }
 
   if (!(array %in% names(array.list))) {
     stopAndReport(paste0("Requested array does not exist in the array list",
-                         " (findPeers). This error should never happen.", 
+                         " (findPeers). This error should never happen.",
                          " Contact developer.")) # nocov
-  } 
-  
+  }
+
     # start with nothing
-    usable.peers <- c() 
-    
+    usable.peers <- c()
+
     # placeholder just to trigger the start of the while loop
-    check.results <- c(TRUE, FALSE) 
-    
+    check.results <- c(TRUE, FALSE)
+
     # round <- 0 # debug counter
 
     # cat("Array", array, "-", peer.direction, "peers\n") # debug and testing
-    
+
     while (any(check.results) & !all(check.results)) {
         # round <- round + 1 # debug counter
         # cat("Round", round, "\n") # debug and testing
 
-        # Check every array that is not the one we're examining and that has 
+        # Check every array that is not the one we're examining and that has
         # not been deemed a peer yet.
         link <- !(names(array.list) %in% c(array, usable.peers))
         to.check <- names(array.list)[link]
         # cat("Checking:", to.check, "\n") # debug and testing
-                        
+
         check.results <- sapply(to.check, function(x) {
           # only relevant to test if array x is a valid peer if it connects
           # with anything in the opposite direction.
-          # e.g. if I have A -- B -- C, A cannot be the "after" peer of anyone, 
+          # e.g. if I have A -- B -- C, A cannot be the "after" peer of anyone,
           # because nothing comes "before" it.
           no.connections <- length(array.list[[x]][[opposite.direction]]) == 0
 
@@ -655,28 +655,28 @@ findPeers <- function(array, array.list,
           # There are two types of parallels that can cause trouble:
           # 1) parallels in the array for which we are determining peers (object "array")
           # 2) parallels in the array we're trying to determine as a valid peer (object "x")
-          # 
+          #
           # Type 1 is only an issue if we want to ignore parallel arrays (i.e. disregard.parallels = TRUE) and
           # the array "array" is right next to the array "x". That will affect the first two components of the check:
           if (disregard.parallels & array %in% array.list[[x]][[opposite.direction]]) {
-            # For array x to be a valid peer of the array we're determining peers for (object "array"), 
-            # the max number of connections to array x can only be the sum of the peers we already know 
+            # For array x to be a valid peer of the array we're determining peers for (object "array"),
+            # the max number of connections to array x can only be the sum of the peers we already know
             # about, the array "array", and any parallels of the array "array".
             n_opposites <- length(array.list[[x]][[opposite.direction]])
             n_peers <- length(usable.peers)
             n_par <- length(array.list[[array]]$parallel)
             too.many.connections <- n_opposites > sum(n_peers, n_par, 1)
             # Additionally, all the connections to array x must be either the array "array", a parallel
-            # of the array "array" that shares all connections with array "array", or an array that has 
+            # of the array "array" that shares all connections with array "array", or an array that has
             # already been determined as a valid peer.
-            valid.parallels <- sapply(array.list[[array]]$parallel, 
+            valid.parallels <- sapply(array.list[[array]]$parallel,
                                       function(parallel) {
-                                        all(array.list[[parallel]][[opposite.direction]] %in% 
+                                        all(array.list[[parallel]][[opposite.direction]] %in%
                                               array.list[[array]][[opposite.direction]])
                                       }
             )
-            all.connections.are.valid.peers <- 
-              all(array.list[[x]][[opposite.direction]] %in% 
+            all.connections.are.valid.peers <-
+              all(array.list[[x]][[opposite.direction]] %in%
                     c(array, names(valid.parallels)[valid.parallels], usable.peers))
           } else {
             # In a situation where either disregard.parallels = FALSE, or the array we're determining
@@ -684,7 +684,7 @@ findPeers <- function(array, array.list,
             # (object "x"), then the nax number of connections to array x can only be the sum of the
             # peers we already know about plus the array "array".
             too.many.connections <- length(array.list[[x]][[opposite.direction]]) > sum(length(usable.peers), 1)
-            # Additionally, all the connections to array x must be either the array "array", or an 
+            # Additionally, all the connections to array x must be either the array "array", or an
             # array that has already been determined as a valid peer. Note that parallels are not allowed here,
             # even if disregard.parallels = TRUE. If this ever becomes a point of confusion, find the
             # drawings in issue #72.
@@ -693,7 +693,7 @@ findPeers <- function(array, array.list,
 
           if (too.many.connections | !all.connections.are.valid.peers){
             return(FALSE) # not worth continuing
-            } 
+            }
 
           # Type 2 is only relevant if disregard.parallels = FALSE. Here, we have to confirm if the
           # arrays that are parallel to array "x" do not have any third-party connections that are not,
@@ -704,13 +704,13 @@ findPeers <- function(array, array.list,
           # F -- E
           # E.g. if array "array" is B, in the two checks above, array C will emerge as a potential peer
           # for B. If we disregard parallels, than that is indeed the case. However, if we do not disregard
-          # parallels, then array E (a parallel of C) will cause array C to be invalidated, due to the 
-          # connection coming from array F. This wouldn't had been a problem if F were a valid peer 
+          # parallels, then array E (a parallel of C) will cause array C to be invalidated, due to the
+          # connection coming from array F. This wouldn't had been a problem if F were a valid peer
           # of "B" (e.g. if B -- F).
           if (disregard.parallels) {
             parallels.are.not.an.issue <- TRUE
           } else {
-            # So, if disregard.parallels = FALSE, and array x has parallels, we 
+            # So, if disregard.parallels = FALSE, and array x has parallels, we
             # need to go find which arrays lead to the parallels of array x
             leading.to.parallels <- unique(unlist(sapply(array.list[[x]]$parallel, function(parallel) array.list[[parallel]][[opposite.direction]])))
             # Finally, we verify that only valid peers of array "array" lead to the parallels listed above.
@@ -832,18 +832,18 @@ setSpatialStandards <- function(input){
   input$Standard.name <- as.character(input$Station.name)
   input$Standard.name <- gsub(" ", "_", input$Standard.name)
   link <- input$Type == "Hydrophone"
-  input$Standard.name[link] <- paste0("St.", 
+  input$Standard.name[link] <- paste0("St.",
                                       seq_len(sum(input$Type == "Hydrophone")))
   return(input)
 }
 
 #' Load distances matrix
 #'
-#' @param input Either a path to a csv file containing a distances matrix, 
+#' @param input Either a path to a csv file containing a distances matrix,
 #'  or an R object containing a distances matrix.
 #' @param spatial A list of spatial objects in the study area.
 #'
-#' @return A matrix of the distances (in metres) between stations 
+#' @return A matrix of the distances (in metres) between stations
 #'  (if a 'distances.csv' is present)
 #'
 #' @keywords internal
@@ -854,37 +854,37 @@ loadDistances <- function(input = "distances.csv", spatial) {
   invalid.dist <- TRUE
   if (is.character(input)) {
     if (file.exists(input)) {
-      appendTo(c("Screen", 
-                 "Report"), 
-               paste0("M: File '", 
+      appendTo(c("Screen",
+                 "Report"),
+               paste0("M: File '",
                       input, "' found, activating speed calculations."))
       dist.mat <- as.matrix(read.csv(input, row.names = 1, check.names = FALSE))
       if (ncol(dist.mat) == 1) {
-        warning("Only one column was identified in '", 
-                input, "'. If this seems wrong,", 
-                " please make sure that the values are separated using commas.", 
-                immediate. = TRUE, 
+        warning("Only one column was identified in '",
+                input, "'. If this seems wrong,",
+                " please make sure that the values are separated using commas.",
+                immediate. = TRUE,
                 call. = FALSE)
         }
     } else {
       dist.mat <- NULL
     }
   } else {
-    # Ensure the input is a matrix, 
+    # Ensure the input is a matrix,
     # in case the user provided the data in a non-base format
     dist.mat <- as.matrix(input)
-  } 
+  }
 
   if (!is.null(dist.mat)) {
     rownames(dist.mat) <- gsub(" ", "_", rownames(dist.mat))
     colnames(dist.mat) <- gsub(" ", "_", colnames(dist.mat))
     invalid.dist <- FALSE
     if (nrow(dist.mat) != ncol(dist.mat)) {
-      appendTo(c("Screen", 
-                 "Report", 
-                 "Warning"), 
-               paste0("The distances matrix appears to be missing data", 
-                      " (ncol != nrow). Deactivating speed calculations", 
+      appendTo(c("Screen",
+                 "Report",
+                 "Warning"),
+               paste0("The distances matrix appears to be missing data",
+                      " (ncol != nrow). Deactivating speed calculations",
                       " to avoid function failure."))
       invalid.dist <- TRUE
     }
@@ -1025,7 +1025,7 @@ loadDeployments <- function(input, tz){
 
   if (preloaded & inherits(input$Start, "POSIXct") & inherits(input$Stop, "POSIXct")) {
     appendTo(c("Screen", "Report"), "M: Preloaded deployment times are already in POSIX format. Skipping timestamp format checks.")
-    
+
     if (attributes(input$Start)$tz != attributes(input$Stop)$tz)
       stopAndReport("Deployment Start and Stop times are not in the same time zone (", attributes(input$Start)$tz, " != ", attributes(input$Stop)$tz, ")! Please double-check the deployments.")
 
@@ -1219,15 +1219,15 @@ loadSpatial <- function(input = "spatial.csv", section.order = NULL){
     aux <- with(aux, as.data.frame.matrix(table(Array, Section)))
     sections.per.array <- apply(aux, 1, function(i) sum(i > 0))
     if (any(sections.per.array > 1)) {
-      stopAndReport(ifelse(sum(sections.per.array > 1) == 1, "Array '", "Arrays '"), 
-        paste0(names(sections.per.array)[sections.per.array > 1], collapse = "', '"), 
-        ifelse(sum(sections.per.array > 1) == 1, "' has been", "' have been"), 
+      stopAndReport(ifelse(sum(sections.per.array > 1) == 1, "Array '", "Arrays '"),
+        paste0(names(sections.per.array)[sections.per.array > 1], collapse = "', '"),
+        ifelse(sum(sections.per.array > 1) == 1, "' has been", "' have been"),
         " assigned to more than one section! Each array can only belong to one section. Please correct the spatial input before continuing.")
     }
   } else {
     if (!is.null(section.order))
       appendTo(c("Screen", "Report", "Warning"), "'section.order' was set but input has no 'Section' column. Ignoring argument.")
-  
+
     appendTo(c("Screen", "Report", "Warning"), "The spatial input does not contain a 'Section' column. This input is only valid for explore() analyses.")
   }
   # check release arrays exist
@@ -1350,7 +1350,7 @@ loadBio <- function(input, tz){
       check <- table(bio$Signal) > 1
       prefix <- "Signal"
     }
-  } 
+  }
   else {
     if (any(colnames(bio) == "Code.space")) {
       aux <- unlist(apply(bio, 1, function(x) {
@@ -1369,10 +1369,10 @@ loadBio <- function(input, tz){
     stopAndReport(prefix, ifelse(sum(check) > 1, "s ", " "), paste(names(check)[check], collapse = ", "), ifelse(sum(check) > 1," are ", " is "), "duplicated in the biometrics.")
 
   # check sensor names
-  if (!expect_integer) { 
+  if (!expect_integer) {
     if (!any(grepl("^Sensor\\.unit$", colnames(bio)))) {
       appendTo(c("Screen", "Warning"), "Tags with multiple sensors are listed in the biometrics, but a 'Sensor.unit' column could not be found. Skipping sensor unit assignment.")
-    } 
+    }
     else {
       bio$Sensor.unit <- as.character(bio$Sensor.unit) # failsafe in case all values are numeric, or NA.
       bio$Sensor.unit[bio$Sensor.unit == ''] <- NA_character_
@@ -1380,14 +1380,14 @@ loadBio <- function(input, tz){
       if (any(link <- na.as.false(startsWith(bio$Sensor.unit, '|'))))
         appendTo(c('screen', 'warning'), paste0("The Sensor.unit information in ",
           ifelse(sum(link) <= 10,
-                 paste0("row(s) ", paste0(which(link), collapse = ", ")), 
+                 paste0("row(s) ", paste0(which(link), collapse = ", ")),
                  paste0(sum(link), " row(s)")),
           " of the biometrics starts with a '|' character. Could you have forgotten to include a sensor unit?"))
 
       if (any(link <- na.as.false(endsWith(bio$Sensor.unit, '|'))))
         appendTo(c('screen', 'warning'), paste0("The Sensor.unit information in ",
           ifelse(sum(link) <= 10,
-                 paste0("row(s) ", paste0(which(link), collapse = ", ")), 
+                 paste0("row(s) ", paste0(which(link), collapse = ", ")),
                  paste0(sum(link), " row(s)")),
           " of the biometrics ends with a '|' character. Could you have forgotten to include a sensor unit?"))
 
@@ -1396,9 +1396,9 @@ loadBio <- function(input, tz){
       sensors_per_tag <- sapply(aux, length)
 
       if (any(link <- signals_per_tag != sensors_per_tag))
-        stopAndReport("The number of provided sensor units does not match the number of signals for ", 
+        stopAndReport("The number of provided sensor units does not match the number of signals for ",
           ifelse(sum(link) <= 10,
-                 paste0("row(s) ", paste0(which(link), collapse = ", ")), 
+                 paste0("row(s) ", paste0(which(link), collapse = ", ")),
                  paste0(sum(link), " row(s)")),
           " of the biometrics.")
     }
@@ -1410,11 +1410,11 @@ loadBio <- function(input, tz){
     bio$Release.site <- "unspecified"
   } else {
     bio$Release.site <- gsub(" ", "_", bio$Release.site)
-  
+
     # replace any weird characters in station names
     if (any(grepl("\\\\|/|:|\\*|\\?|\\\"|<|>|\\\'", bio$Release.site)))
       bio$Release.site <- gsub("\\\\|/|:|\\*|\\?|\\\"|<|>|\\\'", "_", bio$Release.site)
-  
+
     bio$Release.site <- factor(bio$Release.site)
     if (any(link <- is.na(bio$Release.site) | bio$Release.site == "")) {
       appendTo(c("Screen","Report","Warning"),"Some animals contain no release site information. You may want to double-check the data.\n   Filling the blanks with 'unspecified'.")
@@ -1469,7 +1469,7 @@ loadBio <- function(input, tz){
 #'
 #' @keywords internal
 #'
-loadDetections <- function(start.time = NULL, stop.time = NULL, tz, force = FALSE, 
+loadDetections <- function(start.time = NULL, stop.time = NULL, tz, force = FALSE,
   save.detections = FALSE, record.source = FALSE) {
   # NOTE: The variable actel.detections is loaded from a RData file, if present. To avoid package check
   #   notes, the variable name is created before any use.
@@ -1529,13 +1529,13 @@ loadDetections <- function(start.time = NULL, stop.time = NULL, tz, force = FALS
 #'
 #' @keywords internal
 #'
-compileDetections <- function(path = "detections", start.time = NULL, 
+compileDetections <- function(path = "detections", start.time = NULL,
     stop.time = NULL, tz, save.detections = FALSE, record.source = FALSE) {
   appendTo("Screen", "M: Compiling detections...")
   # Find the detection files
   if (file_test("-d", path)) {
-    file.list <- list.files(path = path, 
-      pattern = "*(\\.[cC][sS][vV]|\\.[vV][rR][lL])", 
+    file.list <- list.files(path = path,
+      pattern = "*(\\.[cC][sS][vV]|\\.[vV][rR][lL])",
       full.names = TRUE)
     if (length(file.list) == 0) {
       stopAndReport("A 'detections' folder is present but appears to be empty.")
@@ -1549,7 +1549,7 @@ compileDetections <- function(path = "detections", start.time = NULL,
     }
   }
   if (file_test("-d", path) & file.exists("detections.csv")) {
-    appendTo(c("Screen", "Warning", "Report"), 
+    appendTo(c("Screen", "Warning", "Report"),
       paste0("Both a 'detections' folder and a 'detections.csv' file are ",
         "present in the current directory.\n",
         "   Loading ONLY the files present in the 'detections' folder."))
@@ -1581,7 +1581,7 @@ compileDetections <- function(path = "detections", start.time = NULL,
     }
 
     file_header <- readLines(i, 1)
-  
+
     # find the header format that matches the current file
     file_match <- sapply(header_formats,
       function(fingerprint) {
@@ -1589,7 +1589,7 @@ compileDetections <- function(path = "detections", start.time = NULL,
           function(i) {grepl(i, file_header)}))
       })
 
-    # if no matches were found, then warn the 
+    # if no matches were found, then warn the
     # user that the file won't be processed.
     if (all(!file_match)) {
       appendTo(c("Screen", "Report", "Warning"),
@@ -1618,11 +1618,11 @@ compileDetections <- function(path = "detections", start.time = NULL,
     file_type <- names(file_match)[file_match][1]
 
     # preliminary load and check of CSV logs
-    if (file_type %in% 
+    if (file_type %in%
       c("std", "thelma_new", "thelma_old", "vemco", "innovasea")) {
       aux <- data.table::fread(i, fill = TRUE, sep = ",", showProgress = FALSE)
       if(nrow(aux) == 0){
-        appendTo(c("Screen", "Report"), 
+        appendTo(c("Screen", "Report"),
           paste0("File '", i, "' is empty, skipping processing."))
         flush.console()
         return(NULL) # File is empty, skip to next file
@@ -1631,7 +1631,7 @@ compileDetections <- function(path = "detections", start.time = NULL,
     if (file_type == "std") {
       appendTo("debug", paste0("File '", i, "' matches a Standard log."))
       output <- tryCatch(
-        processStandardFile(input = aux), 
+        processStandardFile(input = aux),
         error = function(e) {
           stopAndReport("Something went wrong when processing file '", i,
             "'. If you are absolutely sure this file is ok, contact the ",
@@ -1690,8 +1690,8 @@ compileDetections <- function(path = "detections", start.time = NULL,
   names(data.files) <- file.list
   if (any(sapply(data.files, is.null))) {
     if (sum(sapply(data.files, is.null)) > 1) {
-      appendTo("Screen", 
-        paste("M:", sum(sapply(data.files, is.null)), 
+      appendTo("Screen",
+        paste("M:", sum(sapply(data.files, is.null)),
               "files were excluded from further analyses."))
     } else {
       appendTo("Screen", "M: One file was excluded from further analyses.")
@@ -1752,12 +1752,12 @@ processStandardFile <- function(input) {
   input <- as.data.frame(input, stringsAsFactors = FALSE)
 
   time_vec <- fasttime::fastPOSIXct(
-    sapply(as.character(input$Timestamp), 
+    sapply(as.character(input$Timestamp),
            function(x) gsub("Z", "", gsub("T", " ", x))),
     tz = "UTC")
 
   output <- data.table::data.table(
-    Timestamp = time_vec, 
+    Timestamp = time_vec,
     Receiver = input$Receiver,
     CodeSpace = input$CodeSpace,
     Signal = input$Signal)
@@ -1860,7 +1860,7 @@ processThelmaNewFile <- function(input) {
 
   codespace_vec <- sapply(input$Protocol,
                           function(x) unlist(strsplit(x, "-", fixed = TRUE))[1])
-  
+
   output <- data.table::data.table(
     Timestamp = time_vec,
     Receiver = input$Receiver,
@@ -1914,10 +1914,10 @@ processVemcoFile <- function(input) {
     input$Sensor.Unit <- rep(NA_character_, nrow(input))
   }
 
-  std_cols <- c("Timestamp", "Receiver", "CodeSpace", 
+  std_cols <- c("Timestamp", "Receiver", "CodeSpace",
                 "Signal", "Sensor.Value", "Sensor.Unit")
   input <- input[, std_cols, with = FALSE]
-  input$Timestamp <- fasttime::fastPOSIXct(as.character(input$Timestamp), 
+  input$Timestamp <- fasttime::fastPOSIXct(as.character(input$Timestamp),
                                            tz = "UTC")
 
   if (any(is.na(input$Timestamp))) {
@@ -1953,20 +1953,20 @@ processInnovaseaFile <- function(input) {
   transmitter_aux <- strsplit(input$Full.ID, "-", fixed = TRUE)
   input$CodeSpace <- extractCodeSpaces(input$Full.ID)
   input$Signal <- extractSignals(input$Full.ID)
-  
-  input <- data.table::setnames(input, 
+
+  input <- data.table::setnames(input,
     c("Serial.Number", "Receiver"),
     c("Device.Time.(UTC)", "Timestamp"),
     c("Raw.Data", "Sensor.Value"))
 
   input$Sensor.Unit <- rep(NA_character_, nrow(input))
 
-  std_cols <- c("Timestamp", "Receiver", "CodeSpace", 
+  std_cols <- c("Timestamp", "Receiver", "CodeSpace",
                 "Signal", "Sensor.Value", "Sensor.Unit")
   input <- input[, std_cols, with = FALSE]
-  input$Timestamp <- fasttime::fastPOSIXct(as.character(input$Timestamp), 
+  input$Timestamp <- fasttime::fastPOSIXct(as.character(input$Timestamp),
                                            tz = "UTC")
-  
+
   if (any(is.na(input$Timestamp))) {
     stop("Importing timestamps failed", call. = FALSE)
   }
@@ -2092,7 +2092,7 @@ createUniqueSerials <- function(input) {
 #'
 splitDetections <- function(detections, bio, exclude.tags = NULL) {
   appendTo("debug", "Running splitDetections.")
-  
+
   if (file.exists(paste0(tempdir(), "/temp_strays.csv")))
     file.remove(paste0(tempdir(), "/temp_strays.csv"))
 
@@ -2132,21 +2132,21 @@ splitDetections <- function(detections, bio, exclude.tags = NULL) {
 
   trimmed_list <- lapply(1:nrow(bio_aux), function(i) {
     # cat(i, "\r")
-    
+
     # create/reset variable to store the codespace
     the_codespace <- c()
 
-    # This sapply grabs all entries that match the target signal(s) and code space (if relevant)    
+    # This sapply grabs all entries that match the target signal(s) and code space (if relevant)
     list_matches <- sapply(bio_aux$Signal_expanded[[i]], function(j) {
       signal_link <- detected$Signal == j
-      
+
       if (sum(signal_link) == 0)
         return(NA)
-      
+
       if (is.na(bio_aux$Code.space[i])) {
         if (sum(signal_link) > 1) # this should never happen because duplicated signals with no codespaces are handled by checkDupSignals
           stopAndReport("Something went wrong when splitting the detections. This should not have happened. Contact the developer. (1)")
-    
+
         the_codespace <<- unique(detected$Code.space[which(signal_link)])
         return(which(signal_link))
       } else {
@@ -2155,9 +2155,9 @@ splitDetections <- function(detections, bio, exclude.tags = NULL) {
           stopAndReport("Something went wrong when splitting the detections. This should not have happened. Contact the developer. (2)")
 
         if (sum(codespace_link) == 0) {
-          appendTo(c("Screen", "Report", "Warning"), 
-            paste0("Signal ", j, " was found in the detections, but its code space does not match the required ('", 
-              bio_aux$Code.space[i],"' != '", paste0(unique(detected$Code.space[which(signal_link)]), collapse = "', '"), 
+          appendTo(c("Screen", "Report", "Warning"),
+            paste0("Signal ", j, " was found in the detections, but its code space does not match the required ('",
+              bio_aux$Code.space[i],"' != '", paste0(unique(detected$Code.space[which(signal_link)]), collapse = "', '"),
               "').\n         Are you sure the code space was written correctly? Discarding detections from alien code space(s)."))
           return(NA)
         } else {
@@ -2318,11 +2318,11 @@ createStandards <- function(detections, spatial, deployments, discard.orphans = 
   detections$Section <- NA_character_
   empty.receivers <- NULL
   appendTo(c("Screen", "Report"), "M: Matching detections with deployment periods.")
-  
+
   if (interactive())
     pb <- txtProgressBar(min = 0, max = nrow(detections), style = 3, width = 60) # nocov
   counter <- 0
-  
+
   for (i in 1:length(deployments)) {
     receiver.link <- detections$Receiver == names(deployments)[i]
     counter <- counter + sum(receiver.link)
@@ -2358,12 +2358,12 @@ createStandards <- function(detections, spatial, deployments, discard.orphans = 
             message(paste0(capture.output(print(detections[receiver.link, ][the.error, !c("Transmitter", "Valid", "Standard.name", "Array", "Section")])), collapse = "\n"))
           message("")
           message("Possible options:\n   a) Stop and double-check the data (recommended)\n   b) Discard orphan detections in this instance.\n   c) Discard orphan detections for all instances.\n   d) Save orphan detections to a file and re-open dialogue.")
-          
+
           restart <- TRUE
           while (restart) {
             if (interactive()) { # nocov start
-              decision <- userInput("Which option should be followed?(a/b/c/d) ", 
-                                    choices = letters[1:4], 
+              decision <- userInput("Which option should be followed?(a/b/c/d) ",
+                                    choices = letters[1:4],
                                     hash = paste("# orphan detections for receiver", names(deployments)[i]))
             } else { # nocov end
               decision <- "b"
@@ -2371,7 +2371,7 @@ createStandards <- function(detections, spatial, deployments, discard.orphans = 
 
             if (decision == "a")
               stopAndReport("Stopping analysis per user command.") # nocov
-            
+
             if (decision == "b") {
               detections <- detections[-rows.to.remove]
               restart <- FALSE
@@ -2393,13 +2393,13 @@ createStandards <- function(detections, spatial, deployments, discard.orphans = 
                 file.name <- paste0(file.name, ".csv")
               # prevent auto-overwrite
               if (file.exists(file.name)) {
-                aux <- userInput(paste0("File '", file.name, "' already exists. Overwrite contents?(y/n) "), 
-                                 choices = c("y", "n"), 
+                aux <- userInput(paste0("File '", file.name, "' already exists. Overwrite contents?(y/n) "),
+                                 choices = c("y", "n"),
                                  hash = "# overwrite file with same name?")
                 if (aux == "y")
                   overwrite <- TRUE
                 else
-                  overwrite <- FALSE 
+                  overwrite <- FALSE
               }
               else
                 overwrite <- TRUE
@@ -2433,16 +2433,16 @@ createStandards <- function(detections, spatial, deployments, discard.orphans = 
   } # nocov end
 
   appendTo(c("Screen", "Report"), paste0("M: Number of ALS: ", length(deployments), " (of which ", length(empty.receivers), " had no detections)"))
-  
+
   if (!is.null(empty.receivers))
     appendTo(c("Screen", "Report", "Warning"), paste0("No detections were found for receiver(s) ", paste0(empty.receivers, collapse = ", "), "."))
-  
+
   detections$Receiver <- as.factor(detections$Receiver)
   detections$Array <- factor(detections$Array, levels = unlist(spatial$array.order))
-  
+
   if (any(grepl("^Section$", colnames(spatial$stations))))
     detections$Section <- factor(detections$Section, levels = names(spatial$array.order))
-  
+
   detections$Standard.name <- factor(detections$Standard.name, levels = spatial$stations$Standard.name)
   return(detections)
 }
@@ -2621,15 +2621,15 @@ discardFirst <- function(input, bio, trim) {
 }
 
 #' Assign live times to arrays
-#' 
+#'
 #' @param arrays The array list
 #' @param deployments the deployments list
 #' @param spatial The spatial list
-#' 
+#'
 #' @return an expanded array list
-#' 
+#'
 #' @keywords internal
-#' 
+#'
 liveArrayTimes <- function(arrays, deployments, spatial) {
   xdep <- do.call(rbind, deployments)
   capture <- lapply(names(arrays), function(a) {

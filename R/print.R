@@ -48,7 +48,7 @@ printProgression <- function(dot, overall.CJS, spatial, status.df, print.release
       to.fill <- gg_colour_hue(length(sections))
 
     diagram_nodes$fillcolor <- rep(NA_character_, nrow(diagram_nodes))
-    
+
     for (i in 1:length(sections)) {
       arrays <- spatial$array.order[[i]]
       diagram_nodes$fillcolor[matchl(diagram_nodes$label, arrays)] <- to.fill[i]
@@ -215,7 +215,7 @@ printDot <- function(dot, spatial, print.releases) {
       to.fill <- gg_colour_hue(length(sections))
 
     diagram_nodes$fillcolor <- rep(NA_character_, nrow(diagram_nodes))
-    
+
     for (i in 1:length(sections)) {
       arrays <- spatial$array.order[[i]]
       diagram_nodes$fillcolor[matchl(diagram_nodes$label, arrays)] <- to.fill[i]
@@ -640,7 +640,7 @@ knitr::kable(intra.array.CJS[[',i ,']]$absolutes)
 #'
 #' @keywords internal
 #'
-printIndividuals <- function(detections.list, movements, valid.movements, spatial, 
+printIndividuals <- function(detections.list, movements, valid.movements, spatial,
   status.df = NULL, rsp.info, y.axis = c("auto", "stations", "arrays"), extension = "png") {
 
   appendTo("debug", "Starting printIndividuals")
@@ -652,7 +652,7 @@ printIndividuals <- function(detections.list, movements, valid.movements, spatia
   Array <- NULL
   Station <- NULL
   y.axis <- match.arg(y.axis)
-  
+
   fake.results <- list(detections = detections.list,
                 movements = movements,
                 valid.movements = valid.movements,
@@ -802,9 +802,9 @@ printCircular <- function(times, bio, suffix = NULL){
       names(trim.times) <- unique(bio$Group)
       ylegend <- -0.97
     }
-   
+
     colours.to.use <- colours[names(trim.times)]
-   
+
     if (legend.pos == "bottom") {
       ylegend <- -1.15
       xlegend <- 0
@@ -831,12 +831,12 @@ printCircular <- function(times, bio, suffix = NULL){
       b <- (ceiling(length(colours.to.use) / number.of.columns))
 
     vertical.mar <- b + 2
-   
+
     # The try call prevents the report from crashing down in the presence of unknown errors.
     try(
-        {grDevices::svg(paste0(work.path, "times_", names(times)[i], suffix, ".svg"), 
+        {grDevices::svg(paste0(work.path, "times_", names(times)[i], suffix, ".svg"),
                         height = 5, width = 5, bg = "transparent")
-        
+
         par(mar = c(b, (b + 2) / 2, 2, (b + 2) / 2), xpd = TRUE) # bottom, left, top, right
 
         copyOfCirclePlotRad(main = names(times)[i], shrink = 1.05, xlab = "", ylab = "")
@@ -845,8 +845,8 @@ printCircular <- function(times, bio, suffix = NULL){
           prop = prop, tcl.text = -0.1, tol = 0.05, col = colours.to.use, border = "black")
 
         roseMean(trim.times, col = scales::alpha(params$col, 1), mean.length = c(0.07, -0.07), mean.lwd = 6,
-          box.range = "std.error", fill = "white", horizontal.border = "black", 
-          vertical.border = scales::alpha(sapply(params$col, darken), 1), box.size = c(1.015, 0.985), 
+          box.range = "std.error", fill = "white", horizontal.border = "black",
+          vertical.border = scales::alpha(sapply(params$col, darken), 1), box.size = c(1.015, 0.985),
           edge.length = c(0.025, -0.025), edge.lwd = 2)
 
         ringsRel(plot.params = params, border = "black", ring.text = TRUE,
@@ -1098,12 +1098,12 @@ ringsRel <- function(plot.params, border, rings.lty,
 #' @keywords internal
 #'
 roseMean <- function(input, col = c("cornflowerblue", "chartreuse3", "deeppink"),
-  mean.length = c(0.0125, -0.0125), mean.lwd = 4, box.range = c("none", "std.error", "sd"), 
+  mean.length = c(0.0125, -0.0125), mean.lwd = 4, box.range = c("none", "std.error", "sd"),
   fill = "white", horizontal.border = "black", vertical.border = "black",
   box.size = c(1.015, 0.985), edge.length = c(0.025, -0.025), edge.lwd = 2){
 
   box.range <- match.arg(box.range)
-  
+
   if(is.matrix(input) | is.data.frame(input)){
     # the different series in the input must be broken into individual
     # list elements to play nicely with the code below.
@@ -1125,7 +1125,7 @@ roseMean <- function(input, col = c("cornflowerblue", "chartreuse3", "deeppink")
 
   if (!exists("plotdata"))
     stop("Input must be a list of circular objects, a data.frame, a matrix or a vector.\n")
-  
+
   # expand colour and fill to match the number of data series to be plotted
   col <- rep(col, length.out = length(plotdata))
   fill <- rep(fill, length.out = length(plotdata))
@@ -1137,7 +1137,7 @@ roseMean <- function(input, col = c("cornflowerblue", "chartreuse3", "deeppink")
   for (i in 1:length(plotdata)) {
     # calculate a circular mean first (needed for the if-statement below)
     m <- circular::mean.circular(plotdata[[i]], na.rm = TRUE)
-   
+
     # start by plotting the desired ranges, if one was requested
     if(box.range != "none"){
       if(box.range == "std.error")
@@ -1155,7 +1155,7 @@ roseMean <- function(input, col = c("cornflowerblue", "chartreuse3", "deeppink")
       # convert to x and y coordinates
       xx <- c(box.size[1] * cos(seq(left, right, length = 1000) + zero), rev(box.size[2] * cos(seq(left, right, length = 1000) + zero)))
       yy <- c(box.size[1] * sin(seq(left, right, length = 1000) + zero), rev(box.size[2] * sin(seq(left, right, length = 1000) + zero)))
-      
+
       # plot the range box
       polygon(xx, yy, col = fill[i], border = horizontal.border[i])
 
@@ -1299,10 +1299,10 @@ printSectionTimes <- function(section.times, bio, detections) {
   appendTo("debug", "Starting printSectionTimes")
 
   Date <- Group <- NULL
-  
+
   cbPalette <- c("#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7", "#999999")
   names(cbPalette) <- c("Orange", "Blue", "Green", "Yellow", "Darkblue", "Darkorange", "Pink", "Grey")
-  
+
   time.range <- c(min(bio$Release.date), max(do.call(c, lapply(detections, function(x) x$Timestamp))))
   dayrange <- as.Date(time.range)
   dayrange[1] <- dayrange[1] - 1
@@ -1312,13 +1312,13 @@ printSectionTimes <- function(section.times, bio, detections) {
     # cat(i, '\n')
     plotdata <- suppressMessages(reshape2::melt(section.times[[i]]))
     plotdata <- plotdata[complete.cases(plotdata), ]
-  
+
     link <- match(plotdata$Transmitter, bio$Transmitter)
     plotdata$Group <- bio$Group[link]
     plotdata$Group <- droplevels(plotdata$Group)
-  
+
     plotdata$Date <- as.Date(substring(as.character(plotdata$value), 1, 10))
-  
+
     p <- ggplot2::ggplot(data = plotdata, ggplot2::aes(x = Date, fill = Group))
     p <- p + ggplot2::geom_bar(width = 0.9)
     p <- p + ggplot2::theme_bw()
@@ -1326,11 +1326,11 @@ printSectionTimes <- function(section.times, bio, detections) {
     p <- p + ggplot2::scale_y_continuous(expand = c(0, 0, 0.05, 0))
     p <- p + ggplot2::scale_x_date(limits = dayrange)
     p <- p + ggplot2::labs(x = "", y = "n")
-  
+
     if (length(unique(plotdata$Group)) <= 8) {
       p <- p + ggplot2::scale_fill_manual(values = as.vector(cbPalette)[1:length(unique(plotdata$Group))], drop = FALSE)
     }
-  
+
     ggplot2::ggsave(paste0(tempdir(), "/actel_report_auxiliary_files/", i,"_days.png"), width = 10, height = length(unique(plotdata$variable)) * 2, limitsize = FALSE)
   })
 
@@ -1379,7 +1379,7 @@ printGlobalRatios <- function(global.ratios, group.ratios, time.ratios, spatial,
 #'
 #' @param ratios the daily ratios
 #' @inheritParams sectionMovements
-#' 
+#'
 #' @return A string of file locations in rmd syntax, to be included in printRmd
 #'
 #' @keywords internal
@@ -1401,13 +1401,13 @@ printIndividualResidency <- function(ratios, global.ratios, spatial, rsp.info) {
 
   capture <- lapply(names(ratios), function(i) {
     counter <<- counter + 1
-    
+
     p <- plotResidency(input = fake.results, tag = i)
 
     ggplot2::ggsave(paste0(tempdir(), "/actel_report_auxiliary_files/", i,"_residency.png"), width = 10, height = 1.5)
-    
+
     individual.plots <<- paste0(individual.plots, "![](", tempdir(), "/actel_report_auxiliary_files/", i, "_residency.png){ width=95% }\n")
-    
+
     if (interactive())
       setTxtProgressBar(pb, counter)
   })
@@ -1435,11 +1435,11 @@ printLastSection <- function(input, spatial) {
 
   cbPalette <- c("#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7", "#999999")
   names(cbPalette) <- c("Orange", "Blue", "Green", "Yellow", "Darkblue", "Darkorange", "Pink", "Grey")
-  
+
   input$Group <- rownames(input)
   plotdata <- suppressMessages(reshape2::melt(input))
   colnames(plotdata) <- c("Group", "Section", "n")
-  plotdata$Section <- factor(gsub("Disap. in |Disap. at ", "", plotdata$Section), 
+  plotdata$Section <- factor(gsub("Disap. in |Disap. at ", "", plotdata$Section),
                              levels = c(names(spatial$array.order), "Release"))
 
   if (length(levels(plotdata$Section)) < 5)
@@ -1473,7 +1473,7 @@ printLastSection <- function(input, spatial) {
   p <- p + ggplot2::scale_y_continuous(expand = c(0, 0, 0.05, 0))
   p <- p + ggplot2::facet_wrap(. ~ Group, ncol = number.of.columns)
   p <- p + ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 90, vjust = 0.5, hjust = 1))
-  
+
   ggplot2::ggsave(paste0(tempdir(), "/actel_report_auxiliary_files/last_section.png"), units = "px", width = 1800, height = ceiling(the.height), limitsize = FALSE)
 
   appendTo("debug", "Finished printLastSection")

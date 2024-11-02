@@ -1,11 +1,11 @@
 #' collapse event indexes into ranges
-#' 
+#'
 #' @param x a numerical vector
-#' 
+#'
 #' @return a string of isolated events and event ranges
-#' 
+#'
 #' @keywords internal
-#' 
+#'
 createEventRanges <- function(x) {
   overlaps <- c(FALSE, x[-length(x)] == x[-1]-1)
   starts <- which(!overlaps)
@@ -15,25 +15,25 @@ createEventRanges <- function(x) {
   aux$Combine <- aux$Start != aux$Stop
   aux$Final <- aux$Start
   aux$Final[aux$Combine] <- paste(aux$Start[aux$Combine], aux$Stop[aux$Combine], sep = ":")
-  return(aux$Final)  
+  return(aux$Final)
 }
 
 #' Split a dataframe every nth row
-#' 
+#'
 #' Idea from here: https://stackoverflow.com/questions/7060272/split-up-a-dataframe-by-number-of-rows
-#' 
+#'
 #' @param x the dataframe
 #' @param n the number of rows to keep in each chunk
-#' 
+#'
 #' @return A list of equal-sized dataframes
-#' 
+#'
 #' @keywords internal
-#' 
+#'
 splitN <- function(x, n, row.names = FALSE) {
   r <- nrow(x)
   z <- rep(1:ceiling(r / n), each = n)[1:r]
   output <- split(x, z)
-  
+
   # reset row names?
   if (!row.names)
     output <- lapply(output, function(x) {
@@ -52,16 +52,16 @@ splitN <- function(x, n, row.names = FALSE) {
 }
 
 #' darken colours
-#' 
+#'
 #' Copied from https://gist.github.com/Jfortin1/72ef064469d1703c6b30
-#' 
+#'
 #' @param color The colour to be darkened
 #' @param factor The level of darkening
-#' 
+#'
 #' @return The darker colour code
-#' 
+#'
 #' @keywords internal
-#'  
+#'
 darken <- function(color, factor = 1.4){
     col <- grDevices::col2rgb(color)
 
@@ -75,14 +75,14 @@ darken <- function(color, factor = 1.4){
 }
 
 #' Match POSIX values
-#' 
+#'
 #' @param this the vector of posix to be match
 #' @param there the vector of posix to be matched against
-#' 
+#'
 #' @return a vector with the matches
-#' 
+#'
 #' @keywords internal
-#' 
+#'
 match.POSIXt <- function(this, there) {
   sapply(this, function(i) {
     x <- which(i == there)
@@ -95,13 +95,13 @@ match.POSIXt <- function(this, there) {
 }
 
 #' stop function but paste error to the report too
-#' 
+#'
 #' @param ... parts of the error string
-#' 
+#'
 #' @return No return value, called for side effects.
-#' 
+#'
 #' @keywords internal
-#' 
+#'
 stopAndReport <- function(...) {
   the.string <- paste0(...)
   appendTo("Report", paste0("Error: ", the.string))
@@ -109,21 +109,21 @@ stopAndReport <- function(...) {
 }
 
 #' Find original station name
-#' 
+#'
 #' @param input The results of an actel analysis (either explore, migration or residency).
 #' @param station The station standard name or number.
-#' 
+#'
 #' @examples
 #' stationName(example.results, 1)
-#' 
+#'
 #' # or
-#' 
+#'
 #' stationName(example.results, "St.2")
-#' 
+#'
 #' @return The original station name
-#' 
+#'
 #' @export
-#' 
+#'
 stationName <- function(input, station) {
   if (!inherits(input, "list"))
     stop("Could not recognise the input as an actel results object.", call. = FALSE)
@@ -524,7 +524,7 @@ emergencyBreak <- function(the.function.call) { # nocov start
   appendTo("Report", paste0("Function call:\n-------------------\n", the.function.call, "\n-------------------"))
 
   message("\nM: The analysis errored. You can recover latest the job log (including your comments and decisions) by running recoverLog().")
-  
+
   if (getOption("actel.debug", default = FALSE)) {
     file.copy(paste0(tempdir(), "/temp_log.txt"), paste0(tempdir(), "/latest_actel_error_log.txt"))
   } else {
@@ -534,10 +534,10 @@ emergencyBreak <- function(the.function.call) { # nocov start
 } # nocov end
 
 #' Recover latest actel crash log
-#' 
+#'
 #' @param file Name of the file to which the log should be saved.
 #' @param overwrite Logical: If 'file' already exists, should its content be overwritten?
-#' 
+#'
 #' @examples
 #' \dontshow{
 #' sink(paste0(tempdir(), "/latest_actel_error_log.txt"))
@@ -550,18 +550,18 @@ emergencyBreak <- function(the.function.call) { # nocov start
 #' Function: example()")
 #' sink()
 #' }
-#' 
+#'
 #' recoverLog(file = paste0(tempdir(), "/new_log.txt"))
-#' 
+#'
 #' \dontshow{
 #' file.remove(paste0(tempdir(), "/latest_actel_error_log.txt"))
 #' file.remove(paste0(tempdir(), "/new_log.txt"))
 #' }
-#' 
+#'
 #' @return No return value, called for side effects.
-#' 
+#'
 #' @export
-#' 
+#'
 recoverLog <- function(file, overwrite = FALSE) {
   if (!file.exists(paste0(tempdir(), "/latest_actel_error_log.txt")))
     stop("No crash logs found.", call. = FALSE)
@@ -651,20 +651,20 @@ timesToCircular <- function(x, by.group = FALSE) {
 
 
 #' cleanly extract lowest signal from signals string
-#' 
+#'
 #' @param x
-#' 
+#'
 #' @return a vector of lowest signals
-#' 
+#'
 #' @keywords internal
-#' 
+#'
 lowestSignal <- function(x) {
-  sapply(as.character(x), function(i) 
+  sapply(as.character(x), function(i)
     min(
       as.numeric(
         unlist(
-          strsplit(i, 
-            "|", 
+          strsplit(i,
+            "|",
             fixed = TRUE)
           )
         )
@@ -673,14 +673,14 @@ lowestSignal <- function(x) {
 }
 
 #' Split signals from multi-signal input
-#' 
+#'
 #' @param x
-#' 
+#'
 #' @return a list of split signals
-#' 
+#'
 #' @keywords internal
-#' 
-#' 
+#'
+#'
 splitSignals <- function(x) {
   if(length(x) != 1)
     stop('splitSignals can only split one input at a time')
@@ -689,12 +689,12 @@ splitSignals <- function(x) {
 
 
 #' Convert Lotek CDMA log to csv
-#' 
+#'
 #' Lotek CDMA logs are exported in TXT, and contain several chunks of
 #' of information. Importantly, the detections may be saved with a GMT offset,
 #' as opposed to the more common UTC standard.
 #' Additionally, the date format isn't the standard yyyy-mm-dd.
-#' 
+#'
 #' This function extracts the detections from the CDMA file, converts the
 #' dates to yyyy-mm-dd, binds the time to the date and resets it to UTC, and
 #' ultimately converts the dataframe into the standard format accepted by actel.
@@ -708,51 +708,51 @@ splitSignals <- function(x) {
 #' sink(dummy_file)
 #' cat(
 #' "WHS FSK Receiver Data File
-#' 
-#' Receiver Configuration: 
+#'
+#' Receiver Configuration:
 #' Working Frequency:  76 KHz
 #' Bit Rate:           2400 bps
 #' Code Type:          FSK
 #' Serial Number:      WHS3K-1234567
 #' Node ID:            10000
-#' 
+#'
 #' Receiver Settings:
 #' GMT Correction:     00:00
-#' 
+#'
 #' Decoded Tag Data:
 #' Date      Time             TOA       Tag ID    Type     Value     Power
 #' =======================================================================
 #' 04/09/24  22:50:03     0.43875        37910       P       9.1        12
 #' 08/21/24  12:45:18     0.99646        55606       M         0         1
 #' 08/23/24  15:01:04     0.76042        55778       P       0.0         2
-#' 
+#'
 #' Receiver Sensor Messages:
 #' Date      Time      Sensor   Temp     Press   Battery  Tilt-X  Tilt-Y  Tilt-Z
 #' =============================================================================
-#' 04/11/24  21:44:00  T / P    1534         0                                  
-#' 
+#' 04/11/24  21:44:00  T / P    1534         0
+#'
 #' Receiver Setup Messages:
-#' Date      Time      Type                    Details                                                     
+#' Date      Time      Type                    Details
 #' =============================================================================
 #' 08/22/24  18:50:11  Change Logging Mode     New Mode: SETUP
 #' ")
 #' sink()
-#' 
+#'
 #' # now read it
 #' x <- convertLotekCDMAFile(dummy_file)
-#' 
+#'
 #' # the dummy file will be deleted automatically once you close this R session.
-#' 
+#'
 #' @return A data frame of standardized detections from the input file.
 #'
 #' @export
 #'
 convertLotekCDMAFile <- function(file, date_format = "%m/%d/%y") {
   file_raw <- readLines(file)
-  
+
   serial_n <- file_raw[grep("^Serial Number:", file_raw)]
   serial_n <- extractSignals(serial_n)
-  
+
   code_type <- file_raw[grep("^Code Type:", file_raw)]
   code_type <- sub("Code Type:\\s*", "", code_type)
   if (code_type == "") {
@@ -767,7 +767,7 @@ convertLotekCDMAFile <- function(file, date_format = "%m/%d/%y") {
   # and the detection headers and then work with them. To find those lines:
   det_start <- grep("=========", file_raw)[1]
   det_end <- grep("Receiver Sensor Messages:", file_raw)[1] - 2
-  
+
   # To properly parse the columns, we must use the column names, otherwise the
   # import will fail if any of the columns only has NAs in it. But we must
   # remove the "===" row before working with it. We must also replace any single
@@ -775,13 +775,13 @@ convertLotekCDMAFile <- function(file, date_format = "%m/%d/%y") {
   det_lines <- file_raw[(det_start-1):det_end]
   det_lines <- det_lines[-2] # <- the "=====" line
   det_lines[1] <- stringr::str_replace_all(det_lines[1],
-                                           pattern = "(?<!\\s)\\s(?!\\s)", 
+                                           pattern = "(?<!\\s)\\s(?!\\s)",
                                            replacement = "_")
-  
+
   # Now that we have the detection lines, we need to work some magic to find
   # the right column widths. This is because read_fwf doesn't allow using the
   # first row as column names, but without knowing the widths of that first row,
-  # we'll run into the NA issue I mentioned above. 
+  # we'll run into the NA issue I mentioned above.
   # All this can be probably be changed _if_ this issue is addressed:
   # https://github.com/tidyverse/readr/issues/1393#issuecomment-2408682861
   #
@@ -805,7 +805,7 @@ convertLotekCDMAFile <- function(file, date_format = "%m/%d/%y") {
   # |Serial_Number    Date      Time             TOA  Tag_ID[dec]     Tag_Type    Sensor     Power
 
   # body_fw:
-  #       1              2         3            4             5            6       !!!          7    
+  #       1              2         3            4             5            6       !!!          7
   # 0           13  17      2527      35   40     47       56  60        70 73               90 93
   # |------------|   |-------| |-------|    |------|        |---|         |--|                |--|
   # |WHS4K-1900132    03/25/24  12:22:25     0.19490         1132          PSK                 512
@@ -818,7 +818,7 @@ convertLotekCDMAFile <- function(file, date_format = "%m/%d/%y") {
   # |WHS4K-1900132    03/25/24  12:22:25     0.19490         1132          PSK                 512
 
   # i_b is set manually because some columns may be missing
-  # in body_fw, so we need to be able to make body_fw lag 
+  # in body_fw, so we need to be able to make body_fw lag
   # behind in comparison to head_fw.
   i_b <- 0
   for (i_h in 1:length(head_fw$begin)) {
@@ -831,7 +831,7 @@ convertLotekCDMAFile <- function(file, date_format = "%m/%d/%y") {
         }
         if (head_fw$end[i_h] <= body_fw$begin[i_b]) {
           # if A starts and ends before/when b begins
-          # then this is a missing column, so for the 
+          # then this is a missing column, so for the
           # coming comparisons we must lag behind in b.
           i_b <- i_b - 1
           break()
@@ -875,8 +875,8 @@ convertLotekCDMAFile <- function(file, date_format = "%m/%d/%y") {
     skip = 1, # skip the column headers to get the data types right.
     show_col_types = FALSE)
 
-  # convert to data.table to stay compatible 
-  # with the rest of the import functions  
+  # convert to data.table to stay compatible
+  # with the rest of the import functions
   output <- as.data.table(output)
 
   # work on the columns we want to keep
@@ -904,10 +904,10 @@ convertLotekCDMAFile <- function(file, date_format = "%m/%d/%y") {
   }
 
   # extract the standard columns
-  std_cols <- c("Timestamp", "Receiver", "CodeSpace", 
+  std_cols <- c("Timestamp", "Receiver", "CodeSpace",
                 "Signal", "Sensor.Value", "Sensor.Unit")
   output <- output[, std_cols, with = FALSE]
-  output$Timestamp <- fasttime::fastPOSIXct(as.character(output$Timestamp), 
+  output$Timestamp <- fasttime::fastPOSIXct(as.character(output$Timestamp),
                                             tz = "UTC")
   output$Timestamp <- output$Timestamp - (gmt_cor * 3600)
 

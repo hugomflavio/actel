@@ -29,7 +29,7 @@
 #'   length(suppressWarnings(packageDescription("gdistance"))),
 #'   length(suppressWarnings(packageDescription("sp"))),
 #'   length(suppressWarnings(packageDescription("terra"))))
-#' 
+#'
 #' missing.packages <- sapply(aux, function(x) x == 1)
 #'
 #' if (any(missing.packages)) {
@@ -121,12 +121,12 @@ shapeToRaster <- function(shape, size, spatial = "spatial.csv",
   } else {
     stop("'shape' must be a .shp file.\n", call. = FALSE)
   }
-  
+
   # extend ranges with the buffer
   if (!is.null(buffer)) {
     OriEx <- terra::ext(shape)
     # terra does xmin, xmax, ymin, ymax
-    
+
     if (length(buffer) == 1){
       NewEx <- terra::ext(OriEx[1] - buffer, #xmin
                           OriEx[2] + buffer, #xmax
@@ -199,7 +199,7 @@ shapeToRaster <- function(shape, size, spatial = "spatial.csv",
   message(paste("M: Chosen pixel size:", size, "\nM: Resulting pixel dimensions:"))
   message(paste0(capture.output(print(pixel.res)), collapse = "\n"), "\n")
 
-  ras <- terra::rast(nrows = pixel.res[2], 
+  ras <- terra::rast(nrows = pixel.res[2],
                     ncols = pixel.res[1],
                     xmin = NewEx[1],
                     xmax = NewEx[2],
@@ -240,16 +240,16 @@ shapeToRaster <- function(shape, size, spatial = "spatial.csv",
 
 
 #' DEPRECATED
-#' 
+#'
 #' Please use shapeToRaster instead.
-#' 
+#'
 #' @inheritParams shapeToRaster
 #'
 #' @examples
 #' \donttest{
 #'  message("This function is deprecated, please use shapeToRaster instead.")
 #' }
-#' 
+#'
 #' @return A raster object.
 #'
 #' @export
@@ -288,7 +288,7 @@ loadShape <- function(shape, size, spatial = "spatial.csv",
 #'   length(suppressWarnings(packageDescription("gdistance"))),
 #'   length(suppressWarnings(packageDescription("sp"))),
 #'   length(suppressWarnings(packageDescription("terra"))))
-#' 
+#'
 #' missing.packages <- sapply(aux, function(x) x == 1)
 #'
 #' if (any(missing.packages)) {
@@ -365,7 +365,7 @@ transitionLayer <- function(x, directions = c(16, 8, 4)){
 #'   length(suppressWarnings(packageDescription("gdistance"))),
 #'   length(suppressWarnings(packageDescription("sp"))),
 #'   length(suppressWarnings(packageDescription("terra"))))
-#' 
+#'
 #' missing.packages <- sapply(aux, function(x) x == 1)
 #'
 #' if (any(missing.packages)) {
@@ -460,7 +460,7 @@ distancesMatrix <- function(t.layer, starters = NULL, targets = starters,
 
     targets <- targets[, c(id.col, coord.x, coord.y)]
     colnames(targets) <- c(id.col, "longitude", "latitude")
-    
+
   if (!is.null(id.col)) {
     if (!is.na(match(id.col, colnames(starters)))) {
       outputRows <- starters[, id.col]
@@ -495,15 +495,15 @@ distancesMatrix <- function(t.layer, starters = NULL, targets = starters,
   #### Create starters and targets spatial dataframes
   sp::coordinates(starters) <- ~ longitude + latitude # converts the file to a spatialPoints object
   raster::crs(starters) <- raster::crs(t.layer) # sets the crs
-  
+
   sp::coordinates(targets) <- ~ longitude + latitude # converts the file to a spatialPoints object
   raster::crs(targets) <- raster::crs(t.layer)
 
-  # NOTE: THE LINES ABOVE COULD BE CHANGED ONCE gdistance'S 
+  # NOTE: THE LINES ABOVE COULD BE CHANGED ONCE gdistance'S
   # FUNCTIONS START LIKING SF OBJECTS LAYER
   # starters <- sf::st_as_sf(starters, coords = c("longitude","latitude"), crs = ...)
   # targets <- sf::st_as_sf(targets, coords = c("longitude","latitude"), crs = ...)
-  # NOTE: currently, transition layer objects are not 
+  # NOTE: currently, transition layer objects are not
   # responding correctly to crs requests (e.g. sf::st_crs)
 
   #### Calculate a matrix of distances to each object
@@ -515,13 +515,13 @@ in the shape file, consider applying a 'buffer' when calculating the transition 
 will artificially add water space around the shape file.", call. = FALSE)
     dist.mat[dist.mat == Inf] <- NA
   }
-  
+
   if (row.rename)
     rownames(dist.mat) <- outputRows
-  
+
   if (col.rename)
     colnames(dist.mat) <- outputCols
-  
+
   if (interactive() & actel) { # nocov start
     decision <- userInput("Would you like to save an actel-compatible distances matrix as 'distances.csv' in the current work directory?(y/n) ",
                           choices = c("y", "n"))
@@ -620,4 +620,4 @@ completeMatrix <- function(x){
   return(x)
 }
 
- 
+

@@ -23,10 +23,10 @@
 #' deploys a set of example files following the structure described in the package
 #' vignettes. Namely:
 #' \itemize{
-#' 	\item biometrics.csv
-#' 	\item deployments.csv
-#' 	\item spatial.csv
-#' 	\item detections/ (a folder with .csv files)
+#'   \item biometrics.csv
+#'   \item deployments.csv
+#'   \item spatial.csv
+#'   \item detections/ (a folder with .csv files)
 #' }
 #'
 #' Once the example dataset is created, \code{\link{exampleWorkspace}} also provides
@@ -64,7 +64,7 @@
 #' \code{\link{explore}}, but on top of it, it analyses the animal behaviour.
 #' By selecting the arrays that lead to success, you can define whether or not
 #' your animals survived the migration. Additional plots help you find out if some
-#' animals/tags has been acting odd. Multiple options allow you to tweak the 
+#' animals/tags has been acting odd. Multiple options allow you to tweak the
 #' analysis to fit your study perfectly.
 #'
 #'

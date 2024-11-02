@@ -7,10 +7,10 @@
 #' odd. Multiple options allow you to tweak the analysis to fit your study
 #' perfectly.
 #'
-#' @param section.order A vector containing the order by which sections should 
+#' @param section.order A vector containing the order by which sections should
 #' be aligned in the results.
 #' @param success.arrays The arrays that mark the end of the study area. If a
-#'  tag crosses one of these arrays, the respective animal is considered to have 
+#'  tag crosses one of these arrays, the respective animal is considered to have
 #'  successfully migrated through the study area.
 #' @param if.last.skip.section Logical: Should a tag detected at the last array
 #'  of a given section be considered to have disappeared in the next section?
@@ -309,11 +309,11 @@ migration <- function(
     x <- replicates[[i]]
     all.stations <- spatial$stations$Standard.name[spatial$stations$Array == i]
     if (any(link <- !x %in% all.stations)) {
-      stopAndReport("In replicates: Station", 
-                  ifelse(sum(link) > 1, "s ", " "), 
-                  paste(x[link], collapse = ", "), 
-                  ifelse(sum(link) > 1, " are", " is"), 
-                  " not part of ", i, " (available stations: ", 
+      stopAndReport("In replicates: Station",
+                  ifelse(sum(link) > 1, "s ", " "),
+                  paste(x[link], collapse = ", "),
+                  ifelse(sum(link) > 1, " are", " is"),
+                  " not part of ", i, " (available stations: ",
                   paste(all.stations, collapse = ", "), ").")
     }
   })
@@ -419,7 +419,7 @@ migration <- function(
       output <- checkFirstDetBackFromRelease(movements = output, tag = tag, detections = detections.list[[tag]], spatial = spatial,
                               bio = bio, arrays = arrays, GUI = GUI, save.tables.locally = save.tables.locally, n = counter)
 
-      output <- checkImpassables(movements = output, tag = tag, bio = bio, detections = detections.list[[tag]], n = counter, 
+      output <- checkImpassables(movements = output, tag = tag, bio = bio, detections = detections.list[[tag]], n = counter,
                                  spatial = spatial, dotmat = dotmat, GUI = GUI, save.tables.locally = save.tables.locally)
 
       output <- checkJumpDistance(movements = output, bio = bio, tag = tag, dotmat = dotmat, paths = paths, arrays = arrays,
@@ -429,8 +429,8 @@ migration <- function(
       if (do.checkSpeeds) {
         temp.valid.movements <- simplifyMovements(movements = output, tag = tag, bio = bio, discard.first = discard.first,
                                                   speed.method = speed.method, dist.mat = dist.mat)
-        output <- checkSpeeds(movements = output, tag = tag, valid.movements = temp.valid.movements, 
-                              detections = detections.list[[tag]], speed.warning = speed.warning, n = counter, 
+        output <- checkSpeeds(movements = output, tag = tag, valid.movements = temp.valid.movements,
+                              detections = detections.list[[tag]], speed.warning = speed.warning, n = counter,
                               speed.error = speed.error, GUI = GUI, save.tables.locally = save.tables.locally)
         rm(temp.valid.movements)
       }
@@ -464,7 +464,7 @@ migration <- function(
       aux <- checkMinimumN(movements = aux, tag = tag, min.total.detections = 0, # don't run the minimum total detections check here.
                            min.per.event = min.per.event[2], n = counter)
 
-      output <- checkLinearity(secmoves = aux, tag = tag, spatial = spatial, arrays = arrays, 
+      output <- checkLinearity(secmoves = aux, tag = tag, spatial = spatial, arrays = arrays,
                                GUI = GUI, save.tables.locally = save.tables.locally, n = counter)
       return(output)
     } else {
@@ -484,7 +484,7 @@ migration <- function(
 
   appendTo(c("Screen", "Report"), "M: Filtering valid section movements.")
 
-  section.movements <- assembleValidSecMoves(valid.moves = valid.movements, spatial = spatial, 
+  section.movements <- assembleValidSecMoves(valid.moves = valid.movements, spatial = spatial,
                                              valid.dist = attributes(dist.mat)$valid)
 
   appendTo(c("Screen", "Report"), "M: Compiling migration timetable.")
@@ -500,7 +500,7 @@ migration <- function(
 
   section.overview <- assembleSectionOverview(status.df = status.df, spatial = spatial)
 
-  aux <- list(valid.movements = valid.movements, spatial = spatial, 
+  aux <- list(valid.movements = valid.movements, spatial = spatial,
               rsp.info = list(bio = bio, analysis.type = "migration"))
   times <- getTimes(input = aux, move.type = "array", event.type = "arrival", n.events = "first")
   rm(aux)
@@ -601,7 +601,7 @@ migration <- function(
   matrices <- the.matrices
 
   # extra info for potential RSP analysis
-  rsp.info <- list(analysis.type = "migration", analysis.time = the.time, bio = bio, 
+  rsp.info <- list(analysis.type = "migration", analysis.time = the.time, bio = bio,
                    tz = tz, actel.version = utils::packageVersion("actel"))
 
   if (!is.null(override))
@@ -623,7 +623,7 @@ migration <- function(
   }
 
   if (interactive()) { # nocov start
-    decision <- userInput(paste0("Would you like to save a copy of the results to ", resultsname, "?(y/n) "), 
+    decision <- userInput(paste0("Would you like to save a copy of the results to ", resultsname, "?(y/n) "),
                           choices = c("y", "n"), hash = "# save results?")
   } else { # nocov end
     decision <- "n"
@@ -632,12 +632,12 @@ migration <- function(
   if (decision == "y") { # nocov start
     appendTo(c("Screen", "Report"), paste0("M: Saving results as '", resultsname, "'."))
     if (attributes(dist.mat)$valid) {
-      save(detections, valid.detections, spatial, deployments, arrays, movements, valid.movements, 
-        section.movements, status.df, section.overview, group.overview, release.overview, matrices, 
+      save(detections, valid.detections, spatial, deployments, arrays, movements, valid.movements,
+        section.movements, status.df, section.overview, group.overview, release.overview, matrices,
         overall.CJS, intra.array.matrices, intra.array.CJS, times, rsp.info, dist.mat, file = resultsname)
     } else {
-      save(detections, valid.detections, spatial, deployments, arrays, movements, valid.movements, 
-        section.movements, status.df, section.overview, group.overview, release.overview, matrices, 
+      save(detections, valid.detections, spatial, deployments, arrays, movements, valid.movements,
+        section.movements, status.df, section.overview, group.overview, release.overview, matrices,
         overall.CJS, intra.array.matrices, intra.array.CJS, times, rsp.info, file = resultsname)
     }
   } else { # nocov end
@@ -706,9 +706,9 @@ migration <- function(
       survival.graph.size <- "width=90%" else survival.graph.size <- "height=4in"
 
     if (any(sapply(valid.detections, function(x) any(!is.na(x$Sensor.Value))))) {
-      sensor.plots <- printSensorData(detections = valid.detections, 
+      sensor.plots <- printSensorData(detections = valid.detections,
                                       spatial = spatial,
-                                      rsp.info = rsp.info, 
+                                      rsp.info = rsp.info,
                                       colour.by = detections.y.axis)
     } else {
       sensor.plots <- NULL
@@ -718,7 +718,7 @@ migration <- function(
 
 # wrap up the txt report
   appendTo("Report", "M: Analysis completed!\n\n-------------------")
-  
+
   if (file.exists(paste(tempdir(), "temp_comments.txt", sep = "/")))
     appendTo("Report", paste0("User comments:\n-------------------\n", gsub("\t", ": ", gsub("\r", "", readr::read_file(paste(tempdir(), "temp_comments.txt", sep = "/")))), "-------------------")) # nocov
 
@@ -783,7 +783,7 @@ migration <- function(
   jobname <- paste0(gsub(" |:", ".", as.character(Sys.time())), ".actel.log.txt")
 
   if (interactive() & !report) { # nocov start
-    decision <- userInput(paste0("Would you like to save a copy of the analysis log to ", jobname, "?(y/n) "), 
+    decision <- userInput(paste0("Would you like to save a copy of the analysis log to ", jobname, "?(y/n) "),
                           choices = c("y", "n"), hash = "# save job log?")
   } else { # nocov end
     decision <- "n"
@@ -796,19 +796,19 @@ migration <- function(
   output <- list(detections = detections,
                  valid.detections = valid.detections,
                  spatial = spatial,
-                 deployments = deployments, 
+                 deployments = deployments,
                  arrays = arrays,
                  movements = movements,
                  valid.movements = valid.movements,
-                 section.movements = section.movements, 
+                 section.movements = section.movements,
                  status.df = status.df,
-                 section.overview = section.overview, 
+                 section.overview = section.overview,
                  group.overview = group.overview,
-                 release.overview = release.overview, 
+                 release.overview = release.overview,
                  matrices = matrices,
-                 overall.CJS = overall.CJS, 
+                 overall.CJS = overall.CJS,
                  intra.array.matrices = intra.array.matrices,
-                 intra.array.CJS = intra.array.CJS, 
+                 intra.array.CJS = intra.array.CJS,
                  times = times,
                  rsp.info = rsp.info)
 
@@ -843,7 +843,7 @@ migration <- function(
 #'
 printMigrationRmd <- function(override.fragment, biometric.fragment, section.overview,
   efficiency.fragment, display.progression, array.overview.fragment, survival.graph.size,
-  individual.plots, circular.plots, sensor.plots, spatial, deployments, valid.detections, 
+  individual.plots, circular.plots, sensor.plots, spatial, deployments, valid.detections,
   detections, detections.y.axis){
 
   work.path <- paste0(tempdir(), "/actel_report_auxiliary_files/")
@@ -1195,7 +1195,7 @@ assembleTimetable <- function(secmoves, valid.moves, all.moves, spatial, arrays,
       the.row <- match(tag, bio$Transmitter)
       origin.time <- bio[the.row, "Release.date"]
       origin.place <- as.character(bio[the.row, "Release.site"])
-      
+
       if (origin.time <= aux$First.time[1]) {
 
         if (grepl("first$", speed.method)) {

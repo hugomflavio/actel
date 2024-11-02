@@ -165,20 +165,20 @@ breakMatricesByArray <- function(m, arrays, type = c("peers", "all"), verbose = 
   recipient <- list()
   for (i in 1:length(arrays)) {
     if ((type == "peers" & !is.null(arrays[[i]]$after.peers)) | (type == "all" & !is.null(arrays[[i]]$all.after))) {
-      
+
       # find out relevant arrays
       if (type == "peers")
         a.regex <- paste0("^", c(names(arrays)[i], arrays[[i]]$after.peers), "$", collapse = "|")
       else
         a.regex <- paste0("^", c(names(arrays)[i], arrays[[i]]$all.after), "$", collapse = "|")
-      
+
       # grab only relevant arrays
       aux  <- lapply(m, function(m_i) m_i[, which(grepl(a.regex, colnames(m_i))), drop = FALSE])
-      
+
       # Failsafe in case some tags are released at one of the peers
       keep <- unlist(lapply(m, function(m_i) any(grepl(paste0("^", names(arrays)[i], "$"), colnames(m_i)))))
       aux  <- aux[keep]
-      
+
       # Failsafe in case there is only one column left
       keep <- unlist(lapply(aux, ncol)) > 1
       aux  <- aux[keep]
@@ -207,7 +207,7 @@ breakMatricesByArray <- function(m, arrays, type = c("peers", "all"), verbose = 
       own.zero.check <- unlist(lapply(aux, function(x) sum(x[, 2]) == 0))
       peer.zero.check <- unlist(lapply(aux, function(x) sum(x$AnyPeer) == 0))
       zero.check <- all(own.zero.check) | all(peer.zero.check)
-      
+
       if (zero.check) {
         if (all(own.zero.check) & verbose) {
           appendTo(c("Screen", "Warning", "Report"), paste0("No tags passed through array ", names(arrays)[i], ". Skipping efficiency estimations for this array."))
@@ -308,7 +308,7 @@ assembleMatrices <- function(spatial, movements, status.df, arrays, paths, dotma
   output <- lapply(temp, function(x) {
     # include transmitters that were never detected
     x <- includeMissing(x = x, status.df = status.df)
-    
+
     # sort the rows by the same order as status.df (I think these two lines are not needed, but leaving them in just in case)
     link <- sapply(status.df$Transmitter, function(i) grep(paste0("^", i, "$"), rownames(x)))
     x <- x[link, ]
@@ -334,7 +334,7 @@ assembleMatrices <- function(spatial, movements, status.df, arrays, paths, dotma
     # If the release sites start in different arrays, trim the matrices as needed
     if (length(unique.release.arrays) > 1) {
       for(i in 1:length(aux)){ # for each matrix, find the corresponding release site.
-        the_release_site <- sapply(spatial$release.sites$Standard.name, function(x) grepl(paste0("\\.", x, "$"), names(aux)[i])) 
+        the_release_site <- sapply(spatial$release.sites$Standard.name, function(x) grepl(paste0("\\.", x, "$"), names(aux)[i]))
         if(sum(the_release_site) > 1) # if there is more than one matching release site, stop.
           stop("Multiple release sites match the matrix name. Make sure that the release sites' names are not contained within the animal groups or within themselves.\n")
         # else, find which is the first column to keep. This is tricky for multi-branch sites...

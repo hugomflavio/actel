@@ -17,7 +17,7 @@ NULL
 #' Group movements
 #'
 #' Crawls trough the detections of each tag and groups them based on ALS arrays and time requirements.
-#' 
+#'
 #' @inheritParams move_args
 #' @inheritParams explore
 #'
@@ -187,7 +187,7 @@ movementSpeeds <- function(movements, speed.method, dist.mat) {
     capture <- lapply(2:nrow(movements), function(i) {
       changed_array <- movements$Array[i] != movements$Array[i - 1]
       neither_unknown <- all(!grep("^Unknown$", movements$Array[(i - 1):i]))
-      
+
       if (changed_array & neither_unknown) {
         if (grepl("^first", speed.method)) {
           time_start <- movements$First.time[i - 1]
@@ -351,7 +351,7 @@ sectionMovements <- function(movements, spatial, valid.dist) {
 
   # combine object above into single vector
   event.index <- combine(aux)
-  
+
   # determine in which array movements the tag changed section
   aux <- rle(event.index)
   last.events <- cumsum(aux$lengths)
@@ -434,15 +434,15 @@ updateValidity <- function(arrmoves, secmoves) {
 }
 
 #' Wrapper for simplifyMovements
-#' 
+#'
 #' @inheritParams move_args
 #' @inheritParams explore
 #' @param movements A list of movements for each tag.
-#' 
+#'
 #' @return A list of valid movements
-#' 
+#'
 #' @keywords internal
-#' 
+#'
 assembleValidMoves <- function(movements, bio, discard.first, speed.method, dist.mat) {
   appendTo("debug", "Running assembleValidMoves.")
   counter <- 0
@@ -450,34 +450,34 @@ assembleValidMoves <- function(movements, bio, discard.first, speed.method, dist
     pb <- txtProgressBar(min = 0, max = sum(sapply(movements, nrow)), style = 3, width = 60)
 
   valid.movements <- lapply(seq_along(movements), function(i) {
-    output <- simplifyMovements(movements = movements[[i]], tag = names(movements)[i], bio = bio, 
+    output <- simplifyMovements(movements = movements[[i]], tag = names(movements)[i], bio = bio,
                                 discard.first = discard.first, speed.method = speed.method, dist.mat = dist.mat)
     counter <<- counter + nrow(movements[[i]])
     if (interactive())
-      setTxtProgressBar(pb, counter)    
+      setTxtProgressBar(pb, counter)
     return(output)
    })
 
   if (interactive())
     close(pb)
   rm(counter)
-  
+
   names(valid.movements) <- names(movements)
   valid.movements <- valid.movements[!unlist(lapply(valid.movements, is.null))]
-  
-  return(valid.movements)  
+
+  return(valid.movements)
 }
-  
+
 #' Wrapper for sectionMovements
-#' 
+#'
 #' @inheritParams move_args
 #' @inheritParams explore
 #' @param valid.moves A list of movements for each tag.
-#' 
+#'
 #' @return A list of valid movements
-#' 
+#'
 #' @keywords internal
-#' 
+#'
 assembleValidSecMoves <- function(valid.moves, spatial, valid.dist) {
   appendTo("debug", "Running assembleValidSecMoves.")
 
@@ -488,12 +488,12 @@ assembleValidSecMoves <- function(valid.moves, spatial, valid.dist) {
   secmoves <- lapply(seq_along(valid.moves), function(i) {
     appendTo("debug", paste0("debug: Compiling valid section movements for tag ", names(valid.moves)[i],"."))
 
-    output <- sectionMovements(movements = valid.moves[[i]], spatial = spatial, 
+    output <- sectionMovements(movements = valid.moves[[i]], spatial = spatial,
                                valid.dist = valid.dist)
 
     counter <<- counter + nrow(valid.moves[[i]])
     if (interactive())
-      setTxtProgressBar(pb, counter)    
+      setTxtProgressBar(pb, counter)
 
     return(output)
   })
@@ -501,9 +501,9 @@ assembleValidSecMoves <- function(valid.moves, spatial, valid.dist) {
   if (interactive())
     close(pb)
   rm(counter)
-  
+
   names(secmoves) <- names(valid.moves)
-  
-  return(secmoves)  
+
+  return(secmoves)
 }
 

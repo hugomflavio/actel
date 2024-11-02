@@ -1,5 +1,5 @@
 #' Deprecated function.
-#' 
+#'
 #' Use blankWorkspace instead.
 #'
 #' @inheritParams blankWorkspace
@@ -142,7 +142,7 @@ Once finished, explore the html report and the object 'results' for the output."
 #'   \item{Longitude}{The longitude of the hydrophone station or release site in WGS84}
 #'   \item{x}{The x coordinate of the hydrophone station or release site in EPSG 32632}
 #'   \item{y}{The y coordinate of the hydrophone station or release site in EPSG 32632}
-#'   \item{Array}{If documenting a hydrophone station, the array to which the station belongs. 
+#'   \item{Array}{If documenting a hydrophone station, the array to which the station belongs.
 #' If documenting a release site, the first array(s) where the fish is expected to be detected.}
 #'   \item{Section}{The Section to which the hydrophone station belongs (irrelevant for the release sites).}
 #'   \item{Type}{The type of spatial object (must be either 'Hydrophone' or 'Release')}
@@ -227,7 +227,7 @@ NULL
 
 #' Example migration results
 #'
-#' A list with the results of a migration analysis ran on the example data. 
+#' A list with the results of a migration analysis ran on the example data.
 #' Note: Many objects were trimmed to reduce package size. Use exampleWorkspace()
 #' To run an analysis on the example data and obtain a full results object.
 #'

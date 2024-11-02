@@ -1,5 +1,5 @@
 #' Plot array live times
-#' 
+#'
 #' @param input An actel results object, or a preload object
 #' @param arrays Optional: A subset of arrays to be plotted
 #' @param show.stations Logical: Should the live times of each station be shown under the array bars?
@@ -11,7 +11,7 @@
 #' @param xlab,ylab Optional axis names for the plot.
 #' @param col An optional colour scheme for the array bars. If left empty, default colours will be added.
 #'  Note: Station bars are 40% lighter than the array bars.
-#' 
+#'
 #' @return A ggplot object.
 #'
 #' @examples
@@ -29,8 +29,8 @@
 #'
 #' @export
 #'
-#' 
-plotLive <- function(input, arrays, show.stations = FALSE, array.size = 2, station.size = 1, 
+#'
+plotLive <- function(input, arrays, show.stations = FALSE, array.size = 2, station.size = 1,
                      show.caps = TRUE, cap.prop = 2, title = "", xlab = "", ylab = "", col) {
   value <- NULL
   Y <- NULL
@@ -62,7 +62,7 @@ plotLive <- function(input, arrays, show.stations = FALSE, array.size = 2, stati
     warning("This dataset contains unknown stations. These stations will not be plotted.", immediate. = TRUE, call. = FALSE)
     xdep <- xdep[xdep$Array != "Unknown", ]
   }
-  
+
   # prepare input
   if (show.stations) {
     xdep$line <- 1:nrow(xdep)
@@ -148,10 +148,10 @@ plotLive <- function(input, arrays, show.stations = FALSE, array.size = 2, stati
   p <- ggplot2::ggplot(data = pd, ggplot2::aes(x = value, y = Y, group = line))
   # place holder just to set the Y in order
   p <- p + ggplot2::geom_path()
-  
+
   a <- pd[pd$Array == pd$Y, ]
   p <- p + ggplot2::geom_path(data = a, ggplot2::aes(col = Section), linewidth = a$Size)
-  
+
   if (show.stations) {
     s <- pd[pd$Array != pd$Y, ]
     p <- p + ggplot2::geom_path(data = s, col = s$col, linewidth = s$Size)
@@ -203,7 +203,7 @@ plotLive <- function(input, arrays, show.stations = FALSE, array.size = 2, stati
 #'
 #' @export
 #'
-plotSensors <- function(input, tag, sensor, title = tag, xlab, ylab, pcol, psize = 1, lsize = 0.5, 
+plotSensors <- function(input, tag, sensor, title = tag, xlab, ylab, pcol, psize = 1, lsize = 0.5,
   colour.by = c("array", "section"), array.alias, lcol = "grey40", verbose = TRUE) {
   Timestamp <- NULL
   Sensor.Value <- NULL
@@ -228,7 +228,7 @@ plotSensors <- function(input, tag, sensor, title = tag, xlab, ylab, pcol, psize
 
   if (length(lcol) > 1)
     stop("Please provide only one value for 'lcol'.", call. = FALSE)
-  
+
   detections <- input$valid.detections[[tag]]
   spatial <- input$spatial
 
@@ -305,7 +305,7 @@ plotSensors <- function(input, tag, sensor, title = tag, xlab, ylab, pcol, psize
 }
 
 #' Plot simultaneous/cumulative presences at a give array or set of arrays
-#' 
+#'
 #' @param input The results of an actel analysis (either explore, migration or residency).
 #' @param arrays One or more arrays to be analysed. If multiple arrays are provided, data will be grouped.
 #' @param title An optional title for the plot.
@@ -333,12 +333,12 @@ plotSensors <- function(input, tag, sensor, title = tag, xlab, ylab, pcol, psize
 #' p
 #'
 #' # You can also save the plot using ggsave!
-#' 
+#'
 #' @export
-#' 
+#'
 plotArray <- function(input, arrays, title, xlab, ylab, lwd = 1, col, by.group = TRUE, y.style = c("absolute", "relative"),
   type = c("default", "bars", "lines"), timestep = c("days", "hours", "mins"), cumulative = FALSE, ladder.type = c("arrival", "departure")) {
-  
+
   cbPalette <- c("#56B4E9", "#E69F00", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7", "#999999")
   names(cbPalette) <- c("Blue", "Orange", "Green", "Yellow", "Darkblue", "Darkorange", "Pink", "Grey")
 
@@ -372,7 +372,7 @@ plotArray <- function(input, arrays, title, xlab, ylab, lwd = 1, col, by.group =
     stop("Could not find array(s) '", paste(arrays[link], collapse = "', '"), "' in the study area.", call. = FALSE)
 
   n.groups <- length(unique(input$status.df$Group))
-  
+
   if (missing(col)) {
     if (by.group) {
       if (n.groups < 8)
@@ -388,7 +388,7 @@ plotArray <- function(input, arrays, title, xlab, ylab, lwd = 1, col, by.group =
     if (by.group) {
       if (length(col) != n.groups)
         stop("The number of colours provided does not match the number of groups in the analysis.", call. = FALSE)
-      names(col) <- unique(input$status.df$Group)      
+      names(col) <- unique(input$status.df$Group)
     } else {
       col <- col[1]
       names(col) <- "All"
@@ -403,7 +403,7 @@ plotArray <- function(input, arrays, title, xlab, ylab, lwd = 1, col, by.group =
       if (ladder.type == "arrival")
         title <- paste(paste(arrays, collapse = "|"), "- Cumulative arrivals")
       else
-        title <- paste(paste(arrays, collapse = "|"), "- Cumulative departures")        
+        title <- paste(paste(arrays, collapse = "|"), "- Cumulative departures")
     }
     else
       title <- paste(paste(arrays, collapse = "|"), "- Simultaneous presence")
@@ -411,7 +411,7 @@ plotArray <- function(input, arrays, title, xlab, ylab, lwd = 1, col, by.group =
 
   # extract information as well as time ranges
   first.time <- as.POSIXct(NA)[-1]
-  last.time <- as.POSIXct(NA)[-1]  
+  last.time <- as.POSIXct(NA)[-1]
 
   plot.list <- lapply(names(input$valid.movements), function(tag) {
     # cat(tag, "\n")
@@ -428,7 +428,7 @@ plotArray <- function(input, arrays, title, xlab, ylab, lwd = 1, col, by.group =
 
       if (as.POSIXlt(output$Last.time[1])$isdst == 1)
         output$Last.time <- output$Last.time + 3600
-      
+
       last.time <<- c(last.time, output$Last.time[nrow(output)])
       first.time <<- c(first.time, output$First.time[1])
       return(output)
@@ -448,7 +448,7 @@ plotArray <- function(input, arrays, title, xlab, ylab, lwd = 1, col, by.group =
     last.time <- max(last.time)
 
   first.time <- min(first.time)
-  
+
   if (timestep == "days")
     seconds <- 3600 * 24
 
@@ -458,7 +458,7 @@ plotArray <- function(input, arrays, title, xlab, ylab, lwd = 1, col, by.group =
   if (timestep == "mins")
     seconds <- 60
 
-  timerange <- seq(from = first.time, to = last.time, by = seconds)  
+  timerange <- seq(from = first.time, to = last.time, by = seconds)
 
   if (is.null(first.time) | is.null(last.time))
     stop("Not enough valid data to draw a plot. Aborting.", call. = FALSE)
@@ -466,7 +466,7 @@ plotArray <- function(input, arrays, title, xlab, ylab, lwd = 1, col, by.group =
   if (by.group) {
     link <- match(names(plot.list), input$status.df$Transmitter)
     group.names <- input$status.df$Group[link]
-  
+
     plotdata <- lapply(unique(group.names), function(the.group) {
       # cat("Group: ", as.character(the.group), "\n")
 
@@ -563,7 +563,7 @@ plotArray <- function(input, arrays, title, xlab, ylab, lwd = 1, col, by.group =
       return(x)
     })
   }
-    
+
   plotdata <- data.table::rbindlist(recipient)
 
   if (missing(xlab))
@@ -600,7 +600,7 @@ plotArray <- function(input, arrays, title, xlab, ylab, lwd = 1, col, by.group =
 }
 
 #' Plot moves for one ore more tags
-#' 
+#'
 #' The output of plotMoves is a ggplot object, which means you can then use it in combination
 #' with other ggplot functions, or even together with other packages such as patchwork.
 #'
@@ -768,11 +768,11 @@ plotMoves <- function(input, tags, title, xlab, ylab, col, array.alias, show.rel
 #'  default section names with user defined ones.
 #' @param frame.warning Logical. By default, actel highlights manually changed or overridden tags in yellow
 #'  and red plot frames, respectively. Set to FALSE to deactivate this behaviour.
-#' @param x.label.format A character string giving a date-time format for the x labels. 
+#' @param x.label.format A character string giving a date-time format for the x labels.
 #'  If missing, ggplot's default labels are used.
 #' @param only.valid Logical. Should only valid detections be printed?
 #' @param like.migration Logical. For plots originating from migration analyses, should the additional
-#'  grey vertical bars be included? Defaults to TRUE, and only has a visible effect if the input stems from 
+#'  grey vertical bars be included? Defaults to TRUE, and only has a visible effect if the input stems from
 #'  a migration analysis.
 #'
 #' @return A ggplot object.
@@ -792,7 +792,7 @@ plotMoves <- function(input, tags, title, xlab, ylab, col, array.alias, show.rel
 #'
 #' @export
 #'
-plotDetections <- function(input, tag, type, y.axis = c("auto", "stations", "arrays"), title, 
+plotDetections <- function(input, tag, type, y.axis = c("auto", "stations", "arrays"), title,
   xlab, ylab, col, array.alias, section.alias, frame.warning = TRUE, x.label.format,
   only.valid = FALSE, like.migration = TRUE) {
   # NOTE: The NULL variables below are actually column names used by ggplot.
@@ -819,7 +819,7 @@ plotDetections <- function(input, tag, type, y.axis = c("auto", "stations", "arr
 
   if (length(tag) > 1)
     stop("Please list only one tag", call. = FALSE)
- 
+
  if (is.na(match(tag, names(input$detections))))
     stop("Could not find tag '", tag, "' in the input.", call. = FALSE)
 
@@ -852,7 +852,7 @@ plotDetections <- function(input, tag, type, y.axis = c("auto", "stations", "arr
     else
       y.axis <- "stations"
   }
-  
+
   # renaming arrays if relevant
   if (!missing(array.alias)) {
     # check if any arrays are alien
@@ -925,7 +925,7 @@ plotDetections <- function(input, tag, type, y.axis = c("auto", "stations", "arr
 
   # assign y values
   if (y.axis == "stations")
-    detections$plot.y <- factor(detections$Standard.name, levels = y.order)    
+    detections$plot.y <- factor(detections$Standard.name, levels = y.order)
   else
     detections$plot.y <- factor(detections$Array, levels = y.order)
 
@@ -934,7 +934,7 @@ plotDetections <- function(input, tag, type, y.axis = c("auto", "stations", "arr
     detections$Colour <- detections$Array
     if (!missing(section.alias))
        warning("section.alias is irrelevant when y.axis = 'stations'. Ignoring section.alias.", immediate. = TRUE, call. = FALSE)
-  } else {   
+  } else {
     aux <- lapply(seq_along(array.order$Array), function(i) {
       x <- match(detections$plot.y, array.order$Array[i])
       x[!is.na(x)] <- array.order$Section[i]
@@ -949,7 +949,7 @@ plotDetections <- function(input, tag, type, y.axis = c("auto", "stations", "arr
       section.levels <- unique(array.order$Section)
 
     detections$Colour <- factor(aux, levels = section.levels)
-    
+
     # Rename sections, if relevant
     if (!missing(section.alias)) {
       link <- match(names(section.alias), section.levels)
@@ -957,7 +957,7 @@ plotDetections <- function(input, tag, type, y.axis = c("auto", "stations", "arr
         warning("Could not find ", ifelse(sum(is.na(link) == 1), "section ", "sections "), names(section.alias)[is.na(link)], " in the study's sections.", call. = FALSE, immediate. = TRUE)
       levels(detections$Colour)[link[!is.na(link)]] <- section.alias[!is.na(link)]
       section.levels <- levels(detections$Colour)
-      
+
       if (any(is.na(detections$Colour))) {
         warning("Suppressing ", !is.na(detections$Colour), " detection(s) as the respective sections were suppressed.", immediate. = TRUE, call. = FALSE)
         detections <- detections[!is.na(detections$Colour), ]
@@ -1156,9 +1156,9 @@ plotDetections <- function(input, tag, type, y.axis = c("auto", "stations", "arr
 #' @param ylegend Adjustment to the vertical positioning of the legend. Only relevant if the legend is being drawn
 #'  in the corner of the plot.
 #' @param xlegend Adjustment to the horizontal positioning of the legend.
-#' @param xjust How the legend is to be justified when the legend is drawn at the bottom a the plot. 
+#' @param xjust How the legend is to be justified when the legend is drawn at the bottom a the plot.
 #'  One of 'auto' (i.e. let actel decide the best adjustment), 'left', 'centre', or 'right'.
-#' @param cex A numerical vector giving the amount by which plotting characters and symbols should be scaled 
+#' @param cex A numerical vector giving the amount by which plotting characters and symbols should be scaled
 #'  relative to the default. When saving the plot in a vectorial form, it is recommended to change the height
 #'  and width arguments rather than the cex.
 #' @param expand Parameter that controls the size of the plotted circle. Defaults to 0.95. Larger values expand the circle, while smaller values shrink the circle.
@@ -1179,8 +1179,8 @@ plotDetections <- function(input, tag, type, y.axis = c("auto", "stations", "arr
 #' @export
 #'
 plotTimes <- function(times, night = NULL, circular.scale = c("area", "linear"), col, alpha = 0.8, title = "", mean.dash = TRUE,
-  mean.range = TRUE, mean.range.darken.factor = 1.4, rings = TRUE, file, width, height, bg = "transparent", ncol, 
-  legend.pos = c("auto", "corner", "bottom"), ylegend, xlegend, xjust = c("auto", "centre", "left", "right"), 
+  mean.range = TRUE, mean.range.darken.factor = 1.4, rings = TRUE, file, width, height, bg = "transparent", ncol,
+  legend.pos = c("auto", "corner", "bottom"), ylegend, xlegend, xjust = c("auto", "centre", "left", "right"),
   expand = 0.95, cex = 1){
 
   legend.pos <- match.arg(legend.pos)
@@ -1319,11 +1319,11 @@ plotTimes <- function(times, night = NULL, circular.scale = c("area", "linear"),
         if (missing(file) || (grepl("\\.svg$", file) | grepl("\\.pdf", file)))
           ylegend <- -0.97 + (0.08 * (ceiling(length(times) / ncol) - 2))
       } else {
-        ylegend <- -0.97      
+        ylegend <- -0.97
       }
     }
     if (xjust != "auto")
-      warning("'xjust' was set but legend is being plotted in the corner. Ignoring 'xjust'.", immediate. = TRUE, call. = FALSE)  
+      warning("'xjust' was set but legend is being plotted in the corner. Ignoring 'xjust'.", immediate. = TRUE, call. = FALSE)
     xjust <- "left"
   } else {
     if (missing(ylegend))
@@ -1347,7 +1347,7 @@ plotTimes <- function(times, night = NULL, circular.scale = c("area", "linear"),
     if (missing(xlegend))
       xlegend <- 0
   }
-  
+
   if (xjust == "right") {
     xjust <- 1
     if (missing(xlegend))
@@ -1370,7 +1370,7 @@ plotTimes <- function(times, night = NULL, circular.scale = c("area", "linear"),
   horizontal.mar <- vertical.mar * area.prop
   oldpar <- par(mar = c(b, horizontal.mar / 2, 2, horizontal.mar / 2), cex = cex, xpd = TRUE) # bottom, left, top, right
 
-  # resetting the par is only necessary if no file was specified, 
+  # resetting the par is only necessary if no file was specified,
   # and thus dev.off() was not called at the end of the function.
   on.exit(if (missing(file)) par(oldpar), add = TRUE)
 
@@ -1387,8 +1387,8 @@ plotTimes <- function(times, night = NULL, circular.scale = c("area", "linear"),
 
   if (mean.dash) {
     roseMean(times, col = scales::alpha(params$col, 1), mean.length = c(0.07, -0.07), mean.lwd = 6,
-      box.range = ifelse(mean.range, "std.error", "none"), fill = "white", horizontal.border = "black", 
-      vertical.border = scales::alpha(sapply(params$col, function(i) darken(i, mean.range.darken.factor)), 1), box.size = c(1.015, 0.985), 
+      box.range = ifelse(mean.range, "std.error", "none"), fill = "white", horizontal.border = "black",
+      vertical.border = scales::alpha(sapply(params$col, function(i) darken(i, mean.range.darken.factor)), 1), box.size = c(1.015, 0.985),
       edge.length = c(0.025, -0.025), edge.lwd = 2)
   }
 
@@ -1404,7 +1404,7 @@ plotTimes <- function(times, night = NULL, circular.scale = c("area", "linear"),
   if(!missing(file))
     message("M: Plot saved to ", file)
 
-  # graphics device is turned off by on.exit set up 
+  # graphics device is turned off by on.exit set up
   # right after the device was opened.
 }
 
@@ -1688,7 +1688,7 @@ plotResidency <- function(input, tag, title, xlab, ylab, col) {
 
   if (length(tag) > 1)
     stop("Please list only one tag", call. = FALSE)
- 
+
   if (is.na(match(tag, names(input$time.ratios))))
     stop("Could not find tag '", tag, "' in the input.", call. = FALSE)
 
@@ -1770,9 +1770,9 @@ plotResidency <- function(input, tag, title, xlab, ylab, col) {
 #'
 #' By default, this function plots the global residency. However, you can use the argument 'group'
 #' to plot the results only from a specific animal group. Lastly, you can also use 'sections', rather
-#' than 'group', to compare the residency at a specific section (or group of sections) between the 
+#' than 'group', to compare the residency at a specific section (or group of sections) between the
 #' different groups.
-#' 
+#'
 #' The output of plotRatios is a ggplot object, which means you can then use it in combination
 #' with other ggplot functions, or even together with other packages such as patchwork.
 #'
@@ -1808,11 +1808,11 @@ plotResidency <- function(input, tag, title, xlab, ylab, col) {
 #'
 #' @export
 #'
-plotRatios <- function(input, groups, sections, 
-    type = c("absolutes", "percentages"), 
+plotRatios <- function(input, groups, sections,
+    type = c("absolutes", "percentages"),
     title, xlab, ylab, col, col.by = c("default", "section", "group")) {
   # NOTE: The NULL variables below are actually column names used by ggplot.
-  # This definition is just to prevent the package check from issuing a 
+  # This definition is just to prevent the package check from issuing a
   # note due unknown variables.
   type <- match.arg(type)
   col.by <- match.arg(col.by)
@@ -1821,9 +1821,9 @@ plotRatios <- function(input, groups, sections,
   Group <- NULL
   n <- NULL
 
-  cbPalette <- c("#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", 
+  cbPalette <- c("#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2",
                  "#D55E00", "#CC79A7", "#999999")
-  names(cbPalette) <- c("Orange", "Blue", "Green", "Yellow", "Darkblue", 
+  names(cbPalette) <- c("Orange", "Blue", "Green", "Yellow", "Darkblue",
                  "Darkorange", "Pink", "Grey")
 
   if (!inherits(input, "list")) {
@@ -1854,20 +1854,20 @@ plotRatios <- function(input, groups, sections,
       if (missing(sections)) {
         title <- "Global ratios"
       } else {
-        title <- paste0("Ratios for section", 
-          ifelse(length(sections) > 1, "s ", " "), 
+        title <- paste0("Ratios for section",
+          ifelse(length(sections) > 1, "s ", " "),
           paste0(sections, collapse = ", "))
       }
     } else {
       if (missing(sections)) {
-        title <- paste0("Ratios for group", 
-          ifelse(length(groups) > 1, "s ", " "), 
+        title <- paste0("Ratios for group",
+          ifelse(length(groups) > 1, "s ", " "),
           paste0(groups, collapse = ", "))
       } else {
-        title <- paste0("Ratios for group", 
-          ifelse(length(groups) > 1, "s ", " "), 
-          paste0(groups, collapse = ", "), 
-          " in section", ifelse(length(sections) > 1, "s ", " "), 
+        title <- paste0("Ratios for group",
+          ifelse(length(groups) > 1, "s ", " "),
+          paste0(groups, collapse = ", "),
+          " in section", ifelse(length(sections) > 1, "s ", " "),
           paste0(sections, collapse = ", "))
       }
     }
@@ -1876,8 +1876,8 @@ plotRatios <- function(input, groups, sections,
   if (!missing(groups)) {
     link <- is.na(match(groups, names(input$group.ratios)))
     if (any(link)) {
-      stop("Could not find group(s) '", 
-        paste(groups[link], collapse = "', '") , 
+      stop("Could not find group(s) '",
+        paste(groups[link], collapse = "', '") ,
         "' in the input.", call. = FALSE)
     }
   } else {
@@ -1887,9 +1887,9 @@ plotRatios <- function(input, groups, sections,
   if (!missing(sections)) {
     link <- any(is.na(match(sections, colnames(input$global.ratios$absolutes))))
     if (link) {
-      stop("Section", ifelse(sum(link) > 1, "s '", " '"), 
+      stop("Section", ifelse(sum(link) > 1, "s '", " '"),
         paste0(sections[link], collapse = "', '"),
-        ifelse(sum(link) > 1, "' do ", "' does "), 
+        ifelse(sum(link) > 1, "' do ", "' does "),
         "not exist, or no tags have ever been assigned to it.", call. = FALSE)
     }
   } else {
@@ -1935,13 +1935,13 @@ plotRatios <- function(input, groups, sections,
 
   # remove groups that were never detected before continuing
   aux <- aux[sapply(aux, length) > 0]
-  
+
   if (col.by == 'group') {
     the.ratios <- aux[[1]][, c('Timeslot', 'n')]
     colnames(the.ratios)[2] <- aux[[1]]$Group[1]
     # add other groups as new columns if there are any
     if (length(aux) > 1) {
-      for (i in 2:length(aux)) {        
+      for (i in 2:length(aux)) {
         the.ratios[, ncol(the.ratios) + 1] <- aux[[i]]$n
         colnames(the.ratios)[ncol(the.ratios)] <- aux[[i]]$Group[1]
       }
@@ -1971,7 +1971,7 @@ plotRatios <- function(input, groups, sections,
         the.ratios[r, 2:(ncol(the.ratios))] <- a / b
       }
     }
-    rm(r) 
+    rm(r)
   }
 
   if (missing(xlab)) {
@@ -2014,8 +2014,8 @@ plotRatios <- function(input, groups, sections,
   } else {
     if (col.by == 'group') {
       if (length(col) < length(groups)) {
-        warning("Not enough colours supplied in 'col' (", 
-          length(col)," supplied and ", length(groups), 
+        warning("Not enough colours supplied in 'col' (",
+          length(col)," supplied and ", length(groups),
           " needed). Reusing colours.", immediate. = TRUE, call. = FALSE)
       }
       unique.colours <- rep(col, length.out = length(groups))
@@ -2030,17 +2030,17 @@ plotRatios <- function(input, groups, sections,
   }
 
   if (col.by == 'group') {
-    p <- ggplot2::ggplot(data = plotdata, 
+    p <- ggplot2::ggplot(data = plotdata,
       ggplot2::aes(x = Timeslot, y = n, fill = Group, col = Group))
   } else {
-    p <- ggplot2::ggplot(data = plotdata, 
+    p <- ggplot2::ggplot(data = plotdata,
       ggplot2::aes(x = Timeslot, y = n, fill = Location, col = Location))
   }
 
   if (attributes(input$global.ratios[[1]])$timestep == "days") {
     bar_width <- 86400
   } else {
-    bar_width <- 3600    
+    bar_width <- 3600
   }
 
   p <- p + ggplot2::geom_bar(width = bar_width, stat = "identity")
@@ -2048,7 +2048,7 @@ plotRatios <- function(input, groups, sections,
 
   max.y <- max(with(plotdata, aggregate(n, list(Timeslot), sum))$x)
   if (type == "absolutes") {
-    p <- p + ggplot2::scale_y_continuous(limits = c(0,  max.y * 1.05), 
+    p <- p + ggplot2::scale_y_continuous(limits = c(0,  max.y * 1.05),
       expand = c(0, 0))
   } else {
     p <- p + ggplot2::scale_y_continuous(limits = c(0,  max.y),
@@ -2072,7 +2072,7 @@ plotRatios <- function(input, groups, sections,
 
 
 #' Plot DOT diagram
-#' 
+#'
 #' This function is useful for quickly checking if your spatial.txt file is
 #' properly set up. The spatial.txt file can be imported using [readDot()]
 #'
@@ -2080,7 +2080,7 @@ plotRatios <- function(input, groups, sections,
 #'  to a dot data frame using [readDot()].
 #' @param spatial a data frame containing stations and respective coordinates.
 #'  Note: The mean coordinates for the stations of any given array will be used.
-#' @param coord.x,coord.y The names of the columns containing the x and y 
+#' @param coord.x,coord.y The names of the columns containing the x and y
 #'  positions of the stations in the spatial data frame.
 #' @param placement Two possible options: "literal" will place the nodes exactly
 #'  at the average coordinates for the array (which may lead to varying degrees
@@ -2107,7 +2107,7 @@ plotRatios <- function(input, groups, sections,
 #'
 #' # now we can plot it using plotDot:
 #' plotDot(my_dot)
-#' 
+#'
 #' # plotDot can also be called directly using the string of text:
 #' plotDot(x)
 #'
@@ -2115,7 +2115,7 @@ plotRatios <- function(input, groups, sections,
 #'
 #' @export
 #'
-plotDot <- function(dot, spatial, coord.x, coord.y, 
+plotDot <- function(dot, spatial, coord.x, coord.y,
     placement = c("literal", "spaced"), expand = 1, file,
     fill = c("#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00",
       "#CC79A7"), text_colour = "white") {
@@ -2159,7 +2159,7 @@ plotDot <- function(dot, spatial, coord.x, coord.y,
       stop("spatial was provided, but coord.x and/or coord.y are missing.",
         call. = FALSE)
     }
-    
+
     if (!any(colnames(spatial) == coord.x)) {
       stop("Could not find column '", coord.x, "' in spatial.", call. = FALSE)
     }
@@ -2170,7 +2170,7 @@ plotDot <- function(dot, spatial, coord.x, coord.y,
 
     # Use only the hydrophone lines
     spatial <- spatial[spatial$Type == "Hydrophone", ]
-    
+
     if (any(is.na(match(unique_arrays, unique(spatial$Array))))) {
       stop("spatial was provided, but not all arrays specified ",
         "in the dot exist in spatial.", call. = FALSE)
@@ -2183,11 +2183,11 @@ plotDot <- function(dot, spatial, coord.x, coord.y,
 
     xspatial <- spatial[!is.na(match(spatial$Array, unique_arrays)), ]
 
-    dot_coords <- aggregate(xspatial[, c(coord.x, coord.y)], 
+    dot_coords <- aggregate(xspatial[, c(coord.x, coord.y)],
                             list(xspatial$Array), mean)
     colnames(dot_coords) <- c("Array", "x", "y")
 
-    # make sure both are in the same row order, 
+    # make sure both are in the same row order,
     # to simplify transferring the data further down.
     fix_row_order <- match(diagram_nodes$label, dot_coords$Array)
     dot_coords <- dot_coords[fix_row_order, ]
@@ -2195,7 +2195,7 @@ plotDot <- function(dot, spatial, coord.x, coord.y,
     # make coords start at 0 to simplify the plotting
     dot_coords$x <- dot_coords$x - min(dot_coords$x)
     dot_coords$y <- dot_coords$y - min(dot_coords$y)
-    
+
     if (placement == "spaced") {
       diagram_nodes$x[order(dot_coords$x)] <- (1:nrow(dot_coords) - 1) * expand
       diagram_nodes$y[order(dot_coords$y)] <- (1:nrow(dot_coords) - 1) * expand
@@ -2242,7 +2242,7 @@ plotDot <- function(dot, spatial, coord.x, coord.y,
       diagram_edges <- NULL
       add_line_details <- FALSE
     } else {
-      diagram_edges <- apply(dot[, c(1, 3), drop = FALSE], 2, 
+      diagram_edges <- apply(dot[, c(1, 3), drop = FALSE], 2,
                         function(x) {
                           match(x, diagram_nodes$label)
                         })
