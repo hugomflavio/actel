@@ -537,11 +537,27 @@ dotList <- function(input, spatial) {
     }
     recipient <- list(
       neighbours = unique(c(auxA$B, auxB$A, names(parallel)[!is.na(parallel)])),
-      before     = ifelse(nrow(auxB) == 0, NULL, unique(auxB$A)),
-      after      = ifelse(nrow(auxA) == 0, NULL, unique(auxA$B)),
-      parallel   = ifelse(!par.trigger, NULL, 
-                          unique(names(parallel)[!is.na(parallel)])),
-      edge       = ifelse(nrow(auxA) == 0, FALSE, any(auxA$Edge)))
+      before     = if (nrow(auxB) == 0) {
+                     NULL 
+                   } else {
+                     unique(auxB$A)
+                   },
+      after      = if (nrow(auxA) == 0) {
+                     NULL
+                   } else {
+                     unique(auxA$B)
+                   },
+      parallel   = if (!par.trigger) {
+                     NULL
+                   } else {
+                     unique(names(parallel)[!is.na(parallel)])
+                   },
+      edge       = if (nrow(auxA) == 0) {
+                     FALSE
+                   } else {
+                     any(auxA$Edge)
+                   }
+      )
     arrays[[length(arrays) + 1]] <- recipient
     names(arrays)[length(arrays)] <- a
   }
