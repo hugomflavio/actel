@@ -47,7 +47,7 @@ userInput <- function(question, choices, tag, hash) {
       }
 
       if (!missing(choices) && is.na(match(output, choices))) {
-        event(type = "screen", 
+        event(type = "screen",
               "Option not recognized, please choose one of: '",
               paste0(choices, collapse = "', '"), "'.")
         output <- NULL
@@ -121,7 +121,7 @@ tableInteraction <- function(moves, detections, tag, trigger, GUI, force = FALSE
                           choices = c("y", "n"),
                           hash = paste0("# comment ", tag, "?"))
     if (decision == "y") {
-      event(type = "ud", 
+      event(type = "ud",
             "comment # on", tag)
       event(type = c("ud", "comment"),
             tag = tag,
@@ -154,20 +154,20 @@ tableInteraction <- function(moves, detections, tag, trigger, GUI, force = FALSE
       to.display <- data.table::as.data.table(cbind(data.frame(Event = 1:sum(moves$Valid)), moves[(Valid)]))
       data.table::fwrite(to.display, target.file, dateTimeAs = "write.csv", showProgress = FALSE)
       # display instructions
-      event(type = "screen", 
+      event(type = "screen",
             "M: The movements table for tag '", tag, "' is too large to display on the console and GUI is set to 'never'.\n   Temporarily saving the table to '", target.file, "'.\n   Please inspect this file and decide if any events should be considered invalid.")
       if (save.tables.locally) {
-        event(type = "screen", 
+        event(type = "screen",
               "   This file will be automatically deleted once",
               " it has served its purpose.")
       } else {
-        event(type = "screen", 
+        event(type = "screen",
               "   Can't find the file? Check out the",
               " save.tables.locally argument.")
       }
-      event(type = "screen", 
+      event(type = "screen",
             "Please use the 'Event' column as a reference",
-            " for the event number. ", sum(!moves$Valid), 
+            " for the event number. ", sum(!moves$Valid),
             " invalid event(type = s) omitted.")
       # start interaction
       if (force) {
@@ -221,8 +221,8 @@ tableInteraction <- function(moves, detections, tag, trigger, GUI, force = FALSE
               sum(!moves$Valid), " invalid event(type = s) omitted):")
         to.display <- moves[(Valid)]
       }
-      event(type = "screen", 
-            paste0(capture.output(print(to.display, 
+      event(type = "screen",
+            paste0(capture.output(print(to.display,
                                         topn = nrow(to.display))),
             collapse = "\n"))
       if (nrow(moves) >= 100) {
@@ -309,7 +309,7 @@ invalidateEvents <- function(displayed.moves, all.moves, detections, tag, GUI, s
         displayed.moves <- all.moves[(Valid)]
         event(type = "screen",
               "\nM: Updated movement table of tag ", tag, ":\n",
-              paste0(capture.output(print(displayed.moves, 
+              paste0(capture.output(print(displayed.moves,
                                           topn = nrow(displayed.moves))),
                      collapse = "\n"),
               "\n")
@@ -412,10 +412,10 @@ invalidateEvents <- function(displayed.moves, all.moves, detections, tag, GUI, s
                 to.display <- all.moves[(Valid)]
               check <- TRUE
               event(type = "screen",
-                    "M: Updated movement table of tag ", tag, 
-                    "(", sum(!all.moves$Valid), 
+                    "M: Updated movement table of tag ", tag,
+                    "(", sum(!all.moves$Valid),
                     " invalid event(type = s) omitted):\n",
-                    paste0(capture.output(print(to.display, 
+                    paste0(capture.output(print(to.display,
                                                 topn = nrow(to.display))),
                            collapse = "\n"),
                     "\nNote: You can select event ranges by separating them",
@@ -433,8 +433,8 @@ invalidateEvents <- function(displayed.moves, all.moves, detections, tag, GUI, s
           }
         }
       } else {
-        event(type = "screen", 
-              "Please select only events within the row limits (1-", 
+        event(type = "screen",
+              "Please select only events within the row limits (1-",
               nrow(all.moves),").")
         check <- TRUE
       }
@@ -502,14 +502,14 @@ graphicalInvalidate <- function(detections, moves, tag, trigger) { # nocov start
     moves$Valid <- graphical_valid
 
     if (restart) {
-      event(type = "screen", 
+      event(type = "screen",
             "M: Saving detection-level changes and refreshing event table.")
     }
   }
 
   if (any(!graphical_valid)) {
     link <- createEventRanges(which(!graphical_valid))
-    event(type = "ud", 
+    event(type = "ud",
           "# From the GUI, these events are invalid: ",
           paste(link, collapse = " "))
   } else {
@@ -549,7 +549,7 @@ expandEvent <- function(displayed.moves, all.moves, detections, tag, GUI, save.t
     } else {
       if (event < 1 | event > nrow(displayed.moves)) {
         event(type = "screen",
-              "Please select only events within the row limits (1-", 
+              "Please select only events within the row limits (1-",
               nrow(displayed.moves),").")
       } else {
         check <- FALSE
@@ -644,7 +644,7 @@ expandEvent <- function(displayed.moves, all.moves, detections, tag, GUI, save.t
         }
       }
     } else {
-      event(type = "screen", 
+      event(type = "screen",
             "Opening detections from event ", event,
             " of tag ", tag, " for inspection:\n",
             paste0(capture.output(print(sub.det, topn = nrow(sub.det))),
@@ -678,7 +678,7 @@ expandEvent <- function(displayed.moves, all.moves, detections, tag, GUI, save.t
 #'
 invalidateDetections <- function(displayed.moves, all.moves, detections, tag, event) { # nocov start
   event(type = "debug", "Running invalidateDetections.")
-  event(type = "screen", 
+  event(type = "screen",
         "Note: You can select row ranges by separating",
         " them with a ':' and/or multiple rows at once",
         " by separating them with a space or a comma.")
@@ -750,10 +750,10 @@ invalidateDetections <- function(displayed.moves, all.moves, detections, tag, ev
 
           if (decision == "y") {
             check <- TRUE
-            event(type = "screen", 
+            event(type = "screen",
                   "M: Updated detections table from valid event ", event,
                   " of tag ", tag, ":\n",
-                  paste0(capture.output(print(detections, 
+                  paste0(capture.output(print(detections,
                                               topn = nrow(detections))),
                          collapse = "\n"),
                   "Note: You can select event ranges by separating them",
@@ -769,7 +769,7 @@ invalidateDetections <- function(displayed.moves, all.moves, detections, tag, ev
                                      event = event)
       } else {
         event(type = "screen",
-              "Please select only events within the row limits (1-", 
+              "Please select only events within the row limits (1-",
               nrow(detections),").")
         check <- TRUE
       }

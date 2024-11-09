@@ -189,7 +189,7 @@ Enhancements:
   * Verify number of columns on all detection files.
   * Run quality checks on standard detection files.
   * New `getSpeeds()` function allows the user to quickly extract all speed information from the analyses.
-  
+
 ## actel 1.0.0
 
 Fixes:

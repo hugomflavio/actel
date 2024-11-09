@@ -182,9 +182,9 @@ explore <- function(
 # debug lines
   if (getOption("actel.debug", default = FALSE)) { # nocov start
     # show debug log location
-    on.exit(event(type = "screen", 
+    on.exit(event(type = "screen",
                   "Debug: Progress log available at ",
-                  gsub("\\\\", "/", paste0(tempdir(), 
+                  gsub("\\\\", "/", paste0(tempdir(),
                                            "/actel_debug_file.txt"))))
     # show debug rdata location
     on.exit(add = TRUE,
@@ -360,7 +360,7 @@ explore <- function(
     names(movements) <- aux
     rm(aux)
   } else {
-   event(type = c("screen", "report"), 
+   event(type = c("screen", "report"),
          "M: Not calculating time/speed from release to first detection",
          " because 'discard.first' was set.")
   }
@@ -370,7 +370,7 @@ explore <- function(
 
   do.checkSpeeds <- FALSE
   if (is.null(speed.warning)) {
-   event(type = c("warning", "screen", "report"), 
+   event(type = c("warning", "screen", "report"),
          "'speed.warning'/'speed.error' were not set, skipping speed checks.")
   } else {
     if(attributes(dist.mat)$valid)
@@ -693,7 +693,7 @@ explore <- function(
   if (attributes(dist.mat)$valid)
     output$dist.mat <- dist.mat
 
- event(type = "Screen", 
+ event(type = "Screen",
        "M: Analysis completed!")
   finished_unexpectedly <- FALSE
 

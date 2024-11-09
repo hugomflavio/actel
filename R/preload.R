@@ -70,9 +70,9 @@ preload <- function(biometrics, spatial, deployments, detections, dot = NULL,
 # debug lines
   if (getOption("actel.debug", default = FALSE)) { # nocov start
     # show debug log location
-    on.exit(event(type = "screen", 
+    on.exit(event(type = "screen",
                   "Debug: Progress log available at ",
-                  gsub("\\\\", "/", paste0(tempdir(), 
+                  gsub("\\\\", "/", paste0(tempdir(),
                                            "/actel_debug_file.txt"))))
     # show debug rdata location
     on.exit(add = TRUE,
@@ -400,7 +400,7 @@ preloadDetections <- function(input, tz, start.time = NULL, stop.time = NULL) {
 
   if (length(the.col <- grep("^[S|s]ensor\\.[V|v]alue$", colnames(input))) > 0)
     colnames(input)[the.col] <- "Sensor.Value"
-  
+
   if (!any(grepl("^Sensor\\.Value$", colnames(input)))) {
     event(type = c("warning", "screen", "report"),
           "Could not find a 'Sensor.Value' column in the detections.",
@@ -435,7 +435,7 @@ preloadDetections <- function(input, tz, start.time = NULL, stop.time = NULL) {
     if (!is.character(input$Timestamp)) {
       input$Timestamp <- as.character(input$Timestamp)
     }
-    
+
     input$Timestamp <- fasttime::fastPOSIXct(input$Timestamp, tz = "UTC")
 
     if (any(is.na(input$Timestamp))) {
@@ -487,7 +487,7 @@ preloadDetections <- function(input, tz, start.time = NULL, stop.time = NULL) {
       input$Valid <- TRUE
     }
   } else {
-    input$Valid <- TRUE    
+    input$Valid <- TRUE
   }
 
   input$Transmitter <- as.factor(paste(input$CodeSpace, input$Signal, sep = "-"))

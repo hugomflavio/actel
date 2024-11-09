@@ -169,9 +169,9 @@ migration <- function(
 # debug lines
   if (getOption("actel.debug", default = FALSE)) { # nocov start
     # show debug log location
-    on.exit(event(type = "screen", 
+    on.exit(event(type = "screen",
                   "Debug: Progress log available at ",
-                  gsub("\\\\", "/", paste0(tempdir(), 
+                  gsub("\\\\", "/", paste0(tempdir(),
                                            "/actel_debug_file.txt"))))
     # show debug rdata location
     on.exit(add = TRUE,
@@ -381,7 +381,7 @@ migration <- function(
     } else {
       event(type = c("warning", "screen", "report"),
             "'success.arrays' was not defined. Assuming success if the",
-            " tags are last detected at arrays ", 
+            " tags are last detected at arrays ",
             paste(success.arrays[-length(success.arrays)], collapse = ", "),
             " or ", tail(success.arrays, 1), ".")
     }
@@ -930,7 +930,7 @@ migration <- function(
   if (attributes(dist.mat)$valid)
     output$dist.mat <- dist.mat
 
-  event(type = "screen", 
+  event(type = "screen",
         "M: Analysis completed!")
   finished_unexpectedly <- FALSE
 

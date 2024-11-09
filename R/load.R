@@ -1237,7 +1237,7 @@ loadSpatial <- function(input = "spatial.csv", section.order = NULL){
   rm(aux)
   # check missing Type column
   if (!any(grepl("^Type$", colnames(input)))) {
-    event(type = c("screen", "report"), 
+    event(type = c("screen", "report"),
           "M: No 'Type' column found in the spatial input.",
           " Assigning all rows as hydrophones.")
     input$Type <- "Hydrophone"
@@ -1548,7 +1548,7 @@ loadBio <- function(input, tz){
       bio$Sensor.unit[bio$Sensor.unit == ''] <- NA_character_
 
       if (any(link <- na.as.false(startsWith(bio$Sensor.unit, '|')))) {
-        event(type = c("warning", "screen"), 
+        event(type = c("warning", "screen"),
               "The Sensor.unit information in ",
               ifelse(sum(link) <= 10,
                      paste0("row(s) ", paste0(which(link), collapse = ", ")),
@@ -1705,7 +1705,7 @@ loadDetections <- function(start.time = NULL, stop.time = NULL, tz, force = FALS
       detections <- convertTimes(input = detections, start.time = start.time, stop.time = stop.time, tz = tz)
       recompile <- FALSE
     } else {
-      event(type = "Screen", 
+      event(type = "Screen",
             "M: Reprocessing the detections.")
     } # nocov end
     rm(actel.detections)
@@ -1814,8 +1814,8 @@ compileDetections <- function(path = "detections", start.time = NULL,
     if (sum(file_match) > 1) {
       event(type = c("screen", "report"),
             "File '", i, "' matches more than one file format (matches: ",
-            paste0(names(file_match)[file_match], collapse = ", "), 
-            "). Picking the first matching type (", 
+            paste0(names(file_match)[file_match], collapse = ", "),
+            "). Picking the first matching type (",
             names(file_match)[file_match][1],
             "). If this causes issues, get in contact through ",
             "www.github.com/hugomflavio/actel/issues/new")
@@ -1859,7 +1859,7 @@ compileDetections <- function(path = "detections", start.time = NULL,
       unknown.file <- FALSE
     }
     if (file_type == "thelma_new") {
-      event(type = "debug", 
+      event(type = "debug",
             "File '", i, "' matches a Thelma log (old format).")
       output <- tryCatch(
         processThelmaNewFile(input = aux), error = function(e) {
@@ -2624,7 +2624,7 @@ createStandards <- function(detections, spatial, deployments, discard.orphans = 
           to_show <- detections[receiver.link, ][orphans, ]
           to_show <- to_show[, !(colnames(to_show) %in% cols_to_hide)]
 
-          event(type = "screen", 
+          event(type = "screen",
                 paste0(capture.output(print(to_show)), collapse = "\n"),
                  "\nPossible options:\n",
                 "   a) Stop and double-check the data (recommended)\n",
@@ -2828,7 +2828,7 @@ transformSpatial <- function(spatial, bio, arrays, dotmat, first.array = NULL) {
                   " release site '", release.sites$Standard.name[i], "'.")
           aux <- unlist(strsplit(release.sites$Array[i], "|", fixed = TRUE))
           if (any(is.na(dotmat[aux, aux])) ||  any(dotmat[aux, aux] > 1)) {
-            event(type = c("warning", "screen", "report"), 
+            event(type = c("warning", "screen", "report"),
                   "Release site ", release.sites$Standard.name[i],
                   " has multiple possible first arrays (",
                   paste(aux, collapse = ", "),
@@ -2944,7 +2944,7 @@ discardFirst <- function(input, bio, trim) {
     output_i <- input[[i]]
     output_i$Valid[output_i$Timestamp <= bio$Release.date[i] + (trim * 3600)] <- FALSE
     count <<- count + (sum(!output_i$Valid))
-    event(type = "debug", 
+    event(type = "debug",
           sum(!output_i$Valid),
           " early detection(s) invalidated for tag ",
           names(input)[i], ".")

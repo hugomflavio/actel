@@ -227,7 +227,7 @@ eventsTabbedWidget <- function(tag, displayed.moves, all.moves, detections, trig
   gWidgets2::visible(moves.window) <- TRUE
 
   if (first.time) {
-    event(type = "screen", 
+    event(type = "screen",
           "M: Make any necessary edits in the external visualization window",
           " and submit the result to continue the analysis.\n",
           "Note: You can use Ctrl and Shift to select multiple events,",
@@ -695,7 +695,7 @@ detectionsSingleWidget <- function(event, tag, to.print, silent) { # nocov start
   gWidgets2::visible(w2) <- TRUE
 
   if (!silent) {
-    event(type = "screen", 
+    event(type = "screen",
           "M: Make any necessary edits in the external visualization window",
           " and submit the result to continue the analysis.\n",
           "Note: You can use Ctrl and Shift to select multiple detections,",

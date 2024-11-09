@@ -53,7 +53,7 @@ getSpeeds <- function(input, type = c("all", "forward", "backward"), direct = FA
   n.events <- match.arg(n.events)
   speed.method <- attributes(input$dist.mat)$speed.method
   to.station.col <- ifelse(speed.method == "last to first", "First.station", "Last.station")
-  
+
   output.list <- lapply(names(input$valid.movements), function(tag) {
     # cat(tag, "\n")
     # treat movements as data frame to avoid data.table shenanigans
@@ -172,7 +172,7 @@ getSpeeds <- function(input, type = c("all", "forward", "backward"), direct = FA
         first.line <- NULL
       }
     } else {
-      first.line <- NULL    
+      first.line <- NULL
     }
 
     if (length(to.extract) > 0) {
@@ -193,10 +193,10 @@ getSpeeds <- function(input, type = c("all", "forward", "backward"), direct = FA
     if (!is.null(output) & n.events != "all") {
       output$temp_column <- with(output, paste0(From.array, "_", To.array))
       aux <- split(output, output$temp_column)
-    
+
       if (n.events == "first")
         aux <- lapply(aux, function(x) x[1, , drop = FALSE])
-      
+
       if (n.events == "last")
         aux <- lapply(aux, function(x) x[nrow(x), , drop = FALSE])
 

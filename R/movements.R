@@ -498,8 +498,8 @@ assembleValidSecMoves <- function(valid.moves, spatial, valid.dist) {
     pb <- txtProgressBar(min = 0, max = sum(sapply(valid.moves, nrow)), style = 3, width = 60)
 
   secmoves <- lapply(seq_along(valid.moves), function(i) {
-    event(type = "debug", 
-          "Compiling valid section movements for tag ", 
+    event(type = "debug",
+          "Compiling valid section movements for tag ",
           names(valid.moves)[i],".")
 
     output <- sectionMovements(movements = valid.moves[[i]], spatial = spatial,

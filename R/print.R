@@ -749,7 +749,7 @@ printCircular <- function(times, bio, suffix = NULL){
   circular.scale <- getOption("actel.circular.scale", default = "area")
 
   if (!(circular.scale %in% c("area", "linear"))) {
-    event(type = c("screen", "warning"), 
+    event(type = c("screen", "warning"),
           "Option actel.circular.scale was set but value is not recognized",
           " (accepted values: 'area', 'linear'). Defaulting back to 'area'.")
     radii.scale <- "sqrt"

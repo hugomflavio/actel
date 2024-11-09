@@ -555,11 +555,11 @@ event <- function(..., type, tag) {
                          comments,
                          "-------------------\n",
                          "User interventions:\n",
-                         "-------------------\n", 
+                         "-------------------\n",
                          uds,
                          "-------------------\n",
                          "Function call:\n",
-                         "-------------------\n", 
+                         "-------------------\n",
                          function_call,
                          "\n",
                          "-------------------")
@@ -653,9 +653,9 @@ recoverLog <- function(file, overwrite = FALSE) {
   x <- readLines(file)
   function_line <- grep("^Function: ", x)
   timestamp_line <- grep("^Timestamp: ", x)
-  message("M: Job log for ", 
+  message("M: Job log for ",
           sub("Function: ", "", x[function_line]),
-              " analysis run on ", 
+              " analysis run on ",
               sub("Timestamp: ", "", x[timestamp_line]),
               " recovered to ", file)
 }

@@ -59,10 +59,10 @@ checkArguments <- function(dp, tz, min.total.detections, min.per.event, max.inte
             !(is.logical(save.detections) && !save.detections), !is.null(exclude.tags))
 
   if (!is.null(dp) & any(link)) {
-    event(type = c("warning", "screen", "report"), 
-          "Argument", ifelse(sum(link) > 1, "s '", " '"), 
+    event(type = c("warning", "screen", "report"),
+          "Argument", ifelse(sum(link) > 1, "s '", " '"),
           paste(no.dp.args[link], collapse = "', '"),
-          ifelse(sum(link) > 1, "' were ", "' was "), 
+          ifelse(sum(link) > 1, "' were ", "' was "),
           "set but a datapack was provided. Disregarding set arguments.")
   }
 
@@ -204,12 +204,12 @@ checkArguments <- function(dp, tz, min.total.detections, min.per.event, max.inte
 
   if (jump.error < jump.warning) {
     if (jump.warning == 2) { # this happens if someone changed jump error but didn't set jump warning.
-      event(type = c("screen", "warning"), 
+      event(type = c("screen", "warning"),
             "Adjusting default 'jump.warning' to match set 'jump.error'.")
       jump.warning <- jump.error
     } else {
       if (jump.error == 3) { # this happens if someone changed jump warning but didn't change jump error.
-        event(type = c("screen", "warning"), 
+        event(type = c("screen", "warning"),
               "Adjusting default 'jump.error' to match set 'jump.warning'.")
         jump.error <- jump.warning
       } else { # this happens if someone set both jump warning and jump error. In this case, stop and let the user decide.
@@ -260,7 +260,7 @@ checkArguments <- function(dp, tz, min.total.detections, min.per.event, max.inte
   }
 
   if (!is.null(override) && is.numeric(override)) {
-    event(type = c('report', 'screen', 'warning'), 
+    event(type = c('report', 'screen', 'warning'),
           "Override is numeric (i.e. the code space has",
           " not been included). Will attempt to identify",
           " tags to be excluded based on signal alone.")
@@ -330,7 +330,7 @@ checkArguments <- function(dp, tz, min.total.detections, min.per.event, max.inte
   if (!missing(section.warning)) {
     if (section.error > section.warning) {
       if (section.warning == 1) { # this happens if someone changed section error but didn't set section warning.
-        event(type = c("screen", "warning"), 
+        event(type = c("screen", "warning"),
               "Adjusting default 'section.warning' to",
               " match set 'section.error'.")
         section.warning <- section.error
@@ -428,7 +428,7 @@ checkGUI <- function(GUI = c("needed", "always", "never"), save.tables.locally) 
   GUI <- match.arg(GUI)
 
   if (GUI != "never" && length(suppressWarnings(packageDescription("gWidgets2tcltk"))) == 1) {
-    event(type = c("screen", "warning"), 
+    event(type = c("screen", "warning"),
           "GUI is set to '", GUI, "' but package 'gWidgets2tcltk' is not",
           " available. Please install it if you intend to run the GUI.",
           " Disabling GUI (i.e. GUI = 'never') for the current run.")
@@ -484,7 +484,7 @@ checkDupDetections <- function(input) {
   dups <- c(FALSE, paired[,1] == paired[,2] & paired[,3] == paired[,4] & paired[,5] == paired[,6])
   if (any(dups)) {
     event(type = c("screen", "report", "warning"),
-          sum(dups), " duplicated detection", 
+          sum(dups), " duplicated detection",
           ifelse(sum(dups) == 1, " was", "s were"),
           " found. Could an input file be duplicated?")
     message("")
@@ -538,7 +538,7 @@ checkDupDetections <- function(input) {
           tryCatch(data.table::fwrite(paired[dups[-1], ], file.name, , dateTimeAs = "write.csv"), error = function(e) {
             event(type = c("screen", "report"),
                   "Error: Could not save file (reason: '",
-                  sub("\n$", "", e), 
+                  sub("\n$", "", e),
                   "').\n       Reopening previous interaction.")
             success <<- FALSE
           })
@@ -604,7 +604,7 @@ checkSpeeds <- function(movements, tag, detections, valid.movements,
   if (any(na.as.false(vm$Average.speed.m.s >= speed.warning))) {
     link <- which(vm$Average.speed.m.s >= speed.warning)
     if (link[1] == 1) {
-      # This function produces complex warnings. 
+      # This function produces complex warnings.
       # We need to build them gradually.
       the_warning <- paste0("Tag ", tag, " ", n, " had an average speed of ",
                             round(vm$Average.speed.m.s[1], 2),
@@ -620,8 +620,8 @@ checkSpeeds <- function(movements, tag, detections, valid.movements,
       for (i in 1:length(link)) {
         warning_counter <- warning_counter + 1
         if (warning_counter < 5) {
-          other_warning <- paste0("Tag ", tag, " ", n, 
-                                  " had an average speed of ", 
+          other_warning <- paste0("Tag ", tag, " ", n,
+                                  " had an average speed of ",
                                   round(vm$Average.speed.m.s[link[i]], 2),
                                   " m/s from valid event ", link[i] - 1,
                                   " to ", link[i], " (",vm$Array[link[i] - 1],
@@ -648,17 +648,17 @@ checkSpeeds <- function(movements, tag, detections, valid.movements,
         event_list <- paste0("         Events that raised warnings: ",
                              paste(link, collapse = ", "))
         event(type = c("screen", "report"),)
-        the_warning <- paste0(the_warning, "\n", 
-                              final_warning, "\n", 
+        the_warning <- paste0(the_warning, "\n",
+                              final_warning, "\n",
                               event_list)
       }
     }
   }
   # Trigger user interaction
   if (any(na.as.false(vm$Average.speed.m.s >= speed.error))) { # nocov start
-    movements <- tableInteraction(moves = movements, tag = tag, 
+    movements <- tableInteraction(moves = movements, tag = tag,
                                   detections = detections,
-                                  trigger = the_warning, GUI = GUI, 
+                                  trigger = the_warning, GUI = GUI,
                                   save.tables.locally = save.tables.locally)
   } # nocov end
   return(movements)
@@ -717,11 +717,11 @@ checkInactiveness <- function(movements, tag, detections, n,
         aux <- dist.mat[the.stations, the.stations]
         if (all(aux <= 1500)) {
           n.detections <- sum(valid.moves$Detections[start_i:Stop])
-          the_warning <- paste0("Tag ", tag, " ", n, " was detected ", 
+          the_warning <- paste0("Tag ", tag, " ", n, " was detected ",
                                 n.detections, " times at stations less than",
                                 " 1.5 km apart in array '",
                                 tail(breaks$values, 1),
-                                "' (", paste(the.stations, collapse = ", "), 
+                                "' (", paste(the.stations, collapse = ", "),
                                 "), over ", days.spent,
                                 " days and then disappeared.",
                                 " Could it be inactive?")
@@ -735,7 +735,7 @@ checkInactiveness <- function(movements, tag, detections, n,
       } else {
         if (length(the.stations) <= 3) {
           n.detections <- sum(valid.moves$Detections[start_i:Stop])
-          the_warning <- paste0("Tag ", tag, " ", n, " was detected ", 
+          the_warning <- paste0("Tag ", tag, " ", n, " was detected ",
                                 n.detections, " times at three or fewer",
                                 " stations of array '", tail(breaks$values, 1),
                                 "' (", paste(the.stations, collapse = ", "),
@@ -751,13 +751,13 @@ checkInactiveness <- function(movements, tag, detections, n,
       }
       # Trigger user interaction
       if (trigger.error) { # nocov start
-        error_message <- paste0("M: Tag ", tag, " ", n, 
-                                " has been inactive for more than ", 
-                                inactive.error, 
+        error_message <- paste0("M: Tag ", tag, " ", n,
+                                " has been inactive for more than ",
+                                inactive.error,
                                 " days. Inactiveness started on event ",
-                                start_i, " (", 
+                                start_i, " (",
                                 as.Date(valid.moves$First.time[start_i]),").")
-        event(type = "screen", 
+        event(type = "screen",
               error_message)
         movements <- tableInteraction(moves = movements, tag = tag, detections = detections,
                                       trigger = paste0(the_warning, "\n", error_message), GUI = GUI,
@@ -793,7 +793,7 @@ checkImpassables <- function(movements, tag, bio, spatial, detections, dotmat, G
     valid.moves <- movements[(Valid)]
     if (!first.time) {
       message("------------------------------------")
-      event(type = c("screen", "warning"), 
+      event(type = c("screen", "warning"),
             "The last interaction did not solve the impassable problem! See",
             " remaining problems below.\n         You can also press ESC to",
             " abort the current run and alter your spatial.txt file.")
@@ -804,12 +804,12 @@ checkImpassables <- function(movements, tag, bio, spatial, detections, dotmat, G
       if(all(is.na(dotmat[as.character(release), as.character(valid.moves$Array[1])]))) {
         the_warning <- paste0("Tag ", tag, " ", n, " made an impassable",
                               " jump: It is not possible to go from",
-                              " release site ", as.character(release), 
-                              " to ", as.character(valid.moves$Array[1]), 
+                              " release site ", as.character(release),
+                              " to ", as.character(valid.moves$Array[1]),
                               ".\n         Please resolve this either by",
                               " invalidating events or by adjusting your",
                               " 'spatial.txt' file and restarting.")
-        event(type = c("screen", "warning", "report"), 
+        event(type = c("screen", "warning", "report"),
               the_warning)
         the_warning <- paste("Warning:", the_warning)
         warning_counter <- warning_counter + 1
@@ -825,17 +825,17 @@ checkImpassables <- function(movements, tag, bio, spatial, detections, dotmat, G
         for (i in which(is.na(distances))) {
           warning_counter <- warning_counter + 1
           if (warning_counter < 5) {
-            other_warning <- paste0("Tag ", tag, " ", n, 
+            other_warning <- paste0("Tag ", tag, " ", n,
                                     " made an impassable jump in events ", i,
-                                    " to ", i + 1, 
-                                    ": It is not possible to go from array ", 
+                                    " to ", i + 1,
+                                    ": It is not possible to go from array ",
                                     shifts[i, 1], " to ", shifts[i, 2], ".")
             event(type = c("screen", "warning", "report"),
                   other_warning)
             other_warning <- paste("Warning:", other_warning)
             the_warning <- paste0(the_warning, "\n", other_warning)
           } else {
-            final_warning <- paste0("Warning: Tag ", tag, " made ", 
+            final_warning <- paste0("Warning: Tag ", tag, " made ",
                                     warning_counter, " impassable jumps (of",
                                     " which the first 4 are displayed above).")
             message(paste0("\r", final_warning), appendLF = FALSE)
@@ -954,10 +954,10 @@ checkLinearity <- function(secmoves, tag, spatial, arrays, GUI, save.tables.loca
 checkReport <- function(report){
   event(type = "debug", "Running checkReport.")
   if (report) {
-    event(type = "report", 
+    event(type = "report",
           "M: 'report' option has been activated.")
     if (!rmarkdown::pandoc_available()) {
-      event(type = c("screen", "report", "warning"), 
+      event(type = c("screen", "report", "warning"),
             "'report' can only be activated if pandoc is installed.",
             " You can find how to install pandoc at:",
             " https://pandoc.org/installing.html\n",
@@ -1099,10 +1099,10 @@ checkJumpDistance <- function(movements, tag, bio, detections, spatial, arrays,
     if (release.steps > jump.warning) {
       # Trigger warning
       the_warning <- paste0("Tag ", tag, " ", n, " jumped through ",
-                            ifelse(say.at.least, "at least ", ""), 
+                            ifelse(say.at.least, "at least ", ""),
                             release.steps - 1,
                             ifelse(release.steps > 2, " arrays ", " array "),
-                            "from release to first valid event (Release -> ", 
+                            "from release to first valid event (Release -> ",
                             vm$Array[1], ").")
       event(type = c("report", "warning", "screen"),
             the_warning)
@@ -1170,7 +1170,7 @@ checkJumpDistance <- function(movements, tag, bio, detections, spatial, arrays,
                                       ifelse(move.steps[i] > 2,
                                              " arrays ",
                                              " array "),
-                                      "in valid events ", i, " -> ", i + 1, 
+                                      "in valid events ", i, " -> ", i + 1,
                                       " (", names(move.steps)[i], ").")
               event(type = c("Report", "Warning", "Screen"),
                     other_warning)
@@ -1189,10 +1189,10 @@ checkJumpDistance <- function(movements, tag, bio, detections, spatial, arrays,
         }
         if (warning_counter >= 5) {
           message()
-          event(type = c("report", "warning"), 
+          event(type = c("report", "warning"),
                 sub("Warning: ", "", final_warning))
           link <- createEventRanges(events.to.complain.about)
-          event_list <- paste0("         Events that raised warnings: ", 
+          event_list <- paste0("         Events that raised warnings: ",
                                paste(link, collapse = ", "))
           event(type = c("screen", "report"),
                 event_list)
@@ -1226,8 +1226,8 @@ checkDeploymentTimes <- function(input) {
       B <- aux[[i]]$Stop[-nrow(aux[[i]])]
       AtoB <- as.numeric(difftime(A, B))
       if (any(AtoB < 0)) {
-        event(type = c("screen", "report"), 
-              "Error: Receiver ", names(aux)[i], 
+        event(type = c("screen", "report"),
+              "Error: Receiver ", names(aux)[i],
               " was re-deployed before being retrieved:\n")
         aux[[i]][, "placeholder"] <- ""
         aux[[i]][c(FALSE, AtoB < 0), "placeholder"] <- " <- !!!"
@@ -1456,17 +1456,17 @@ checkDetectionsBeforeRelease <- function(input, bio, discard.orphans = FALSE){
   for(i in seq_len(length(link))) {
     if (!is.na(link[i])) {
       if (any(to.remove <- !(input[[link[i]]]$Timestamp > bio$Release.date[i]))) {
-        event(type = c("screen", "warning", "report"), 
-              "Tag ", names(input)[link[i]], 
+        event(type = c("screen", "warning", "report"),
+              "Tag ", names(input)[link[i]],
               " was detected before being released!")
         if (!discard.orphans) {
-          event(type = "screen", 
+          event(type = "screen",
                 "  Release time: ", bio$Release.date[i])
-          event(type = "screen", 
+          event(type = "screen",
                 "  First detection time: ", input[[link[i]]]$Timestamp[1])
-          event(type = "screen", 
+          event(type = "screen",
                 "  Number of detections before release: ", sum(to.remove))
-          event(type = "screen", 
+          event(type = "screen",
                 "\nPossible options:\n",
                 "   a) Stop and double-check the data (recommended)\n",
                 "   b) Discard orphan detections in this instance.\n",
@@ -1590,7 +1590,7 @@ checkDupSignals <- function(input, bio){
   event(type = "debug", "Running checkDupSignals.")
 
   if (any(colnames(bio) == "Code.space")) {
-    event(type = 'debug', 
+    event(type = 'debug',
           'Debug: Skipping checkDupSignals as there is a codespace column')
   }
   else {
@@ -1677,7 +1677,7 @@ checkIssue79 <- function(arrays, spatial) {
 
   if (any(link)) {
     if (getOption("actel.bypass_issue_79", default = FALSE)) {
-      event(type = c("Screen", "warning", "report"), 
+      event(type = c("Screen", "warning", "report"),
             "This study area seems to trigger issue 79.",
             " However, you have activated the bypass,",
             " so the analysis will continue.")

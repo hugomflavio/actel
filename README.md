@@ -14,7 +14,7 @@ NOTE: actel now has a dedicated [website!](https://hugomflavio.github.io/actel-w
 
 ## Overview
 
-If you are using acoustic telemetry to track animals as they move inside a study area or as they migrate somewhere, actel is the package for you. 
+If you are using acoustic telemetry to track animals as they move inside a study area or as they migrate somewhere, actel is the package for you.
 By bringing together the study area configuration and the recorded detections, actel provides a systematic way of analysing animal migration and residency data.
 
 <img src="vignettes/mb_arrays.svg" alt="drawing" width="870"/>
@@ -24,11 +24,11 @@ By bringing together the study area configuration and the recorded detections, a
 **1. explore()**
 
  explore() allows you to quickly get a summary of your data. You can use explore() to get a general feel for the study results, and check if the input files are behaving as expected. It is also a good candidate if you just want to validate your detections for later use in other analyses.
- 
+
 **2. migration()**
 
   The migration() analysis runs the same initial checks as explore(), but on top of it, it analyses the animal behaviour. By selecting the arrays that lead to success, you can define whether or not your animals survived the migration. Additional plots help you find out if some animal/tag has been acting odd. Multiple options allow you to tweak the analysis to fit your study perfectly.
- 
+
 **3. residency()**
 
   The residency() analysis runs the same initial checks as explore(), but, similarly to migration, explores particular points of the animal behaviour. If you want to know where your animals were in each day of the study, how many animals were in each section each day, and other residency-focused variables, this is the analysis you are looking for!
@@ -38,7 +38,7 @@ By bringing together the study area configuration and the recorded detections, a
 To truly learn how to operate actel, you must read the package vignettes. These have been arranged so that you can
 prepare your analysis as you learn; quite soon you will get your first results!
 
-Here are some examples: 
+Here are some examples:
 
 **Movement tables:**
 
@@ -70,7 +70,7 @@ Here are some examples:
 
 <img src="vignettes/readme_global_residency.png" alt="drawing" width="870"/>
 
-## Installing actel 
+## Installing actel
 
 **CRAN version: 1.3.0**
 

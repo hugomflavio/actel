@@ -74,7 +74,7 @@ getDualMatrices <- function(replicates, CJS = NULL, spatial, detections.list) {
 includeIntraArrayEstimates <- function(m, efficiency = NULL, CJS = NULL) {
   event(type = "debug", "Running includeIntraArrayEstimates.")
   if (!is.null(efficiency) & !is.null(CJS)) {
-    event(type = "stop", 
+    event(type = "stop",
           "Use only one of 'efficiency' or 'CJS' at a time.")
   }
   if (length(m) > 0) {
@@ -426,7 +426,7 @@ simpleCJS <- function(input, estimate = NULL, fixed.efficiency = NULL, silent = 
             "Please use only one value for estimate.")
     # stop if estimate exceeds 1
     if (!is.null(estimate) && (estimate < 0 | estimate > 1))
-      event(type = "stop", 
+      event(type = "stop",
             "'estimate' must be between 0 and 1.")
     # all good
   }
@@ -435,7 +435,7 @@ simpleCJS <- function(input, estimate = NULL, fixed.efficiency = NULL, silent = 
   if (!is.null(fixed.efficiency)) {
     # stop if there are not enough efficiency values
     if (length(fixed.efficiency) != ncol(input)) {
-     event(type = "stop", 
+     event(type = "stop",
            "Fixed efficiency was set but its length is not the same as",
            " the number of columns in the input.")
     }

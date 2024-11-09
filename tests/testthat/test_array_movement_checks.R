@@ -46,13 +46,13 @@ if (interactive()) {
   # ONLY RUN THIS PART IF YOU CAN MANUALLY CONTROL THE CONSOLE INPUT. USE THE VALUES PROVIDED BELOW
   xdotmat <- dotmat
   xdotmat["A7", "A8"] <- NA
-  expect_warning(output <- checkImpassables(movements = moves[[1]], tag = "R64K-4451", bio = bio, 
+  expect_warning(output <- checkImpassables(movements = moves[[1]], tag = "R64K-4451", bio = bio,
       spatial = spatial, dotmat = xdotmat, GUI = "never", n = "(1/1)"),
     "Tag R64K-4451 (1/1) made an impassable jump in events 16 to 17: It is not possible to go from array A7 to A8.", fixed = TRUE)
   # 17
   # y
   # n
-  expect_warning(output <- checkImpassables(movements = moves[[1]], tag = "R64K-4451", bio = bio, 
+  expect_warning(output <- checkImpassables(movements = moves[[1]], tag = "R64K-4451", bio = bio,
       spatial = spatial, dotmat = xdotmat, GUI = "never", n = "(1/1)"),
 "The last interaction did not solve the impassable problem! See remaining problems below.
          You can also press ESC to abort the current run and alter your spatial.txt file.", fixed = TRUE)
@@ -65,7 +65,7 @@ if (interactive()) {
    	xdotmat <- dotmat
    	xdotmat["A7", "A8"] <- NA
       expect_error(
-      	expect_warning(output <- checkImpassables(movements = moves[[1]], tag = "R64K-4451", bio = bio, 
+      	expect_warning(output <- checkImpassables(movements = moves[[1]], tag = "R64K-4451", bio = bio,
             spatial = spatial, dotmat = xdotmat, GUI = "never", n = "(1/1)"),
       		"Tag R64K-4451 (1/1) made an impassable jump in events 16 to 17: It is not possible to go from array A7 to A8.", fixed = TRUE), 	
     		"Preventing analysis from entering interactive mode in a non-interactive session.", fixed = TRUE)
@@ -95,7 +95,7 @@ test_that("checkJumpDistance reacts as expected", {
 	# jump from first to second event
 	xmoves <- moves[[1]]
 	xmoves$Array[2] <- "A3"
-	expect_warning(checkJumpDistance(movements = xmoves, bio = bio, tag = "R64K-4451", dotmat = dotmat, paths = paths, n = "(1/1)", 
+	expect_warning(checkJumpDistance(movements = xmoves, bio = bio, tag = "R64K-4451", dotmat = dotmat, paths = paths, n = "(1/1)",
                                    arrays = arrays, spatial = spatial, jump.warning = 1, jump.error = Inf, GUI = "never",
                                    detections = detections.list[["R64K-4451"]], save.tables.locally = FALSE),
 	"Tag R64K-4451 (1/1) jumped through 1 array in valid events 1 -> 2 (A1 -> A3)", fixed = TRUE)
@@ -104,7 +104,7 @@ test_that("checkJumpDistance reacts as expected", {
 	xmoves <- moves[[1]]
 	xmoves$Array[2] <- "Unknown"
 	xmoves$Valid[2] <- FALSE
-	expect_warning(checkJumpDistance(movements = xmoves, bio = bio, tag = "R64K-4451", dotmat = dotmat, paths = paths, n = "(1/1)", 
+	expect_warning(checkJumpDistance(movements = xmoves, bio = bio, tag = "R64K-4451", dotmat = dotmat, paths = paths, n = "(1/1)",
                                    arrays = arrays, spatial = spatial, jump.warning = 1, jump.error = Inf, GUI = "never",
                                    detections = detections.list[["R64K-4451"]], save.tables.locally = FALSE),
 	"Tag R64K-4451 (1/1) jumped through 1 array in valid events 1 -> 2 (A1 -> A3)", fixed = TRUE)
@@ -113,13 +113,13 @@ test_that("checkJumpDistance reacts as expected", {
 	xdotmat <- dotmat
  	xdotmat["A1", "A2"] <- NA
   xmoves <- moves[[1]][-1, ]
-	expect_error(checkJumpDistance(movements = xmoves, bio = bio, tag = "R64K-4451", dotmat = xdotmat, paths = paths, n = "(1/1)", 
+	expect_error(checkJumpDistance(movements = xmoves, bio = bio, tag = "R64K-4451", dotmat = xdotmat, paths = paths, n = "(1/1)",
                                    arrays = arrays, spatial = spatial, jump.warning = 1, jump.error = Inf, GUI = "never",
                                    detections = detections.list[["R64K-4451"]], save.tables.locally = FALSE),
 	"There are unresolved impassable jumps in the movements (Found at release).", fixed = TRUE)
 
   # Impassable jump exception elsewhere
-  expect_error(checkJumpDistance(movements = moves[[1]], bio = bio, tag = "R64K-4451", dotmat = xdotmat, paths = paths, n = "(1/1)", 
+  expect_error(checkJumpDistance(movements = moves[[1]], bio = bio, tag = "R64K-4451", dotmat = xdotmat, paths = paths, n = "(1/1)",
                                    arrays = arrays, spatial = spatial, jump.warning = 1, jump.error = Inf, GUI = "never",
                                    detections = detections.list[["R64K-4451"]], save.tables.locally = FALSE),
   "There are unresolved impassable jumps in the movements (Found during moves).", fixed = TRUE)
@@ -184,7 +184,7 @@ test_that("checkFirstDetBackFromRelease reacts as expected.", {
   xspatial$release.sites$Array <- "A2"
   expect_warning(checkFirstDetBackFromRelease(movements = moves[[1]], tag = "R64K-4451", bio = bio, spatial = xspatial, arrays = arrays, GUI = "never", n = "(1/1)"),
     "Tag R64K-4451 (1/1) was detected in an array that is not after its release site! Opening relevant data for inspection.\nExpected first array: A2", fixed = TRUE)
-  
+
   xmoves <- moves[[1]]
   xmoves$Valid <- FALSE
   tryCatch(output <- checkFirstDetBackFromRelease(movements = xmoves, tag = "R64K-4451", bio = bio, spatial = xspatial, arrays = arrays, GUI = "never", n = "(1/1)"),

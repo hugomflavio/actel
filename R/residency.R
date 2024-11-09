@@ -166,9 +166,9 @@ residency <- function(
 # debug lines
   if (getOption("actel.debug", default = FALSE)) { # nocov start
     # show debug log location
-    on.exit(event(type = "screen", 
+    on.exit(event(type = "screen",
                   "Debug: Progress log available at ",
-                  gsub("\\\\", "/", paste0(tempdir(), 
+                  gsub("\\\\", "/", paste0(tempdir(),
                                            "/actel_debug_file.txt"))))
     # show debug rdata location
     on.exit(add = TRUE,
@@ -519,7 +519,7 @@ residency <- function(
   section.movements <- assembleValidSecMoves(valid.moves = valid.movements, spatial = spatial,
                                              valid.dist = attributes(dist.mat)$valid)
 
-  event(type = c("screen", "report"), 
+  event(type = c("screen", "report"),
         "M: Compiling residency objects.")
 
   res.df <- assembleResidency(secmoves = section.movements, movements = movements, spatial = spatial)
@@ -542,12 +542,12 @@ residency <- function(
   rm(aux)
 
   if (length(residency.list) == 0) {
-    event(type = "stop", 
+    event(type = "stop",
           "No tags have enough data for residency analysis.",
           " Consider running explore() instead.")
   }
 
-  event(type = c("screen", "report"), 
+  event(type = c("screen", "report"),
         "M: Calculating",
         ifelse(timestep == "days", " daily", " hourly"),
         " locations for each tag.")
@@ -564,7 +564,7 @@ residency <- function(
     link <- match(the.transmitters, colnames(time.positions))
     if (all(is.na(link))) {
       event(type = c("warning", "screen", "report"),
-            'Group ', as.character(i), 
+            'Group ', as.character(i),
             ' has no detections. Skipping ratio calculations.')
       return(NULL)
     }
@@ -578,7 +578,7 @@ residency <- function(
   })
   names(group.ratios) <- unique(bio$Group)
 
-  event(type = "screen", 
+  event(type = "screen",
         "M: Validating detections.")
 
   recipient <- validateDetections(detections.list = detections.list, movements = valid.movements)
@@ -725,7 +725,7 @@ residency <- function(
                                                       bio = bio,
                                                       suffix = "_section_departure")
 
-    event(type = c("screen", "report"), 
+    event(type = c("screen", "report"),
           "M: Drawing individual residency graphics.")
 
 
