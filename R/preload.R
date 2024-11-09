@@ -60,24 +60,37 @@ preload <- function(biometrics, spatial, deployments, detections, dot = NULL,
     section.order = NULL, exclude.tags = NULL, disregard.parallels = FALSE,
     discard.orphans = FALSE) {
 
+# clean up any lost helpers
   deleteHelpers()
+  if (file.exists(paste0(tempdir(), "/actel_debug_file.txt"))) {
+    file.remove(paste0(tempdir(), "/actel_debug_file.txt"))
+  }
+# ------------------------
 
 # debug lines
   if (getOption("actel.debug", default = FALSE)) { # nocov start
-    on.exit(message("Debug: Progress log available at ",
-        gsub("\\\\", "/", paste0(tempdir(), "/actel_debug_file.txt"))))
-    on.exit(message("Debug: Saving carbon copy to ",
-        gsub("\\\\", "/", paste0(tempdir(), "/actel.preload.debug.RData"))),
-      add = TRUE)
-    on.exit(save(list = ls(),
-      file = paste0(tempdir(), "/actel.preload.debug.RData")),
-      add = TRUE)
-    message("!!!--- Debug mode has been activated ---!!!")
+    # show debug log location
+    on.exit(event(type = "screen",
+                  "Debug: Progress log available at ",
+                  gsub("\\\\", "/", paste0(tempdir(),
+                                           "/actel_debug_file.txt"))))
+    # show debug rdata location
+    on.exit(add = TRUE,
+            event(type = "screen",
+                  "Debug: Saving carbon copy to ",
+                  gsub("\\\\", "/", paste0(tempdir(),
+                                           "/actel.debug.RData"))))
+    # save debug rdata
+    on.exit(add = TRUE,
+            save(list = ls(),
+                 file = paste0(tempdir(), "/actel.debug.RData")))
+    event(type = c("screen", "report"),
+          "!!!--- Debug mode has been activated ---!!!")
   } # nocov end
 # ------------------------
 
 # Store function call
-  the.function.call <- paste0("preload(biometrics = ",
+  the_function_call <- paste0("preload(biometrics = ",
       deparse(substitute(biometrics)),
     ", spatial = ", deparse(substitute(spatial)),
     ", deployments = ", deparse(substitute(deployments)),
@@ -98,29 +111,59 @@ preload <- function(biometrics, spatial, deployments, detections, dot = NULL,
     ", discard.orphans = ", ifelse(discard.orphans, "TRUE", "FALSE"),
     ")")
 
-  appendTo("debug", the.function.call)
+  event(type = "debug", the_function_call)
 # ------------------------
 
+# Final arrangements before beginning
+  the_time <- Sys.time()
+  event(type = "report",
+        "Actel R package report.\n",
+        "Version: ", utils::packageVersion("actel"), "\n",
+        "Target folder: ", getwd(), "\n",
+        "Timestamp: ", the_time, "\n",
+        "Function: preload()\n")
+# -----------------------------------
+
   if (is.na(match(tz, OlsonNames()))) {
-    stop("'tz' could not be recognized as a time zone.",
-      " Check available time zones with OlsonNames()\n", call. = FALSE)
+    event(type = "stop",
+          "'tz' could not be recognized as a time zone.",
+          " Check available time zones with OlsonNames()")
   }
 
   if (!is.null(exclude.tags) && any(!grepl("-", exclude.tags, fixed = TRUE))) {
-    stop("Not all contents in 'exclude.tags' could be recognized as tags (i.e.",
-      " 'codespace-signal'). Valid examples: 'R64K-1234', A69-1303-1234'\n",
-      call. = FALSE)
+    event(type = "stop",
+          "Not all contents in 'exclude.tags' could be recognized as tags",
+          " (i.e. 'codespace-signal').",
+          " Valid examples: 'R64K-1234', A69-1303-1234'")
   }
 
   if (!is.null(section.order) && any(table(section.order) > 1)) {
-    stop("Some section names are duplicated in the 'section.order' argument. ",
-      "Please include each section only once.\n", call. = FALSE)
+    event(type = "stop",
+          "Some section names are duplicated in the 'section.order' argument.",
+          " Please include each section only once.", call. = FALSE)
   }
 
+# Prepare clean-up before function ends
+  finished_unexpectedly <- TRUE
+  on.exit(add = TRUE,
+          if (interactive() & finished_unexpectedly) {
+            event(type = "crash", the_function_call)
+          })
+
+  if (!getOption("actel.debug", default = FALSE)) {
+    on.exit(add = TRUE,
+            deleteHelpers())
+  }
+
+  on.exit(add = TRUE,
+          tryCatch(sink(), warning = function(w) {hide <- NA}))
+# --------------------------------------
+
+# Ready to start working
   bio <- loadBio(input = biometrics, tz = tz)
 
-  appendTo(c("Screen", "Report"),
-    paste0("M: Number of target tags: ", nrow(bio), "."))
+  event(type = c("screen", "report"),
+        "M: Number of target tags: ", nrow(bio), ".")
 
   deployments <- loadDeployments(input = deployments, tz = tz)
   # check that receivers are not deployed before being retrieved
@@ -153,10 +196,10 @@ preload <- function(biometrics, spatial, deployments, detections, dot = NULL,
                           preloading = TRUE)
   } else {
     if (!is.character(dot)) {
-      stop("'dot' was set but could not recognised as a string. ",
-        "Please prepare a dot string and include it in the dot argument.\n",
-        "You can use readDot to check the quality of your dot string.",
-        call. = FALSE)
+      event(type = "stop",
+            "'dot' was set but could not recognised as a string. ",
+            "Please prepare a dot string and include it in the dot argument.\n",
+            "You can use readDot to check the quality of your dot string.")
     } else {
       recipient <- loadDot(string = dot, spatial = spatial,
                            disregard.parallels = disregard.parallels,
@@ -168,8 +211,9 @@ preload <- function(biometrics, spatial, deployments, detections, dot = NULL,
   dotmat <- recipient$dotmat
   paths <- recipient$paths
   if (is.null(dot) | is.null(arrays) | is.null(dotmat) | is.null(paths)) {
-    stop("Something went wrong when assigning recipient objects (loadDot). ",
-      "If this error persists, contact the developer.") # nocov
+    event(type = "stop",
+          "Something went wrong when assigning recipient objects (loadDot).",
+          " If this error persists, contact the developer.") # nocov
   }
 
   rm(recipient)
@@ -192,9 +236,9 @@ preload <- function(biometrics, spatial, deployments, detections, dot = NULL,
   detections <- createStandards(detections = detections, spatial = spatial,
                                 deployments = deployments,
                                 discard.orphans = discard.orphans)
-  appendTo(c("Screen", "Report"),
-    paste0("M: Data time range: ", as.character(head(detections$Timestamp, 1)),
-           " to ", as.character(tail(detections$Timestamp, 1)), " (", tz, ")."))
+  event(type = c("screen", "report"),
+        "M: Data time range: ", as.character(head(detections$Timestamp, 1)),
+        " to ", as.character(tail(detections$Timestamp, 1)), " (", tz, ").")
 
   # Check if there are detections from unknown receivers
   checkUnknownReceivers(input = detections)
@@ -221,9 +265,10 @@ preload <- function(biometrics, spatial, deployments, detections, dot = NULL,
   detections.list <- recipient$detections.list
   bio <- recipient$bio
   if (is.null(detections.list) | is.null(bio)) {
-    stop("Something went wrong when assigning recipient objects ",
-      "(splitDetections). If this error persists, contact the ",
-      "developer.\n", call. = FALSE) # nocov
+    event(type = "stop",
+          "Something went wrong when assigning recipient objects",
+          " (splitDetections). If this error persists, contact the",
+          " developer.") # nocov
   }
   rm(recipient)
 
@@ -235,15 +280,17 @@ preload <- function(biometrics, spatial, deployments, detections, dot = NULL,
   deployments <- recipient$deployments
   detections.list <- recipient$detections.list
   if (is.null(spatial) | is.null(deployments) | is.null(detections.list)) {
-    stop("Something went wrong when assigning recipient objects ",
-      "(unknownReceivers). If this error persists, contact the developer.\n",
-      call. = FALSE) # nocov
+    event(type = "stop",
+          "Something went wrong when assigning recipient objects",
+          " (unknownReceivers). If this error persists,",
+          " contact the developer.") # nocov
   }
   rm(recipient)
 
   detections.list <- checkDetectionsBeforeRelease(input = detections.list,
                                   bio = bio, discard.orphans = discard.orphans)
-  appendTo(c("Screen", "Report"), "M: Data successfully imported!")
+  event(type = c("screen", "report"),
+        "M: Data successfully imported!")
 
   output <- list(bio = bio, deployments = deployments, spatial = spatial,
     dot = dot, arrays = arrays, dotmat = dotmat, dist.mat = dist.mat,
@@ -269,7 +316,9 @@ preload <- function(biometrics, spatial, deployments, detections, dot = NULL,
   # carbon copy report messages
   attributes(output)$loading_messages <- readLines(paste0(tempdir(),
                                                    "/temp_log.txt"))
-  attributes(output)$function_call <- the.function.call
+  attributes(output)$function_call <- the_function_call
+
+  finished_unexpectedly <- FALSE
   return(output)
 }
 
@@ -284,6 +333,7 @@ preload <- function(biometrics, spatial, deployments, detections, dot = NULL,
 #' @keywords internal
 #'
 preloadDetections <- function(input, tz, start.time = NULL, stop.time = NULL) {
+  event(type = "debug", "Running preloadDetections.")
   mandatory.cols <- c("Timestamp", "Receiver", "CodeSpace", "Signal")
 
   if (any(link <- is.na(match(mandatory.cols, colnames(input))))) {
@@ -294,46 +344,49 @@ preloadDetections <- function(input, tz, start.time = NULL, stop.time = NULL) {
       also.say <- ""
     }
 
-    stop("The following mandatory columns are missing in the detections: ",
-      paste(mandatory.cols[link], collapse = ", "), also.say, call. = FALSE)
+    event(type = "stop",
+          "The following mandatory columns are missing in the detections: ",
+          paste(mandatory.cols[link], collapse = ", "), also.say)
   }
 
   link <- apply(input[, mandatory.cols], 2, function(i) any(is.na(i)))
   if (any(link)) {
-    stop("There is missing data in the following mandatory columns of the ",
-      "detections: ", paste0(mandatory.cols[link], collapse = ", "),
-      call. = FALSE)
+    event(type = "stop",
+          "There is missing data in the following mandatory columns of the",
+          " detections: ", paste0(mandatory.cols[link], collapse = ", "))
   }
 
   if (!is.integer(input$Signal)) {
-    appendTo(c("Screen", "Warning", "Report"),
-      paste0("The 'Signal' column in the detections is not of type integer. ",
-        "Attempting to convert."))
+    event(type = c("warning", "screen", "report"),
+          "The 'Signal' column in the detections is not of type integer.",
+          " Attempting to convert.")
     input$Signal <- tryCatch(as.integer(input$Signal),
       warning = function(w) {
-        stop("Attempting to convert the 'Signal' to integer failed.
-          Aborting.", call. = FALSE)
+        event(type = "stop",
+              "Attempting to convert the 'Signal' to integer failed.",
+              " Aborting.", call. = FALSE)
       })
   }
 
   if (!is.integer(input$Receiver)) {
-    appendTo(c("Screen", "Warning", "Report"),
-      paste0("The 'Receiver' column in the detections is not of type ",
-        "integer. Attempting to convert."))
+    event(type = c("warning", "screen", "report"),
+          "The 'Receiver' column in the detections is not of type",
+          " integer. Attempting to convert.")
 
     aux <- tryCatch(as.integer(input$Receiver),
       warning = function(w) {
-        appendTo(c("Screen", "Warning", "Report"),
-          paste0("Attempting to convert the 'Receiver' to integer failed. ",
-            "Attempting to extract only the serial numbers."))
-        return(NULL) })
+        event(type = c("warning", "screen", "report"),
+              "Attempting to convert the 'Receiver' to integer failed.",
+              " Attempting to extract only the serial numbers.")
+        return(NULL)
+      })
 
     if (is.null(aux)) {
       # extractSignals works for extracting only the receiver numbers too
       aux <- tryCatch(extractSignals(input$Receiver),
         warning = function(w) {
-          stop("Extracting the serial numbers failed. Aborting.",
-            call. = FALSE)
+          event(type = "stop",
+                "Extracting the serial numbers failed. Aborting.")
         })
     }
     input$Receiver <- aux
@@ -347,58 +400,61 @@ preloadDetections <- function(input, tz, start.time = NULL, stop.time = NULL) {
 
   if (length(the.col <- grep("^[S|s]ensor\\.[V|v]alue$", colnames(input))) > 0)
     colnames(input)[the.col] <- "Sensor.Value"
-  
+
   if (!any(grepl("^Sensor\\.Value$", colnames(input)))) {
-    appendTo(c("Screen", "Warning", "Report"),
-      paste0("Could not find a 'Sensor.Value' column in the detections. ",
-        "Filling one with NA."))
+    event(type = c("warning", "screen", "report"),
+          "Could not find a 'Sensor.Value' column in the detections.",
+          " Filling one with NA.")
     input$Sensor.Value <- NA_real_
   }
 
   if (!any(grepl("^Sensor\\.Unit$", colnames(input)))) {
-    appendTo(c("Screen", "Warning", "Report"),
-    paste0("Could not find a 'Sensor.Unit' column in the detections. ",
-      "Filling one with NA."))
+    event(type = c("warning", "screen", "report"),
+          "Could not find a 'Sensor.Unit' column in the detections.",
+          " Filling one with NA.")
     input$Sensor.Unit <- NA_character_
   }
 
   if (!is.numeric(input$Sensor.Value)) {
-    appendTo(c("Screen", "Warning", "Report"),
-      paste0("The 'Sensor.Value' column in the detections is not of type ",
-        "numeric. Attempting to convert."))
+    event(type = c("warning", "screen", "report"),
+          "The 'Sensor.Value' column in the detections is not of type",
+          " numeric. Attempting to convert.")
     input$Sensor.Value <- tryCatch(as.numeric(input$Sensor.Value),
       warning = function(w) {
-        stop("Attempting to convert the 'Sensor.Value' to numeric failed. ",
-          "Aborting.", call. = FALSE)
+        event(type = "stop",
+              "Attempting to convert the 'Sensor.Value' to numeric failed.",
+              " Aborting.")
       })
   }
 
 
   if (!inherits(input$Timestamp, "POSIXct")) {
-    appendTo(c("Screen", "Report"),
-      "M: Converting detection timestamps to POSIX objects.")
+    event(type = c("screen", "report"),
+          "M: Converting detection timestamps to POSIX objects.")
 
     if (!is.character(input$Timestamp)) {
       input$Timestamp <- as.character(input$Timestamp)
     }
-    
+
     input$Timestamp <- fasttime::fastPOSIXct(input$Timestamp, tz = "UTC")
 
     if (any(is.na(input$Timestamp))) {
-      stop("Converting the timestamps failed. Aborting.", call. = FALSE)
+      event(type = "stop",
+            "Converting the timestamps failed. Aborting.")
     }
     attributes(input$Timestamp)$tzone <- tz
   } else {
     if (attributes(input$Timestamp)$tz != "UTC") {
       if (attributes(input$Timestamp)$tz != tz) {
-        stopAndReport("Detections provided in POSIX format but not in UTC ",
-          "and time zone does not match tz argument (",
-          attributes(input$Timestamp)$tz, " != ", tz,
-          ")! Stopping to avoid erroneous output.")
+        event(type = "stop",
+              "Detections provided in POSIX format but not in UTC",
+              " and time zone does not match tz argument (",
+              attributes(input$Timestamp)$tz, " != ", tz,
+              ")! Stopping to avoid erroneous output.")
       } else {
-        appendTo(c("Screen", "Report"),
-          paste0("M: Detection timestamps are already POSIX and time zone ",
-            "already matches tz argument. Skipping time zone matching."))
+        event(type = c("screen", "report"),
+              paste0("M: Detection timestamps are already POSIX and time zone",
+              " already matches tz argument. Skipping time zone matching."))
       }
     } else {
       attributes(input$Timestamp)$tzone <- tz
@@ -411,27 +467,27 @@ preloadDetections <- function(input, tz, start.time = NULL, stop.time = NULL) {
   if (!is.null(start.time)){
     onr <- nrow(input)
     input <- input[input$Timestamp >= as.POSIXct(start.time, tz = tz), ]
-    appendTo(c("Screen", "Report"),
-      paste0("M: Discarding detection data previous to ", start.time,
-        " per user command (", onr - nrow(input), " detections discarded)."))
+    event(type = c("screen", "report"),
+          "M: Discarding detection data previous to ", start.time,
+          " per user command (", onr - nrow(input), " detections discarded).")
   }
   if (!is.null(stop.time)){
     onr <- nrow(input)
     input <- input[input$Timestamp <= as.POSIXct(stop.time, tz = tz), ]
-    appendTo(c("Screen", "Report"),
-      paste0("M: Discarding detection data posterior to ", stop.time,
-        " per user command (", onr - nrow(input), " detections discarded)."))
+    event(type = c("screen", "report"),
+          "M: Discarding detection data posterior to ", stop.time,
+          " per user command (", onr - nrow(input), " detections discarded).")
   }
 
   if (any(grepl("^Valid$", colnames(input)))) {
     if (!is.logical(input$Valid)) {
-      appendTo(c("Screen", "Warning", "Report"),
-        paste0("The detections have a column named 'Valid' but its content ",
-          "is not logical. Resetting to Valid = TRUE."))
+      event(type = c("warning", "screen", "report"),
+            "The detections have a column named 'Valid' but its content",
+            " is not logical. Resetting to Valid = TRUE.")
       input$Valid <- TRUE
     }
   } else {
-    input$Valid <- TRUE    
+    input$Valid <- TRUE
   }
 
   input$Transmitter <- as.factor(paste(input$CodeSpace, input$Signal, sep = "-"))

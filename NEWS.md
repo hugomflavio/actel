@@ -21,6 +21,7 @@ Enhancements:
   * New `processInnovaseaFile()` function to handle updated innovasea detection file format (issue [#97](https://github.com/hugomflavio/actel/issues/97)).
   * New `convertLotekCDMAFile()` function to prepare lotek txt logs for further analyses (issue [#103](https://github.com/hugomflavio/actel/issues/103)).
   * New `plotDot()` function to help users inspect their spatial.txt files (issue [#55](https://github.com/hugomflavio/actel/issues/55)).
+  * Improved internal mechanisms for message/warning/debug/stop reporting. new internal function `event()` replaces the old `appendTo()`, `stopAndReport()`, and `emergencyBreak()` (issue [#135](https://github.com/hugomflavio/actel/issues/135))
 
 ## actel 1.3.0
 
@@ -189,7 +190,7 @@ Enhancements:
   * Verify number of columns on all detection files.
   * Run quality checks on standard detection files.
   * New `getSpeeds()` function allows the user to quickly extract all speed information from the analyses.
-  
+
 ## actel 1.0.0
 
 Fixes:

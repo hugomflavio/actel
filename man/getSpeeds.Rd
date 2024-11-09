@@ -45,7 +45,7 @@ getSpeeds(example.results, type = "forward")
 # or
 getSpeeds(example.results, type = "backward")
 
-# and also how many events per tag (this won't change the output 
+# and also how many events per tag (this won't change the output
 # with the example.results, only because these results are minimal).
 getSpeeds(example.results, n.events = "first")
 # or

@@ -78,8 +78,10 @@ test_that("combine works as expected.", {
 	expect_equal(combine(list(A = c(NA, 1, NA), B = c(2, NA, 2))), c(2, 1, 2))
 })
 
-test_that("appendTo stores comments.", {
-	appendTo("Comment", "test comment", "Test tag")
+test_that("event stores comments.", {
+	event(type = "comment",
+	      tag = "Test tag",
+	      "test comment")
 	expect_true(file.exists("temp_comments.txt"))
 	expect_equal(read.table("temp_comments.txt", sep = "\t"), read.csv(text = '"V1","V2"\n"Test tag","test comment"'))
 	file.remove("temp_comments.txt")

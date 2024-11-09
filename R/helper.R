@@ -63,15 +63,15 @@ splitN <- function(x, n, row.names = FALSE) {
 #' @keywords internal
 #'
 darken <- function(color, factor = 1.4){
-    col <- grDevices::col2rgb(color)
+  col <- grDevices::col2rgb(color)
 
-    if (factor > 1)
-      col <- col / factor
-    else
-      col <- col + (255 - col) * (1 - factor)
+  if (factor > 1)
+    col <- col / factor
+  else
+    col <- col + (255 - col) * (1 - factor)
 
-    col <- grDevices::rgb(t(col), maxColorValue = 255)
-    return(col)
+  col <- grDevices::rgb(t(col), maxColorValue = 255)
+  return(col)
 }
 
 #' Match POSIX values
@@ -92,20 +92,6 @@ match.POSIXt <- function(this, there) {
       return(min(x))
     return(x)
   })
-}
-
-#' stop function but paste error to the report too
-#'
-#' @param ... parts of the error string
-#'
-#' @return No return value, called for side effects.
-#'
-#' @keywords internal
-#'
-stopAndReport <- function(...) {
-  the.string <- paste0(...)
-  appendTo("Report", paste0("Error: ", the.string))
-  stop(the.string, call. = FALSE)
 }
 
 #' Find original station name
@@ -267,13 +253,15 @@ extractCodeSpaces <- function(input) {
 #' @keywords internal
 #'
 std.error.circular <- function(x, na.rm = TRUE, silent = FALSE){
- a <- length(x)
- if(na.rm)
-  x <- x[!is.na(x)]
- output <- circular::sd.circular(x) / sqrt(length(x))
- if (!silent && a != length(x))
-  message("M: Ommited ", a - length(x), " missing ", ifelse((a - length(x)) > 1, "values.", "value."))
- return(output)
+  a <- length(x)
+  if(na.rm) {
+    x <- x[!is.na(x)]
+  }
+  output <- circular::sd.circular(x) / sqrt(length(x))
+  if (!silent && a != length(x)) {
+    message("M: Ommited ", a - length(x), " missing ", ifelse((a - length(x)) > 1, "values.", "value."))
+  }
+  return(output)
 }
 
 
@@ -435,103 +423,183 @@ combine <- function(input) {
   return(output)
 }
 
-#' Append to ...
+#' Log a new event
 #'
-#' Appends a note/comment to the specified recipient, which in turn corresponds to a temporary helper file.
+#' Logs useful information as the analysis progresses. May be called to abort
+#' the run if type includes "stop"
 #'
-#' @param recipient 'Screen' displays the message on screen, 'Report' appends the message to 'temp_log.txt', 'Warning' appends the message to 'temp_warnings.txt', 'UD' appends the message to 'temp_UD.txt', 'Comment' appends the message to 'temp_comments.txt'. The same message may be appended to multiple recipients at once.
-#' @param line The text to be appended.
-#' @param tag the tag number to which the comment belongs. Only used when recipient = 'Comment'.
+#' @param type A vector with one of more of several options:
+#'  \itemize{
+#'    \item 'crash' special case to be used only together with on.exit(). Meant
+#'       to capture function failures not expressly handled by our coded stops.
+#'    \item 'stop' appends the message to temp_log.txt then stops the execution.
+#'    \item 'warning' appends the message to temp_warnings.txt,
+#'    \item 'screen' displays the message on screen,
+#'    \item 'report' appends the message to temp_log.txt,
+#'    \item 'ud' appends the message to temp_UD.txt,
+#'    \item 'comment' appends the message to temp_comments.txt,
+#'    \item 'debug' appends the message only to the debug log. NOTE: does not have to be
+#'      explicitly called; everything goes into the debug log. Use when you
+#'      _only_ want the event to be logged in as debug.
+#'  }
+#'  The same message may be appended to multiple types at once.
+#'  Preferred order is "stop", "warning", "screen", "report".
+#' @param tag Only relevant one 'comment' is one of the types. Put the
+#'  transmitter ID here so the comment is attached to the right animal.
+#' @param ... The text fragments that compose the event message.
 #'
 #' @return No return value, called for side effects.
 #'
 #' @keywords internal
 #'
-appendTo <- function(recipient, line, tag) {
-  recipient <- tolower(recipient)
-  for (i in recipient) {
-    if (i == "screen") {
-      if (any(recipient == "warning"))
-        warning(line, immediate. = TRUE, call. = FALSE)
-      else
-        message(line)
-      flush.console()
+event <- function(..., type, tag) {
+  if (missing(type)) {
+    stop("event was called without expressly defining argument 'type'.",
+         call. = FALSE)
+  }
+  type <- tolower(type)
+
+  if ("warning" %in% type & "error" %in% type) { # nocov start
+    # this should never happen, this is a dev error
+    stop("event() was called with both warning and error flags.",
+         call. = FALSE)
+  } # nocov end
+
+  if ("crash" %in% type) {
+    type <- c("crash", "screen", "report")
+    event_text <- paste0("\nA fatal exception occurred!\n",
+                         "Found a bug? Report it here:",
+                         " https://github.com/hugomflavio/actel/issues",
+                         "\n\n",
+                         "You can recover latest the job log (including your",
+                         " comments and decisions) by running recoverLog().\n",
+                         "-------------------")
+    function_call <- paste0(...)
+  } else {
+    event_text <- paste0(...)
+  }
+
+  if ("screen" %in% type) {
+    if ("warning" %in% type) {
+      warning(event_text, immediate. = TRUE, call. = FALSE)
+    } else {
+      message(event_text)
     }
-    if (i == "report") {
-      if (any(recipient == "warning")) {
-        write(paste("Warning:", line),
-          file = paste(tempdir(), "temp_log.txt", sep = "/"),
-          append = file.exists(paste(tempdir(), "temp_log.txt", sep = "/")))
-      } else {
-        write(line,
-          file = paste(tempdir(), "temp_log.txt", sep = "/"),
-          append = file.exists(paste(tempdir(), "temp_log.txt", sep = "/")))
-      }
-    }
-    if (i == "warning") {
-      write(paste("Warning:", line),
-        file = paste(tempdir(), "temp_warnings.txt", sep = "/"),
-        append = file.exists(paste(tempdir(), "temp_warnings.txt", sep = "/")))
-    }
-    if (i == "ud") { # nocov start
-      write(line,
-        file = paste(tempdir(), "temp_UD.txt", sep = "/"),
-        append = file.exists(paste(tempdir(), "temp_UD.txt", sep = "/")))
-    } # nocov end
-    if (i == "comment") {
-      write(paste(tag, line, sep = "\t"),
-        file = paste(tempdir(), "temp_comments.txt", sep = "/"),
-        append = file.exists(paste(tempdir(), "temp_comments.txt", sep = "/")))
+    flush.console() # for buffered consoles.
+  }
+
+  # stop calls should always be logged to the report
+  if ("report" %in% type | "stop" %in% type) {
+    if ("warning" %in% type) {
+      write(paste("Warning:", event_text),
+            file = paste(tempdir(), "temp_log.txt", sep = "/"),
+            append = file.exists(paste(tempdir(), "temp_log.txt", sep = "/")))
+    } else {
+      write(event_text,
+            file = paste(tempdir(), "temp_log.txt", sep = "/"),
+            append = file.exists(paste(tempdir(), "temp_log.txt", sep = "/")))
     }
   }
-  write(paste(format(Sys.time(), "%H:%M:%S.:"), line),
+
+  if ("warning" %in% type) {
+    write(paste("Warning:", event_text),
+      file = paste(tempdir(), "temp_warnings.txt", sep = "/"),
+      append = file.exists(paste(tempdir(), "temp_warnings.txt", sep = "/")))
+  }
+
+  # "ud" stands for "user decision"
+  if ("ud" %in% type) { # nocov start
+    write(event_text,
+      file = paste(tempdir(), "temp_UD.txt", sep = "/"),
+      append = file.exists(paste(tempdir(), "temp_UD.txt", sep = "/")))
+  } # nocov end
+
+  if ("comment" %in% type) {
+    write(paste(tag, event_text, sep = "\t"),
+      file = paste(tempdir(), "temp_comments.txt", sep = "/"),
+      append = file.exists(paste(tempdir(), "temp_comments.txt", sep = "/")))
+  }
+
+  # everything goes into debug
+  if ("debug" %in% type) {
+    event_text <- paste("Debug:", event_text)
+    if (getOption("actel.debug", default = FALSE)) {
+      message(event_text)
+    }
+  }
+  write(paste(format(Sys.time(), "%H:%M:%S:"), event_text),
     file = paste(tempdir(), "actel_debug_file.txt", sep = "/"),
     append = file.exists(paste(tempdir(), "actel_debug_file.txt", sep = "/")))
+
+  if ("stop" %in% type) {
+    stop(event_text, call. = FALSE)
+  }
+
+  if ("crash" %in% type) {
+    # transfer comments, decisions, and function call to job log
+    if (file.exists(paste0(tempdir(), "/temp_comments.txt"))) {
+      comments <- readr::read_file(paste0(tempdir(), "/temp_comments.txt"))
+      comments <- gsub("\r", "", comments)
+      comments <- gsub("\t", ": ", comments)
+    } else {
+      comments <- ""
+    }
+    if (file.exists(paste0(tempdir(), "/temp_UD.txt"))) {
+      uds <- readr::read_file(paste0(tempdir(), "/temp_UD.txt"))
+      uds <- gsub("\r", "", uds)
+    } else {
+      uds <- ""
+    }
+    text_block <- paste0("User comments:\n",
+                         "-------------------\n",
+                         comments,
+                         "-------------------\n",
+                         "User interventions:\n",
+                         "-------------------\n",
+                         uds,
+                         "-------------------\n",
+                         "Function call:\n",
+                         "-------------------\n",
+                         function_call,
+                         "\n",
+                         "-------------------")
+      write(text_block,
+            file = paste(tempdir(), "temp_log.txt", sep = "/"),
+            append = file.exists(paste(tempdir(), "temp_log.txt", sep = "/")))
+
+    # rename the log file
+    if (getOption("actel.debug", default = FALSE)) {
+      # if in debug mode, export the debug log
+      file.copy(paste0(tempdir(), "/actel_debug_file.txt"),
+                paste0(tempdir(), "/latest_actel_error_log.txt"),
+                overwrite = TRUE)
+    } else {
+      # if not in debug mode, export the regular log
+      file.rename(paste0(tempdir(), "/temp_log.txt"),
+                  paste0(tempdir(), "/latest_actel_error_log.txt"))
+      # and clean up
+      deleteHelpers()
+    }
+  }
 }
 
 #' Delete temporary files
 #'
-#' At the end of the function actel or emergencyBreak, removes temporary files.
+#' At the end of the function actel or event(type = "crash"),
+#' removes temporary files.
 #'
 #' @return No return value, called for side effects.
 #'
 #' @keywords internal
 #'
 deleteHelpers <- function() {
-  helper.list <- paste0(tempdir(), paste0("/temp_", c("log", "warnings", "UD", "comments"), ".txt"))
+  temp_files <- paste0("/temp_", c("log", "warnings", "UD", "comments"), ".txt")
+  helper.list <- paste0(tempdir(), temp_files)
   link <- unlist(lapply(helper.list, file.exists))
   for (file in helper.list[link]) {
     file.remove(file)
   }
 }
-
-#' Standard procedure when aborting
-#'
-#' Wraps up the report in R's temporary folder before the function end.
-#'
-#' @return No return value, called for side effects.
-#'
-#' @keywords internal
-#'
-emergencyBreak <- function(the.function.call) { # nocov start
-  appendTo("Report", "\nA fatal exception occurred, stopping the process!\nFound a bug? Report it here: https://github.com/hugomflavio/actel/issues\n\n-------------------")
-  if (file.exists(paste0(tempdir(), "/temp_comments.txt")))
-    appendTo("Report", paste0("User comments:\n-------------------\n", gsub("\t", ": ", gsub("\r", "", readr::read_file(paste0(tempdir(), "/temp_comments.txt")))), "-------------------"))
-
-  if (file.exists(paste0(tempdir(), "/temp_UD.txt")))
-    appendTo("Report", paste0("User interventions:\n-------------------\n", gsub("\r", "", readr::read_file(paste0(tempdir(), "/temp_UD.txt"))), "-------------------"))
-
-  appendTo("Report", paste0("Function call:\n-------------------\n", the.function.call, "\n-------------------"))
-
-  message("\nM: The analysis errored. You can recover latest the job log (including your comments and decisions) by running recoverLog().")
-
-  if (getOption("actel.debug", default = FALSE)) {
-    file.copy(paste0(tempdir(), "/temp_log.txt"), paste0(tempdir(), "/latest_actel_error_log.txt"))
-  } else {
-    file.rename(paste0(tempdir(), "/temp_log.txt"), paste0(tempdir(), "/latest_actel_error_log.txt"))
-    deleteHelpers()
-  }
-} # nocov end
 
 #' Recover latest actel crash log
 #'
@@ -583,7 +651,13 @@ recoverLog <- function(file, overwrite = FALSE) {
   file.copy(paste0(tempdir(), "/latest_actel_error_log.txt"), file, overwrite = overwrite)
 
   x <- readLines(file)
-  message("M: Job log for ", sub("Function: ", "", x[6]), " analysis run on ", sub("Timestamp: ", "", x[5]), " recovered to ", file)
+  function_line <- grep("^Function: ", x)
+  timestamp_line <- grep("^Timestamp: ", x)
+  message("M: Job log for ",
+          sub("Function: ", "", x[function_line]),
+              " analysis run on ",
+              sub("Timestamp: ", "", x[timestamp_line]),
+              " recovered to ", file)
 }
 
 #' Convert a data frame with timestamps into a list of circular objects

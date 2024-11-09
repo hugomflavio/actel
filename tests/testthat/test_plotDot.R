@@ -6,7 +6,7 @@ setwd(tempdir())
 xspatial <- data.frame(
 	Station.name = 1:7,
 	Array = c("A1", "A2", "B1", "B2", "B3", "C1", "C2"),
-	Section = factor(c("A", "A", "B", "B", "B", "C", "C"), 
+	Section = factor(c("A", "A", "B", "B", "B", "C", "C"),
 				levels = c("A", "B", "C")),
 	Type = "Hydrophone",
 	x = 1:7,
@@ -40,7 +40,7 @@ test_that("plotDot stops if spatial argument is bad", {
 	expect_error(plotDot(dot, spatial = xspatial, coord.x = "x", coord.y = "a"),
 		"Could not find column 'a' in spatial.",
 		fixed = TRUE)
-	expect_error(plotDot(dot, spatial = xspatial[1:5,], 
+	expect_error(plotDot(dot, spatial = xspatial[1:5,],
 			coord.x = "x", coord.y = "y"),
 		paste0("spatial was provided, but not all arrays specified ",
         "in the dot exist in spatial."),
@@ -51,20 +51,20 @@ test_that("plotDot warns if spatial has more arrays than dot", {
 	xspatial2 <- data.frame(
 		Station.name = 1:8,
 		Array = c("A1", "A2", "B1", "B2", "B3", "C1", "C2", "C3"),
-		Section = factor(c("A", "A", "B", "B", "B", "C", "C", "C"), 
+		Section = factor(c("A", "A", "B", "B", "B", "C", "C", "C"),
 					levels = c("A", "B", "C")),
 		Type = "Hydrophone",
 		x = 1:8,
 		y = c(1,1,2,2,2,3,3,3))
 
-	expect_warning(plotDot(dot, spatial = xspatial2, 
+	expect_warning(plotDot(dot, spatial = xspatial2,
 			coord.x = "x", coord.y = "y"),
 		"Not all arrays present in spatial were listed in dot.",
 		fixed = TRUE)
 })
 
 test_that("plotDot warns if not enough fill colours are provided", {
-	expect_warning(plotDot(dot, spatial = xspatial, 
+	expect_warning(plotDot(dot, spatial = xspatial,
 			coord.x = "x", coord.y = "y", fill = "grey"),
 		"Not enough colours defined. Using colour ramp instead.",
 		fixed = TRUE)
@@ -82,13 +82,13 @@ test_that("plotDot throws no unexpected warnings", {
 		warning = function(w) stop("plotDot threw an unexpected warning!\n", w))
 	expect_true(file.exists("plotDot_output1.pdf"))
 	
-	tryCatch(plotDot(dot, spatial = xspatial, 
+	tryCatch(plotDot(dot, spatial = xspatial,
 			coord.x = "x", coord.y = "y", file = "plotDot_output2.svg"),
 		warning = function(w) stop("plotDot threw an unexpected warning!\n", w))
 	expect_true(file.exists("plotDot_output2.svg"))
 
-	tryCatch(plotDot(dot = dot, spatial = xspatial, 
-			coord.x = "x", coord.y = "y", 
+	tryCatch(plotDot(dot = dot, spatial = xspatial,
+			coord.x = "x", coord.y = "y",
 			expand = 0.2, file = "plotDot_output3.png"),
 		warning = function(w) stop("plotDot threw an unexpected warning!\n", w))
 	expect_true(file.exists("plotDot_output3.png"))

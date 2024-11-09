@@ -26,7 +26,7 @@ NULL
 #' @keywords internal
 #'
 groupMovements <- function(detections.list, bio, spatial, speed.method, max.interval, tz, dist.mat) {
-  appendTo("debug", "Running groupMovements.")
+  event(type = "debug", "Running groupMovements.")
   trigger.unknown <- FALSE
   round.points <- floor(seq(from = length(detections.list)/10, to = length(detections.list), length.out = 10))
   counter <- 1
@@ -34,7 +34,7 @@ groupMovements <- function(detections.list, bio, spatial, speed.method, max.inte
     if (interactive())
       pb <- txtProgressBar(min = 0, max = sum(sapply(detections.list, function(x) sum(x$Valid))), style = 3, width = 60)
     movements <- lapply(names(detections.list), function(i) {
-      appendTo("debug", paste0("Debug: (Movements) Analysing tag ", i, "."))
+      event(type = "debug", "(Movements) Analysing tag ", i, ".")
       x <- detections.list[[i]]
       # discount invalid detections
       x <- x[x$Valid, ]
@@ -125,10 +125,11 @@ groupMovements <- function(detections.list, bio, spatial, speed.method, max.inte
       close(pb)
   }
 
-  if (trigger.unknown)
-    warning("Movement events at 'Unknown' locations have been rendered invalid.", immediate. = TRUE, call. = FALSE)
+  if (trigger.unknown) {
+    event(type = c("warning", "screen"),
+          "Movement events at 'Unknown' locations have been rendered invalid.")
+  }
 
-  appendTo("debug", "Done.")
   return(movements)
 }
 
@@ -144,6 +145,7 @@ groupMovements <- function(detections.list, bio, spatial, speed.method, max.inte
 #' @keywords internal
 #'
 simplifyMovements <- function(movements, discard.first, tag, bio, speed.method, dist.mat) {
+  event(type = "debug", "Running simplifyMovements.")
   # NOTE: The NULL variables below are actually column names used by data.table.
   # This definition is just to prevent the package check from issuing a note due unknown variables.
   Valid <- NULL
@@ -180,7 +182,7 @@ simplifyMovements <- function(movements, discard.first, tag, bio, speed.method, 
 #' @keywords internal
 #'
 movementSpeeds <- function(movements, speed.method, dist.mat) {
-  appendTo("debug", "Running movementSpeeds.")
+  event(type = "debug", "Running movementSpeeds.")
   movements$Average.speed.m.s[1] <- NA
   if (nrow(movements) > 1) {
     # run through every row, matching to the previous row
@@ -231,9 +233,9 @@ movementSpeeds <- function(movements, speed.method, dist.mat) {
 #' @keywords internal
 #'
 movementTimes <- function(movements, type = c("array", "section")){
+  event(type = "debug", "Running movementTimes.")
   type = match.arg(type)
   time.in <- paste0("Time.in.", type)
-  appendTo("debug", "Running movementTimes.")
   # Time traveling
   if (nrow(movements) > 1) {
     aux <- data.frame(
@@ -284,10 +286,13 @@ movementTimes <- function(movements, type = c("array", "section")){
 #' @keywords internal
 #'
 speedReleaseToFirst <- function(tag, bio, movements, dist.mat, speed.method){
-  appendTo("debug", "Running speedReleaseToFirst.")
+  event(type = "debug", "Running speedReleaseToFirst.")
   the.row <- match(tag, bio$Transmitter)
-  if (is.na(the.row) | length(the.row) != 1)
-    stopAndReport('This error should never happen. Contact the developer. [tag not in bio$Transmitter, or match is not unique]')
+  if (is.na(the.row) | length(the.row) != 1) {
+    event(type = "stop",
+          'This error should never happen. Contact the developer.",
+          " [tag not in bio$Transmitter, or match is not unique]')
+  }
   origin.time <- bio[the.row, "Release.date"]
   origin.place <- as.character(bio[the.row, "Release.site"])
   if (origin.time <= movements$First.time[1]) {
@@ -334,6 +339,7 @@ speedReleaseToFirst <- function(tag, bio, movements, dist.mat, speed.method){
 #' @keywords internal
 #'
 sectionMovements <- function(movements, spatial, valid.dist) {
+  event(type = "debug", "Running sectionMovements.")
   Valid <- NULL
 
   if (any(movements$Valid))
@@ -411,6 +417,7 @@ sectionMovements <- function(movements, spatial, valid.dist) {
 #' @keywords internal
 #'
 updateValidity <- function(arrmoves, secmoves) {
+  event(type = "debug", "Running updateValidity.")
   Valid <- NULL
   output <- lapply(names(arrmoves),
     function(i) {
@@ -422,10 +429,15 @@ updateValidity <- function(arrmoves, secmoves) {
             B <- A + (aux$Events[j] - 1)
             return(A:B)
           }))
-        appendTo(c("Screen", "Report"), paste0("M: Rendering ", length(to.change), " array movement(s) invalid for tag ", i ," as the respective section movements were discarded by the user."))
+        event(type = c("screen", "report"),
+              "M: Rendering ", length(to.change),
+              " array movement(s) invalid for tag ", i,
+              " as the respective section movements",
+              " were discarded by the user.")
         arrmoves[[i]]$Valid[to.change] <- FALSE
-        if (attributes(arrmoves[[i]])$p.type == "Auto")
+        if (attributes(arrmoves[[i]])$p.type == "Auto") {
           attributes(arrmoves[[i]])$p.type <- "Manual"
+        }
       }
       return(arrmoves[[i]])
     })
@@ -444,7 +456,7 @@ updateValidity <- function(arrmoves, secmoves) {
 #' @keywords internal
 #'
 assembleValidMoves <- function(movements, bio, discard.first, speed.method, dist.mat) {
-  appendTo("debug", "Running assembleValidMoves.")
+  event(type = "debug", "Running assembleValidMoves.")
   counter <- 0
   if (interactive())
     pb <- txtProgressBar(min = 0, max = sum(sapply(movements, nrow)), style = 3, width = 60)
@@ -479,14 +491,16 @@ assembleValidMoves <- function(movements, bio, discard.first, speed.method, dist
 #' @keywords internal
 #'
 assembleValidSecMoves <- function(valid.moves, spatial, valid.dist) {
-  appendTo("debug", "Running assembleValidSecMoves.")
+  event(type = "debug", "Running assembleValidSecMoves.")
 
   counter <- 0
   if (interactive())
     pb <- txtProgressBar(min = 0, max = sum(sapply(valid.moves, nrow)), style = 3, width = 60)
 
   secmoves <- lapply(seq_along(valid.moves), function(i) {
-    appendTo("debug", paste0("debug: Compiling valid section movements for tag ", names(valid.moves)[i],"."))
+    event(type = "debug",
+          "Compiling valid section movements for tag ",
+          names(valid.moves)[i],".")
 
     output <- sectionMovements(movements = valid.moves[[i]], spatial = spatial,
                                valid.dist = valid.dist)

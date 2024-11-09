@@ -140,7 +140,7 @@ test_that("explore stops when any argument does not make sense", {
   
   if (length(suppressWarnings(packageDescription("gWidgets2tcltk"))) == 1) {
 		expect_warning(explore(tz = "Europe/Copenhagen", report = FALSE),
-      paste0("GUI is set to 'needed' but package 'gWidgets2tcltk' is not available. Please install it if you intend to run GUI.\n         Disabling GUI (i.e. GUI = 'never') for the current run."),
+      paste0("GUI is set to 'needed' but package 'gWidgets2tcltk' is not available. Please install it if you intend to run the GUI. Disabling GUI (i.e. GUI = 'never') for the current run."),
       fixed = TRUE)
   }
 

@@ -36,7 +36,6 @@ attributes(moves[[1]])$p.type <- "Manual"
 
 secmoves <- lapply(seq_along(moves), function(i) {
   tag <- names(moves)[i]
-  appendTo("debug", paste0("debug: Compiling valid section movements for tag ", tag,"."))
   output <- sectionMovements(movements = moves[[i]], spatial = spatial, valid.dist = attributes(dist.mat)$valid)
   return(output)
 })
@@ -170,7 +169,7 @@ test_that("globalRatios works as expected.", {
   load(paste0(tests.home, "/aux_globalRatios_day.RData"))
   expect_equal(global.ratios.day, aux_globalRatios.day)
 
-  global.ratios.hour <- globalRatios(positions = res.positions.hour, section.order = c("River", "Fjord", "Sea"))  
+  global.ratios.hour <- globalRatios(positions = res.positions.hour, section.order = c("River", "Fjord", "Sea"))
 
   ### ONLY RUN THIS TO RESET REFERENCE
   # aux_globalRatios.hour <- global.ratios.hour

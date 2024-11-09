@@ -24,7 +24,7 @@ NULL
 #' @keywords internal
 #'
 eventsTabbedWidget <- function(tag, displayed.moves, all.moves, detections, trigger, first.time, type) { # nocov start
-  appendTo("debug", "Running eventsTabbedWidget.")
+  event(type = "debug", "Running eventsTabbedWidget.")
   # initiate button variables
   cp <- NULL
   complain <- NULL
@@ -38,9 +38,10 @@ eventsTabbedWidget <- function(tag, displayed.moves, all.moves, detections, trig
   placeholder_layout <- gWidgets2::ggroup(horizontal = FALSE, container = placeholder)
   gWidgets2::glabel("The GUI window is loading...", container = placeholder_layout)
 
-  message("M: Please wait while the GUI loads."); flush.console()
+  event(type = "screen",
+        "M: Please wait while the GUI loads.")
 
-  moves.window <- gWidgets2::gwindow(paste0("Valid events for tag  ", tag, " (", sum(!all.moves$Valid), " invalid event(s) omitted)"),
+  moves.window <- gWidgets2::gwindow(paste0("Valid events for tag  ", tag, " (", sum(!all.moves$Valid), " invalid event(type = s) omitted)"),
                           width = 900, height = 500, visible = FALSE)
 
   on.exit({if(gWidgets2::isExtant(moves.window)) gWidgets2::dispose(moves.window)}, add = TRUE)
@@ -225,13 +226,20 @@ eventsTabbedWidget <- function(tag, displayed.moves, all.moves, detections, trig
   gWidgets2::dispose(placeholder)
   gWidgets2::visible(moves.window) <- TRUE
 
-  if (first.time)
-    message("M: Make any necessary edits in the external visualization window and submit the result to continue the analysis.\nNote: You can use Ctrl and Shift to select multiple events, and Ctrl+A to select all events at once."); flush.console()
+  if (first.time) {
+    event(type = "screen",
+          "M: Make any necessary edits in the external visualization window",
+          " and submit the result to continue the analysis.\n",
+          "Note: You can use Ctrl and Shift to select multiple events,",
+          " and Ctrl+A to select all events at once.")
+  }
 
   while (gWidgets2::isExtant(moves.window)) {}
 
   if (is.null(graphical_valid)) {
-    appendTo(c("Screen", "Warning", "Report"), "External visualization window was closed before result submission. Assuming no changes are to be made.")
+    event(type = c("warning", "screen", "report"),
+          "External visualization window was closed before result submission.",
+          " Assuming no changes are to be made.")
     graphical_valid <- all.moves$Valid
   }
 
@@ -247,7 +255,7 @@ eventsTabbedWidget <- function(tag, displayed.moves, all.moves, detections, trig
 #' @keywords internal
 #'
 eventsSingleWidget <- function(tag, displayed.moves, all.moves, detections, trigger, first.time, type) { # nocov start
-  appendTo("debug", "Running eventsSingleWidget.")
+  event(type = "debug", "Running eventsSingleWidget.")
 
   # initiate button variables
   complain <- NULL
@@ -261,9 +269,10 @@ eventsSingleWidget <- function(tag, displayed.moves, all.moves, detections, trig
   placeholder_layout <- gWidgets2::ggroup(horizontal = FALSE, container = placeholder)
   gWidgets2::glabel("The GUI window is loading...", container = placeholder_layout)
 
-  message("M: Please wait while the GUI loads."); flush.console()
+  event(type = "screen",
+        "M: Please wait while the GUI loads.")
 
-  moves.window <- gWidgets2::gwindow(paste0("Valid events for tag  ", tag, " (", sum(!all.moves$Valid), " invalid event(s) omitted)"),
+  moves.window <- gWidgets2::gwindow(paste0("Valid events for tag  ", tag, " (", sum(!all.moves$Valid), " invalid event(type = s) omitted)"),
                           width = 900, height = 500, visible = TRUE)
 
   on.exit({if(gWidgets2::isExtant(moves.window)) gWidgets2::dispose(moves.window)}, add = TRUE)
@@ -405,13 +414,20 @@ eventsSingleWidget <- function(tag, displayed.moves, all.moves, detections, trig
   gWidgets2::dispose(placeholder)
   gWidgets2::visible(moves.window) <- TRUE
 
-  if (first.time)
-    message("M: Make any necessary edits in the external visualization window and submit the result to continue the analysis.\nNote: You can use Ctrl and Shift to select multiple events, and Ctrl+A to select all events at once."); flush.console()
+  if (first.time) {
+    event(type = "screen",
+          "M: Make any necessary edits in the external visualization window",
+          " and submit the result to continue the analysis.\n",
+          "Note: You can use Ctrl and Shift to select multiple events,",
+          " and Ctrl+A to select all events at once.")
+  }
 
   while (gWidgets2::isExtant(moves.window)) {}
 
   if (is.null(graphical_valid)) {
-    appendTo(c("Screen", "Warning", "Report"), "External visualization window was closed before result submission. Assuming no changes are to be made.")
+    event(type = c("warning", "screen", "report"),
+          "External visualization window was closed before result submission.",
+          " Assuming no changes are to be made.")
     graphical_valid <- all.moves$Valid
   }
 
@@ -427,7 +443,7 @@ eventsSingleWidget <- function(tag, displayed.moves, all.moves, detections, trig
 #' @keywords internal
 #'
 detectionsTabbedWidget <- function(event, tag, to.print, silent) { # nocov start
-  appendTo("debug", "Running detectionsTabbedWidget.")
+  event(type = "debug", "Running detectionsTabbedWidget.")
 
   # initiate button variables
   cp <- NULL
@@ -568,7 +584,7 @@ detectionsTabbedWidget <- function(event, tag, to.print, silent) { # nocov start
   while (gWidgets2::isExtant(w2)) {}
 
   if (is.null(graphical_valid)) {
-    appendTo(c("Screen", "Warning", "Report"), "External visualization window was closed before result submission. Assuming no changes are to be made.")
+    event(type = c("Screen", "Warning", "Report"), "External visualization window was closed before result submission. Assuming no changes are to be made.")
     graphical_valid <- to.print$Valid
   }
 
@@ -584,7 +600,7 @@ detectionsTabbedWidget <- function(event, tag, to.print, silent) { # nocov start
 #' @keywords internal
 #'
 detectionsSingleWidget <- function(event, tag, to.print, silent) { # nocov start
-  appendTo("debug", "Running detectionsSingleWidget.")
+  event(type = "debug", "Running detectionsSingleWidget.")
 
   # initiate button variables
   confirm <- NULL
@@ -595,7 +611,8 @@ detectionsSingleWidget <- function(event, tag, to.print, silent) { # nocov start
   placeholder_layout <- gWidgets2::ggroup(horizontal = FALSE, container = placeholder)
   gWidgets2::glabel("The GUI window is loading...", container = placeholder_layout)
 
-  message("M: Please wait while the GUI loads."); flush.console()
+  event(type = "screen",
+        "M: Please wait while the GUI loads.")
 
   w2 <- gWidgets2::gwindow(paste0("Detections for valid event ", event, " from tag ", tag ,"."),
                            width = 900, height = 500, visible = FALSE)
@@ -677,13 +694,20 @@ detectionsSingleWidget <- function(event, tag, to.print, silent) { # nocov start
   gWidgets2::dispose(placeholder)
   gWidgets2::visible(w2) <- TRUE
 
-  if (!silent)
-    message("M: Make any necessary edits in the external visualization window and submit the result to continue the analysis.\nNote: You can use Ctrl and Shift to select multiple detections, and Ctrl+A to select all events at once."); flush.console()
+  if (!silent) {
+    event(type = "screen",
+          "M: Make any necessary edits in the external visualization window",
+          " and submit the result to continue the analysis.\n",
+          "Note: You can use Ctrl and Shift to select multiple detections,",
+          " and Ctrl+A to select all events at once.")
+  }
 
   while (gWidgets2::isExtant(w2)) {}
 
   if (is.null(graphical_valid)) {
-    appendTo(c("Screen", "Warning", "Report"), "External visualization window was closed before result submission. Assuming no changes are to be made.")
+    event(type = c("warning", "screen", "report"),
+          "External visualization window was closed before result submission.",
+          " Assuming no changes are to be made.")
     graphical_valid <- to.print$Valid
   }
 
