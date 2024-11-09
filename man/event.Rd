@@ -11,6 +11,8 @@ event(..., type, tag)
 
 \item{type}{A vector with one of more of several options:
 \itemize{
+\item 'crash' special case to be used only together with on.exit(). Meant
+to capture function failures not expressly handled by our coded stops.
 \item 'stop' appends the message to temp_log.txt then stops the execution.
 \item 'warning' appends the message to temp_warnings.txt,
 \item 'screen' displays the message on screen,

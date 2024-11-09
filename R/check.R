@@ -430,8 +430,8 @@ checkGUI <- function(GUI = c("needed", "always", "never"), save.tables.locally) 
   if (GUI != "never" && length(suppressWarnings(packageDescription("gWidgets2tcltk"))) == 1) {
     event(type = c("screen", "warning"), 
           "GUI is set to '", GUI, "' but package 'gWidgets2tcltk' is not",
-          " available. Please install it if you intend to run GUI.\n",
-          "         Disabling GUI (i.e. GUI = 'never') for the current run.")
+          " available. Please install it if you intend to run the GUI.",
+          " Disabling GUI (i.e. GUI = 'never') for the current run.")
     GUI <- "never"
   }
 
@@ -1683,7 +1683,8 @@ checkIssue79 <- function(arrays, spatial) {
             " so the analysis will continue.")
     } else {
       event(type = "stop",
-            "\nREAD CAREFULLY\n",
+            "READ CAREFULLY\n",
+            "---------------------\n",
             "It seems your study area contains parallel sections. actel is",
             " currently incapable of comprehending parallel sections during",
             " migration. This bug (issue 79) was brought to light in version",

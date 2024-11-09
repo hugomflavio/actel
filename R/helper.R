@@ -430,6 +430,8 @@ combine <- function(input) {
 #'
 #' @param type A vector with one of more of several options:
 #'  \itemize{
+#'    \item 'crash' special case to be used only together with on.exit(). Meant
+#'       to capture function failures not expressly handled by our coded stops.
 #'    \item 'stop' appends the message to temp_log.txt then stops the execution.
 #'    \item 'warning' appends the message to temp_warnings.txt,
 #'    \item 'screen' displays the message on screen,
@@ -463,7 +465,19 @@ event <- function(..., type, tag) {
          call. = FALSE)
   } # nocov end
 
-  event_text <- paste0(...)
+  if ("crash" %in% type) {
+    type <- c("crash", "screen", "report")
+    event_text <- paste0("\nA fatal exception occurred!\n",
+                         "Found a bug? Report it here:",
+                         " https://github.com/hugomflavio/actel/issues",
+                         "\n\n",
+                         "You can recover latest the job log (including your",
+                         " comments and decisions) by running recoverLog().\n",
+                         "-------------------")
+    function_call <- paste0(...)
+  } else {
+    event_text <- paste0(...)
+  }
 
   if ("screen" %in% type) {
     if ("warning" %in% type) {
@@ -509,74 +523,83 @@ event <- function(..., type, tag) {
   # everything goes into debug
   if ("debug" %in% type) {
     event_text <- paste("Debug:", event_text)
+    if (getOption("actel.debug", default = FALSE)) {
+      message(event_text)
+    }
   }
-  write(paste(format(Sys.time(), "%H:%M:%S.:"), event_text),
+  write(paste(format(Sys.time(), "%H:%M:%S:"), event_text),
     file = paste(tempdir(), "actel_debug_file.txt", sep = "/"),
     append = file.exists(paste(tempdir(), "actel_debug_file.txt", sep = "/")))
 
   if ("stop" %in% type) {
     stop(event_text, call. = FALSE)
   }
+
+  if ("crash" %in% type) {
+    # transfer comments, decisions, and function call to job log
+    if (file.exists(paste0(tempdir(), "/temp_comments.txt"))) {
+      comments <- readr::read_file(paste0(tempdir(), "/temp_comments.txt"))
+      comments <- gsub("\r", "", comments)
+      comments <- gsub("\t", ": ", comments)
+    } else {
+      comments <- ""
+    }
+    if (file.exists(paste0(tempdir(), "/temp_UD.txt"))) {
+      uds <- readr::read_file(paste0(tempdir(), "/temp_UD.txt"))
+      uds <- gsub("\r", "", uds)
+    } else {
+      uds <- ""
+    }
+    text_block <- paste0("User comments:\n",
+                         "-------------------\n",
+                         comments,
+                         "-------------------\n",
+                         "User interventions:\n",
+                         "-------------------\n", 
+                         uds,
+                         "-------------------\n",
+                         "Function call:\n",
+                         "-------------------\n", 
+                         function_call,
+                         "\n",
+                         "-------------------")
+      write(text_block,
+            file = paste(tempdir(), "temp_log.txt", sep = "/"),
+            append = file.exists(paste(tempdir(), "temp_log.txt", sep = "/")))
+
+    # rename the log file
+    if (getOption("actel.debug", default = FALSE)) {
+      # if in debug mode, export the debug log
+      file.copy(paste0(tempdir(), "/actel_debug_file.txt"),
+                paste0(tempdir(), "/latest_actel_error_log.txt"),
+                overwrite = TRUE)
+    } else {
+      # if not in debug mode, export the regular log
+      file.rename(paste0(tempdir(), "/temp_log.txt"),
+                  paste0(tempdir(), "/latest_actel_error_log.txt"))
+      # and clean up
+      deleteHelpers()
+    }
+  }
 }
 
 #' Delete temporary files
 #'
-#' At the end of the function actel or emergencyBreak, removes temporary files.
+#' At the end of the function actel or event(type = "crash"),
+#' removes temporary files.
 #'
 #' @return No return value, called for side effects.
 #'
 #' @keywords internal
 #'
 deleteHelpers <- function() {
-  helper.list <- paste0(tempdir(), paste0("/temp_", c("log", "warnings", "UD", "comments"), ".txt"))
+  temp_files <- paste0("/temp_", c("log", "warnings", "UD", "comments"), ".txt")
+  helper.list <- paste0(tempdir(), temp_files)
   link <- unlist(lapply(helper.list, file.exists))
   for (file in helper.list[link]) {
     file.remove(file)
   }
 }
-
-#' Standard procedure when aborting
-#'
-#' Wraps up the report in R's temporary folder before the function end.
-#'
-#' @return No return value, called for side effects.
-#'
-#' @keywords internal
-#'
-emergencyBreak <- function(the.function.call) { # nocov start
-  event(type = "report",
-        "\nA fatal exception occurred, stopping the process!\nFound a bug?",
-        " Report it here: https://github.com/hugomflavio/actel/issues",
-        "\n\n-------------------")
-  if (file.exists(paste0(tempdir(), "/temp_comments.txt"))) {
-    aux <- readr::read_file(paste0(tempdir(), "/temp_comments.txt"))
-    aux <- gsub("\r", "", aux)
-    aux <- gsub("\t", ": ", aux)
-    event(type = "report",
-          "User comments:\n-------------------\n", aux, "-------------------")
-  }
-
-  if (file.exists(paste0(tempdir(), "/temp_UD.txt"))) {
-    aux <- readr::read_file(paste0(tempdir(), "/temp_UD.txt"))
-    aux <- gsub("\r", "", aux)
-    event(type = "report",
-          "User interventions:\n-------------------\n", 
-          aux, "-------------------")
-  }
-
-  event(type = "report",
-        paste0("Function call:\n-------------------\n", 
-               the.function.call, "\n-------------------"))
-
-  message("\nM: The analysis errored. You can recover latest the job log (including your comments and decisions) by running recoverLog().")
-
-  if (getOption("actel.debug", default = FALSE)) {
-    file.copy(paste0(tempdir(), "/temp_log.txt"), paste0(tempdir(), "/latest_actel_error_log.txt"))
-  } else {
-    file.rename(paste0(tempdir(), "/temp_log.txt"), paste0(tempdir(), "/latest_actel_error_log.txt"))
-    deleteHelpers()
-  }
-} # nocov end
 
 #' Recover latest actel crash log
 #'
@@ -628,7 +651,13 @@ recoverLog <- function(file, overwrite = FALSE) {
   file.copy(paste0(tempdir(), "/latest_actel_error_log.txt"), file, overwrite = overwrite)
 
   x <- readLines(file)
-  message("M: Job log for ", sub("Function: ", "", x[6]), " analysis run on ", sub("Timestamp: ", "", x[5]), " recovered to ", file)
+  function_line <- grep("^Function: ", x)
+  timestamp_line <- grep("^Timestamp: ", x)
+  message("M: Job log for ", 
+          sub("Function: ", "", x[function_line]),
+              " analysis run on ", 
+              sub("Timestamp: ", "", x[timestamp_line]),
+              " recovered to ", file)
 }
 
 #' Convert a data frame with timestamps into a list of circular objects

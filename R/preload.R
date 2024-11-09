@@ -60,29 +60,37 @@ preload <- function(biometrics, spatial, deployments, detections, dot = NULL,
     section.order = NULL, exclude.tags = NULL, disregard.parallels = FALSE,
     discard.orphans = FALSE) {
 
+# clean up any lost helpers
   deleteHelpers()
+  if (file.exists(paste0(tempdir(), "/actel_debug_file.txt"))) {
+    file.remove(paste0(tempdir(), "/actel_debug_file.txt"))
+  }
+# ------------------------
 
 # debug lines
   if (getOption("actel.debug", default = FALSE)) { # nocov start
-    on.exit(event(type = "screen",
+    # show debug log location
+    on.exit(event(type = "screen", 
                   "Debug: Progress log available at ",
-                  gsub("\\\\", "/", paste0(tempdir(),
+                  gsub("\\\\", "/", paste0(tempdir(), 
                                            "/actel_debug_file.txt"))))
+    # show debug rdata location
     on.exit(add = TRUE,
             event(type = "screen",
                   "Debug: Saving carbon copy to ",
                   gsub("\\\\", "/", paste0(tempdir(),
-                                           "/actel.preload.debug.RData"))))
+                                           "/actel.debug.RData"))))
+    # save debug rdata
     on.exit(add = TRUE,
             save(list = ls(),
-                 file = paste0(tempdir(), "/actel.preload.debug.RData")))
-    event(type = "screen",
+                 file = paste0(tempdir(), "/actel.debug.RData")))
+    event(type = c("screen", "report"),
           "!!!--- Debug mode has been activated ---!!!")
   } # nocov end
 # ------------------------
 
 # Store function call
-  the.function.call <- paste0("preload(biometrics = ",
+  the_function_call <- paste0("preload(biometrics = ",
       deparse(substitute(biometrics)),
     ", spatial = ", deparse(substitute(spatial)),
     ", deployments = ", deparse(substitute(deployments)),
@@ -103,8 +111,18 @@ preload <- function(biometrics, spatial, deployments, detections, dot = NULL,
     ", discard.orphans = ", ifelse(discard.orphans, "TRUE", "FALSE"),
     ")")
 
-  event(type = "debug", the.function.call)
+  event(type = "debug", the_function_call)
 # ------------------------
+
+# Final arrangements before beginning
+  the_time <- Sys.time()
+  event(type = "report",
+        "Actel R package report.\n",
+        "Version: ", utils::packageVersion("actel"), "\n",
+        "Target folder: ", getwd(), "\n",
+        "Timestamp: ", the_time, "\n",
+        "Function: preload()\n")
+# -----------------------------------
 
   if (is.na(match(tz, OlsonNames()))) {
     event(type = "stop",
@@ -125,9 +143,26 @@ preload <- function(biometrics, spatial, deployments, detections, dot = NULL,
           " Please include each section only once.", call. = FALSE)
   }
 
+# Prepare clean-up before function ends
+  finished_unexpectedly <- TRUE
+  on.exit(add = TRUE,
+          if (interactive() & finished_unexpectedly) {
+            event(type = "crash", the_function_call)
+          })
+
+  if (!getOption("actel.debug", default = FALSE)) {
+    on.exit(add = TRUE,
+            deleteHelpers())
+  }
+
+  on.exit(add = TRUE,
+          tryCatch(sink(), warning = function(w) {hide <- NA}))
+# --------------------------------------
+
+# Ready to start working
   bio <- loadBio(input = biometrics, tz = tz)
 
-  event(type = c("Screen", "Report"),
+  event(type = c("screen", "report"),
         "M: Number of target tags: ", nrow(bio), ".")
 
   deployments <- loadDeployments(input = deployments, tz = tz)
@@ -281,7 +316,9 @@ preload <- function(biometrics, spatial, deployments, detections, dot = NULL,
   # carbon copy report messages
   attributes(output)$loading_messages <- readLines(paste0(tempdir(),
                                                    "/temp_log.txt"))
-  attributes(output)$function_call <- the.function.call
+  attributes(output)$function_call <- the_function_call
+
+  finished_unexpectedly <- FALSE
   return(output)
 }
 

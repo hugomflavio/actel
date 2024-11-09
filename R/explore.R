@@ -182,14 +182,16 @@ explore <- function(
 # debug lines
   if (getOption("actel.debug", default = FALSE)) { # nocov start
     # show debug log location
-    aux <- gsub("\\\\", "/", paste0(tempdir(), "/actel_debug_file.txt"))
     on.exit(event(type = "screen", 
-                  "Debug: Progress log available at ", aux))
+                  "Debug: Progress log available at ",
+                  gsub("\\\\", "/", paste0(tempdir(), 
+                                           "/actel_debug_file.txt"))))
     # show debug rdata location
-    aux <- gsub("\\\\", "/", paste0(tempdir(), "/actel.debug.RData"))
     on.exit(add = TRUE,
             event(type = "screen",
-                  "Debug: Saving carbon copy to ", aux))
+                  "Debug: Saving carbon copy to ",
+                  gsub("\\\\", "/", paste0(tempdir(),
+                                           "/actel.debug.RData"))))
     # save debug rdata
     on.exit(add = TRUE,
             save(list = ls(),
@@ -247,7 +249,7 @@ explore <- function(
 # ------------------------
 
 # Store function call
-  the.function.call <- paste0("explore(tz = ", ifelse(is.null(tz), "NULL", paste0("'", tz, "'")),
+  the_function_call <- paste0("explore(tz = ", ifelse(is.null(tz), "NULL", paste0("'", tz, "'")),
     ", datapack = ", ifelse(is.null(datapack), "NULL", deparse(substitute(datapack))),
     ", max.interval = ", max.interval,
     ", min.total.detections = ", min.total.detections,
@@ -274,14 +276,14 @@ explore <- function(
     ", detections.y.axis = '", detections.y.axis, "'",
     ")")
 
- event(type = "debug", the.function.call)
+ event(type = "debug", the_function_call)
 # --------------------
 
 # Prepare clean-up before function ends
-  finished.unexpectedly <- TRUE
+  finished_unexpectedly <- TRUE
   on.exit(add = TRUE,
-          if (interactive() & finished.unexpectedly) {
-            emergencyBreak(the.function.call)
+          if (interactive() & finished_unexpectedly) {
+            event(type = "crash", the_function_call)
           })
 
   if (!getOption("actel.debug", default = FALSE)) {
@@ -613,7 +615,7 @@ explore <- function(
 
  event(type = "report",
        "Explore function call:\n-------------------\n",
-       the.function.call, "\n-------------------")
+       the_function_call, "\n-------------------")
 # ------------------
 
 # print html report
@@ -693,7 +695,7 @@ explore <- function(
 
  event(type = "Screen", 
        "M: Analysis completed!")
-  finished.unexpectedly <- FALSE
+  finished_unexpectedly <- FALSE
 
   return(output)
 }

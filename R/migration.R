@@ -169,14 +169,16 @@ migration <- function(
 # debug lines
   if (getOption("actel.debug", default = FALSE)) { # nocov start
     # show debug log location
-    aux <- gsub("\\\\", "/", paste0(tempdir(), "/actel_debug_file.txt"))
     on.exit(event(type = "screen", 
-                  "Debug: Progress log available at ", aux))
+                  "Debug: Progress log available at ",
+                  gsub("\\\\", "/", paste0(tempdir(), 
+                                           "/actel_debug_file.txt"))))
     # show debug rdata location
-    aux <- gsub("\\\\", "/", paste0(tempdir(), "/actel.debug.RData"))
     on.exit(add = TRUE,
             event(type = "screen",
-                  "Debug: Saving carbon copy to ", aux))
+                  "Debug: Saving carbon copy to ",
+                  gsub("\\\\", "/", paste0(tempdir(),
+                                           "/actel.debug.RData"))))
     # save debug rdata
     on.exit(add = TRUE,
             save(list = ls(),
@@ -231,7 +233,7 @@ migration <- function(
 # ------------------------
 
 # Store function call
-  the.function.call <- paste0("migration(tz = ", ifelse(is.null(tz), "NULL", paste0("'", tz, "'")),
+  the_function_call <- paste0("migration(tz = ", ifelse(is.null(tz), "NULL", paste0("'", tz, "'")),
     ", section.order = ", ifelse(is.null(section.order), "NULL", paste0("c('", paste(section.order, collapse = "', '"), "')")),
     ", datapack = ", ifelse(is.null(datapack), "NULL", deparse(substitute(datapack))),
     ", success.arrays = ", ifelse(is.null(success.arrays), "NULL", paste0("c('", paste(success.arrays, collapse = "', '"), "')")),
@@ -263,17 +265,23 @@ migration <- function(
     ", detections.y.axis = '", detections.y.axis, "'",
     ")")
 
-  event(type = "debug", the.function.call)
+  event(type = "debug", the_function_call)
 # --------------------
 
 # Prepare clean-up before function ends
-  finished.unexpectedly <- TRUE
-  on.exit({if (interactive() & finished.unexpectedly) emergencyBreak(the.function.call)}, add = TRUE)
+  finished_unexpectedly <- TRUE
+  on.exit(add = TRUE,
+          if (interactive() & finished_unexpectedly) {
+            event(type = "crash", the_function_call)
+          })
 
-  if (!getOption("actel.debug", default = FALSE))
-    on.exit(deleteHelpers(), add = TRUE)
+  if (!getOption("actel.debug", default = FALSE)) {
+    on.exit(add = TRUE,
+            deleteHelpers())
+  }
 
-  on.exit(tryCatch(sink(), warning = function(w) {hide <- NA}), add = TRUE)
+  on.exit(add = TRUE,
+          tryCatch(sink(), warning = function(w) {hide <- NA}))
 # --------------------------------------
 
 # Final arrangements before beginning
@@ -831,7 +839,7 @@ migration <- function(
 
  event(type = "report",
        "Migration function call:\n-------------------\n",
-       the.function.call, "\n-------------------")
+       the_function_call, "\n-------------------")
 # ------------------
 
 # print html report
@@ -924,7 +932,7 @@ migration <- function(
 
   event(type = "screen", 
         "M: Analysis completed!")
-  finished.unexpectedly <- FALSE
+  finished_unexpectedly <- FALSE
 
   return(output)
 }
