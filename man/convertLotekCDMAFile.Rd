@@ -32,7 +32,7 @@ sink(dummy_file)
 cat(
 "WHS FSK Receiver Data File
 
-Receiver Configuration: 
+Receiver Configuration:
 Working Frequency:  76 KHz
 Bit Rate:           2400 bps
 Code Type:          FSK
@@ -52,10 +52,10 @@ Date      Time             TOA       Tag ID    Type     Value     Power
 Receiver Sensor Messages:
 Date      Time      Sensor   Temp     Press   Battery  Tilt-X  Tilt-Y  Tilt-Z
 =============================================================================
-04/11/24  21:44:00  T / P    1534         0                                  
+04/11/24  21:44:00  T / P    1534         0
 
 Receiver Setup Messages:
-Date      Time      Type                    Details                                                     
+Date      Time      Type                    Details
 =============================================================================
 08/22/24  18:50:11  Change Logging Mode     New Mode: SETUP
 ")

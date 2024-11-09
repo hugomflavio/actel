@@ -29,7 +29,8 @@ A list containing:
 \itemize{
 \item \code{dot}: A data frame containing the connections between arrays
 \item \code{arrays}: A list containing detailed information on the arrays
-\item \code{dotmat}: A matrix of the distance (in number of arrays) between pairs of arrays
+\item \code{dotmat}: A matrix of the distance (in number of arrays)
+between pairs of arrays
 \item \code{paths}: A list of the all array paths between each pair of arrays.
 }
 }
