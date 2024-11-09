@@ -679,7 +679,7 @@ migration <- function(
   matrices <- the.matrices
 
   # extra info for potential RSP analysis
-  rsp.info <- list(analysis.type = "migration", analysis.time = the.time, bio = bio,
+  rsp.info <- list(analysis.type = "migration", analysis.time = the_time, bio = bio,
                    tz = tz, actel.version = utils::packageVersion("actel"))
 
   if (!is.null(override))

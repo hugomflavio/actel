@@ -613,7 +613,7 @@ residency <- function(
   efficiency <- efficiency[1:3]
 
   # extra info for potential RSP analysis
-  rsp.info <- list(analysis.type = "residency", analysis.time = the.time, bio = bio,
+  rsp.info <- list(analysis.type = "residency", analysis.time = the_time, bio = bio,
                    tz = tz, actel.version = utils::packageVersion("actel"))
 
   if (!is.null(override))

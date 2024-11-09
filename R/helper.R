@@ -450,9 +450,9 @@ combine <- function(input) {
 #'
 #' @keywords internal
 #'
-event <- function(type, tag, ...) {
+event <- function(..., type, tag) {
   if (missing(type)) {
-    stop("event was called without expressely defining argument 'type'.",
+    stop("event was called without expressly defining argument 'type'.",
          call. = FALSE)
   }
   type <- tolower(type)

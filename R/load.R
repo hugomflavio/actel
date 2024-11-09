@@ -1903,8 +1903,8 @@ compileDetections <- function(path = "detections", start.time = NULL,
   if (any(sapply(data.files, is.null))) {
     if (sum(sapply(data.files, is.null)) > 1) {
       event(type = "screen",
-            "M:", sum(sapply(data.files, is.null)),
-            "files were excluded from further analyses.")
+            "M: ", sum(sapply(data.files, is.null)),
+            " files were excluded from further analyses.")
     } else {
       event(type = "Screen",
             "M: One file was excluded from further analyses.")
@@ -2621,8 +2621,9 @@ createStandards <- function(detections, spatial, deployments, discard.orphans = 
           if ("Source.file" %in% colnames(detections)) {
             cols_to_hide <- c(cols_to_hide, "Source.file")
           }
+          to_show <- detections[receiver.link, ][orphans, ]
+          to_show <- to_show[, !(colnames(to_show) %in% cols_to_hide)]
 
-          to_show <- detections[receiver.link, ][orphans, !cols_to_hide]
           event(type = "screen", 
                 paste0(capture.output(print(to_show)), collapse = "\n"),
                  "\nPossible options:\n",

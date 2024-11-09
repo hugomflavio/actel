@@ -4,9 +4,11 @@
 \alias{event}
 \title{Log a new event}
 \usage{
-event(type, tag, ...)
+event(..., type, tag)
 }
 \arguments{
+\item{...}{The text fragments that compose the event message.}
+
 \item{type}{A vector with one of more of several options:
 \itemize{
 \item 'stop' appends the message to temp_log.txt then stops the execution.
@@ -24,8 +26,6 @@ Preferred order is "stop", "warning", "screen", "report".}
 
 \item{tag}{Only relevant one 'comment' is one of the types. Put the
 transmitter ID here so the comment is attached to the right animal.}
-
-\item{...}{The text fragments that compose the event message.}
 }
 \value{
 No return value, called for side effects.
