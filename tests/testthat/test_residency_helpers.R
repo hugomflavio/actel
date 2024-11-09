@@ -36,7 +36,6 @@ attributes(moves[[1]])$p.type <- "Manual"
 
 secmoves <- lapply(seq_along(moves), function(i) {
   tag <- names(moves)[i]
-  appendTo("debug", paste0("debug: Compiling valid section movements for tag ", tag,"."))
   output <- sectionMovements(movements = moves[[i]], spatial = spatial, valid.dist = attributes(dist.mat)$valid)
   return(output)
 })

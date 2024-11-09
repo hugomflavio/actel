@@ -236,22 +236,31 @@ plotSensors <- function(input, tag, sensor, title = tag, xlab, ylab, pcol, psize
     stop("No sensor data found for this tag.", call. = FALSE)
 
   if (any(is.na(detections$Sensor.Value))) {
-    if (verbose)
-      appendTo(c("Screen", "Warning"), paste0(sum(is.na(detections$Sensor.Value)), " rows in this tag's detections do not contain sensor values and will be discarded."))
+    if (verbose) {
+      warning(sum(is.na(detections$Sensor.Value)),
+              " rows in this tag's detections do not contain sensor",
+              " values and will be discarded.", call. = FALSE,
+              immediate. = FALSE)
+    }
     detections <- detections[!is.na(detections$Sensor.Value), ]
   }
 
   if (any(link <- is.na(detections$Sensor.Unit) | detections$Sensor.Unit == "")) {
     detections$Sensor.Unit[link] <- paste0("? (", detections$Signal[link], ")")
-    if (verbose)
-      appendTo(c("Screen", "Warning"), "Not all rows with sensor data contain a sensor unit! Plotting unknown data separately.")
+    if (verbose) {
+      warning("Not all rows with sensor data contain a sensor unit!",
+              " Plotting unknown data separately.",
+              call. = FALSE, immediate. = FALSE)
+    }
   }
 
   if (missing(sensor)) {
     sensor <- unique(detections$Sensor.Unit)
   } else {
     if (any(link <- is.na(match(sensor, unique(detections$Sensor.Unit)))))
-      stop("Could not find sensor unit(s) '", paste(sensor[link], collapse = "', '"), "' in the tag detections.", call. = FALSE)
+      stop("Could not find sensor unit(s) '",
+           paste(sensor[link], collapse = "', '"),
+           "' in the tag detections.", call. = FALSE)
   }
 
   # renaming arrays if relevant

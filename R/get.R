@@ -36,6 +36,7 @@
 #' @export
 #'
 getSpeeds <- function(input, type = c("all", "forward", "backward"), direct = FALSE, n.events = c("first", "all", "last")){
+  event(type = "debug", "Running getSpeeds.")
   if (!inherits(input, "list"))
     stop("Could not recognise the input as an actel results object.", call. = FALSE)
 
@@ -240,6 +241,7 @@ getSpeeds <- function(input, type = c("all", "forward", "backward"), direct = FA
 #' @export
 #'
 getTimes <- function(input, locations = NULL, move.type = c("array", "section"), event.type = c("arrival", "departure"), n.events = c("first", "all", "last")){
+  event(type = "debug", "Running getTimes.")
   if (!inherits(input, "list"))
     stop("Could not recognise the input as an actel results object.", call. = FALSE)
 
