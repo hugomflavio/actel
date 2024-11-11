@@ -7,7 +7,8 @@
 splitDetections(detections, bio, exclude.tags = NULL)
 }
 \arguments{
-\item{detections}{A data frame with all the detections. Supplied by loadDetections.}
+\item{detections}{A data frame with all the detections.
+Supplied by loadDetections.}
 
 \item{bio}{A table with the tags and biometrics of the studied animals.}
 
@@ -20,6 +21,7 @@ tag are detected in the study area.}
 A list of detections for each tag.
 }
 \description{
-Splits the detections' table by tags and selects only detections from target tags
+Splits the detections' table by tags and selects only detections
+from target tags
 }
 \keyword{internal}
