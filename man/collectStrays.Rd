@@ -2,7 +2,8 @@
 % Please edit documentation in R/load.R
 \name{collectStrays}
 \alias{collectStrays}
-\title{Collect summary information on the tags detected but that are not part of the study.}
+\title{Collect summary information on the tags detected
+but that are not part of the study.}
 \usage{
 collectStrays(input)
 }
@@ -13,6 +14,7 @@ collectStrays(input)
 No return value, called for side effects.
 }
 \description{
-Collect summary information on the tags detected but that are not part of the study.
+Collect summary information on the tags detected
+but that are not part of the study.
 }
 \keyword{internal}

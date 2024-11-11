@@ -2,26 +2,27 @@
 % Please edit documentation in R/load.R
 \name{findPeers}
 \alias{findPeers}
-\title{Find efficiency peers for each array}
+\title{Find efficiency peers for a specific array}
 \usage{
 findPeers(
   array,
-  array.list,
-  peer.direction = c("before", "after"),
+  network,
+  direction = c("before", "after"),
   disregard.parallels
 )
 }
 \arguments{
 \item{array}{The array for which to find peers}
 
-\item{array.list}{An array list}
+\item{network}{An array list}
 
-\item{peer.direction}{The direction of peers to be found ("before" or "after")}
+\item{direction}{The direction of peers to be
+found ("before" or "after")}
 }
 \value{
 The array list with efficiency peers.
 }
 \description{
-Find efficiency peers for each array
+Find efficiency peers for a specific array
 }
 \keyword{internal}

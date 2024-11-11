@@ -13,6 +13,7 @@ convertCodes(input)
 A data frame with standardized code spaces.
 }
 \description{
-Unifies CodeSpace names, to avoid having different names depending on ALS vendor.
+Unifies CodeSpace names, to avoid having different names depending on
+ALS vendor.
 }
 \keyword{internal}

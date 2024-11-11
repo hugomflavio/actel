@@ -7,16 +7,20 @@
 loadSpatial(input = "spatial.csv", section.order = NULL)
 }
 \arguments{
-\item{input}{Either a data frame or the name of an input file with spatial data in the actel format.}
+\item{input}{Either a data frame or the name of an input file with spatial
+data in the actel format.}
 
-\item{section.order}{A vector containing the order by which sections should be aligned in the results.}
+\item{section.order}{A vector containing the order by which sections should
+be aligned in the results.}
 }
 \value{
-A data frame with the spatial information present in 'spatial.csv' and the Standard.name column.
+A data frame with the spatial information present in 'spatial.csv'
+and the Standard.name column.
 }
 \description{
-Loads a spatial file prepared for actel and appends the Standard.name column. Additionally,
-performs a series of quality checks on the contents of the target file.
+Loads a spatial file prepared for actel and appends the Standard.name column.
+Additionally, performs a series of quality checks on the contents of the
+target file.
 }
 \examples{
 # This function requires the presence of a file with spatial information

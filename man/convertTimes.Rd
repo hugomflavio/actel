@@ -24,6 +24,7 @@ present in \code{\link[base]{timezones}}.}
 A data frame with corrected timestamps.
 }
 \description{
-Converts the ALS timestamps (UTC) to the designated study area time zone. Can also trim the data by time.
+Converts the ALS timestamps (UTC) to the designated study area time zone.
+Can also trim the data by time.
 }
 \keyword{internal}

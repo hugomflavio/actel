@@ -15,6 +15,7 @@ transformSpatial(spatial, bio, arrays, dotmat, first.array = NULL)
 The stations, release sites and array order.
 }
 \description{
-Creates a list containing multiple spatial elements required throughout the analyses
+Creates a list containing multiple spatial elements required
+throughout the analyses
 }
 \keyword{internal}
