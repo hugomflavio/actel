@@ -1,3 +1,79 @@
+#' Parse argument and its value as a string
+#' 
+#' used to store the calls of the main actel functions as a string
+#' 
+#' @param arg the argument to be parsed
+#' @param arg_val an optional argument, to use as the value of the argument
+#'        used in "arg". Used when arg is, in itself, a complex object provided
+#'        by the user. E.g. a datapack, or an argument of preload.
+#' 
+#' @return A string showing the argument and its value, as it would have been
+#'         inputted into the R console.
+#' 
+#' @keywords internal
+#' 
+parse_arg <- function(arg,  arg_val) {
+  output <- paste0(deparse(substitute(arg)), " = ")
+
+  if (!missing(arg_val)) {
+    return(paste0(output, arg_val))
+  }
+  if (is.null(arg)) {
+    return(paste0(output, "NULL"))
+  }
+
+  if (is.character(arg)) {
+    a <- "'"
+    b <- "', '"
+  } else {
+    a <- ""
+    b <- ", "
+  }
+  if (is.list(arg)) {
+      output <- paste0(output, parse_list(arg))
+  } else {
+    if (length(arg) == 1) {
+      output <- paste0(output, a, arg, a)
+    } else {
+      output <- paste0(output, "c(", a, paste0(arg, collapse = b), a, ")")
+    }
+  }
+  return(output)
+}
+
+#' Helper to parse list arguments
+#' 
+#' Used inside [parse_arg()] to properly parse list arguments
+#' 
+#' @inheritParams parse_arg
+#' 
+#' @return A string showing the list as it would have been
+#'         inputted into the R console.
+#' 
+#' @keywords internal
+#' 
+parse_list <- function(arg) {
+  aux <- sapply(1:length(arg), function(i) {
+    if (is.character(arg[[i]])) {
+      a <- "'"
+      b <- "', '"
+    } else {
+      a <- ""
+      b <- ", "
+    }
+    name_i <- names(arg)[i]
+    content <- paste(arg[[i]], collapse = b)
+    if (length(arg[[i]]) == 1) {
+      output_i <- paste0("'", name_i,"' = ", a, content, a)
+    } else {
+      output_i <- paste0("'", name_i,"' = c(", a, content, a, ")")
+    }
+    return(output_i)
+  })
+  output <- paste0("list(", paste0(aux, collapse = ", "), ")")
+  return(output)
+}
+
 #' collapse event indexes into ranges
 #'
 #' @param x a numerical vector

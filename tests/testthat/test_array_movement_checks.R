@@ -176,18 +176,18 @@ test_that("checkInactiveness reacts as expected.", {
   expect_equal(output, xmoves)
 })
 
-test_that("checkFirstDetBackFromRelease reacts as expected.", {
-  tryCatch(x <- checkFirstDetBackFromRelease(movements = moves[[1]], tag = "R64K-4451", bio = bio, spatial = spatial, arrays = arrays, GUI = "never", n = "(1/1)"),
+test_that("checkFirstMove reacts as expected.", {
+  tryCatch(x <- checkFirstMove(movements = moves[[1]], tag = "R64K-4451", bio = bio, spatial = spatial, arrays = arrays, GUI = "never", n = "(1/1)"),
     warning = function(w) stop("A warning was issued where it should not have been."))
 
   xspatial <- spatial
   xspatial$release.sites$Array <- "A2"
-  expect_warning(checkFirstDetBackFromRelease(movements = moves[[1]], tag = "R64K-4451", bio = bio, spatial = xspatial, arrays = arrays, GUI = "never", n = "(1/1)"),
+  expect_warning(checkFirstMove(movements = moves[[1]], tag = "R64K-4451", bio = bio, spatial = xspatial, arrays = arrays, GUI = "never", n = "(1/1)"),
     "Tag R64K-4451 (1/1) was detected in an array that is not after its release site! Opening relevant data for inspection.\nExpected first array: A2", fixed = TRUE)
 
   xmoves <- moves[[1]]
   xmoves$Valid <- FALSE
-  tryCatch(output <- checkFirstDetBackFromRelease(movements = xmoves, tag = "R64K-4451", bio = bio, spatial = xspatial, arrays = arrays, GUI = "never", n = "(1/1)"),
+  tryCatch(output <- checkFirstMove(movements = xmoves, tag = "R64K-4451", bio = bio, spatial = xspatial, arrays = arrays, GUI = "never", n = "(1/1)"),
     warning = function(w) stop("A warning was issued where it should not have been."))
   expect_equal(output, xmoves)
 })

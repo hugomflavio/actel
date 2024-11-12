@@ -170,40 +170,53 @@ to one of "stations" or "arrays".}
 \value{
 A list containing:
 \itemize{
-\item \code{detections}: A list containing all detections for each target tag;
-\item \code{valid.detections}: A list containing the valid detections for each target tag;
-\item \code{spatial}: A list containing the spatial information used during the analysis;
-\item \code{deployments}: A data frame containing the deployments of each receiver;
-\item \code{arrays}: A list containing the array details used during the analysis;
-\item \code{movements}: A list containing all movement events for each target tag;
-\item \code{valid.movements}: A list containing the valid movement events for each target tag;
-\item \code{section.movements}: A list containing the valid section shifts for each target tag;
-\item \code{status.df}: A data.frame containing summary information for each tag, including the
-following columns:
+\item \code{detections}: A list containing all detections for each target
+tag;
+\item \code{valid.detections}: A list containing the valid detections for
+each target tag;
+\item \code{spatial}: A list containing the spatial information used during
+the analysis;
+\item \code{deployments}: A data frame containing the deployments of each
+receiver;
+\item \code{arrays}: A list containing the array details used during the
+analysis;
+\item \code{movements}: A list containing all movement events for each
+target tag;
+\item \code{valid.movements}: A list containing the valid movement events
+for each target tag;
+\item \code{section.movements}: A list containing the valid section shifts
+for each target tag;
+\item \code{status.df}: A data.frame containing summary information for each
+tag, including the following columns:
 \itemize{
-\item \emph{Times.entered.[section]}: Number of times the tag was recorded
-entering a given section.
+\item \emph{Times.entered.[section]}: Number of times the tag was
+recorded entering a given section.
 \item \emph{Average.time.until.[section]}: Time spent between release
 or leaving another section and reaching at the given section.
-\item \emph{Average.speed.to.[section]}: Average speed from release or leaving
-one section and reaching the given section (if speed.method = "last to first"),
-or from release/leaving one section and leaving the given section (if speed.method
-= "last to last").
+\item \emph{Average.speed.to.[section]}: Average speed from release or
+leaving one section and reaching the given section (if
+speed.method = "last to first"), or from release/leaving one
+section and leaving the given section
+(if speed.method = "last to last").
 \item \emph{First.array.[section]}: Array in which the tag was
 first detected in a given section
-\item \emph{First.station.[section]}: Standard name of the first station
-where the tag was detected in a given section
-\item \emph{First.arrived.[section]}: Very first arrival time at a given section
-\item \emph{Average.time.in.[section]}: Average time spent within a given section
-at each stay.
-\item \emph{Average.speed.in.[section]}: Average speed within a given section
-at each stay (only displayed if speed.method = "last to first").
+\item \emph{First.station.[section]}: Standard name of the first
+station where the tag was detected in a given section
+\item \emph{First.arrived.[section]}: Very first arrival time at a
+given section
+\item \emph{Average.time.in.[section]}: Average time spent within a
+given section at each stay.
+\item \emph{Average.speed.in.[section]}: Average speed within a given
+section at each stay (only displayed if
+speed.method = "last to first").
 \item \emph{Last.array.[section]}: Array in which the tag was
 last detected in a given section
 \item \emph{Last.station.[section]}: Standard name of the last station
 where the tag was detected in a given section
-\item \emph{Last.left.[section]}: Very last departure time from a given section
-\item \emph{Total.time.in[section]}: Total time spent in a given section
+\item \emph{Last.left.[section]}: Very last departure time from a
+given section
+\item \emph{Total.time.in[section]}: Total time spent in a given
+section
 \item \emph{Very.last.array}: Last array where the tag was detected
 \item \emph{Status}: Fate assigned to the tag
 \item \emph{Valid.detections}: Number of valid detections
@@ -221,17 +234,23 @@ changes to the validity of the events,
 }
 \item \emph{Comments}: Comments left by the user during the analysis
 }
-\item \code{section.overview}: A data frame containing the number of tags that
-disappeared in each section;
+\item \code{section.overview}: A data frame containing the number of tags
+that disappeared in each section;
 \item \code{group.overview}: A list containing the number of known and
 estimated tags to have passed through each array, divided by group;
 \item \code{release.overview}: A list containing the number of known and
-estimated tags to have passed through each array, divided by group and release sites;
-\item \code{matrices}: A list of CJS matrices used for the efficiency calculations;
-\item \code{overall.CJS}: A list of CJS results of the inter-array CJS calculations;
-\item \code{intra.array.CJS}: A list of CJS results of the intra-array CJS calculations;
-\item \code{times}: A data frame containing all arrival times (per tag) at each array;
-\item \code{rsp.info}: A list containing appendix information for the RSP package;
+estimated tags to have passed through each array, divided by group
+and release sites;
+\item \code{matrices}: A list of CJS matrices used for the efficiency
+calculations;
+\item \code{overall.CJS}: A list of CJS results of the inter-array CJS
+calculations;
+\item \code{intra.array.CJS}: A list of CJS results of the intra-array CJS
+calculations;
+\item \code{times}: A data frame containing all arrival times (per tag) at
+each array;
+\item \code{rsp.info}: A list containing appendix information for the RSP
+package;
 \item \code{dist.mat}: The distance matrix used in the analysis (if a valid
 distance matrix was supplied)
 }
@@ -240,9 +259,9 @@ distance matrix was supplied)
 The \code{migration} analysis runs the same initial checks as \code{explore},
 but on top of it, it analyses the animal behaviour. By selecting the arrays
 that lead to success, you can define whether or not your animals survived the
-migration. Additional plots help you find out if some animal/tag has been acting
-odd. Multiple options allow you to tweak the analysis to fit your study
-perfectly.
+migration. Additional plots help you find out if some animal/tag has been
+acting odd. Multiple options allow you to tweak the analysis to fit your
+study perfectly.
 }
 \examples{
 \donttest{

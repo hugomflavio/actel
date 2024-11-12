@@ -14,8 +14,10 @@ countBackMoves(movements, arrays)
 \value{
 A list containing:
 \itemize{
-\item \code{sum.back.moves} The number of backwards movements for the target tag
-\item \code{max.back.moves} The maximum number of consecutive backwards movements for the target tag
+\item \code{sum.back.moves} The number of backwards movements for
+the target tag
+\item \code{max.back.moves} The maximum number of consecutive backwards
+movements for the target tag
 }
 }
 \description{

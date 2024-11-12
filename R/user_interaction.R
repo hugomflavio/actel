@@ -869,8 +869,8 @@ transferValidity <- function(from, to) { # nocov start
 #'
 #' @keywords internal
 #'
-overrideValidityChecks <- function(moves, detections, tag, GUI, save.tables.locally, n) { # nocov start
-  event(type = "debug", "Starting overrideValidityChecks.")
+overrideChecks <- function(moves, detections, tag, GUI, save.tables.locally, n) { # nocov start
+  event(type = "debug", "Starting overrideChecks.")
   trigger <- paste0("M: Override has been triggered for tag ", tag,
                     " ", n, ". Entering full manual mode.")
 

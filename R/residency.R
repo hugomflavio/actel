@@ -473,7 +473,7 @@ residency <- function(
                                     dist.mat = dist.mat, GUI = GUI, save.tables.locally = save.tables.locally)
       }
     } else {
-      output <- overrideValidityChecks(moves = movements[[tag]], tag = tag, detections = detections.list[[tag]], # nocov
+      output <- overrideChecks(moves = movements[[tag]], tag = tag, detections = detections.list[[tag]], # nocov
                                        GUI = GUI, save.tables.locally = save.tables.locally, n = counter) # nocov
     }
     return(output)
@@ -494,12 +494,21 @@ residency <- function(
 
     aux <- sectionMovements(movements = movements[[i]], spatial = spatial, valid.dist = attributes(dist.mat)$valid)
 
-    aux <- checkMinimumN(movements = aux, tag = tag, min.total.detections = 0, # don't run the minimum total detections check here.
+    if (!is.null(aux)) {
+      # don't run the minimum total detections check here (i.e. set it to 0);
+      # that's already done when compiling the array movements.
+      aux <- checkMinimumN(movements = aux, tag = tag, min.total.detections = 0,
                          min.per.event = min.per.event[2], n = counter)
 
-    output <- checkSMovesN(secmoves = aux, tag = tag, section.warning = section.warning, section.error = section.error, GUI = GUI,
-                           save.tables.locally = save.tables.locally, n = counter)
-    return(output)
+      output <- checkSMovesN(secmoves = aux, tag = tag,
+                             section.warning = section.warning,
+                             section.error = section.error, GUI = GUI,
+                             save.tables.locally = save.tables.locally,
+                             n = counter)
+      return(output)
+    } else {
+      return(NULL)
+    }
   })
   names(section.movements) <- names(movements)
 
