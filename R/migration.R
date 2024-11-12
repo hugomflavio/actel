@@ -594,7 +594,6 @@ migration <- function(
     aux <- sectionMovements(movements = movements[[i]], spatial = spatial,
                             valid.dist = attributes(dist.mat)$valid)
 
-    # interesting... why do I have this if here but not on residency? hm...
     if (!is.null(aux)) {
       # don't run the minimum total detections check here (i.e. set it to 0);
       # that's already done when compiling the array movements.
