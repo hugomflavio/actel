@@ -147,6 +147,9 @@ test_that("migration is able to run speed and inactiveness checks.", {
 # n
 # n
 # n
+# n
+# n
+# n
 
 # Throw in a fake report just to test the number appending code
 write(1, file = "actel_migration_report.html")

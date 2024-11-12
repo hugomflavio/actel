@@ -450,7 +450,7 @@ explore <- function(
                                     dist.mat = dist.mat, GUI = GUI, save.tables.locally = save.tables.locally)
       }
     } else { # nocov start
-      output <- overrideValidityChecks(moves = movements[[tag]], tag = tag, detections = detections.list[[tag]],
+      output <- overrideChecks(moves = movements[[tag]], tag = tag, detections = detections.list[[tag]],
                                        GUI = GUI, save.tables.locally = save.tables.locally, n = counter)
     } # nocov end
     return(output)

@@ -23,13 +23,17 @@ printResidencyRmd(
 )
 }
 \arguments{
-\item{override.fragment}{Rmarkdown string specifying the type of report for the header.}
+\item{override.fragment}{Rmarkdown string specifying the type of report for
+the header.}
 
-\item{biometric.fragment}{Rmarkdown string specifying the biometric graphics drawn.}
+\item{biometric.fragment}{Rmarkdown string specifying the biometric graphics
+drawn.}
 
-\item{efficiency.fragment}{Rmarkdown string specifying the efficiency results.}
+\item{efficiency.fragment}{Rmarkdown string specifying the efficiency
+results.}
 
-\item{sensor.plots}{Rmarkdown string specifying the name of the sensor plots.}
+\item{sensor.plots}{Rmarkdown string specifying the name of the sensor
+plots.}
 }
 \value{
 No return value, called for side effects.

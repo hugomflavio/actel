@@ -473,7 +473,7 @@ residency <- function(
                                     dist.mat = dist.mat, GUI = GUI, save.tables.locally = save.tables.locally)
       }
     } else {
-      output <- overrideValidityChecks(moves = movements[[tag]], tag = tag, detections = detections.list[[tag]], # nocov
+      output <- overrideChecks(moves = movements[[tag]], tag = tag, detections = detections.list[[tag]], # nocov
                                        GUI = GUI, save.tables.locally = save.tables.locally, n = counter) # nocov
     }
     return(output)

@@ -52,9 +52,11 @@ tag crosses one of these arrays, the respective animal is considered to have
 successfully migrated through the study area.}
 }
 \value{
-A data frame containing the entering and leaving timestamps for each section per target tag
+A data frame containing the entering and leaving timestamps
+for each section per target tag
 }
 \description{
-Crawls trough the movement events of each tag to find when it entered and left each section of the study area.
+Crawls trough the movement events of each tag to find when it entered and
+left each section of the study area.
 }
 \keyword{internal}
