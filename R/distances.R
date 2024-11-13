@@ -472,8 +472,7 @@ distancesMatrix <- function(t.layer, starters = NULL, targets = starters,
       # stop event
       if(!file.exists(new_path)) {
         event(type = "stop",
-              "'File_path' specified to 'spatial.csv' not found in the",
-              " working directory.")
+              "'spatial.csv' not found in the 'file_path' specified")
       }
   
       # Specify new file path to 'spatial.csv' and run as normal
@@ -603,9 +602,9 @@ distancesMatrix <- function(t.layer, starters = NULL, targets = starters,
     }
 
   if (interactive() & actel) { # nocov start
-    decision <- userInput("Would you like to save an actel-compatible", 
+    decision <- userInput(paste0("Would you like to save an actel-compatible", 
                           " distances matrix as 'distances.csv' in the",
-                          " current work directory?(y/n) ",
+                          " current work directory?(y/n) "),
                           choices = c("y", "n"))
     
     if (decision == "y") {
@@ -622,8 +621,8 @@ distancesMatrix <- function(t.layer, starters = NULL, targets = starters,
           warning("A file 'distances.csv' is already present in the current",
                   " directory.", call. = FALSE, immediate. = TRUE)
           
-          decision <- userInput("Continuing will overwrite this file. Would",
-                                " you like to continue?(y/n) ", 
+          decision <- userInput(paste0("Continuing will overwrite this file.",
+                                "  Would you like to continue?(y/n) "), 
                                 choices = c("y", "n"))
         }
         
@@ -639,8 +638,8 @@ distancesMatrix <- function(t.layer, starters = NULL, targets = starters,
           warning("A file 'distances.csv' is already present in the current",
                   " directory.", call. = FALSE, immediate. = TRUE)
           
-          decision <- userInput("Continuing will overwrite this file. Would",
-                                " you like to continue?(y/n) ", 
+          decision <- userInput(paste0("Continuing will overwrite this file.",
+                                " Would you like to continue?(y/n) "), 
                                 choices = c("y", "n"))
       }
       if (decision == "y") {
