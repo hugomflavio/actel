@@ -112,6 +112,12 @@ if (any(missing.packages)) {
 		})
 		# n
 
+		test_that("distancesMatrix handles missing sptial.csv when file_path used", {
+		  expect_error(output <- distancesMatrix(t.layer = t.layer, coord.x = "x.32632", 
+		                            coord.y = "y.32632", file_path = "file_test"),
+		               "'spatial.csv' not found in the 'file_path' specified")
+		})
+		
 		test_that("distancesMatrix handles bad data correctly pt1", {
 			expect_error(distancesMatrix(t.layer = t.layer, id.col = 1:2),
 				"Please provide only one column name in 'id.col'", fixed = TRUE)
@@ -165,6 +171,23 @@ if (any(missing.packages)) {
 			"Could not find a column 'test' in 'targets'.", fixed = TRUE)
 		})
 
+		dir.create("file_test")
+		
+		write.csv(xspatial, "file_test/spatial.csv", row.names = FALSE)
+		
+		test_that("distancesMatrix output is as expected when file_path used", {
+		  output <- distancesMatrix(t.layer = t.layer, coord.x = "x.32632",
+		                            coord.y = "y.32632", file_path = "file_test/")
+		  expect_equal(colnames(output), paste("St", 1:4, sep = "."))
+		  expect_equal(rownames(output), paste("St", 1:4, sep = "."))
+		  expect_equal(output[, 1], c(   0, 586, 934, 1154))
+		  expect_equal(output[, 2], c( 586,   0, 490,  656))
+		  expect_equal(output[, 3], c( 934, 490,   0,  237))
+		  expect_equal(output[, 4], c(1154, 656, 237,    0))
+		})
+		
+		unlink("file_test", recursive = TRUE)
+		
 		test_that("distancesMatrix output is as expected", {
 		 output <- distancesMatrix(t.layer = t.layer, coord.x = "x.32632", coord.y = "y.32632")
 		 expect_equal(colnames(output), paste("St", 1:4, sep = "."))
