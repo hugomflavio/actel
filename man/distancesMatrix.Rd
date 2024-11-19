@@ -7,11 +7,10 @@
 distancesMatrix(
   t.layer,
   starters = NULL,
-  targets = starters,
+  targets = NULL,
   coord.x = "x",
   coord.y = "y",
   id.col = NULL,
-  file_path = NULL,
   actel = TRUE
 )
 }
@@ -20,11 +19,9 @@ distancesMatrix(
 \code{\link{transitionLayer}}.}
 
 \item{starters}{A data frame with the points from which to start measuring
-the distance. Ignored if actel = TRUE (default), as the 'spatial.csv' is
-loaded as starters.}
+the distance or the output of \code{loadSpatial()}.}
 
-\item{targets}{A data frame with the points to which a way must be found.
-Ignored if actel = TRUE (default), as the 'spatial.csv' is loaded as targets.}
+\item{targets}{A data frame with the points to which a way must be found.}
 
 \item{coord.x, coord.y}{The names of the columns containing the x and y
 coordinates in the starters and targets. Must be identical in the starters
@@ -33,9 +30,6 @@ and targets.}
 \item{id.col}{The name of the column containing the IDs of the points to
 be used as starters and targets. Must be identical in both files.
 Ignored if actel = TRUE (default), as the stations' standard names are used.}
-
-\item{file_path}{Specify the file path to the 'spatial.csv' file if not in
-the main working directory.}
 
 \item{actel}{Logical: Should the distance matrix be optimized for actel?
 Defaults to TRUE.}
