@@ -111,12 +111,6 @@ if (any(missing.packages)) {
 		  		" around the shape file."), fixed = TRUE)
 		})
 		# n
-
-		test_that("distancesMatrix handles missing sptial.csv when file_path used", {
-		  expect_error(output <- distancesMatrix(t.layer = t.layer, coord.x = "x.32632", 
-		                            coord.y = "y.32632", file_path = "file_test"),
-		               "'spatial.csv' not found in the 'file_path' specified")
-		})
 		
 		test_that("distancesMatrix handles bad data correctly pt1", {
 			expect_error(distancesMatrix(t.layer = t.layer, id.col = 1:2),
@@ -134,13 +128,9 @@ if (any(missing.packages)) {
 				"'starters' must be a data frame.", fixed = TRUE)
 
 			file.remove("test.txt")
-			
-			expect_warning(distancesMatrix(t.layer =  t.layer,
-		  		coord.x = "x.32632", coord.y = "y.32632", starters = "test", id.col = "test", actel = TRUE),
-			"starters' or 'targets' were set but will be ignored because 'actel' is set to TRUE. Set 'actel' to FALSE to use the 'starters' and 'targets' arguments.", fixed = TRUE)
 
 			expect_warning(distancesMatrix(t.layer =  t.layer,
-		  		coord.x = "x.32632", coord.y = "y.32632", starters = "test", id.col = "test", actel = TRUE),
+		  		coord.x = "x.32632", coord.y = "y.32632", id.col = "test", actel = TRUE),
 			"id.col' was set but will be ignored because 'actel' is set to TRUE. Set 'actel' to FALSE to use the 'id.col' argument.", fixed = TRUE)
 		})
 		# n
@@ -170,14 +160,12 @@ if (any(missing.packages)) {
 		  		coord.x = "x.32632", coord.y = "test", starters = loadSpatial("spatial2.csv"), targets = loadSpatial(), actel = FALSE),
 			"Could not find a column 'test' in 'targets'.", fixed = TRUE)
 		})
-
-		dir.create("file_test")
 		
-		write.csv(xspatial, "file_test/spatial.csv", row.names = FALSE)
+		test_loadspatial <- loadSpatial()
 		
-		test_that("distancesMatrix output is as expected when file_path used", {
+		test_that("distancesMatrix output is as expected when output of loadSpatial() is used", {
 		  output <- distancesMatrix(t.layer = t.layer, coord.x = "x.32632",
-		                            coord.y = "y.32632", file_path = "file_test/")
+		                            coord.y = "y.32632", starters = test_loadspatial)
 		  expect_equal(colnames(output), paste("St", 1:4, sep = "."))
 		  expect_equal(rownames(output), paste("St", 1:4, sep = "."))
 		  expect_equal(output[, 1], c(   0, 586, 934, 1154))
@@ -186,7 +174,7 @@ if (any(missing.packages)) {
 		  expect_equal(output[, 4], c(1154, 656, 237,    0))
 		})
 		
-		unlink("file_test", recursive = TRUE)
+		rm(test_loadspatial)
 		
 		test_that("distancesMatrix output is as expected", {
 		 output <- distancesMatrix(t.layer = t.layer, coord.x = "x.32632", coord.y = "y.32632")
