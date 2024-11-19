@@ -1,9 +1,11 @@
 #' Extract speeds from the analysis results.
 #'
 #' @inheritParams getTimes
-#' @param direct Logical: Extract only speeds between arrays that are directly connected (i.e. neighbouring arrays)?
-#' @param type The type of movements to record. One of "all", "forward", or "backward". In the two last options,
-#'  only the forward or backwards (relatively to the study area structure) movement speeds are returned.
+#' @param direct Logical: Extract only speeds between arrays that are directly
+#'        connected (i.e. neighbouring arrays)?
+#' @param type The type of movements to record. One of "all", "forward", or
+#'        "backward". In the two last options, only the forward or backwards
+#'        (relatively to the study area structure) movement speeds are returned.
 #'
 #' @examples
 #' # using the example results loaded with actel
@@ -35,181 +37,221 @@
 #'
 #' @export
 #'
-getSpeeds <- function(input, type = c("all", "forward", "backward"), direct = FALSE, n.events = c("first", "all", "last")){
+getSpeeds <- function(input, type = c("all", "forward", "backward"),
+                      direct = FALSE, n.events = c("first", "all", "last")){
   event(type = "debug", "Running getSpeeds.")
-  if (!inherits(input, "list"))
-    stop("Could not recognise the input as an actel results object.", call. = FALSE)
+  if (!inherits(input, "list")) {
+    stop("Could not recognise the input as an actel results object.",
+         call. = FALSE)
+  }
 
-  if (is.null(input$valid.movements) | is.null(input$spatial) | is.null(input$rsp.info))
-    stop("Could not recognise the input as an actel results object.", call. = FALSE)
+  check_moves <- is.null(input$valid.movements)
+  check_spatial <- is.null(input$spatial)
+  check_rsp <- is.null(input$rsp.info)
+  if (check_moves | check_spatial | check_rsp) {
+    stop("Could not recognise the input as an actel results object.",
+         call. = FALSE)
+  }
+  if (!is.null(input$dist.mat) && is.null(attributes(input$dist.mat)$valid)) {
+    stop("The input object was not compiled using actel 1.1.0 or higher.",
+         " Please re-run the analysis with the current version of actel.",
+         call. = FALSE)
+  }
 
-  if (!is.null(input$dist.mat) && is.null(attributes(input$dist.mat)$valid))
-    stop("The input object was not compiled using actel 1.1.0 or higher. Please re-run the analysis with the current version of actel.", call. = FALSE)
-
-  if (is.null(input$dist.mat) || !attributes(input$dist.mat)$valid)
-    stop("These results do not contain a valid distances matrix.", call. = FALSE)
+  if (is.null(input$dist.mat) || !attributes(input$dist.mat)$valid) {
+    stop("These results do not contain a valid distances matrix.",
+         call. = FALSE)
+  }
 
   type <- match.arg(type)
   n.events <- match.arg(n.events)
-  speed.method <- attributes(input$dist.mat)$speed.method
-  to.station.col <- ifelse(speed.method == "last to first", "First.station", "Last.station")
 
   output.list <- lapply(names(input$valid.movements), function(tag) {
     # cat(tag, "\n")
     # treat movements as data frame to avoid data.table shenanigans
-    aux <- as.data.frame(input$valid.movements[[tag]])
+    moves <- as.data.frame(input$valid.movements[[tag]])
     # find events with speeds
-    to.extract <- which(!is.na(aux$Average.speed.m.s))
+    rows_to_extract <- which(!is.na(moves$Average.speed.m.s))
+    # find the release site
+    release_link <- which(input$rsp.info$bio$Transmitter == tag)
+    the_release <- input$rsp.info$bio$Release.site[release_link]
+    # find expected first array
+    array_link <- input$spatial$release.sites$Standard.name == the_release
+    exp_first_array <- input$spatial$release.sites$Array[array_link]
 
     if (direct) {
-      if (to.extract[1] == 1) {
-        # check that first event is connected to release
-        the.release <- input$rsp.info$bio$Release.site[which(input$rsp.info$bio$Transmitter == tag)]
-        the.first.array <- input$spatial$release.sites$Array[input$spatial$release.sites$Standard.name == the.release]
-        # if not, exclude first event
-        if (aux$Array[1] != the.first.array)
-          to.extract <- to.extract[-1]
-      }
-
-      # check that remaining events are direct
-      if (length(to.extract) > 0) {
-        # If first event is still present, avoid it
-        if (to.extract[1] == 1) {
-          if (length(to.extract) > 1) {
-            keep <- sapply(to.extract[-1], function(i) {
-              the.array <- aux$Array[i]
-              return(aux$Array[i - 1] %in% input$arrays[[the.array]]$neighbours)
-            })
-            to.extract <- to.extract[c(TRUE, keep)]
-          }
-        # else just work through everything
-        } else {
-          keep <- sapply(to.extract, function(i) {
-            the.array <- aux$Array[i]
-            return(aux$Array[i - 1] %in% input$arrays[[the.array]]$neighbours)
-          })
-          to.extract <- to.extract[keep]
-        }
-      }
+      # if direct, check the neighbours
+      rows_to_extract <- getSpeedsChecker(rows = rows_to_extract, moves = moves,
+                                          first = exp_first_array,
+                                          arrays = input$arrays,
+                                          side = "neighbours")
     }
 
-    if (length(to.extract) > 0 & type == "forward") {
-      # if first event was selected
-      if (to.extract[1] == 1) {
-        # check that first event is at expected first array or at some array coming after it
-        the.release <- input$rsp.info$bio$Release.site[which(input$rsp.info$bio$Transmitter == tag)]
-        the.first.array <- input$spatial$release.sites$Array[input$spatial$release.sites$Standard.name == the.release]
-        if (!(aux$Array[1] %in% c(the.first.array, input$arrays[[the.first.array]]$all.after))) #first array must be expected first array or after it
-          to.extract <- to.extract[-1]
-      }
-
-      # check that remaining events are forward
-      if (length(to.extract) > 0) {
-        # If first event is still present, avoid it
-        if (to.extract[1] == 1) {
-          if (length(to.extract) > 1) {
-            keep <- sapply(to.extract[-1], function(i) {
-              the.array <- aux$Array[i]
-              return(aux$Array[i - 1] %in% input$arrays[[the.array]]$all.before) # previous array must be before current array
-            })
-            to.extract <- to.extract[c(TRUE, keep)]
-          }
-        # else just work through everything
-        } else {
-          keep <- sapply(to.extract, function(i) {
-            the.array <- aux$Array[i]
-            return(aux$Array[i - 1] %in% input$arrays[[the.array]]$all.before) # previous array must be before current array
-          })
-          to.extract <- to.extract[keep]
-        }
-      }
+    if (length(rows_to_extract) > 0 & type == "forward") {
+      # if forward, check all.before
+      expected_arrays <- c(exp_first_array,
+                           input$arrays[[exp_first_array]]$all.after)
+      rows_to_extract <- getSpeedsChecker(rows = rows_to_extract, moves = moves,
+                                          first = expected_arrays,
+                                          arrays = input$arrays,
+                                          side = "all.before")
     }
 
-    if (length(to.extract) > 0 & type == "backward") {
-      # if first event was selected
-      if (to.extract[1] == 1) {
-        # check that first event is at expected first array or at some array coming after it
-        the.release <- input$rsp.info$bio$Release.site[which(input$rsp.info$bio$Transmitter == tag)]
-        the.first.array <- input$spatial$release.sites$Array[input$spatial$release.sites$Standard.name == the.release]
-        if (!(aux$Array[1] %in% input$arrays[[the.first.array]]$all.before)) # first array must be before expected first array
-          to.extract <- to.extract[-1]
-      }
-
-      # check that remaining events are forward
-      if (length(to.extract) > 0) {
-        # If first event is still present, avoid it
-        if (to.extract[1] == 1) {
-          if (length(to.extract) > 1) {
-            keep <- sapply(to.extract[-1], function(i) {
-              the.array <- aux$Array[i]
-              return(aux$Array[i - 1] %in% input$arrays[[the.array]]$all.after) # previous array must be after current array
-            })
-            to.extract <- to.extract[c(TRUE, keep)]
-          }
-        # else just work through everything
-        } else {
-          keep <- sapply(to.extract, function(i) {
-            the.array <- aux$Array[i]
-            return(aux$Array[i - 1] %in% input$arrays[[the.array]]$all.after) # previous array must be after current array
-          })
-          to.extract <- to.extract[keep]
-        }
-      }
+    if (length(rows_to_extract) > 0 & type == "backward") {
+      # if backward, check all.after
+      expected_arrays <- input$arrays[[exp_first_array]]$all.before
+      rows_to_extract <- getSpeedsChecker(rows = rows_to_extract, moves = moves,
+                                          first = expected_arrays,
+                                          arrays = input$arrays,
+                                          side = "all.after")
     }
 
-    if (length(to.extract) > 0) {
-      if (to.extract[1] == 1) {
-        first.line <- data.frame(
+    # Now we know which rows to keep. Compile the output table.
+    speed.method <- attributes(input$dist.mat)$speed.method
+    output <- getSpeedsCompiler(rows = rows_to_extract, moves = moves,
+                                tag = tag, release = the_release,
+                                speed.method = speed.method,
+                                n.events = n.events)
+
+
+    return(output)
+  })
+
+  # combine the output for every tag into a single table for simplicity
+  output <- data.table::rbindlist(output.list)
+
+  return(output)
+}
+
+#' Helper function of getSpeeds
+#' 
+#' Checks if each row should be considered for extraction or not.
+#' 
+#' @param rows a vector of rows to check.
+#' @param moves the respective movements table.
+#' @param first a list of valid arrays for the first movement.
+#' @param arrays the list of arrays in the study area.
+#' @param side which pool of array-relatives to check against.
+#' 
+#' @return an updated vector of rows to consider for extraction.
+#' 
+#' @keywords internal
+#' 
+getSpeedsChecker <- function(rows, moves, first, arrays,
+                             side = c("neighbours", "all.before", 
+                                      "all.after")) {
+  # check that first event is connected to release
+  # if not, we won't be extracting that row.
+  if (rows[1] == 1 & !(moves$Array[1] %in% first)) {
+    rows <- rows[-1]
+  }
+
+  # Then, for every other row, check that the move happened at an array that
+  # neighbours the previous array where the tag had been detected.
+  # (i.e. no skipped arrays)
+  if (length(rows) > 0) {
+    # Don't check row 1 again.
+    if (rows[1] == 1) {
+      check <- rows[-1]
+      keep <- TRUE
+    } else {
+      check <- rows
+      keep <- NULL
+    }
+    # If there's anything to check
+    if (length(check) > 0) {
+      aux <- sapply(check, function(i) {
+        the_array <- moves$Array[i]
+        return(moves$Array[i - 1] %in% arrays[[the_array]][[side]])
+      })
+      # this step keeps the first row if it wasn't invalidated earlier
+      keep <- c(keep, aux)
+    }
+    rows <- rows[keep]
+  }
+}
+
+#' Helper function of getSpeeds
+#' 
+#' Compiles the final output table for each tag
+#' 
+#' @inheritParams getSpeedsChecker
+#' @param tag the transmitter code being analysed.
+#' @param release the release site of the tag.
+#' @inheritParams getSpeeds
+#' 
+#' @return a data.frame with the speeds for the target tag
+#' 
+#' @keywords internal
+#' 
+getSpeedsCompiler <- function(rows, moves, tag, release,
+                              speed.method, n.events) {
+    if (grepl("^first", speed.method)) {
+      from_col <- "First.station"
+    } else {
+      from_col <- "Last.station"
+    }
+
+    if (grepl("first$", speed.method)) {
+      to_col <- "First.station"
+    } else {
+      to_col <- "Last.station"
+    }
+
+    # compile the release line separately
+    if (length(rows) > 0) {
+      if (rows[1] == 1) {
+        first_line <- data.frame(
           Tag = tag,
           Event = 1,
           From.array = "Release",
-          From.station = input$rsp.info$bio$Release.site[which(input$rsp.info$bio$Transmitter == tag)],
-          To.array = aux$Array[1],
-          To.station = aux[1, to.station.col],
-          Speed = aux$Average.speed.m.s[1])
-        to.extract <- to.extract[-1]
+          From.station = release,
+          To.array = moves$Array[1],
+          To.station = moves[1, to_col],
+          Speed = moves$Average.speed.m.s[1])
+        rows <- rows[-1]
       } else {
-        first.line <- NULL
+        first_line <- NULL
       }
     } else {
-      first.line <- NULL
+      first_line <- NULL
     }
 
-    if (length(to.extract) > 0) {
-      other.lines <- data.frame(
-        Tag = rep(tag, length(to.extract)),
-        Event = to.extract,
-        From.array = aux$Array[to.extract - 1],
-        From.station = aux$Last.station[to.extract - 1],
-        To.array = aux$Array[to.extract],
-        To.station = aux[to.extract, to.station.col],
-        Speed = aux$Average.speed.m.s[to.extract])
+    # then prepare the other lines
+    if (length(rows) > 0) {
+      other_lines <- data.frame(
+        Tag = rep(tag, length(rows)),
+        Event = rows,
+        From.array = moves$Array[rows - 1],
+        From.station = moves[rows - 1, from_col],
+        To.array = moves$Array[rows],
+        To.station = moves[rows, to_col],
+        Speed = moves$Average.speed.m.s[rows])
     } else {
-      other.lines <- NULL
+      other_lines <- NULL
     }
 
-    output <- rbind(first.line, other.lines)
+    # and merge both fragments
+    output <- rbind(first_line, other_lines)
 
+    # and then discard any rows we don't want.
     if (!is.null(output) & n.events != "all") {
       output$temp_column <- with(output, paste0(From.array, "_", To.array))
       aux <- split(output, output$temp_column)
 
-      if (n.events == "first")
+      if (n.events == "first") {
         aux <- lapply(aux, function(x) x[1, , drop = FALSE])
+      }
 
-      if (n.events == "last")
+      if (n.events == "last") {
         aux <- lapply(aux, function(x) x[nrow(x), , drop = FALSE])
+      }
 
       output <- as.data.frame(data.table::rbindlist(aux))
       output <- output[, -match("temp_column", colnames(output))]
     }
 
     return(output)
-  })
-
-  output <- data.table::rbindlist(output.list)
-
-  return(output)
 }
 
 #' Extract timestamps from the analysis results.
