@@ -647,10 +647,11 @@ checkSpeeds <- function(movements, tag, detections, valid.movements,
         link <- createEventRanges(link)
         event_list <- paste0("         Events that raised warnings: ",
                              paste(link, collapse = ", "))
-        event(type = c("screen", "report"),)
         the_warning <- paste0(the_warning, "\n",
                               final_warning, "\n",
                               event_list)
+        event(type = c("screen", "report"),
+              the_warning)
       }
     }
   }
