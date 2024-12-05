@@ -717,7 +717,7 @@ checkInactiveness <- function(movements, tag, detections, n,
       if (attributes(dist.mat)$valid) {
         aux <- dist.mat[the.stations, the.stations]
         if (any(is.na(aux))) {
-          event(type = c("report", "warning", "screen"),
+          event(type = c("report", "warning", "screen"),  
                 "Distance between some stations is NA!",
                 " Could not check station proximity!",
                 " Fix distances matrix.")
@@ -726,7 +726,7 @@ checkInactiveness <- function(movements, tag, detections, n,
           use_distances <- TRUE
         }
       } else {
-        use_distnaces <- FALSE
+        use_distances <- FALSE
       }
       if (use_distances) {
         if (all(aux <= 1500)) {
