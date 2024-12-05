@@ -213,12 +213,16 @@ tableInteraction <- function(moves, detections, tag, trigger, GUI, force = FALSE
       if (colnames(moves)[1] == "Section") {
         event(type = "screen",
               "Opening ", tag, "'s section movement events for inspection (",
-              sum(!moves$Valid), " invalid event(type = s) omitted):")
+              sum(!moves$Valid), " invalid event",
+              ifelse(sum(!moves$Valid) > 1, "s", ""),
+              " omitted):")
         to.display <- moves[, -c(5, 7)]
       } else {
         event(type = "screen",
               "Opening ", tag, "'s array movement events for inspection (",
-              sum(!moves$Valid), " invalid event(type = s) omitted):")
+              sum(!moves$Valid), " invalid event",
+              ifelse(sum(!moves$Valid) > 1, "s", ""),
+              " omitted):")
         to.display <- moves[(Valid)]
       }
       event(type = "screen",
