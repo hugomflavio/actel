@@ -626,12 +626,12 @@ distancesMatrix <- function(t.layer, starters = NULL, targets = NULL,
          
          target_dir <- ""
 
-         while(!dir.exists(target_dir)){
+         while(!dir.exists(target_dir)) {
            target_dir <- readline(paste0("Specify the folder to save 'distances.csv'",
                                          " to. Hit enter to skip."))
            if(nchar(target_dir) == 0) {
              dir_decision <- "y"
-             {break}
+             break
            } 
            
            if(!dir.exists(target_dir)) {
@@ -640,54 +640,43 @@ distancesMatrix <- function(t.layer, starters = NULL, targets = NULL,
                        choices = c("y", "n"))
              if(dir_decision == "n") {
                dir_decision <- "y"
-               {break}
+               break
              }
            }
          }
        }
-    }
+     }
    
     if (decision == "y") {
       
       if(dir_decision == "n") {
         
-        # If a 'file_path' has been specified, a new path is created where 
-        # 'distances.csv' will be saved
-        new_path <- paste(target_dir,"distances.csv", sep = "/")
+        # If a different directory has been specified, a new path is created  
+        # where 'distances.csv' will be saved
+        path <- paste(target_dir,"distances.csv", sep = "/")
         
-        # Checks if 'distances.csv' is already in the file path specified
-        if (file.exists(new_path)) {
-          
-          warning("A file 'distances.csv' is already present in the current",
-                  " directory.", call. = FALSE, immediate. = TRUE)
-          
-          decision <- userInput(paste0("Continuing will overwrite this file.",
-                                "  Would you like to continue?(y/n) "), 
-                                choices = c("y", "n"))
-        }
-        
-        if (decision == "y") {
-          
-          write.csv(round(dist.mat, 0), new_path, row.names = TRUE)
-          
-          }
-      } else {
-        # If no 'file_path' specified, then 'distances.csv' is saved to the 
+        } else {
+        # If no 'path' specified, then 'distances.csv' is saved to the 
         # current working directory
-        if (file.exists('distances.csv')) {
-          warning("A file 'distances.csv' is already present in the current",
-                  " directory.", call. = FALSE, immediate. = TRUE)
-          
-          decision <- userInput(paste0("Continuing will overwrite this file.",
-                                " Would you like to continue?(y/n) "), 
-                                choices = c("y", "n"))
+        
+        path <- paste("distances.csv", sep = "/")
+        
+        }
+      # Checks if 'distances.csv' is already in the file path specified
+      if (file.exists(path)) {
+        
+        warning("A file 'distances.csv' is already present in the current",
+                " directory.", call. = FALSE, immediate. = TRUE)
+        
+        decision <- userInput(paste0("Continuing will overwrite this file.",
+                                     "  Would you like to continue?(y/n) "), 
+                              choices = c("y", "n"))
       }
       if (decision == "y") {
-        write.csv(round(dist.mat, 0), "distances.csv", row.names = TRUE)
-        }
+        
+        write.csv(round(dist.mat, 0), path, row.names = TRUE)
+        
       }
-      
-      
     }
   } # nocov end
   return(round(dist.mat, 0))
