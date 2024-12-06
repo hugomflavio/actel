@@ -103,13 +103,15 @@ if (any(missing.packages)) {
 		test_that("distancesMatrix produces a warning when there are no viable passages between stations", {
 			expect_warning(dist.mat <- distancesMatrix(t.layer = t.layer,
 		  		coord.x = "x.32632", coord.y = "y.32632", actel = TRUE),
-			"At least one station is completely blocked off from the remaining stations by land. Filling
-the respective fields with NA. If your animals were expected to travel around the areas present
-in the shape file, consider applying a 'buffer' when calculating the transition layer. This
-will artificially add water space around the shape file.", fixed = TRUE)
+		  		paste0("At least one station is completely blocked off from the remaining",
+		  		" stations by land. Filling the respective fields with NA.", 
+		  		" If your animals were expected to travel around the areas present", 
+		  		" in the shape file, consider applying a 'buffer' when calculating", 
+		  		" the transition layer. This will artificially add water space", 
+		  		" around the shape file."), fixed = TRUE)
 		})
 		# n
-
+		
 		test_that("distancesMatrix handles bad data correctly pt1", {
 			expect_error(distancesMatrix(t.layer = t.layer, id.col = 1:2),
 				"Please provide only one column name in 'id.col'", fixed = TRUE)
@@ -126,13 +128,9 @@ will artificially add water space around the shape file.", fixed = TRUE)
 				"'starters' must be a data frame.", fixed = TRUE)
 
 			file.remove("test.txt")
-			
-			expect_warning(distancesMatrix(t.layer =  t.layer,
-		  		coord.x = "x.32632", coord.y = "y.32632", starters = "test", id.col = "test", actel = TRUE),
-			"starters' or 'targets' were set but will be ignored because 'actel' is set to TRUE. Set 'actel' to FALSE to use the 'starters' and 'targets' arguments.", fixed = TRUE)
 
 			expect_warning(distancesMatrix(t.layer =  t.layer,
-		  		coord.x = "x.32632", coord.y = "y.32632", starters = "test", id.col = "test", actel = TRUE),
+		  		coord.x = "x.32632", coord.y = "y.32632", id.col = "test", actel = TRUE),
 			"id.col' was set but will be ignored because 'actel' is set to TRUE. Set 'actel' to FALSE to use the 'id.col' argument.", fixed = TRUE)
 		})
 		# n
@@ -162,7 +160,22 @@ will artificially add water space around the shape file.", fixed = TRUE)
 		  		coord.x = "x.32632", coord.y = "test", starters = loadSpatial("spatial2.csv"), targets = loadSpatial(), actel = FALSE),
 			"Could not find a column 'test' in 'targets'.", fixed = TRUE)
 		})
-
+		
+		test_loadspatial <- loadSpatial()
+		
+		test_that("distancesMatrix output is as expected when output of loadSpatial() is used", {
+		  output <- distancesMatrix(t.layer = t.layer, coord.x = "x.32632",
+		                            coord.y = "y.32632", starters = test_loadspatial)
+		  expect_equal(colnames(output), paste("St", 1:4, sep = "."))
+		  expect_equal(rownames(output), paste("St", 1:4, sep = "."))
+		  expect_equal(output[, 1], c(   0, 586, 934, 1154))
+		  expect_equal(output[, 2], c( 586,   0, 490,  656))
+		  expect_equal(output[, 3], c( 934, 490,   0,  237))
+		  expect_equal(output[, 4], c(1154, 656, 237,    0))
+		})
+		
+		rm(test_loadspatial)
+		
 		test_that("distancesMatrix output is as expected", {
 		 output <- distancesMatrix(t.layer = t.layer, coord.x = "x.32632", coord.y = "y.32632")
 		 expect_equal(colnames(output), paste("St", 1:4, sep = "."))

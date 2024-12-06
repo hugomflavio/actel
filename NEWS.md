@@ -23,6 +23,7 @@ Enhancements:
   * New `convertLotekCDMAFile()` function to prepare lotek txt logs for further analyses (issue [#103](https://github.com/hugomflavio/actel/issues/103)).
   * New `plotDot()` function to help users inspect their spatial.txt files (issue [#55](https://github.com/hugomflavio/actel/issues/55)).
   * Improved internal mechanisms for message/warning/debug/stop reporting. new internal function `event()` replaces the old `appendTo()`, `stopAndReport()`, and `emergencyBreak()` (issue [#135](https://github.com/hugomflavio/actel/issues/135))
+  * Added the ability to use output of `loadSpatial()` as 'starters' for `distancesMatrix()` when 'actel' is 'TRUE'. This allows a user to input their spatial.csv if located in a separate working directory (issue [#133](https://github.com/hugomflavio/actel/issues/133))
 
 ## actel 1.3.0
 
