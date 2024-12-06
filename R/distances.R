@@ -655,13 +655,13 @@ distancesMatrix <- function(t.layer, starters = NULL, targets = NULL,
         # where 'distances.csv' will be saved
         path <- paste(target_dir,"distances.csv", sep = "/")
         
-        } else {
+      } else {
         # If no 'path' specified, then 'distances.csv' is saved to the 
         # current working directory
         
         path <- paste("distances.csv", sep = "/")
         
-        }
+      }
       # Checks if 'distances.csv' is already in the file path specified
       if (file.exists(path)) {
         
