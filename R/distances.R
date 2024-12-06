@@ -611,7 +611,7 @@ distancesMatrix <- function(t.layer, starters = NULL, targets = NULL,
 
   if (col.rename) {
     colnames(dist.mat) <- outputCols
-    }
+  }
 
   if (interactive() & actel) { # nocov start
     decision <- userInput(paste0("Would you like to save an actel-compatible", 
