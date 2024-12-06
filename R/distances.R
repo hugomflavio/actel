@@ -626,7 +626,7 @@ distancesMatrix <- function(t.layer, starters = NULL, targets = NULL,
          
          target_dir <- ""
 
-         while(!dir.exists(target_dir)) {
+         while (!dir.exists(target_dir)) {
            target_dir <- readline(paste0("Specify the folder to save",
                                          " 'distances.csv' to.",
                                          " Hit enter to skip."))
