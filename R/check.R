@@ -713,9 +713,22 @@ checkInactiveness <- function(movements, tag, detections, n,
       # find all stations
       the.stations <- as.character(sort(unique(the.detections$Standard.name)))
       trigger.error <- FALSE
-        # Trigger warning
+      # Trigger warning
       if (attributes(dist.mat)$valid) {
         aux <- dist.mat[the.stations, the.stations]
+        if (any(is.na(aux))) {
+          event(type = c("report", "warning", "screen"),  
+                "Distance between some stations is NA!",
+                " Could not check station proximity!",
+                " Fix distances matrix.")
+          use_distances <- FALSE
+        } else {
+          use_distances <- TRUE
+        }
+      } else {
+        use_distances <- FALSE
+      }
+      if (use_distances) {
         if (all(aux <= 1500)) {
           n.detections <- sum(valid.moves$Detections[start_i:Stop])
           the_warning <- paste0("Tag ", tag, " ", n, " was detected ",
@@ -730,9 +743,10 @@ checkInactiveness <- function(movements, tag, detections, n,
                 the_warning)
           the_warning <- paste("Warning:", the_warning)
           continue <- FALSE
+          if (days.spent >= inactive.error) {
+            trigger.error <- TRUE # nocov
+          }
         }
-        if (all(aux <= 1500) & days.spent >= inactive.error)
-          trigger.error <- TRUE # nocov
       } else {
         if (length(the.stations) <= 3) {
           n.detections <- sum(valid.moves$Detections[start_i:Stop])
@@ -746,9 +760,10 @@ checkInactiveness <- function(movements, tag, detections, n,
                 the_warning)
           the_warning <- paste("Warning:", the_warning)
           continue <- FALSE
+          if (days.spent >= inactive.error) {
+            trigger.error <- TRUE # nocov
+          }
         }
-        if (length(the.stations) <= 3 & days.spent >= inactive.error)
-          trigger.error <- TRUE # nocov
       }
       # Trigger user interaction
       if (trigger.error) { # nocov start
