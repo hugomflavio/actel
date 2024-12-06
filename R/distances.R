@@ -574,7 +574,7 @@ distancesMatrix <- function(t.layer, starters = NULL, targets = NULL,
 
 
   #### Create starters and targets spatial dataframes
-    # converts the file to a spatialPoints object
+  # converts the file to a spatialPoints object
   sp::coordinates(starters) <- ~ longitude + latitude 
   
   # sets the crs
