@@ -618,9 +618,10 @@ distancesMatrix <- function(t.layer, starters = NULL, targets = NULL,
                                  " distances matrix as 'distances.csv'?(y/n)"),
                           choices = c("y", "n"))
     if (decision == "y") {
-       dir_decision <- userInput(paste0("Would you like 'distances.csv' saved in",
-                                    " the current working directory?(y/n)"),
-                          choices = c("y", "n"))
+       dir_decision <- userInput(paste0("Would you like 'distances.csv'",
+                                        " saved in the current working",
+                                        " directory?(y/n)"),
+                                 choices = c("y", "n"))
        if (dir_decision == "n") {
          
          target_dir <- ""
