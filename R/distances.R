@@ -452,7 +452,7 @@ distancesMatrix <- function(t.layer, starters = NULL, targets = NULL,
   if (actel) {
     message("M: Creating actel-compatible distances matrix."); flush.console()
     
-    if(!is.null(starters) | !is.null(targets)) {
+    if (!is.null(starters) | !is.null(targets)) {
       # distancesMatrix() crashes if actel = TRUE and starters/targets were 
       # supplied but do not contain a column called "Standard.name"
       if(!is.null(starters) && !("Standard.name" %in% colnames(starters))) {
@@ -460,7 +460,7 @@ distancesMatrix <- function(t.layer, starters = NULL, targets = NULL,
              call. = FALSE)
       }
       
-      if(!is.null(targets) & !any(grepl(c("Standard.name"), 
+      if (!is.null(targets) & !any(grepl(c("Standard.name"), 
                                          colnames(targets)))) {
         stop("'targets' is missing column called 'Standard.name'",
              call. = FALSE)
@@ -468,22 +468,22 @@ distancesMatrix <- function(t.layer, starters = NULL, targets = NULL,
     }
     
     if (!is.null(starters) & !is.null(targets)) {
-      warning("'starters' and 'targets' were specified while 'actel'",
-              " is set to TRUE. Using 'starters' and 'targets' for distances.", 
+      message("M: 'starters' and 'targets' were specified.",
+              " Using 'starters' and 'targets' for distances.", 
               call. = FALSE, immediate. = TRUE) 
     }
     
     if (!is.null(starters) & is.null(targets)) {
-        warning("'starters' were specified but 'targets' were not while 'actel'",
-              " is set to TRUE. Using 'starters' for 'targets'.", 
+        message("M: 'starters' were specified but 'targets' were not.",
+                " Using 'starters' for 'targets'.", 
               call. = FALSE, immediate. = TRUE) 
       
         targets <- starters
         }
     
     if (is.null(starters) & is.null(targets)) {
-        warning("'starters' and 'targets' were not set while 'actel' is set to",
-              " TRUE. Creating 'starters' and 'targets' from 'spatial.csv' ",
+        message("M: 'starters' and 'targets' were not specified.",
+              " Creating 'starters' and 'targets' from 'spatial.csv' ",
               " in working directory." , call. = FALSE, immediate. = TRUE)
         starters <- targets <- loadSpatial() 
         }
@@ -492,15 +492,19 @@ distancesMatrix <- function(t.layer, starters = NULL, targets = NULL,
       warning("id.col' was set but will be ignored because 'actel' is set to", 
               " TRUE. Set 'actel' to FALSE to use the 'id.col' argument.", 
               call. = FALSE, immediate. = TRUE) 
-      }
+        }
     id.col <- "Standard.name"
   }
   
   # Failsafe from old way code worked where targets used starters by default 
   # when actel == FALSE
-  if(!actel) {
-    if(is.null(targets)) {
+  if (!actel) {
+    if (is.null(targets)) {
       targets <- starters
+        message("M: 'starters' were specified but 'targets' were not.",
+                " Using 'starters' for 'targets'.", 
+                call. = FALSE, immediate. = TRUE) 
+      }
     }
   }
 
