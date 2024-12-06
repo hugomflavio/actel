@@ -462,8 +462,8 @@ distancesMatrix <- function(t.layer, starters = NULL, targets = NULL,
       
       if(!is.null(targets) & !any(grepl(c("Standard.name"), 
                                          colnames(targets)))) {
-        event("'targets' is missing column called 'Standard.name'",
-              type = "stop")
+        stop("'targets' is missing column called 'Standard.name'",
+             call. = FALSE)
       }
     }
     
