@@ -634,11 +634,11 @@ distancesMatrix <- function(t.layer, starters = NULL, targets = NULL,
              break
            } 
            
-           if(!dir.exists(target_dir)) {
+           if (!dir.exists(target_dir)) {
              dir_decision <- userInput(paste0("Directory specified not found.",
                                               " Do you want to continue?(y/n)"),
-                       choices = c("y", "n"))
-             if(dir_decision == "n") {
+                                       choices = c("y", "n"))
+             if (dir_decision == "n") {
                dir_decision <- "y"
                break
              }
