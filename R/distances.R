@@ -456,8 +456,8 @@ distancesMatrix <- function(t.layer, starters = NULL, targets = NULL,
       # distancesMatrix() crashes if actel = TRUE and starters/targets were 
       # supplied but do not contain a column called "Standard.name"
       if(!is.null(starters) && !("Standard.name" %in% colnames(starters))) {
-        event("'starters' is missing column called 'Standard.name'",
-              type = "stop")
+        stop("'starters' is missing column called 'Standard.name'",
+             call. = FALSE)
       }
       
       if(!is.null(targets) & !any(grepl(c("Standard.name"), 
