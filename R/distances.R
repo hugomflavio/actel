@@ -629,7 +629,7 @@ distancesMatrix <- function(t.layer, starters = NULL, targets = NULL,
            target_dir <- readline(paste0("Specify the folder to save",
                                          " 'distances.csv' to.",
                                          " Hit enter to skip."))
-           if(nchar(target_dir) == 0) {
+           if (nchar(target_dir) == 0) {
              dir_decision <- "y"
              break
            } 
