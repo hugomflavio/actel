@@ -607,7 +607,7 @@ distancesMatrix <- function(t.layer, starters = NULL, targets = NULL,
 
   if (row.rename) {
     rownames(dist.mat) <- outputRows
-    }
+  }
 
   if (col.rename) {
     colnames(dist.mat) <- outputCols
