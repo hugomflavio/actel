@@ -505,7 +505,6 @@ distancesMatrix <- function(t.layer, starters = NULL, targets = NULL,
                 call. = FALSE, immediate. = TRUE) 
       }
     }
-  }
 
   if (!inherits(starters, "data.frame")) {
     stop("'starters' must be a data frame.\n", call. = FALSE)
