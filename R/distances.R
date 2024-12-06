@@ -514,11 +514,11 @@ distancesMatrix <- function(t.layer, starters = NULL, targets = NULL,
   if (is.na(match(coord.x, colnames(starters)))) {
     stop(paste0("Could not find a column '", 
                 coord.x, "' in 'starters'."), call. = FALSE)
-    }
+  }
   if (is.na(match(coord.y, colnames(starters)))) {
     stop(paste0("Could not find a column '", 
                 coord.y, "' in 'starters'."), call. = FALSE)
-    }
+  }
   if (is.na(match(coord.x, colnames(targets)))) {
     stop(paste0("Could not find a column '", 
                 coord.x, "' in 'targets'."), call. = FALSE)
@@ -526,7 +526,7 @@ distancesMatrix <- function(t.layer, starters = NULL, targets = NULL,
   if (is.na(match(coord.y, colnames(targets)))) {
     stop(paste0("Could not find a column '", 
                 coord.y, "' in 'targets'."), call. = FALSE)
-    }
+  }
 
     starters <- starters[, c(id.col, coord.x, coord.y)]
     colnames(starters) <- c(id.col, "longitude", "latitude")
