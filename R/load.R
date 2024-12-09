@@ -1012,7 +1012,6 @@ loadDistances <- function(input = "distances.csv", spatial) {
         event(type = c("warning", "screen", "report"),
               "NAs detected in the distances matrix!",
               " Distance and speed calculations might fail!")
-        invalid.dist <- TRUE
       }
     }
   } else {
