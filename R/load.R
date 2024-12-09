@@ -922,7 +922,7 @@ loadDistances <- function(input = "distances.csv", spatial) {
               " please make sure that the values are separated using commas.")
       }
     } else {
-      dist.mat <- NULL
+      dist.mat <- NA
     }
   } else {
     # Ensure the input is a matrix,
@@ -930,7 +930,7 @@ loadDistances <- function(input = "distances.csv", spatial) {
     dist.mat <- as.matrix(input)
   }
 
-  if (!is.null(dist.mat)) {
+  if (is.matrix(dist.mat)) {
     rownames(dist.mat) <- gsub(" ", "_", rownames(dist.mat))
     colnames(dist.mat) <- gsub(" ", "_", colnames(dist.mat))
     invalid.dist <- FALSE
@@ -1012,11 +1012,8 @@ loadDistances <- function(input = "distances.csv", spatial) {
         event(type = c("warning", "screen", "report"),
               "NAs detected in the distances matrix!",
               " Distance and speed calculations might fail!")
-        invalid.dist <- TRUE
       }
     }
-  } else {
-    dist.mat <- NA
   }
 
   attributes(dist.mat)$valid <- !invalid.dist
