@@ -930,7 +930,7 @@ loadDistances <- function(input = "distances.csv", spatial) {
     dist.mat <- as.matrix(input)
   }
 
-  if (!is.na(dist.mat)) {
+  if (is.matrix(dist.mat)) {
     rownames(dist.mat) <- gsub(" ", "_", rownames(dist.mat))
     colnames(dist.mat) <- gsub(" ", "_", colnames(dist.mat))
     invalid.dist <- FALSE
@@ -1015,6 +1015,7 @@ loadDistances <- function(input = "distances.csv", spatial) {
       }
     }
   }
+
   attributes(dist.mat)$valid <- !invalid.dist
   return(dist.mat)
 }
