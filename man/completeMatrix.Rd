@@ -13,11 +13,13 @@ completeMatrix(x)
 A matrix of distances between pairs of points.
 }
 \description{
-Completes the bottom diagonal of a matrix with the same number of rows and columns.
+Completes the bottom diagonal of a matrix with the same number of rows
+and columns.
 }
 \details{
-It is highly recommended to read the manual page regarding distances matrices before running this function.
-You can find it here: \href{https://hugomflavio.github.io/actel-website/manual-distances.html}{https://hugomflavio.github.io/actel-website/manual-distances.html}
+It is highly recommended to read the manual page regarding distances matrices
+before running this function. You can find it here:
+\url{https://hugomflavio.github.io/actel-website/manual-distances.html}
 }
 \examples{
 # Create dummy matrix with upper diagonal filled.
