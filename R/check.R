@@ -899,21 +899,27 @@ checkImpassables <- function(movements, tag, bio, spatial, detections, dotmat, G
 #'
 #' @keywords internal
 #'
-checkSMovesN <- function(secmoves, tag, section.warning, section.error, GUI, save.tables.locally, n) {
+checkSMovesN <- function(secmoves, tag, section.warning, section.error,
+                         GUI, save.tables.locally, n) {
   event(type = "debug", "Running checkSMovesN.")
 
   if (any(secmoves$Detections <= section.warning & secmoves$Valid)) {
-    the_warning <- paste0("Section movements with ", section.warning,
-                          " or fewer detections are present for tag ",
+    the_warning <- paste0("Section movements with", 
+                          ifelse(section.warning == 1,
+                                 " one detection",
+                                 paste0(section.warning, 
+                                       " or fewer detections")),
+                          " are present for tag ",
                           tag, " ", n, ".")
     event(type = c("screen", "report", "warning"),
           the_warning)
   }
 
-  if (any(secmoves$Detections <= section.error & secmoves$Valid)) {
-    secmoves <- tableInteraction(moves = secmoves, tag = tag, trigger = the_warning, # nocov
-                                 GUI = GUI, save.tables.locally = save.tables.locally) # nocov
-  }
+  if (any(secmoves$Detections <= section.error & secmoves$Valid)) { # nocov start
+    secmoves <- tableInteraction(moves = secmoves, tag = tag, 
+                                 trigger = the_warning, GUI = GUI,
+                                 save.tables.locally = save.tables.locally)
+  } # nocov end
 
   return(secmoves)
 }
