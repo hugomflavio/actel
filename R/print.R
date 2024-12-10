@@ -700,12 +700,17 @@ printIndividuals <- function(detections.list, movements, valid.movements,
     the.width <- 5
     # Adjustments depending on number of legend valudes
     if (y.axis == "stations") {
-      to.check <- levels(detections.list[[tag]]$Array)
+      n_labels <- length(levels(detections.list[[tag]]$Array))
+      any_ukn <- any(levels(detections.list[[tag]]$Array) == "Unknown")
+      any_invalid <- any(!detections.list[[tag]]$Valid)
+      if (any_ukn & any_invalid) {
+        n_labels <- n_labels + 1
+      }
     } else {
-      to.check <- names(spatial$array.order)
+      n_labels <- length(names(spatial$array.order))
     }
 
-    if (length(to.check) > 14 & length(to.check) <= 29) {
+    if (n_labels > 14 & n_labels <= 29) {
       if (counter %% 2 == 0) {
         p <- p + ggplot2::guides(colour = ggplot2::guide_legend(ncol = 2))
         the.width <- 6
@@ -714,7 +719,7 @@ printIndividuals <- function(detections.list, movements, valid.movements,
         the.width <- 4
       }
     }
-    if (length(to.check) > 29) {
+    if (n_labels > 29) {
       if (counter %% 2 == 0) {
         p <- p + ggplot2::guides(colour = ggplot2::guide_legend(ncol = 3))
         the.width <- 7.5
@@ -1574,12 +1579,18 @@ printSensorData <- function(detections, spatial, rsp.info, colour.by = c("auto",
       # default width:
       the.width <- 5
       # Adjustments depending on number of legend valudes
-      if (colour.by == "stations")
-        to.check <- levels(detections[[tag]]$Array)
-      else
-        to.check <- names(spatial$array.order)
+      if (colour.by == "stations") {
+        n_labels <- length(levels(detections.list[[tag]]$Array))
+        any_ukn <- any(levels(detections.list[[tag]]$Array) == "Unknown")
+        any_invalid <- any(!detections.list[[tag]]$Valid)
+        if (any_ukn & any_invalid) {
+          n_labels <- n_labels + 1
+        }
+      } else {
+        n_labels <- length(names(spatial$array.order))
+      }
 
-      if (length(to.check) > 14 & length(to.check) <= 29) {
+      if (n_labels > 14 & n_labels <= 29) {
         if (counter %% 2 == 0) {
           p <- p + ggplot2::guides(colour = ggplot2::guide_legend(ncol = 2))
           the.width <- 5.8
@@ -1588,7 +1599,7 @@ printSensorData <- function(detections, spatial, rsp.info, colour.by = c("auto",
           the.width <- 4.2
         }
       }
-      if (length(to.check) > 29) {
+      if (n_labels > 29) {
         if (counter %% 2 == 0) {
           p <- p + ggplot2::guides(colour = ggplot2::guide_legend(ncol = 3))
           the.width <- 7.5
