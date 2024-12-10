@@ -701,13 +701,13 @@ printIndividuals <- function(detections.list, movements, valid.movements,
     # Adjustments depending on number of legend valudes
     if (y.axis == "stations") {
       n_labels <- length(levels(detections.list[[tag]]$Array))
-      any_ukn <- any(levels(detections.list[[tag]]$Array) == "Unknown")
-      any_invalid <- any(!detections.list[[tag]]$Valid)
-      if (any_ukn & any_invalid) {
-        n_labels <- n_labels + 1
-      }
     } else {
       n_labels <- length(names(spatial$array.order))
+    }
+    any_ukn <- any(levels(detections.list[[tag]]$Array) == "Unknown")
+    any_invalid <- any(!detections.list[[tag]]$Valid)
+    if (any_ukn & any_invalid) {
+      n_labels <- n_labels + 1
     }
 
     if (n_labels > 14 & n_labels <= 29) {
@@ -1596,13 +1596,13 @@ printSensorData <- function(detections, spatial, rsp.info,
       # Adjustments depending on number of legend valudes
       if (colour.by == "stations") {
         n_labels <- length(levels(detections.list[[tag]]$Array))
-        any_ukn <- any(levels(detections.list[[tag]]$Array) == "Unknown")
-        any_invalid <- any(!detections.list[[tag]]$Valid)
-        if (any_ukn & any_invalid) {
-          n_labels <- n_labels + 1
-        }
       } else {
         n_labels <- length(names(spatial$array.order))
+      }
+      any_ukn <- any(levels(detections.list[[tag]]$Array) == "Unknown")
+      any_invalid <- any(!detections.list[[tag]]$Valid)
+      if (any_ukn & any_invalid) {
+        n_labels <- n_labels + 1
       }
 
       if (n_labels > 14 & n_labels <= 29) {
