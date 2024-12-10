@@ -51,7 +51,7 @@ test_that("residency is able to run speed and inactiveness checks.", {
 			GUI = "never", speed.error = 1000000, inactive.error = 1000000),
 		"Running inactiveness checks without a distance matrix. Performance may be limited.", fixed = TRUE)
 	expect_false(any(is.na(match(names(output), c('array.times', 'arrays', 'time.positions', 'time.ratios',
-		'deployments', 'detections', 'efficiency', 'global.ratios', 'group.ratios', 'intra.array.CJS', 'intra.array.matrices',
+		'deployments', 'detections', 'dist.mat', 'efficiency', 'global.ratios', 'group.ratios', 'intra.array.CJS', 'intra.array.matrices',
 		'last.seen', 'movements', 'residency.list', 'rsp.info', 'section.movements', 'section.times',
 		'spatial', 'status.df', 'valid.detections', 'valid.movements')))))
 })

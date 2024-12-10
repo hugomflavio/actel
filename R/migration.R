@@ -831,19 +831,11 @@ migration <- function(
     # in coding style (actel 2.0).
     section.movements <- secmoves
     intra.array.matrices <- intra_mats
-    if (attributes(dist.mat)$valid) {
-      save(detections, valid.detections, spatial, deployments, arrays,
-           movements, valid.movements, section.movements, status.df,
-           section.overview, group.overview, release.overview, matrices,
-           overall.CJS, intra.array.matrices, intra.array.CJS, times,
-           rsp.info, dist.mat, file = resultsname)
-    } else {
-      save(detections, valid.detections, spatial, deployments, arrays,
-           movements, valid.movements, section.movements, status.df,
-           section.overview, group.overview, release.overview, matrices,
-           overall.CJS, intra.array.matrices, intra.array.CJS, times,
-           rsp.info, file = resultsname)
-    }
+    save(detections, valid.detections, spatial, deployments, arrays,
+         movements, valid.movements, section.movements, status.df,
+         section.overview, group.overview, release.overview, matrices,
+         overall.CJS, intra.array.matrices, intra.array.CJS, times,
+         rsp.info, dist.mat, file = resultsname)
   } else { # nocov end
     event(type = c("screen", "report"),
           "M: Skipping saving of the results.")
@@ -1065,11 +1057,8 @@ migration <- function(
                  intra.array.matrices = intra_mats,
                  intra.array.CJS = intra.array.CJS,
                  times = times,
-                 rsp.info = rsp.info)
-
-  if (attributes(dist.mat)$valid) {
-    output$dist.mat <- dist.mat
-  }
+                 rsp.info = rsp.info,
+                 dist.mat = dist.mat)
 
   event(type = "screen",
         "M: Analysis completed!")

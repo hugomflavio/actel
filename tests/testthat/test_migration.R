@@ -140,7 +140,7 @@ test_that("migration is able to run speed and inactiveness checks.", {
 			GUI = "never", speed.error = 1000000, inactive.error = 1000000),
 		"Running inactiveness checks without a distance matrix. Performance may be limited.", fixed = TRUE)
 	
-	expect_false(any(is.na(match(names(output), c('arrays', 'deployments', 'detections', 'group.overview', 'intra.array.CJS',
+	expect_false(any(is.na(match(names(output), c('arrays', 'deployments', 'detections', 'dist.mat', 'group.overview', 'intra.array.CJS',
 	 'intra.array.matrices','matrices', 'movements', 'overall.CJS', 'release.overview', 'rsp.info', 'section.movements',
 	  'section.overview', 'spatial', 'status.df', 'times', 'valid.detections', 'valid.movements')))))
 })

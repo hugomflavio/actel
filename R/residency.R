@@ -660,16 +660,10 @@ residency <- function(
   if (decision == "y") {
     event(type = c("screen", "report"),
           "M: Saving results as '", resultsname, "'.")
-    if (attributes(dist.mat)$valid)
-      save(detections, valid.detections, spatial, deployments, arrays, movements, valid.movements,
-        section.movements, status.df, last.seen, array.times, section.times, intra.array.matrices,
-        residency.list, time.ratios, time.positions, global.ratios, group.ratios, efficiency,
-        intra.array.CJS, rsp.info, dist.mat, file = resultsname)
-    else
-      save(detections, valid.detections, spatial, deployments, arrays, movements, valid.movements,
-        section.movements, status.df, last.seen, array.times, section.times, intra.array.matrices,
-        residency.list, time.ratios, time.positions, global.ratios, group.ratios, efficiency,
-        intra.array.CJS, rsp.info, file = resultsname)
+    save(detections, valid.detections, spatial, deployments, arrays, movements, valid.movements,
+         section.movements, status.df, last.seen, array.times, section.times, intra.array.matrices,
+         residency.list, time.ratios, time.positions, global.ratios, group.ratios, efficiency,
+         intra.array.CJS, rsp.info, dist.mat, file = resultsname)
   } else {
     event(type = c("screen", "report"),
           "M: Skipping saving of the results.")
@@ -883,10 +877,8 @@ residency <- function(
                  global.ratios = global.ratios,
                  group.ratios = group.ratios,
                  last.seen = last.seen,
-                 rsp.info = rsp.info)
-
-  if (attributes(dist.mat)$valid)
-    output$dist.mat <- dist.mat
+                 rsp.info = rsp.info,
+                 dist.mat = dist.mat)
 
   event(type = "screen",
         "M: Analysis completed!")

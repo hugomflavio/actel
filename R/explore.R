@@ -520,12 +520,9 @@ explore <- function(
   if (decision == "y") { # nocov start
    event(type = c("screen", "report"),
          paste0("M: Saving results as '", resultsname, "'."))
-    if (attributes(dist.mat)$valid)
-      save(bio, detections, valid.detections, spatial, deployments, arrays,
-        movements, valid.movements, times, rsp.info, dist.mat, file = resultsname)
-    else
-      save(bio, detections, valid.detections, spatial, deployments, arrays,
-        movements, valid.movements, times, rsp.info, file = resultsname)
+   save(bio, detections, valid.detections, spatial, deployments, arrays,
+        movements, valid.movements, times, rsp.info, dist.mat, 
+        file = resultsname)
   } else {
    event(type = c("screen", "report"),
          paste0("M: Skipping saving of the results."))
@@ -688,10 +685,8 @@ explore <- function(
                  movements = movements,
                  valid.movements = valid.movements,
                  times = times,
-                 rsp.info = rsp.info)
-
-  if (attributes(dist.mat)$valid)
-    output$dist.mat <- dist.mat
+                 rsp.info = rsp.info,
+                 dist.mat = dist.mat)
 
  event(type = "Screen",
        "M: Analysis completed!")
