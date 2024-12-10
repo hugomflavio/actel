@@ -798,7 +798,6 @@ printCircular <- function(times, bio, suffix = NULL){
     text(x = 0.5, y = 0.5, "Could not save SVG graphic.\nPlease verify that the SVG engines are working.")
     grDevices::dev.off()
   }
-
   if (length(unique(bio$Group)) < 8)
     colours <- paste0(cbPalette[c(1:length(unique(bio$Group)))], 80)
   else
@@ -812,88 +811,106 @@ printCircular <- function(times, bio, suffix = NULL){
     legend.pos <- "corner"
 
   for (i in 1:length(times)) {
-    if (length(unique(bio$Group)) > 1) {
-      link <- match(names(times[[i]]), bio$Transmitter)
-      groups <- factor(bio$Group[link], levels = sort(unique(bio$Group)))
-      trim.times <- split(times[[i]], groups)
-      trim.times <- trim.times[!unlist(lapply(trim.times, function(x) all(is.na(x))))]
-      ylegend <- -0.97 + (0.1 * (length(unique(groups)) - 2))
+    plot_file <- paste0(work.path, "circular_svg_print_failure_bounce_back.png")
+    new_plot_file <- paste0(work.path,
+                            "times_", names(times)[i], suffix, ".svg")
+    if (all(is.na(times[[i]]))) {
+      # nothing to plot, use no tags placeholder.
+      {
+        grDevices::png(new_plot_file, height = 500, width = 500)
+        par(mar = c(1, 1, 1, 1), cex = 1.5)
+        plot(NA, xlim = 0:1, ylim = 0:1,
+             xaxt = "n", yaxt = "n", bty="n",
+             ann = FALSE, main = names(times)[i])
+        text(x = 0.5, y = 0.55, names(times)[i], font = 2)
+        text(x = 0.5, y = 0.45, paste0("No tags detected"))
+        grDevices::dev.off()
+      }
+
     } else {
-      trim.times <- times[i]
-      names(trim.times) <- unique(bio$Group)
-      ylegend <- -0.97
+      if (length(unique(bio$Group)) > 1) {
+        link <- match(names(times[[i]]), bio$Transmitter)
+        groups <- factor(bio$Group[link], levels = sort(unique(bio$Group)))
+        trim.times <- split(times[[i]], groups)
+        trim.times <- trim.times[!unlist(lapply(trim.times, function(x) all(is.na(x))))]
+        ylegend <- -0.97 + (0.1 * (length(unique(groups)) - 2))
+      } else {
+        trim.times <- times[i]
+        names(trim.times) <- unique(bio$Group)
+        ylegend <- -0.97
+      }
+
+      colours.to.use <- colours[names(trim.times)]
+
+      if (legend.pos == "bottom") {
+        ylegend <- -1.15
+        xlegend <- 0
+        xjust <- 0.5
+        number.of.columns <- 1
+        if (length(colours.to.use) > 2)
+          number.of.columns <- 2
+        if (length(colours.to.use) > 6)
+          number.of.columns <- 3
+        if (length(colours.to.use) > 9 & !any(nchar(names(colours.to.use)) > 9))
+          number.of.columns <- 4
+      } else {
+        ylegend <- -0.97 + (0.08 * (length(colours.to.use) - 2))
+        xlegend <- -1.3
+        xjust <- 0
+        number.of.columns <- 1
+      }
+
+      prop <- floor(1 / max(unlist(lapply(trim.times, function(x) table(ceiling(x)) / sum(!is.na(x))))))
+
+      if (legend.pos == "corner")
+        b <- 1
+      else
+        b <- (ceiling(length(colours.to.use) / number.of.columns))
+
+      vertical.mar <- b + 2
+      # The try call prevents the report from crashing down in the presence of unknown errors.
+      try(
+          {grDevices::svg(new_plot_file, height = 5, width = 5,
+                          bg = "transparent")
+
+          par(mar = c(b, (b + 2) / 2, 2, (b + 2) / 2), xpd = TRUE) # bottom, left, top, right
+
+          copyOfCirclePlotRad(main = names(times)[i], shrink = 1.05, xlab = "", ylab = "")
+
+          params <- myRoseDiag(trim.times, bins = 24, radii.scale = radii.scale,
+            prop = prop, tcl.text = -0.1, tol = 0.05, col = colours.to.use, border = "black")
+
+          roseMean(trim.times, col = scales::alpha(params$col, 1), mean.length = c(0.07, -0.07), mean.lwd = 6,
+            box.range = "std.error", fill = "white", horizontal.border = "black",
+            vertical.border = scales::alpha(sapply(params$col, darken), 1), box.size = c(1.015, 0.985),
+            edge.length = c(0.025, -0.025), edge.lwd = 2)
+
+          ringsRel(plot.params = params, border = "black", ring.text = TRUE,
+            ring.text.pos = 0.07, rings.lty = "f5", ring.text.cex = 0.8)
+
+          legend(x = xlegend, y = ylegend, xjust = xjust, ncol = number.of.columns,
+            legend = paste(names(trim.times), " (", unlist(lapply(trim.times, function(x) sum(!is.na(x)))), ")", sep =""),
+            fill = params$col, bty = "n", x.intersp = 0.3, cex = 0.8)
+
+          grDevices::dev.off()},
+        silent = TRUE)
+    }
+    # plot_file is a failsafe placeholder by default.
+    # replace if the real plot file exists.
+    if (file.exists(new_plot_file)) {
+      plot_file <- new_plot_file
     }
 
-    colours.to.use <- colours[names(trim.times)]
-
-    if (legend.pos == "bottom") {
-      ylegend <- -1.15
-      xlegend <- 0
-      xjust <- 0.5
-      number.of.columns <- 1
-      if (length(colours.to.use) > 2)
-        number.of.columns <- 2
-      if (length(colours.to.use) > 6)
-        number.of.columns <- 3
-      if (length(colours.to.use) > 9 & !any(nchar(names(colours.to.use)) > 9))
-        number.of.columns <- 4
-    } else {
-      ylegend <- -0.97 + (0.08 * (length(colours.to.use) - 2))
-      xlegend <- -1.3
-      xjust <- 0
-      number.of.columns <- 1
-    }
-
-    prop <- floor(1 / max(unlist(lapply(trim.times, function(x) table(ceiling(x)) / sum(!is.na(x))))))
-
-    if (legend.pos == "corner")
-      b <- 1
-    else
-      b <- (ceiling(length(colours.to.use) / number.of.columns))
-
-    vertical.mar <- b + 2
-
-    # The try call prevents the report from crashing down in the presence of unknown errors.
-    try(
-        {grDevices::svg(paste0(work.path, "times_", names(times)[i], suffix, ".svg"),
-                        height = 5, width = 5, bg = "transparent")
-
-        par(mar = c(b, (b + 2) / 2, 2, (b + 2) / 2), xpd = TRUE) # bottom, left, top, right
-
-        copyOfCirclePlotRad(main = names(times)[i], shrink = 1.05, xlab = "", ylab = "")
-
-        params <- myRoseDiag(trim.times, bins = 24, radii.scale = radii.scale,
-          prop = prop, tcl.text = -0.1, tol = 0.05, col = colours.to.use, border = "black")
-
-        roseMean(trim.times, col = scales::alpha(params$col, 1), mean.length = c(0.07, -0.07), mean.lwd = 6,
-          box.range = "std.error", fill = "white", horizontal.border = "black",
-          vertical.border = scales::alpha(sapply(params$col, darken), 1), box.size = c(1.015, 0.985),
-          edge.length = c(0.025, -0.025), edge.lwd = 2)
-
-        ringsRel(plot.params = params, border = "black", ring.text = TRUE,
-          ring.text.pos = 0.07, rings.lty = "f5", ring.text.cex = 0.8)
-
-        legend(x = xlegend, y = ylegend, xjust = xjust, ncol = number.of.columns,
-          legend = paste(names(trim.times), " (", unlist(lapply(trim.times, function(x) sum(!is.na(x)))), ")", sep =""),
-          fill = params$col, bty = "n", x.intersp = 0.3, cex = 0.8)
-
-        grDevices::dev.off()},
-      silent = TRUE)
+    circular.plots <- paste0(circular.plots,
+                             "![](", plot_file, "){ width=50% }")
 
     if (i %% 2 == 0) {
-      if (file.exists(paste0(work.path, "times_", names(times)[i], suffix, ".svg")))
-        circular.plots <- paste0(circular.plots, "![](", work.path, "times_", names(times)[i], suffix, ".svg){ width=50% }\n")
-      else
-        circular.plots <- paste0(circular.plots, "![](", work.path, "circular_svg_print_failure_bounce_back.png){ width=50% }\n")
-    } else {
-      if (file.exists(paste0(work.path, "times_", names(times)[i], suffix, ".svg")))
-        circular.plots <- paste0(circular.plots, "![", work.path, "circular_svg_print_failure_bounce_back.png](times_", names(times)[i], suffix, ".svg){ width=50% }")
-      else
-        circular.plots <- paste0(circular.plots, "![](", work.path, "circular_svg_print_failure_bounce_back.png){ width=50% }")
+      circular.plots <- paste0(circular.plots, "\n")
     }
   }
   return(circular.plots)
 }
+
 
 #' Draw a section on the outside of the circle
 #'

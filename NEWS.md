@@ -14,6 +14,7 @@ Fixes:
   * Fix silent bug causing `time.ratios` (residency analysis) to occasionally calculate exceedingly long times when using `timestep = hours` (issue [#89](https://github.com/hugomflavio/actel/issues/89)).
   * Fixed `loadDistances()` issue where R objects were causing errors but .csv files were non-issue (issue [#134](https://github.com/hugomflavio/actel/issues/134)).
   * Fixed inactiveness check crash if distances matrix contains NAs (issue [#148](https://github.com/hugomflavio/actel/issues/148)).
+  * Fixed circular plot warnings issued when no tags passed by an array (issue [#151](https://github.com/hugomflavio/actel/issues/151)).
 
 Enhancements:
   * Improve timestamp handling when importing data through `preload()` (issue [#94](https://github.com/hugomflavio/actel/issues/94)).
