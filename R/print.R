@@ -1535,7 +1535,9 @@ printLastArray <- function(status.df) {
 #'
 #' @return A string of file locations in rmd syntax, to be included in printRmd
 #'
-printSensorData <- function(detections, spatial, rsp.info, colour.by = c("auto", "stations", "arrays"), extension = "png") {
+printSensorData <- function(detections, spatial, rsp.info,
+                            colour.by = c("auto", "stations", "arrays"),
+                            extension = "png") {
   event(type = "debug", "Running printSensorData.")
 
   individual.plots <- NULL
@@ -1544,37 +1546,50 @@ printSensorData <- function(detections, spatial, rsp.info, colour.by = c("auto",
   Sensor.Unit <- NULL
   colour.by <- match.arg(colour.by)
 
-  event(type = c("screen", "report"), "M: Printing sensor values for tags with sensor data.")
+  event(type = c("screen", "report"),
+        "M: Printing sensor values for tags with sensor data.")
 
   fake.results <- list(valid.detections = detections,
-                spatial = spatial,
-                valid.movements = "valid.movements",
-                rsp.info = rsp.info)
+                       spatial = spatial,
+                       valid.movements = "valid.movements",
+                       rsp.info = rsp.info)
 
-  if (interactive())
-    pb <- txtProgressBar(min = 0, max = length(detections), style = 3, width = 60) # nocov
+  if (interactive()) {
+    pb <- txtProgressBar(min = 0, max = length(detections),
+                         style = 3, width = 60) # nocov
+  }
 
   counter <- 0
   n.plots <- 0
   individual.plots <- ""
 
+  # decide y.axis type, if needed
   if (colour.by == "auto") {
-    if (nrow(spatial$stations) > 40 | length(unique(spatial$stations$Array)) > 14)
+    ovr40_stations <- nrow(spatial$stations) > 40
+    ovr14_arrays <- length(unique(spatial$stations$Array)) > 14
+
+    if (ovr40_stations | ovr14_arrays) {
       colour.by <- "arrays"
-    else
+    } else {
       colour.by <- "stations"
+    }
   }
 
   capture <- lapply(names(detections), function(tag) {
     counter <<- counter + 1
     if (any(!is.na(detections[[tag]]$Sensor.Value))) {
-      p <- plotSensors(input = fake.results, tag = tag, verbose = getOption("actel.debug", default = FALSE),
-        colour.by = ifelse(colour.by == "stations", "array", "section"))
+      p <- plotSensors(input = fake.results, tag = tag,
+                       verbose = getOption("actel.debug", default = FALSE),
+                       colour.by = ifelse(colour.by == "stations",
+                                          "array",
+                                          "section"))
 
-      if (length(unique(detections[[tag]]$Sensor.Unit)) > 2)
-        the.height <- 4 + ((length(unique(detections[[tag]]$Sensor.Unit)) - 2) * 2)
-      else
+      if (length(unique(detections[[tag]]$Sensor.Unit)) > 2) {
+        n_sensors <- length(unique(detections[[tag]]$Sensor.Unit))
+        the.height <- 4 + ((n_sensors - 2) * 2)
+      } else {
         the.height <- 4
+      }
 
       # default width:
       the.width <- 5
@@ -1609,21 +1624,27 @@ printSensorData <- function(detections, spatial, rsp.info, colour.by = c("auto",
         }
       }
 
-      # Save
-      ggplot2::ggsave(paste0(tempdir(), "/actel_report_auxiliary_files/", tag, "_sensors.", extension), width = the.width, height = the.height, limitsize = FALSE)  # better to save in png to avoid point overlapping issues
+      # better to save in png to avoid point overlapping issues
+      ggplot2::ggsave(paste0(tempdir(), "/actel_report_auxiliary_files/",
+                             tag, "_sensors.", extension),
+                      width = the.width, height = the.height, limitsize = FALSE)
 
       n.plots <- n.plots + 1
+      individual.plots <<- paste0(individual.plots, "![](", tempdir(),
+                                  "/actel_report_auxiliary_files/", tag,
+                                  "_sensors.", extension, "){ width=",
+                                  the.width * 10, "% }")
       if (n.plots %% 2 == 0) {
-        individual.plots <<- paste0(individual.plots, "![](", tempdir(), "/actel_report_auxiliary_files/", tag, "_sensors.", extension, "){ width=", the.width * 10, "% }\n")
-      } else {
-        individual.plots <<- paste0(individual.plots, "![](", tempdir(), "/actel_report_auxiliary_files/", tag, "_sensors.", extension, "){ width=", the.width * 10, "% }")
+        individual.plots <<- paste0(individual.plots, "\n")
       }
     }
-    if (interactive())
+    if (interactive()) {
       setTxtProgressBar(pb, counter)
+    }
   })
-  if (interactive())
+  if (interactive()) {
     close(pb)
+  }
 
   return(individual.plots)
 }
