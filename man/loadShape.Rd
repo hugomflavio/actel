@@ -15,22 +15,28 @@ loadShape(
 )
 }
 \arguments{
-\item{shape}{The path to a shapefile containing land polygons of the study area.}
+\item{shape}{The path to a shapefile containing land polygons of the study
+area.}
 
-\item{size}{The pixel size, in metres.}
+\item{size}{The pixel size, in the same unit as the coordinate system.
+I.e., usually either metres or degrees.}
 
-\item{spatial}{Either a character string specifying the path to a spatial.csv file or a spatial data frame.
-This argument is not mandatory, but can be used to perform an early check of the shape file's compatibility
-with the study stations and release sites.}
+\item{spatial}{Either a character string specifying the path to a spatial.csv
+file or a spatial data frame. This argument is not mandatory, but can be
+used to perform an early check of the shape file's compatibility with the
+study stations and release sites.}
 
-\item{coord.x, coord.y}{The names of the columns containing the x and y positions of the stations
-in the spatial.csv file. these coordinates MUST BE in the same coordinate system as the shape file.}
+\item{coord.x, coord.y}{The names of the columns containing the x and y
+positions of the stations in the spatial.csv file. these coordinates
+MUST BE in the same coordinate system as the shape file.}
 
-\item{buffer}{Artificially expand the map edges. Can be a single value (applied to all edges)
-or four values (xmin, xmax, ymin, ymax). The unit of the buffer depends on the shape file's
-coordinate system.}
+\item{buffer}{Artificially expand the map edges. Can be a single value
+(applied to all edges) or four values (xmin, xmax, ymin, ymax). The unit
+of the buffer depends on the shape file's coordinate system.}
 
-\item{type}{The type of shapefile being loaded. One of "land", if the shapefile's polygons represent landmasses, or "water", if the shapefile's polygons represent water bodies.}
+\item{type}{The type of shapefile being loaded. One of "land", if the
+shapefile's polygons represent landmasses, or "water", if the shapefile's
+polygons represent water bodies.}
 }
 \value{
 A raster object.

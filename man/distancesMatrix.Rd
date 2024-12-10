@@ -38,17 +38,17 @@ Defaults to TRUE.}
 A matrix with the distances between each pair of points.
 }
 \description{
-Using a previously created transition layer (see \code{\link{transitionLayer}}),
-calculates the distances between spatial points. Adapted from Grant Adams'
-script "distance to closest mpa". If the argument 'actel' is set to
-TRUE (default), an actel-compatible matrix is generated, and the user will be
-asked if they would like to save the matrix as 'distances.csv' in the current
-directory.
+Using a previously created transition layer (see
+\code{\link{transitionLayer}}), calculates the distances between spatial
+points. Adapted from Grant Adams's script "distance to closest mpa".
+If the argument 'actel' is set to TRUE (default), an actel-compatible matrix
+is generated, and the user will be asked if they would like to save the
+matrix as 'distances.csv' in the current directory.
 }
 \details{
 It is highly recommended to read the manual page regarding distances matrices
-before running this function.
-You can find it here:\href{https://hugomflavio.github.io/actel-website/manual-distances.html}{https://hugomflavio.github.io/actel-website/manual-distances.html}
+before running this function. You can find it here:
+\url{https://hugomflavio.github.io/actel-website/manual-distances.html}
 }
 \examples{
 \donttest{

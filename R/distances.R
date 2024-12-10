@@ -1,25 +1,34 @@
 #' Load shapefile and convert to a raster object.
 #'
-#' shapeToRaster can also perform early quality checks on the shape file, to ensure it is compatible
-#' with the remaining study data. To activate these, set the names of the columns in the spatial.csv
-#' file that contain the x and y coordinates of the stations using coord.x and coord.y. By default,
-#' shapeToRaster looks for a spatial.csv file in the current working directory, but this can be
-#' personalized using the spatial argument.
+#' shapeToRaster can also perform early quality checks on the shape file,
+#' to ensure it is compatible with the remaining study data. To activate these,
+#' set the names of the columns in the spatial.csv file that contain the x 
+#' and y coordinates of the stations using coord.x and coord.y. By default,
+#' shapeToRaster looks for a spatial.csv file in the current working directory,
+#' but this can be personalized using the spatial argument.
 #'
-#' It is highly recommended to read the manual page regarding distances matrices before running this function.
-#' You can find it here: \href{https://hugomflavio.github.io/actel-website/manual-distances.html}{https://hugomflavio.github.io/actel-website/manual-distances.html}
+#' It is highly recommended to read the manual page regarding distances matrices
+#' before running this function.
+#' You can find it here: 
+#' \url{https://hugomflavio.github.io/actel-website/manual-distances.html}
 #'
-#' @param shape The path to a shapefile containing land polygons of the study area.
-#' @param size The pixel size, in metres.
-#' @param spatial Either a character string specifying the path to a spatial.csv file or a spatial data frame.
-#'  This argument is not mandatory, but can be used to perform an early check of the shape file's compatibility
-#'  with the study stations and release sites.
-#' @param coord.x,coord.y The names of the columns containing the x and y positions of the stations
-#'  in the spatial.csv file. these coordinates MUST BE in the same coordinate system as the shape file.
-#' @param buffer Artificially expand the map edges. Can be a single value (applied to all edges)
-#'  or four values (xmin, xmax, ymin, ymax). The unit of the buffer depends on the shape file's
-#'  coordinate system.
-#' @param type The type of shapefile being loaded. One of "land", if the shapefile's polygons represent landmasses, or "water", if the shapefile's polygons represent water bodies.
+#' @param shape The path to a shapefile containing land polygons of the study
+#'   area.
+#' @param size The pixel size, in the same unit as the coordinate system.
+#'   I.e., usually either metres or degrees.
+#' @param spatial Either a character string specifying the path to a spatial.csv
+#'   file or a spatial data frame. This argument is not mandatory, but can be
+#'   used to perform an early check of the shape file's compatibility with the
+#'   study stations and release sites.
+#' @param coord.x,coord.y The names of the columns containing the x and y
+#'   positions of the stations in the spatial.csv file. these coordinates
+#'   MUST BE in the same coordinate system as the shape file.
+#' @param buffer Artificially expand the map edges. Can be a single value
+#'   (applied to all edges) or four values (xmin, xmax, ymin, ymax). The unit
+#'   of the buffer depends on the shape file's coordinate system.
+#' @param type The type of shapefile being loaded. One of "land", if the
+#'   shapefile's polygons represent landmasses, or "water", if the shapefile's
+#'   polygons represent water bodies.
 #'
 #' @examples
 #' \donttest{
@@ -34,12 +43,15 @@
 #'
 #' if (any(missing.packages)) {
 #'   message("Sorry, this function requires packages '",
-#'     paste(c("raster", "gdistance", "sp", "terra")[missing.packages], collapse = "', '"),
-#'     "' to operate. Please install ", ifelse(sum(missing.packages) > 1, "them", "it"),
-#'     " before proceeding.")
+#'           paste(c("raster", "gdistance", "sp", "terra")[missing.packages],
+#'                 collapse = "', '"),
+#'           "' to operate. Please install ",
+#'           ifelse(sum(missing.packages) > 1, "them", "it"),
+#'           " before proceeding.")
 #' } else {
 #'   # Fetch actel's example shapefile
-#'   example.shape <- paste0(system.file(package = "actel")[1], "/example_shapefile.shp")
+#'   example.shape <- paste0(system.file(package = "actel")[1],
+#'                           "/example_shapefile.shp")
 #'
 #'   # import the shape file
 #'   x <- shapeToRaster(shape = example.shape, size = 20)
@@ -64,23 +76,37 @@ shapeToRaster <- function(shape, size, spatial = "spatial.csv",
     length(suppressWarnings(packageDescription("terra"))))
   missing.packages <- sapply(aux, function(x) x == 1)
   if (any(missing.packages)) {
-    stop(paste0("This function requires packages '", paste(c("raster", "gdistance", "sp", "terra")[missing.packages], collapse = "', '"),
-      "' to operate. Please install ", ifelse(sum(missing.packages) > 1, "them", "it"), " before proceeding.\n"), call. = FALSE)
+    stop("This function requires packages '",
+         paste(c("raster", "gdistance", "sp", "terra")[missing.packages],
+               collapse = "', '"),
+         "' to operate. Please install ",
+         ifelse(sum(missing.packages) > 1, "them", "it"),
+         " before proceeding.\n", call. = FALSE)
   }
 
   type <- match.arg(type)
 
-  if (!is.null(buffer) & length(buffer) != 4 & length(buffer) != 1)
-    stop("'buffer' must either contain one value (applied to all four corners), or four values (applied to xmin, xmax, ymin and ymax, respectively).\n", call. = FALSE)
-  if (!is.null(buffer) & !is.numeric(buffer))
-    stop("'buffer' must be numeric (in metres or degrees, depending on the shape coordinate system).\n", call. = FALSE)
-  if (any(buffer < 0))
+  if (!is.null(buffer) & length(buffer) != 4 & length(buffer) != 1) {
+    stop("'buffer' must either contain one value (applied to all four",
+         " corners), or four values (applied to xmin, xmax, ymin and",
+         " ymax, respectively).\n", call. = FALSE)
+  }
+  if (!is.null(buffer) & !is.numeric(buffer)) {
+    stop("'buffer' must be numeric (in metres or degrees,",
+         " depending on the shape coordinate system).\n", call. = FALSE)
+  }
+  if (any(buffer < 0)) {
     stop("'buffer' values cannot be negative.\n", call. = FALSE)
+  }
 
-  if (is.null(coord.x) & !is.null(coord.y))
-    warning("'coord.y' was set but 'coord.x' was not. Skipping range check.", call. = FALSE, immediate. = TRUE)
-  if (!is.null(coord.x) & is.null(coord.y))
-    warning("'coord.x' was set but 'coord.y' was not. Skipping range check.", call. = FALSE, immediate. = TRUE)
+  if (is.null(coord.x) & !is.null(coord.y)) {
+    warning("'coord.y' was set but 'coord.x' was not. Skipping range check.",
+            call. = FALSE, immediate. = TRUE)
+  }
+  if (!is.null(coord.x) & is.null(coord.y)) {
+    warning("'coord.x' was set but 'coord.y' was not. Skipping range check.",
+            call. = FALSE, immediate. = TRUE)
+  }
 
   # check if spatial information is present
   if (!is.null(coord.x) & !is.null(coord.y)) {
@@ -89,7 +115,10 @@ shapeToRaster <- function(shape, size, spatial = "spatial.csv",
       if (file.exists(spatial)) {
         spatial <- loadSpatial(spatial)
       } else {
-        warning("Could not find a ", spatial, " file in the current working directory. Skipping range check.", call. = FALSE, immediate. = TRUE)
+        warning("Could not find a ", spatial, 
+                " file in the current working directory.",
+                " Skipping range check.",
+                call. = FALSE, immediate. = TRUE)
         check.spatial <- FALSE
         spatial <- NULL
       }
@@ -97,12 +126,19 @@ shapeToRaster <- function(shape, size, spatial = "spatial.csv",
     if (check.spatial) {
       if (any(is.na(xy <- match(c(coord.x, coord.y), colnames(spatial))))) {
         if (all(is.na(xy))) {
-          warning("Could not find columns '", coord.x, "' and '", coord.y, "' in the spatial data frame. Skipping range check.", call. = FALSE, immediate. = TRUE)
+          warning("Could not find columns '", coord.x, "' and '", coord.y,
+                  "' in the spatial data frame. Skipping range check.",
+                  call. = FALSE, immediate. = TRUE)
         } else {
-          if (is.na(xy[1]))
-            warning("Could not find column '", coord.x, "' in the spatial data frame. Skipping range check.", call. = FALSE, immediate. = TRUE)
-          else
-            warning("Could not find column '", coord.y, "' in the spatial data frame. Skipping range check.", call. = FALSE, immediate. = TRUE)
+          if (is.na(xy[1])) {
+            warning("Could not find column '", coord.x,
+                    "' in the spatial data frame. Skipping range check.",
+                    call. = FALSE, immediate. = TRUE)
+          } else {
+            warning("Could not find column '", coord.y,
+                    "' in the spatial data frame. Skipping range check.",
+                    call. = FALSE, immediate. = TRUE)
+          }
         }
         spatial <- NULL
       }
@@ -112,8 +148,9 @@ shapeToRaster <- function(shape, size, spatial = "spatial.csv",
   }
 
   # remaining input quality checks
-  if (!file.exists(shape))
+  if (!file.exists(shape)) {
     stop(paste0("Could not find file '", shape, "'.\n"), call. = FALSE)
+  }
 
   # load shape file
   if (tools::file_ext(shape) == "shp") {
@@ -166,8 +203,10 @@ shapeToRaster <- function(shape, size, spatial = "spatial.csv",
       issue.message.1 <- TRUE
       NewEx[4] <- ymax
     }
-    if (issue.message.1)
-      message("M: Extending the shape ranges with open water to ensure the stations fit inside it.")
+    if (issue.message.1) {
+      message("M: Extending the shape ranges with open water",
+              " to ensure the stations fit inside it.")
+    }
   }
 
   # ensure range allows for integer pixels
@@ -187,8 +226,10 @@ shapeToRaster <- function(shape, size, spatial = "spatial.csv",
     NewEx[4] <- NewEx[4] - fix.y #ymax
   }
 
-  if (issue.message.2)
-    message("M: Applying a small correction to the shape extent to ensure an integer number of pixels.")
+  if (issue.message.2) {
+    message("M: Applying a small correction to the shape extent",
+            " to ensure an integer number of pixels.")
+  }
 
   if (issue.message.1 | issue.message.2) {
     message("M: New shape extent:")
@@ -196,7 +237,8 @@ shapeToRaster <- function(shape, size, spatial = "spatial.csv",
   }
 
   pixel.res <- (NewEx[c(2, 4)] - NewEx[c(1, 3)]) / size
-  message(paste("M: Chosen pixel size:", size, "\nM: Resulting pixel dimensions:"))
+  message("M: Chosen pixel size:", size,
+          "\nM: Resulting pixel dimensions:")
   message(paste0(capture.output(print(pixel.res)), collapse = "\n"), "\n")
 
   ras <- terra::rast(nrows = pixel.res[2],
@@ -209,11 +251,14 @@ shapeToRaster <- function(shape, size, spatial = "spatial.csv",
 
 
   #### "Burn" the shapefile into the raster
-  message("M: Burning the shape into a raster. This process may take several minutes depending on the shape size and chosen pixel size."); flush.console()
+  message("M: Burning the shape into a raster. This process may take",
+          " several minutes depending on the shape size and chosen pixel size.")
+  flush.console()
   shape.mask <- terra::rasterize(x = shape, y = ras)
 
   project.raster <- is.na(shape.mask)
-  project.raster[project.raster == 0] <- NA # make land impossible to cross
+  # make land impossible to cross
+  project.raster[project.raster == 0] <- NA
 
   if (type == "water") {
     # invert raster
@@ -224,14 +269,19 @@ shapeToRaster <- function(shape, size, spatial = "spatial.csv",
 
   # check if stations are in water
   if (!is.null(spatial)) {
-    sp_points <- terra::vect(spatial, geom = c(coord.x, coord.y), crs = terra::crs(project.raster))
+    sp_points <- terra::vect(spatial, geom = c(coord.x, coord.y), 
+                             crs = terra::crs(project.raster))
 
     check <- terra::extract(project.raster, sp_points)
 
     if (any(is.na(check))) {
       one <- sum(is.na(check)) == 1
-      warning(ifelse(one, "Station '", "Stations '"), paste(spatial$Station.name[is.na(check$layer)], collapse = "', '"),
-        ifelse(one, "' is", "' are"), " not placed in water! This can cause several problems.", call. = FALSE, immediate. = TRUE)
+      warning(ifelse(one, "Station '", "Stations '"),
+              paste(spatial$Station.name[is.na(check$layer)],
+                    collapse = "', '"),
+              ifelse(one, "' is", "' are"), 
+              " not placed in water! This can cause several problems.",
+              call. = FALSE, immediate. = TRUE)
     }
   }
 
@@ -257,11 +307,15 @@ shapeToRaster <- function(shape, size, spatial = "spatial.csv",
 loadShape <- function(shape, size, spatial = "spatial.csv",
   coord.x = NULL, coord.y = NULL, buffer = NULL, type = c("land", "water")) {
 
-  .Deprecated(shapeToRaster, package=NULL, "loadShape is deprecated. Please use shapeToRaster instead. This function will stop working once the next version of actel is released.",
+  .Deprecated(shapeToRaster, package = NULL,
+              msg = paste0("loadShape is deprecated. Please use shapeToRaster",
+                           " instead. This function will stop working once",
+                           " the next version of actel is released."),
               old = as.character(sys.call(sys.parent()))[1L])
 
   output <- shapeToRaster(shape = shape, size = size, spatial = spatial,
-                          coord.x = coord.x, coord.y = coord.y, buffer = buffer, type = type)
+                          coord.x = coord.x, coord.y = coord.y,
+                          buffer = buffer, type = type)
 
   return(output)
 }
@@ -269,16 +323,20 @@ loadShape <- function(shape, size, spatial = "spatial.csv",
 
 #' Calculate Transition Layer
 #'
-#' Using a previously imported shape file that has been converted to a raster (see \code{\link{shapeToRaster}}),
-#' Prepares a TransitionLayer object to be used in distance
-#' estimations (see \code{\link{distancesMatrix}}). Adapted from Grant Adams' script "distance to closest mpa".
+#' Using a previously imported shape file that has been converted to a raster
+#' (see \code{\link{shapeToRaster}}). Prepares a TransitionLayer object to be
+#' used in distance estimations (see \code{\link{distancesMatrix}}).
+#' Adapted from Grant Adams' script "distance to closest mpa".
 #'
-#' It is highly recommended to read the manual page regarding distances matrices before running this function.
-#' You can find it here: \href{https://hugomflavio.github.io/actel-website/manual-distances.html}{https://hugomflavio.github.io/actel-website/manual-distances.html}
+#' It is highly recommended to read the manual page regarding distances matrices
+#' before running this function. You can find it here:
+#' \url{https://hugomflavio.github.io/actel-website/manual-distances.html}
 #'
-#' @param x A water raster; for example the output of \code{\link{shapeToRaster}}
-#' @param directions The number of directions considered for every movement situation during cost
-#'  calculation. See the manual page linked above for more details.
+#' @param x A water raster; for example the output of
+#'   \code{\link{shapeToRaster}}
+#' @param directions The number of directions considered for every movement
+#'   situation during cost calculation. See the manual page linked above
+#'   for more details.
 #'
 #' @examples
 #' \donttest{
@@ -293,12 +351,15 @@ loadShape <- function(shape, size, spatial = "spatial.csv",
 #'
 #' if (any(missing.packages)) {
 #'   message("Sorry, this function requires packages '",
-#'     paste(c("raster", "gdistance", "sp", "terra")[missing.packages], collapse = "', '"),
-#'     "' to operate. Please install ", ifelse(sum(missing.packages) > 1, "them", "it"),
-#'     " before proceeding.")
+#'           paste(c("raster", "gdistance", "sp", "terra")[missing.packages],
+#'                 collapse = "', '"),
+#'           "' to operate. Please install ",
+#'           ifelse(sum(missing.packages) > 1, "them", "it"),
+#'           " before proceeding.")
 #' } else {
 #'   # Fetch actel's example shapefile
-#'   example.shape <- paste0(system.file(package = "actel")[1], "/example_shapefile.shp")
+#'   example.shape <- paste0(system.file(package = "actel")[1],
+#'                           "/example_shapefile.shp")
 #'
 #'   # import the shape file
 #'   x <- shapeToRaster(shape = example.shape, size = 20)
@@ -324,34 +385,45 @@ transitionLayer <- function(x, directions = c(16, 8, 4)){
     length(suppressWarnings(packageDescription("terra"))))
   missing.packages <- sapply(aux, function(x) x == 1)
   if (any(missing.packages)) {
-    stop(paste0("This function requires packages '", paste(c("raster", "gdistance", "sp", "terra")[missing.packages], collapse = "', '"),
-      "' to operate. Please install ", ifelse(sum(missing.packages) > 1, "them", "it"), " before proceeding.\n"), call. = FALSE)
+    stop("This function requires packages '",
+         paste(c("raster", "gdistance", "sp", "terra")[missing.packages],
+               collapse = "', '"),
+         "' to operate. Please install ",
+         ifelse(sum(missing.packages) > 1, "them", "it"),
+         " before proceeding.\n", call. = FALSE)
   }
 
   # argument quality
   directions <- as.character(directions[1])
   directions <- match.arg(directions)
 
-  #### The transition layer will be used as the shape for calculating least-cost distance
-  message("M: Constructing the transition layer. This process may take several minutes depending on the study area size and chosen pixel size."); flush.console()
+  # The transition layer will be used as the shape
+  # for calculating least-cost distance
+  message("M: Constructing the transition layer. This process may take several",
+          " minutes depending on the study area size and chosen pixel size.")
+  flush.console()
 
-  transition.layer <- gdistance::transition(raster::raster(x), transitionFunction = mean, directions = as.numeric(directions))
-  transition.layer <- gdistance::geoCorrection(transition.layer, type = "c") # correct for shape distortion, as well as for diagonal connections between grid cells
+  transition.layer <- gdistance::transition(raster::raster(x),
+                                            transitionFunction = mean,
+                                            directions = as.numeric(directions))
+  # correct for shape distortion, as well as for diagonal
+  # connections between grid cells
+  transition.layer <- gdistance::geoCorrection(transition.layer, type = "c")
   return(transition.layer)
 }
 
 #' Calculate Distances Matrix
 #'
-#' Using a previously created transition layer (see \code{\link{transitionLayer}}), 
-#' calculates the distances between spatial points. Adapted from Grant Adams' 
-#' script "distance to closest mpa". If the argument 'actel' is set to 
-#' TRUE (default), an actel-compatible matrix is generated, and the user will be 
-#' asked if they would like to save the matrix as 'distances.csv' in the current 
-#' directory.
+#' Using a previously created transition layer (see
+#' \code{\link{transitionLayer}}), calculates the distances between spatial
+#' points. Adapted from Grant Adams's script "distance to closest mpa".
+#' If the argument 'actel' is set to TRUE (default), an actel-compatible matrix
+#' is generated, and the user will be asked if they would like to save the
+#' matrix as 'distances.csv' in the current directory.
 #'
-#' It is highly recommended to read the manual page regarding distances matrices 
-#' before running this function.
-#' You can find it here:\href{https://hugomflavio.github.io/actel-website/manual-distances.html}{https://hugomflavio.github.io/actel-website/manual-distances.html}
+#' It is highly recommended to read the manual page regarding distances matrices
+#' before running this function. You can find it here:
+#' \url{https://hugomflavio.github.io/actel-website/manual-distances.html}
 #'
 #' @param t.layer A TransitionLayer object, generated by 
 #' \code{\link{transitionLayer}}.
@@ -687,13 +759,15 @@ distancesMatrix <- function(t.layer, starters = NULL, targets = NULL,
 
 #' Create a Template Distances Matrix
 #'
-#' Creates an empty matrix based on the local 'spatial.csv' file and saves it to 'distances.csv' so the
-#' user can manually fill it.
+#' Creates an empty matrix based on the local 'spatial.csv' file and saves it to
+#' 'distances.csv' so the user can manually fill it.
 #'
-#' It is highly recommended to read the manual page regarding distances matrices before running this function.
-#' You can find it here: \href{https://hugomflavio.github.io/actel-website/manual-distances.html}{https://hugomflavio.github.io/actel-website/manual-distances.html}
+#' It is highly recommended to read the manual page regarding distances matrices
+#' before running this function. You can find it here:
+#' \url{https://hugomflavio.github.io/actel-website/manual-distances.html}
 #'
-#' @param input Either a data frame with spatial data or the path to the file containing the spatial information.
+#' @param input Either a data frame with spatial data or the path to the file
+#'   containing the spatial information.
 #'
 #' @examples
 #' # This function requires a file with spatial information
@@ -728,10 +802,12 @@ emptyMatrix <- function(input = "spatial.csv"){
 
 #' Complete a Distances Matrix
 #'
-#' Completes the bottom diagonal of a matrix with the same number of rows and columns.
+#' Completes the bottom diagonal of a matrix with the same number of rows
+#' and columns.
 #'
-#' It is highly recommended to read the manual page regarding distances matrices before running this function.
-#' You can find it here: \href{https://hugomflavio.github.io/actel-website/manual-distances.html}{https://hugomflavio.github.io/actel-website/manual-distances.html}
+#' It is highly recommended to read the manual page regarding distances matrices
+#' before running this function. You can find it here:
+#' \url{https://hugomflavio.github.io/actel-website/manual-distances.html}
 #'
 #' @param x A distances matrix to be completed.
 #'
@@ -757,10 +833,13 @@ emptyMatrix <- function(input = "spatial.csv"){
 #' @export
 #'
 completeMatrix <- function(x){
-  if (!inherits(x, "matrix"))
+  if (!inherits(x, "matrix")) {
     stop("The input must be a matrix", call. = FALSE)
-  if (nrow(x) != ncol(x))
-    stop("The matrix does not contain the same number of columns and rows. Aborting.", call. = FALSE)
+  }
+  if (nrow(x) != ncol(x)) {
+    stop("The matrix does not contain the same number of columns and rows.",
+         " Aborting.", call. = FALSE)
+  }
 
   for (i in 1:ncol(x)) {
     x[i:ncol(x), i] <- t(x[i, i:ncol(x)])
