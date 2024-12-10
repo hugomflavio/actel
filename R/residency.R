@@ -661,9 +661,9 @@ residency <- function(
     event(type = c("screen", "report"),
           "M: Saving results as '", resultsname, "'.")
     save(detections, valid.detections, spatial, deployments, arrays, movements, valid.movements,
-        section.movements, status.df, last.seen, array.times, section.times, intra.array.matrices,
-        residency.list, time.ratios, time.positions, global.ratios, group.ratios, efficiency,
-        intra.array.CJS, rsp.info, dist.mat, file = resultsname)
+         section.movements, status.df, last.seen, array.times, section.times, intra.array.matrices,
+         residency.list, time.ratios, time.positions, global.ratios, group.ratios, efficiency,
+         intra.array.CJS, rsp.info, dist.mat, file = resultsname)
   } else {
     event(type = c("screen", "report"),
           "M: Skipping saving of the results.")
