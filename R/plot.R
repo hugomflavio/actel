@@ -950,8 +950,8 @@ plotDetections <- function(input, tag, type,
   # Include invalid, if needed
   if (y.axis == "stations") {
     any_ukn <- any(levels(detections$Array) == "Unknown")
-    any_valid <- any(!detections$Valid)
-    if (any_ukn | any_valid) {
+    any_invalid <- any(!detections$Valid)
+    if (any_ukn | any_invalid) {
       ukn_lvl <- levels(detections$Array) == "Unknown"
       levels(detections$Array)[ukn_lvl] <- "Invalid"
       if (!(any(levels(detections$Array) == "Invalid"))) {
