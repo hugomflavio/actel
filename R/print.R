@@ -1595,12 +1595,12 @@ printSensorData <- function(detections, spatial, rsp.info,
       the.width <- 5
       # Adjustments depending on number of legend valudes
       if (colour.by == "stations") {
-        n_labels <- length(levels(detections.list[[tag]]$Array))
+        n_labels <- length(levels(detections[[tag]]$Array))
       } else {
         n_labels <- length(names(spatial$array.order))
       }
-      any_ukn <- any(levels(detections.list[[tag]]$Array) == "Unknown")
-      any_invalid <- any(!detections.list[[tag]]$Valid)
+      any_ukn <- any(levels(detections[[tag]]$Array) == "Unknown")
+      any_invalid <- any(!detections[[tag]]$Valid)
       if (any_ukn & any_invalid) {
         n_labels <- n_labels + 1
       }
