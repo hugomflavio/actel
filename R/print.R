@@ -543,7 +543,7 @@ printEfficiency <- function(CJS = NULL, efficiency = NULL, intra.CJS, type = c("
       efficiency.fragment <- paste0('
 Note:
   : These efficiency calculations **do not account for** backwards movements. This implies that the total number of animals to have been **last seen** at a given array **may be lower** than the displayed below. Please refer to the [section survival overview](#section-survival) and [last seen arrays](#last-seen-arrays) to find out how many animals were considered to have disappeared per section.
-  : The data used in the tables below is stored in the `overall.CJS` object. Auxiliary information can also be found in the `matrices` and `arrays` objects.
+  : The data used in the tables below are stored in the `overall.CJS` object. Auxiliary information can also be found in the `matrices` and `arrays` objects.
   : These efficiency values are estimated using the analytical equations provided in the paper "Using mark-recapture models to estimate survival from telemetry data" by [Perry et al. (2012)](<https://www.researchgate.net/publication/256443823_Using_mark-recapture_models_to_estimate_survival_from_telemetry_data>). In some situations, more advanced efficiency estimation methods may be required.
   : You can try running `advEfficiency(results$overall.CJS)` to obtain beta-drawn efficiency distributions (replace `results` with the name of the object where you saved the analysis).
 
@@ -579,7 +579,7 @@ Note:
       efficiency.fragment <- paste0('
 Note:
   : More information on the differences between "Known missed events" and "Potentially missed events" can be found in the package vignettes.
-  : The data used in this table is stored in the `efficiency` object.
+  : The data used in this table are stored in the `efficiency` object.
   : These efficiency values are estimated using a simple step-by-step method (described in the package vignettes). In some situations, more advanced efficiency estimation methods may be required.
   : You can try running `advEfficiency(results$efficiency)` to obtain beta-drawn efficiency distributions (replace `results` with the name of the object where you saved the analysis).
 
@@ -601,7 +601,7 @@ Note:
 #### Intra array efficiency estimates
 
 Note:
-  : The data used in the table(s) below is stored in the `intra.array.CJS` object. Auxiliary information can also be found in the `intra.array.matrices` object.
+  : The data used in the table(s) below are stored in the `intra.array.CJS` object. Auxiliary information can also be found in the `intra.array.matrices` object.
   : These efficiency values are estimated using the analytical equations provided in the paper "Using mark-recapture models to estimate survival from telemetry data" by [Perry et al. (2012)](<https://www.researchgate.net/publication/256443823_Using_mark-recapture_models_to_estimate_survival_from_telemetry_data>). In some situations, more advanced efficiency estimation methods may be required.
   : You can try running `advEfficiency(results$intra.array.CJS$', names(intra.CJS)[1], ')` to obtain beta-drawn efficiency distributions (replace `results` with the name of the object where you saved the analysis).
 ')

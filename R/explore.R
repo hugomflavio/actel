@@ -734,7 +734,7 @@ printExploreRmd <- function(override.fragment, biometric.fragment, individual.pl
 
 Note:
   : The colouring in these plots will follow that of the individual detection plots, which can be modified using `detections.y.axis`.
-  : The data used for these graphics is stored in the `valid.detections` object.
+  : The data used for these graphics are stored in the `valid.detections` object.
   : You can replicate these graphics and edit them as needed using the `plotSensors()` function.
 
 <center>\n", sensor.plots, "\n</center>")
@@ -841,7 +841,7 @@ Note:
 Note:
   : Coloured lines on the outer circle indicate the mean value for each group and the respective ranges show the standard error of the mean. Each group\'s bars sum to 100%. The number of data points in each group is presented between brackets in the legend of each pannel.
   : You can replicate these graphics and edit them as needed using the `plotTimes()` function.
-  : The data used in these graphics is stored in the `times` object.
+  : The data used in these graphics are stored in the `times` object.
   : To obtain reports with the legacy linear circular scale, run `options(actel.circular.scale = "linear")` before running your analyses.
 
 <center>
@@ -859,7 +859,7 @@ Note:
   : The ', ifelse(detections.y.axis == "stations", 'stations', 'arrays'), ' have been aligned by ', ifelse(detections.y.axis == "stations", 'array', 'section'), ', following the order provided ', ifelse(detections.y.axis == "stations", '', 'either '), 'in the spatial input', ifelse(detections.y.axis == "stations", '.', ' or the `section.order` argument.'), '
   : You can replicate these graphics and edit them as needed using the `plotDetections()` function.
   : You can also see the movement events of multiple tags simultaneously using the `plotMoves()` function.
-  : The data used in these graphics is stored in the `detections` and `movements` objects (and respective valid counterparts).
+  : The data used in these graphics are stored in the `detections` and `movements` objects (and respective valid counterparts).
 
 <center>
 ', individual.plots,'
