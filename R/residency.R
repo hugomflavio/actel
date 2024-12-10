@@ -878,7 +878,7 @@ residency <- function(
                  group.ratios = group.ratios,
                  last.seen = last.seen,
                  rsp.info = rsp.info,
-                 dist.mat <- dist.mat)
+                 dist.mat = dist.mat)
 
   event(type = "screen",
         "M: Analysis completed!")

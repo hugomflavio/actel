@@ -1058,7 +1058,7 @@ migration <- function(
                  intra.array.CJS = intra.array.CJS,
                  times = times,
                  rsp.info = rsp.info,
-                 dist.mat <- dist.mat)
+                 dist.mat = dist.mat)
 
   event(type = "screen",
         "M: Analysis completed!")

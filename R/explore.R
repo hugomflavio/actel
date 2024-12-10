@@ -686,7 +686,7 @@ explore <- function(
                  valid.movements = valid.movements,
                  times = times,
                  rsp.info = rsp.info,
-                 dist.mat <- dist.mat)
+                 dist.mat = dist.mat)
 
  event(type = "Screen",
        "M: Analysis completed!")
