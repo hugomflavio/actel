@@ -904,9 +904,9 @@ checkSMovesN <- function(secmoves, tag, section.warning, section.error,
   event(type = "debug", "Running checkSMovesN.")
 
   if (any(secmoves$Detections <= section.warning & secmoves$Valid)) {
-    the_warning <- paste0("Section movements with", 
+    the_warning <- paste0("Section movements with ", 
                           ifelse(section.warning == 1,
-                                 " one detection",
+                                 "one detection",
                                  paste0(section.warning, 
                                        " or fewer detections")),
                           " are present for tag ",
