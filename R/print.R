@@ -621,7 +621,8 @@ knitr::kable(intra.array.CJS[[',i ,']]$absolutes)
 
 #' Print individual graphics
 #'
-#' Prints the individual detections for each tag, overlaying the points in time considered crucial during the analysis.
+#' Prints the individual detections for each tag, overlaying the points
+#' in time considered crucial during the analysis.
 #'
 #' @inheritParams explore
 #' @inheritParams groupMovements
@@ -634,12 +635,15 @@ knitr::kable(intra.array.CJS[[',i ,']]$absolutes)
 #'
 #' @keywords internal
 #'
-printIndividuals <- function(detections.list, movements, valid.movements, spatial,
-  status.df = NULL, rsp.info, y.axis = c("auto", "stations", "arrays"), extension = "png") {
+printIndividuals <- function(detections.list, movements, valid.movements,
+                             spatial, status.df = NULL, rsp.info,
+                             y.axis = c("auto", "stations", "arrays"),
+                             extension = "png") {
   event(type = "debug", "Running printIndividuals.")
 
   # NOTE: The NULL variables below are actually column names used by ggplot.
-  # This definition is just to prevent the package check from issuing a note due unknown variables.
+  # This definition is just to prevent the package check from
+  # issuing a note due unknown variables.
   Timestamp <- NULL
   Standard.name <- NULL
   Array <- NULL
@@ -647,25 +651,31 @@ printIndividuals <- function(detections.list, movements, valid.movements, spatia
   y.axis <- match.arg(y.axis)
 
   fake.results <- list(detections = detections.list,
-                movements = movements,
-                valid.movements = valid.movements,
-                spatial = spatial,
-                status.df = status.df,
-                rsp.info = rsp.info)
+                       movements = movements,
+                       valid.movements = valid.movements,
+                       spatial = spatial,
+                       status.df = status.df,
+                       rsp.info = rsp.info)
 
   event(type = c("Screen", "Report"),
         "M: Drawing individual detection graphics.")
 
-  if (interactive())
-    pb <- txtProgressBar(min = 0, max = length(detections.list), style = 3, width = 60) # nocov
+  if (interactive()) {
+    pb <- txtProgressBar(min = 0, max = length(detections.list),
+                         style = 3, width = 60) # nocov
+  }
   counter <- 0
   individual.plots <- ""
 
   if (y.axis == "auto") {
-    if (nrow(spatial$stations) > 40 | length(unique(spatial$stations$Array)) > 14)
+    ovr40_stations <- nrow(spatial$stations) > 40
+    ovr14_arrays <- length(unique(spatial$stations$Array)) > 14
+
+    if (ovr40_stations | ovr14_arrays) {
       y.axis <- "arrays"
-    else
+    } else {
       y.axis <- "stations"
+    }
   }
 
   capture <- lapply(names(detections.list), function(tag) {
@@ -674,25 +684,33 @@ printIndividuals <- function(detections.list, movements, valid.movements, spatia
     p <- plotDetections(input = fake.results, tag = tag, y.axis = y.axis)
 
     # decide height
-    if (y.axis == "stations")
+    if (y.axis == "stations") {
       to.check <- levels(detections.list[[tag]]$Standard.name)
-    else
+    } else {
       to.check <- levels(detections.list[[tag]]$Array)
+    }
 
-    if (length(to.check) <= 29)
+    if (length(to.check) <= 29) {
       the.height <- 4
-    else
+    } else {
       the.height <- 4 + ((length(to.check) - 30) * 0.1)
+    }
 
     # default width:
     the.width <- 5
     # Adjustments depending on number of legend valudes
-    if (y.axis == "stations")
-      to.check <- levels(detections.list[[tag]]$Array)
-    else
-      to.check <- names(spatial$array.order)
+    if (y.axis == "stations") {
+      n_labels <- length(levels(detections.list[[tag]]$Array))
+    } else {
+      n_labels <- length(names(spatial$array.order))
+    }
+    any_ukn <- any(levels(detections.list[[tag]]$Array) == "Unknown")
+    any_invalid <- any(!detections.list[[tag]]$Valid)
+    if (any_ukn & any_invalid) {
+      n_labels <- n_labels + 1
+    }
 
-    if (length(to.check) > 14 & length(to.check) <= 29) {
+    if (n_labels > 14 & n_labels <= 29) {
       if (counter %% 2 == 0) {
         p <- p + ggplot2::guides(colour = ggplot2::guide_legend(ncol = 2))
         the.width <- 6
@@ -701,7 +719,7 @@ printIndividuals <- function(detections.list, movements, valid.movements, spatia
         the.width <- 4
       }
     }
-    if (length(to.check) > 29) {
+    if (n_labels > 29) {
       if (counter %% 2 == 0) {
         p <- p + ggplot2::guides(colour = ggplot2::guide_legend(ncol = 3))
         the.width <- 7.5
@@ -711,18 +729,27 @@ printIndividuals <- function(detections.list, movements, valid.movements, spatia
       }
     }
     # Save
-    ggplot2::ggsave(paste0(tempdir(), "/actel_report_auxiliary_files/", tag, ".", extension), width = the.width, height = the.height, limitsize = FALSE)  # better to save in png to avoid point overlapping issues
+    plot_file <- paste0(tempdir(),
+                        "/actel_report_auxiliary_files/",
+                        tag, ".", extension)
+    # better to save in png to avoid point overlapping issues
+    ggplot2::ggsave(plot_file, width = the.width, 
+                    height = the.height, limitsize = FALSE)
 
+    individual.plots <<- paste0(individual.plots, "![](", tempdir(),
+                                "/actel_report_auxiliary_files/",
+                                tag, ".", extension, "){ width=",
+                                the.width * 10, "% }")
     if (counter %% 2 == 0) {
-      individual.plots <<- paste0(individual.plots, "![](", tempdir(), "/actel_report_auxiliary_files/", tag, ".", extension, "){ width=", the.width * 10, "% }\n")
-    } else {
-      individual.plots <<- paste0(individual.plots, "![](", tempdir(), "/actel_report_auxiliary_files/", tag, ".", extension, "){ width=", the.width * 10, "% }")
+      individual.plots <<- paste0(individual.plots, "\n")
     }
-    if (interactive())
+    if (interactive()) {
       setTxtProgressBar(pb, counter) # nocov
+    }
   })
-  if (interactive())
+  if (interactive()) {
     close(pb) # nocov
+  }
 
   return(individual.plots)
 }
@@ -1508,7 +1535,9 @@ printLastArray <- function(status.df) {
 #'
 #' @return A string of file locations in rmd syntax, to be included in printRmd
 #'
-printSensorData <- function(detections, spatial, rsp.info, colour.by = c("auto", "stations", "arrays"), extension = "png") {
+printSensorData <- function(detections, spatial, rsp.info,
+                            colour.by = c("auto", "stations", "arrays"),
+                            extension = "png") {
   event(type = "debug", "Running printSensorData.")
 
   individual.plots <- NULL
@@ -1517,47 +1546,66 @@ printSensorData <- function(detections, spatial, rsp.info, colour.by = c("auto",
   Sensor.Unit <- NULL
   colour.by <- match.arg(colour.by)
 
-  event(type = c("screen", "report"), "M: Printing sensor values for tags with sensor data.")
+  event(type = c("screen", "report"),
+        "M: Printing sensor values for tags with sensor data.")
 
   fake.results <- list(valid.detections = detections,
-                spatial = spatial,
-                valid.movements = "valid.movements",
-                rsp.info = rsp.info)
+                       spatial = spatial,
+                       valid.movements = "valid.movements",
+                       rsp.info = rsp.info)
 
-  if (interactive())
-    pb <- txtProgressBar(min = 0, max = length(detections), style = 3, width = 60) # nocov
+  if (interactive()) {
+    pb <- txtProgressBar(min = 0, max = length(detections),
+                         style = 3, width = 60) # nocov
+  }
 
   counter <- 0
   n.plots <- 0
   individual.plots <- ""
 
+  # decide y.axis type, if needed
   if (colour.by == "auto") {
-    if (nrow(spatial$stations) > 40 | length(unique(spatial$stations$Array)) > 14)
+    ovr40_stations <- nrow(spatial$stations) > 40
+    ovr14_arrays <- length(unique(spatial$stations$Array)) > 14
+
+    if (ovr40_stations | ovr14_arrays) {
       colour.by <- "arrays"
-    else
+    } else {
       colour.by <- "stations"
+    }
   }
 
   capture <- lapply(names(detections), function(tag) {
     counter <<- counter + 1
     if (any(!is.na(detections[[tag]]$Sensor.Value))) {
-      p <- plotSensors(input = fake.results, tag = tag, verbose = getOption("actel.debug", default = FALSE),
-        colour.by = ifelse(colour.by == "stations", "array", "section"))
+      p <- plotSensors(input = fake.results, tag = tag,
+                       verbose = getOption("actel.debug", default = FALSE),
+                       colour.by = ifelse(colour.by == "stations",
+                                          "array",
+                                          "section"))
 
-      if (length(unique(detections[[tag]]$Sensor.Unit)) > 2)
-        the.height <- 4 + ((length(unique(detections[[tag]]$Sensor.Unit)) - 2) * 2)
-      else
+      if (length(unique(detections[[tag]]$Sensor.Unit)) > 2) {
+        n_sensors <- length(unique(detections[[tag]]$Sensor.Unit))
+        the.height <- 4 + ((n_sensors - 2) * 2)
+      } else {
         the.height <- 4
+      }
 
       # default width:
       the.width <- 5
       # Adjustments depending on number of legend valudes
-      if (colour.by == "stations")
-        to.check <- levels(detections[[tag]]$Array)
-      else
-        to.check <- names(spatial$array.order)
+      if (colour.by == "stations") {
+        n_labels <- length(levels(detections[[tag]]$Array))
+      } else {
+        n_labels <- length(names(spatial$array.order))
+      }
+      any_ukn <- any(levels(detections[[tag]]$Array) == "Unknown")
+      any_invalid <- any(!detections[[tag]]$Valid)
+      if (any_ukn & any_invalid) {
+        n_labels <- n_labels + 1
+      }
 
-      if (length(to.check) > 14 & length(to.check) <= 29) {
+      if (n_labels > 14 & n_labels <= 29) {
         if (counter %% 2 == 0) {
           p <- p + ggplot2::guides(colour = ggplot2::guide_legend(ncol = 2))
           the.width <- 5.8
@@ -1566,7 +1614,7 @@ printSensorData <- function(detections, spatial, rsp.info, colour.by = c("auto",
           the.width <- 4.2
         }
       }
-      if (length(to.check) > 29) {
+      if (n_labels > 29) {
         if (counter %% 2 == 0) {
           p <- p + ggplot2::guides(colour = ggplot2::guide_legend(ncol = 3))
           the.width <- 7.5
@@ -1576,21 +1624,27 @@ printSensorData <- function(detections, spatial, rsp.info, colour.by = c("auto",
         }
       }
 
-      # Save
-      ggplot2::ggsave(paste0(tempdir(), "/actel_report_auxiliary_files/", tag, "_sensors.", extension), width = the.width, height = the.height, limitsize = FALSE)  # better to save in png to avoid point overlapping issues
+      # better to save in png to avoid point overlapping issues
+      ggplot2::ggsave(paste0(tempdir(), "/actel_report_auxiliary_files/",
+                             tag, "_sensors.", extension),
+                      width = the.width, height = the.height, limitsize = FALSE)
 
       n.plots <- n.plots + 1
+      individual.plots <<- paste0(individual.plots, "![](", tempdir(),
+                                  "/actel_report_auxiliary_files/", tag,
+                                  "_sensors.", extension, "){ width=",
+                                  the.width * 10, "% }")
       if (n.plots %% 2 == 0) {
-        individual.plots <<- paste0(individual.plots, "![](", tempdir(), "/actel_report_auxiliary_files/", tag, "_sensors.", extension, "){ width=", the.width * 10, "% }\n")
-      } else {
-        individual.plots <<- paste0(individual.plots, "![](", tempdir(), "/actel_report_auxiliary_files/", tag, "_sensors.", extension, "){ width=", the.width * 10, "% }")
+        individual.plots <<- paste0(individual.plots, "\n")
       }
     }
-    if (interactive())
+    if (interactive()) {
       setTxtProgressBar(pb, counter)
+    }
   })
-  if (interactive())
+  if (interactive()) {
     close(pb)
+  }
 
   return(individual.plots)
 }

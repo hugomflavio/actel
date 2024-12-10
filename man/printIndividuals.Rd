@@ -32,6 +32,7 @@ printIndividuals(
 A string of file locations in rmd syntax, to be included in printRmd
 }
 \description{
-Prints the individual detections for each tag, overlaying the points in time considered crucial during the analysis.
+Prints the individual detections for each tag, overlaying the points
+in time considered crucial during the analysis.
 }
 \keyword{internal}
