@@ -650,7 +650,9 @@ explore <- function(
 
    event(type = "debug", "debug: Converting report to html")
     rmarkdown::render(input = paste0(tempdir(), "/actel_report_auxiliary_files/actel_explore_report.Rmd"),
-      output_dir = paste0(tempdir(), "/actel_report_auxiliary_files"), quiet = TRUE)
+      output_dir = paste0(tempdir(), "/actel_report_auxiliary_files"),
+      quiet = !getOption("actel.debug", default = FALSE),
+      clean = !getOption("actel.debug", default = FALSE))
 
    event(type = "debug", "debug: Moving report")
     file.copy(paste0(tempdir(), "/actel_report_auxiliary_files/actel_explore_report.html"), reportname)
