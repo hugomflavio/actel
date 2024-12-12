@@ -187,7 +187,7 @@ test_that("explore is able to run speed and inactiveness checks.", {
 	file.remove("distances.csv")
 	output <- suppressWarnings(explore(tz = 'Europe/Copenhagen', report = TRUE, GUI = "never", speed.warning = 1000000, inactive.warning = 1000000))
 	expect_false(any(is.na(match(names(output), c('bio', 'detections', 'valid.detections', 'spatial', 'deployments', 'arrays',
-    'movements', 'valid.movements', 'times', 'rsp.info')))))
+    'movements', 'valid.movements', 'times', 'rsp.info', 'dist.mat')))))
 })
 # n
 # n
