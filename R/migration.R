@@ -1006,7 +1006,9 @@ migration <- function(
                                      "actel_migration_report.Rmd"),
                       output_dir = paste0(tempdir(),
                                           "/actel_report_auxiliary_files"),
-                      quiet = TRUE)
+                      quiet = !getOption("actel.debug", default = FALSE),
+                      clean = !getOption("actel.debug", default = FALSE))
+
 
     event(type = "debug", "Moving report")
     file.copy(from = paste0(tempdir(),

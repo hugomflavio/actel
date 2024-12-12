@@ -830,7 +830,9 @@ residency <- function(
     event(type = "debug", "Converting report to html")
     rmarkdown::render(input = paste0(tempdir(), "/actel_report_auxiliary_files/actel_residency_report.Rmd"),
                       output_dir = paste0(tempdir(), "/actel_report_auxiliary_files"),
-                      quiet = TRUE)
+                      quiet = !getOption("actel.debug", default = FALSE),
+                      clean = !getOption("actel.debug", default = FALSE))
+
 
     event(type = "debug", "Moving report")
     file.copy(paste0(tempdir(), "/actel_report_auxiliary_files/actel_residency_report.html"), reportname)
