@@ -292,7 +292,12 @@ dataToList <- function(source){
 #'
 extractSignals <- function(input) {
   output <- stringr::str_extract(input, "(?<=-)[^-]*$")
-  return(as.numeric(output))
+  if (any(is.na(output))) {
+    warning("NAs generated during signal extraction!",
+            immediate. = TRUE, call. = FALSE)
+  }
+  output <- as.numeric(output)
+  return(output)
 }
 
 #' Extract Code Spaces from transmitter names
@@ -312,6 +317,10 @@ extractSignals <- function(input) {
 #'
 extractCodeSpaces <- function(input) {
   output <- stringr::str_extract(input, ".*(?=-)")
+  if (any(is.na(output))) {
+    warning("NAs generated during code space extraction!",
+            immediate. = TRUE, call. = FALSE)
+  }
   return(output)
 }
 
