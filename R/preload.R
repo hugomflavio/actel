@@ -176,8 +176,8 @@ preload <- function(biometrics, spatial, deployments, detections, dot = NULL,
   # Prepare serial numbers to overwrite the serials in detections
   deployments <- createUniqueSerials(input = deployments)
 
-
-  detections <- preloadDetections(input = detections, tz = tz,
+  detections <- preloadDetections(input = as.data.frame(detections),
+                                  tz = tz,
                                   start.time = start.time,
                                   stop.time = stop.time)
   detections <- checkDupDetections(input = detections)
