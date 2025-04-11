@@ -42,6 +42,10 @@ Node ID:            10000
 Receiver Settings:
 GMT Correction:     00:00
 
+Beacon Configuration:
+Beacon ID:          10072
+Beacon Period:      15 sec
+
 Decoded Tag Data:
 Date      Time             TOA       Tag ID    Type     Value     Power
 =======================================================================
