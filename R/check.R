@@ -1658,6 +1658,11 @@ checkIssue79 <- function(arrays, spatial) {
     return()
   }
 
+  if (length(unique(spatial$stations$Section)) < 3) {
+    # not enough sections to have a problem
+    return()
+  }
+
   output <- lapply(names(arrays), function(i) {
     link <- match(i, spatial$stations$Array)
     this.section <- as.character(unique(spatial$stations$Section[link]))
