@@ -876,6 +876,10 @@ splitSignals <- function(x) {
 #' Receiver Settings:
 #' GMT Correction:     00:00
 #'
+#' Beacon Configuration:
+#' Beacon ID:          10072
+#' Beacon Period:      15 sec
+#'
 #' Decoded Tag Data:
 #' Date      Time             TOA       Tag ID    Type     Value     Power
 #' =======================================================================
@@ -907,22 +911,28 @@ splitSignals <- function(x) {
 convertLotekCDMAFile <- function(file, date_format = "%m/%d/%y") {
   file_raw <- readLines(file)
 
-  serial_n <- file_raw[grep("^Serial Number:", file_raw)]
+  serial_n <- file_raw[grep("^Serial Number:", file_raw[1:100])]
   serial_n <- extractSignals(serial_n)
 
-  code_type <- file_raw[grep("^Code Type:", file_raw)]
+  code_type <- file_raw[grep("^Code Type:", file_raw[1:100])]
   code_type <- sub("Code Type:\\s*", "", code_type)
   if (code_type == "") {
     code_type <- NA
   }
 
-  gmt_cor <- file_raw[grep("^GMT Correction:", file_raw)]
+  beacon_id <- file_raw[grep("^Beacon ID:", file_raw[1:100])]
+  beacon_id <- stringr::str_extract(beacon_id, "\\d+")
+
+  beacon_period <- file_raw[grep("^Beacon Period:", file_raw[1:100])]
+  beacon_period <- stringr::str_extract(beacon_period, "\\d+")
+
+  gmt_cor <- file_raw[grep("^GMT Correction:", file_raw[1:100])]
   gmt_cor <- sub("GMT Correction:\\s*", "", gmt_cor)
   gmt_cor <- decimalTime(gmt_cor)
 
   # importing this file is not easy. We must extract the detection lines
   # and the detection headers and then work with them. To find those lines:
-  det_start <- grep("=========", file_raw)[1]
+  det_start <- grep("=========", file_raw[1:100])[1]
   det_end <- grep("Receiver Sensor Messages:", file_raw)[1] - 2
 
   # To properly parse the columns, we must use the column names, otherwise the
@@ -1034,7 +1044,7 @@ convertLotekCDMAFile <- function(file, date_format = "%m/%d/%y") {
 
   # convert to data.table to stay compatible
   # with the rest of the import functions
-  output <- as.data.table(output)
+  output <- data.table::as.data.table(output)
 
   # work on the columns we want to keep
   output$CodeSpace <- code_type
@@ -1061,8 +1071,8 @@ convertLotekCDMAFile <- function(file, date_format = "%m/%d/%y") {
   }
 
   # extract the standard columns
-  std_cols <- c("Timestamp", "Receiver", "CodeSpace",
-                "Signal", "Sensor.Value", "Sensor.Unit")
+  std_cols <- c("Timestamp", "TOA", "Receiver", "CodeSpace",
+                "Signal", "Sensor.Value", "Sensor.Unit", "Power")
   output <- output[, std_cols, with = FALSE]
   output$Timestamp <- fasttime::fastPOSIXct(as.character(output$Timestamp),
                                             tz = "UTC")
@@ -1094,5 +1104,7 @@ convertLotekCDMAFile <- function(file, date_format = "%m/%d/%y") {
       call. = FALSE)
   }
 
+  attributes(output)$beacon_id <- as.numeric(beacon_id)
+  attributes(output)$beacon_period <- as.numeric(beacon_period)
   return(output)
 }
