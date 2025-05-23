@@ -975,7 +975,7 @@ checkSMovesN <- function(secmoves, tag, section.warning, section.error,
 #'
 checkLinearity <- function(secmoves, tag, spatial, arrays, GUI,
                            save.tables.locally, n,
-                           back.warning, back.error) {
+                           back.warning = "all", back.error = "all") {
   event(type = "debug", "Running checkLinearity.")
   trigger.interaction <- FALSE
 

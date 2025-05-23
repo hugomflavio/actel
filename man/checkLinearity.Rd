@@ -12,8 +12,8 @@ checkLinearity(
   GUI,
   save.tables.locally,
   n,
-  back.warning,
-  back.error
+  back.warning = "all",
+  back.error = "all"
 )
 }
 \arguments{
