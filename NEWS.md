@@ -27,6 +27,7 @@ Enhancements:
   * Added the ability to use output of `loadSpatial()` as 'starters' for `distancesMatrix()` when 'actel' is 'TRUE'. This allows a user to input their spatial.csv if located in a separate working directory (issue [#133](https://github.com/hugomflavio/actel/issues/133))
   * Distance matrix is now retained in the output of `explore()`, `residency()`, and `migration()` analysis when invalid. Additionally, if the distance matrix is not available NA will be denoted in the output. (issue [#142](https://github.com/hugomflavio/actel/issues/142))
   * Improved the inner mechanics of `extractSignals()` and `extractCodeSpaces()` so they're much faster now.
+  * New arguments `back.warning` and `back.error` included to `migration()` to give users more control over warnings and user interaction prompts.
 
 ## actel 1.3.0
 

@@ -46,7 +46,8 @@ NULL
 checkArguments <- function(dp, tz, min.total.detections, min.per.event, max.interval, speed.method = c("last to first", "last to last", "first to first"),
   speed.warning, speed.error, start.time, stop.time, report, auto.open, save.detections, jump.warning, jump.error,
   inactive.warning, inactive.error, exclude.tags, override, print.releases, detections.y.axis = c("auto", "stations", "arrays"),
-  if.last.skip.section = NULL, replicates = NULL, section.warning, section.error, section.order = NULL, timestep = c("days", "hours")) {
+  if.last.skip.section = NULL, replicates = NULL, section.warning, section.error, section.order = NULL, timestep = c("days", "hours"),
+  back.warning = c("all", "u", "none"), back.error = c("all", "u", "none")) {
   event(type = "debug", "Running checkArguments.")
 
   # Note: Checks only relevant for migration() or residency() are listed at the bottom!
@@ -315,6 +316,43 @@ checkArguments <- function(dp, tz, min.total.detections, min.per.event, max.inte
           "'if.last.skip.section' must be logical.")
   }
 
+  if (!is.character(back.warning)) {
+    event(type = "stop",
+          "'back.warning' should be one of 'all',",
+          " 'u', or 'none'.")
+  }
+  back.warning <- match.arg(back.warning)
+
+  if (!is.character(back.error)) {
+    event(type = "stop",
+          "'back.error' should be one of 'all',",
+          " 'u', or 'none'.")
+  }
+  back.error <- match.arg(back.error)
+
+  # warn error
+  # none none  fine
+  # none u     bad <-
+  # none all   bad <-
+  # u    none  fine
+  # u    u     fine
+  # u    all   bad <-
+  # all  none  fine
+  # all  u     fine
+  # all  all   fine
+
+  if (back.warning == "none" & back.error != "none") {
+    event(type = c("stop"),
+          "If back.warning is set to 'none',",
+          " back.error must be set to 'none' as well.")
+  }
+
+  if (back.warning == "u" & back.error == "all") {
+    event(type = c("stop"),
+          "If back.warning is set to 'u',",
+          " back.error must be set to either 'u' or 'none'.")
+  }
+
   if (!is.null(replicates) && !is.list(replicates)) {
     event(type = "stop",
           "'replicates' must be a list.")
@@ -372,6 +410,8 @@ checkArguments <- function(dp, tz, min.total.detections, min.per.event, max.inte
               speed.error = speed.error,
               jump.warning = jump.warning,
               jump.error = jump.error,
+              back.warning = back.warning,
+              back.error = back.error,
               inactive.warning = inactive.warning,
               inactive.error = inactive.error,
               detections.y.axis = detections.y.axis,
@@ -933,33 +973,43 @@ checkSMovesN <- function(secmoves, tag, section.warning, section.error,
 #'
 #' @keywords internal
 #'
-checkLinearity <- function(secmoves, tag, spatial, arrays, GUI, save.tables.locally, n) {
+checkLinearity <- function(secmoves, tag, spatial, arrays, GUI,
+                           save.tables.locally, n,
+                           back.warning, back.error) {
   event(type = "debug", "Running checkLinearity.")
+  trigger.interaction <- FALSE
 
   valid.secmoves <- secmoves[secmoves$Valid, ]
 
   sections <- names(spatial$array.order)
   back.check <- match(valid.secmoves$Section, sections)
   turn.check <- rev(match(sections, rev(valid.secmoves$Section))) # captures the last event of each section. Note, the values count from the END of the events
-  if (is.unsorted(back.check)) {
-      if (is.unsorted(turn.check, na.rm = TRUE)) {
-        the_warning <- paste0("Inter-section backwards movements were",
-                              " detected for tag ", tag, " ", n,
-                              " and the last events are not ordered!")
-        event(type = c("screen", "report", "warning"),
-              the_warning)
+  if (is.unsorted(back.check) & back.warning != "none") {
+    if (is.unsorted(turn.check, na.rm = TRUE)) {
+      the_warning <- paste0("Inter-section backwards movements were",
+                            " detected for tag ", tag, " ", n,
+                            " and the last events are not ordered!")
+      event(type = c("screen", "report", "warning"),
+            the_warning)
+      if (back.error != "none") {
+        trigger.interaction <- TRUE
       }
-      else {
+    } else {
+      if (back.warning == "all") {
         the_warning <- paste0("Inter-section backwards movements were",
                               " detected for tag ", tag, " ", n, ".")
         event(type = c("screen", "report", "warning"),
               the_warning)
       }
-    if (interactive()) { # nocov start
-      secmoves <- tableInteraction(moves = secmoves, tag = tag, trigger = the_warning,
-                                   GUI = GUI, force = FALSE, save.tables.locally = save.tables.locally)
-    } # nocov end
+      if (back.error == "all") {
+        trigger.interaction <- TRUE
+      }
+    }
   }
+  if (trigger.interaction & interactive()) { # nocov start
+    secmoves <- tableInteraction(moves = secmoves, tag = tag, trigger = the_warning,
+                                 GUI = GUI, force = FALSE, save.tables.locally = save.tables.locally)
+  } # nocov end
   return(secmoves)
 }
 
