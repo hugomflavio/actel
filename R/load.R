@@ -962,12 +962,16 @@ loadDistances <- function(input = "distances.csv", spatial) {
       }
     }
 
-    # Failsafe for the case of unspecified release sites
+    # Failsafe for the case of unspecified release site
     if (any(grepl("^unspecified$", spatial$release.sites$Standard.name))) {
       dist.mat <- rbind(dist.mat, NA)
       dist.mat <- cbind(dist.mat, NA)
       colnames(dist.mat)[ncol(dist.mat)] <- "unspecified"
       rownames(dist.mat)[nrow(dist.mat)] <- "unspecified"
+      event(type = c("warning", "screen", "report"),
+            "A distances matrix is being used but release site is unspecified.",
+            " Adding a row and column of NAs to the distances matrix to avoid",
+            " function failure.")
     }
     if (!invalid.dist && sum(nrow(spatial$stations),
                              nrow(spatial$release.sites)) != nrow(dist.mat)) {

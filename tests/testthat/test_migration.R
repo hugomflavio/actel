@@ -44,6 +44,12 @@ test_that("migration stops when any argument does not make sense", {
 
 	expect_error(migration(tz = 'Europe/Copenhagen', print.releases = "a", GUI = "never"),
 		"'print.releases' must be logical.", fixed = TRUE)
+
+	expect_error(migration(tz = 'Europe/Copenhagen', back.warning = "none", GUI = "never"),
+		"If back.warning is set to 'none', back.error must be set to 'none' as well.", fixed = TRUE)
+
+	expect_error(migration(tz = 'Europe/Copenhagen', back.warning = "u", GUI = "never"),
+		"If back.warning is set to 'u', back.error must be set to either 'u' or 'none'.", fixed = TRUE)
 })
 
 test_that("migration results contains all the expected elements.", {

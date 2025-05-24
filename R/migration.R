@@ -16,6 +16,17 @@
 #'  of a given section be considered to have disappeared in the next section?
 #' @param disregard.parallels Logical:  Should the presence of parallel arrays
 #'  invalidate potential efficiency peers? See the vignettes for more details.
+#' @param back.warning Warn the user about backwards inter-section movements.
+#'  One of three values: "all" will warn the user about S shaped turns (where
+#'  the animal moves backwards but then resumes normal movement), and U shaped
+#'  turns (where the animal moves backwards and disappears); "u" will warn the
+#'  about U-shaped turns (i.e. no warnings for S-shaped turns); "none" will
+#'  suppress all inter-section movement warnings.
+#' @param back.error Pause the analysis so the user can inspect the movements
+#'  table that generated an inter-section backwards movement warning.
+#'  One of three values: "all" will prompt the user both for S shaped turns and
+#'  U shaped turns; "u" will prompt the user only for U-shaped turns, and "none"
+#'  will never pause the analysis for inter-section movements inspection.
 #' @param replicates A list containing, for each array to which intra-array
 #'  efficiency is to be calculated: The standard names of the stations to be
 #'  used as a replicate. See the vignettes for more details.
@@ -153,6 +164,8 @@ migration <- function(
   speed.error = NULL,
   jump.warning = 2,
   jump.error = 3,
+  back.warning = c("all", "u", "none"),
+  back.error = c("all", "u", "none"),
   inactive.warning = NULL,
   inactive.error = NULL,
   exclude.tags = NULL,
@@ -228,6 +241,8 @@ migration <- function(
                         save.detections = save.detections,
                         jump.warning = jump.warning,
                         jump.error = jump.error,
+                        back.warning = back.warning,
+                        back.error = back.error,
                         inactive.warning = inactive.warning,
                         inactive.error = inactive.error,
                         exclude.tags = exclude.tags,
@@ -244,6 +259,8 @@ migration <- function(
   speed.error <- aux$speed.error
   jump.warning <- aux$jump.warning
   jump.error <- aux$jump.error
+  back.warning <- aux$back.warning
+  back.error <- aux$back.error
   inactive.warning <- aux$inactive.warning
   inactive.error <- aux$inactive.error
   detections.y.axis <- aux$detections.y.axis
@@ -268,6 +285,8 @@ migration <- function(
     parse_arg(speed.error), ", ",
     parse_arg(jump.warning), ", ",
     parse_arg(jump.error), ", ",
+    parse_arg(back.warning), ", ",
+    parse_arg(back.error), ", ",
     parse_arg(inactive.warning), ", ",
     parse_arg(inactive.error), ", ",
     parse_arg(exclude.tags), ", ",
@@ -603,7 +622,8 @@ migration <- function(
       output <- checkLinearity(secmoves = aux, tag = tag, spatial = spatial,
                                arrays = arrays, GUI = GUI,
                                save.tables.locally = save.tables.locally,
-                               n = counter)
+                               n = counter, back.warning = back.warning,
+                               back.error = back.error)
       return(output)
     } else {
       return(NULL)

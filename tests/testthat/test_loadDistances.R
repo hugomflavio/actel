@@ -53,7 +53,8 @@ test_that("loadDistances output imports data correctly", {
 
 	write.csv(example.distances[-18, -18], "distances.csv")
 
-	output <- loadDistances(spatial = spatial)
+	expect_warning(output <- loadDistances(spatial = spatial),
+	   "A distances matrix is being used but release site is unspecified. Adding a row and column of NAs to the distances matrix to avoid function failure.", fixed = TRUE)
 	expect_equal(nrow(output), 18)
 	expect_equal(colnames(output)[18], "unspecified")
 	expect_equal(rownames(output)[18], "unspecified")

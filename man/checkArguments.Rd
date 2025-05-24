@@ -31,7 +31,9 @@ checkArguments(
   section.warning,
   section.error,
   section.order = NULL,
-  timestep = c("days", "hours")
+  timestep = c("days", "hours"),
+  back.warning = c("all", "u", "none"),
+  back.error = c("all", "u", "none")
 )
 }
 \arguments{
@@ -142,6 +144,19 @@ be aligned in the results.}
 
 \item{timestep}{The resolution desired for the residency calculations.
 One of "days" (default) or "hours".}
+
+\item{back.warning}{Warn the user about backwards inter-section movements.
+One of three values: "all" will warn the user about S shaped turns (where
+the animal moves backwards but then resumes normal movement), and U shaped
+turns (where the animal moves backwards and disappears); "u" will warn the
+about U-shaped turns (i.e. no warnings for S-shaped turns); "none" will
+suppress all inter-section movement warnings.}
+
+\item{back.error}{Pause the analysis so the user can inspect the movements
+table that generated an inter-section backwards movement warning.
+One of three values: "all" will prompt the user both for S shaped turns and
+U shaped turns; "u" will prompt the user only for U-shaped turns, and "none"
+will never pause the analysis for inter-section movements inspection.}
 }
 \value{
 updated parameters

@@ -4,7 +4,17 @@
 \alias{checkLinearity}
 \title{Check that the tag linearly moved along the sections}
 \usage{
-checkLinearity(secmoves, tag, spatial, arrays, GUI, save.tables.locally, n)
+checkLinearity(
+  secmoves,
+  tag,
+  spatial,
+  arrays,
+  GUI,
+  save.tables.locally,
+  n,
+  back.warning = "all",
+  back.error = "all"
+)
 }
 \arguments{
 \item{secmoves}{the section movements list.}
@@ -28,6 +38,19 @@ for user inspection, should it be saved in the current working directory, or
 in R's temporary folder?}
 
 \item{n}{A string indicating the overall progress.}
+
+\item{back.warning}{Warn the user about backwards inter-section movements.
+One of three values: "all" will warn the user about S shaped turns (where
+the animal moves backwards but then resumes normal movement), and U shaped
+turns (where the animal moves backwards and disappears); "u" will warn the
+about U-shaped turns (i.e. no warnings for S-shaped turns); "none" will
+suppress all inter-section movement warnings.}
+
+\item{back.error}{Pause the analysis so the user can inspect the movements
+table that generated an inter-section backwards movement warning.
+One of three values: "all" will prompt the user both for S shaped turns and
+U shaped turns; "u" will prompt the user only for U-shaped turns, and "none"
+will never pause the analysis for inter-section movements inspection.}
 }
 \value{
 A list of section movements with updated 'Valid' columns
