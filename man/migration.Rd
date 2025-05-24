@@ -104,7 +104,7 @@ Defaults to 3. To disable user intervention suggestions, set to Inf.}
 \item{back.warning}{Warn the user about backwards inter-section movements.
 One of three values: "all" will warn the user about S shaped turns (where
 the animal moves backwards but then resumes normal movement), and U shaped
-turns (where the animal moves backwards and disappears; "u" will warn the
+turns (where the animal moves backwards and disappears); "u" will warn the
 about U-shaped turns (i.e. no warnings for S-shaped turns); "none" will
 suppress all inter-section movement warnings.}
 
