@@ -10,20 +10,32 @@ setwd("exampleWorkspace")
 write.csv(example.distances, "distances.csv")
 
 test_that("explore stops when any argument does not make sense", {
+	expect_error(explore(),
+		'argument "tz" is missing, with no default', fixed = TRUE)
+
 	expect_error(explore(tz = 1),
-		"'tz' could not be recognized as a timezone. Check available timezones with OlsonNames()", fixed = TRUE)
+		"'tz' could not be recognized as a time zone. Check available time zones with OlsonNames()", fixed = TRUE)
 	
 	expect_error(explore(tz = "abc"),
-		"'tz' could not be recognized as a timezone. Check available timezones with OlsonNames()", fixed = TRUE)
+		"'tz' could not be recognized as a time zone. Check available time zones with OlsonNames()", fixed = TRUE)
+	
+	expect_error(explore(tz = "Europe/Copenhagen", min.per.event = "a"),
+		"'min.per.event' must be numeric.", fixed = TRUE)
+	
+	expect_error(explore(tz = "Europe/Copenhagen", min.per.event = -1),
+		"'min.per.event' must be positive.", fixed = TRUE)
 	
 	expect_error(explore(tz = "Europe/Copenhagen", max.interval = "a"),
 		"'max.interval' must be numeric.", fixed = TRUE)
-	
+
 	expect_error(explore(tz = "Europe/Copenhagen", max.interval = "1"),
 		"'max.interval' must be numeric.", fixed = TRUE)
 	
 	expect_error(explore(tz = "Europe/Copenhagen", max.interval = -1),
 		"'max.interval' must be positive.", fixed = TRUE)
+	
+	expect_warning(explore(tz = "Europe/Copenhagen", max.interval = 2),
+		"Setting 'max.interval' to less than 10 minutes is not recommended!\n         This can lead to the creation of an immense number of movement events,\n         which will be hardly manageable if any quality check is triggered.", fixed = TRUE)
 	
 	expect_error(explore(tz = "Europe/Copenhagen", min.total.detections = "a"),
 		"'min.total.detections' must be numeric.", fixed = TRUE)
@@ -47,7 +59,7 @@ test_that("explore stops when any argument does not make sense", {
 		"'stop.time' must be in 'yyyy-mm-dd hh:mm:ss' format.", fixed = TRUE)
 	
 	expect_error(explore(tz = "Europe/Copenhagen", speed.method = 1),
-		"'speed.method' should be one of 'last to first' or 'last to last'.", fixed = TRUE)
+		"'speed.method' should be one of 'last to first', 'last to last', or 'first to first'.", fixed = TRUE)
 	
 	expect_error(explore(tz = "Europe/Copenhagen", speed.method = "abc"),
 		"'arg' should be one of ", fixed = TRUE)
@@ -128,7 +140,7 @@ test_that("explore stops when any argument does not make sense", {
   
   if (length(suppressWarnings(packageDescription("gWidgets2tcltk"))) == 1) {
 		expect_warning(explore(tz = "Europe/Copenhagen", report = FALSE),
-      paste0("GUI is set to 'needed' but package 'gWidgets2tcltk' is not available. Please install it if you intend to run GUI.\n         Disabling GUI (i.e. GUI = 'never') for the current run."),
+      paste0("GUI is set to 'needed' but package 'gWidgets2tcltk' is not available. Please install it if you intend to run the GUI. Disabling GUI (i.e. GUI = 'never') for the current run."),
       fixed = TRUE)
   }
 
@@ -175,7 +187,7 @@ test_that("explore is able to run speed and inactiveness checks.", {
 	file.remove("distances.csv")
 	output <- suppressWarnings(explore(tz = 'Europe/Copenhagen', report = TRUE, GUI = "never", speed.warning = 1000000, inactive.warning = 1000000))
 	expect_false(any(is.na(match(names(output), c('bio', 'detections', 'valid.detections', 'spatial', 'deployments', 'arrays',
-    'movements', 'valid.movements', 'times', 'rsp.info')))))
+    'movements', 'valid.movements', 'times', 'rsp.info', 'dist.mat')))))
 })
 # n
 # n

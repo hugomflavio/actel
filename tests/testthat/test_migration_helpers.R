@@ -37,7 +37,6 @@ test_that("assembleTimetable correctly extracts tag information", {
 
   secmoves <- lapply(seq_along(vm), function(i) {
     tag <- names(vm)[i]
-    appendTo("debug", paste0("debug: Compiling valid section movements for tag ", tag,"."))
     output <- sectionMovements(movements = vm[[i]], spatial = spatial, valid.dist = attributes(dist.mat)$valid)
     return(output)
   })
@@ -96,7 +95,6 @@ test_that("assembleTimetable correctly handles speed methods and invalid.dist", 
 
   secmoves.ff <- lapply(seq_along(vm.ff), function(i) {
     tag <- names(vm.ff)[i]
-    appendTo("debug", paste0("debug: Compiling valid section movements for tag ", tag,"."))
     output <- sectionMovements(movements = vm.ff[[i]], spatial = spatial, valid.dist = attributes(dist.mat)$valid)
     return(output)
   })
@@ -144,7 +142,6 @@ test_that("assembleTimetable correctly handles speed methods and invalid.dist", 
   vm.ff[[1]] <- vm.ff[[1]][-18, ]
   secmoves.ff <- lapply(seq_along(vm.ff), function(i) {
     tag <- names(vm.ff)[i]
-    appendTo("debug", paste0("debug: Compiling valid section movements for tag ", tag,"."))
     output <- sectionMovements(movements = vm.ff[[i]], spatial = spatial, valid.dist = attributes(dist.mat)$valid)
     return(output)
   })
@@ -196,7 +193,6 @@ vm[[1]] <- vm[[1]][-18, ]
 
 secmoves <- lapply(seq_along(vm), function(i) {
   tag <- names(vm)[i]
-  appendTo("debug", paste0("debug: Compiling valid section movements for tag ", tag,"."))
   output <- sectionMovements(movements = vm[[i]], spatial = spatial, valid.dist = attributes(dist.mat)$valid)
   return(output)
 })

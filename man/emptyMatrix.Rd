@@ -7,19 +7,21 @@
 emptyMatrix(input = "spatial.csv")
 }
 \arguments{
-\item{input}{Either a data frame with spatial data or the path to the file containing the spatial information.}
+\item{input}{Either a data frame with spatial data or the path to the file
+containing the spatial information.}
 }
 \value{
 An empty matrix with the rows and columns required to
 operate with the target spatial file.
 }
 \description{
-Creates an empty matrix based on the local 'spatial.csv' file and saves it to 'distances.csv' so the
-user can manually fill it.
+Creates an empty matrix based on the local 'spatial.csv' file and saves it to
+'distances.csv' so the user can manually fill it.
 }
 \details{
-It is highly recommended to read the manual page regarding distances matrices before running this function.
-You can find it here: \href{https://hugomflavio.github.io/actel-website/manual-distances.html}{https://hugomflavio.github.io/actel-website/manual-distances.html}
+It is highly recommended to read the manual page regarding distances matrices
+before running this function. You can find it here:
+\url{https://hugomflavio.github.io/actel-website/manual-distances.html}
 }
 \examples{
 # This function requires a file with spatial information

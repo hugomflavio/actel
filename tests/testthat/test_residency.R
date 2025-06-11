@@ -8,6 +8,12 @@ exampleWorkspace("exampleWorkspace", force = TRUE)
 setwd("exampleWorkspace")
 write.csv(example.distances, "distances.csv")
 
+test_that("residency stops when any argument does not make sense", {
+	expect_error(residency(tz = 'Europe/Copenhagen', timestep = 1),
+		"'timestep' should be one of 'days' or 'hours'", fixed = TRUE)
+})
+
+
 test_that("residency results contains all the expected elements.", {
 	output <- suppressWarnings(residency(tz = 'Europe/Copenhagen', report = FALSE, GUI = "never"))
 
@@ -45,7 +51,7 @@ test_that("residency is able to run speed and inactiveness checks.", {
 			GUI = "never", speed.error = 1000000, inactive.error = 1000000),
 		"Running inactiveness checks without a distance matrix. Performance may be limited.", fixed = TRUE)
 	expect_false(any(is.na(match(names(output), c('array.times', 'arrays', 'time.positions', 'time.ratios',
-		'deployments', 'detections', 'efficiency', 'global.ratios', 'group.ratios', 'intra.array.CJS', 'intra.array.matrices',
+		'deployments', 'detections', 'dist.mat', 'efficiency', 'global.ratios', 'group.ratios', 'intra.array.CJS', 'intra.array.matrices',
 		'last.seen', 'movements', 'residency.list', 'rsp.info', 'section.movements', 'section.times',
 		'spatial', 'status.df', 'valid.detections', 'valid.movements')))))
 })

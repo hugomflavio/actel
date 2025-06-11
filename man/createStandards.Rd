@@ -18,6 +18,7 @@ A data frame with standardized station names.
 }
 \description{
 Matches the ALS serial number to the deployments to rename the serial number.
-The corresponding deployment is then used to update the Standard Station name and the array based in the spatial object.
+The corresponding deployment is then used to update the Standard Station name
+and the array based in the spatial object.
 }
 \keyword{internal}

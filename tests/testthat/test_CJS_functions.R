@@ -38,7 +38,6 @@ vm[[1]] <- vm[[1]][-18, ]
 
 secmoves <- lapply(seq_along(vm), function(i) {
   tag <- names(vm)[i]
-  appendTo("debug", paste0("debug: Compiling valid section movements for tag ", tag,"."))
   output <- sectionMovements(movements = vm[[i]], spatial = spatial, valid.dist = attributes(dist.mat)$valid)
   return(output)
 })

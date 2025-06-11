@@ -7,22 +7,26 @@
 transitionLayer(x, directions = c(16, 8, 4))
 }
 \arguments{
-\item{x}{A water raster; for example the output of \code{\link{loadShape}}}
+\item{x}{A water raster; for example the output of
+\code{\link{shapeToRaster}}}
 
-\item{directions}{The number of directions considered for every movement situation during cost
-calculation. See the manual page linked above for more details.}
+\item{directions}{The number of directions considered for every movement
+situation during cost calculation. See the manual page linked above
+for more details.}
 }
 \value{
 A TransitionLayer object.
 }
 \description{
-Using a previously imported shape file that has been converted to a raster (see \code{\link{loadShape}}),
-Prepares a TransitionLayer object to be used in distance
-estimations (see \code{\link{distancesMatrix}}). Adapted from Grant Adams' script "distance to closest mpa".
+Using a previously imported shape file that has been converted to a raster
+(see \code{\link{shapeToRaster}}). Prepares a TransitionLayer object to be
+used in distance estimations (see \code{\link{distancesMatrix}}).
+Adapted from Grant Adams' script "distance to closest mpa".
 }
 \details{
-It is highly recommended to read the manual page regarding distances matrices before running this function.
-You can find it here: \href{https://hugomflavio.github.io/actel-website/manual-distances.html}{https://hugomflavio.github.io/actel-website/manual-distances.html}
+It is highly recommended to read the manual page regarding distances matrices
+before running this function. You can find it here:
+\url{https://hugomflavio.github.io/actel-website/manual-distances.html}
 }
 \examples{
 \donttest{
@@ -37,15 +41,18 @@ missing.packages <- sapply(aux, function(x) x == 1)
 
 if (any(missing.packages)) {
   message("Sorry, this function requires packages '",
-    paste(c("raster", "gdistance", "sp", "terra")[missing.packages], collapse = "', '"),
-    "' to operate. Please install ", ifelse(sum(missing.packages) > 1, "them", "it"),
-    " before proceeding.")
+          paste(c("raster", "gdistance", "sp", "terra")[missing.packages],
+                collapse = "', '"),
+          "' to operate. Please install ",
+          ifelse(sum(missing.packages) > 1, "them", "it"),
+          " before proceeding.")
 } else {
   # Fetch actel's example shapefile
-  example.shape <- paste0(system.file(package = "actel")[1], "/example_shapefile.shp")
+  example.shape <- paste0(system.file(package = "actel")[1],
+                          "/example_shapefile.shp")
 
   # import the shape file
-  x <- loadShape(shape = example.shape, size = 20)
+  x <- shapeToRaster(shape = example.shape, size = 20)
 
   # Build the transition layer
   t.layer <- transitionLayer(x)

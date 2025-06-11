@@ -12,8 +12,10 @@ movementSpeeds(movements, speed.method, dist.mat)
 \item{speed.method}{Can take two forms: 'last to first' or 'last to last'.
 If 'last to first' (default), the last detection on the previous array is matched
 to the first detection on the target array to perform the calculations.
-If 'last to last', the last detection on ´the previous array is matched to the
-last detection on the target array to perform the calculations.}
+If 'last to last', the last detection on the previous array is matched to the
+last detection on the target array to perform the calculations.
+If 'first to first', the first detection on the previous array is matched to the
+first detection on the target array to perform the calculations.}
 
 \item{dist.mat}{A matrix of the distances between the deployed ALS.}
 }

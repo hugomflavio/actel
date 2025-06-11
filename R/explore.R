@@ -56,7 +56,7 @@
 #' @param override A vector of signals for which the user intends to manually
 #'  define which movement events are valid and invalid.
 #' @param detections.y.axis The type of y axis desired for the individual
-#'  detection plots. While the argument defaults to "auto", it can be hard-set 
+#'  detection plots. While the argument defaults to "auto", it can be hard-set
 #'  to one of "stations" or "arrays".
 #' @param print.releases Logical: Should the release sites be printed in the
 #'  study area diagrams?
@@ -75,8 +75,10 @@
 #' @param speed.method Can take two forms: 'last to first' or 'last to last'.
 #'  If 'last to first' (default), the last detection on the previous array is matched
 #'  to the first detection on the target array to perform the calculations.
-#'  If 'last to last', the last detection on ´the previous array is matched to the
+#'  If 'last to last', the last detection on the previous array is matched to the
 #'  last detection on the target array to perform the calculations.
+#'  If 'first to first', the first detection on the previous array is matched to the
+#'  first detection on the target array to perform the calculations.
 #' @param speed.warning If a tag moves at a speed equal or greater than
 #'  \code{speed.warning} (in metres per second), a warning is issued. If left
 #'  NULL (default), no warnings are issued. Must be equal to or lower than \code{speed.error}
@@ -142,7 +144,7 @@ explore <- function(
   min.per.event = 1,
   start.time = NULL,
   stop.time = NULL,
-  speed.method = c("last to first", "last to last"),
+  speed.method = c("last to first", "last to last", "first to first"),
   speed.warning = NULL,
   speed.error = NULL,
   jump.warning = 2,
@@ -159,25 +161,43 @@ explore <- function(
   GUI = c("needed", "always", "never"),
   save.tables.locally = FALSE,
   print.releases = TRUE,
-  detections.y.axis = c("auto", "stations", "arrays")) 
+  detections.y.axis = c("auto", "stations", "arrays"))
 {
+  event(type = "debug", "Running explore.")
 
 # check deprecated argument
-  if (!missing(minimum.detections))
-    stop("'minimum.detections' has been deprecated. Please use 'min.total.detections' and 'min.per.event' instead.", call. = FALSE)
+  if (!missing(minimum.detections)) {
+    event(type = "stop",
+          "'minimum.detections' has been deprecated.",
+          " Please use 'min.total.detections' and 'min.per.event' instead.")
+  }
 
 # clean up any lost helpers
   deleteHelpers()
-  if (file.exists(paste0(tempdir(), "/actel_debug_file.txt")))
+  if (file.exists(paste0(tempdir(), "/actel_debug_file.txt"))) {
     file.remove(paste0(tempdir(), "/actel_debug_file.txt"))
+  }
 # ------------------------
 
 # debug lines
   if (getOption("actel.debug", default = FALSE)) { # nocov start
-    on.exit(message("Debug: Progress log available at ", gsub("\\\\", "/", paste0(tempdir(), "/actel_debug_file.txt"))))
-    on.exit(message("Debug: Saving carbon copy to ", gsub("\\\\", "/", paste0(tempdir(), "/actel.debug.RData"))), add = TRUE)
-    on.exit(save(list = ls(), file = paste0(tempdir(), "/actel.debug.RData")), add = TRUE)
-    message("!!!--- Debug mode has been activated ---!!!")
+    # show debug log location
+    on.exit(event(type = "screen",
+                  "Debug: Progress log available at ",
+                  gsub("\\\\", "/", paste0(tempdir(),
+                                           "/actel_debug_file.txt"))))
+    # show debug rdata location
+    on.exit(add = TRUE,
+            event(type = "screen",
+                  "Debug: Saving carbon copy to ",
+                  gsub("\\\\", "/", paste0(tempdir(),
+                                           "/actel.debug.RData"))))
+    # save debug rdata
+    on.exit(add = TRUE,
+            save(list = ls(),
+                 file = paste0(tempdir(), "/actel.debug.RData")))
+    event(type = c("screen", "report"),
+          "!!!--- Debug mode has been activated ---!!!")
   } # nocov end
 # ------------------------
 
@@ -186,10 +206,12 @@ explore <- function(
     checkToken(token = attributes(datapack)$actel.token,
                timestamp = attributes(datapack)$timestamp)
 
-  if (length(min.per.event) > 1) 
-    appendTo(c('screen', 'warning', 'report'),
-      'explore() only has array movements but two values were set for min.per.event. Disregarding second value.')
-  
+  if (length(min.per.event) > 1) {
+   event(type = c('screen', 'warning', 'report'),
+         "explore() only has array movements but two values were set for",
+         " min.per.event. Disregarding second value.")
+  }
+
   aux <- checkArguments(dp = datapack,
                         tz = tz,
                         min.total.detections = min.total.detections,
@@ -227,7 +249,7 @@ explore <- function(
 # ------------------------
 
 # Store function call
-  the.function.call <- paste0("explore(tz = ", ifelse(is.null(tz), "NULL", paste0("'", tz, "'")),
+  the_function_call <- paste0("explore(tz = ", ifelse(is.null(tz), "NULL", paste0("'", tz, "'")),
     ", datapack = ", ifelse(is.null(datapack), "NULL", deparse(substitute(datapack))),
     ", max.interval = ", max.interval,
     ", min.total.detections = ", min.total.detections,
@@ -254,23 +276,33 @@ explore <- function(
     ", detections.y.axis = '", detections.y.axis, "'",
     ")")
 
-  appendTo("debug", the.function.call)
+ event(type = "debug", the_function_call)
 # --------------------
 
 # Prepare clean-up before function ends
-  finished.unexpectedly <- TRUE
-  on.exit({if (interactive() & finished.unexpectedly) emergencyBreak(the.function.call)}, add = TRUE)
+  finished_unexpectedly <- TRUE
+  on.exit(add = TRUE,
+          if (interactive() & finished_unexpectedly) {
+            event(type = "crash", the_function_call)
+          })
 
-  if (!getOption("actel.debug", default = FALSE))
-    on.exit(deleteHelpers(), add = TRUE)
+  if (!getOption("actel.debug", default = FALSE)) {
+    on.exit(add = TRUE,
+            deleteHelpers())
+  }
 
-  on.exit(tryCatch(sink(), warning = function(w) {hide <- NA}), add = TRUE)
+  on.exit(add = TRUE,
+          tryCatch(sink(), warning = function(w) {hide <- NA}))
 # --------------------------------------
 
 # Final arrangements before beginning
-  appendTo("Report", paste0("Actel R package report.\nVersion: ", utils::packageVersion("actel"), "\n"))
-
-  appendTo(c("Report"), paste0("Target folder: ", getwd(), "\nTimestamp: ", the.time <- Sys.time(), "\nFunction: explore()\n"))
+  the_time <- Sys.time()
+  event(type = "report",
+        "Actel R package report.\n",
+        "Version: ", utils::packageVersion("actel"), "\n",
+        "Target folder: ", getwd(), "\n",
+        "Timestamp: ", the_time, "\n",
+        "Function: explore()\n")
 
   report <- checkReport(report = report)
 # -----------------------------------
@@ -281,8 +313,14 @@ explore <- function(
                                 start.time = start.time, stop.time = stop.time, discard.orphans = discard.orphans,
                                 section.order = NULL, exclude.tags = exclude.tags)
   } else {
-    appendTo(c("Screen", "Report"), paste0("M: Running analysis on preloaded data (compiled on ", attributes(datapack)$timestamp, ")."))
-    appendTo("Report", paste0("Messages displayed during preload:\n-------------------\n", paste0(attributes(datapack)$loading_messages, collapse = "\n"), "\n-------------------"))
+   event(type = c("screen", "report"),
+         "M: Running analysis on preloaded data (compiled on ",
+         attributes(datapack)$timestamp, ").")
+   event(type = "report",
+         "Messages displayed during preload:\n-------------------\n",
+         paste0(attributes(datapack)$loading_messages, collapse = "\n"),
+         "\n-------------------")
+
     study.data <- datapack
     tz <- study.data$tz
     disregard.parallels <- study.data$disregard.parallels
@@ -307,7 +345,8 @@ explore <- function(
     detections.list <- discardFirst(input = detections.list, bio, trim = discard.first)
 
   # group detections into array movements
-  appendTo(c("Screen", "Report"), "M: Creating movement records for the valid tags.")
+  event(type = c("screen", "report"),
+        "M: Creating movement records for the valid tags.")
   movements <- groupMovements(detections.list = detections.list, bio = bio, spatial = spatial,
     speed.method = speed.method, max.interval = max.interval, tz = tz, dist.mat = dist.mat)
 
@@ -321,27 +360,38 @@ explore <- function(
     names(movements) <- aux
     rm(aux)
   } else {
-    appendTo(c("Screen", "Report"), "M: Not calculating time/speed from release to first detection because 'discard.first' was set.")
+   event(type = c("screen", "report"),
+         "M: Not calculating time/speed from release to first detection",
+         " because 'discard.first' was set.")
   }
 
-  appendTo(c("Screen", "Report"), "M: Checking movement events quality.")
+ event(type = c("screen", "report"),
+       "M: Checking movement events quality.")
 
   do.checkSpeeds <- FALSE
   if (is.null(speed.warning)) {
-    appendTo(c("Screen", "Report", "Warning"), "'speed.warning'/'speed.error' were not set, skipping speed checks.")
+   event(type = c("warning", "screen", "report"),
+         "'speed.warning'/'speed.error' were not set, skipping speed checks.")
   } else {
     if(attributes(dist.mat)$valid)
       do.checkSpeeds <- TRUE
     else
-      appendTo(c("Screen", "Report", "Warning"), "'speed.warning'/'speed.error' were set, but a valid distance matrix is not present. Aborting speed checks.")
+     event(type = c("warning", "screen", "report"),
+           "'speed.warning'/'speed.error' were set, but a valid distance",
+           " matrix is not present. Aborting speed checks.")
   }
 
   do.checkInactiveness <- FALSE
   if (is.null(inactive.warning)) {
-    appendTo(c("Screen", "Report", "Warning"), "'inactive.warning'/'inactive.error' were not set, skipping inactivity checks.")
+   event(type = c("warning", "screen", "report"),
+         "'inactive.warning'/'inactive.error' were not set,",
+         " skipping inactivity checks.")
   } else {
-    if (!attributes(dist.mat)$valid)
-      appendTo(c("Report", "Screen", "Warning"), "Running inactiveness checks without a distance matrix. Performance may be limited.")
+    if (!attributes(dist.mat)$valid) {
+     event(type = c("warning", "screen", "report"),
+           "Running inactiveness checks without a distance matrix.",
+           " Performance may be limited.")
+    }
     do.checkInactiveness <- TRUE
   }
 
@@ -354,9 +404,12 @@ explore <- function(
     trigger_override_warning <- any(link <- !override %in% movement.names)
 
   if (trigger_override_warning) {
-    appendTo(c("Screen", "Warning", "Report"), paste0("Override has been triggered for ",
-      ifelse(sum(link) == 1, "tag ", "tags "), paste(override[link], collapse = ", "), " but ",
-      ifelse(sum(link) == 1, "this signal was", "these signals were"), " not detected."))
+   event(type = c("warning", "screen", "report"),
+         "Override has been triggered for ",
+         ifelse(sum(link) == 1, "tag ", "tags "),
+         paste(override[link], collapse = ", "), " but ",
+         ifelse(sum(link) == 1, "this signal was", "these signals were"),
+         " not detected.")
     override <- override[!link]
   }
 
@@ -369,13 +422,13 @@ explore <- function(
     tag <- names(movements)[i]
     counter <- paste0("(", i, "/", length(movements), ")")
 
-    appendTo("debug", paste0("debug: Checking movement quality for tag ", tag,"."))
+   event(type = "debug", "debug: Checking movement quality for tag ", tag,".")
 
     if (is.na(match(tag, override))) {
       output <- checkMinimumN(movements = movements[[tag]], tag = tag, min.total.detections = min.total.detections,
                                min.per.event = min.per.event[1], n = counter)
 
-      output <- checkImpassables(movements = output, tag = tag, bio = bio, detections = detections.list[[tag]], n = counter, 
+      output <- checkImpassables(movements = output, tag = tag, bio = bio, detections = detections.list[[tag]], n = counter,
                                  spatial = spatial, dotmat = dotmat, GUI = GUI, save.tables.locally = save.tables.locally)
 
       output <- checkJumpDistance(movements = output, bio = bio, tag = tag, dotmat = dotmat, paths = paths, arrays = arrays,
@@ -385,8 +438,8 @@ explore <- function(
       if (do.checkSpeeds) {
         temp.valid.movements <- simplifyMovements(movements = output, tag = tag, bio = bio, discard.first = discard.first,
                                                   speed.method = speed.method, dist.mat = dist.mat)
-        output <- checkSpeeds(movements = output, tag = tag, detections = detections.list[[tag]], n = counter, 
-                              valid.movements = temp.valid.movements, speed.warning = speed.warning, 
+        output <- checkSpeeds(movements = output, tag = tag, detections = detections.list[[tag]], n = counter,
+                              valid.movements = temp.valid.movements, speed.warning = speed.warning,
                               speed.error = speed.error, GUI = GUI, save.tables.locally = save.tables.locally)
         rm(temp.valid.movements)
       }
@@ -395,9 +448,9 @@ explore <- function(
         output <- checkInactiveness(movements = output, tag = tag, detections = detections.list[[tag]], n = counter,
                                     inactive.warning = inactive.warning, inactive.error = inactive.error,
                                     dist.mat = dist.mat, GUI = GUI, save.tables.locally = save.tables.locally)
-      }  
+      }
     } else { # nocov start
-      output <- overrideValidityChecks(moves = movements[[tag]], tag = tag, detections = detections.list[[tag]], 
+      output <- overrideChecks(moves = movements[[tag]], tag = tag, detections = detections.list[[tag]],
                                        GUI = GUI, save.tables.locally = save.tables.locally, n = counter)
     } # nocov end
     return(output)
@@ -405,22 +458,25 @@ explore <- function(
   names(movements) <- movement.names
   rm(movement.names)
 
-  appendTo(c("Screen", "Report"), "M: Filtering valid array movements.")
+ event(type = c("screen", "report"),
+       "M: Filtering valid array movements.")
 
   valid.movements <- assembleValidMoves(movements = movements, bio = bio, discard.first = discard.first,
                                          speed.method = speed.method, dist.mat = dist.mat)
 
 
-  appendTo(c("Screen", "Report"), "M: Compiling circular times.")
+ event(type = c("screen", "report"),
+       "M: Compiling circular times.")
 
   aux <- list(valid.movements = valid.movements,
               spatial = spatial,
-              rsp.info = list(bio = bio, 
+              rsp.info = list(bio = bio,
                               analysis.type = "explore"))
   times <- getTimes(input = aux, move.type = "array", event.type = "arrival", n.events = "first")
   rm(aux)
 
-  appendTo("Screen", "M: Validating detections.")
+ event(type = "Screen",
+       "M: Validating detections.")
 
   recipient <- validateDetections(detections.list = detections.list, movements = valid.movements)
   detections <- recipient$detections
@@ -432,7 +488,7 @@ explore <- function(
   deployments <- do.call(rbind.data.frame, deployments)
 
   # extra info for potential RSP analysis
-  rsp.info <- list(analysis.type = "explore", analysis.time = the.time, 
+  rsp.info <- list(analysis.type = "explore", analysis.time = the_time,
                    bio = bio, tz = tz, actel.version = utils::packageVersion("actel"))
 
   if (!is.null(override))
@@ -455,22 +511,21 @@ explore <- function(
   }
 
   if (interactive()) { # nocov start
-    decision <- userInput(paste0("Would you like to save a copy of the results to ", resultsname, "?(y/n) "), 
+    decision <- userInput(paste0("Would you like to save a copy of the results to ", resultsname, "?(y/n) "),
                           choices = c("y", "n"), hash = "# save results?")
   } else { # nocov end
     decision <- "n"
   }
 
   if (decision == "y") { # nocov start
-    appendTo(c("Screen", "Report"), paste0("M: Saving results as '", resultsname, "'."))
-    if (attributes(dist.mat)$valid)
-      save(bio, detections, valid.detections, spatial, deployments, arrays, 
-        movements, valid.movements, times, rsp.info, dist.mat, file = resultsname)
-    else
-      save(bio, detections, valid.detections, spatial, deployments, arrays, 
-        movements, valid.movements, times, rsp.info, file = resultsname)
+   event(type = c("screen", "report"),
+         paste0("M: Saving results as '", resultsname, "'."))
+   save(bio, detections, valid.detections, spatial, deployments, arrays,
+        movements, valid.movements, times, rsp.info, dist.mat, 
+        file = resultsname)
   } else {
-    appendTo(c("Screen", "Report"), paste0("M: Skipping saving of the results."))
+   event(type = c("screen", "report"),
+         paste0("M: Skipping saving of the results."))
   } # nocov end
   rm(decision)
 
@@ -479,37 +534,46 @@ explore <- function(
 # Print graphics
   trigger.report.error.message <- TRUE
   if (report) {
-    appendTo(c("Screen", "Report"), "M: Producing the report.")
-    on.exit({if (trigger.report.error.message) message("M: Producing the report failed. If you have saved a copy of the results, you can reload them using dataToList().")}, add = TRUE)
+    event(type = c("screen", "report"),
+          "M: Producing the report.")
+    on.exit(add = TRUE,
+      if (trigger.report.error.message) {
+        event(type = "screen",
+              "M: Producing the report failed. If you have saved a copy of",
+              " the results, you can reload them using dataToList().")
+      })
 
     if (dir.exists(paste0(tempdir(), "/actel_report_auxiliary_files")))
       unlink(paste0(tempdir(), "/actel_report_auxiliary_files"), recursive = TRUE)
 
     dir.create(paste0(tempdir(), "/actel_report_auxiliary_files"))
 
-    if (!getOption("actel.debug", default = FALSE))
-      on.exit(unlink(paste0(tempdir(), "/actel_report_auxiliary_files"), recursive = TRUE), add = TRUE)
+    if (!getOption("actel.debug", default = FALSE)) {
+      on.exit(add = TRUE,
+              unlink(paste0(tempdir(), "/actel_report_auxiliary_files"),
+                     recursive = TRUE))
+    }
 
     biometric.fragment <- printBiometrics(bio = bio)
 
-    printDot(dot = dot, 
-             spatial = spatial, 
+    printDot(dot = dot,
+             spatial = spatial,
              print.releases = print.releases)
 
-    individual.plots <- printIndividuals(detections.list = detections, 
+    individual.plots <- printIndividuals(detections.list = detections,
                                          movements = movements,
                                          valid.movements = valid.movements,
                                          spatial = spatial,
                                          rsp.info = rsp.info,
                                          y.axis = detections.y.axis)
 
-    circular.plots <- printCircular(times = timesToCircular(times), 
+    circular.plots <- printCircular(times = timesToCircular(times),
                                     bio = bio)
 
     if (any(sapply(valid.detections, function(x) any(!is.na(x$Sensor.Value))))) {
-      sensor.plots <- printSensorData(detections = valid.detections, 
+      sensor.plots <- printSensorData(detections = valid.detections,
                                       spatial = spatial,
-                                      rsp.info = rsp.info, 
+                                      rsp.info = rsp.info,
                                       colour.by = detections.y.axis)
     } else {
       sensor.plots <- NULL
@@ -519,18 +583,36 @@ explore <- function(
 # ---------------
 
 # wrap up the txt report
-  appendTo("Report", "M: Analysis completed!\n\n-------------------")
+  event(type = "report",
+       "M: Analysis completed!\n\n-------------------")
 
-  if (file.exists(paste(tempdir(), "temp_comments.txt", sep = "/")))
-    appendTo("Report", paste0("User comments:\n-------------------\n", gsub("\t", ": ", gsub("\r", "", readr::read_file(paste(tempdir(), "temp_comments.txt", sep = "/")))), "-------------------")) # nocov
+  comments <- paste(tempdir(), "temp_comments.txt", sep = "/")
+  if (file.exists(comments)) { # nocov start
+    aux <- readr::read_file(comments)
+    aux <- gsub("\r", "", aux)
+    aux <- gsub("\t", ": ", aux)
+    event(type = "report",
+          "User comments:\n-------------------\n",
+          aux, "-------------------")
+  } # nocov end
+  uds <- paste(tempdir(), "temp_UD.txt", sep = "/")
+  if (file.exists(uds)) { # nocov start
+    aux <- readr::read_file(uds)
+    aux <- gsub("\r", "", aux)
+    event(type = "report",
+          "User interventions:\n-------------------\n",
+          aux, "-------------------")
+  } # nocov end
 
-  if (file.exists(paste(tempdir(), "temp_UD.txt", sep = "/")))
-    appendTo("Report", paste0("User interventions:\n-------------------\n", gsub("\r", "", readr::read_file(paste(tempdir(), "temp_UD.txt", sep = "/"))), "-------------------")) # nocov
+  if (!is.null(datapack)) {
+    event(type = "report",
+          "Preload function call:\n-------------------\n",
+          attributes(datapack)$function_call, "\n-------------------")
+  }
 
-  if (!is.null(datapack))
-    appendTo("Report", paste0("Preload function call:\n-------------------\n", attributes(datapack)$function_call, "\n-------------------"))
-
-  appendTo("Report", paste0("Explore function call:\n-------------------\n", the.function.call, "\n-------------------"))
+ event(type = "report",
+       "Explore function call:\n-------------------\n",
+       the_function_call, "\n-------------------")
 # ------------------
 
 # print html report
@@ -545,13 +627,16 @@ explore <- function(
           continue <- FALSE
         }
       }
-      appendTo("Screen", paste0("M: An actel report is already present in the current directory.\n   Saving new report as ", reportname, "."))
+     event(type = "screen",
+           "M: An actel report is already present in the current directory.\n",
+           "   Saving new report as ", reportname, ".")
       rm(continue, index)
     } else {
-      appendTo("Screen", "M: Saving actel report as 'actel_explore_report.html'.")
+     event(type = "screen",
+           "M: Saving actel report as 'actel_explore_report.html'.")
     }
 
-    appendTo("debug", "debug: Printing report rmd")
+   event(type = "debug", "debug: Printing report rmd")
     printExploreRmd(override.fragment = override.fragment,
                     biometric.fragment = biometric.fragment,
                     individual.plots = individual.plots,
@@ -563,14 +648,16 @@ explore <- function(
                     valid.detections = valid.detections,
                     detections.y.axis = detections.y.axis)
 
-    appendTo("debug", "debug: Converting report to html")
+   event(type = "debug", "debug: Converting report to html")
     rmarkdown::render(input = paste0(tempdir(), "/actel_report_auxiliary_files/actel_explore_report.Rmd"),
-      output_dir = paste0(tempdir(), "/actel_report_auxiliary_files"), quiet = TRUE)
+      output_dir = paste0(tempdir(), "/actel_report_auxiliary_files"),
+      quiet = !getOption("actel.debug", default = FALSE),
+      clean = !getOption("actel.debug", default = FALSE))
 
-    appendTo("debug", "debug: Moving report")
+   event(type = "debug", "debug: Moving report")
     file.copy(paste0(tempdir(), "/actel_report_auxiliary_files/actel_explore_report.html"), reportname)
     if (interactive() & auto.open) { # nocov start
-      appendTo("debug", "debug: Opening report.")
+     event(type = "debug", "debug: Opening report.")
       browseURL(reportname)
     } # nocov end
   }
@@ -580,32 +667,32 @@ explore <- function(
   jobname <- paste0(gsub(" |:", ".", as.character(Sys.time())), ".actel.log.txt")
 
   if (interactive() & !report) { # nocov start
-    decision <- userInput(paste0("Would you like to save a copy of the analysis log to ", jobname, "?(y/n) "), 
+    decision <- userInput(paste0("Would you like to save a copy of the analysis log to ", jobname, "?(y/n) "),
                           choices = c("y", "n"), hash = "# save job log?")
   } else { # nocov end
     decision <- "n"
   }
   if (decision == "y") { # nocov start
-    appendTo("Screen", paste0("M: Saving job log as '",jobname, "'."))
+   event(type = "screen",
+         "M: Saving job log as '",jobname, "'.")
     file.copy(paste(tempdir(), "temp_log.txt", sep = "/"), jobname)
   } # nocov end
 
   output <- list(bio = bio,
-                 detections = detections, 
-                 valid.detections = valid.detections, 
-                 spatial = spatial, 
-                 deployments = deployments, 
+                 detections = detections,
+                 valid.detections = valid.detections,
+                 spatial = spatial,
+                 deployments = deployments,
                  arrays = arrays,
-                 movements = movements, 
-                 valid.movements = valid.movements, 
-                 times = times, 
-                 rsp.info = rsp.info)
+                 movements = movements,
+                 valid.movements = valid.movements,
+                 times = times,
+                 rsp.info = rsp.info,
+                 dist.mat = dist.mat)
 
-  if (attributes(dist.mat)$valid)
-    output$dist.mat <- dist.mat
-
-  appendTo("Screen", "M: Analysis completed!")
-  finished.unexpectedly <- FALSE
+ event(type = "Screen",
+       "M: Analysis completed!")
+  finished_unexpectedly <- FALSE
 
   return(output)
 }
@@ -621,7 +708,7 @@ explore <- function(
 #' @param circular.plots Rmarkdown string specifying the name of the circular plots.
 #' @param sensor.plots Rmarkdown string specifying the name of the sensor plots.
 #' @param detections All the detections used in the study
-#' @param valid.detectiosn The valid detections used in the study
+#' @param valid.detections The valid detections used in the study
 #' @inheritParams loadDetections
 #'
 #' @return No return value, called for side effects.
@@ -630,6 +717,7 @@ explore <- function(
 #'
 printExploreRmd <- function(override.fragment, biometric.fragment, individual.plots,
   circular.plots, sensor.plots, spatial, deployments, detections, valid.detections, detections.y.axis){
+  event(type = "debug", "Running printExploreRmd.")
 
   work.path <- paste0(tempdir(), "/actel_report_auxiliary_files/")
 
@@ -643,7 +731,7 @@ printExploreRmd <- function(override.fragment, biometric.fragment, individual.pl
 
 Note:
   : The colouring in these plots will follow that of the individual detection plots, which can be modified using `detections.y.axis`.
-  : The data used for these graphics is stored in the `valid.detections` object.
+  : The data used for these graphics are stored in the `valid.detections` object.
   : You can replicate these graphics and edit them as needed using the `plotSensors()` function.
 
 <center>\n", sensor.plots, "\n</center>")
@@ -669,7 +757,8 @@ Note:
   }
 
   oldoptions <- options(knitr.kable.NA = "-")
-  on.exit(options(oldoptions), add = TRUE)
+  on.exit(add = TRUE,
+          options(oldoptions))
 
   sink(paste0(work.path, "actel_explore_report.Rmd"))
   cat(paste0(
@@ -749,7 +838,7 @@ Note:
 Note:
   : Coloured lines on the outer circle indicate the mean value for each group and the respective ranges show the standard error of the mean. Each group\'s bars sum to 100%. The number of data points in each group is presented between brackets in the legend of each pannel.
   : You can replicate these graphics and edit them as needed using the `plotTimes()` function.
-  : The data used in these graphics is stored in the `times` object.
+  : The data used in these graphics are stored in the `times` object.
   : To obtain reports with the legacy linear circular scale, run `options(actel.circular.scale = "linear")` before running your analyses.
 
 <center>
@@ -767,7 +856,7 @@ Note:
   : The ', ifelse(detections.y.axis == "stations", 'stations', 'arrays'), ' have been aligned by ', ifelse(detections.y.axis == "stations", 'array', 'section'), ', following the order provided ', ifelse(detections.y.axis == "stations", '', 'either '), 'in the spatial input', ifelse(detections.y.axis == "stations", '.', ' or the `section.order` argument.'), '
   : You can replicate these graphics and edit them as needed using the `plotDetections()` function.
   : You can also see the movement events of multiple tags simultaneously using the `plotMoves()` function.
-  : The data used in these graphics is stored in the `detections` and `movements` objects (and respective valid counterparts).
+  : The data used in these graphics are stored in the `detections` and `movements` objects (and respective valid counterparts).
 
 <center>
 ', individual.plots,'
@@ -883,6 +972,7 @@ sink()
 #' @keywords internal
 #'
 validateDetections <- function(detections.list, movements) {
+  event(type = "debug", "Running validateDetections.")
   Valid <- NULL
   counter <- 0
   if (interactive())

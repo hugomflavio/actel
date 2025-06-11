@@ -1,19 +1,24 @@
 Package: actel
 Title: Acoustic Telemetry Data Analysis
-Version: 1.2.1.9018
-Authors@R: person("Hugo", "Flávio", role = c("aut", "cre"), email = "hflavio@wlu.ca", comment = c(ORCID = "0000-0002-5174-1197"))
+Version: 1.3.0.9021
+Authors@R: c(
+    person("Hugo", "Flávio", role = c("aut", "cre"),
+           email = "hflavio@dal.ca", comment = c(ORCID = "0000-0002-5174-1197")),
+    person("Devon", "Smith", role = c("ctb"),
+           email = "smithd0@unbc.ca", comment = c(ORCID = "0009-0005-3954-6355"))
+    )
 Description: Designed for studies where animals tagged with acoustic tags are expected
-    to move through receiver arrays. This package combines the advantages of automatic sorting and checking 
-    of animal movements with the possibility for user intervention on tags that deviate from expected 
-    behaviour. The three analysis functions (explore(), migration() and residency()) 
-    allow the users to analyse their data in a systematic way, making it easy to compare results from 
+    to move through receiver arrays. This package combines the advantages of automatic sorting and checking
+    of animal movements with the possibility for user intervention on tags that deviate from expected
+    behaviour. The three analysis functions (explore(), migration() and residency())
+    allow the users to analyse their data in a systematic way, making it easy to compare results from
     different studies.
     CJS calculations are based on Perry et al. (2012) <https://www.researchgate.net/publication/256443823_Using_mark-recapture_models_to_estimate_survival_from_telemetry_data>.
 License: GPL-3
 Encoding: UTF-8
 LazyData: true
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.2.3
+RoxygenNote: 7.3.2
 Language: en-GB
 Depends: R (>= 3.6)
 Imports:
@@ -36,12 +41,13 @@ Imports:
     stringr,
     svglite,
     utils
-Suggests: 
+Suggests:
     gdistance,
     gWidgets2,
     gWidgets2tcltk,
     raster,
     sp,
+    sf,
     terra,
     testthat
 VignetteBuilder: knitr

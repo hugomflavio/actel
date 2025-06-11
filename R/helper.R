@@ -1,11 +1,87 @@
-#' collapse event indexes into ranges
+#' Parse argument and its value as a string
 #' 
-#' @param x a numerical vector
+#' used to store the calls of the main actel functions as a string
 #' 
-#' @return a string of isolated events and event ranges
+#' @param arg the argument to be parsed
+#' @param arg_val an optional argument, to use as the value of the argument
+#'        used in "arg". Used when arg is, in itself, a complex object provided
+#'        by the user. E.g. a datapack, or an argument of preload.
+#' 
+#' @return A string showing the argument and its value, as it would have been
+#'         inputted into the R console.
 #' 
 #' @keywords internal
 #' 
+parse_arg <- function(arg,  arg_val) {
+  output <- paste0(deparse(substitute(arg)), " = ")
+
+  if (!missing(arg_val)) {
+    return(paste0(output, arg_val))
+  }
+  if (is.null(arg)) {
+    return(paste0(output, "NULL"))
+  }
+
+  if (is.character(arg)) {
+    a <- "'"
+    b <- "', '"
+  } else {
+    a <- ""
+    b <- ", "
+  }
+  if (is.list(arg)) {
+      output <- paste0(output, parse_list(arg))
+  } else {
+    if (length(arg) == 1) {
+      output <- paste0(output, a, arg, a)
+    } else {
+      output <- paste0(output, "c(", a, paste0(arg, collapse = b), a, ")")
+    }
+  }
+  return(output)
+}
+
+#' Helper to parse list arguments
+#' 
+#' Used inside [parse_arg()] to properly parse list arguments
+#' 
+#' @inheritParams parse_arg
+#' 
+#' @return A string showing the list as it would have been
+#'         inputted into the R console.
+#' 
+#' @keywords internal
+#' 
+parse_list <- function(arg) {
+  aux <- sapply(1:length(arg), function(i) {
+    if (is.character(arg[[i]])) {
+      a <- "'"
+      b <- "', '"
+    } else {
+      a <- ""
+      b <- ", "
+    }
+    name_i <- names(arg)[i]
+    content <- paste(arg[[i]], collapse = b)
+    if (length(arg[[i]]) == 1) {
+      output_i <- paste0("'", name_i,"' = ", a, content, a)
+    } else {
+      output_i <- paste0("'", name_i,"' = c(", a, content, a, ")")
+    }
+    return(output_i)
+  })
+  output <- paste0("list(", paste0(aux, collapse = ", "), ")")
+  return(output)
+}
+
+#' collapse event indexes into ranges
+#'
+#' @param x a numerical vector
+#'
+#' @return a string of isolated events and event ranges
+#'
+#' @keywords internal
+#'
 createEventRanges <- function(x) {
   overlaps <- c(FALSE, x[-length(x)] == x[-1]-1)
   starts <- which(!overlaps)
@@ -15,25 +91,25 @@ createEventRanges <- function(x) {
   aux$Combine <- aux$Start != aux$Stop
   aux$Final <- aux$Start
   aux$Final[aux$Combine] <- paste(aux$Start[aux$Combine], aux$Stop[aux$Combine], sep = ":")
-  return(aux$Final)  
+  return(aux$Final)
 }
 
 #' Split a dataframe every nth row
-#' 
+#'
 #' Idea from here: https://stackoverflow.com/questions/7060272/split-up-a-dataframe-by-number-of-rows
-#' 
+#'
 #' @param x the dataframe
 #' @param n the number of rows to keep in each chunk
-#' 
+#'
 #' @return A list of equal-sized dataframes
-#' 
+#'
 #' @keywords internal
-#' 
+#'
 splitN <- function(x, n, row.names = FALSE) {
   r <- nrow(x)
   z <- rep(1:ceiling(r / n), each = n)[1:r]
   output <- split(x, z)
-  
+
   # reset row names?
   if (!row.names)
     output <- lapply(output, function(x) {
@@ -52,37 +128,37 @@ splitN <- function(x, n, row.names = FALSE) {
 }
 
 #' darken colours
-#' 
+#'
 #' Copied from https://gist.github.com/Jfortin1/72ef064469d1703c6b30
-#' 
+#'
 #' @param color The colour to be darkened
 #' @param factor The level of darkening
-#' 
+#'
 #' @return The darker colour code
-#' 
+#'
 #' @keywords internal
-#'  
+#'
 darken <- function(color, factor = 1.4){
-    col <- grDevices::col2rgb(color)
+  col <- grDevices::col2rgb(color)
 
-    if (factor > 1)
-      col <- col / factor
-    else
-      col <- col + (255 - col) * (1 - factor)
+  if (factor > 1)
+    col <- col / factor
+  else
+    col <- col + (255 - col) * (1 - factor)
 
-    col <- grDevices::rgb(t(col), maxColorValue = 255)
-    return(col)
+  col <- grDevices::rgb(t(col), maxColorValue = 255)
+  return(col)
 }
 
 #' Match POSIX values
-#' 
+#'
 #' @param this the vector of posix to be match
 #' @param there the vector of posix to be matched against
-#' 
+#'
 #' @return a vector with the matches
-#' 
+#'
 #' @keywords internal
-#' 
+#'
 match.POSIXt <- function(this, there) {
   sapply(this, function(i) {
     x <- which(i == there)
@@ -94,36 +170,22 @@ match.POSIXt <- function(this, there) {
   })
 }
 
-#' stop function but paste error to the report too
-#' 
-#' @param ... parts of the error string
-#' 
-#' @return No return value, called for side effects.
-#' 
-#' @keywords internal
-#' 
-stopAndReport <- function(...) {
-  the.string <- paste0(...)
-  appendTo("Report", paste0("Error: ", the.string))
-  stop(the.string, call. = FALSE)
-}
-
 #' Find original station name
-#' 
+#'
 #' @param input The results of an actel analysis (either explore, migration or residency).
 #' @param station The station standard name or number.
-#' 
+#'
 #' @examples
 #' stationName(example.results, 1)
-#' 
+#'
 #' # or
-#' 
+#'
 #' stationName(example.results, "St.2")
-#' 
+#'
 #' @return The original station name
-#' 
+#'
 #' @export
-#' 
+#'
 stationName <- function(input, station) {
   if (!inherits(input, "list"))
     stop("Could not recognise the input as an actel results object.", call. = FALSE)
@@ -229,7 +291,13 @@ dataToList <- function(source){
 #' @export
 #'
 extractSignals <- function(input) {
-  unlist(lapply(input, function(x) tail(unlist(strsplit(as.character(x), "-")), 1)))
+  output <- stringr::str_extract(input, "(?<=-)[^-]*$")
+  if (any(is.na(output))) {
+    warning("NAs generated during signal extraction!",
+            immediate. = TRUE, call. = FALSE)
+  }
+  output <- as.numeric(output)
+  return(output)
 }
 
 #' Extract Code Spaces from transmitter names
@@ -248,7 +316,12 @@ extractSignals <- function(input) {
 #' @export
 #'
 extractCodeSpaces <- function(input) {
-  unname(sapply(input, function(x) sub("-[0-9]*$", "", as.character(x))))
+  output <- stringr::str_extract(input, ".*(?=-)")
+  if (any(is.na(output))) {
+    warning("NAs generated during code space extraction!",
+            immediate. = TRUE, call. = FALSE)
+  }
+  return(output)
 }
 
 
@@ -263,13 +336,15 @@ extractCodeSpaces <- function(input) {
 #' @keywords internal
 #'
 std.error.circular <- function(x, na.rm = TRUE, silent = FALSE){
- a <- length(x)
- if(na.rm)
-  x <- x[!is.na(x)]
- output <- circular::sd.circular(x) / sqrt(length(x))
- if (!silent && a != length(x))
-  message("M: Ommited ", a - length(x), " missing ", ifelse((a - length(x)) > 1, "values.", "value."))
- return(output)
+  a <- length(x)
+  if(na.rm) {
+    x <- x[!is.na(x)]
+  }
+  output <- circular::sd.circular(x) / sqrt(length(x))
+  if (!silent && a != length(x)) {
+    message("M: Ommited ", a - length(x), " missing ", ifelse((a - length(x)) > 1, "values.", "value."))
+  }
+  return(output)
 }
 
 
@@ -431,109 +506,189 @@ combine <- function(input) {
   return(output)
 }
 
-#' Append to ...
+#' Log a new event
 #'
-#' Appends a note/comment to the specified recipient, which in turn corresponds to a temporary helper file.
+#' Logs useful information as the analysis progresses. May be called to abort
+#' the run if type includes "stop"
 #'
-#' @param recipient 'Screen' displays the message on screen, 'Report' appends the message to 'temp_log.txt', 'Warning' appends the message to 'temp_warnings.txt', 'UD' appends the message to 'temp_UD.txt', 'Comment' appends the message to 'temp_comments.txt'. The same message may be appended to multiple recipients at once.
-#' @param line The text to be appended.
-#' @param tag the tag number to which the comment belongs. Only used when recipient = 'Comment'.
+#' @param type A vector with one of more of several options:
+#'  \itemize{
+#'    \item 'crash' special case to be used only together with on.exit(). Meant
+#'       to capture function failures not expressly handled by our coded stops.
+#'    \item 'stop' appends the message to temp_log.txt then stops the execution.
+#'    \item 'warning' appends the message to temp_warnings.txt,
+#'    \item 'screen' displays the message on screen,
+#'    \item 'report' appends the message to temp_log.txt,
+#'    \item 'ud' appends the message to temp_UD.txt,
+#'    \item 'comment' appends the message to temp_comments.txt,
+#'    \item 'debug' appends the message only to the debug log. NOTE: does not have to be
+#'      explicitly called; everything goes into the debug log. Use when you
+#'      _only_ want the event to be logged in as debug.
+#'  }
+#'  The same message may be appended to multiple types at once.
+#'  Preferred order is "stop", "warning", "screen", "report".
+#' @param tag Only relevant one 'comment' is one of the types. Put the
+#'  transmitter ID here so the comment is attached to the right animal.
+#' @param ... The text fragments that compose the event message.
 #'
 #' @return No return value, called for side effects.
 #'
 #' @keywords internal
 #'
-appendTo <- function(recipient, line, tag) {
-  recipient <- tolower(recipient)
-  for (i in recipient) {
-    if (i == "screen") {
-      if (any(recipient == "warning"))
-        warning(line, immediate. = TRUE, call. = FALSE)
-      else
-        message(line)
-      flush.console()
+event <- function(..., type, tag) {
+  if (missing(type)) {
+    stop("event was called without expressly defining argument 'type'.",
+         call. = FALSE)
+  }
+  type <- tolower(type)
+
+  if ("warning" %in% type & "error" %in% type) { # nocov start
+    # this should never happen, this is a dev error
+    stop("event() was called with both warning and error flags.",
+         call. = FALSE)
+  } # nocov end
+
+  if ("crash" %in% type) {
+    type <- c("crash", "screen", "report")
+    event_text <- paste0("\nA fatal exception occurred!\n",
+                         "Found a bug? Report it here:",
+                         " https://github.com/hugomflavio/actel/issues",
+                         "\n\n",
+                         "You can recover latest the job log (including your",
+                         " comments and decisions) by running recoverLog().\n",
+                         "-------------------")
+    function_call <- paste0(...)
+  } else {
+    event_text <- paste0(...)
+  }
+
+  if ("screen" %in% type) {
+    if ("warning" %in% type) {
+      warning(event_text, immediate. = TRUE, call. = FALSE)
+    } else {
+      message(event_text)
     }
-    if (i == "report") {
-      if (any(recipient == "warning")) {
-        write(paste("Warning:", line),
-          file = paste(tempdir(), "temp_log.txt", sep = "/"),
-          append = file.exists(paste(tempdir(), "temp_log.txt", sep = "/")))
-      } else {
-        write(line,
-          file = paste(tempdir(), "temp_log.txt", sep = "/"),
-          append = file.exists(paste(tempdir(), "temp_log.txt", sep = "/")))
-      }
-    }
-    if (i == "warning") {
-      write(paste("Warning:", line),
-        file = paste(tempdir(), "temp_warnings.txt", sep = "/"),
-        append = file.exists(paste(tempdir(), "temp_warnings.txt", sep = "/")))
-    }
-    if (i == "ud") { # nocov start
-      write(line,
-        file = paste(tempdir(), "temp_UD.txt", sep = "/"),
-        append = file.exists(paste(tempdir(), "temp_UD.txt", sep = "/")))
-    } # nocov end
-    if (i == "comment") {
-      write(paste(tag, line, sep = "\t"),
-        file = paste(tempdir(), "temp_comments.txt", sep = "/"),
-        append = file.exists(paste(tempdir(), "temp_comments.txt", sep = "/")))
+    flush.console() # for buffered consoles.
+  }
+
+  # stop calls should always be logged to the report
+  if ("report" %in% type | "stop" %in% type) {
+    if ("warning" %in% type) {
+      write(paste("Warning:", event_text),
+            file = paste(tempdir(), "temp_log.txt", sep = "/"),
+            append = file.exists(paste(tempdir(), "temp_log.txt", sep = "/")))
+    } else {
+      write(event_text,
+            file = paste(tempdir(), "temp_log.txt", sep = "/"),
+            append = file.exists(paste(tempdir(), "temp_log.txt", sep = "/")))
     }
   }
-  write(paste(format(Sys.time(), "%H:%M:%S.:"), line),
+
+  if ("warning" %in% type) {
+    write(paste("Warning:", event_text),
+      file = paste(tempdir(), "temp_warnings.txt", sep = "/"),
+      append = file.exists(paste(tempdir(), "temp_warnings.txt", sep = "/")))
+  }
+
+  # "ud" stands for "user decision"
+  if ("ud" %in% type) { # nocov start
+    write(event_text,
+      file = paste(tempdir(), "temp_UD.txt", sep = "/"),
+      append = file.exists(paste(tempdir(), "temp_UD.txt", sep = "/")))
+  } # nocov end
+
+  if ("comment" %in% type) {
+    write(paste(tag, event_text, sep = "\t"),
+      file = paste(tempdir(), "temp_comments.txt", sep = "/"),
+      append = file.exists(paste(tempdir(), "temp_comments.txt", sep = "/")))
+  }
+
+  # everything goes into debug
+  if ("debug" %in% type) {
+    event_text <- paste("Debug:", event_text)
+    if (getOption("actel.debug", default = FALSE)) {
+      message(event_text)
+    }
+  }
+  write(paste(format(Sys.time(), "%H:%M:%S:"), event_text),
     file = paste(tempdir(), "actel_debug_file.txt", sep = "/"),
     append = file.exists(paste(tempdir(), "actel_debug_file.txt", sep = "/")))
+
+  if ("stop" %in% type) {
+    stop(event_text, call. = FALSE)
+  }
+
+  if ("crash" %in% type) {
+    # transfer comments, decisions, and function call to job log
+    if (file.exists(paste0(tempdir(), "/temp_comments.txt"))) {
+      comments <- readr::read_file(paste0(tempdir(), "/temp_comments.txt"))
+      comments <- gsub("\r", "", comments)
+      comments <- gsub("\t", ": ", comments)
+    } else {
+      comments <- ""
+    }
+    if (file.exists(paste0(tempdir(), "/temp_UD.txt"))) {
+      uds <- readr::read_file(paste0(tempdir(), "/temp_UD.txt"))
+      uds <- gsub("\r", "", uds)
+    } else {
+      uds <- ""
+    }
+    text_block <- paste0("User comments:\n",
+                         "-------------------\n",
+                         comments,
+                         "-------------------\n",
+                         "User interventions:\n",
+                         "-------------------\n",
+                         uds,
+                         "-------------------\n",
+                         "Function call:\n",
+                         "-------------------\n",
+                         function_call,
+                         "\n",
+                         "-------------------")
+      write(text_block,
+            file = paste(tempdir(), "temp_log.txt", sep = "/"),
+            append = file.exists(paste(tempdir(), "temp_log.txt", sep = "/")))
+
+    # rename the log file
+    if (getOption("actel.debug", default = FALSE)) {
+      # if in debug mode, export the debug log
+      file.copy(paste0(tempdir(), "/actel_debug_file.txt"),
+                paste0(tempdir(), "/latest_actel_error_log.txt"),
+                overwrite = TRUE)
+    } else {
+      # if not in debug mode, export the regular log
+      file.rename(paste0(tempdir(), "/temp_log.txt"),
+                  paste0(tempdir(), "/latest_actel_error_log.txt"))
+      # and clean up
+      deleteHelpers()
+    }
+  }
 }
 
 #' Delete temporary files
 #'
-#' At the end of the function actel or emergencyBreak, removes temporary files.
+#' At the end of the function actel or event(type = "crash"),
+#' removes temporary files.
 #'
 #' @return No return value, called for side effects.
 #'
 #' @keywords internal
 #'
 deleteHelpers <- function() {
-  helper.list <- paste0(tempdir(), paste0("/temp_", c("log", "warnings", "UD", "comments"), ".txt"))
+  temp_files <- paste0("/temp_", c("log", "warnings", "UD", "comments"), ".txt")
+  helper.list <- paste0(tempdir(), temp_files)
   link <- unlist(lapply(helper.list, file.exists))
   for (file in helper.list[link]) {
     file.remove(file)
   }
 }
 
-#' Standard procedure when aborting
-#'
-#' Wraps up the report in R's temporary folder before the function end.
-#'
-#' @return No return value, called for side effects.
-#'
-#' @keywords internal
-#'
-emergencyBreak <- function(the.function.call) { # nocov start
-  appendTo("Report", "\nA fatal exception occurred, stopping the process!\nFound a bug? Report it here: https://github.com/hugomflavio/actel/issues\n\n-------------------")
-  if (file.exists(paste0(tempdir(), "/temp_comments.txt")))
-    appendTo("Report", paste0("User comments:\n-------------------\n", gsub("\t", ": ", gsub("\r", "", readr::read_file(paste0(tempdir(), "/temp_comments.txt")))), "-------------------"))
-
-  if (file.exists(paste0(tempdir(), "/temp_UD.txt")))
-    appendTo("Report", paste0("User interventions:\n-------------------\n", gsub("\r", "", readr::read_file(paste0(tempdir(), "/temp_UD.txt"))), "-------------------"))
-
-  appendTo("Report", paste0("Function call:\n-------------------\n", the.function.call, "\n-------------------"))
-
-  message("\nM: The analysis errored. You can recover latest the job log (including your comments and decisions) by running recoverLog().")
-  
-  if (getOption("actel.debug", default = FALSE)) {
-    file.copy(paste0(tempdir(), "/temp_log.txt"), paste0(tempdir(), "/latest_actel_error_log.txt"))
-  } else {
-    file.rename(paste0(tempdir(), "/temp_log.txt"), paste0(tempdir(), "/latest_actel_error_log.txt"))
-    deleteHelpers()
-  }
-} # nocov end
-
 #' Recover latest actel crash log
-#' 
+#'
 #' @param file Name of the file to which the log should be saved.
 #' @param overwrite Logical: If 'file' already exists, should its content be overwritten?
-#' 
+#'
 #' @examples
 #' \dontshow{
 #' sink(paste0(tempdir(), "/latest_actel_error_log.txt"))
@@ -546,18 +701,18 @@ emergencyBreak <- function(the.function.call) { # nocov start
 #' Function: example()")
 #' sink()
 #' }
-#' 
+#'
 #' recoverLog(file = paste0(tempdir(), "/new_log.txt"))
-#' 
+#'
 #' \dontshow{
 #' file.remove(paste0(tempdir(), "/latest_actel_error_log.txt"))
 #' file.remove(paste0(tempdir(), "/new_log.txt"))
 #' }
-#' 
+#'
 #' @return No return value, called for side effects.
-#' 
+#'
 #' @export
-#' 
+#'
 recoverLog <- function(file, overwrite = FALSE) {
   if (!file.exists(paste0(tempdir(), "/latest_actel_error_log.txt")))
     stop("No crash logs found.", call. = FALSE)
@@ -570,7 +725,7 @@ recoverLog <- function(file, overwrite = FALSE) {
   if (!is.character(file) | length(file) != 1)
     stop("'file' must be a single character string.", call. = FALSE)
 
-  if (!grepl(".txt$", file))
+  if (!grepl("\\.txt$", file))
     file <- paste0(file, ".txt")
 
   if (file.exists(file) & !overwrite)
@@ -579,7 +734,13 @@ recoverLog <- function(file, overwrite = FALSE) {
   file.copy(paste0(tempdir(), "/latest_actel_error_log.txt"), file, overwrite = overwrite)
 
   x <- readLines(file)
-  message("M: Job log for ", sub("Function: ", "", x[6]), " analysis run on ", sub("Timestamp: ", "", x[5]), " recovered to ", file)
+  function_line <- grep("^Function: ", x)
+  timestamp_line <- grep("^Timestamp: ", x)
+  message("M: Job log for ",
+          sub("Function: ", "", x[function_line]),
+              " analysis run on ",
+              sub("Timestamp: ", "", x[timestamp_line]),
+              " recovered to ", file)
 }
 
 #' Convert a data frame with timestamps into a list of circular objects
@@ -647,20 +808,20 @@ timesToCircular <- function(x, by.group = FALSE) {
 
 
 #' cleanly extract lowest signal from signals string
-#' 
+#'
 #' @param x
-#' 
+#'
 #' @return a vector of lowest signals
-#' 
+#'
 #' @keywords internal
-#' 
+#'
 lowestSignal <- function(x) {
-  sapply(as.character(x), function(i) 
+  sapply(as.character(x), function(i)
     min(
       as.numeric(
         unlist(
-          strsplit(i, 
-            "|", 
+          strsplit(i,
+            "|",
             fixed = TRUE)
           )
         )
@@ -669,17 +830,281 @@ lowestSignal <- function(x) {
 }
 
 #' Split signals from multi-signal input
-#' 
+#'
 #' @param x
-#' 
+#'
 #' @return a list of split signals
-#' 
+#'
 #' @keywords internal
-#' 
-#' 
+#'
+#'
 splitSignals <- function(x) {
   if(length(x) != 1)
     stop('splitSignals can only split one input at a time')
   as.numeric(unlist(strsplit(as.character(x), "|", fixed = TRUE)))
 }
 
+
+#' Convert Lotek CDMA log to csv
+#'
+#' Lotek CDMA logs are exported in TXT, and contain several chunks of
+#' of information. Importantly, the detections may be saved with a GMT offset,
+#' as opposed to the more common UTC standard.
+#' Additionally, the date format isn't the standard yyyy-mm-dd.
+#'
+#' This function extracts the detections from the CDMA file, converts the
+#' dates to yyyy-mm-dd, binds the time to the date and resets it to UTC, and
+#' ultimately converts the dataframe into the standard format accepted by actel.
+#'
+#' @param file the file name.
+#' @param date_format the format used by the computer that generated the file
+#'
+#' @examples
+#' # create a dummy detections file to read
+#' dummy_file <- tempfile()
+#' sink(dummy_file)
+#' cat(
+#' "WHS FSK Receiver Data File
+#'
+#' Receiver Configuration:
+#' Working Frequency:  76 KHz
+#' Bit Rate:           2400 bps
+#' Code Type:          FSK
+#' Serial Number:      WHS3K-1234567
+#' Node ID:            10000
+#'
+#' Receiver Settings:
+#' GMT Correction:     00:00
+#'
+#' Beacon Configuration:
+#' Beacon ID:          10072
+#' Beacon Period:      15 sec
+#'
+#' Decoded Tag Data:
+#' Date      Time             TOA       Tag ID    Type     Value     Power
+#' =======================================================================
+#' 04/09/24  22:50:03     0.43875        37910       P       9.1        12
+#' 08/21/24  12:45:18     0.99646        55606       M         0         1
+#' 08/23/24  15:01:04     0.76042        55778       P       0.0         2
+#'
+#' Receiver Sensor Messages:
+#' Date      Time      Sensor   Temp     Press   Battery  Tilt-X  Tilt-Y  Tilt-Z
+#' =============================================================================
+#' 04/11/24  21:44:00  T / P    1534         0
+#'
+#' Receiver Setup Messages:
+#' Date      Time      Type                    Details
+#' =============================================================================
+#' 08/22/24  18:50:11  Change Logging Mode     New Mode: SETUP
+#' ")
+#' sink()
+#'
+#' # now read it
+#' x <- convertLotekCDMAFile(dummy_file)
+#'
+#' # the dummy file will be deleted automatically once you close this R session.
+#'
+#' @return A data frame of standardized detections from the input file.
+#'
+#' @export
+#'
+convertLotekCDMAFile <- function(file, date_format = "%m/%d/%y") {
+  file_raw <- readLines(file)
+
+  serial_n <- file_raw[grep("^Serial Number:", file_raw[1:100])]
+  serial_n <- extractSignals(serial_n)
+
+  code_type <- file_raw[grep("^Code Type:", file_raw[1:100])]
+  code_type <- sub("Code Type:\\s*", "", code_type)
+  if (code_type == "") {
+    code_type <- NA
+  }
+
+  beacon_id <- file_raw[grep("^Beacon ID:", file_raw[1:100])]
+  beacon_id <- stringr::str_extract(beacon_id, "\\d+")
+
+  beacon_period <- file_raw[grep("^Beacon Period:", file_raw[1:100])]
+  beacon_period <- stringr::str_extract(beacon_period, "\\d+")
+
+  gmt_cor <- file_raw[grep("^GMT Correction:", file_raw[1:100])]
+  gmt_cor <- sub("GMT Correction:\\s*", "", gmt_cor)
+  gmt_cor <- decimalTime(gmt_cor)
+
+  # importing this file is not easy. We must extract the detection lines
+  # and the detection headers and then work with them. To find those lines:
+  det_start <- grep("=========", file_raw[1:100])[1]
+  det_end <- grep("Receiver Sensor Messages:", file_raw)[1] - 2
+
+  # To properly parse the columns, we must use the column names, otherwise the
+  # import will fail if any of the columns only has NAs in it. But we must
+  # remove the "===" row before working with it. We must also replace any single
+  # spaces in the column names with underscores.
+  det_lines <- file_raw[(det_start-1):det_end]
+  det_lines <- det_lines[-2] # <- the "=====" line
+  det_lines[1] <- stringr::str_replace_all(det_lines[1],
+                                           pattern = "(?<!\\s)\\s(?!\\s)",
+                                           replacement = "_")
+
+  # Now that we have the detection lines, we need to work some magic to find
+  # the right column widths. This is because read_fwf doesn't allow using the
+  # first row as column names, but without knowing the widths of that first row,
+  # we'll run into the NA issue I mentioned above.
+  # All this can be probably be changed _if_ this issue is addressed:
+  # https://github.com/tidyverse/readr/issues/1393#issuecomment-2408682861
+  #
+  # So:
+  # find out how fwf would read the headers
+  head_fw <- readr::fwf_empty(I(det_lines[1]))
+  # add the column names to head_fw
+  aux <- sub("Tag_ID[^ ]*", "Signal", det_lines[1])
+  head_fw$col_names <- unlist(strsplit(aux, "\\s+"))
+  # find out how fwf would read the table content
+  body_fw <- readr::fwf_empty(I(det_lines), skip = 1)
+  # now the fun part, compare the two and expand head_fw as needed.
+  # at the end of the foor loop below, head_fw will have the right
+  # column positions to import the detection lines correctly.
+
+  # the code below works for this example:
+  # head_fw:
+  #       1            2         3                4        5             6          7         8
+  # 0           13  17  21    27  31           44 4749         60   65      73  77    83   88   93
+  # |------------|   |---|     |---|            |--| |----------|    |-------|   |-----|    |----|
+  # |Serial_Number    Date      Time             TOA  Tag_ID[dec]     Tag_Type    Sensor     Power
+
+  # body_fw:
+  #       1              2         3            4             5            6       !!!          7
+  # 0           13  17      2527      35   40     47       56  60        70 73               90 93
+  # |------------|   |-------| |-------|    |------|        |---|         |--|                |--|
+  # |WHS4K-1900132    03/25/24  12:22:25     0.19490         1132          PSK                 512
+
+  # Both combined:
+  #       1              2         3            4          5             6          7         8
+  # 0           13  17      2527      35   40     4749         60   65      73  77    83   88   93
+  # |------------|   |-------| |-------|    |------| |----------|    |-------|   |-----|    |----|
+  # |Serial_Number    Date      Time             TOA  Tag_ID[dec]     Tag_Type    Sensor     Power
+  # |WHS4K-1900132    03/25/24  12:22:25     0.19490         1132          PSK                 512
+
+  # i_b is set manually because some columns may be missing
+  # in body_fw, so we need to be able to make body_fw lag
+  # behind in comparison to head_fw.
+  i_b <- 0
+  for (i_h in 1:length(head_fw$begin)) {
+    i_b <- i_b + 1
+    while (TRUE) {
+      if (head_fw$begin[i_h] < body_fw$begin[i_b]) {
+        if (is.na(head_fw$end[i_h])) {
+          # we've reached the end
+          break()
+        }
+        if (head_fw$end[i_h] <= body_fw$begin[i_b]) {
+          # if A starts and ends before/when b begins
+          # then this is a missing column, so for the
+          # coming comparisons we must lag behind in b.
+          i_b <- i_b - 1
+          break()
+        } else {
+          # a starts earlier, which is fine.
+          if (head_fw$end[i_h] >= body_fw$end[i_b]) {
+            # a already encompasses b.
+            break()
+          } else {
+            # expand a to encompass b.
+            head_fw$end[i_h] <- body_fw$end[i_b]
+          }
+        }
+      }
+      if (head_fw$begin[i_h] == body_fw$begin[i_b]) {
+        if (is.na(head_fw$end[i_h])) {
+          # we've reached the end
+          break()
+        }
+        if (head_fw$end[i_h] == body_fw$end[i_b]) {
+          # a and b are the same.
+          break()
+        } else {
+          if (head_fw$begin[i_h + 1] >= body_fw$end[i_b]) {
+            head_fw$end[i_h] <- body_fw$end[i_b]
+          } else {
+            # should never happen?
+            stop("something went wrong, contact developer")
+          }
+        }
+      }
+      if (head_fw$begin[i_h] > body_fw$begin[i_b]) {
+        head_fw$begin[i_h] <- body_fw$begin[i_b]
+      }
+    }
+  }
+
+  # now that we know the fixed widths, we can import the data
+  output <- readr::read_fwf(I(det_lines),
+    col_positions = head_fw,
+    skip = 1, # skip the column headers to get the data types right.
+    show_col_types = FALSE)
+
+  # convert to data.table to stay compatible
+  # with the rest of the import functions
+  output <- data.table::as.data.table(output)
+
+  # work on the columns we want to keep
+  output$CodeSpace <- code_type
+  output$Receiver <- as.numeric(serial_n)
+  output$Date <- as.Date(output$Date, format = date_format)
+  output$Timestamp <- paste(output$Date, output$Time)
+  output$Signal <- suppressWarnings(as.numeric(output$Signal))
+  # a more elegant warning is thrown at the end if NAs are formed here
+
+  link <- matchl(colnames(output), c("Type", "Sensor"))
+  if (sum(link) > 1) {
+    stop("too many sensor type matches. contact developer")
+  }
+  if (sum(link) == 1) {
+    output$Sensor.Unit <- output[, which(link), with = FALSE]
+  } else {
+    output$Sensor.Unit <- NA
+  }
+
+  if ("Value" %in% colnames(output)) {
+    output$Sensor.Value <- output$Value
+  } else {
+    output$Sensor.Value <- NA
+  }
+
+  # extract the standard columns
+  std_cols <- c("Timestamp", "TOA", "Receiver", "CodeSpace",
+                "Signal", "Sensor.Value", "Sensor.Unit", "Power")
+  output <- output[, std_cols, with = FALSE]
+  output$Timestamp <- fasttime::fastPOSIXct(as.character(output$Timestamp),
+                                            tz = "UTC")
+  output$Timestamp <- output$Timestamp - (gmt_cor * 3600)
+
+  # final checks
+  if (any(is.na(output$Timestamp))) {
+    warning(
+      paste0("Some timestamp values are NA. This must be fixed before these ",
+      "detections are used in an actel analysis."),
+      call. = FALSE)
+  }
+  if (any(is.na(output$Receiver))) {
+    warning(
+      paste0("Some receiver serial number values are NA. This must be fixed ",
+        "before these detections are used in an actel analysis."),
+      call. = FALSE)
+  }
+  if (any(is.na(output$CodeSpace))) {
+    warning(
+      paste0("Some code space values are NA. This must be fixed before these ",
+      "detections are used in an actel analysis."),
+      call. = FALSE)
+  }
+  if (any(is.na(output$Signal))) {
+    warning(
+      paste0("Some signal values are NA. This must be fixed before these ",
+      "detections are used in an actel analysis."),
+      call. = FALSE)
+  }
+
+  attributes(output)$beacon_id <- as.numeric(beacon_id)
+  attributes(output)$beacon_period <- as.numeric(beacon_period)
+  return(output)
+}

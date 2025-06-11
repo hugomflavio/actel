@@ -10,7 +10,7 @@ test_that("blankWorkspace deploys necessary files", {
 	expect_true(file.exists("actel_workspace/spatial.csv"))
 	expect_true(dir.exists("actel_workspace/detections"))
 
-	expect_error(blankWorkspace("actel_workspace"), 
+	expect_error(blankWorkspace("actel_workspace"),
 		"The specified directory already exists! Stopping to avoid accidental data loss. To continue regardless, run again with force = TRUE.", fixed = TRUE)
 
 	expect_warning(blankWorkspace("actel_workspace", force = TRUE),

@@ -47,9 +47,9 @@ jobs:
 
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
-          cashe-version: 1
+          cache-version: 1
           dependencies: '"hard"'
-          extra-packages: any::covr, any::testthat, any::terra, any::sp, any::raster, any::gdistance
+          extra-packages: any::covr, any::testthat, any::terra, any::sp, any::raster, any::gdistance, any::rcmdcheck
           needs: check
 
       - name: Install system dependencies on macOS

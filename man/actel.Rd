@@ -2,8 +2,8 @@
 % Please edit documentation in R/actel.R
 \docType{package}
 \name{actel}
-\alias{actel}
 \alias{actel-package}
+\alias{actel}
 \title{actel: Acoustic Telemetry Data Analysis}
 \description{
 actel is designed for studies where animals tagged with acoustic tags are expected
@@ -86,7 +86,12 @@ for!
 \code{\link{exampleWorkspace}}, \code{\link{blankWorkspace}}
 }
 \author{
-\strong{Maintainer}: Hugo Flávio \email{hflavio@wlu.ca} (\href{https://orcid.org/0000-0002-5174-1197}{ORCID})
+\strong{Maintainer}: Hugo Flávio \email{hflavio@dal.ca} (\href{https://orcid.org/0000-0002-5174-1197}{ORCID})
+
+Other contributors:
+\itemize{
+  \item Devon Smith \email{smithd0@unbc.ca} (\href{https://orcid.org/0009-0005-3954-6355}{ORCID}) [contributor]
+}
 
 }
 \keyword{internal}

@@ -5,6 +5,33 @@ Find out the main highlights of each update.
 ## Development
 
 Fixes:
+  * Fix warning bug when reporting duplicated signals in the presence of dual-signal tags.
+  * Gracefully stop in the presence of "" array names (issue [#95](https://github.com/hugomflavio/actel/issues/95)).
+  * Fix minor aesthetic bug that would cause invalid detections to show up as NA in the captions of individual detection plots.
+  * Fix crash when running migration analysis with only one array (issue [#113](https://github.com/hugomflavio/actel/issues/113)).
+  * Fix crash when running residency analysis and a group of animals is never detected (issue [#114](https://github.com/hugomflavio/actel/issues/114)).
+  * Remove "Index" column from residency list tables with one row (issue [#93](https://github.com/hugomflavio/actel/issues/93)).
+  * Fix silent bug causing `time.ratios` (residency analysis) to occasionally calculate exceedingly long times when using `timestep = hours` (issue [#89](https://github.com/hugomflavio/actel/issues/89)).
+  * Fixed `loadDistances()` issue where R objects were causing errors but .csv files were non-issue (issue [#134](https://github.com/hugomflavio/actel/issues/134)).
+  * Fixed inactiveness check crash if distances matrix contains NAs (issue [#148](https://github.com/hugomflavio/actel/issues/148)).
+  * Fixed circular plot warnings issued when no tags passed by an array (issue [#151](https://github.com/hugomflavio/actel/issues/151)).
+
+Enhancements:
+  * Improve timestamp handling when importing data through `preload()` (issue [#94](https://github.com/hugomflavio/actel/issues/94)).
+  * Improve column name checks to avoid accidentally matching anything to the dot wildcard.
+  * Add new "first to first" method to speed calculations (issue [#96](https://github.com/hugomflavio/actel/issues/96))
+  * New `processInnovaseaFile()` function to handle updated innovasea detection file format (issue [#97](https://github.com/hugomflavio/actel/issues/97)).
+  * New `convertLotekCDMAFile()` function to prepare lotek txt logs for further analyses (issue [#103](https://github.com/hugomflavio/actel/issues/103)).
+  * New `plotDot()` function to help users inspect their spatial.txt files (issue [#55](https://github.com/hugomflavio/actel/issues/55)).
+  * Improved internal mechanisms for message/warning/debug/stop reporting. new internal function `event()` replaces the old `appendTo()`, `stopAndReport()`, and `emergencyBreak()` (issue [#135](https://github.com/hugomflavio/actel/issues/135))
+  * Added the ability to use output of `loadSpatial()` as 'starters' for `distancesMatrix()` when 'actel' is 'TRUE'. This allows a user to input their spatial.csv if located in a separate working directory (issue [#133](https://github.com/hugomflavio/actel/issues/133))
+  * Distance matrix is now retained in the output of `explore()`, `residency()`, and `migration()` analysis when invalid. Additionally, if the distance matrix is not available NA will be denoted in the output. (issue [#142](https://github.com/hugomflavio/actel/issues/142))
+  * Improved the inner mechanics of `extractSignals()` and `extractCodeSpaces()` so they're much faster now.
+  * New arguments `back.warning` and `back.error` included to `migration()` to give users more control over warnings and user interaction prompts.
+
+## actel 1.3.0
+
+Fixes:
   * Fix `printLastSection()` crash for very large datasets.
   * Fix `printCircular()` crash if there are six or more groups but only one is present at the array.
   * Fix actel missing some efficiency peers as per issue [#72](https://github.com/hugomflavio/actel/issues/72).
@@ -35,7 +62,7 @@ Enhancements:
   * Improve handling of manually set `jump.warning` and `jump.error` arguments when the set values don't respect the `jump.warning <= jump.error` rule.
   * Change the behaviour of `recoverLog()` so it attempts to save the log to `actel_job_log.txt` if a `file` argument is not provided.
   * Added new `force` argument to `blankWorkspace()` and `exampleWorkspace()`.
-  * New `Code.space` column in the biometrics allows the user to specificy the code space of the target tags.
+  * New `Code.space` column in the biometrics allows the user to specify the code space of the target tags.
   * New arguments in `plotArray()`: `by.group` and `y.style`. See function documentation for more details.
   * Include `preload()` log in reports where preloaded data is used.
   * `plotRatios()` can now subset multiple groups and sections simultaneously. The user can also decide to either colour the plot by group or by section using the new `col.by` argument (issue [#77](https://github.com/hugomflavio/actel/issues/77))).
@@ -169,7 +196,7 @@ Enhancements:
   * Verify number of columns on all detection files.
   * Run quality checks on standard detection files.
   * New `getSpeeds()` function allows the user to quickly extract all speed information from the analyses.
-  
+
 ## actel 1.0.0
 
 Fixes:

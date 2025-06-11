@@ -2,7 +2,8 @@
 % Please edit documentation in R/load.R
 \name{excludeTags}
 \alias{excludeTags}
-\title{Collect summary information on the tags detected but that are not part of the study.}
+\title{Collect summary information on the tags detected
+but that are not part of the study.}
 \usage{
 excludeTags(input, exclude.tags)
 }
@@ -15,9 +16,11 @@ stray tags from a different code space but with the same signal as a target
 tag are detected in the study area.}
 }
 \value{
-A list of detections for each tag that does not contain the excluded tags.
+A list of detections for each tag that
+does not contain the excluded tags.
 }
 \description{
-Collect summary information on the tags detected but that are not part of the study.
+Collect summary information on the tags detected
+but that are not part of the study.
 }
 \keyword{internal}

@@ -2,17 +2,19 @@ Jump to [**installation instructions**](#installing-actel)
 
 # actel<img src="vignettes/actel_logo.png" align="right" width="120" />
 
-[![R-CMD-check](https://github.com/hugomflavio/actel/workflows/R-CMD-check/badge.svg)](https://github.com/hugomflavio/actel/actions)
+[![R-CMD-check](https://github.com/hugomflavio/actel/actions/workflows/R-CMD-check.yml/badge.svg)](https://github.com/hugomflavio/actel/actions)
 [![CRAN\_Status\_Badge](https://www.r-pkg.org/badges/version/actel)](https://cran.r-project.org/package=actel)
 [![CRAN RStudio mirror downloads](https://cranlogs.r-pkg.org/badges/actel)](https://cran.r-project.org/package=actel)
 
-[![codecov](https://codecov.io/github/hugomflavio/actel/branch/master/graphs/badge.svg)](https://codecov.io/github/hugomflavio/actel)<sup> of non-interactive code*</sup>
+[![codecov](https://codecov.io/github/hugomflavio/actel/branch/master/graphs/badge.svg)](https://app.codecov.io/github/hugomflavio/actel)<sup> of non-interactive code*</sup>
 
 Read the [latest news here!](https://github.com/hugomflavio/actel/blob/master/NEWS.md#news)
 
+NOTE: actel now has a dedicated [website!](https://hugomflavio.github.io/actel-website/)
+
 ## Overview
 
-If you are using acoustic telemetry to track animals as they move inside a study area or as they migrate somewhere, actel is the package for you. 
+If you are using acoustic telemetry to track animals as they move inside a study area or as they migrate somewhere, actel is the package for you.
 By bringing together the study area configuration and the recorded detections, actel provides a systematic way of analysing animal migration and residency data.
 
 <img src="vignettes/mb_arrays.svg" alt="drawing" width="870"/>
@@ -22,11 +24,11 @@ By bringing together the study area configuration and the recorded detections, a
 **1. explore()**
 
  explore() allows you to quickly get a summary of your data. You can use explore() to get a general feel for the study results, and check if the input files are behaving as expected. It is also a good candidate if you just want to validate your detections for later use in other analyses.
- 
+
 **2. migration()**
 
   The migration() analysis runs the same initial checks as explore(), but on top of it, it analyses the animal behaviour. By selecting the arrays that lead to success, you can define whether or not your animals survived the migration. Additional plots help you find out if some animal/tag has been acting odd. Multiple options allow you to tweak the analysis to fit your study perfectly.
- 
+
 **3. residency()**
 
   The residency() analysis runs the same initial checks as explore(), but, similarly to migration, explores particular points of the animal behaviour. If you want to know where your animals were in each day of the study, how many animals were in each section each day, and other residency-focused variables, this is the analysis you are looking for!
@@ -36,7 +38,7 @@ By bringing together the study area configuration and the recorded detections, a
 To truly learn how to operate actel, you must read the package vignettes. These have been arranged so that you can
 prepare your analysis as you learn; quite soon you will get your first results!
 
-Here are some examples: 
+Here are some examples:
 
 **Movement tables:**
 
@@ -68,9 +70,9 @@ Here are some examples:
 
 <img src="vignettes/readme_global_residency.png" alt="drawing" width="870"/>
 
-## Installing actel 
+## Installing actel
 
-**CRAN version: 1.2.1**
+**CRAN version: 1.3.0**
 
 actel is available on CRAN. To install the latest stable version, simply run:
 
@@ -86,9 +88,7 @@ If you would like to install the [latest updates](https://github.com/hugomflavio
 
 **Have a look at the manual:**
 
-After installing, you should read the package vignettes (i.e. the manual), which can be found by running:
-
-    browseVignettes("actel")
+After installing, you should read the manual, which can now be found in [actel's website](https://hugomflavio.github.io/actel-website/index.html).
 
 **Note:**
 
@@ -101,7 +101,12 @@ After installing, you should read the package vignettes (i.e. the manual), which
 
 ## Works using or relating to actel
 
-**2023** (13)
+**2024** (1)
+
+- Waters, C., Cotter, D., O’Neill, R., Drumm, A., Cooney, J., Bond, N., Rogan, G., & Maoiléidigh, N. Ó. (2024). The use of predator tags to explain reversal movement patterns in Atlantic salmon smolts (_Salmo salar_ L.). Journal of Fish Biology. https://doi.org/10.1111/jfb.15658
+
+
+**2023** (15)
 
 - Becker, A., Fielder, D. S., Lowry, M. B., & Taylor, M. D. (2023). Suitability of saltmarsh creeks as release locations for stocked Mulloway (Argyrosomus japonicus). Estuarine, Coastal and Shelf Science, 108455. https://doi.org/10.1016/j.ecss.2023.108455
 
@@ -112,6 +117,8 @@ After installing, you should read the package vignettes (i.e. the manual), which
 - Dhellemmes, F., Aspillaga, E., Rittweg, T., Alós, J., Möller, P., & Arlinghaus, R. (2023). Body size scaling of space use in coastal pike (_Esox lucius_) in brackish lagoons of the southern Baltic Sea. Fisheries Research, 260, 106560. https://doi.org/10.1016/j.fishres.2022.106560
 
 - Dhellemmes, F., Aspillaga, E., & Monk, C. T. (2023). ATfiltR: A solution for managing and filtering detections from passive acoustic telemetry data. MethodsX, 10, 102222. https://doi.org/10.1016/j.mex.2023.102222
+
+- English, G., Wilson, B. M., Lawrence, M. J., Black, M., Hawkes, J. P., Hardie, D. C., Daniels, J. M., Carr, J. W., Rycroft, C., Crossin, G. T., Whoriskey, F., den Heyer, C. E., Bordeleau, X., McKindsey, C. W., & Trudel, M. (2023). Determining early marine survival and predation by endothermic predators on acoustically-tagged Atlantic salmon (<i>Salmo salar</i>) post-smolts. Canadian Journal of Fisheries and Aquatic Sciences. https://doi.org/10.1139/cjfas-2023-0206
 
 - Flink, H., Tibblin, P., Hall, M., Hellström, G., & Nordahl, O. (2023). Variation among bays in spatiotemporal aggregation of Baltic Sea pike highlights management complexity. Fisheries Research, 259, 106579. https://doi.org/10.1016/j.fishres.2022.106579
 
@@ -126,6 +133,8 @@ After installing, you should read the package vignettes (i.e. the manual), which
 - Nordli, E., Strøm, J., Bøhn, T., Thorstad, E., Serra-Llinares, R., Nilsen, R., & Bjørn, P. (2023). Behaviour and habitat use of first-time migrant Arctic charr: Novel insights from a subarctic marine area. Marine Ecology Progress Series, 709, 77–90. https://doi.org/10.3354/meps14279
 
 - O’Connor, B. (2023). Linking spatial stream network modeling and telemetry data to investigate thermal habitat use by adult arctic grayling [Master of Science, University of Northern British Columbia]. https://doi.org/10.24124/2023/59378
+
+- Stoot, L. J., Butler, G. L., Niella, Y., Doran, G. S., Thiem, J. D., Taylor, M. D., & Baumgartner, L. J. (2023). Environmental Effects on the Seasonal Distribution of an Estuarine Species _Neoarius graeffei_ in Northern New South Wales, Australia. Estuaries and Coasts. https://doi.org/10.1007/s12237-023-01269-9
 
 - van Leeuwen, C. H. A., de Leeuw, J. J., van Keeken, O. A., Volwater, J. J. J., Seljee, F., van Aalderen, R., van Emmerik, W. A. M., & Bakker, E. S. (2023). Multispecies fish tracking across newly created shallow and deep habitats in a forward-restored lake. Movement Ecology, 11(1), 43. https://doi.org/10.1186/s40462-023-00405-1
 

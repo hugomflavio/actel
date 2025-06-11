@@ -12,14 +12,14 @@ test_that("plotLive works with actel results", {
 })
 
 test_that("plotLive works with preload datasets", {
-	suppressWarnings(x <- preload(biometrics = example.biometrics, spatial = example.spatial, deployments = example.deployments, 
+	suppressWarnings(x <- preload(biometrics = example.biometrics, spatial = example.spatial, deployments = example.deployments,
 							 									detections = example.detections, tz = "Europe/Copenhagen"))
 	tryCatch(plotLive(x), warning = function(w) stop("a warning was issued where it should not had been!"))
 })
 
 test_that("plotLive works with unknown receivers", {
 	xspatial <- example.spatial[-3, ]
-	suppressWarnings(x <- preload(biometrics = example.biometrics, spatial = xspatial, deployments = example.deployments, 
+	suppressWarnings(x <- preload(biometrics = example.biometrics, spatial = xspatial, deployments = example.deployments,
 							 									detections = example.detections, tz = "Europe/Copenhagen"))
 	expect_warning(plotLive(x), "This dataset contains unknown stations. These stations will not be plotted.", fixed = TRUE)
 })

@@ -2,19 +2,19 @@
 % Please edit documentation in R/load.R
 \name{collectStrays}
 \alias{collectStrays}
-\title{Collect summary information on the tags detected but that are not part of the study.}
+\title{Collect summary information on the tags detected
+but that are not part of the study.}
 \usage{
 collectStrays(input)
 }
 \arguments{
 \item{input}{list of detections for the tags to be excluded.}
-
-\item{restart}{logical: if TRUE, remove file 'temp_strays.csv' from the working directory.}
 }
 \value{
 No return value, called for side effects.
 }
 \description{
-Collect summary information on the tags detected but that are not part of the study.
+Collect summary information on the tags detected
+but that are not part of the study.
 }
 \keyword{internal}

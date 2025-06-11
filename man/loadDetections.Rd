@@ -32,6 +32,7 @@ future runs?}
 A data frame with all the detections
 }
 \description{
-If there are previously compiled detections present, offers the chance to reuse. Otherwise triggers combineDetections.
+If there are previously compiled detections present, offers the chance
+to reuse. Otherwise triggers combineDetections.
 }
 \keyword{internal}

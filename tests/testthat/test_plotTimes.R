@@ -83,38 +83,38 @@ test_that("plotTimes returns no errors on actual data, plus saves files", {
 })
 
 test_that("different extensions are working in plotTimes", {
-	tryCatch(plotTimes(times = times, file = "test.svg"), 
+	tryCatch(plotTimes(times = times, file = "test.svg"),
 		warning = function(w) stop("plotTimes threw an unexpected warning"))	
 	expect_true(file.exists("test.svg"))
 	file.remove("test.svg")
 
-	tryCatch(plotTimes(times = times, file = "test.pdf"), 
+	tryCatch(plotTimes(times = times, file = "test.pdf"),
 		warning = function(w) stop("plotTimes threw an unexpected warning"))	
 	expect_true(file.exists("test.pdf"))
 	file.remove("test.pdf")
 
-	tryCatch(plotTimes(times = times, file = "test.png"), 
+	tryCatch(plotTimes(times = times, file = "test.png"),
 		warning = function(w) stop("plotTimes threw an unexpected warning"))	
 	expect_true(file.exists("test.png"))
 	file.remove("test.png")
 
-	tryCatch(plotTimes(times = times, file = "test.tiff"), 
+	tryCatch(plotTimes(times = times, file = "test.tiff"),
 		warning = function(w) stop("plotTimes threw an unexpected warning"))	
 	expect_true(file.exists("test.tiff"))
 	file.remove("test.tiff")
 
-	expect_error(plotTimes(times = times, file = "test"), 
+	expect_error(plotTimes(times = times, file = "test"),
 		"Could not recognise 'file' extension (recognised extensions: .svg, .pdf, .png, .tiff).", fixed = TRUE)	
 })
 
 test_that("plotTimes complains if xjust is set in corner legend", {
-	expect_warning(plotTimes(times = times, xjust = "centre"), 
+	expect_warning(plotTimes(times = times, xjust = "centre"),
 		"'xjust' was set but legend is being plotted in the corner. Ignoring 'xjust'.", fixed = TRUE)	
 
-	tryCatch(plotTimes(times = times, legend.pos = "bottom"), 
+	tryCatch(plotTimes(times = times, legend.pos = "bottom"),
 		warning = function(w) stop("plotTimes threw an unexpected warning"))	
 
-	tryCatch(plotTimes(times = times, legend.pos = "bottom", xjust = "right"), 
+	tryCatch(plotTimes(times = times, legend.pos = "bottom", xjust = "right"),
 		warning = function(w) stop("plotTimes threw an unexpected warning"))	
 })
 

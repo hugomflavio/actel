@@ -12,7 +12,7 @@
 #'  \code{section.error} detections, user intervention is suggested.
 #'  Defaults to 1. To disable user intervention suggestions, set to 0.
 #' @param section.warning If a tag has section movement events with less or equal to
-#'  \code{section.warning} detections, a warning is issued. Defaults to 1. 
+#'  \code{section.warning} detections, a warning is issued. Defaults to 1.
 #'  To disable section warnings, set to 0. Must be equal to or greater than \code{section.error}.
 #' @param timestep The resolution desired for the residency calculations.
 #'  One of "days" (default) or "hours".
@@ -120,7 +120,7 @@ residency <- function(
   min.per.event = 1,
   start.time = NULL,
   stop.time = NULL,
-  speed.method = c("last to first", "last to last"),
+  speed.method = c("last to first", "last to last", "first to first"),
   speed.warning = NULL,
   speed.error = NULL,
   jump.warning = 2,
@@ -146,11 +146,16 @@ residency <- function(
 {
 
 # check deprecated argument
-  if (!missing(minimum.detections))
-    stop("'minimum.detections' has been deprecated. Please use 'min.total.detections' and 'min.per.event' instead.", call. = FALSE)
-
-  if (!missing(section.minimum))
-    stop("'section.minimum' has been deprecated. Please use 'section.warning' and 'section.error' instead.", call. = FALSE)
+  if (!missing(minimum.detections)) {
+    event(type = "stop",
+          "'minimum.detections' has been deprecated.",
+          " Please use 'min.total.detections' and 'min.per.event' instead.")
+  }
+  if (!missing(section.minimum)) {
+    event(type = "stop",
+          "'section.minimum' has been deprecated.",
+          " Please use 'section.warning' and 'section.error' instead.")
+  }
 
 # clean up any lost helpers
   deleteHelpers()
@@ -160,10 +165,23 @@ residency <- function(
 
 # debug lines
   if (getOption("actel.debug", default = FALSE)) { # nocov start
-    on.exit(message("Debug: Progress log available at ", gsub("\\\\", "/", paste0(tempdir(), "/actel_debug_file.txt"))))
-    on.exit(message("Debug: Saving carbon copy to ", gsub("\\\\", "/", paste0(tempdir(), "/actel.debug.RData"))), add = TRUE)
-    on.exit(save(list = ls(), file = paste0(tempdir(), "/actel.debug.RData")), add = TRUE)
-    message("!!!--- Debug mode has been activated ---!!!")
+    # show debug log location
+    on.exit(event(type = "screen",
+                  "Debug: Progress log available at ",
+                  gsub("\\\\", "/", paste0(tempdir(),
+                                           "/actel_debug_file.txt"))))
+    # show debug rdata location
+    on.exit(add = TRUE,
+            event(type = "screen",
+                  "Debug: Saving carbon copy to ",
+                  gsub("\\\\", "/", paste0(tempdir(),
+                                           "/actel.debug.RData"))))
+    # save debug rdata
+    on.exit(add = TRUE,
+            save(list = ls(),
+                 file = paste0(tempdir(), "/actel.debug.RData")))
+    event(type = c("screen", "report"),
+          "!!!--- Debug mode has been activated ---!!!")
   } # nocov end
 # ------------------------
 
@@ -217,7 +235,7 @@ residency <- function(
 # ------------------------
 
 # Store function call
-  the.function.call <- paste0("residency(tz = ", ifelse(is.null(tz), "NULL", paste0("'", tz, "'")),
+  the_function_call <- paste0("residency(tz = ", ifelse(is.null(tz), "NULL", paste0("'", tz, "'")),
     ", section.order = ", ifelse(is.null(section.order), "NULL", paste0("c('", paste(section.order, collapse = "', '"), "')")),
     ", datapack = ", ifelse(is.null(datapack), "NULL", deparse(substitute(datapack))),
     ", max.interval = ", max.interval,
@@ -249,23 +267,33 @@ residency <- function(
     ", detections.y.axis = '", detections.y.axis, "'",
     ")")
 
-  appendTo("debug", the.function.call)
+  event(type = "debug", the_function_call)
 # --------------------
 
 # Prepare clean-up before function ends
-  finished.unexpectedly <- TRUE
-  on.exit({if (interactive() & finished.unexpectedly) emergencyBreak(the.function.call)}, add = TRUE)
+  finished_unexpectedly <- TRUE
+  on.exit(add = TRUE,
+          if (interactive() & finished_unexpectedly) {
+            event(type = "crash", the_function_call)
+          })
 
-  if (!getOption("actel.debug", default = FALSE))
-    on.exit(deleteHelpers(), add = TRUE)
+  if (!getOption("actel.debug", default = FALSE)) {
+    on.exit(add = TRUE,
+            deleteHelpers())
+  }
 
-  on.exit(tryCatch(sink(), warning = function(w) {hide <- NA}), add = TRUE)
+  on.exit(add = TRUE,
+          tryCatch(sink(), warning = function(w) {hide <- NA}))
 # --------------------------------------
 
 # Final arrangements before beginning
-  appendTo("Report", paste0("Actel R package report.\nVersion: ", utils::packageVersion("actel"), "\n"))
-
-  appendTo(c("Report"), paste0("Target folder: ", getwd(), "\nTimestamp: ", the.time <- Sys.time(), "\nFunction: residency()\n"))
+  the_time <- Sys.time()
+  event(type = "report",
+        "Actel R package report.\n",
+        "Version: ", utils::packageVersion("actel"), "\n",
+        "Target folder: ", getwd(), "\n",
+        "Timestamp: ", the_time, "\n",
+        "Function: residency()\n")
 
   report <- checkReport(report = report)
 # -----------------------------------
@@ -276,8 +304,14 @@ residency <- function(
                                 start.time = start.time, stop.time = stop.time, discard.orphans = discard.orphans,
                                 section.order = section.order, exclude.tags = exclude.tags)
   } else {
-    appendTo(c("Screen", "Report"), paste0("M: Running analysis on preloaded data (compiled on ", attributes(datapack)$timestamp, ")."))
-    appendTo("Report", paste0("Messages displayed during preload:\n-------------------\n", paste0(attributes(datapack)$loading_messages, collapse = "\n"), "\n-------------------"))
+   event(type = c("screen", "report"),
+         "M: Running analysis on preloaded data (compiled on ",
+         attributes(datapack)$timestamp, ").")
+   event(type = "report",
+         "Messages displayed during preload:\n-------------------\n",
+         paste0(attributes(datapack)$loading_messages, collapse = "\n"),
+         "\n-------------------")
+
     study.data <- datapack
     tz <- study.data$tz
     disregard.parallels <- study.data$disregard.parallels
@@ -297,26 +331,35 @@ residency <- function(
 
 # Final quality checks
   # Verify the existance of sections
-  if (all(!grepl("^Section$", colnames(spatial$stations))))
-    stop("To run residency(), please assign the arrays to their sections using a 'Section' column in the spatial input.", call. = FALSE)
+  if (all(!grepl("^Section$", colnames(spatial$stations)))) {
+    event(type = "stop",
+          "To run residency(), please assign the arrays to their sections",
+          " using a 'Section' column in the spatial input.")
+  }
 
   # Verify that replicate information is valid
-  if (!is.null(replicates) && any(is.na(match(names(replicates), names(arrays)))))
-    stop("Some of the array names listed in the 'replicates' argument do not match the study's arrays.\n", call. = FALSE)
+  not_null <- !is.null(replicates)
+  any_mismatch <- not_null && any(is.na(match(names(replicates), names(arrays))))
+  if (any_mismatch) {
+    event(type = "stop",
+          "Some of the array names listed in the 'replicates' argument",
+          " do not match the study's arrays.")
+  }
 
   capture <- lapply(names(replicates), function(i) {
     x <- replicates[[i]]
     all.stations <- spatial$stations$Standard.name[spatial$stations$Array == i]
     if (any(link <- !x %in% all.stations)) {
-      stop(paste0("In replicates: Station", 
-                  ifelse(sum(link) > 1, "s ", " "), 
-                  paste(x[link], collapse = ", "), 
-                  ifelse(sum(link) > 1, " are", " is"), 
-                  " not part of ", i, " (available stations: ", 
-                  paste(all.stations, collapse = ", "), ")."), 
-           call. = FALSE)
+      event(type = "stop",
+            "In replicates: Station",
+            ifelse(sum(link) > 1, "s ", " "),
+            paste(x[link], collapse = ", "),
+            ifelse(sum(link) > 1, " are", " is"),
+            " not part of ", i, " (available stations: ",
+            paste(all.stations, collapse = ", "), ").")
     }
   })
+
 # -------------------------------------
 
 # Discard early detections, if required
@@ -324,7 +367,8 @@ residency <- function(
     detections.list <- discardFirst(input = detections.list, bio, trim = discard.first)
 
 # Compile array movements
-  appendTo(c("Screen", "Report"), "M: Creating movement records for the valid tags.")
+  event(type = c("screen", "report"),
+        "M: Creating movement records for the valid tags.")
   movements <- groupMovements(detections.list = detections.list, bio = bio, spatial = spatial,
                               speed.method = speed.method, max.interval = max.interval, tz = tz,
                               dist.mat = dist.mat)
@@ -338,32 +382,44 @@ residency <- function(
     names(movements) <- aux
     rm(aux)
   } else {
-    appendTo(c("Screen", "Report"), "M: Not calculating time/speed from release to first detection because 'discard.first' was set.")
+    event(type = c("screen", "report"),
+          "M: Not calculating time/speed from release to first",
+          " detection because 'discard.first' was set.")
   }
 
-
-  appendTo(c("Screen", "Report"), "M: Checking movement events quality.")
+  event(type = c("screen", "report"),
+        "M: Checking movement events quality.")
 
   do.checkSpeeds <- FALSE
   if (is.null(speed.warning)) {
-    appendTo(c("Screen", "Report", "Warning"), "'speed.warning'/'speed.error' were not set, skipping speed checks.")
+    event(type = c("warning", "screen", "report"),
+          "'speed.warning'/'speed.error' were not set, skipping speed checks.")
   } else {
-    if(attributes(dist.mat)$valid)
+    if(attributes(dist.mat)$valid) {
       do.checkSpeeds <- TRUE
-    else
-      appendTo(c("Screen", "Report", "Warning"), "'speed.warning'/'speed.error' were set, but a valid distance matrix is not present. Aborting speed checks.")
+    } else {
+      event(type = c("warning", "screen", "report"),
+            "'speed.warning'/'speed.error' were set, but a valid distance",
+            " matrix is not present. Aborting speed checks.")
+    }
   }
 
   do.checkInactiveness <- FALSE
   if (is.null(inactive.warning)) {
-    appendTo(c("Screen", "Report", "Warning"), "'inactive.warning'/'inactive.error' were not set, skipping inactivity checks.")
+    event(type = c("warning", "screen", "report"),
+          "'inactive.warning'/'inactive.error' were not set,",
+          " skipping inactivity checks.")
   } else {
-    if (!attributes(dist.mat)$valid)
-      appendTo(c("Report", "Screen", "Warning"), "Running inactiveness checks without a distance matrix. Performance may be limited.")
+    if (!attributes(dist.mat)$valid) {
+      event(type = c("report", "Screen", "Warning"),
+            "Running inactiveness checks without a distance matrix.",
+            " Performance may be limited.")
+    }
     do.checkInactiveness <- TRUE
   }
 
-  movement.names <- names(movements) # this will be used further down to reinstate the names in the movements list.
+  # this will be used further down to reinstate the names in the movements list.
+  movement.names <- names(movements)
 
   # clean override based on movements
   if (is.numeric(override))
@@ -372,9 +428,12 @@ residency <- function(
     trigger_override_warning <- any(link <- !override %in% movement.names)
 
   if (trigger_override_warning) {
-    appendTo(c("Screen", "Warning", "Report"), paste0("Override has been triggered for ",
-      ifelse(sum(link) == 1, "tag ", "tags "), paste(override[link], collapse = ", "), " but ",
-      ifelse(sum(link) == 1, "this signal was", "these signals were"), " not detected."))
+    event(type = c("warning", "screen", "report"),
+          "Override has been triggered for ",
+          ifelse(sum(link) == 1, "tag ", "tags "),
+          paste(override[link], collapse = ", "), " but ",
+          ifelse(sum(link) == 1, "this signal was", "these signals were"),
+          " not detected.")
     override <- override[!link]
   }
 
@@ -386,13 +445,13 @@ residency <- function(
     tag <- names(movements)[i]
     counter <- paste0("(", i, "/", length(movements), ")")
 
-    appendTo("debug", paste0("debug: Checking movement quality for tag ", tag,"."))
+    event(type = "debug", "Checking movement quality for tag ", tag,".")
 
     if (is.na(match(tag, override))) {
       output <- checkMinimumN(movements = movements[[tag]], tag = tag, min.total.detections = min.total.detections,
                                min.per.event = min.per.event[1], n = counter)
 
-      output <- checkImpassables(movements = output, tag = tag, bio = bio, detections = detections.list[[tag]], n = counter, 
+      output <- checkImpassables(movements = output, tag = tag, bio = bio, detections = detections.list[[tag]], n = counter,
                                  spatial = spatial, dotmat = dotmat, GUI = GUI, save.tables.locally = save.tables.locally)
 
       output <- checkJumpDistance(movements = output, bio = bio, tag = tag, dotmat = dotmat, paths = paths, arrays = arrays,
@@ -402,8 +461,8 @@ residency <- function(
       if (do.checkSpeeds) {
         temp.valid.movements <- simplifyMovements(movements = output, tag = tag, bio = bio, discard.first = discard.first,
                                                   speed.method = speed.method, dist.mat = dist.mat)
-        output <- checkSpeeds(movements = output, tag = tag, valid.movements = temp.valid.movements, 
-                              detections = detections.list[[tag]], speed.warning = speed.warning, n = counter, 
+        output <- checkSpeeds(movements = output, tag = tag, valid.movements = temp.valid.movements,
+                              detections = detections.list[[tag]], speed.warning = speed.warning, n = counter,
                               speed.error = speed.error, GUI = GUI, save.tables.locally = save.tables.locally)
         rm(temp.valid.movements)
       }
@@ -414,7 +473,7 @@ residency <- function(
                                     dist.mat = dist.mat, GUI = GUI, save.tables.locally = save.tables.locally)
       }
     } else {
-      output <- overrideValidityChecks(moves = movements[[tag]], tag = tag, detections = detections.list[[tag]], # nocov
+      output <- overrideChecks(moves = movements[[tag]], tag = tag, detections = detections.list[[tag]], # nocov
                                        GUI = GUI, save.tables.locally = save.tables.locally, n = counter) # nocov
     }
     return(output)
@@ -425,21 +484,31 @@ residency <- function(
 
 
 # Compile section movements
-  appendTo(c("Screen", "Report"), "M: Compiling and checking section movements for the valid tags.")
+  event(type = c("screen", "report"),
+        "M: Compiling and checking section movements for the valid tags.")
 
   section.movements <- lapply(seq_along(movements), function(i) {
     tag <- names(movements)[i]
     counter <- paste0("(", i, "/", length(movements), ")")
-    appendTo("debug", paste0("debug: Compiling section movements for tag ", tag,"."))
+    event(type = "debug", "Compiling section movements for tag ", tag,".")
 
     aux <- sectionMovements(movements = movements[[i]], spatial = spatial, valid.dist = attributes(dist.mat)$valid)
-    
-    aux <- checkMinimumN(movements = aux, tag = tag, min.total.detections = 0, # don't run the minimum total detections check here.
+
+    if (!is.null(aux)) {
+      # don't run the minimum total detections check here (i.e. set it to 0);
+      # that's already done when compiling the array movements.
+      aux <- checkMinimumN(movements = aux, tag = tag, min.total.detections = 0,
                          min.per.event = min.per.event[2], n = counter)
 
-    output <- checkSMovesN(secmoves = aux, tag = tag, section.warning = section.warning, section.error = section.error, GUI = GUI, 
-                           save.tables.locally = save.tables.locally, n = counter)
-    return(output)
+      output <- checkSMovesN(secmoves = aux, tag = tag,
+                             section.warning = section.warning,
+                             section.error = section.error, GUI = GUI,
+                             save.tables.locally = save.tables.locally,
+                             n = counter)
+      return(output)
+    } else {
+      return(NULL)
+    }
   })
   names(section.movements) <- names(movements)
 
@@ -447,18 +516,20 @@ residency <- function(
   movements <- updateValidity(arrmoves = movements, secmoves = section.movements)
 
   # compile valid movements
-  appendTo(c("Screen", "Report"), "M: Filtering valid array movements.")
+  event(type = c("screen", "report"),
+        "M: Filtering valid array movements.")
 
   valid.movements <- assembleValidMoves(movements = movements, bio = bio, discard.first = discard.first,
                                          speed.method = speed.method, dist.mat = dist.mat)
 
-  appendTo(c("Screen", "Report"), "M: Filtering valid section movements.")
+  event(type = c("screen", "report"),
+        "M: Filtering valid section movements.")
 
-  section.movements <- assembleValidSecMoves(valid.moves = valid.movements, spatial = spatial, 
+  section.movements <- assembleValidSecMoves(valid.moves = valid.movements, spatial = spatial,
                                              valid.dist = attributes(dist.mat)$valid)
-  
-  # Grab summary information
-  appendTo(c("Screen", "Report"), "M: Compiling residency objects.")
+
+  event(type = c("screen", "report"),
+        "M: Compiling residency objects.")
 
   res.df <- assembleResidency(secmoves = section.movements, movements = movements, spatial = spatial)
 
@@ -473,21 +544,22 @@ residency <- function(
               spatial = spatial, rsp.info = list(bio = bio, analysis.type = "residency"))
   array.times <- getTimes(input = aux, move.type = "array", event.type = "arrival", n.events = "all")
 
-  section.times <- list(arrival = getTimes(input = aux, move.type = "section", 
+  section.times <- list(arrival = getTimes(input = aux, move.type = "section",
                                            event.type = "arrival", n.events = "all"),
-                        departure = getTimes(input = aux, move.type = "section", 
+                        departure = getTimes(input = aux, move.type = "section",
                                              event.type = "departure", n.events = "all"))
   rm(aux)
 
   if (length(residency.list) == 0) {
-    emergencyBreak()
-    stopAndReport("No tags have enough data for residency analysis. Consider running explore() instead.\n")
+    event(type = "stop",
+          "No tags have enough data for residency analysis.",
+          " Consider running explore() instead.")
   }
 
-  if (timestep == "days")
-    appendTo(c("Screen", "Report"), "M: Calculating daily locations for each tag.")
-  else
-    appendTo(c("Screen", "Report"), "M: Calculating hourly locations for each tag.")
+  event(type = c("screen", "report"),
+        "M: Calculating",
+        ifelse(timestep == "days", " daily", " hourly"),
+        " locations for each tag.")
 
   time.ratios <- resRatios(res = residency.list, timestep = timestep, tz = tz)
 
@@ -500,10 +572,11 @@ residency <- function(
     the.transmitters <- bio$Transmitter[bio$Group == i]
     link <- match(the.transmitters, colnames(time.positions))
     if (all(is.na(link))) {
-      appendTo(c('screen', 'warning', 'report'),
-        paste0('Group ', as.character(i), ' has no detections. Skipping ratio calculations.'))
+      event(type = c("warning", "screen", "report"),
+            'Group ', as.character(i),
+            ' has no detections. Skipping ratio calculations.')
       return(NULL)
-    } 
+    }
     else {
       link <- link[!is.na(link)]
       trim.positions <- time.positions[, c(1, link)]
@@ -514,7 +587,8 @@ residency <- function(
   })
   names(group.ratios) <- unique(bio$Group)
 
-  appendTo("Screen", "M: Validating detections.")
+  event(type = "screen",
+        "M: Validating detections.")
 
   recipient <- validateDetections(detections.list = detections.list, movements = valid.movements)
   detections <- recipient$detections
@@ -525,14 +599,18 @@ residency <- function(
 
 # Efficiency
   if (length(arrays) == 0) {
-    appendTo(c("Screen", "Warning", "Report"), "Cannot calculate inter-array efficiency when there is only one array (will limit the report's output).")
+    event(type = c("warning", "screen", "report"),
+          "Cannot calculate inter-array efficiency when there is only",
+          " one array (will limit the report's output).")
     efficiency <- NULL
   } else {
-    appendTo(c("Screen", "Report"), "M: Calculating inter-array efficiency.")
+    event(type = c("screen", "report"),
+          "M: Calculating inter-array efficiency.")
     efficiency <- res_efficiency(arrmoves = valid.movements, bio = bio, spatial = spatial, arrays = arrays, paths = paths, dotmat = dotmat)
   }
   if (!is.null(replicates)) {
-    appendTo(c("Screen", "Report"), "M: Calculating intra-array efficiency.")
+    event(type = c("screen", "report"),
+          "M: Calculating intra-array efficiency.")
     intra.array.matrices <- getDualMatrices(replicates = replicates, CJS = NULL, spatial = spatial, detections.list = valid.detections)
     recipient <- includeIntraArrayEstimates(m = intra.array.matrices, efficiency = efficiency, CJS = NULL)
     efficiency <- recipient$efficiency
@@ -545,15 +623,13 @@ residency <- function(
 
 # ----------
 
-# ---------------
-
 # wrap up in-R objects
   deployments <- do.call(rbind.data.frame, deployments)
 
   efficiency <- efficiency[1:3]
 
   # extra info for potential RSP analysis
-  rsp.info <- list(analysis.type = "residency", analysis.time = the.time, bio = bio, 
+  rsp.info <- list(analysis.type = "residency", analysis.time = the_time, bio = bio,
                    tz = tz, actel.version = utils::packageVersion("actel"))
 
   if (!is.null(override))
@@ -575,26 +651,22 @@ residency <- function(
   }
 
   if (interactive()) { # nocov start
-    decision <- userInput(paste0("Would you like to save a copy of the results to ", resultsname, "?(y/n) "), 
+    decision <- userInput(paste0("Would you like to save a copy of the results to ", resultsname, "?(y/n) "),
                           choices = c("y", "n"), hash = "# save results?")
   } else { # nocov end
     decision <- "n"
   }
 
   if (decision == "y") {
-    appendTo(c("Screen", "Report"), paste0("M: Saving results as '", resultsname, "'."))
-    if (attributes(dist.mat)$valid)
-      save(detections, valid.detections, spatial, deployments, arrays, movements, valid.movements,
-        section.movements, status.df, last.seen, array.times, section.times, intra.array.matrices,
-        residency.list, time.ratios, time.positions, global.ratios, group.ratios, efficiency, 
-        intra.array.CJS, rsp.info, dist.mat, file = resultsname)
-    else
-      save(detections, valid.detections, spatial, deployments, arrays, movements, valid.movements,
-        section.movements, status.df, last.seen, array.times, section.times, intra.array.matrices,
-        residency.list, time.ratios, time.positions, global.ratios, group.ratios, efficiency, 
-        intra.array.CJS, rsp.info, file = resultsname)
+    event(type = c("screen", "report"),
+          "M: Saving results as '", resultsname, "'.")
+    save(detections, valid.detections, spatial, deployments, arrays, movements, valid.movements,
+         section.movements, status.df, last.seen, array.times, section.times, intra.array.matrices,
+         residency.list, time.ratios, time.positions, global.ratios, group.ratios, efficiency,
+         intra.array.CJS, rsp.info, dist.mat, file = resultsname)
   } else {
-    appendTo(c("Screen", "Report"), paste0("M: Skipping saving of the results."))
+    event(type = c("screen", "report"),
+          "M: Skipping saving of the results.")
   }
   rm(decision)
 
@@ -603,9 +675,15 @@ residency <- function(
 # Print graphics
   trigger.report.error.message <- TRUE
   if (report) {
-    appendTo(c("Screen", "Report"), "M: Producing the report.")
-    on.exit({if (trigger.report.error.message) message("M: Producing the report failed. If you have saved a copy of the results, you can reload them using dataToList().")}, add = TRUE)
-    
+    event(type = c("screen", "report"),
+          "M: Producing the report.")
+    on.exit(add = TRUE,
+      if (trigger.report.error.message) {
+        event(type = "screen",
+              "M: Producing the report failed. If you have saved a copy of",
+              " the results, you can reload them using dataToList().")
+      })
+
     if (dir.exists(paste0(tempdir(), "/actel_report_auxiliary_files")))
       unlink(paste0(tempdir(), "/actel_report_auxiliary_files"), recursive = TRUE)
 
@@ -615,7 +693,7 @@ residency <- function(
       on.exit(unlink(paste0(tempdir(), "/actel_report_auxiliary_files"), recursive = TRUE), add = TRUE)
 
     biometric.fragment <- printBiometrics(bio = bio)
-    
+
     printDot(dot = dot,
              spatial = spatial,
              print.releases = print.releases)
@@ -643,15 +721,16 @@ residency <- function(
                                           suffix = "_array")
 
     section.arrival.circular.plots <- printCircular(times = timesToCircular(section.times$arrival),
-                                                    bio = bio, 
+                                                    bio = bio,
                                                     suffix = "_section_arrival")
 
-    section.departure.circular.plots <- printCircular(times = timesToCircular(section.times$departure), 
-                                                      bio = bio, 
+    section.departure.circular.plots <- printCircular(times = timesToCircular(section.times$departure),
+                                                      bio = bio,
                                                       suffix = "_section_departure")
 
-    appendTo(c("Screen", "Report"), "M: Drawing individual residency graphics.")
-    
+    event(type = c("screen", "report"),
+          "M: Drawing individual residency graphics.")
+
 
     individual.residency.plots <- printIndividualResidency(ratios = time.ratios,
                                                            global.ratios = global.ratios,
@@ -666,9 +745,9 @@ residency <- function(
                      spatial = spatial)
 
     if (any(sapply(valid.detections, function(x) any(!is.na(x$Sensor.Value))))) {
-      sensor.plots <- printSensorData(detections = valid.detections, 
+      sensor.plots <- printSensorData(detections = valid.detections,
                                       spatial = spatial,
-                                      rsp.info = rsp.info, 
+                                      rsp.info = rsp.info,
                                       colour.by = detections.y.axis)
     } else {
       sensor.plots <- NULL
@@ -678,18 +757,36 @@ residency <- function(
 # ---------------
 
 # wrap up the txt report
-  appendTo("Report", "M: Analysis completed!\n\n-------------------")
-  
-  if (file.exists(paste(tempdir(), "temp_comments.txt", sep = "/")))
-    appendTo("Report", paste0("User comments:\n-------------------\n", gsub("\t", ": ", gsub("\r", "", readr::read_file(paste(tempdir(), "temp_comments.txt", sep = "/")))), "-------------------")) # nocov
+  event(type = "report",
+       "M: Analysis completed!\n\n-------------------")
 
-  if (file.exists(paste(tempdir(), "temp_UD.txt", sep = "/")))
-    appendTo("Report", paste0("User interventions:\n-------------------\n", gsub("\r", "", readr::read_file(paste(tempdir(), "temp_UD.txt", sep = "/"))), "-------------------")) # nocov
+  comments <- paste(tempdir(), "temp_comments.txt", sep = "/")
+  if (file.exists(comments)) { # nocov start
+    aux <- readr::read_file(comments)
+    aux <- gsub("\r", "", aux)
+    aux <- gsub("\t", ": ", aux)
+    event(type = "report",
+          "User comments:\n-------------------\n",
+          aux, "-------------------")
+  } # nocov end
+  uds <- paste(tempdir(), "temp_UD.txt", sep = "/")
+  if (file.exists(uds)) { # nocov start
+    aux <- readr::read_file(uds)
+    aux <- gsub("\r", "", aux)
+    event(type = "report",
+          "User interventions:\n-------------------\n",
+          aux, "-------------------")
+  } # nocov end
 
-  if (!is.null(datapack))
-    appendTo("Report", paste0("Preload function call:\n-------------------\n", attributes(datapack)$function_call, "\n-------------------"))
+  if (!is.null(datapack)) {
+    event(type = "report",
+          "Preload function call:\n-------------------\n",
+          attributes(datapack)$function_call, "\n-------------------")
+  }
 
-  appendTo("Report", paste0("Residency function call:\n-------------------\n", the.function.call, "\n-------------------"))
+ event(type = "report",
+       "Residency function call:\n-------------------\n",
+       the_function_call, "\n-------------------")
 # ------------------
 
 # print html report
@@ -704,13 +801,16 @@ residency <- function(
           continue <- FALSE
         }
       }
-      appendTo("Screen", paste0("M: An actel report is already present in the current directory.\n   Saving new report as ", reportname, "."))
+     event(type = "screen",
+           "M: An actel report is already present in the current directory.\n",
+           "   Saving new report as ", reportname, ".")
       rm(continue, index)
     } else {
-      appendTo("Screen", "M: Saving actel report as 'actel_residency_report.html'.")
+      event(type = "Screen",
+            "M: Saving actel report as 'actel_migration_report.html'.")
     }
 
-    appendTo("debug", "debug: Printing report md")
+    event(type = "debug", "Printing report md")
     printResidencyRmd(override.fragment = override.fragment,
                       biometric.fragment = biometric.fragment,
                       efficiency.fragment = efficiency.fragment,
@@ -727,15 +827,17 @@ residency <- function(
                       last.seen = last.seen,
                       detections.y.axis = detections.y.axis)
 
-    appendTo("debug", "debug: Converting report to html")
+    event(type = "debug", "Converting report to html")
     rmarkdown::render(input = paste0(tempdir(), "/actel_report_auxiliary_files/actel_residency_report.Rmd"),
-                      output_dir = paste0(tempdir(), "/actel_report_auxiliary_files"), 
-                      quiet = TRUE)
+                      output_dir = paste0(tempdir(), "/actel_report_auxiliary_files"),
+                      quiet = !getOption("actel.debug", default = FALSE),
+                      clean = !getOption("actel.debug", default = FALSE))
 
-    appendTo("debug", "debug: Moving report")
+
+    event(type = "debug", "Moving report")
     file.copy(paste0(tempdir(), "/actel_report_auxiliary_files/actel_residency_report.html"), reportname)
     if (interactive() & auto.open) { # nocov start
-      appendTo("debug", "debug: Opening report.")
+      event(type = "debug", "debug: Opening report.")
       browseURL(reportname)
     } # nocov end
   }
@@ -745,14 +847,15 @@ residency <- function(
   jobname <- paste0(gsub(" |:", ".", as.character(Sys.time())), ".actel.log.txt")
 
   if (interactive() & !report) { # nocov start
-    decision <- userInput(paste0("Would you like to save a copy of the analysis log to ", jobname, "?(y/n) "), 
+    decision <- userInput(paste0("Would you like to save a copy of the analysis log to ", jobname, "?(y/n) "),
                           choices = c("y", "n"), hash = "# save job log?")
   } else { # nocov end
     decision <- "n"
   }
 
   if (decision == "y") { # nocov start
-    appendTo("Screen", paste0("M: Saving job log as '",jobname, "'."))
+    event(type = "Screen",
+          "M: Saving job log as '",jobname, "'.")
     file.copy(paste(tempdir(), "temp_log.txt", sep = "/"), jobname)
   } # nocov end
 
@@ -776,13 +879,12 @@ residency <- function(
                  global.ratios = global.ratios,
                  group.ratios = group.ratios,
                  last.seen = last.seen,
-                 rsp.info = rsp.info)
+                 rsp.info = rsp.info,
+                 dist.mat = dist.mat)
 
-  if (attributes(dist.mat)$valid)
-    output$dist.mat <- dist.mat
-
-  appendTo("Screen", "M: Analysis completed!")
-  finished.unexpectedly <- FALSE
+  event(type = "screen",
+        "M: Analysis completed!")
+  finished_unexpectedly <- FALSE
 
   return(output)
 }
@@ -815,6 +917,7 @@ printResidencyRmd <- function(
   last.seen,
   detections.y.axis)
 {
+  event(type = "debug", "Running printResidencyRmd.")
 
   work.path <- paste0(tempdir(), "/actel_report_auxiliary_files/")
 
@@ -828,7 +931,7 @@ printResidencyRmd <- function(
 
 Note:
   : The colouring in these plots will follow that of the individual detection plots, which can be modified using `detections.y.axis`.
-  : The data used for these graphics is stored in the `valid.detections` object.
+  : The data used for these graphics are stored in the `valid.detections` object.
   : You can replicate these graphics and edit them as needed using the `plotSensors()` function.
 
 <center>\n", sensor.plots, "\n</center>")
@@ -936,7 +1039,7 @@ Note:
 ### Last seen
 
 Note:
-  : The data used in this table and graphic is stored in the `last.seen` object.
+  : The data used in this table and graphic are stored in the `last.seen` object.
 
 ', paste(knitr::kable(last.seen), collapse = "\n"), '
 
@@ -950,7 +1053,7 @@ Note:
 Note:
   : Coloured lines on the outer circle indicate the mean value for each group and the respective ranges show the standard error of the mean. Each group\'s bars sum to 100%. The number of data points in each group is presented between brackets in the legend of each pannel.
   : You can replicate these graphics and edit them as needed using the `plotTimes()` function.
-  : The data used in these graphics is stored in the `array.times` object.
+  : The data used in these graphics are stored in the `array.times` object.
   : To obtain reports with the legacy linear circular scale, run `options(actel.circular.scale = "linear")` before running your analyses.
 
 <center>
@@ -962,7 +1065,7 @@ Note:
 #### Arrival days at each section
 
 Note:
-  : The data used in these graphics is stored in the `section.times$arrival` object.
+  : The data used in these graphics are stored in the `section.times$arrival` object.
 
 <center>
 ![](', work.path, 'arrival_days.png){ width=95% }
@@ -973,7 +1076,7 @@ Note:
 Note:
   : Coloured lines on the outer circle indicate the mean value for each group and the respective ranges show the standard error of the mean. Each group\'s bars sum to 100%. The number of data points in each group is presented between brackets in the legend of each pannel.
   : You can replicate these graphics and edit them as needed using the `plotTimes()` function.
-  : The data used in these graphics is stored in the `section.times$arrival` object.
+  : The data used in these graphics are stored in the `section.times$arrival` object.
   : To obtain reports with the legacy linear circular scale, run `options(actel.circular.scale = "linear")` before running your analyses.
 
 <center>
@@ -983,7 +1086,7 @@ Note:
 #### Departure days at each section
 
 Note:
-  : The data used in these graphics is stored in the `section.times$departure` object.
+  : The data used in these graphics are stored in the `section.times$departure` object.
 
 <center>
 ![](', work.path, 'departure_days.png){ width=95% }
@@ -994,7 +1097,7 @@ Note:
 Note:
   : Coloured lines on the outer circle indicate the mean value for each group and the respective ranges show the standard error of the mean. Each group\'s bars sum to 100%. The number of data points in each group is presented between brackets in the legend of each pannel.
   : You can replicate these graphics and edit them as needed using the `plotTimes()` function.
-  : The data used in these graphics is stored in the `section.times$departure` object.
+  : The data used in these graphics are stored in the `section.times$departure` object.
   : To obtain reports with the legacy linear circular scale, run `options(actel.circular.scale = "linear")` before running your analyses.
 
 <center>
@@ -1004,7 +1107,7 @@ Note:
 ### Global residency
 
 Note:
-  : The data used in these graphics is stored in the `global.ratios` and `time.positions` objects.
+  : The data used in these graphics are stored in the `global.ratios` and `time.positions` objects.
   : You can replicate these graphics and edit them as needed using the `plotRatios()` function.
   : This data is also available split by group in the `group.ratios`object.
   : You can plot these results by group using the \'group\' argument in `plotRatios()`.
@@ -1025,7 +1128,7 @@ Note:
 ### Individual residency plots
 
 Note:
-  : The data used in these graphics is stored in the `time.ratios` object (one table per tag). More condensed information can be found in the `section.movements` object.
+  : The data used in these graphics are stored in the `time.ratios` object (one table per tag). More condensed information can be found in the `section.movements` object.
   : You can replicate these graphics and edit them as needed using the `plotResidency()` function.
 
 <center>
@@ -1034,7 +1137,7 @@ Note:
 
 ### Individual detection plots
 
-Note:  
+Note:
   : You can choose to plot detections by station or by array using the `detections.y.axis` argument.
   : The detections are coloured by ', ifelse(detections.y.axis == "stations", 'array', 'section'), '. The vertical black dashed line shows the release time. The full dark-grey line shows the movement events considered valid, while the dashed dark-grey line shows the movement events considered invalid.
 ', ifelse(detections.y.axis == "stations", '  : The movement event lines move straight between the first and last station of each event (i.e. in-between detections will not be individually linked by the line).\n', ''),
@@ -1043,7 +1146,7 @@ Note:
   : The ', ifelse(detections.y.axis == "stations", 'stations', 'arrays'), ' have been aligned by ', ifelse(detections.y.axis == "stations", 'array', 'section'), ', following the order provided ', ifelse(detections.y.axis == "stations", '', 'either '), 'in the spatial input', ifelse(detections.y.axis == "stations", '.', ' or the `section.order` argument.'), '
   : You can replicate these graphics and edit them as needed using the `plotDetections()` function.
   : You can also see the movement events of multiple tags simultaneously using the `plotMoves()` function.
-  : The data used in these graphics is stored in the `detections` and `movements` objects (and respective valid counterparts).
+  : The data used in these graphics are stored in the `detections` and `movements` objects (and respective valid counterparts).
 
 <center>
 ', individual.detection.plots,'
@@ -1171,7 +1274,7 @@ sink()
 #' @keywords internal
 #'
 assembleResidency <- function(secmoves, movements, spatial) {
-  appendTo("debug", "Running assembleResidency")
+  event(type = "debug", "Running assembleResidency.")
   Last.array <- NULL
   Last.time <- NULL
   Valid <- NULL
@@ -1200,12 +1303,12 @@ assembleResidency <- function(secmoves, movements, spatial) {
       recipient <- rep(NA, ncol(res.df))
       names(recipient) <- colnames(res.df)
       recipient <- t(as.data.frame(recipient))
-    
+
       total.time <- apply(aux[[i]][, c("First.time", "Last.time")], 1, function(x) difftime(x[2], x[1], units = "secs"))
       recipient[1, paste0("Total.time.", names(aux)[i])] <- sum(total.time)
       recipient[1, paste0("Average.time.", names(aux)[i])] <- mean(total.time)
       recipient[1, paste0("Times.entered.", names(aux)[i])] <- nrow(aux[[i]])
-    
+
       entry.time <- mean(circular::circular(decimalTime(format(aux[[i]]$First.time, "%H:%M:%S")), units = "hours", template = "clock24"))
       if (!is.na(entry.time)) {
         if (entry.time < 0)
@@ -1228,7 +1331,7 @@ assembleResidency <- function(secmoves, movements, spatial) {
 
     recipient <- as.data.frame(combine(recipient), stringsAsFactors = FALSE)
     # convert Total.times to numeric and replace NAs
-    the.cols <- which(grepl("Times.entered", colnames(recipient)))
+    the.cols <- which(grepl("Times\\.entered", colnames(recipient)))
     recipient[, the.cols] <- as.numeric(recipient[, the.cols])
     recipient[, the.cols[which(is.na(recipient[, the.cols]))]] <- 0
     # --
@@ -1287,12 +1390,12 @@ assembleResidency <- function(secmoves, movements, spatial) {
 #' @keywords internal
 #'
 res_assembleOutput <- function(res.df, bio, spatial, tz) {
-  appendTo("debug", "Running res_assembleOutput")
+  event(type = "debug", "Running res_assembleOutput.")
   status.df <- merge(bio, res.df, by = "Transmitter", all = TRUE)
 
   sections <- names(spatial$array.order)
 
-  appendTo("debug", "Completing entries for tags that were never detected.")
+  event(type = "debug", "Completing entries for tags that were never detected.")
   status.df$Status[is.na(status.df$Status)] <- "Disap. at Release"
   status.df$Status <- factor(status.df$Status, levels = c(paste("Disap. in", sections), "Disap. at Release"))
   status.df$Very.last.array[is.na(status.df$Very.last.array)] <- "Release"
@@ -1307,7 +1410,7 @@ res_assembleOutput <- function(res.df, bio, spatial, tz) {
   status.df$Release.date <- as.POSIXct(status.df$Release.date, tz = tz)
   status.df$Very.last.time <- as.POSIXct(status.df$Very.last.time, tz = tz)
 
-  appendTo("debug", "Appending comments.")
+  event(type = "debug", "Appending comments.")
   if (file.exists(paste0(tempdir(), "/temp_comments.txt"))) { # nocov start
     temp <- read.table(paste0(tempdir(), "/temp_comments.txt"), header = FALSE, sep = "\t")
     status.df[, "Comments"] <- NA_character_
@@ -1320,7 +1423,6 @@ res_assembleOutput <- function(res.df, bio, spatial, tz) {
       }
     }
   } # nocov end
-  appendTo("debug", "Done.")
   return(status.df)
 }
 
@@ -1344,7 +1446,7 @@ res_assembleOutput <- function(res.df, bio, spatial, tz) {
 #' @keywords internal
 #'
 res_efficiency <- function(arrmoves, bio, spatial, arrays, paths, dotmat) {
-  appendTo("debug", "Running res_efficiency")
+  event(type = "debug", "Running res_efficiency.")
   values.per.tag <- lapply(names(arrmoves), function(tag) {
     # cat(tag, "\n")
       first.array <- firstArrayFailure(tag = tag, bio = bio, spatial = spatial, first.array = arrmoves[[tag]]$Array[1], paths = paths, dotmat = dotmat)
@@ -1404,7 +1506,7 @@ res_efficiency <- function(arrmoves, bio, spatial, arrays, paths, dotmat) {
 #' @keywords internal
 #'
 firstArrayFailure <- function(tag, bio, spatial, first.array, paths, dotmat) {
-  appendTo("debug", "Running firstArrayFailure")
+  event(type = "debug", "Running firstArrayFailure.")
   release <- as.character(bio$Release.site[na.as.false(bio$Transmitter == tag)])
   aux <- as.character(with(spatial, release.sites[release.sites$Standard.name == release, "Array"]))
   release.arrays <- unlist(strsplit(aux, "|", fixed = TRUE))
@@ -1453,21 +1555,26 @@ firstArrayFailure <- function(tag, bio, spatial, first.array, paths, dotmat) {
 #' @keywords internal
 #'
 getResidency <- function(movements, spatial){
-  appendTo("debug", "Running getResidency")
+  event(type = "debug", "Running getResidency.")
   output <- lapply(movements, function(x) {
       recipient <- as.data.frame(x)[, c("Section", "First.time", "Last.time")]
       recipient$Index <- (1:nrow(recipient) * 2) - 1
       if (nrow(recipient) > 1) {
         to.add <- data.frame(
-          A = match(recipient$Section[-nrow(recipient)], names(spatial$array.order)),
+          A = match(recipient$Section[-nrow(recipient)],
+                    names(spatial$array.order)),
           B = match(recipient$Section[-1], names(spatial$array.order)),
           First.time = recipient$Last.time[-nrow(recipient)],
           Last.time = recipient$First.time[-1])
         to.add$Section <- apply(to.add, 1, function(xi) {
           if (xi[1] < xi[2]) {
-            return(paste0(names(spatial$array.order)[as.numeric(xi[1])], "-", names(spatial$array.order)[as.numeric(xi[2])]))
+            return(paste0(
+              names(spatial$array.order)[as.numeric(xi[1])],
+              "-", names(spatial$array.order)[as.numeric(xi[2])]))
           } else
-            return(paste0(names(spatial$array.order)[as.numeric(xi[2])], "-", names(spatial$array.order)[as.numeric(xi[1])]))
+            return(paste0(
+              names(spatial$array.order)[as.numeric(xi[2])],
+              "-", names(spatial$array.order)[as.numeric(xi[1])]))
         })
         to.add <- to.add[, c("Section", "First.time", "Last.time")]
         to.add$Index <- 1:nrow(to.add) * 2
@@ -1476,13 +1583,19 @@ getResidency <- function(movements, spatial){
         output <- output[, -ncol(output)]
         row.names(output) <- 1:nrow(output)
       } else {
-        output <- recipient
+        output <- recipient[, c("Section", "First.time", "Last.time")]
       }
       return(output)
     })
-  inst.exception <- sapply(output, function(x) nrow(x) == 1 && x$First.time == x$Last.time)
+  inst.exception <- sapply(output, function(x) {
+    nrow(x) == 1 && x$First.time == x$Last.time
+  })
   if (any(inst.exception)) {
-    appendTo(c("Screen", "Report", "Warning"), paste("Valid detections for tag", paste(names(output)[inst.exception], collapse = ", "), "start and end on the same instant. Excluding them from residency analyses."))
+    event(type = c("warning", "screen", "report"),
+          "Valid detections for tag ",
+          paste(names(output)[inst.exception], collapse = ", "),
+          " start and end on the same instant. ",
+          " Excluding them from residency analyses.")
     output <- output[!inst.exception]
   }
   return(output)
@@ -1498,85 +1611,111 @@ getResidency <- function(movements, spatial){
 #' @keywords internal
 #'
 resRatios <- function(res, timestep = c("days", "hours"), tz) {
-  appendTo("debug", "Running resRatios")
+  event(type = "debug", "Running resRatios.")
   timestep <- match.arg(timestep)
-  num.step <- ifelse(timestep == "days", 86400, 3600)
+  one_step <- ifelse(timestep == "days", 86400, 3600)
+  half_step <- one_step/2
   counter <- 0
-  if (interactive())
+  if (interactive()) {
     pb <- txtProgressBar(min = 0, max = length(res), style = 3, width = 60) # nocov
+  }
   output <- lapply(res, function(x) {
     counter <<- counter + 1
     # cat("\n", counter, "\n")
-    res.range <- seq(from = round.POSIXt(x$First.time[1] - (num.step / 2), units = timestep),
-      to =  round.POSIXt(x$Last.time[nrow(x)] - (num.step / 2), units = timestep), by = num.step)
+    res.range <- seq(
+      from = round.POSIXt(x$First.time[1] - half_step, units = timestep),
+      to =  round.POSIXt(x$Last.time[nrow(x)] - half_step, units = timestep),
+      by = one_step)
 
-    # If a daily period starts in daylight saving time and timestep == days: Standardize so the break points are in "normal" time
+    # If a daily period starts in daylight saving time and timestep == days:
+    # Standardize so the break points are in "normal" time
     if (timestep == "days" && as.POSIXlt(res.range[1])$isdst == 1) {
       res.range <- res.range + 3600
       # If readjustment causes the first time to fall off, add one day before.
-      if (x$First.time[1] < res.range[1])
+      if (x$First.time[1] < res.range[1]) {
         res.range <- c(res.range[1] - (3600 * 24), res.range)
+      }
       # If readjustment causes last day to be empty, remove last day.
-      if (x$Last.time[nrow(x)] < res.range[length(res.range)])
+      if (x$Last.time[nrow(x)] < res.range[length(res.range)]) {
         res.range <- res.range[-length(res.range)]
+      }
     }
 
     res.list <- lapply(res.range, function(d) {
       # cat(as.character(d), "\n")
-      findSecondsPerSection(res = x, frame = d, the.range = range(res.range), num.step = num.step)
+      findSecondsPerSection(res = x, frame = d,
+        the_range = range(res.range), one_step = one_step)
     })
-    if (interactive())
+    if (interactive()) {
       setTxtProgressBar(pb, counter) # nocov
-    resRatiosIndOut(input = res.list, slots = res.range, tz = tz, tag = names(res)[counter])
+    }
+    resRatiosIndOut(input = res.list, slots = res.range,
+      tz = tz, tag = names(res)[counter])
   })
-  if (interactive())
+  if (interactive()) {
     close(pb) # nocov
+  }
+
   attributes(output)$timestep <- timestep
+
   return(output)
 }
 
 #' Calculate number of seconds at each location per day
 #'
 #' @inheritParams resRatios
-#' @param start.time the start time of the period being analysed (a Date object)
-#' @param the.range the first and last start.time for the specific tag
-#' @param num.step the size of the block
+#' @param the_range the first and last start.time for the specific tag
+#' @param one_step the size of the block
 #'
-#' @return A data frame containing the number of seconds spent at each location for a specific timeframe
+#' @return A data frame containing the number of seconds spent at each
+#'  location for a specific timeframe
 #'
 #' @keywords internal
 #'
-findSecondsPerSection <- function(res, frame, the.range, num.step) {
-  appendTo("debug", "Running findSecondsPerSection")
+findSecondsPerSection <- function(res, frame, the_range, one_step) {
+  event(type = "debug", "Running findSecondsPerSection.")
   aux <- c()
-  candidate.events <- which(res$First.time <= frame + num.step)
+  candidate.events <- which(res$First.time <= frame + one_step)
   potential.events <- which(res$First.time[candidate.events] >= frame)
-  # IF potential events returns 0, then the only valid event is the very last candidate
-  if (length(potential.events) == 0)
+  # IF potential events returns 0, then the only
+  # valid event is the very last candidate
+  if (length(potential.events) == 0) {
     e <- tail(candidate.events, 1)
-  else
+  } else {
     e <- potential.events
+  }
   # IF there is only one event
   if (length(e) == 1) {
     # and that event is the very first one
     if (e == 1) {
-      # Exception for if the tag was only detected one frame, calculates difference between event start and stop.
-      if (the.range[2] == the.range[1]) {
-        aux[length(aux) + 1] <- difftime(res$Last.time[e], res$First.time[e], units = "secs")
+      # Exception for if the tag was only detected one frame,
+      # calculates difference between event start and stop.
+      if (the_range[2] == the_range[1]) {
+        aux[length(aux) + 1] <- difftime(res$Last.time[e],
+                                         res$First.time[e],
+                                         units = "secs")
         names(aux)[length(aux)] <- res$Section[e]
         aux[length(aux) + 1] <- 0
         names(aux)[length(aux)] <- "Changes"
       } else {
-        # Exception for if the frame being analysed is the last frame, calculates difference between frane start and event stop.
-        if (frame == the.range[2]) {
-          aux[length(aux) + 1] <- difftime(res$Last.time[e], frame, units = "secs")
+        # Exception for if the frame being analysed is the last frame,
+        # calculates difference between frane start and event stop.
+        if (frame == the_range[2]) {
+          aux[length(aux) + 1] <- difftime(res$Last.time[e],
+                                           frame,
+                                           units = "secs")
           names(aux)[length(aux)] <- res$Section[e]
-        # Otherwise calculate difference between event start and frame end, and trim at a full frame.
+        # Otherwise calculate difference between event start and frame end,
+        # and trim at a full frame.
         } else {
-          aux[length(aux) + 1] <- min(num.step, as.numeric(difftime(frame + num.step, res$First.time[e], units = "secs")))
+          the_diff <- difftime(frame + one_step,
+                               res$First.time[e],
+                               units = "secs")
+          aux[length(aux) + 1] <- min(one_step, as.numeric(the_diff))
           names(aux)[length(aux)] <- res$Section[e]
         }
-        # Regardless of path, if length(e) == 1 and the event is the first one, the number of changes is 0
+        # Regardless of path, if length(e) == 1 and the event is
+        # the first one, the number of changes is 0
         aux[length(aux) + 1] <- 0
         names(aux)[length(aux)] <- "Changes"
       }
@@ -1584,25 +1723,36 @@ findSecondsPerSection <- function(res, frame, the.range, num.step) {
     } else {
       # If the frame of the event is previous to the frame itself
       if (res$First.time[e] < frame) {
-        # Exception for the last frame, calculates difference between frame start and event stop.
-        if (frame == the.range[2]) {
-          aux[length(aux) + 1] <- difftime(res$Last.time[e], frame, units = "secs")
+        # Exception for the last frame, calculates difference
+        # between frame start and event stop.
+        if (frame == the_range[2]) {
+          aux[length(aux) + 1] <- difftime(res$Last.time[e],
+                                           frame,
+                                           units = "secs")
           names(aux)[length(aux)] <- res$Section[e]
-        # otherwise, since there are no more 'e', the tag has stayed the whole frame in the event
+        # otherwise, since there are no more 'e', the tag has
+        # stayed the whole frame in the event
         } else {
-          aux[length(aux) + 1] <- num.step
+          aux[length(aux) + 1] <- one_step
           names(aux)[length(aux)] <- res$Section[e]
         }
-        # In either case above the tag spends the whole time in the event, so changes = 0
+        # In either case above the tag spends the whole time in the event,
+        # so changes = 0
         aux[length(aux) + 1] <- 0
         names(aux)[length(aux)] <- "Changes"
       # If the frame of the event is already in the frame itself
       } else {
-        # Start by storing the time spent in previous event (i.e. difference between frame start and event start)
-        aux[length(aux) + 1] <- difftime(res$First.time[e], frame, units = "secs")
+        # Start by storing the time spent in previous event
+        # (i.e. difference between frame start and event start)
+        aux[length(aux) + 1] <- difftime(res$First.time[e],
+                                         frame,
+                                         units = "secs")
         names(aux)[length(aux)] <- res$Section[e - 1]
-        # Then, since there are no more events, calculate difference between event start and frame end.
-        aux[length(aux) + 1] <- difftime(frame + num.step, res$First.time[e], units = "secs")
+        # Then, since there are no more events, calculate
+        # difference between event start and frame end.
+        aux[length(aux) + 1] <- difftime(frame + one_step,
+                                         res$First.time[e],
+                                         units = "secs")
         names(aux)[length(aux)] <- res$Section[e]
         # Since the frame is split in two events, there is 1 change
         aux[length(aux) + 1] <- 1
@@ -1613,32 +1763,44 @@ findSecondsPerSection <- function(res, frame, the.range, num.step) {
   } else {
     n <- length(e)
     # calculate difference between frame start and first time
-    aux[length(aux) + 1] <- difftime(res$First.time[e[1]], frame, units = "secs")
-    # Exception for if the frame being analysed is the first frame (in which case this fragment should be excluded at the end)
-    if (frame == the.range[1])
+    aux[length(aux) + 1] <- difftime(res$First.time[e[1]],
+                                     frame,
+                                     units = "secs")
+    # Exception for if the frame being analysed is the first frame
+    # (in which case this fragment should be excluded at the end)
+    if (frame == the_range[1]) {
       names(aux)[length(aux)] <- "TO.EXCLUDE"
-    else
+    } else {
       names(aux)[length(aux)] <- res$Section[e[1] - 1]
-    # For all events except the last, calculate the difference between first and last time of the event.
+    }
+    # For all events except the last, calculate the difference
+    # between first and last time of the event.
     for (i in e[-n]) {
-      aux[length(aux) + 1] <- difftime(res$Last.time[i], res$First.time[i], units = "secs")
+      aux[length(aux) + 1] <- difftime(res$Last.time[i],
+                                       res$First.time[i],
+                                       units = "secs")
       names(aux)[length(aux)] <- res$Section[i]
     }
     # For the very last frame
-    # exception for if the frame being analysed is the last frame, where the behaviour should be the same as the above
-    if (frame == the.range[2]) {
-      aux[length(aux) + 1] <- difftime(res$Last.time[e[n]], res$First.time[e[n]], units = "secs")
+    # exception for if the frame being analysed is the last frame,
+    # where the behaviour should be the same as the above
+    if (frame == the_range[2]) {
+      aux[length(aux) + 1] <- difftime(res$Last.time[e[n]],
+                                       res$First.time[e[n]],
+                                       units = "secs")
       names(aux)[length(aux)] <- res$Section[e[n]]
-    # otherwise, remove the seconds already accounted for to a full frame, and store the result
+    # otherwise, remove the seconds already accounted for to a full frame,
+    # and store the result
     } else {
-      aux[length(aux) + 1] <- 86400 - sum(as.vector(aux))
+      aux[length(aux) + 1] <- one_step - sum(as.vector(aux))
       names(aux)[length(aux)] <- res$Section[e[n]]
     }
     # The number of changes will be the number of events - 1
     aux[length(aux) + 1] <- length(e) - 1
     names(aux)[length(aux)] <- "Changes"
   }
-  # Conclude the exception started above, where the first fragment must be excluded
+  # Conclude the exception started above, where the
+  # first fragment must be excluded
   if (any(link <- names(aux) == "TO.EXCLUDE")) {
     aux <- aux[!link]
     aux["Changes"] <- aux["Changes"] - 1
@@ -1656,7 +1818,7 @@ findSecondsPerSection <- function(res, frame, the.range, num.step) {
 #' @keywords internal
 #'
 resRatiosIndOut <- function(input, slots, tz, tag) {
-  appendTo("debug", "Running resRatiosIndOut")
+  event(type = "debug", "Running resRatiosIndOut.")
   # sort out all column names
   the.cols <- sort(unique(unlist(lapply(input, names))))
   the.cols <- the.cols[-match("Changes", the.cols)]
@@ -1702,7 +1864,7 @@ resRatiosIndOut <- function(input, slots, tz, tag) {
   the.zone <- apply(output[, aux, drop = FALSE], 1, function(x) {
     if (sum(x == max(x)) > 1 & issue.warning) {
       message('') # to break from the progress bar
-      appendTo(c('report', 'warning', 'screen'), paste0('In at least one timeslot, tag ', tag, ' spent an equal ammount of time in two or more sections. Assigning the animal to the first section listed.'))
+      event(type = c("warning", "screen", "report"), paste0('In at least one timeslot, tag ', tag, ' spent an equal ammount of time in two or more sections. Assigning the animal to the first section listed.'))
       issue.warning <<- FALSE
     }
     return(which(x == max(x))[1])
@@ -1710,7 +1872,7 @@ resRatiosIndOut <- function(input, slots, tz, tag) {
 
   # assign section name
   output$Most.time <- colnames(output)[aux - 1][the.zone]
-  
+
   # finally, round the proportions to a more sensible format
   output[, aux] <- round(output[, aux, drop = FALSE], 3)
 
@@ -1726,20 +1888,20 @@ resRatiosIndOut <- function(input, slots, tz, tag) {
 #' @keywords internal
 #'
 resPositions <- function(ratios, timestep = c("days", "hours")) {
-  appendTo("debug", "Running resPositions")
+  event(type = "debug", "Running resPositions.")
   timestep <- match.arg(timestep)
-  num.step <- ifelse(timestep == "days", 86400, 3600)
+  one_step <- ifelse(timestep == "days", 86400, 3600)
 
   # extract first and last time
   first.time <- as.POSIXct(NA)[-1]
   last.time <- as.POSIXct(NA)[-1]
-  
+
   capture <- lapply(ratios, function(x) {
     first.time <<- c(first.time, x$Timeslot[1])
     last.time <<- c(last.time, x$Timeslot[nrow(x)])
   })
 
-  res.range <- seq(from = min(first.time), to = max(last.time), by = num.step)
+  res.range <- seq(from = min(first.time), to = max(last.time), by = one_step)
   attributes(res.range)$tzone <- attributes(ratios[[1]]$Timeslot)$tzone # I don't think this line is needed # Edit: Yes it is.
 
   output <- matrix(ncol = length(ratios) + 1, nrow = length(res.range))
@@ -1753,13 +1915,16 @@ resPositions <- function(ratios, timestep = c("days", "hours")) {
     # cat(i, "\n"); flush.console()
 
     link <- match.POSIXt(ratios[[i]]$Timeslot, output$Timeslot)
-    if (any(is.na(link)))
-      stop("Something went wrong when creating the recipient for the global ratios. Contact the developer.")
-    
+    if (any(is.na(link))) {
+      event(type = "stop",
+            "Something went wrong when creating the recipient for the",
+            " global ratios. Contact the developer.")
+    }
+
     output[link, i] <<- ratios[[i]]$Most.time
   })
 
-  attributes(output)$timestep <- timestep  
+  attributes(output)$timestep <- timestep
   return(output)
 }
 
@@ -1775,7 +1940,7 @@ resPositions <- function(ratios, timestep = c("days", "hours")) {
 #' @keywords internal
 #'
 vectorsIntoTables <- function(input, columns) {
-  appendTo("debug", "Running vectorsIntoTables")
+  event(type = "debug", "Running vectorsIntoTables.")
   counter <- 0
   output <- lapply(input, function(x) {
     counter <<- counter + 1
@@ -1808,7 +1973,7 @@ vectorsIntoTables <- function(input, columns) {
 #' @keywords internal
 #'
 globalRatios <- function(positions, section.order) {
-  appendTo("debug", "Running globalRatios")
+  event(type = "debug", "Running globalRatios.")
   aux <- apply(positions, 1, function(x) as.data.frame(t(as.matrix(table(x[-1])))))
   the.cols <- sort(unique(unlist(lapply(aux, names))))
   the.tables <- vectorsIntoTables(input = aux, columns = the.cols)

@@ -23,25 +23,35 @@ printMigrationRmd(
 )
 }
 \arguments{
-\item{override.fragment}{Rmarkdown string specifying the type of report for the header.}
+\item{override.fragment}{Rmarkdown string specifying the type of report for
+the header.}
 
-\item{biometric.fragment}{Rmarkdown string specifying the biometric graphics drawn.}
+\item{biometric.fragment}{Rmarkdown string specifying the biometric graphics
+drawn.}
 
-\item{section.overview}{A summary table with the number of tags that disappeared/moved onwards at each section.}
+\item{section.overview}{A summary table with the number of tags that
+disappeared/moved onwards at each section.}
 
-\item{efficiency.fragment}{Rmarkdown string specifying the efficiency results.}
+\item{efficiency.fragment}{Rmarkdown string specifying the efficiency
+results.}
 
-\item{display.progression}{Logical. If TRUE, the progression plot has been created and can be displayed.}
+\item{display.progression}{Logical. If TRUE, the progression plot has been
+created and can be displayed.}
 
-\item{array.overview.fragment}{Rmarkdown string specifying the array overview results.}
+\item{array.overview.fragment}{Rmarkdown string specifying the array
+overview results.}
 
-\item{survival.graph.size}{Rmarkdown string specifying the type size of the survival graphics.}
+\item{survival.graph.size}{Rmarkdown string specifying the type size
+of the survival graphics.}
 
-\item{individual.plots}{Rmarkdown string specifying the name of the individual plots.}
+\item{individual.plots}{Rmarkdown string specifying the name of the
+individual plots.}
 
-\item{circular.plots}{Rmarkdown string specifying the name of the circular plots.}
+\item{circular.plots}{Rmarkdown string specifying the name of the
+circular plots.}
 
-\item{sensor.plots}{Rmarkdown string specifying the name of the sensor plots.}
+\item{sensor.plots}{Rmarkdown string specifying the name of the sensor
+plots.}
 }
 \value{
 No return value, called for side effects.

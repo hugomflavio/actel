@@ -13,7 +13,7 @@ explore(
   min.per.event = 1,
   start.time = NULL,
   stop.time = NULL,
-  speed.method = c("last to first", "last to last"),
+  speed.method = c("last to first", "last to last", "first to first"),
   speed.warning = NULL,
   speed.error = NULL,
   jump.warning = 2,
@@ -66,8 +66,10 @@ the analysis.}
 \item{speed.method}{Can take two forms: 'last to first' or 'last to last'.
 If 'last to first' (default), the last detection on the previous array is matched
 to the first detection on the target array to perform the calculations.
-If 'last to last', the last detection on ´the previous array is matched to the
-last detection on the target array to perform the calculations.}
+If 'last to last', the last detection on the previous array is matched to the
+last detection on the target array to perform the calculations.
+If 'first to first', the first detection on the previous array is matched to the
+first detection on the target array to perform the calculations.}
 
 \item{speed.warning}{If a tag moves at a speed equal or greater than
 \code{speed.warning} (in metres per second), a warning is issued. If left

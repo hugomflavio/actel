@@ -8,8 +8,8 @@ aux <- c(
 missing.packages <- sapply(aux, function(x) x == 1)
 
 if (any(missing.packages)) {
-  test_that("loadShape, transitionLayer and distancesMatrix stop due to missing dependencies", {
-  	expect_error(loadShape(),
+  test_that("shapeToRaster, transitionLayer and distancesMatrix stop due to missing dependencies", {
+  	expect_error(shapeToRaster(),
   		paste0("This function requires packages '", paste(c("raster", "gdistance", "sp", "terra")[missing.packages], collapse = "', '"),
       	"' to operate. Please install ", ifelse(sum(missing.packages) > 1, "them", "it"), " before proceeding.\n"), fixed = TRUE)
   	expect_error(transitionLayer(),
@@ -25,16 +25,16 @@ if (any(missing.packages)) {
 		setwd(tempdir())
 		shape.path <- paste0(tests.home, "/aux_transitionLayer.shp")
 
-		test_that("loadShape complains if coord.y or coord.x are given and spatial.csv is not present", {
-			expect_warning(loadShape(shape = shape.path,
+		test_that("shapeToRaster complains if coord.y or coord.x are given and spatial.csv is not present", {
+			expect_warning(shapeToRaster(shape = shape.path,
 					size = 10, coord.x = "x.32632", coord.y = "y.32632"),
 			"Could not find a spatial.csv file in the current working directory. Skipping range check.", fixed = TRUE)
 
-			expect_warning(loadShape(shape = shape.path,
+			expect_warning(shapeToRaster(shape = shape.path,
 					size = 10, coord.x = "x.32632"),
 			"'coord.x' was set but 'coord.y' was not. Skipping range check.", fixed = TRUE)
 
-			expect_warning(loadShape(shape = shape.path,
+			expect_warning(shapeToRaster(shape = shape.path,
 					size = 10, coord.y = "x.32632"),
 			"'coord.y' was set but 'coord.x' was not. Skipping range check.", fixed = TRUE)
 		})
@@ -44,47 +44,47 @@ if (any(missing.packages)) {
 		xspatial$y.32632 <- c(6242912, 6242630, 6242387, 6242169)
 		write.csv(xspatial, "spatial.csv", row.names = FALSE)
 
-		test_that("loadShape complains if coord.y or coord.x are not valid column names", {
-			expect_warning(loadShape(shape = shape.path, size = 10,
+		test_that("shapeToRaster complains if coord.y or coord.x are not valid column names", {
+			expect_warning(shapeToRaster(shape = shape.path, size = 10,
 					coord.x = "test", coord.y = "y.32632", type = "water"),
 			"Could not find column 'test' in the spatial data frame. Skipping range check.", fixed = TRUE)	
 
-			expect_warning(loadShape(shape = shape.path, size = 10,
+			expect_warning(shapeToRaster(shape = shape.path, size = 10,
 					coord.x = "x.32632", coord.y = "test"),
 			"Could not find column 'test' in the spatial data frame. Skipping range check.", fixed = TRUE)
 
-			expect_warning(loadShape(shape = shape.path, size = 10,
+			expect_warning(shapeToRaster(shape = shape.path, size = 10,
 					coord.x = "test2", coord.y = "test"),
 			"Could not find columns 'test2' and 'test' in the spatial data frame. Skipping range check.", fixed = TRUE)
 		})
 
-		test_that("loadShape only allows valid buffers", {
-			expect_error(loadShape(shape = shape.path, size = 10, buffer = "a"),
+		test_that("shapeToRaster only allows valid buffers", {
+			expect_error(shapeToRaster(shape = shape.path, size = 10, buffer = "a"),
 			"'buffer' must be numeric (in metres or degrees, depending on the shape coordinate system).", fixed = TRUE)
 
-			expect_error(loadShape(shape = shape.path, size = 10, buffer = 1:2),
+			expect_error(shapeToRaster(shape = shape.path, size = 10, buffer = 1:2),
 			"'buffer' must either contain one value (applied to all four corners), or four values (applied to xmin, xmax, ymin and ymax, respectively)", fixed = TRUE)
 			
-			expect_error(loadShape(shape = shape.path, size = 10, buffer = -1),
+			expect_error(shapeToRaster(shape = shape.path, size = 10, buffer = -1),
 			"'buffer' values cannot be negative.", fixed = TRUE)
 			
-			tryCatch(loadShape(shape = shape.path, size = 10, buffer = 100),
-				warning = function(w) stop("A warning was issued where it should not have been."))
+			tryCatch(shapeToRaster(shape = shape.path, size = 10, buffer = 100),
+				warning = function(w) stop(paste("A warning was issued where it should not have been. This was the warning:", w)))
 			
-			tryCatch(base.raster <<- loadShape(shape = paste0(tests.home, "/aux_transitionLayer.shp"), size = 10, buffer = c(50, 100, 200, 250)),
-				warning = function(w) stop("A warning was issued where it should not have been."))
+			tryCatch(base.raster <<- shapeToRaster(shape = paste0(tests.home, "/aux_transitionLayer.shp"), size = 10, buffer = c(50, 100, 200, 250)),
+				warning = function(w) stop(paste("A warning was issued where it should not have been. This was the warning:", w)))
 		})
 
-		test_that("loadShape stops if shape is not present or is not .shp", {
-			expect_error(loadShape(shape = "test/test.shp", size = 10, buffer = 100),
+		test_that("shapeToRaster stops if shape is not present or is not .shp", {
+			expect_error(shapeToRaster(shape = "test/test.shp", size = 10, buffer = 100),
 			"Could not find file 'test/test.shp'.", fixed = TRUE)
 
-			expect_error(loadShape(shape = "test.shp", size = 10, buffer = 100),
+			expect_error(shapeToRaster(shape = "test.shp", size = 10, buffer = 100),
 			"Could not find file 'test.shp'.", fixed = TRUE)
 
 			write.table(1, "test.txt")
 
-			expect_error(loadShape(shape = "test.txt", size = 10, buffer = 100),
+			expect_error(shapeToRaster(shape = "test.txt", size = 10, buffer = 100),
 			"'shape' must be a .shp file.", fixed = TRUE)
 
 			file.remove("test.txt")
@@ -92,24 +92,26 @@ if (any(missing.packages)) {
 
 		test_that("transitionLayer is working properly", {
 			tryCatch(t.layer <- transitionLayer(base.raster),
-				warning = function(w) stop("A warning was issued where it should not have been."))
+				warning = function(w) stop(paste("A warning was issued where it should not have been. This was the warning:", w)))
 			expect_equal(as.character(class(t.layer)), "TransitionLayer")
 		})
 
-		base.raster <- loadShape(shape = shape.path, size = 5,
+		base.raster <- shapeToRaster(shape = shape.path, size = 5,
 			coord.x = "x.32632", coord.y = "y.32632")
 		t.layer <- transitionLayer(base.raster)
 
 		test_that("distancesMatrix produces a warning when there are no viable passages between stations", {
 			expect_warning(dist.mat <- distancesMatrix(t.layer = t.layer,
 		  		coord.x = "x.32632", coord.y = "y.32632", actel = TRUE),
-			"At least one station is completely blocked off from the remaining stations by land. Filling
-the respective fields with NA. If your animals were expected to travel around the areas present
-in the shape file, consider applying a 'buffer' when calculating the transition layer. This
-will artificially add water space around the shape file.", fixed = TRUE)
+		  		paste0("At least one station is completely blocked off from the remaining",
+		  		" stations by land. Filling the respective fields with NA.", 
+		  		" If your animals were expected to travel around the areas present", 
+		  		" in the shape file, consider applying a 'buffer' when calculating", 
+		  		" the transition layer. This will artificially add water space", 
+		  		" around the shape file."), fixed = TRUE)
 		})
 		# n
-
+		
 		test_that("distancesMatrix handles bad data correctly pt1", {
 			expect_error(distancesMatrix(t.layer = t.layer, id.col = 1:2),
 				"Please provide only one column name in 'id.col'", fixed = TRUE)
@@ -126,19 +128,15 @@ will artificially add water space around the shape file.", fixed = TRUE)
 				"'starters' must be a data frame.", fixed = TRUE)
 
 			file.remove("test.txt")
-			
-			expect_warning(distancesMatrix(t.layer =  t.layer,
-		  		coord.x = "x.32632", coord.y = "y.32632", starters = "test", id.col = "test", actel = TRUE),
-			"starters' or 'targets' were set but will be ignored because 'actel' is set to TRUE. Set 'actel' to FALSE to use the 'starters' and 'targets' arguments.", fixed = TRUE)
 
 			expect_warning(distancesMatrix(t.layer =  t.layer,
-		  		coord.x = "x.32632", coord.y = "y.32632", starters = "test", id.col = "test", actel = TRUE),
+		  		coord.x = "x.32632", coord.y = "y.32632", id.col = "test", actel = TRUE),
 			"id.col' was set but will be ignored because 'actel' is set to TRUE. Set 'actel' to FALSE to use the 'id.col' argument.", fixed = TRUE)
 		})
 		# n
 		# n
 
-		base.raster <- loadShape(shape = shape.path, size = 5,
+		base.raster <- shapeToRaster(shape = shape.path, size = 5,
 			coord.x = "x.32632", coord.y = "y.32632", buffer = 100)
 		t.layer <- transitionLayer(base.raster)
 
@@ -162,7 +160,22 @@ will artificially add water space around the shape file.", fixed = TRUE)
 		  		coord.x = "x.32632", coord.y = "test", starters = loadSpatial("spatial2.csv"), targets = loadSpatial(), actel = FALSE),
 			"Could not find a column 'test' in 'targets'.", fixed = TRUE)
 		})
-
+		
+		test_loadspatial <- loadSpatial()
+		
+		test_that("distancesMatrix output is as expected when output of loadSpatial() is used", {
+		  output <- distancesMatrix(t.layer = t.layer, coord.x = "x.32632",
+		                            coord.y = "y.32632", starters = test_loadspatial)
+		  expect_equal(colnames(output), paste("St", 1:4, sep = "."))
+		  expect_equal(rownames(output), paste("St", 1:4, sep = "."))
+		  expect_equal(output[, 1], c(   0, 586, 934, 1154))
+		  expect_equal(output[, 2], c( 586,   0, 490,  656))
+		  expect_equal(output[, 3], c( 934, 490,   0,  237))
+		  expect_equal(output[, 4], c(1154, 656, 237,    0))
+		})
+		
+		rm(test_loadspatial)
+		
 		test_that("distancesMatrix output is as expected", {
 		 output <- distancesMatrix(t.layer = t.layer, coord.x = "x.32632", coord.y = "y.32632")
 		 expect_equal(colnames(output), paste("St", 1:4, sep = "."))
@@ -178,8 +191,8 @@ will artificially add water space around the shape file.", fixed = TRUE)
 		xspatial$x.32632 <- c(454568, 453400, 452047, 452975)
 		xspatial$y.32632 <- c(6243912, 6242630, 6242387, 6241169)
 
-		test_that("loadShape expands the grid range if the spatial objects are outside the shape range.", {
-			expect_message(loadShape(shape = shape.path, size = 10,
+		test_that("shapeToRaster expands the grid range if the spatial objects are outside the shape range.", {
+			expect_message(shapeToRaster(shape = shape.path, size = 10,
 					coord.x = "x.32632", coord.y = "y.32632", spatial = xspatial),
 			"Extending the shape ranges with open water to ensure the stations fit inside it.", fixed = TRUE)
 		})
@@ -187,8 +200,8 @@ will artificially add water space around the shape file.", fixed = TRUE)
 		xspatial <- example.spatial[8:11, ]
 		xspatial$x.32632 <- c(453500, 453400, 452047, 452975)
 		xspatial$y.32632 <- c(6242800, 6242630, 6242387, 6241169)
-		test_that("loadShape expands the grid range if the spatial objects are outside the shape range.", {
-			expect_warning(loadShape(shape = shape.path, size = 10,
+		test_that("shapeToRaster expands the grid range if the spatial objects are outside the shape range.", {
+			expect_warning(shapeToRaster(shape = shape.path, size = 10,
 					coord.x = "x.32632", coord.y = "y.32632", spatial = xspatial),
 			"Station 'Station 7' is not placed in water! This can cause several problems.", fixed = TRUE)
 		})

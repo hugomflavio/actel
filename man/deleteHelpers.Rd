@@ -10,6 +10,7 @@ deleteHelpers()
 No return value, called for side effects.
 }
 \description{
-At the end of the function actel or emergencyBreak, removes temporary files.
+At the end of the function actel or event(type = "crash"),
+removes temporary files.
 }
 \keyword{internal}

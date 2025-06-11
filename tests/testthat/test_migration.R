@@ -44,6 +44,12 @@ test_that("migration stops when any argument does not make sense", {
 
 	expect_error(migration(tz = 'Europe/Copenhagen', print.releases = "a", GUI = "never"),
 		"'print.releases' must be logical.", fixed = TRUE)
+
+	expect_error(migration(tz = 'Europe/Copenhagen', back.warning = "none", GUI = "never"),
+		"If back.warning is set to 'none', back.error must be set to 'none' as well.", fixed = TRUE)
+
+	expect_error(migration(tz = 'Europe/Copenhagen', back.warning = "u", GUI = "never"),
+		"If back.warning is set to 'u', back.error must be set to either 'u' or 'none'.", fixed = TRUE)
 })
 
 test_that("migration results contains all the expected elements.", {
@@ -140,10 +146,13 @@ test_that("migration is able to run speed and inactiveness checks.", {
 			GUI = "never", speed.error = 1000000, inactive.error = 1000000),
 		"Running inactiveness checks without a distance matrix. Performance may be limited.", fixed = TRUE)
 	
-	expect_false(any(is.na(match(names(output), c('arrays', 'deployments', 'detections', 'group.overview', 'intra.array.CJS',
+	expect_false(any(is.na(match(names(output), c('arrays', 'deployments', 'detections', 'dist.mat', 'group.overview', 'intra.array.CJS',
 	 'intra.array.matrices','matrices', 'movements', 'overall.CJS', 'release.overview', 'rsp.info', 'section.movements',
 	  'section.overview', 'spatial', 'status.df', 'times', 'valid.detections', 'valid.movements')))))
 })
+# n
+# n
+# n
 # n
 # n
 # n
@@ -156,7 +165,7 @@ test_that("migration can handle multiple expected first arrays", {
 	xspatial <- example.spatial
 	xspatial$Array[18] <- "A1|A2"
 	write.csv(xspatial, "spatial.csv", row.names = FALSE)
-	expect_message(suppressWarnings(output <- migration(tz = 'Europe/Copenhagen', 
+	expect_message(suppressWarnings(output <- migration(tz = 'Europe/Copenhagen',
 		report = TRUE, success.arrays = "A9", GUI = "never")),
 		"Multiple possible first arrays detected for release site 'RS1'.", fixed = TRUE)
 })

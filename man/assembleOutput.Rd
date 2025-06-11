@@ -7,7 +7,8 @@
 assembleOutput(timetable, bio, spatial, dist.mat, tz)
 }
 \arguments{
-\item{timetable}{A table of the entering and leaving points for each section per target tag, created by assembleTimetable.}
+\item{timetable}{A table of the entering and leaving points for each
+section per target tag, created by assembleTimetable.}
 
 \item{bio}{A table with the tags and biometrics of the studied animals.}
 

@@ -10,7 +10,7 @@ checkArguments(
   min.total.detections,
   min.per.event,
   max.interval,
-  speed.method = c("last to first", "last to last"),
+  speed.method = c("last to first", "last to last", "first to first"),
   speed.warning,
   speed.error,
   start.time,
@@ -31,7 +31,9 @@ checkArguments(
   section.warning,
   section.error,
   section.order = NULL,
-  timestep = c("days", "hours")
+  timestep = c("days", "hours"),
+  back.warning = c("all", "u", "none"),
+  back.error = c("all", "u", "none")
 )
 }
 \arguments{
@@ -55,8 +57,10 @@ for a new event to be created. Defaults to 60.}
 \item{speed.method}{Can take two forms: 'last to first' or 'last to last'.
 If 'last to first' (default), the last detection on the previous array is matched
 to the first detection on the target array to perform the calculations.
-If 'last to last', the last detection on ´the previous array is matched to the
-last detection on the target array to perform the calculations.}
+If 'last to last', the last detection on the previous array is matched to the
+last detection on the target array to perform the calculations.
+If 'first to first', the first detection on the previous array is matched to the
+first detection on the target array to perform the calculations.}
 
 \item{speed.warning}{If a tag moves at a speed equal or greater than
 \code{speed.warning} (in metres per second), a warning is issued. If left
@@ -140,6 +144,19 @@ be aligned in the results.}
 
 \item{timestep}{The resolution desired for the residency calculations.
 One of "days" (default) or "hours".}
+
+\item{back.warning}{Warn the user about backwards inter-section movements.
+One of three values: "all" will warn the user about S shaped turns (where
+the animal moves backwards but then resumes normal movement), and U shaped
+turns (where the animal moves backwards and disappears); "u" will warn the
+about U-shaped turns (i.e. no warnings for S-shaped turns); "none" will
+suppress all inter-section movement warnings.}
+
+\item{back.error}{Pause the analysis so the user can inspect the movements
+table that generated an inter-section backwards movement warning.
+One of three values: "all" will prompt the user both for S shaped turns and
+U shaped turns; "u" will prompt the user only for U-shaped turns, and "none"
+will never pause the analysis for inter-section movements inspection.}
 }
 \value{
 updated parameters

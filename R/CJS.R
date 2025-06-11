@@ -27,24 +27,28 @@ NULL
 #' @keywords internal
 #'
 getDualMatrices <- function(replicates, CJS = NULL, spatial, detections.list) {
-  appendTo("debug", "Running getDualMatrices.")
+  event(type = "debug", "Running getDualMatrices.")
   output <- list()
   for(i in 1:length(replicates)) {
     continue <- TRUE
     if (!is.null(CJS)) {
-      if (any(grepl("^max.efficiency$", names(CJS))))
+      if (any(grepl("^max\\.efficiency$", names(CJS))))
         already.calculated <- !is.na(CJS$max.efficiency[names(replicates)[i]])
       else
         already.calculated <- !is.na(CJS$efficiency[names(replicates)[i]])
       if (already.calculated) {
-        appendTo(c("Screen", "Warning", "Report"), paste0("An inter-array efficiency has already been calculated for array ", names(replicates)[i],"."))
+        event(type = c("screen", "warning", "report"),
+              "An inter-array efficiency has already been calculated",
+              " for array ", names(replicates)[i],".")
         decision <- userInput("Do you want to replace this with an intra-array efficiency estimate?(y/n) ",
                                 choices = c("y", "n"), hash = "# replace efficiency?")
         if (!interactive() | decision == "y") {
-          appendTo("Report", paste0("Replacing efficiency estimation."))
+          event(type = "report",
+                "Replacing efficiency estimation.")
           continue <- TRUE
         } else { # nocov start
-          appendTo("Report", paste0("Keeping inter-array efficiency estimation."))
+          event(type = "report",
+                "Keeping inter-array efficiency estimation.")
           continue <- FALSE
         } # nocov end
       }
@@ -68,9 +72,11 @@ getDualMatrices <- function(replicates, CJS = NULL, spatial, detections.list) {
 #' @keywords internal
 #'
 includeIntraArrayEstimates <- function(m, efficiency = NULL, CJS = NULL) {
-  appendTo("debug", "Running includeIntraArrayEstimates.")
-  if (!is.null(efficiency) & !is.null(CJS))
-    stop("Use only one of 'efficiency' or 'CJS' at a time.\n")
+  event(type = "debug", "Running includeIntraArrayEstimates.")
+  if (!is.null(efficiency) & !is.null(CJS)) {
+    event(type = "stop",
+          "Use only one of 'efficiency' or 'CJS' at a time.")
+  }
   if (length(m) > 0) {
     intra.CJS <- lapply(m, dualArrayCJS)
     if (!is.null(CJS)) {
@@ -106,7 +112,7 @@ includeIntraArrayEstimates <- function(m, efficiency = NULL, CJS = NULL) {
 #' @keywords internal
 #'
 assembleSplitCJS <- function(mat, CJS, arrays, releases, intra.CJS = NULL) {
-  appendTo("debug", "Running assembleSplitCJS.")
+  event(type = "debug", "Running assembleSplitCJS.")
   recipient <- lapply(names(CJS), function(i) {
     aux <- releases[releases$Combined == i, ]
     output <- assembleArrayCJS(mat = mat[i], CJS = CJS[[i]], arrays = arrays, releases = aux)[[1]]
@@ -132,7 +138,7 @@ assembleSplitCJS <- function(mat, CJS, arrays, releases, intra.CJS = NULL) {
 #' @keywords internal
 #'
 assembleGroupCJS <- function(mat, CJS, arrays, releases, intra.CJS = NULL) {
-  appendTo("debug", "Running assembleGroupCJS.")
+  event(type = "debug", "Running assembleGroupCJS.")
   recipient <- lapply(names(CJS), function(i) {
     link <- grepl(paste0("^", i), names(mat))
     aux <- releases[releases$Group == i, ]
@@ -152,7 +158,7 @@ assembleGroupCJS <- function(mat, CJS, arrays, releases, intra.CJS = NULL) {
 #' Break the detection matrices per array
 #'
 #' @param type The type of arrays to be matched
-#' @param verbose Logical: Should appendTo be used?
+#' @param verbose Logical: Should [event()] be used to show and log messages?
 #' @inheritParams cjs_args
 #'
 #' @return A list containing the split matrices for each array
@@ -160,25 +166,25 @@ assembleGroupCJS <- function(mat, CJS, arrays, releases, intra.CJS = NULL) {
 #' @keywords internal
 #'
 breakMatricesByArray <- function(m, arrays, type = c("peers", "all"), verbose = TRUE) {
-  appendTo("debug", "Running breakMatricesByArray.")
+  event(type = "debug", "Running breakMatricesByArray.")
   type <- match.arg(type)
   recipient <- list()
   for (i in 1:length(arrays)) {
     if ((type == "peers" & !is.null(arrays[[i]]$after.peers)) | (type == "all" & !is.null(arrays[[i]]$all.after))) {
-      
+
       # find out relevant arrays
       if (type == "peers")
         a.regex <- paste0("^", c(names(arrays)[i], arrays[[i]]$after.peers), "$", collapse = "|")
       else
         a.regex <- paste0("^", c(names(arrays)[i], arrays[[i]]$all.after), "$", collapse = "|")
-      
+
       # grab only relevant arrays
       aux  <- lapply(m, function(m_i) m_i[, which(grepl(a.regex, colnames(m_i))), drop = FALSE])
-      
+
       # Failsafe in case some tags are released at one of the peers
       keep <- unlist(lapply(m, function(m_i) any(grepl(paste0("^", names(arrays)[i], "$"), colnames(m_i)))))
       aux  <- aux[keep]
-      
+
       # Failsafe in case there is only one column left
       keep <- unlist(lapply(aux, ncol)) > 1
       aux  <- aux[keep]
@@ -207,13 +213,18 @@ breakMatricesByArray <- function(m, arrays, type = c("peers", "all"), verbose = 
       own.zero.check <- unlist(lapply(aux, function(x) sum(x[, 2]) == 0))
       peer.zero.check <- unlist(lapply(aux, function(x) sum(x$AnyPeer) == 0))
       zero.check <- all(own.zero.check) | all(peer.zero.check)
-      
+
       if (zero.check) {
         if (all(own.zero.check) & verbose) {
-          appendTo(c("Screen", "Warning", "Report"), paste0("No tags passed through array ", names(arrays)[i], ". Skipping efficiency estimations for this array."))
+          event(type = c("screen", "warning", "report"),
+                "No tags passed through array ", names(arrays)[i],
+                ". Skipping efficiency estimations for this array.")
         } else {
           if (all(peer.zero.check) & verbose)
-            appendTo(c("Screen", "Warning", "Report"), paste0("No tags passed through any of the efficiency peers of array ", names(arrays)[i], ". Skipping efficiency estimations for this array."))
+            event(type = c("screen", "warning", "report"),
+                  "No tags passed through any of the efficiency peers",
+                  " of array ", names(arrays)[i],
+                  ". Skipping efficiency estimations for this array.")
           }
       } else {
         recipient[[length(recipient) + 1]] <- aux
@@ -222,7 +233,8 @@ breakMatricesByArray <- function(m, arrays, type = c("peers", "all"), verbose = 
     }
   }
   if (length(recipient) == 0 & verbose) {
-    appendTo(c("Screen", "Warning", "Report"), "None of the arrays has valid efficiency peers.")
+    event(type = c("screen", "warning", "report"),
+          "None of the arrays has valid efficiency peers.")
     return(NULL)
   } else {
     return(recipient)
@@ -239,7 +251,7 @@ breakMatricesByArray <- function(m, arrays, type = c("peers", "all"), verbose = 
 #' @keywords internal
 #'
 assembleArrayCJS <- function(mat, CJS, arrays, releases, silent = TRUE) {
-  appendTo("debug", "Running assembleArrayCJS.")
+  event(type = "debug", "Running assembleArrayCJS.")
   # Compile final objects
   absolutes <- matrix(nrow = 5, ncol = length(arrays))
   colnames(absolutes) <- names(arrays)
@@ -276,8 +288,11 @@ assembleArrayCJS <- function(mat, CJS, arrays, releases, silent = TRUE) {
   for (i in 1:length(arrays)) {
     if (fix.zero[i]) {
       # fix estimated for arrays with 0 efficiency. # if any of the before is NA, this will be NA too.
-      if (!silent)
-        appendTo(c("Screen", "Report", "Warning"), paste0("Array '", names(arrays)[i], "' has 0 efficiency. Attempting to round estimated based on peers, if possible."))
+      if (!silent) {
+        event(type = c("screen", "warning", "report"),
+              "Array '", names(arrays)[i], "' has 0 efficiency. Attempting",
+              " to round estimated based on peers, if possible.")
+      }
       if (!is.null(arrays[[i]]$before))
         absolutes["estimated", i] <- sum(absolutes["estimated", arrays[[i]]$before])
     }
@@ -303,12 +318,12 @@ assembleArrayCJS <- function(mat, CJS, arrays, releases, silent = TRUE) {
 #' @keywords internal
 #'
 assembleMatrices <- function(spatial, movements, status.df, arrays, paths, dotmat) {
+  event(type = "debug", "Running assembleMatrices.")
   temp <- efficiencyMatrix(movements = movements, arrays = arrays, paths = paths, dotmat = dotmat)
-  appendTo("debug", "Running assembleMatrices.")
   output <- lapply(temp, function(x) {
     # include transmitters that were never detected
     x <- includeMissing(x = x, status.df = status.df)
-    
+
     # sort the rows by the same order as status.df (I think these two lines are not needed, but leaving them in just in case)
     link <- sapply(status.df$Transmitter, function(i) grep(paste0("^", i, "$"), rownames(x)))
     x <- x[link, ]
@@ -334,9 +349,13 @@ assembleMatrices <- function(spatial, movements, status.df, arrays, paths, dotma
     # If the release sites start in different arrays, trim the matrices as needed
     if (length(unique.release.arrays) > 1) {
       for(i in 1:length(aux)){ # for each matrix, find the corresponding release site.
-        the_release_site <- sapply(spatial$release.sites$Standard.name, function(x) grepl(paste0(".", x, "$"), names(aux)[i])) 
-        if(sum(the_release_site) > 1) # if there is more than one matching release site, stop.
-          stop("Multiple release sites match the matrix name. Make sure that the release sites' names are not contained within the animal groups or within themselves.\n")
+        the_release_site <- sapply(spatial$release.sites$Standard.name, function(x) grepl(paste0("\\.", x, "$"), names(aux)[i]))
+        if(sum(the_release_site) > 1) { # if there is more than one matching release site, stop.
+          event(type = "stop",
+                "Multiple release sites match the matrix name.",
+                " Make sure that the release sites' names are not contained",
+                " within the animal groups or within themselves.\n")
+        }
         # else, find which is the first column to keep. This is tricky for multi-branch sites...
         the.col <- min(which(grepl(spatial$release.sites$Array[the_release_site], colnames(aux[[i]]))))
         # then keep only the relevant columns
@@ -375,45 +394,64 @@ assembleMatrices <- function(spatial, movements, status.df, arrays, paths, dotma
 #' @export
 #'
 simpleCJS <- function(input, estimate = NULL, fixed.efficiency = NULL, silent = TRUE){
-  if (!is.matrix(input) & !is.data.frame(input))
-    stop("input must be a matrix or data frame containing only 0's and 1's.\n")
+  event(type = "debug", "Running simpleCJS")
+  if (!is.matrix(input) & !is.data.frame(input)) {
+    event(type = "stop",
+          "input must be a matrix or data frame containing only 0's and 1's.")
+  }
 
   # stop if there is weird data in the input
-  if (any(input != 0 & input != 1))
-    stop("input must be a matrix or data frame containing only 0's and 1's.\n")
+  if (any(input != 0 & input != 1)) {
+    event(type = "stop",
+          "input must be a matrix or data frame containing only 0's and 1's.")
+  }
 
   # stop if both estimate and fixed efficiency are present
-  if (!is.null(estimate) & !is.null(fixed.efficiency))
-    stop("Please choose only one of 'estimate' or 'fixed.efficiency'.\n")
+  if (!is.null(estimate) & !is.null(fixed.efficiency)) {
+    event(type = "stop",
+          "Please choose only one of 'estimate' or 'fixed.efficiency'.")
+  }
 
-  if (any(input[, 1] == 0))
-    stop("The first column of the input should only contain 1's (i.e. release point).\n")
+  if (any(input[, 1] == 0)) {
+    event(type = "stop",
+          "The first column of the input should only contain 1's",
+          " (i.e. release point).")
+  }
 
   # Only check below if estimate is set
   if (!is.null(estimate)) {
     # stop if multiple estimate values are provided.
     if (!is.null(estimate) && length(estimate) != 1)
-      stop("Please use only one value for estimate.\n")
+      event(type = "stop",
+            "Please use only one value for estimate.")
     # stop if estimate exceeds 1
     if (!is.null(estimate) && (estimate < 0 | estimate > 1))
-      stop("'estimate' must be between 0 and 1.\n")
+      event(type = "stop",
+            "'estimate' must be between 0 and 1.")
     # all good
   }
 
   # Only check below if fixed.efficiency was set
   if (!is.null(fixed.efficiency)) {
     # stop if there are not enough efficiency values
-    if (length(fixed.efficiency) != ncol(input))
-     stop("Fixed efficiency was set but its length is not the same as the number of columns in the input.\n")
+    if (length(fixed.efficiency) != ncol(input)) {
+     event(type = "stop",
+           "Fixed efficiency was set but its length is not the same as",
+           " the number of columns in the input.")
+    }
     # stop if any efficiency exceeds 1
-    if (any(fixed.efficiency > 1, na.rm = TRUE))
-      stop("Fixed efficiency estimates must be between 0 and 1.\n")
+    if (any(fixed.efficiency > 1, na.rm = TRUE)) {
+      event(type = "stop", "Fixed efficiency estimates must be",
+            " between 0 and 1.")
+    }
     # Fake estimate to avoid further changes below.
     if (!is.na(tail(fixed.efficiency, 1)))
      estimate <- tail(fixed.efficiency, 1)
     # all good
-    if(!silent)
-      message("M: Running CJS with fixed efficiency estimates."); flush.console()
+    if(!silent) {
+      event(type = "screen",
+            "M: Running CJS with fixed efficiency estimates.")
+    }
   }
 
   # Start the calculations
@@ -454,10 +492,16 @@ simpleCJS <- function(input, estimate = NULL, fixed.efficiency = NULL, silent = 
     # number of animals estimated alive at i (M)
     # Failsafe for array with 0 efficiency. Issues warning.
     if (p[i] == 0 | m[i] == 0) {
-      if(p[i] == 0 & !silent)
-        warning("Array '", colnames(input)[i],"' had 0% efficiency. Skipping survival estimation.")
-      if(m[i] == 0 & !silent)
-        warning("No tags were detected at array '", colnames(input)[i],"'. Skipping survival estimation.")
+      if(p[i] == 0 & !silent) {
+        event(type = c("screen", "warning"),
+              "Array '", colnames(input)[i],
+              "' had 0% efficiency. Skipping survival estimation.")
+      }
+      if(m[i] == 0 & !silent) {
+        event(type = c("screen", "warning"),
+              "No tags were detected at array '", colnames(input)[i],
+              "'. Skipping survival estimation.")
+      }
       M[i] = M[i - 1]
       S[i - 1] = -999
       if (i == (ncol(input)-1))
@@ -467,8 +511,11 @@ simpleCJS <- function(input, estimate = NULL, fixed.efficiency = NULL, silent = 
       # Fix M if the fixed efficiency value draws it too low.
       if (!is.null(fixed.efficiency) && M[i] < sum(m[i], z[i])){
         # Prevent fairly common warning from showing up while inside Actel.
-        if(!silent)
-          warning("The fixed efficiency caused a too low estimate at iteration ", i,". Forcing higher estimate.")
+        if(!silent) {
+          event(type = c("screen", "warning"),
+                "The fixed efficiency caused a too low estimate at iteration ",
+                i,". Forcing higher estimate.")
+        }
         M[i] = sum(m[i], z[i])
       }
       # Correct M if the estimate at i is bigger than the estimate at i - 1
@@ -540,7 +587,7 @@ simpleCJS <- function(input, estimate = NULL, fixed.efficiency = NULL, silent = 
 #' @keywords internal
 #'
 mbSplitCJS <- function(mat, fixed.efficiency = NULL) {
-  appendTo("debug", "Running mbSplitCJS.")
+  event(type = "debug", "Running mbSplitCJS.")
   recipient <- lapply(mat, function(m) {
     if (is.na(fixed.efficiency[grepl(paste0("^", colnames(m[[1]])[2], "$"), names(fixed.efficiency))]))
       array.efficiency <- NULL
@@ -578,7 +625,7 @@ mbSplitCJS <- function(mat, fixed.efficiency = NULL) {
 #' @keywords internal
 #'
 mbGroupCJS <- function(mat, status.df, fixed.efficiency = NULL) {
-  appendTo("debug", "Running mbGroupCJS.")
+  event(type = "debug", "Running mbGroupCJS.")
   output <- list()
   for (i in 1:length(unique(status.df$Group))) {
     output[[i]] <- lapply(mat, function(m_i) {
@@ -612,7 +659,7 @@ mbGroupCJS <- function(mat, status.df, fixed.efficiency = NULL) {
 #' @keywords internal
 #'
 efficiencyMatrix <- function(movements, arrays, paths, dotmat) {
-  appendTo("debug", "Starting efficiencyMatrix.")
+  event(type = "debug", "Running efficiencyMatrix.")
   max.ef <- as.data.frame(matrix(ncol = length(arrays) + 1, nrow = length(movements)))
   colnames(max.ef) <- c("Release", names(arrays))
   rownames(max.ef) <- names(movements)
@@ -649,7 +696,7 @@ efficiencyMatrix <- function(movements, arrays, paths, dotmat) {
 #' @keywords internal
 #'
 oneWayMoves <- function(movements, arrays) {
-  appendTo("debug", "Running oneWayMoves.")
+  event(type = "debug", "Running oneWayMoves.")
   if (nrow(movements) > 1) {
     while (TRUE) {
       aux <- data.frame(from = movements$Array[-nrow(movements)], to = movements$Array[-1])
@@ -679,7 +726,7 @@ oneWayMoves <- function(movements, arrays) {
 #' @keywords internal
 #'
 countArrayFailures <- function(moves, paths, dotmat) {
-  appendTo("debug", "Running countArrayFailures.")
+  event(type = "debug", "Running countArrayFailures.")
   x <- lapply(1:(nrow(moves) - 1), function(i) {
     A <- moves$Array[i]
     B <- moves$Array[i + 1]
@@ -702,10 +749,12 @@ countArrayFailures <- function(moves, paths, dotmat) {
 #' @keywords internal
 #'
 blameArrays <- function(from, to, paths) {
-  appendTo("debug", "Running blameArrays.")
+  event(type = "debug", "Running blameArrays.")
   the.paths <- paths[[paste0(from, "_to_", to)]]
-  if (is.null(the.paths))
-    stop("Either 'from' is not connected to 'to', or both are neighbours.\n")
+  if (is.null(the.paths)) {
+    event(type = "stop",
+          "Either 'from' is not connected to 'to', or both are neighbours.")
+  }
   if (length(the.paths) == 1) {
     return(list(known = unique(unlist(strsplit(the.paths, " -> ")))))
   } else {
@@ -733,7 +782,7 @@ blameArrays <- function(from, to, paths) {
 #' @keywords internal
 #'
 includeMissing <- function(x, status.df){
-  appendTo("debug", "Running includeMissing.")
+  event(type = "debug", "Running includeMissing.")
   missing_transmitters <- status.df$Transmitter[!status.df$Transmitter %in% rownames(x)]
   x[missing_transmitters, ] <- 0
   x[missing_transmitters, 1] <- 1
@@ -749,7 +798,7 @@ includeMissing <- function(x, status.df){
 #' @keywords internal
 #'
 dualMatrix <- function(array, replicates, spatial, detections.list){
-  appendTo("debug", "Running dualMatrix.")
+  event(type = "debug", "Running dualMatrix.")
   all.stations <- spatial$stations$Standard.name[spatial$stations$Array == array]
   original <- all.stations[!all.stations %in% replicates]
   efficiency <- as.data.frame(matrix(ncol = 2, nrow = length(detections.list)))
@@ -787,10 +836,15 @@ dualMatrix <- function(array, replicates, spatial, detections.list){
 #' @export
 #'
 dualArrayCJS <- function(input){
-  appendTo("debug", "Running dualArrayCJS.")
-  if ((!inherits(input, "matrix") & !inherits(input, "data.frame")) || ncol(input) != 2 | any(!apply(input, 2, is.logical)))
-    stop("Please provide a data.frame or matrix of TRUE/FALSE's with two columns", call. = FALSE)
-
+  event(type = "debug", "Running dualArrayCJS.")
+  is_a_table <- inherits(input, "matrix") | inherits(input, "data.frame")
+  has_2_cols <- is_a_table && ncol(input) == 2
+  is_logical <- has_2_cols && all(apply(input, 2, is.logical))
+  if (!is_logical) {
+    event(type = "stop",
+          "Please provide a data.frame or matrix of TRUE/FALSE's",
+          " with two columns")
+  }
   if (is.null(colnames(input)))
     colnames(input) <- c("R1", "R2")
   # r: tags detected at i and on other pair
@@ -833,21 +887,35 @@ dualArrayCJS <- function(input){
 #' @keywords internal
 #'
 combineCJS <- function(..., estimate = NULL, fixed.efficiency = NULL, silent = FALSE){
-  appendTo("debug", "Running combineCJS.")
+  event(type = "debug", "Running combineCJS.")
   # stop if both estimate and fixed efficiency are present
-  if (!is.null(estimate) & !is.null(fixed.efficiency))
-    stop("Please choose only one of 'estimate' or 'fixed.efficiency'.\n")
+  if (!is.null(estimate) & !is.null(fixed.efficiency)) {
+    event(type = "stop",
+          "Please choose only one of 'estimate' or 'fixed.efficiency'.")
+  }
 
   # stop if multiple estimate values are provided.
-  if (!is.null(estimate) && length(estimate) != 1)
-    stop("Please use only one value for estimate.\n")
+  if (!is.null(estimate) && length(estimate) != 1) {
+    event(type = "stop",
+          "Please use only one value for estimate.")
+  }
 
-  # stop if any efficiency exceeds 1
-  if (!is.null(fixed.efficiency) && any(fixed.efficiency > 1 | fixed.efficiency < 0, na.rm = TRUE))
-    stop("Fixed efficiency estimates must be between 0 and 1.\n")
+  # stop if any efficiency is outside [0, 1]
+  not_null <- !is.null(fixed.efficiency)
+  above_1 <- not_null && any(fixed.efficiency > 1, na.rm = TRUE)
+  below_0 <- not_null && any(fixed.efficiency < 0, na.rm = TRUE)
+  if (above_1 | below_0) {
+    event(type = "stop",
+          "Fixed efficiency estimates must be between 0 and 1.")
+  }
 
-  if (!is.null(estimate) && (estimate > 1 | estimate < 0))
-    stop("'estimate' must be between 0 and 1.\n")
+  not_null <- !is.null(estimate)
+  above_1 <- not_null && any(estimate > 1, na.rm = TRUE)
+  below_0 <- not_null && any(estimate < 0, na.rm = TRUE)
+  if (above_1 | below_0) {
+    event(type = "stop",
+          "'estimate' must be between 0 and 1.")
+  }
 
   # hack to figure the number of arguments in the dots, because I could not find a better way around it.
   arg.names <- names(match.call())
@@ -862,21 +930,32 @@ combineCJS <- function(..., estimate = NULL, fixed.efficiency = NULL, silent = F
   if ((length(match.call()) - discount) == 1) {
     if(is.list(...)) {
       input <- (...)
-      if (length(input) == 1)
-        stop("Input appears to contain a list with only one element.\n")
+      if (length(input) == 1) {
+        event(type = "stop",
+              "Input appears to contain a list with only one element.")
+      }
     } else {
-      stop("Only one object provided but it is not a list.\n")
+      event(type = "stop",
+            "Only one object provided but it is not a list.")
     }
   } else {
     input <- list(...)
   }
-  if(any(unlist(lapply(input, function(x) !is.matrix(x) & !is.data.frame(x)))))
-    stop("Not all objects provided are matrices or data frames. Please use either one list of matrices/data frames or multiple matrices/data frames.\n")
+
+  check <- lapply(input, function(x) !is.matrix(x) & !is.data.frame(x))
+  if(any(unlist(check))) {
+    event(type = "stop",
+          "Not all objects provided are matrices or data frames.",
+          " Please use either one list of matrices/data frames or",
+          " multiple matrices/data frames.")
+  }
 
   # stop if not all matrices finish in the same array
   the.last <- unlist(lapply(input, function(x) tail(colnames(x),1)))
-  if (length(unique(the.last)) > 1)
-    stop("The last array is not the same in all input matrices.\n")
+  if (length(unique(the.last)) > 1) {
+    event(type = "stop",
+          "The last array is not the same in all input matrices.")
+  }
 
   ncols <- sapply(input, ncol)
   groups <- rev(sort(unique(ncols)))
@@ -884,10 +963,14 @@ combineCJS <- function(..., estimate = NULL, fixed.efficiency = NULL, silent = F
   if (!is.null(fixed.efficiency)){
     # stop if there are not enough efficiency values
     if (length(fixed.efficiency) != max(sapply(input, ncol))) {
-      stop("Fixed efficiency was set but its length is not the same as the maximum number of columns in the input.\n")
+      event(type = "stop",
+            "Fixed efficiency was set but its length is not the same as the",
+            " maximum number of columns in the input.")
     } else {
-      if (!silent)
-        message("M: Running CJS with fixed efficiency values."); flush.console()
+      if (!silent) {
+        event(type = "screen",
+              "M: Running CJS with fixed efficiency values.")
+      }
     }
   }
 
