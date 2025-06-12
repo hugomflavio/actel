@@ -14,9 +14,7 @@ detections.list <- study.data$detections.list
 bio <- study.data$bio
 spatial <- study.data$spatial
 dist.mat <- study.data$dist.mat
-dotmat <- study.data$dotmat
-arrays <- study.data$arrays
-paths <- study.data$paths
+dot_list <- study.data$dot_list
 
 moves <- groupMovements(detections.list = detections.list[1:2], bio = bio, spatial = spatial,
     speed.method = "last to first", max.interval = 60, tz = "Europe/Copenhagen", dist.mat = dist.mat)
@@ -44,16 +42,16 @@ test_that("checkMinimumN reacts as expected", {
 
 if (interactive()) {
   # ONLY RUN THIS PART IF YOU CAN MANUALLY CONTROL THE CONSOLE INPUT. USE THE VALUES PROVIDED BELOW
-  xdotmat <- dotmat
-  xdotmat["A7", "A8"] <- NA
+  xdot_list <- dot_list
+  xdot_list$array_info$dotmat["A7", "A8"] <- NA
   expect_warning(output <- checkImpassables(movements = moves[[1]], tag = "R64K-4451", bio = bio,
-      spatial = spatial, dotmat = xdotmat, GUI = "never", n = "(1/1)"),
+      spatial = spatial, dot_list = xdot_list, GUI = "never", n = "(1/1)"),
     "Tag R64K-4451 (1/1) made an impassable jump in events 16 to 17: It is not possible to go from array A7 to A8.", fixed = TRUE)
   # 17
   # y
   # n
   expect_warning(output <- checkImpassables(movements = moves[[1]], tag = "R64K-4451", bio = bio,
-      spatial = spatial, dotmat = xdotmat, GUI = "never", n = "(1/1)"),
+      spatial = spatial, dot_list = xdot_list, GUI = "never", n = "(1/1)"),
 "The last interaction did not solve the impassable problem! See remaining problems below.
          You can also press ESC to abort the current run and alter your spatial.txt file.", fixed = TRUE)
   # 17
@@ -62,11 +60,11 @@ if (interactive()) {
 
 } else {
   test_that("checkImpassables reacts as expected", {
-   	xdotmat <- dotmat
-   	xdotmat["A7", "A8"] <- NA
+  xdot_list <- dot_list
+  xdot_list$array_info$dotmat["A7", "A8"] <- NA
       expect_error(
       	expect_warning(output <- checkImpassables(movements = moves[[1]], tag = "R64K-4451", bio = bio,
-            spatial = spatial, dotmat = xdotmat, GUI = "never", n = "(1/1)"),
+            spatial = spatial, dot_list = xdot_list, GUI = "never", n = "(1/1)"),
       		"Tag R64K-4451 (1/1) made an impassable jump in events 16 to 17: It is not possible to go from array A7 to A8.", fixed = TRUE), 	
     		"Preventing analysis from entering interactive mode in a non-interactive session.", fixed = TRUE)
   })
@@ -79,24 +77,24 @@ test_that("checkJumpDistance reacts as expected", {
 	# jump from release to first event
 	xmoves <- moves[[1]]
 	xmoves$Array[1] <- "A3"
-	expect_warning(checkJumpDistance(movements = xmoves, bio = bio, tag = "R64K-4451", dotmat = dotmat, paths = paths, n = "(1/1)",
-                                   arrays = arrays, spatial = spatial, jump.warning = 1, jump.error = Inf, GUI = "never",
+	expect_warning(checkJumpDistance(movements = xmoves, bio = bio, tag = "R64K-4451", dot_list = dot_list, n = "(1/1)",
+                                   spatial = spatial, jump.warning = 1, jump.error = Inf, GUI = "never",
                                    detections = detections.list[["R64K-4451"]], save.tables.locally = FALSE),
 	"Tag R64K-4451 (1/1) jumped through 2 arrays from release to first valid event (Release -> A3).", fixed = TRUE)
 
 	# jump from release because first event is invalid
 	xmoves <- moves[[1]]
 	xmoves$Valid[1] <- FALSE
-	expect_warning(checkJumpDistance(movements = xmoves, bio = bio, tag = "R64K-4451", dotmat = dotmat, paths = paths, n = "(1/1)",
-                                   arrays = arrays, spatial = spatial, jump.warning = 1, jump.error = Inf, GUI = "never",
+	expect_warning(checkJumpDistance(movements = xmoves, bio = bio, tag = "R64K-4451", dot_list = dot_list, n = "(1/1)",
+                                   spatial = spatial, jump.warning = 1, jump.error = Inf, GUI = "never",
                                    detections = detections.list[["R64K-4451"]], save.tables.locally = FALSE),
 	"Tag R64K-4451 (1/1) jumped through 1 array from release to first valid event (Release -> A2).", fixed = TRUE)
 
 	# jump from first to second event
 	xmoves <- moves[[1]]
 	xmoves$Array[2] <- "A3"
-	expect_warning(checkJumpDistance(movements = xmoves, bio = bio, tag = "R64K-4451", dotmat = dotmat, paths = paths, n = "(1/1)",
-                                   arrays = arrays, spatial = spatial, jump.warning = 1, jump.error = Inf, GUI = "never",
+	expect_warning(checkJumpDistance(movements = xmoves, bio = bio, tag = "R64K-4451", dot_list = dot_list, n = "(1/1)",
+                                   spatial = spatial, jump.warning = 1, jump.error = Inf, GUI = "never",
                                    detections = detections.list[["R64K-4451"]], save.tables.locally = FALSE),
 	"Tag R64K-4451 (1/1) jumped through 1 array in valid events 1 -> 2 (A1 -> A3)", fixed = TRUE)
 	
@@ -104,23 +102,31 @@ test_that("checkJumpDistance reacts as expected", {
 	xmoves <- moves[[1]]
 	xmoves$Array[2] <- "Unknown"
 	xmoves$Valid[2] <- FALSE
-	expect_warning(checkJumpDistance(movements = xmoves, bio = bio, tag = "R64K-4451", dotmat = dotmat, paths = paths, n = "(1/1)",
-                                   arrays = arrays, spatial = spatial, jump.warning = 1, jump.error = Inf, GUI = "never",
+	expect_warning(checkJumpDistance(movements = xmoves, bio = bio, tag = "R64K-4451", dot_list = dot_list, n = "(1/1)",
+                                   spatial = spatial, jump.warning = 1, jump.error = Inf, GUI = "never",
                                    detections = detections.list[["R64K-4451"]], save.tables.locally = FALSE),
 	"Tag R64K-4451 (1/1) jumped through 1 array in valid events 1 -> 2 (A1 -> A3)", fixed = TRUE)
 
+  # many jumps
+  xmoves <- moves[[1]]
+  xmoves$Array[1:8*2] <- "A9"
+  expect_warning(checkJumpDistance(movements = xmoves, bio = bio, tag = "R64K-4451", dot_list = dot_list, n = "(1/1)",
+                                   spatial = spatial, jump.warning = 1, jump.error = Inf, GUI = "never",
+                                   detections = detections.list[["R64K-4451"]], save.tables.locally = FALSE),
+  "Tag R64K-4451 (1/1) jumped 1 or more arrays on 15 occasions (of which the first 4 are displayed above).", fixed = TRUE)
+
 	# Impassable jump exception at release
-	xdotmat <- dotmat
- 	xdotmat["A1", "A2"] <- NA
+	xdot_list <- dot_list
+ 	xdot_list$array_info$dotmat["A1", "A2"] <- NA
   xmoves <- moves[[1]][-1, ]
-	expect_error(checkJumpDistance(movements = xmoves, bio = bio, tag = "R64K-4451", dotmat = xdotmat, paths = paths, n = "(1/1)",
-                                   arrays = arrays, spatial = spatial, jump.warning = 1, jump.error = Inf, GUI = "never",
+	expect_error(checkJumpDistance(movements = xmoves, bio = bio, tag = "R64K-4451", dot_list = xdot_list, n = "(1/1)",
+                                   spatial = spatial, jump.warning = 1, jump.error = Inf, GUI = "never",
                                    detections = detections.list[["R64K-4451"]], save.tables.locally = FALSE),
 	"There are unresolved impassable jumps in the movements (Found at release).", fixed = TRUE)
 
   # Impassable jump exception elsewhere
-  expect_error(checkJumpDistance(movements = moves[[1]], bio = bio, tag = "R64K-4451", dotmat = xdotmat, paths = paths, n = "(1/1)",
-                                   arrays = arrays, spatial = spatial, jump.warning = 1, jump.error = Inf, GUI = "never",
+  expect_error(checkJumpDistance(movements = moves[[1]], bio = bio, tag = "R64K-4451", dot_list = xdot_list, n = "(1/1)",
+                                   spatial = spatial, jump.warning = 1, jump.error = Inf, GUI = "never",
                                    detections = detections.list[["R64K-4451"]], save.tables.locally = FALSE),
   "There are unresolved impassable jumps in the movements (Found during moves).", fixed = TRUE)
 	# jump.error is not automatically tested because it triggers user interaction.
@@ -141,6 +147,14 @@ test_that("checkSpeeds reacts as expected.", {
     speed.warning = 2, speed.error = Inf, GUI = "never", n = "(1/1)"),
 	"Tag R64K-4451 (1/1) had an average speed of 2.12 m/s from valid event 4 to 5 (A4 -> A5)", fixed = TRUE)
 	expect_equal(output, moves[[1]])
+
+  # many speed warnings
+  xmoves <- moves[[1]]
+  xmoves$Average.speed.m.s <- 3
+  expect_warning(output <- checkSpeeds(movements = xmoves, tag = "R64K-4451", valid.movements = xmoves,
+    speed.warning = 2, speed.error = Inf, GUI = "never", n = "(1/1)"),
+  "Tag R64K-4451 (1/1) had an average speed higher than 2 m/s in 18 events (of which the first 4 are displayed above).", fixed = TRUE)
+  expect_equal(output, xmoves)
 
 	# no warnings, runs smoothly
 	output <- checkSpeeds(movements = moves[[1]], tag = "test", valid.movements = moves[[1]],
@@ -177,17 +191,17 @@ test_that("checkInactiveness reacts as expected.", {
 })
 
 test_that("checkFirstMove reacts as expected.", {
-  tryCatch(x <- checkFirstMove(movements = moves[[1]], tag = "R64K-4451", bio = bio, spatial = spatial, arrays = arrays, GUI = "never", n = "(1/1)"),
+  tryCatch(x <- checkFirstMove(movements = moves[[1]], tag = "R64K-4451", bio = bio, spatial = spatial, dot_list = dot_list, GUI = "never", n = "(1/1)"),
     warning = function(w) stop("A warning was issued where it should not have been."))
 
   xspatial <- spatial
   xspatial$release.sites$Array <- "A2"
-  expect_warning(checkFirstMove(movements = moves[[1]], tag = "R64K-4451", bio = bio, spatial = xspatial, arrays = arrays, GUI = "never", n = "(1/1)"),
-    "Tag R64K-4451 (1/1) was detected in an array that is not after its release site! Opening relevant data for inspection.\nExpected first array: A2", fixed = TRUE)
+  expect_warning(checkFirstMove(movements = moves[[1]], tag = "R64K-4451", bio = bio, spatial = xspatial, dot_list = dot_list, GUI = "never", n = "(1/1)"),
+    "Tag R64K-4451 (1/1) was detected in an array that is not after its release site! Opening relevant data for inspection.\nExpected first array(s): A2", fixed = TRUE)
 
   xmoves <- moves[[1]]
   xmoves$Valid <- FALSE
-  tryCatch(output <- checkFirstMove(movements = xmoves, tag = "R64K-4451", bio = bio, spatial = xspatial, arrays = arrays, GUI = "never", n = "(1/1)"),
+  tryCatch(output <- checkFirstMove(movements = xmoves, tag = "R64K-4451", bio = bio, spatial = xspatial, dot_list = dot_list, GUI = "never", n = "(1/1)"),
     warning = function(w) stop("A warning was issued where it should not have been."))
   expect_equal(output, xmoves)
 })
