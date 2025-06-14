@@ -26,7 +26,6 @@ checkArguments(
   override,
   print.releases,
   detections.y.axis = c("auto", "stations", "arrays"),
-  if.last.skip.section = NULL,
   replicates = NULL,
   section.warning,
   section.error,
@@ -123,9 +122,6 @@ study area diagrams?}
 \item{detections.y.axis}{The type of y axis desired for the individual
 detection plots. While the argument defaults to "auto", it can be hard-set
 to one of "stations" or "arrays".}
-
-\item{if.last.skip.section}{Logical: Should a tag detected at the last array
-of a given section be considered to have disappeared in the next section?}
 
 \item{replicates}{A list containing, for each array to which intra-array
 efficiency is to be calculated: The standard names of the stations to be

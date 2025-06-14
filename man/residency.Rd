@@ -9,7 +9,6 @@ residency(
   section.order = NULL,
   datapack = NULL,
   max.interval = 60,
-  minimum.detections,
   min.total.detections = 2,
   min.per.event = 1,
   start.time = NULL,
@@ -30,7 +29,6 @@ residency(
   save.detections = FALSE,
   section.warning = 1,
   section.error = 1,
-  section.minimum,
   timestep = c("days", "hours"),
   replicates = NULL,
   GUI = c("needed", "always", "never"),
@@ -51,9 +49,6 @@ May be used to run actel analyses based on R objects, rather than input files.}
 
 \item{max.interval}{The number of minutes that must pass between detections
 for a new event to be created. Defaults to 60.}
-
-\item{minimum.detections}{DEPRECATED. Please use the arguments min.total.detections
-and min.per.event instead.}
 
 \item{min.total.detections}{Minimum number of times a tag must have
 been detected during the study period for the detections to be considered true
@@ -142,8 +137,6 @@ To disable section warnings, set to 0. Must be equal to or greater than \code{se
 \item{section.error}{If a tag has section movement events with less or equal to
 \code{section.error} detections, user intervention is suggested.
 Defaults to 1. To disable user intervention suggestions, set to 0.}
-
-\item{section.minimum}{DEPRECATED: Please use section.warning and section.error instead.}
 
 \item{timestep}{The resolution desired for the residency calculations.
 One of "days" (default) or "hours".}

@@ -46,7 +46,7 @@ NULL
 checkArguments <- function(dp, tz, min.total.detections, min.per.event, max.interval, speed.method = c("last to first", "last to last", "first to first"),
   speed.warning, speed.error, start.time, stop.time, report, auto.open, save.detections, jump.warning, jump.error,
   inactive.warning, inactive.error, exclude.tags, override, print.releases, detections.y.axis = c("auto", "stations", "arrays"),
-  if.last.skip.section = NULL, replicates = NULL, section.warning, section.error, section.order = NULL, timestep = c("days", "hours"),
+  replicates = NULL, section.warning, section.error, section.order = NULL, timestep = c("days", "hours"),
   back.warning = Inf, back.error = Inf) {
   event(type = "debug", "Running checkArguments.")
 
@@ -309,11 +309,6 @@ checkArguments <- function(dp, tz, min.total.detections, min.per.event, max.inte
     event(type = "stop",
           "Some section names are duplicated in the 'section.order' argument.",
           " Please include each section only once.")
-  }
-
-  if (!is.null(if.last.skip.section) && !is.logical(if.last.skip.section)) {
-    event(type = "stop",
-          "'if.last.skip.section' must be logical.")
   }
 
   if (!is.numeric(back.warning)) {

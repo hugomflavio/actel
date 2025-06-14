@@ -44,7 +44,7 @@ test_that("assembleTimetable correctly extracts tag information", {
 
   output <- assembleTimetable(secmoves = secmoves, valid.moves = vm, all.moves = xmoves, spatial = spatial,
     dot_list = dot_list, dist.mat = dist.mat, speed.method = "last to first",
-    if.last.skip.section = TRUE, success.arrays = "A9", bio = bio, tz = "Europe/Copenhagen")
+    success.arrays = "A9", bio = bio, tz = "Europe/Copenhagen")
   timetable <<- output
 
   expect_equal(colnames(output), c('Times.entered.River', 'Average.time.until.River', 'Average.speed.to.River',
@@ -103,7 +103,7 @@ test_that("assembleTimetable correctly handles speed methods and invalid.dist", 
 
   output <- assembleTimetable(secmoves = secmoves.ff, valid.moves = vm.ff, all.moves = xmoves.ff, spatial = spatial,
     dot_list = dot_list, dist.mat = dist.mat, speed.method = "last to last",
-    if.last.skip.section = FALSE, success.arrays = "A9", bio = bio, tz = "Europe/Copenhagen")
+    success.arrays = "A9", bio = bio, tz = "Europe/Copenhagen")
   expect_equal(colnames(output), c('Times.entered.River', 'Average.time.until.River', 'Average.speed.to.River',
     'First.array.River', 'First.station.River', 'First.arrived.River', 'Average.time.in.River',
     'Last.array.River', 'Last.station.River', 'Last.left.River', 'Total.time.in.River', 'Times.entered.Fjord',
@@ -122,7 +122,7 @@ test_that("assembleTimetable correctly handles speed methods and invalid.dist", 
   attributes(xdist)$valid <- FALSE
   output <- assembleTimetable(secmoves = secmoves.ff, valid.moves = vm.ff, all.moves = xmoves.ff, spatial = spatial,
     dot_list = dot_list, dist.mat = xdist, speed.method = "last to last",
-    if.last.skip.section = FALSE, success.arrays = "A9", bio = bio, tz = "Europe/Copenhagen")
+    success.arrays = "A9", bio = bio, tz = "Europe/Copenhagen")
   expect_equal(colnames(output), c('Times.entered.River', 'Average.time.until.River',
     'First.array.River', 'First.station.River', 'First.arrived.River', 'Average.time.in.River',
     'Last.array.River', 'Last.station.River', 'Last.left.River', 'Total.time.in.River',
@@ -150,14 +150,14 @@ test_that("assembleTimetable correctly handles speed methods and invalid.dist", 
 
   output <- assembleTimetable(secmoves = secmoves.ff, valid.moves = vm.ff, all.moves = xmoves.ff, spatial = spatial,
     dot_list = dot_list, dist.mat = dist.mat, speed.method = "last to last",
-    if.last.skip.section = FALSE, success.arrays = "A9", bio = bio, tz = "Europe/Copenhagen")
+    success.arrays = "A9", bio = bio, tz = "Europe/Copenhagen")
   expect_equal(output$Backwards.movements, c(3))
   expect_equal(output$Max.cons.back.moves, c(2))
 
   xmoves.ff[[2]] <- xmoves.ff[[2]][1, ]
   output <- assembleTimetable(secmoves = secmoves.ff, valid.moves = vm.ff, all.moves = xmoves.ff, spatial = spatial,
     dot_list = dot_list, dist.mat = dist.mat, speed.method = "last to last",
-    if.last.skip.section = FALSE, success.arrays = "A9", bio = bio, tz = "Europe/Copenhagen")
+    success.arrays = "A9", bio = bio, tz = "Europe/Copenhagen")
   expect_equal(output$Backwards.movements, c(3))
   expect_equal(output$Max.cons.back.moves, c(2))
 })
@@ -201,7 +201,7 @@ names(secmoves) <- names(vm)
 
 timetable <- assembleTimetable(secmoves = secmoves, valid.moves = vm, all.moves = xmoves, spatial = spatial,
   dot_list = dot_list, dist.mat = dist.mat, speed.method = "last to first",
-  if.last.skip.section = TRUE, success.arrays = "A9", bio = bio, tz = "Europe/Copenhagen")
+  success.arrays = "A9", bio = bio, tz = "Europe/Copenhagen")
 
 status.df <- assembleOutput(timetable = timetable, bio = bio, spatial = spatial,
   dist.mat = dist.mat, tz = "Europe/Copenhagen")

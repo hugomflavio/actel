@@ -44,8 +44,6 @@
 #'  to 2. To disable jump warnings, set to Inf. Must be equal to or lower than \code{jump.error}.
 #' @param max.interval The number of minutes that must pass between detections
 #'  for a new event to be created. Defaults to 60.
-#' @param minimum.detections DEPRECATED. Please use the arguments min.total.detections
-#'  and min.per.event instead.
 #' @param min.total.detections Minimum number of times a tag must have
 #'  been detected during the study period for the detections to be considered true
 #'  and not just random noise. Defaults to 2.
@@ -139,7 +137,6 @@ explore <- function(
   tz = NULL,
   datapack = NULL,
   max.interval = 60,
-  minimum.detections,
   min.total.detections = 2,
   min.per.event = 1,
   start.time = NULL,
@@ -164,13 +161,6 @@ explore <- function(
   detections.y.axis = c("auto", "stations", "arrays"))
 {
   event(type = "debug", "Running explore.")
-
-# check deprecated argument
-  if (!missing(minimum.detections)) {
-    event(type = "stop",
-          "'minimum.detections' has been deprecated.",
-          " Please use 'min.total.detections' and 'min.per.event' instead.")
-  }
 
 # clean up any lost helpers
   deleteHelpers()

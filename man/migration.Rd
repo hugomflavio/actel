@@ -10,7 +10,6 @@ migration(
   datapack = NULL,
   success.arrays = NULL,
   max.interval = 60,
-  minimum.detections,
   min.total.detections = 2,
   min.per.event = 1,
   start.time = NULL,
@@ -31,7 +30,7 @@ migration(
   discard.orphans = FALSE,
   discard.first = NULL,
   save.detections = FALSE,
-  if.last.skip.section = TRUE,
+  if.last.skip.section,
   replicates = NULL,
   disregard.parallels = TRUE,
   GUI = c("needed", "always", "never"),
@@ -56,9 +55,6 @@ successfully migrated through the study area.}
 
 \item{max.interval}{The number of minutes that must pass between detections
 for a new event to be created. Defaults to 60.}
-
-\item{minimum.detections}{DEPRECATED. Please use the arguments min.total.detections
-and min.per.event instead.}
 
 \item{min.total.detections}{Minimum number of times a tag must have
 been detected during the study period for the detections to be considered true
@@ -149,8 +145,7 @@ the release-to-first-detection calculations.}
 \item{save.detections}{Logical: Should the processed detections be saved for
 future runs?}
 
-\item{if.last.skip.section}{Logical: Should a tag detected at the last array
-of a given section be considered to have disappeared in the next section?}
+\item{if.last.skip.section}{DEPRECATED - does nothing.}
 
 \item{replicates}{A list containing, for each array to which intra-array
 efficiency is to be calculated: The standard names of the stations to be

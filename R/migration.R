@@ -12,8 +12,7 @@
 #' @param success.arrays The arrays that mark the end of the study area. If a
 #'  tag crosses one of these arrays, the respective animal is considered to have
 #'  successfully migrated through the study area.
-#' @param if.last.skip.section Logical: Should a tag detected at the last array
-#'  of a given section be considered to have disappeared in the next section?
+#' @param if.last.skip.section DEPRECATED - does nothing.
 #' @param disregard.parallels Logical:  Should the presence of parallel arrays
 #'  invalidate potential efficiency peers? See the vignettes for more details.
 #' @param back.error If a tag moves backwards a number of arrays equal or
@@ -150,7 +149,6 @@ migration <- function(
   datapack = NULL,
   success.arrays = NULL,
   max.interval = 60,
-  minimum.detections,
   min.total.detections = 2,
   min.per.event = 1,
   start.time = NULL,
@@ -171,7 +169,7 @@ migration <- function(
   discard.orphans = FALSE,
   discard.first = NULL,
   save.detections = FALSE,
-  if.last.skip.section = TRUE,
+  if.last.skip.section,
   replicates = NULL,
   disregard.parallels = TRUE,
   GUI = c("needed", "always", "never"),
@@ -182,10 +180,10 @@ migration <- function(
   event(type = "debug", "Running migration.")
 
 # check deprecated argument
-  if (!missing(minimum.detections)) {
+  if (!missing(if.last.skip.section)) {
     event(type = "stop",
-          "'minimum.detections' has been deprecated.",
-          " Please use 'min.total.detections' and 'min.per.event' instead.")
+          "'if.last.skip.section' has been deprecated.",
+          " This was necessary to fix issue 79.")
   }
 
 # clean up any lost helpers
@@ -244,7 +242,6 @@ migration <- function(
                         exclude.tags = exclude.tags,
                         override = override,
                         print.releases = print.releases,
-                        if.last.skip.section = if.last.skip.section,
                         replicates = replicates,
                         section.order = section.order,
                         detections.y.axis = detections.y.axis)
@@ -292,7 +289,6 @@ migration <- function(
     parse_arg(discard.orphans), ", ",
     parse_arg(discard.first), ", ",
     parse_arg(save.detections), ", ",
-    parse_arg(if.last.skip.section), ", ",
     parse_arg(replicates), ", ",
     parse_arg(disregard.parallels), ", ",
     parse_arg(GUI), ", ",
@@ -650,7 +646,6 @@ migration <- function(
                                  dot_list = dot_list, bio = bio, tz = tz, 
                                  dist.mat = dist.mat, 
                                  speed.method = speed.method,
-                                 if.last.skip.section = if.last.skip.section,
                                  success.arrays = success.arrays)
 
   status.df <- assembleOutput(timetable = timetable, bio = bio,
@@ -1539,7 +1534,7 @@ printMigrationRmd <- function(override.fragment, biometric.fragment,
 #'
 assembleTimetable <- function(secmoves, valid.moves, all.moves, spatial,
                               dot_list, bio, tz, dist.mat, speed.method,
-                              if.last.skip.section, success.arrays) {
+                              success.arrays) {
   event(type = "debug", "Running assembleTimetable.")
 
   # NOTE: The NULL variables below are actually column names used by data.table.

@@ -8,7 +8,6 @@ explore(
   tz = NULL,
   datapack = NULL,
   max.interval = 60,
-  minimum.detections,
   min.total.detections = 2,
   min.per.event = 1,
   start.time = NULL,
@@ -42,9 +41,6 @@ May be used to run actel analyses based on R objects, rather than input files.}
 
 \item{max.interval}{The number of minutes that must pass between detections
 for a new event to be created. Defaults to 60.}
-
-\item{minimum.detections}{DEPRECATED. Please use the arguments min.total.detections
-and min.per.event instead.}
 
 \item{min.total.detections}{Minimum number of times a tag must have
 been detected during the study period for the detections to be considered true

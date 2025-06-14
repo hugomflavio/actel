@@ -148,7 +148,9 @@ In the spatial input, the expected first arrays of the release sites should matc
 		"Long section names detected. To improve graphic rendering, consider keeping section names under six characters.", fixed = TRUE)
 
 	write.csv(example.spatial[, -match("Section", colnames(example.spatial))], "spatial.csv", row.names = FALSE)
-	expect_error(loadSpatial(section.order = c("Fjord" ,"Sea")),
+	expect_error(
+	  expect_warning(loadSpatial(section.order = c("Fjord" ,"Sea")),
+	     "spatial does not contain a 'Section' column. Assigning all arrays to section 'All'", fixed = TRUE),
 		"Not all sections are listed in 'section.order'. Sections missing: All", fixed = TRUE)
 })
 

@@ -27,9 +27,6 @@ test_that("migration stops when any argument does not make sense", {
 			"Arrays '1', 'a' are listed in the 'success.arrays' argument, but these arrays are not part of the study arrays.", fixed = TRUE),
 	"No detections were found for receiver(s) 132907.", fixed = TRUE)
 
-	expect_error(migration(tz = 'Europe/Copenhagen', report = TRUE, GUI = "never", if.last.skip.section = "a"),
-		"'if.last.skip.section' must be logical.", fixed = TRUE)
-
 	expect_error(migration(tz = 'Europe/Copenhagen', report = TRUE, GUI = "never", replicates = "a"),
 		"'replicates' must be a list.", fixed = TRUE)
 

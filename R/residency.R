@@ -7,7 +7,6 @@
 #' and other residency-focused variables, this is the analysis you are looking
 #' for!
 #'
-#' @param section.minimum DEPRECATED: Please use section.warning and section.error instead.
 #' @param section.error If a tag has section movement events with less or equal to
 #'  \code{section.error} detections, user intervention is suggested.
 #'  Defaults to 1. To disable user intervention suggestions, set to 0.
@@ -115,7 +114,6 @@ residency <- function(
   section.order = NULL,
   datapack = NULL,
   max.interval = 60,
-  minimum.detections,
   min.total.detections = 2,
   min.per.event = 1,
   start.time = NULL,
@@ -136,7 +134,6 @@ residency <- function(
   save.detections = FALSE,
   section.warning = 1,
   section.error = 1,
-  section.minimum,
   timestep = c("days", "hours"),
   replicates = NULL,
   GUI = c("needed", "always", "never"),
@@ -144,18 +141,6 @@ residency <- function(
   print.releases = TRUE,
   detections.y.axis = c("auto", "stations", "arrays"))
 {
-
-# check deprecated argument
-  if (!missing(minimum.detections)) {
-    event(type = "stop",
-          "'minimum.detections' has been deprecated.",
-          " Please use 'min.total.detections' and 'min.per.event' instead.")
-  }
-  if (!missing(section.minimum)) {
-    event(type = "stop",
-          "'section.minimum' has been deprecated.",
-          " Please use 'section.warning' and 'section.error' instead.")
-  }
 
 # clean up any lost helpers
   deleteHelpers()

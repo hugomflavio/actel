@@ -62,7 +62,7 @@ names(secmoves) <- names(vm)
 
 timetable <- assembleTimetable(secmoves = secmoves, valid.moves = vm, all.moves = xmoves, spatial = spatial,
   dot_list = dot_list, dist.mat = dist.mat, speed.method = "last to first",
-  if.last.skip.section = TRUE, success.arrays = "A9", bio = bio, tz = "Europe/Copenhagen")
+  success.arrays = "A9", bio = bio, tz = "Europe/Copenhagen")
 
 status.df <- assembleOutput(timetable = timetable, bio = bio, spatial = spatial,
   dist.mat = dist.mat, tz = "Europe/Copenhagen")
@@ -200,7 +200,7 @@ names(secmoves) <- names(vm)
 
 timetable <- assembleTimetable(secmoves = secmoves, valid.moves = vm, all.moves = xmoves, spatial = spatial,
   dot_list = dot_list, dist.mat = dist.mat, speed.method = "last to first",
-  if.last.skip.section = TRUE, success.arrays = "A9", bio = bio, tz = "Europe/Copenhagen")
+  success.arrays = "A9", bio = bio, tz = "Europe/Copenhagen")
 
 status.df <- assembleOutput(timetable = timetable, bio = bio, spatial = spatial,
   dist.mat = dist.mat, tz = "Europe/Copenhagen")
