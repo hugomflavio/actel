@@ -10,16 +10,12 @@
 #'   case of the `explore` function)
 #'  \item \code{deployments}: A list corresponding to 'deployments.csv'
 #'  \item \code{spatial}: A list corresponding to 'spatial.csv'
-#'  \item \code{dot}: A data frame containing the connections between arrays
-#'  \item \code{arrays}: A list containing detailed information on the arrays
-#'  \item \code{dotmat}: A matrix of the distance (in number of arrays) between
-#'   pairs of arrays
+#'  \item \code{dot_list}: A list containing detailed information on the
+#'   study area configuration.
 #'  \item \code{dist.mat}: A matrix of the distances (in metres) between
 #'   stations (if a 'distances.csv' is present)
 #'  \item \code{detections.list}: A list containing the detection data
 #'   for each tag
-#'  \item \code{paths}: A list of the all array paths between each pair
-#'   of arrays.
 #' }
 #'
 #' @keywords internal
@@ -112,22 +108,21 @@ loadStudyData <- function(tz, override = NULL, start.time,
                                tz = tz, save.detections = save.detections,
                                record.source = TRUE)
   detections <- checkDupDetections(input = detections)
-
   use.fakedot <- TRUE
   if (file.exists("spatial.dot")) {
     event(type = c("screen", "report"),
           "M: A 'spatial.dot' file was detected",
           ", activating multi-branch analysis.")
-    recipient <- loadDot(input = "spatial.dot", spatial = spatial,
-                         disregard.parallels = disregard.parallels)
+    dot_list <- loadDot(input = "spatial.dot", spatial = spatial,
+                        disregard.parallels = disregard.parallels)
     use.fakedot <- FALSE
   }
   if (use.fakedot & file.exists("spatial.txt")) {
     event(type = c("screen", "report"),
           "M: A 'spatial.txt' file was detected, activating",
           " multi-branch analysis.")
-    recipient <- loadDot(input = "spatial.txt", spatial = spatial,
-                         disregard.parallels = disregard.parallels)
+    dot_list <- loadDot(input = "spatial.txt", spatial = spatial,
+                        disregard.parallels = disregard.parallels)
     use.fakedot <- FALSE
   }
   if (use.fakedot) {
@@ -139,32 +134,21 @@ loadStudyData <- function(tz, override = NULL, start.time,
       aux <- unique(spatial$Array[spatial$Type == "Hydrophone"])
       fakedot <- paste(aux, "--", aux)
     }
-    recipient <- loadDot(string = fakedot, spatial = spatial,
-                         disregard.parallels = disregard.parallels)
+    dot_list <- loadDot(string = fakedot, spatial = spatial,
+                        disregard.parallels = disregard.parallels)
   }
-  dot <- recipient$dot
-  arrays <- recipient$arrays
-  dotmat <- recipient$dotmat
-  paths <- recipient$paths
-  if (is.null(dot) | is.null(arrays) | is.null(dotmat) | is.null(paths)) {
-    event(type = "stop",
-          "Something went wrong when assigning recipient objects",
-          " (loadDot). If this error persists, contact the developer.") # nocov
-  }
-
-  rm(use.fakedot, recipient)
 
   # Check if there is a logical first array in the study area, should a
   # replacement release site need to be created.
-  if (sum(unlist(lapply(arrays, function(a) is.null(a$before)))) == 1) {
-    link <- unlist(lapply(arrays, function(a) is.null(a$before)))
-    first.array <- names(arrays)[link]
+  link <- sapply(dot_list$array_info$arrays, function(a) is.null(a$before))
+  if (sum(link) == 1) {
+    first.array <- names(dot_list$array_info$arrays)[link]
   } else {
     first.array <- NULL
   }
   # Finish structuring the spatial file
-  spatial <- transformSpatial(spatial = spatial, bio = bio, arrays = arrays,
-                              dotmat = dotmat, first.array = first.array)
+  spatial <- transformSpatial(spatial = spatial, bio = bio,
+                              dot_list = dot_list, first.array = first.array)
 
   # Get standardized station and receiver names, check for receivers
   # with no detections
@@ -181,12 +165,14 @@ loadStudyData <- function(tz, override = NULL, start.time,
         " to ", as.character(tail(detections$Timestamp, 1)),
         " (", tz, ").")
 
-  arrays <- liveArrayTimes(arrays = arrays, deployments = deployments,
-                           spatial = spatial)
+  dot_list$array_info$arrays <- liveArrayTimes(
+    arrays = dot_list$array_info$arrays,
+    deployments = deployments,
+    spatial = spatial)
 
   # Reorder arrays object by spatial order
-  link <- match(unlist(spatial$array.order), names(arrays))
-  arrays <- arrays[link]
+  link <- match(unlist(spatial$array.order), names(dot_list$array_info$arrays))
+  dot_list$array_info$arrays <- dot_list$array_info$arrays[link]
   rm(link)
 
   # Load distances and check if they are valid
@@ -214,11 +200,12 @@ loadStudyData <- function(tz, override = NULL, start.time,
   spatial <- recipient$spatial
   deployments <- recipient$deployments
   detections.list <- recipient$detections.list
-  if (is.null(spatial) | is.null(deployments) | is.null(detections.list))
+  if (is.null(spatial) | is.null(deployments) | is.null(detections.list)) {
     event(type = "stop",
           "Something went wrong when assigning recipient objects",
           " (unknownReceivers). If this error persists,",
           " contact the developer.") # nocov
+  }
   rm(recipient)
 
   detections.list <- checkDetectionsBeforeRelease(input = detections.list,
@@ -232,12 +219,9 @@ loadStudyData <- function(tz, override = NULL, start.time,
   return(list(bio = bio,
               deployments = deployments,
               spatial = spatial,
-              dot = dot,
-              arrays = arrays,
-              dotmat = dotmat,
+              dot_list = dot_list,
               dist.mat = dist.mat,
-              detections.list = detections.list,
-              paths = paths))
+              detections.list = detections.list))
 }
 
 #' Load spatial.dot
@@ -283,7 +267,8 @@ loadDot <- function(string = NULL, input = NULL, spatial,
                 }
   )
   unique.arrays <- unique(unlist(aux))
-  if (any(link <- is.na(match(unique.arrays, colnames(mat))))) {
+  link <- is.na(match(unique.arrays, colnames(mat)))
+  if (any(link)) {
     if (preloading) {
       event(type = "stop",
             "Not all arrays listed in the spatial input are",
@@ -314,7 +299,8 @@ loadDot <- function(string = NULL, input = NULL, spatial,
         }
     }
   }
-  if (any(link <- is.na(match(colnames(mat), unique.arrays)))) {
+  link <- is.na(match(colnames(mat), unique.arrays))
+  if (any(link)) {
     if (preloading) {
       event(type = "stop",
             "Not all arrays listed in the dot input are",
@@ -349,8 +335,53 @@ loadDot <- function(string = NULL, input = NULL, spatial,
   }
   arrays <- dotList(input = dot, spatial = spatial)
   arrays <- dotPaths(input = arrays, disregard.parallels = disregard.parallels)
-  shortest.paths <- findShortestChains(input = arrays)
-  return(list(dot = dot, arrays = arrays, dotmat = mat, paths = shortest.paths))
+  array_paths <- findShortestChains(input = arrays)
+
+  array_info <- list(arrays = arrays,
+                     dotmat = mat,
+                     paths = array_paths)
+
+  # section connections
+  # use array dot to make section connections
+  sdot <- dot
+  # swap array names with section names
+  link <- match(dot$A, spatial$Array)
+  sdot$A <- spatial$Section[link]
+  link <- match(dot$B, spatial$Array)
+  sdot$B <- spatial$Section[link]
+  # no support for one-way section connections
+  sdot$to <- "--"
+  # remove repeated rows
+  check <- apply(sdot, 1, paste, collapse = "")
+  sdot <- sdot[!duplicated(check),]
+  # remove self connections
+  check <- sdot$A != sdot$B
+  sdot <- sdot[check, ]
+
+  if (nrow(sdot) > 0) {
+    smat <- dotMatrix(input = sdot)
+    sections <- dotList(input = sdot, spatial = spatial, style = "s")
+    sections <- dotPaths(input = sections, disregard.parallels = FALSE)
+    section_paths <- findShortestChains(input = sections)
+  } else {
+    aux <- list(arrays = unique(spatial$Array[spatial$Type == "Hydrophone"]))
+    sections <- list(aux)
+    names(sections) <- unique(spatial$Section[spatial$Type == "Hydrophone"])
+    smat <- matrix(0)
+    rownames(smat) <- unique(spatial$Section[spatial$Type == "Hydrophone"])
+    colnames(smat) <- unique(spatial$Section[spatial$Type == "Hydrophone"])
+    section_paths <- list()
+  }
+
+  section_info <- list(sections = sections,
+                       dotmat = smat,
+                       paths = section_paths)
+
+  # and all out
+  output <- list(dot = dot,
+                 array_info = array_info,
+                 section_info = section_info)
+  return(output)
 }
 
 #' Read dot file or string
@@ -523,17 +554,19 @@ dotMatrix <- function(input) {
 #'
 #' @param input a dot data frame
 #' @param spatial The spatial data frame
+#' @param style one of array or section, depending on the type of list we want
 #'
 #' @return  A list containing detailed information on the arrays
 #'
 #' @keywords internal
 #'
-dotList <- function(input, spatial) {
+dotList <- function(input, spatial, style = c("array", "section")) {
   event(type = "debug", "Running dotList.")
+  style <- match.arg(style)
 
-  # if there are sections, determine which connections are at the
-  # edge between sections
-  if (any(grepl("^Section$", colnames(spatial)))) {
+  # For array-style lists, if there are sections, determine which connections
+  # are at the edge between sections
+  if (style == "array" && any(grepl("^Section$", colnames(spatial)))) {
     sections <- levels(spatial$Section)
     input$SectionA <- rep(NA_character_, nrow(input))
     input$SectionB <- rep(NA_character_, nrow(input))
@@ -545,48 +578,53 @@ dotList <- function(input, spatial) {
     input$Edge <- with(input, SectionA != SectionB)
   }
 
-  arrays <- list()
-  for (a in unique(c(t(input[, c(1, 3)])))) { # go through each unique array
-    auxA <- input[input$A == a, ]
+  output <- list()
+  for (i in unique(c(t(input[, c(1, 3)])))) { # go through each unique node
+    auxA <- input[input$A == i, ]
     auxA <- auxA[auxA$to != "<-", ]
-    auxB <- input[input$B == a, ]
+    auxB <- input[input$B == i, ]
     auxB <- auxB[auxB$to != "->", ]
-    # find parallel arrays (i.e. both before and after)
+    # find parallel output (i.e. both before and after)
     par.trigger <- FALSE
-    parallel <- sapply(auxA[, 3], function(x) match(x, auxB[, 1]))
-    if (any(!is.na(parallel))) {
-      # discount those from the before and after, and trigger parallel inclusion
-      auxA <- auxA[-which(!is.na(parallel)), , drop = FALSE]
-      auxB <- auxB[-parallel[!is.na(parallel)], , drop = FALSE]
-      par.trigger <- TRUE
+    if (nrow(auxA) > 0 & nrow(auxB) > 0) {
+      parallel <- sapply(auxA[, 3], function(x) match(x, auxB[, 1]))
+      if (any(!is.na(parallel))) {
+        # discount those from the before and after, and trigger parallel inclusion
+        auxA <- auxA[-which(!is.na(parallel)), , drop = FALSE]
+        auxB <- auxB[-parallel[!is.na(parallel)], , drop = FALSE]
+        par.trigger <- TRUE
+      }
+    } else {
+      parallel <- NA
     }
-    recipient <- list(
-      neighbours = unique(c(auxA$B, auxB$A, names(parallel)[!is.na(parallel)])),
-      before     = if (nrow(auxB) == 0) {
-                     NULL
-                   } else {
-                     unique(auxB$A)
-                   },
-      after      = if (nrow(auxA) == 0) {
-                     NULL
-                   } else {
-                     unique(auxA$B)
-                   },
-      parallel   = if (!par.trigger) {
-                     NULL
-                   } else {
-                     unique(names(parallel)[!is.na(parallel)])
-                   },
-      edge       = if (nrow(auxA) == 0) {
-                     FALSE
-                   } else {
-                     any(auxA$Edge)
-                   }
-      )
-    arrays[[length(arrays) + 1]] <- recipient
-    names(arrays)[length(arrays)] <- a
+    all_nearby <- c(auxA$B, auxB$A, names(parallel)[!is.na(parallel)])
+    if (style == "array") {
+      recipient <- list(section = ifelse(nrow(auxA) > 0,
+                                         auxA$SectionA[1],
+                                         auxB$SectionB[1]),
+                        neighbours = unique(all_nearby))
+    } else {
+      aux <- spatial$Array[na.as.false(spatial$Section == i)]
+      recipient <- list(arrays = unique(aux),
+                        neighbours = unique(all_nearby))      
+    }
+    if (nrow(auxB) > 0) {
+      recipient$before <- unique(auxB$A)
+    }
+    if (nrow(auxA) > 0) {
+      recipient$after <- unique(auxA$B)
+    }
+    if (par.trigger) {
+      recipient$parallel <- unique(names(parallel)[!is.na(parallel)])
+    }
+    if (style == "array") {
+      recipient$edge <- any(auxA$Edge) | any(auxB$Edge)
+    }
+    output[[length(output) + 1]] <- recipient
+    names(output)[length(output)] <- i
   }
-  return(arrays)
+  attributes(output)$type <- style
+  return(output)
 }
 
 #' Find arrays valid for efficiency calculation
@@ -833,40 +871,65 @@ findShortestChains <- function(input) {
   # List to store the paths
   the_paths <- list()
   for (A in names(input)) {
-    # make list of arrays to look for
+    # make vector of arrays to look for
     look_for <- rep(NA, length(input))
     names(look_for) <- names(input)
     # Don't look for the own array
     look_for[A] <- 0
     # Set neighbours with distance 1, to start
-    look_for[input[[A]]$neighbours] <- 1
-    # begin
-    iteration <- 1
-    while(any(na.as.false(look_for == iteration)) & any(is.na(look_for))) {
-      to_check <- names(look_for)[na.as.false(look_for == iteration)]
+    look_for[as.character(input[[A]]$neighbours)] <- 1
+    # begin. 
+    # The loop below looks for the shortest way to all the other
+    # nodes simultaneously.
+    this_step <- 0
+    more_to_find <- TRUE
+    while (more_to_find) {
+      # increment steps
+      this_step <- this_step + 1
+      # starting points are those that match the steps
+      # e.g. the first iteration starts from the neighbours (1 step to reach)
+      to_check <- names(look_for)[na.as.false(look_for == this_step)]
+      # nodes to look for are those that have not been seen yet
       to_look <- names(look_for)[is.na(look_for)]
-      recipient <- lapply(to_check, function(i) {
+      # for each of the starting points...
+      for (i in to_check) {
+        # see if the ones we're looking for are their neighbours
         aux <- match(to_look, input[[i]]$neighbours)
+        # if any neighbours are who we're looking for...
         if (any(!is.na(aux))) {
+          # grab their names
           aux <- input[[i]]$neighbours[na.as.false(aux)]
+          # and then, for each of them
           for (found in aux) {
+            # if the path is just starting, then just paste
+            # the name of the starting point
             if (is.null(the_paths[[paste0(A, "_to_", i)]])) {
               to.add <- i
+            # else concatenate the stepping stones with " -> "
             } else {
               to.add <- paste(the_paths[[paste0(A, "_to_", i)]],
                               i, sep = " -> ")
             }
             A_to_found <- paste0(A,"_to_",found)
+            # if this is the first short path found, simply allocate.
+            # otherwise, store the multiple possible shortest paths together
             if (is.null(the_paths[[A_to_found]])) {
-              the_paths[[A_to_found]] <<- to.add
+              the_paths[[A_to_found]] <- to.add
             } else {
-              the_paths[[A_to_found]] <<- c(the_paths[[A_to_found]], to.add)
+              the_paths[[A_to_found]] <- c(the_paths[[A_to_found]], to.add)
             }
-            look_for[found] <<- iteration + 1
+            # allocate the shortest distance to the look_for vector
+            look_for[found] <- this_step + 1
           }
         }
-      })
-      iteration <- iteration + 1
+      }
+      # now, to decide if we go again:
+      # 1) Is there anything else to look for?
+      check1 <- any(is.na(look_for))
+      # 2) Are there new paths still available?
+      check2 <- any(na.as.false(look_for == (this_step + 1))) 
+      # If yes, then go again.
+      more_to_find <- check1 & check2
     }
   }
   return(the_paths)
@@ -1322,109 +1385,106 @@ loadSpatial <- function(input = "spatial.csv", section.order = NULL){
     }
   }
   # Check Section column
-  if (any(grepl("^Section$", colnames(input)))) {
-    # check missing data in the arrays
-    no_section <- any(is.na(input$Section[input$Type == "Hydrophone"]))
-    empty_section <- any(input$Section[input$Type == "Hydrophone"] == "")
-    if (no_section | empty_section) {
-      event(type = "stop",
-            "Some rows do not contain 'Section' information in the spatial",
-            " input. Please double-check the input files.")
-    }
-    # check spaces in the array names
-    if (any(grepl(" ", input$Section))) {
-      event(type = "screen",
-            "M: Replacing spaces with '_' in section names to",
-            " prevent function failure.")
-      input$Section <- gsub(" ", "_", input$Section)
-    }
-    if (any(grepl(weird_chars, input$Section))) {
-      event(type = c("warning", "screen", "report"),
-            "Troublesome characters found in the section names (\\/|:*?\"<>|).",
-            " Replacing these with '_' to prevent function failure.")
-      input$Section <- gsub(weird_chars, "_", input$Section)
-    }
-    sections <- unique(input$Section[input$Type == "Hydrophone"])
-    # check reserved section names
-    if (any(grepl("^Release$", sections))) {
-      event(type = "stop",
-            "The term 'Release' is reserved for internal calculations.",
-            " Do not name any sections or arrays as 'Release'.")
-    }
-    if (any(grepl("^Total$", sections))) {
-      event(type = "stop",
-            "The term 'Total' is reserved for internal calculations.",
-            " Do not name any sections or arrays as 'Total'.")
-    }
-    if (any(grepl("^Unknown$", sections))) {
-      event(type = "stop",
-            "The term 'Unknown' is reserved for internal calculations.",
-            " Do not name any sections or arrays as 'Unknown'.")
-    }
-    # check that section names are independent
-    link <- sapply(sections, function(i) length(grep(i, sections))) > 1
-    if (any(link)) {
-      event(type = "stop",
-            ifelse(sum(link) == 1, "Section '", "Sections '"),
-            paste(sections[link], collapse = "', '"),
-            ifelse(sum(link) == 1, "' is", "' are"),
-            " contained within other section names.",
-            " Sections must be unique and independent.\n",
-            "       Please rename your sections so that section",
-            " names are not contained within each other.")
-    }
-
-    if (is.null(section.order)) {
-      input$Section <- factor(input$Section, levels = sections)
-    } else {
-      section.order <- gsub(" ", "_", section.order)
-
-      if (any(link <- is.na(match(sections, section.order)))) {
-        event(type = "stop",
-              "Not all sections are listed in 'section.order'.",
-              " Sections missing: ", paste(sections[link], collapse = ", "))
-      }
-
-      if (any(link <- is.na(match(section.order, sections)))) {
-        event(type = c("warning", "screen", "report"),
-              "Not all values listed in 'section.order' correspond",
-              " to sections. Discarding the following values: ",
-              paste(section.order[link], collapse = ", "))
-        section.order <- section.order[!link]
-      }
-      input$Section <- factor(input$Section, levels = section.order)
-    }
-    if (any(nchar(as.character(sections)) > 6)) {
-      event(type = c("warning", "screen", "report"),
-            "Long section names detected. To improve graphic rendering,",
-            " consider keeping section names under six characters.")
-    }
-
-    # find if arrays are assigned to more than one section
-    aux <- input[input$Type == "Hydrophone", ]
-    aux <- with(aux, as.data.frame.matrix(table(Array, Section)))
-    sections.per.array <- apply(aux, 1, function(i) sum(i > 0))
-    if (any(sections.per.array > 1)) {
-      event(type = "stop",
-            ifelse(sum(sections.per.array > 1) == 1, "Array '", "Arrays '"),
-            paste0(names(sections.per.array)[sections.per.array > 1],
-                   collapse = "', '"),
-            ifelse(sum(sections.per.array > 1) == 1,
-                   "' has been", "' have been"),
-            " assigned to more than one section! Each array can only belong",
-            " to one section. Please correct the spatial input before",
-            " continuing.")
-    }
-  } else {
-    if (!is.null(section.order)) {
-      event(type = c("warning", "screen", "report"),
-            "'section.order' was set but input has no 'Section' column.",
-            " Ignoring argument.")
-    }
+  if (!any(grepl("^Section$", colnames(input)))) {
     event(type = c("warning", "screen", "report"),
-          "The spatial input does not contain a 'Section' column.",
-          " This input is only valid for explore() analyses.")
+          "spatial does not contain a 'Section' column. Assigning all",
+          " arrays to section 'All'")
+    input$Section <- "All"
   }
+
+  # check missing data in the arrays
+  no_section <- any(is.na(input$Section[input$Type == "Hydrophone"]))
+  empty_section <- any(input$Section[input$Type == "Hydrophone"] == "")
+  if (no_section | empty_section) {
+    event(type = "stop",
+          "Some rows do not contain 'Section' information in the spatial",
+          " input. Please double-check the input files.")
+  }
+  # check spaces in the array names
+  if (any(grepl(" ", input$Section))) {
+    event(type = "screen",
+          "M: Replacing spaces with '_' in section names to",
+          " prevent function failure.")
+    input$Section <- gsub(" ", "_", input$Section)
+  }
+  if (any(grepl(weird_chars, input$Section))) {
+    event(type = c("warning", "screen", "report"),
+          "Troublesome characters found in the section names (\\/|:*?\"<>|).",
+          " Replacing these with '_' to prevent function failure.")
+    input$Section <- gsub(weird_chars, "_", input$Section)
+  }
+  sections <- unique(input$Section[input$Type == "Hydrophone"])
+  # check reserved section names
+  if (any(grepl("^Release$", sections))) {
+    event(type = "stop",
+          "The term 'Release' is reserved for internal calculations.",
+          " Do not name any sections or arrays as 'Release'.")
+  }
+  if (any(grepl("^Total$", sections))) {
+    event(type = "stop",
+          "The term 'Total' is reserved for internal calculations.",
+          " Do not name any sections or arrays as 'Total'.")
+  }
+  if (any(grepl("^Unknown$", sections))) {
+    event(type = "stop",
+          "The term 'Unknown' is reserved for internal calculations.",
+          " Do not name any sections or arrays as 'Unknown'.")
+  }
+  # check that section names are independent
+  link <- sapply(sections, function(i) length(grep(i, sections))) > 1
+  if (any(link)) {
+    event(type = "stop",
+          ifelse(sum(link) == 1, "Section '", "Sections '"),
+          paste(sections[link], collapse = "', '"),
+          ifelse(sum(link) == 1, "' is", "' are"),
+          " contained within other section names.",
+          " Sections must be unique and independent.\n",
+          "       Please rename your sections so that section",
+          " names are not contained within each other.")
+  }
+
+  if (is.null(section.order)) {
+    input$Section <- factor(input$Section, levels = sections)
+  } else {
+    section.order <- gsub(" ", "_", section.order)
+
+    if (any(link <- is.na(match(sections, section.order)))) {
+      event(type = "stop",
+            "Not all sections are listed in 'section.order'.",
+            " Sections missing: ", paste(sections[link], collapse = ", "))
+    }
+
+    if (any(link <- is.na(match(section.order, sections)))) {
+      event(type = c("warning", "screen", "report"),
+            "Not all values listed in 'section.order' correspond",
+            " to sections. Discarding the following values: ",
+            paste(section.order[link], collapse = ", "))
+      section.order <- section.order[!link]
+    }
+    input$Section <- factor(input$Section, levels = section.order)
+  }
+  if (any(nchar(as.character(sections)) > 6)) {
+    event(type = c("warning", "screen", "report"),
+          "Long section names detected. To improve graphic rendering,",
+          " consider keeping section names under six characters.")
+  }
+
+  # find if arrays are assigned to more than one section
+  aux <- input[input$Type == "Hydrophone", ]
+  aux <- with(aux, as.data.frame.matrix(table(Array, Section)))
+  sections.per.array <- apply(aux, 1, function(i) sum(i > 0))
+  if (any(sections.per.array > 1)) {
+    event(type = "stop",
+          ifelse(sum(sections.per.array > 1) == 1, "Array '", "Arrays '"),
+          paste0(names(sections.per.array)[sections.per.array > 1],
+                 collapse = "', '"),
+          ifelse(sum(sections.per.array > 1) == 1,
+                 "' has been", "' have been"),
+          " assigned to more than one section! Each array can only belong",
+          " to one section. Please correct the spatial input before",
+          " continuing.")
+  }
+
   # check release arrays exist
   receivers <- unique(input$Array[input$Type == "Hydrophone"])
   releases <- unique(unlist(sapply(input$Array[input$Type == "Release"],
@@ -2933,7 +2993,7 @@ createStandards <- function(detections, spatial, deployments,
 #'
 #' @keywords internal
 #'
-transformSpatial <- function(spatial, bio, arrays, dotmat, first.array = NULL) {
+transformSpatial <- function(spatial, bio, dot_list, first.array = NULL) {
   event(type = "debug", "Running transformSpatial.")
   # Break the stations away
   event(type = "debug", "Creating 'stations'.")
@@ -3019,7 +3079,8 @@ transformSpatial <- function(spatial, bio, arrays, dotmat, first.array = NULL) {
           }
           aux <- unlist(strsplit(release.sites$Array[i],
                                  "|", fixed = TRUE))
-          if (any(is.na(dotmat[aux, aux])) ||  any(dotmat[aux, aux] > 1)) {
+          these <- dot_list$array_info$dotmat[aux, aux]
+          if (any(is.na(these)) ||  any(these > 1)) {
             event(type = c("warning", "screen", "report"),
                   "Release site ", release.sites$Standard.name[i],
                   " has multiple possible first arrays (",
@@ -3068,7 +3129,7 @@ transformSpatial <- function(spatial, bio, arrays, dotmat, first.array = NULL) {
       array.order[[j]] <- unique(spatial$Array[link])
     }
   } else {
-    array.order <- list(all = names(arrays))
+    array.order <- list(all = names(dot_list$array_info$arrays))
   }
   # Order release sites by entry point.
   first.releases <- sapply(as.character(release.sites$Array),

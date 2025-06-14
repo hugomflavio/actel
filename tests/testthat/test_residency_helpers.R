@@ -14,9 +14,7 @@ detections.list <- study.data$detections.list
 bio <- study.data$bio
 spatial <- study.data$spatial
 dist.mat <- study.data$dist.mat
-dotmat <- study.data$dotmat
-paths <- study.data$paths
-arrays <- study.data$arrays
+dot_list <- study.data$dot_list
 sections <- study.data$sections
 
 moves <- groupMovements(detections.list = detections.list[1:2], bio = bio, spatial = spatial,
@@ -99,7 +97,7 @@ test_that("res_assembleOutput works as expected.", {
   expect_false(any(is.na(status.df$Valid.detections)))
   expect_false(any(is.na(status.df$All.detections)))
   expect_false(any(is.na(status.df$Status)))
-  expect_equal(levels(status.df$Very.last.array), c("Release", names(arrays)))
+  expect_equal(levels(status.df$Very.last.array), c("Release", names(dot_list$array_info$arrays)))
   expect_equal(levels(status.df$Status), c("Disap. in River", "Disap. in Fjord", "Disap. in Sea", "Disap. at Release"))
   expect_equal(unique(status.df$P.type), c("Manual", "Auto", "Skipped"))
 })
@@ -180,7 +178,7 @@ test_that("globalRatios works as expected.", {
 })
 
 test_that("res_efficiency works as expected, and can include intra array estimates", {
-  efficiency <<- res_efficiency(arrmoves = moves, bio = bio, spatial = spatial, arrays = arrays, paths = paths, dotmat = dotmat)
+  efficiency <<- res_efficiency(arrmoves = moves, bio = bio, spatial = spatial, dot_list = dot_list)
   expect_equal(names(efficiency), c("absolutes", "max.efficiency", "min.efficiency",  "values.per.tag"))
   ### ONLY RUN THIS TO RESET REFERENCE
   # aux_res_efficiency <- efficiency
@@ -253,7 +251,7 @@ test_that("advEfficiency can plot efficiency results", {
 })
 
 test_that("firstArrayFailure is able to deal with multile first expected arrays", {
-  xdot <- loadDot(string =
+  xdot_list <- loadDot(string =
 "A0 -- A1 -- A0
 A1 -- A2 -- A3 -- A6 -- A7 -- A9
 A0 -- A4 -- A5 -- A6 -- A8 -- A9
@@ -264,16 +262,16 @@ A7 -- A8 -- A7
   xspatial <- spatial
   xspatial$release.sites$Array <- "A0|A1"
 
-  first.array <- firstArrayFailure(tag = "R64K-4451", bio = bio, spatial = xspatial, first.array = "A5", paths = xdot$paths, dotmat = xdot$dotmat)
+  first.array <- firstArrayFailure(tag = "R64K-4451", bio = bio, spatial = xspatial, first.array = "A5", dot_list = xdot_list)
   expect_equal(first.array,  c(known1 = "A0", known2 = "A4"))
 
-  first.array <- firstArrayFailure(tag = "R64K-4451", bio = bio, spatial = xspatial, first.array = "A6", paths = xdot$paths, dotmat = xdot$dotmat)
+  first.array <- firstArrayFailure(tag = "R64K-4451", bio = bio, spatial = xspatial, first.array = "A6", dot_list = xdot_list)
   expect_equal(first.array,  c(unsure1 = "A0", unsure2 = "A1", unsure3 = "A4", unsure4 = "A5", unsure5 = "A2", unsure6 = "A3"))
 
-  first.array <- firstArrayFailure(tag = "R64K-4451", bio = bio, spatial = xspatial, first.array = "A7", paths = xdot$paths, dotmat = xdot$dotmat)
+  first.array <- firstArrayFailure(tag = "R64K-4451", bio = bio, spatial = xspatial, first.array = "A7", dot_list = xdot_list)
   expect_equal(first.array,  c(known = "A6", unsure1 = "A0", unsure2 = "A1", unsure3 = "A4", unsure4 = "A5", unsure5 = "A2", unsure6 = "A3"))
 
-  first.array <- firstArrayFailure(tag = "R64K-4451", bio = bio, spatial = xspatial, first.array = "A9", paths = xdot$paths, dotmat = xdot$dotmat)
+  first.array <- firstArrayFailure(tag = "R64K-4451", bio = bio, spatial = xspatial, first.array = "A9", dot_list = xdot_list)
   expect_equal(first.array,  c(known = "A6", unsure1 = "A0", unsure2 = "A1", unsure3 = "A4", unsure4 = "A5", unsure5 = "A7", unsure6 = "A8", unsure7 = "A2", unsure8 = "A3"))
 })
 

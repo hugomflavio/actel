@@ -69,7 +69,7 @@ test_that("loadSpatial responds correctly if data is missing or badly formatted"
 
 	write.csv(example.spatial[, -match("Section", colnames(example.spatial))], "spatial.csv", row.names = FALSE)
 	expect_warning(loadSpatial(),
-		"The spatial input does not contain a 'Section' column. This input is only valid for explore() analyses.", fixed = TRUE)
+		"spatial does not contain a 'Section' column. Assigning all arrays to section 'All'", fixed = TRUE)
 
 	spatial <- example.spatial
 	spatial$Type[1] <- "test"
@@ -148,8 +148,8 @@ In the spatial input, the expected first arrays of the release sites should matc
 		"Long section names detected. To improve graphic rendering, consider keeping section names under six characters.", fixed = TRUE)
 
 	write.csv(example.spatial[, -match("Section", colnames(example.spatial))], "spatial.csv", row.names = FALSE)
-	expect_warning(loadSpatial(section.order = c("Fjord" ,"Sea")),
-		"'section.order' was set but input has no 'Section' column. Ignoring argument.", fixed = TRUE)
+	expect_error(loadSpatial(section.order = c("Fjord" ,"Sea")),
+		"Not all sections are listed in 'section.order'. Sections missing: All", fixed = TRUE)
 })
 
 test_that("loadSpatial converts factors to character", {

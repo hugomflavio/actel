@@ -6,9 +6,6 @@
 \usage{
 oneWayMoves(movements, arrays)
 }
-\arguments{
-\item{arrays}{A list containing information for each array.}
-}
 \value{
 A data frame with the uni-directional movements for the target tags.
 }

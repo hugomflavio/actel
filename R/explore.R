@@ -330,10 +330,7 @@ explore <- function(
   sections <- study.data$sections
   deployments <- study.data$deployments
   spatial <- study.data$spatial
-  dot <- study.data$dot
-  arrays <- study.data$arrays
-  dotmat <- study.data$dotmat
-  paths <- study.data$paths
+  dot_list <- study.data$dot_list
   dist.mat <- study.data$dist.mat
   attributes(dist.mat)$speed.method <- speed.method
   detections.list <- study.data$detections.list
@@ -429,9 +426,9 @@ explore <- function(
                                min.per.event = min.per.event[1], n = counter)
 
       output <- checkImpassables(movements = output, tag = tag, bio = bio, detections = detections.list[[tag]], n = counter,
-                                 spatial = spatial, dotmat = dotmat, GUI = GUI, save.tables.locally = save.tables.locally)
+                                 spatial = spatial, dot_list = dot_list, GUI = GUI, save.tables.locally = save.tables.locally)
 
-      output <- checkJumpDistance(movements = output, bio = bio, tag = tag, dotmat = dotmat, paths = paths, arrays = arrays,
+      output <- checkJumpDistance(movements = output, bio = bio, tag = tag, dot_list = dot_list,
                                   spatial = spatial, jump.warning = jump.warning, jump.error = jump.error, GUI = GUI, n = counter,
                                   detections = detections.list[[tag]], save.tables.locally = save.tables.locally)
 
@@ -520,7 +517,7 @@ explore <- function(
   if (decision == "y") { # nocov start
    event(type = c("screen", "report"),
          paste0("M: Saving results as '", resultsname, "'."))
-   save(bio, detections, valid.detections, spatial, deployments, arrays,
+   save(bio, detections, valid.detections, spatial, deployments, dot_list,
         movements, valid.movements, times, rsp.info, dist.mat, 
         file = resultsname)
   } else {
@@ -556,7 +553,7 @@ explore <- function(
 
     biometric.fragment <- printBiometrics(bio = bio)
 
-    printDot(dot = dot,
+    printDot(dot = dot_list$dot,
              spatial = spatial,
              print.releases = print.releases)
 
@@ -683,7 +680,7 @@ explore <- function(
                  valid.detections = valid.detections,
                  spatial = spatial,
                  deployments = deployments,
-                 arrays = arrays,
+                 dot_list = dot_list,
                  movements = movements,
                  valid.movements = valid.movements,
                  times = times,

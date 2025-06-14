@@ -14,7 +14,7 @@
 
 \item{efficiency}{The efficiency results.}
 
-\item{arrays}{A list containing information for each array.}
+\item{dot_list}{A list containing information on the study area configuration.}
 
 \item{mat, m}{The presence/absence matrices.}
 
@@ -23,10 +23,6 @@
 \item{movements, moves}{The movements table.}
 
 \item{status.df}{The main results table.}
-
-\item{dotmat}{The matrix of distances between arrays.}
-
-\item{paths}{A list containing the shortest paths between arrays with distance > 1.}
 
 \item{estimate}{An estimate of the last array's efficiency, between 0 and 1.}
 

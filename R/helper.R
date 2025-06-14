@@ -1108,3 +1108,22 @@ convertLotekCDMAFile <- function(file, date_format = "%m/%d/%y") {
   attributes(output)$beacon_period <- as.numeric(beacon_period)
   return(output)
 }
+
+#' extract the string of expected first arrays for a tag
+#' 
+#' @param tag the tag number to check
+#' @param bio the biometrics table
+#' @param spatial the spatial list
+#' 
+#' @return a string of arrays where the animal should have been seen first.
+#' 
+#' @keywords internal
+#' 
+expFirstArray <- function(tag, bio, spatial) {
+  link <- na.as.false(bio$Transmitter == tag)
+  the_release <- as.character(bio$Release.site[link])
+  link <- spatial$release.sites$Standard.name == the_release
+  output <- spatial$release.sites$Array[link]
+  output <- unlist(strsplit(output, "|", fixed = TRUE))
+  return(output)
+}

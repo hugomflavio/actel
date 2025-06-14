@@ -132,6 +132,51 @@ test_that("checkJumpDistance reacts as expected", {
 	# jump.error is not automatically tested because it triggers user interaction.
 })
 
+test_that("checkBackwards reacts as expected", {
+  # 1 backwards move of distance 1
+  xmoves <- moves[[1]]
+  xmoves$Array[1] <- "A3"
+  expect_warning(checkBackwards(movements = xmoves, tag = "R64K-4451", bio = bio, detections = detections.list[["R64K-4451"]],
+                                spatial = spatial, dot_list = dot_list, back.warning = 1, back.error = Inf, GUI = "never",
+                                save.tables.locally = FALSE, n = "(1/1)"),
+  "Tag R64K-4451 (1/1) moved backwards 1 array in valid events 1 -> 2 (A3 -> A2).", fixed = TRUE)
+
+  # 1 backwards move of distance 5
+  xmoves <- moves[[1]]
+  xmoves$Array[1] <- "A7"
+  expect_warning(checkBackwards(movements = xmoves, tag = "R64K-4451", bio = bio, detections = detections.list[["R64K-4451"]],
+                                spatial = spatial, dot_list = dot_list, back.warning = 1, back.error = Inf, GUI = "never",
+                                save.tables.locally = FALSE, n = "(1/1)"),
+  "Tag R64K-4451 (1/1) moved backwards 5 arrays in valid events 1 -> 2 (A7 -> A2).", fixed = TRUE)
+
+  # 2 consecutive backwards moves of max distance 5
+  xmoves <- moves[[1]]
+  xmoves$Array[1] <- "A8"
+  xmoves$Array[2] <- "A5"
+  expect_warning(checkBackwards(movements = xmoves, tag = "R64K-4451", bio = bio, detections = detections.list[["R64K-4451"]],
+                                spatial = spatial, dot_list = dot_list, back.warning = 1, back.error = Inf, GUI = "never",
+                                save.tables.locally = FALSE, n = "(1/1)"),
+  "Tag R64K-4451 (1/1) moved backwards 5 arrays in valid events 1 -> 3 (A8 -> A3).", fixed = TRUE)
+
+  # 2 consecutive backwards moves of max distance 5, and then another
+  xmoves <- moves[[1]]
+  xmoves$Array[1] <- "A8"
+  xmoves$Array[2] <- "A5"
+  xmoves$Array[9] <- "A9"
+  expect_warning(checkBackwards(movements = xmoves, tag = "R64K-4451", bio = bio, detections = detections.list[["R64K-4451"]],
+                                spatial = spatial, dot_list = dot_list, back.warning = 1, back.error = 2, GUI = "never",
+                                save.tables.locally = FALSE, n = "(1/1)"),
+  "Tag R64K-4451 (1/1) moved backwards 2 arrays in valid events 9 -> 10 (A9 -> A7).", fixed = TRUE)
+
+  # many back moves
+  xmoves <- moves[[1]]
+  xmoves$Array[1:8*2] <- "A9"
+  xmoves$Array[4] <- "A4"
+  expect_warning(checkBackwards(movements = xmoves, tag = "R64K-4451", bio = bio, detections = detections.list[["R64K-4451"]],
+                                spatial = spatial, dot_list = dot_list, back.warning = 1, back.error = Inf, GUI = "never",
+                                save.tables.locally = FALSE, n = "(1/1)"),
+  "Tag R64K-4451 (1/1) moved backwards up to 6 arrays on 7 occasions (of which the first 4 are displayed above).", fixed = TRUE)
+})
 
 test_that("checkSpeeds reacts as expected.", {
 	# speed warning from release

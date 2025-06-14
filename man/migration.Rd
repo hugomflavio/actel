@@ -20,8 +20,8 @@ migration(
   speed.error = NULL,
   jump.warning = 2,
   jump.error = 3,
-  back.warning = c("all", "u", "none"),
-  back.error = c("all", "u", "none"),
+  back.warning = 2,
+  back.error = 3,
   inactive.warning = NULL,
   inactive.error = NULL,
   exclude.tags = NULL,
@@ -101,18 +101,14 @@ to 2. To disable jump warnings, set to Inf. Must be equal to or lower than \code
 \code{jump.error} without being detected, user intervention is suggested.
 Defaults to 3. To disable user intervention suggestions, set to Inf.}
 
-\item{back.warning}{Warn the user about backwards inter-section movements.
-One of three values: "all" will warn the user about S shaped turns (where
-the animal moves backwards but then resumes normal movement), and U shaped
-turns (where the animal moves backwards and disappears); "u" will warn the
-about U-shaped turns (i.e. no warnings for S-shaped turns); "none" will
-suppress all inter-section movement warnings.}
+\item{back.warning}{If a tag moves backwards a number of arrays equal or
+greater than \code{back.warning}, a warning is issued. Defaults
+to 2. To disable back warnings, set to Inf.
+Must be equal to or lower than \code{back.error}.}
 
-\item{back.error}{Pause the analysis so the user can inspect the movements
-table that generated an inter-section backwards movement warning.
-One of three values: "all" will prompt the user both for S shaped turns and
-U shaped turns; "u" will prompt the user only for U-shaped turns, and "none"
-will never pause the analysis for inter-section movements inspection.}
+\item{back.error}{If a tag moves backwards a number of arrays equal or
+greater than \code{back.error}, user intervention is suggested.
+Defaults to 3. To disable user intervention suggestions, set to Inf.}
 
 \item{inactive.warning}{If a tag spends a number of days equal or greater
 than \code{inactive.warning} in a given array at the tail of the respective

@@ -10,8 +10,6 @@ blameArrays(from, to, paths)
 \item{from}{The array where the tag started}
 
 \item{to}{The array where the tag was next detected}
-
-\item{paths}{a list containing the shortest paths between arrays with distance > 1}
 }
 \value{
 A list containing information on the arrays that failed

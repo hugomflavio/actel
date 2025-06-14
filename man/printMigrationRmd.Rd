@@ -11,7 +11,6 @@ printMigrationRmd(
   efficiency.fragment,
   display.progression,
   array.overview.fragment,
-  survival.graph.size,
   individual.plots,
   circular.plots,
   sensor.plots,
@@ -40,9 +39,6 @@ created and can be displayed.}
 
 \item{array.overview.fragment}{Rmarkdown string specifying the array
 overview results.}
-
-\item{survival.graph.size}{Rmarkdown string specifying the type size
-of the survival graphics.}
 
 \item{individual.plots}{Rmarkdown string specifying the name of the
 individual plots.}

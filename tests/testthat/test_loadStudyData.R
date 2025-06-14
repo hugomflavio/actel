@@ -12,7 +12,7 @@ test_that("loadStudyData contains all the required elements", {
 	expect_warning(output <- loadStudyData(tz = "Europe/Copenhagen", override = NULL, start.time = NULL, stop.time = NULL,
 	  exclude.tags = NULL, disregard.parallels = TRUE),
 		"No detections were found for receiver(s) 132907.", fixed = TRUE)
-	expect_equal(names(output), c('bio', 'deployments', 'spatial', 'dot', 'arrays', 'dotmat', 'dist.mat', 'detections.list', 'paths'))
+	expect_equal(names(output), c('bio', 'deployments', 'spatial', 'dot_list', 'dist.mat', 'detections.list'))
 })
 
 test_that("loadStudyData stops if override contains unknown data.", {

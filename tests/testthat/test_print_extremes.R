@@ -122,12 +122,13 @@ test_that("printBiometrics works for more than two variables", {
 })
 
 
-## printSurvivalGraphic
+## printSurvivalGraphics
 
-test_that("printSurvivalGraphic can handle sections with 0 survivors", {
+test_that("printSurvivalGraphics can handle sections with 0 survivors", {
 	x <- example.results$section.overview
-	x[1, 5:6] <- 0
-	tryCatch(printSurvivalGraphic(x), warning = function(w) stop("Warning in printSurvivalGraphic: w"))
+	x[5:7, 1] <- 0
+	x[11, 1] <- 0
+	tryCatch(printSurvivalGraphics(x, example.results$status.df), warning = function(w) stop("Warning in printSurvivalGraphic:", w))
 	expect_is("The real test is above, this is just to prevent test_that from complaining", "character")
 })
 
@@ -152,6 +153,7 @@ test_that("printCircular complains if option actel.circular.scale is set but val
 	expect_warning(x <- explore(tz = "Europe/Copenhagen", report = TRUE),
 		"Option actel.circular.scale was set but value is not recognized (accepted values: 'area', 'linear'). Defaulting back to 'area'.", fixed = TRUE)
 })
+# n
 
 setwd("..")
 unlink("exampleWorkspace", recursive = TRUE)

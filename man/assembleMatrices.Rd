@@ -4,21 +4,18 @@
 \alias{assembleMatrices}
 \title{Assemble detection matrices}
 \usage{
-assembleMatrices(spatial, movements, status.df, arrays, paths, dotmat)
+assembleMatrices(spatial, movements, status.df, dot_list)
 }
 \arguments{
 \item{spatial}{The spatial data frame.}
 
 \item{status.df}{The main results table.}
 
-\item{arrays}{A list containing information for each array.}
-
-\item{paths}{A list containing the shortest paths between arrays with distance > 1.}
-
-\item{dotmat}{The matrix of distances between arrays.}
+\item{dot_list}{A list containing information on the study area configuration.}
 }
 \value{
-A list containing the detection matrices split by groups and release sites
+A list containing the detection matrices split by groups and
+release sites
 }
 \description{
 Assemble detection matrices

@@ -16,17 +16,13 @@
 #'  of a given section be considered to have disappeared in the next section?
 #' @param disregard.parallels Logical:  Should the presence of parallel arrays
 #'  invalidate potential efficiency peers? See the vignettes for more details.
-#' @param back.warning Warn the user about backwards inter-section movements.
-#'  One of three values: "all" will warn the user about S shaped turns (where
-#'  the animal moves backwards but then resumes normal movement), and U shaped
-#'  turns (where the animal moves backwards and disappears); "u" will warn the
-#'  about U-shaped turns (i.e. no warnings for S-shaped turns); "none" will
-#'  suppress all inter-section movement warnings.
-#' @param back.error Pause the analysis so the user can inspect the movements
-#'  table that generated an inter-section backwards movement warning.
-#'  One of three values: "all" will prompt the user both for S shaped turns and
-#'  U shaped turns; "u" will prompt the user only for U-shaped turns, and "none"
-#'  will never pause the analysis for inter-section movements inspection.
+#' @param back.error If a tag moves backwards a number of arrays equal or
+#'  greater than \code{back.error}, user intervention is suggested.
+#'  Defaults to 3. To disable user intervention suggestions, set to Inf.
+#' @param back.warning If a tag moves backwards a number of arrays equal or
+#'  greater than \code{back.warning}, a warning is issued. Defaults
+#'  to 2. To disable back warnings, set to Inf. 
+#'  Must be equal to or lower than \code{back.error}.
 #' @param replicates A list containing, for each array to which intra-array
 #'  efficiency is to be calculated: The standard names of the stations to be
 #'  used as a replicate. See the vignettes for more details.
@@ -164,8 +160,8 @@ migration <- function(
   speed.error = NULL,
   jump.warning = 2,
   jump.error = 3,
-  back.warning = c("all", "u", "none"),
-  back.error = c("all", "u", "none"),
+  back.warning = 2,
+  back.error = 3,
   inactive.warning = NULL,
   inactive.error = NULL,
   exclude.tags = NULL,
@@ -361,9 +357,7 @@ migration <- function(
   bio <- study.data$bio
   deployments <- study.data$deployments
   spatial <- study.data$spatial
-  dot <- study.data$dot
-  arrays <- study.data$arrays
-  dotmat <- study.data$dotmat
+  dot_list <- study.data$dot_list
   paths <- study.data$paths
   dist.mat <- study.data$dist.mat
   attributes(dist.mat)$speed.method <- speed.method
@@ -372,17 +366,11 @@ migration <- function(
 # -------------------------------------
 
 # Final quality checks
-  # Verify the existance of sections
-  if (all(!grepl("^Section$", colnames(spatial$stations)))) {
-    event(type = "stop",
-          "To run migration(), please assign the arrays to their sections",
-          " using a 'Section' column in the spatial input.")
-  }
 
   # Verify that replicate information is valid
   not_null <- !is.null(replicates)
-  any_mismatch <- not_null && any(is.na(match(names(replicates), 
-                                              names(arrays))))
+  aux <- names(dot_list$array_info$arrays)
+  any_mismatch <- not_null && any(is.na(match(names(replicates), aux)))
   if (any_mismatch) {
     event(type = "stop",
           "Some of the array names listed in the 'replicates' argument",
@@ -392,7 +380,8 @@ migration <- function(
   capture <- lapply(names(replicates), function(i) {
     x <- replicates[[i]]
     all.stations <- spatial$stations$Standard.name[spatial$stations$Array == i]
-    if (any(link <- !x %in% all.stations)) {
+    link <- !x %in% all.stations
+    if (any(link)) {
       event(type = "stop",
             "In replicates: Station",
             ifelse(sum(link) > 1, "s ", " "),
@@ -403,7 +392,8 @@ migration <- function(
     }
   })
 
-  if (any(!sapply(arrays, function(x) is.null(x$parallel)))) {
+  check <- sapply(dot_list$array_info$arrays, function(x) is.null(x$parallel))
+  if (any(!check)) {
     if (disregard.parallels) {
       event(type = c("screen", "report"),
             "M: 'disregard.parallels' is set to TRUE; the presence of",
@@ -416,8 +406,11 @@ migration <- function(
   }
 
   if (is.null(success.arrays)) {
-    no_after <- unlist(lapply(arrays, function(x) is.null(x$after)))
-    success.arrays <- names(arrays)[no_after]
+    not_after <- lapply(dot_list$array_info$arrays, function(x) {
+      is.null(x$after)
+    })
+    no_after <- unlist(not_after)
+    success.arrays <- names(dot_list$array_info$arrays)[no_after]
     if (length(success.arrays) == 1) {
       event(type = c("warning", "screen", "report"),
             "'success.arrays' was not defined. Assuming success if the",
@@ -443,14 +436,15 @@ migration <- function(
   }
 
   # CHECK ISSUE 79
-  checkIssue79(arrays, spatial)
+  # checkIssue79(dot_list$array_info$arrays, spatial)
 
 # -------------------------------------
 
 # Discard early detections, if required
-  if (!is.null(discard.first) && discard.first > 0)
+  if (!is.null(discard.first) && discard.first > 0) {
     detections.list <- discardFirst(input = detections.list,
                                     bio = bio, trim = discard.first)
+  }
 
 # Compile array movements
   event(type = c("screen", "report"),
@@ -546,28 +540,31 @@ migration <- function(
       output <- checkFirstMove(movements = output, tag = tag,
                                detections = detections.list[[tag]], 
                                spatial = spatial, bio = bio,
-                               arrays = arrays, GUI = GUI,
+                               dot_list = dot_list, GUI = GUI,
                                save.tables.locally = save.tables.locally,
                                n = counter)
 
       output <- checkImpassables(movements = output, tag = tag, bio = bio,
                                  detections = detections.list[[tag]],
                                  n = counter, spatial = spatial,
-                                 dotmat = dotmat, GUI = GUI,
+                                 dot_list = dot_list, GUI = GUI,
                                  save.tables.locally = save.tables.locally)
 
       output <- checkJumpDistance(movements = output, bio = bio, tag = tag,
-                                  dotmat = dotmat, paths = paths,
-                                  arrays = arrays, spatial = spatial,
+                                  dot_list = dot_list, spatial = spatial,
                                   jump.warning = jump.warning, 
                                   jump.error = jump.error, GUI = GUI,
                                   detections = detections.list[[tag]], 
                                   save.tables.locally = save.tables.locally,
                                   n = counter)
 
-      output <- checkLinearity(movements = output, bio = bio, tag = tag, arrays = arrays, spatial = spatial, 
-                               backwards.warning = backwards.warning, backwards.error = backwards.error, GUI = GUI,
-                               detections = detections.list[[tag]], save.tables.locally = save.tables.locally, n = counter)
+      output <- checkBackwards(movements = output, bio = bio, tag = tag,
+                               dot_list = dot_list, spatial = spatial, 
+                               back.warning = back.warning,
+                               back.error = back.error, GUI = GUI,
+                               detections = detections.list[[tag]],
+                               save.tables.locally = save.tables.locally,
+                               n = counter)
 
       if (do.checkSpeeds) {
         temp.valid.movements <- simplifyMovements(movements = output, tag = tag,
@@ -620,14 +617,8 @@ migration <- function(
     if (!is.null(aux)) {
       # don't run the minimum total detections check here (i.e. set it to 0);
       # that's already done when compiling the array movements.
-      aux <- checkMinimumN(movements = aux, tag = tag, min.total.detections = 0,
-                           min.per.event = min.per.event[2], n = counter)
-
-      output <- checkLinearity(secmoves = aux, tag = tag, spatial = spatial,
-                               arrays = arrays, GUI = GUI,
-                               save.tables.locally = save.tables.locally,
-                               n = counter, back.warning = back.warning,
-                               back.error = back.error)
+      output <- checkMinimumN(movements = aux, tag = tag, min.total.detections = 0,
+                              min.per.event = min.per.event[2], n = counter)
       return(output)
     } else {
       return(NULL)
@@ -651,15 +642,15 @@ migration <- function(
   event(type = c("screen", "report"),
         "M: Filtering valid section movements.")
   secmoves <- assembleValidSecMoves(valid.moves = valid.movements,
-                                     spatial = spatial,
-                                     valid.dist = attributes(dist.mat)$valid)
+                                    spatial = spatial,
+                                    valid.dist = attributes(dist.mat)$valid)
 
   event(type = c("screen", "report"),
         "M: Compiling migration timetable.")
   timetable <- assembleTimetable(secmoves = secmoves, 
                                  valid.moves = valid.movements, 
                                  all.moves = movements, spatial = spatial,
-                                 arrays = arrays, bio = bio, tz = tz, 
+                                 dot_list = dot_list, bio = bio, tz = tz, 
                                  dist.mat = dist.mat, 
                                  speed.method = speed.method,
                                  if.last.skip.section = if.last.skip.section,
@@ -672,7 +663,8 @@ migration <- function(
   event(type = c("screen", "report"),
         "M: Compiling summary information tables.")
   section.overview <- assembleSectionOverview(status.df = status.df,
-                                              spatial = spatial)
+                                              secmoves = secmoves,
+                                              dot_list = dot_list)
 
   aux <- list(valid.movements = valid.movements, spatial = spatial,
               rsp.info = list(bio = bio, analysis.type = "migration"))
@@ -694,12 +686,11 @@ migration <- function(
   the.matrices <- assembleMatrices(spatial = spatial,
                                    movements = valid.movements,
                                    status.df = status.df,
-                                   arrays = arrays, paths = paths,
-                                   dotmat = dotmat)
+                                   dot_list = dot_list)
   # keep only the minimum matrix
   the.matrices <- the.matrices[[2]]
 
-  m.by.array <- breakMatricesByArray(m = the.matrices, arrays = arrays,
+  m.by.array <- breakMatricesByArray(m = the.matrices, dot_list = dot_list,
                                      type = "peers")
 
   if (is.null(m.by.array[[1]])) {
@@ -731,7 +722,7 @@ migration <- function(
                                     sep = ".")
 
     overall.CJS <- assembleArrayCJS(mat = the.matrices, CJS = CJS.list,
-                                    arrays = arrays, releases = release_nodes,
+                                    dot_list = dot_list, releases = release_nodes,
                                     silent = FALSE)
 
     if (!is.null(replicates)) {
@@ -752,7 +743,7 @@ migration <- function(
                       fixed.efficiency = overall.CJS$efficiency)
     aux <- aux[names(the.matrices)]
     split.CJS <- assembleSplitCJS(mat = the.matrices, CJS = aux,
-                                  arrays = arrays, releases = release_nodes,
+                                  dot_list = dot_list, releases = release_nodes,
                                   intra.CJS = intra.array.CJS)
 
     release.overview <- lapply(names(split.CJS), 
@@ -771,7 +762,7 @@ migration <- function(
     aux <- mbGroupCJS(mat = m.by.array, status.df = status.df,
                       fixed.efficiency = overall.CJS$efficiency)
     group.CJS <- assembleGroupCJS(mat = the.matrices, CJS = aux,
-                                  arrays = arrays, releases = release_nodes,
+                                  dot_list = dot_list, releases = release_nodes,
                                   intra.CJS = intra.array.CJS)
     group.overview <- lapply(names(group.CJS),
                              function(i, releases = spatial$release.sites) {
@@ -820,9 +811,9 @@ migration <- function(
     override.fragment <- paste0('<span style="color:red">Manual mode has been',
                                 ' triggered for **', length(override),
                                 '** tag(s).</span>\n')
-  }
-  else
+  } else {
     override.fragment <- ""
+  }
 
   if (file.exists(resultsname <- "actel_migration_results.RData")) {
     continue <- TRUE
@@ -851,11 +842,11 @@ migration <- function(
     event(type = c("screen", "report"),
           "M: Saving results as '", resultsname, "'.")
     # These changes of name are here for consistency with earlier versions of
-    # actel. The exported names can be updated once we makde the big revamp
+    # actel. The exported names can be updated once we make the big revamp
     # in coding style (actel 2.0).
     section.movements <- secmoves
     intra.array.matrices <- intra_mats
-    save(detections, valid.detections, spatial, deployments, arrays,
+    save(detections, valid.detections, spatial, deployments, dot_list,
          movements, valid.movements, section.movements, status.df,
          section.overview, group.overview, release.overview, matrices,
          overall.CJS, intra.array.matrices, intra.array.CJS, times,
@@ -902,16 +893,17 @@ migration <- function(
     printDotplots(status.df = status.df,
                   valid.dist = attributes(dist.mat)$valid)
 
-    printSurvivalGraphic(section.overview = section.overview)
+    printSurvivalGraphics(section.overview = section.overview,
+                          status.df = status.df)
 
     printLastArray(status.df = status.df)
 
-    printDot(dot = dot,
+    printDot(dot = dot_list$dot,
              spatial = spatial,
              print.releases = print.releases)
 
     if (calculate.efficiency) {
-      printProgression(dot = dot,
+      printProgression(dot = dot_list$dot,
                        overall.CJS = overall.CJS,
                        spatial = spatial,
                        status.df = status.df,
@@ -933,12 +925,6 @@ migration <- function(
 
     circular.plots <- printCircular(times = timesToCircular(times),
                                     bio = bio)
-
-    if (nrow(section.overview) > 3) {
-      survival.graph.size <- "width=90%"
-    } else {
-      survival.graph.size <- "height=4in"
-    }
 
     check <- sapply(valid.detections, function(x) any(!is.na(x$Sensor.Value)))
     if (any(check)) {
@@ -1014,7 +1000,6 @@ migration <- function(
                       efficiency.fragment = efficiency.fragment,
                       display.progression = display.progression,
                       array.overview.fragment = array.overview.fragment,
-                      survival.graph.size = survival.graph.size,
                       individual.plots = individual.plots,
                       circular.plots = circular.plots,
                       sensor.plots = sensor.plots,
@@ -1070,7 +1055,7 @@ migration <- function(
                  valid.detections = valid.detections,
                  spatial = spatial,
                  deployments = deployments,
-                 arrays = arrays,
+                 dot_list = dot_list,
                  movements = movements,
                  valid.movements = valid.movements,
                  section.movements = secmoves,
@@ -1109,8 +1094,6 @@ migration <- function(
 #'        created and can be displayed.
 #' @param array.overview.fragment Rmarkdown string specifying the array
 #'        overview results.
-#' @param survival.graph.size Rmarkdown string specifying the type size
-#'        of the survival graphics.
 #' @param individual.plots Rmarkdown string specifying the name of the
 #'        individual plots.
 #' @param circular.plots Rmarkdown string specifying the name of the
@@ -1126,7 +1109,7 @@ migration <- function(
 printMigrationRmd <- function(override.fragment, biometric.fragment,
                               section.overview, efficiency.fragment,
                               display.progression, array.overview.fragment,
-                              survival.graph.size, individual.plots,
+                              individual.plots,
                               circular.plots, sensor.plots, spatial,
                               deployments, valid.detections,
                               detections, detections.y.axis){
@@ -1285,16 +1268,18 @@ printMigrationRmd <- function(override.fragment, biometric.fragment,
                   "</center>\n")
            ), "\n",
     "\n",
-    "### Section Survival\n",
+    "### Section Summary\n",
     "\n",
     "Note:\n",
-    ": The data used in this table and graphic are stored in the",
-    " `section.overview` object.\n",
+    ": The data used in this table and graphics are stored in the",
+    " `section.overview` and `status.df` objects.\n",
     "\n",
     paste(knitr::kable(section.overview), collapse = "\n"), "\n",
     "\n",
     "<center>\n",
-    "![](survival.png){ ",survival.graph.size ," }\n",
+    "![](survival1.png){ width=90% }\n",
+    "![](survival2.png){ width=90% }\n",
+    "![](survival3.png){ width=90% }\n",
     "</center>\n",
     "\n",
     "### Last Seen Arrays\n",
@@ -1304,7 +1289,7 @@ printMigrationRmd <- function(override.fragment, biometric.fragment,
     " ('Very.last.array' column).\n",
     "\n",
     "<center>\n",
-    "![](last_arrays.png){ width=66% }\n",
+    "![](last_arrays.png){ width=90% }\n",
     "</center>\n",
     "\n",
     "### Progression\n",
@@ -1520,7 +1505,7 @@ printMigrationRmd <- function(override.fragment, biometric.fragment,
     ifelse(biometric.fragment == "", 
            "", 
            "  <a href=\"#biometric-graphics\">Biometrics</a>\n"),
-    "  <a href=\"#section-survival\">Section survival</a>\n",
+    "  <a href=\"#section-summary\">Section survival</a>\n",
     "  <a href=\"#last-seen-arrays\">Last seen</a>\n",
     "  <a href=\"#progression\">Progression</a>\n",
     "  <a href=\"#time-of-arrival-at-each-array\">Arrival times</a>\n",
@@ -1556,7 +1541,7 @@ printMigrationRmd <- function(override.fragment, biometric.fragment,
 #' @keywords internal
 #'
 assembleTimetable <- function(secmoves, valid.moves, all.moves, spatial,
-                              arrays, bio, tz, dist.mat, speed.method,
+                              dot_list, bio, tz, dist.mat, speed.method,
                               if.last.skip.section, success.arrays) {
   event(type = "debug", "Running assembleTimetable.")
 
@@ -1639,7 +1624,7 @@ assembleTimetable <- function(secmoves, valid.moves, all.moves, spatial,
     rm(aux)
   }
 
-  sections <- names(spatial$array.order)
+  sections <- names(dot_list$section_info$sections)
 
   # Create the timetable
   recipient <- vector()
@@ -1663,7 +1648,7 @@ assembleTimetable <- function(secmoves, valid.moves, all.moves, spatial,
                            sections[i], sep = "."))
     }
   }
-  recipient <- c(recipient, "Very.last.array", "Very.last.time", "Status",
+  recipient <- c(recipient, "Last.section", "Very.last.array", "Very.last.time", "Status",
                  "Valid.detections", "Valid.events", "Invalid.detections",
                  "Invalid.events", "Backwards.movements",
                  "Max.cons.back.moves", "P.type")
@@ -1750,6 +1735,7 @@ assembleTimetable <- function(secmoves, valid.moves, all.moves, spatial,
     recipient[, the_cols] <- as.numeric(recipient[, the_cols])
     # --
 
+    recipient$Last.section <- secmoves[[tag]][.N, Section]
     recipient$Very.last.array <- secmoves[[tag]][.N, Last.array]
     recipient$Very.last.time <- as.character(secmoves[[tag]][.N, Last.time])
     recipient$Valid.detections <- sum(secmoves[[tag]]$Detections)
@@ -1763,26 +1749,39 @@ assembleTimetable <- function(secmoves, valid.moves, all.moves, spatial,
     }
     recipient$P.type <- attributes(secmoves[[tag]])$p.type
 
-    aux <- countBackMoves(movements = valid.moves[[tag]], arrays = arrays)
+    aux <- countBackMoves(movements = valid.moves[[tag]], dot_list = dot_list)
     recipient$Backwards.movements <- aux[[1]]
     recipient$Max.cons.back.moves <- aux[[2]]
     recipient$P.type <- attributes(valid.moves[[tag]])$p.type
 
-
     # assign fate
     the.last.section <- secmoves[[tag]][.N, Section]
     the.last.array <- secmoves[[tag]][.N, Last.array]
-    recipient$Status <- paste0("Disap. in ", the.last.section)
 
-    not.last.section <- match(the.last.section, sections) != length(sections)
-    edge.array <- arrays[[the.last.array]]$edge
+    edge.array <- dot_list$array_info$arrays[[the.last.array]]$edge
 
-    # this will be a problem with parallel sections.
-    if (if.last.skip.section && not.last.section && edge.array) {
-      recipient$Status <- paste("Disap. in",
-                                sections[match(the.last.section, sections) + 1])
+    if (edge.array) {
+      neighbours <- dot_list$array_info$arrays[[the.last.array]]$neighbours
+      other_sections <- sort(unique(unlist(sapply(neighbours, function(x) {
+        dot_list$array_info$arrays[[x]]$section
+      }))))
+      possible_sections <- unique(c(the.last.section, other_sections))
+      if (length(possible_sections) == 2) {
+        recipient$Status <- paste0("Disap. between ", possible_sections[1],
+                                   " and ", possible_sections[2])
+      }      
+      if (length(possible_sections) == 3) {
+        recipient$Status <- paste0("Disap. between ", possible_sections[1],
+                                   ", ", possible_sections[2],
+                                   ", and ", possible_sections[3])
+      }      
+      if (length(possible_sections) >= 4) {
+        recipient$Status <- paste0("Disap. between ", possible_sections[1],
+                                   " and ", length(possible_sections) - 1,
+                                   " other sections.")
+      }      
     } else {
-      recipient$Status <- paste("Disap. in", the.last.section)
+      recipient$Status <- paste0("Disap. in ", the.last.section)      
     }
 
     if(!is.na(match(the.last.array, success.arrays))) {
@@ -1848,7 +1847,7 @@ assembleTimetable <- function(secmoves, valid.moves, all.moves, spatial,
 #'
 #' @keywords internal
 #'
-countBackMoves <- function(movements, arrays){
+countBackMoves <- function(movements, dot_list){
   event(type = "debug", "Running countBackMoves.")
   if (nrow(movements) > 1) {# Determine number of backwards movements
     aux <- data.frame(
@@ -1856,7 +1855,7 @@ countBackMoves <- function(movements, arrays){
       B = movements$Array[-1])
     backwards.movements <- apply(aux, 1, function(x)
       if(x[1] != x[2])
-        is.na(match(x[2], arrays[[x[1]]]$all.after))
+        is.na(match(x[2], dot_list$array_info$arrays[[x[1]]]$all.after))
       else
         FALSE
       )
@@ -1900,14 +1899,14 @@ assembleOutput <- function(timetable, bio, spatial, dist.mat, tz) {
   event(type = "debug", "Completing entries for tags that were never detected.")
   sections <- names(spatial$array.order)
 
-  status.df$Status[is.na(status.df$Status)] <- paste("Disap. in", sections[1])
-  status.df$Status <- factor(status.df$Status,
-                             levels = c(paste("Disap. in", sections),
-                                        "Succeeded"))
+  status.df$Last.section[is.na(status.df$Last.section)] <- "Release"
+  status.df$Last.section <- factor(status.df$Last.section, 
+                                   levels = c("Release", sections))
   status.df$Very.last.array[is.na(status.df$Very.last.array)] <- "Release"
   status.df$Very.last.array <- factor(status.df$Very.last.array,
                                      levels = c("Release",
                                                 levels(spatial$stations$Array)))
+  status.df$Status[is.na(status.df$Status)] <- "Never detected"
   status.df$P.type[is.na(status.df$P.type)] <- "Skipped"
   status.df$Valid.detections[is.na(status.df$Valid.detections)] <- 0
   status.df$Invalid.detections[is.na(status.df$Invalid.detections)] <- 0
@@ -1946,38 +1945,47 @@ assembleOutput <- function(timetable, bio, spatial, dist.mat, tz) {
 #'
 #' @keywords internal
 #'
-assembleSectionOverview <- function(status.df, spatial) {
+assembleSectionOverview <- function(status.df, secmoves, dot_list) {
   event(type = "debug", "Running assembleSectionOverview.")
-  section.overview <- with(status.df, table(Group, Status))
-  section.overview <- as.data.frame.matrix(section.overview)
-  section.overview$Total <- as.vector(with(status.df, table(Group)))
-  colnames(section.overview) <- gsub(" ", ".", colnames(section.overview))
 
-  sections <- names(spatial$array.order)
+  sections <- names(dot_list$section_info$sections)
+  x <- matrix(0,
+              nrow = length(sections) * 3,
+              ncol = length(levels(status.df$Group)))
+  x <- as.data.frame(x)
+  rownames(x) <- paste0(c("n_entered_", "times_entered_", "last_at_"),
+                        rep(sections, each = 3))
+  colnames(x) <- levels(status.df$Group)
+  x
 
-  if (length(sections) >= 2) {
-    to.col <- paste("Migrated.to", sections[2], sep = ".")
-    from.col <- paste("Disap..in", sections[1], sep = ".")
-    section.overview[, to.col] <- section.overview$Total - 
-                                  section.overview[, from.col]
-    recipient <- vector()
-    for (i in 2:length(sections)) {
-      recipient <- c(recipient, paste(c("Migrated.to", "Disap..in"), 
-                                      sections[i], sep = "."))
+  for (i in names(secmoves)) {
+    col <- as.character(status.df$Group[status.df$Transmitter == i])
+    times_entered <- secmoves[[i]]$Section
+    for (s in times_entered) {
+      row <- paste0("times_entered_", s)
+      x[row, col] <- x[row, col] + 1
     }
-  } else {
-    recipient <- NULL
-  }
-  if (length(sections) > 2) {
-    for (i in 3:length(sections)) {
-      to.col <- paste("Migrated.to", sections[i], sep = ".")
-      from.colA <- paste("Migrated.to", sections[i - 1], sep = ".")
-      from.colB <- paste("Disap..in", sections[i - 1], sep = ".")
-      section.overview[, to.col] <- section.overview[, from.colA] -
-                                    section.overview[, from.colB]
+    n_entered <- unique(secmoves[[i]]$Section)
+    for (s in n_entered) {
+      row <- paste0("n_entered_", s)
+      x[row, col] <- x[row, col] + 1
     }
+    last_at <- tail(secmoves[[i]]$Section, 1)
+    row <- paste0("last_at_", last_at)
+    x[row, col] <- x[row, col] + 1
   }
-  recipient <- c("Total", paste("Disap..in", sections[1], sep = "."),
-                 recipient, "Succeeded")
-  return(section.overview[, recipient])
+  x
+
+  aux <- as.data.frame(table(status.df$Group))
+  rownames(aux) <- aux$Var1
+  above <- t(aux[,-1, drop = FALSE])
+  rownames(above) <- "n_total"
+  aux <- as.data.frame(table(status.df$Group[status.df$Status == "Succeeded"]))
+  rownames(aux) <- aux$Var1
+  below <- t(aux[,-1, drop = FALSE])
+  rownames(below) <- "succeeded"
+
+  section.overview <- rbind(above, x, below)
+
+  return(section.overview)
 }

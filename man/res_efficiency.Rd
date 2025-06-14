@@ -4,16 +4,12 @@
 \alias{res_efficiency}
 \title{Calculate array efficiency for residency analysis}
 \usage{
-res_efficiency(arrmoves, bio, spatial, arrays, paths, dotmat)
+res_efficiency(arrmoves, bio, spatial, dot_list)
 }
 \arguments{
 \item{bio}{A table with the tags and biometrics of the studied animals.}
 
 \item{spatial}{A list of spatial objects in the study area}
-
-\item{arrays}{a list containing information for each array}
-
-\item{paths}{a list containing the shortest paths between arrays with distance > 1}
 }
 \value{
 A list containing:

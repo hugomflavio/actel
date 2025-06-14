@@ -4,12 +4,12 @@
 \alias{countBackMoves}
 \title{Count backwards movements}
 \usage{
-countBackMoves(movements, arrays)
+countBackMoves(movements, dot_list)
 }
 \arguments{
 \item{movements}{the movement dataframe for the tag being analysed.}
 
-\item{arrays}{A list containing information for each array.}
+\item{dot_list}{A list containing information on the study area configuration.}
 }
 \value{
 A list containing:

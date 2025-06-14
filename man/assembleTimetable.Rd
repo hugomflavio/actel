@@ -9,7 +9,7 @@ assembleTimetable(
   valid.moves,
   all.moves,
   spatial,
-  arrays,
+  dot_list,
   bio,
   tz,
   dist.mat,
@@ -27,7 +27,7 @@ assembleTimetable(
 
 \item{spatial}{The spatial list.}
 
-\item{arrays}{A list containing information for each array.}
+\item{dot_list}{A list containing information on the study area configuration.}
 
 \item{bio}{The biometrics table.}
 

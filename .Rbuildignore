@@ -1,5 +1,6 @@
 ^doc$
 ^Meta$
+^data/actel-data-raw$
 ^compiled_vignettes$
 ^actel_vignettes.zip$
 ^.travis.yml$

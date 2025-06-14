@@ -4,12 +4,12 @@
 \alias{assembleArrayCJS}
 \title{Combine the individual CJS's of each array into a single table}
 \usage{
-assembleArrayCJS(mat, CJS, arrays, releases, silent = TRUE)
+assembleArrayCJS(mat, CJS, dot_list, releases, silent = TRUE)
 }
 \arguments{
 \item{CJS}{A list of CJS calculated for each array}
 
-\item{arrays}{A list containing information for each array.}
+\item{dot_list}{A list containing information on the study area configuration.}
 
 \item{silent}{Logical: Should messages be printed? This argument is mainly intended for function calls running within actel's analyses.}
 }

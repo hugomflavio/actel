@@ -10,7 +10,7 @@ checkImpassables(
   bio,
   spatial,
   detections,
-  dotmat,
+  dot_list,
   GUI,
   save.tables.locally,
   n
@@ -26,8 +26,6 @@ checkImpassables(
 \item{spatial}{A list of spatial objects in the study area.}
 
 \item{detections}{The detections data.frame for a specific tag.}
-
-\item{dotmat}{The matrix of distances between arrays.}
 
 \item{GUI}{One of "needed", "always" or "never". If "needed", a new window is
 opened to inspect the movements only if the movements table is too big to be

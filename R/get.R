@@ -83,26 +83,26 @@ getSpeeds <- function(input, type = c("all", "forward", "backward"),
       # if direct, check the neighbours
       rows_to_extract <- getSpeedsChecker(rows = rows_to_extract, moves = moves,
                                           first = exp_first_array,
-                                          arrays = input$arrays,
+                                          dot_list = input$dot_list,
                                           side = "neighbours")
     }
 
     if (length(rows_to_extract) > 0 & type == "forward") {
       # if forward, check all.before
       expected_arrays <- c(exp_first_array,
-                           input$arrays[[exp_first_array]]$all.after)
+                           input$dot_list$array_info$arrays[[exp_first_array]]$all.after)
       rows_to_extract <- getSpeedsChecker(rows = rows_to_extract, moves = moves,
                                           first = expected_arrays,
-                                          arrays = input$arrays,
+                                          dot_list = input$dot_list,
                                           side = "all.before")
     }
 
     if (length(rows_to_extract) > 0 & type == "backward") {
       # if backward, check all.after
-      expected_arrays <- input$arrays[[exp_first_array]]$all.before
+      expected_arrays <- input$dot_list$array_info$arrays[[exp_first_array]]$all.before
       rows_to_extract <- getSpeedsChecker(rows = rows_to_extract, moves = moves,
                                           first = expected_arrays,
-                                          arrays = input$arrays,
+                                          dot_list = input$dot_list,
                                           side = "all.after")
     }
 
@@ -130,14 +130,14 @@ getSpeeds <- function(input, type = c("all", "forward", "backward"),
 #' @param rows a vector of rows to check.
 #' @param moves the respective movements table.
 #' @param first a list of valid arrays for the first movement.
-#' @param arrays the list of arrays in the study area.
+#' @param dot_list the list with the study area structure.
 #' @param side which pool of array-relatives to check against.
 #' 
 #' @return an updated vector of rows to consider for extraction.
 #' 
 #' @keywords internal
 #' 
-getSpeedsChecker <- function(rows, moves, first, arrays,
+getSpeedsChecker <- function(rows, moves, first, dot_list,
                              side = c("neighbours", "all.before", 
                                       "all.after")) {
   # check that first event is connected to release
@@ -162,7 +162,8 @@ getSpeedsChecker <- function(rows, moves, first, arrays,
     if (length(check) > 0) {
       aux <- sapply(check, function(i) {
         the_array <- moves$Array[i]
-        return(moves$Array[i - 1] %in% arrays[[the_array]][[side]])
+        the_options <- dot_list$array_info$arrays[[the_array]][[side]]
+        return(moves$Array[i - 1] %in% the_options)
       })
       # this step keeps the first row if it wasn't invalidated earlier
       keep <- c(keep, aux)

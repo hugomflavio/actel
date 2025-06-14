@@ -8,7 +8,7 @@ getSpeedsChecker(
   rows,
   moves,
   first,
-  arrays,
+  dot_list,
   side = c("neighbours", "all.before", "all.after")
 )
 }
@@ -19,7 +19,7 @@ getSpeedsChecker(
 
 \item{first}{a list of valid arrays for the first movement.}
 
-\item{arrays}{the list of arrays in the study area.}
+\item{dot_list}{the list with the study area structure.}
 
 \item{side}{which pool of array-relatives to check against.}
 }

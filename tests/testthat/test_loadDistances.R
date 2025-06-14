@@ -11,9 +11,9 @@ write.csv(example.biometrics, "biometrics.csv", row.names = FALSE)
 bio <- loadBio(input = "biometrics.csv", tz = "Europe/Copenhagen")
 file.remove("biometrics.csv")
 
-dot <- loadDot(string = paste(unique(spatial$Array), collapse = "--"), spatial = spatial, disregard.parallels = TRUE)
+dot_list <- loadDot(string = paste(unique(spatial$Array), collapse = "--"), spatial = spatial, disregard.parallels = TRUE)
 
-spatial <- transformSpatial(spatial = spatial, bio = bio, arrays = dot$arrays)
+spatial <- transformSpatial(spatial = spatial, bio = bio, dot_list = dot_list)
 
 test_that("loadDistances returns correct output if distances.csv is not present", {
 	expect_true(is.na(loadDistances(spatial = spatial)))

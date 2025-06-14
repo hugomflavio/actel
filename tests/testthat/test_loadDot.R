@@ -59,10 +59,13 @@ test_that("loadDot output is as expected for simple single channel study areas",
 	output <- loadDot(input = "spatial.txt", spatial = example.spatial, disregard.parallels = TRUE)	
 	file.remove("spatial.txt")
 
-	expect_equal(names(output), c("dot", "arrays", "dotmat", "paths"))
+	expect_equal(names(output), c("dot", "array_info", "section_info"))
+	expect_equal(names(output$array_info), c("arrays", "dotmat", "paths"))
+	expect_equal(names(output$section_info), c("sections", "dotmat", "paths"))
 	
-	expect_equal(names(output$arrays), c('A0', 'A1', 'A2', 'A3',
+	expect_equal(names(output$array_info$arrays), c('A0', 'A1', 'A2', 'A3',
 		'A4', 'A5', 'A6', 'A7', 'A8', 'A9'))
+	expect_equal(names(output$section_info$sections), c("River", "Fjord", "Sea"))
 	
 	dot <- read.csv(text = c('"A","to","B"
 "A0","--","A1"
@@ -90,7 +93,7 @@ c('"","A0","A1","A2","A3","A4","A5","A6","A7","A8","A9"
 "A8",8,7,6,5,4,3,2,1,0,1
 "A9",9,8,7,6,5,4,3,2,1,0
 '), stringsAsFactors = FALSE, row.names = 1)
-	expect_equal(output$dotmat, as.matrix(dotmat))
+	expect_equal(output$array_info$dotmat, as.matrix(dotmat))
 
 	pathnames <- c('A0_to_A2', 'A0_to_A3', 'A0_to_A4', 'A0_to_A5',
 		'A0_to_A6', 'A0_to_A7', 'A0_to_A8', 'A0_to_A9', 'A1_to_A3',
@@ -107,10 +110,10 @@ c('"","A0","A1","A2","A3","A4","A5","A6","A7","A8","A9"
 		'A8_to_A4', 'A8_to_A3', 'A8_to_A2', 'A8_to_A1', 'A8_to_A0',
 		'A9_to_A7', 'A9_to_A6', 'A9_to_A5', 'A9_to_A4', 'A9_to_A3',
 		'A9_to_A2', 'A9_to_A1', 'A9_to_A0')
-	expect_equal(names(output$paths), pathnames)
+	expect_equal(names(output$array_info$paths), pathnames)
 	# sample 2 contents
-	expect_equal(output$paths[[3]], "A1 -> A2 -> A3")
-	expect_equal(output$paths[[6]], "A1 -> A2 -> A3 -> A4 -> A5 -> A6")
+	expect_equal(output$array_info$paths[[3]], "A1 -> A2 -> A3")
+	expect_equal(output$array_info$paths[[6]], "A1 -> A2 -> A3 -> A4 -> A5 -> A6")
 })
 
 
@@ -121,9 +124,10 @@ test_that("loadDot output is as expected for single channel study areas with a b
 	output <- loadDot(input = "spatial.txt", spatial = example.spatial, disregard.parallels = TRUE)	
 	file.remove("spatial.txt")
 
-	expect_equal(names(output), c("dot", "arrays", "dotmat", "paths"))
+	expect_equal(names(output), c("dot", "array_info", "section_info"))
+	expect_equal(names(output$array_info), c("arrays", "dotmat", "paths"))
 	
-	expect_equal(names(output$arrays), c('A0', 'A1', 'A2', 'A3',
+	expect_equal(names(output$array_info$arrays), c('A0', 'A1', 'A2', 'A3',
 		'A4', 'A5', 'A6', 'A7', 'A8', 'A9'))
 	
 	dot <- read.csv(text = c('"A","to","B"
@@ -152,7 +156,7 @@ c('"","A0","A1","A2","A3","A4","A5","A6","A7","A8","A9"
 "A8",NA,NA,NA,NA,NA,NA,2,1,0,1
 "A9",NA,NA,NA,NA,NA,NA,3,2,1,0
 '), stringsAsFactors = FALSE, row.names = 1)
-	expect_equal(output$dotmat, as.matrix(dotmat))
+	expect_equal(output$array_info$dotmat, as.matrix(dotmat))
 
 	pathnames <- c('A0_to_A2', 'A0_to_A3', 'A0_to_A4', 'A0_to_A5',
 		'A0_to_A6', 'A0_to_A7', 'A0_to_A8', 'A0_to_A9', 'A1_to_A3',
@@ -164,10 +168,10 @@ c('"","A0","A1","A2","A3","A4","A5","A6","A7","A8","A9"
 		'A4_to_A8', 'A4_to_A9', 'A5_to_A3', 'A5_to_A7', 'A5_to_A2',
 		'A5_to_A8', 'A5_to_A1', 'A5_to_A9', 'A5_to_A0', 'A6_to_A8',
 		'A6_to_A9', 'A7_to_A9', 'A8_to_A6', 'A9_to_A7', 'A9_to_A6')
-	expect_equal(names(output$paths), pathnames)
+	expect_equal(names(output$array_info$paths), pathnames)
 	# sample 2 contents
-	expect_equal(output$paths[[3]], "A1 -> A2 -> A3")
-	expect_equal(output$paths[[6]], "A1 -> A2 -> A3 -> A4 -> A5 -> A6")
+	expect_equal(output$array_info$paths[[3]], "A1 -> A2 -> A3")
+	expect_equal(output$array_info$paths[[6]], "A1 -> A2 -> A3 -> A4 -> A5 -> A6")
 })
 
 
@@ -180,9 +184,9 @@ test_that("loadDot output is as expected for simple multi channel study areas", 
 	output <- loadDot(input = "spatial.txt", spatial = example.spatial, disregard.parallels = TRUE)	
 	file.remove("spatial.txt")
 
-	expect_equal(names(output), c("dot", "arrays", "dotmat", "paths"))
+	expect_equal(names(output$array_info), c("arrays", "dotmat", "paths"))
 	
-	expect_equal(names(output$arrays), c('A0', 'A1', 'A2', 'A4',
+	expect_equal(names(output$array_info$arrays), c('A0', 'A1', 'A2', 'A4',
 		'A5', 'A6', 'A7', 'A8', 'A9', 'A3'))
 	
 	dot <- read.csv(text = c('"A","to","B"
@@ -214,7 +218,7 @@ c('"","A0","A1","A2","A4","A5","A6","A7","A8","A3","A9"
 "A3",2,1,1,1,2,3,4,5,0,6
 "A9",8,7,6,5,4,3,2,1,6,0
 '), stringsAsFactors = FALSE, row.names = 1)
-	expect_equal(output$dotmat, as.matrix(dotmat))
+	expect_equal(output$array_info$dotmat, as.matrix(dotmat))
 
 	pathnames <- c('A0_to_A2', 'A0_to_A3', 'A0_to_A4', 'A0_to_A5',
 		'A0_to_A6', 'A0_to_A7', 'A0_to_A8', 'A0_to_A9', 'A1_to_A4',
@@ -230,11 +234,11 @@ c('"","A0","A1","A2","A4","A5","A6","A7","A8","A3","A9"
 		'A9_to_A7', 'A9_to_A6', 'A9_to_A5', 'A9_to_A4', 'A9_to_A2',
 		'A9_to_A3', 'A9_to_A1', 'A9_to_A0', 'A3_to_A0', 'A3_to_A5',
 		'A3_to_A6', 'A3_to_A7', 'A3_to_A8', 'A3_to_A9')
-	expect_equal(names(output$paths), pathnames)
+	expect_equal(names(output$array_info$paths), pathnames)
 	# sample 2 contents
-	expect_equal(output$paths[[3]], c("A1 -> A2", "A1 -> A3"))
-	expect_equal(output$paths[[6]], c("A1 -> A2 -> A4 -> A5 -> A6", "A1 -> A3 -> A4 -> A5 -> A6"))
-	expect_equal(output$paths$A7_to_A1, c("A6 -> A5 -> A4 -> A2", "A6 -> A5 -> A4 -> A3"))	
+	expect_equal(output$array_info$paths[[3]], c("A1 -> A2", "A1 -> A3"))
+	expect_equal(output$array_info$paths[[6]], c("A1 -> A2 -> A4 -> A5 -> A6", "A1 -> A3 -> A4 -> A5 -> A6"))
+	expect_equal(output$array_info$paths$A7_to_A1, c("A6 -> A5 -> A4 -> A2", "A6 -> A5 -> A4 -> A3"))	
 })
 
 
@@ -247,9 +251,9 @@ test_that("loadDot output is as expected for multi channel study areas with barr
 	output <- loadDot(input = "spatial.txt", spatial = example.spatial, disregard.parallels = TRUE)	
 	file.remove("spatial.txt")
 
-	expect_equal(names(output), c("dot", "arrays", "dotmat", "paths"))
+	expect_equal(names(output$array_info), c("arrays", "dotmat", "paths"))
 	
-	expect_equal(names(output$arrays), c('A0', 'A1', 'A2', 'A4',
+	expect_equal(names(output$array_info$arrays), c('A0', 'A1', 'A2', 'A4',
 		'A5', 'A6', 'A7', 'A8', 'A9', 'A3'))
 	
 	dot <- read.csv(text = c('"A","to","B"
@@ -281,7 +285,7 @@ c('"","A0","A1","A2","A4","A5","A6","A7","A8","A3","A9"
 "A3",2,1,1,1,2,3,4,5,0,6
 "A9",8,7,6,5,4,3,2,1,7,0
 '), stringsAsFactors = FALSE, row.names = 1)
-	expect_equal(output$dotmat, as.matrix(dotmat))
+	expect_equal(output$array_info$dotmat, as.matrix(dotmat))
 
 	pathnames <- c('A0_to_A2', 'A0_to_A3', 'A0_to_A4', 'A0_to_A5',
 		'A0_to_A6', 'A0_to_A7', 'A0_to_A8', 'A0_to_A9', 'A1_to_A4',
@@ -297,11 +301,11 @@ c('"","A0","A1","A2","A4","A5","A6","A7","A8","A3","A9"
 		'A8_to_A0', 'A9_to_A7', 'A9_to_A6', 'A9_to_A5', 'A9_to_A4',
 		'A9_to_A2', 'A9_to_A1', 'A9_to_A3', 'A9_to_A0', 'A3_to_A0',
 		'A3_to_A5', 'A3_to_A6', 'A3_to_A7', 'A3_to_A8', 'A3_to_A9')
-	expect_equal(names(output$paths), pathnames)
+	expect_equal(names(output$array_info$paths), pathnames)
 	# sample 2 contents
-	expect_equal(output$paths$A0_to_A4, c("A1 -> A2", "A1 -> A3"))
-	expect_equal(output$paths$A0_to_A7, c("A1 -> A2 -> A4 -> A5 -> A6", "A1 -> A3 -> A4 -> A5 -> A6"))
-	expect_equal(output$paths$A7_to_A1, "A6 -> A5 -> A4 -> A2")
+	expect_equal(output$array_info$paths$A0_to_A4, c("A1 -> A2", "A1 -> A3"))
+	expect_equal(output$array_info$paths$A0_to_A7, c("A1 -> A2 -> A4 -> A5 -> A6", "A1 -> A3 -> A4 -> A5 -> A6"))
+	expect_equal(output$array_info$paths$A7_to_A1, "A6 -> A5 -> A4 -> A2")
 })
 
 test_that("loadDot correctly identifies edge arrays", {
@@ -313,10 +317,10 @@ test_that("loadDot correctly identifies edge arrays", {
 	file.remove("spatial.txt")
 
 	# check edges
-	expect_equal(output$arrays$A3$edge, FALSE)
-	expect_equal(output$arrays$A6$edge, TRUE)
-	expect_equal(output$arrays$A7$edge, FALSE)
-	expect_equal(output$arrays$A8$edge, TRUE)
+	expect_equal(output$array_info$arrays$A3$edge, FALSE)
+	expect_equal(output$array_info$arrays$A6$edge, TRUE)
+	expect_equal(output$array_info$arrays$A7$edge, TRUE)
+	expect_equal(output$array_info$arrays$A8$edge, TRUE)
 })
 
 test_that("loadDot handles parallel arrays properly", {
@@ -334,37 +338,37 @@ test_that("loadDot handles parallel arrays properly", {
 
 	file.remove("spatial.txt")
 
-	expect_equal(names(output), c("dot", "arrays", "dotmat", "paths"))
+	expect_equal(names(output$array_info), c("arrays", "dotmat", "paths"))
 	
-	expect_equal(names(output$arrays), c('A0', 'A1', 'A2', 'A4',
+	expect_equal(names(output$array_info$arrays), c('A0', 'A1', 'A2', 'A4',
 		'A5', 'A6', 'A7', 'A8', 'A9', 'A3'))
 
 	# check parallels
-	expect_equal(output$arrays$A3$parallel, "A2")
-	expect_equal(output$arrays$A2$parallel, "A3")
-	expect_equal(output$arrays$A1$parallel, NULL)
+	expect_equal(output$array_info$arrays$A3$parallel, "A2")
+	expect_equal(output$array_info$arrays$A2$parallel, "A3")
+	expect_equal(output$array_info$arrays$A1$parallel, NULL)
 
 	# check peers with disregard.parallels = TRUE
-	expect_equal(output$arrays$A0$after.peers, paste0("A", 1:9))
-	expect_equal(output$arrays$A2$after.peers, paste0("A", 4:9))
-	expect_equal(output$arrays$A3$after.peers, paste0("A", 4:9))
-	expect_equal(output$arrays$A5$after.peers, paste0("A", 6:9))
+	expect_equal(output$array_info$arrays$A0$after.peers, paste0("A", 1:9))
+	expect_equal(output$array_info$arrays$A2$after.peers, paste0("A", 4:9))
+	expect_equal(output$array_info$arrays$A3$after.peers, paste0("A", 4:9))
+	expect_equal(output$array_info$arrays$A5$after.peers, paste0("A", 6:9))
 
-	expect_equal(output$arrays$A0$before.peers, NULL)
-	expect_equal(output$arrays$A2$before.peers, paste0("A", 1:0))
-	expect_equal(output$arrays$A3$before.peers, paste0("A", 1:0))
-	expect_equal(output$arrays$A5$before.peers, paste0("A", c(4, 2, 3, 1, 0)))
+	expect_equal(output$array_info$arrays$A0$before.peers, NULL)
+	expect_equal(output$array_info$arrays$A2$before.peers, paste0("A", 1:0))
+	expect_equal(output$array_info$arrays$A3$before.peers, paste0("A", 1:0))
+	expect_equal(output$array_info$arrays$A5$before.peers, paste0("A", c(4, 2, 3, 1, 0)))
 
 	# check peers with disregard.parallels = TRUE
-	expect_equal(output2$arrays$A0$after.peers, paste0("A", 1:9))
-	expect_equal(output2$arrays$A2$after.peers, NULL)
-	expect_equal(output2$arrays$A3$after.peers, NULL)
-	expect_equal(output2$arrays$A5$after.peers, paste0("A", 6:9))
+	expect_equal(output2$array_info$arrays$A0$after.peers, paste0("A", 1:9))
+	expect_equal(output2$array_info$arrays$A2$after.peers, NULL)
+	expect_equal(output2$array_info$arrays$A3$after.peers, NULL)
+	expect_equal(output2$array_info$arrays$A5$after.peers, paste0("A", 6:9))
 
-	expect_equal(output2$arrays$A0$before.peers, NULL)
-	expect_equal(output2$arrays$A2$before.peers, NULL)
-	expect_equal(output2$arrays$A3$before.peers, NULL)
-	expect_equal(output2$arrays$A5$before.peers, paste0("A", c(4, 2, 3, 1, 0)))
+	expect_equal(output2$array_info$arrays$A0$before.peers, NULL)
+	expect_equal(output2$array_info$arrays$A2$before.peers, NULL)
+	expect_equal(output2$array_info$arrays$A3$before.peers, NULL)
+	expect_equal(output2$array_info$arrays$A5$before.peers, paste0("A", c(4, 2, 3, 1, 0)))
 })
 
 

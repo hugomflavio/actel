@@ -4,10 +4,10 @@
 \alias{breakMatricesByArray}
 \title{Break the detection matrices per array}
 \usage{
-breakMatricesByArray(m, arrays, type = c("peers", "all"), verbose = TRUE)
+breakMatricesByArray(m, dot_list, type = c("peers", "all"), verbose = TRUE)
 }
 \arguments{
-\item{arrays}{A list containing information for each array.}
+\item{dot_list}{A list containing information on the study area configuration.}
 
 \item{type}{The type of arrays to be matched}
 

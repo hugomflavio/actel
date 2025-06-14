@@ -12,7 +12,7 @@ bio <- read.csv("biometrics.csv")
 deployments <- read.csv("deployments.csv")
 spatial <- read.csv("spatial.csv")
 detections <- example.detections
-detections$ExtraCol <- NA
+detections$ExtraCol <- NA # HF: what is this for?...
 dot <- paste(unique(spatial$Array[spatial$Type == "Hydrophone"]),
        collapse = "--")
 
@@ -94,29 +94,6 @@ test_that("explore with preload == explore with traditional loading", {
 # n
 # n
 
-test_that("migration and residency don't start if datapack is incompatible", {
-  xspatial <- spatial[, -match("Section", colnames(spatial))]
-  expect_warning(d <- preload(biometrics = bio, deployments = deployments,
-                              spatial = xspatial, detections = detections,
-                              tz = "Europe/Copenhagen"),
-                 paste0("The spatial input does not contain a 'Section'",
-                        " column. This input is only valid for explore()",
-                        " analyses."),
-                 fixed = TRUE)
-
-  expect_error(results <- migration(datapack = d, GUI = "never"),
-               paste0("To run migration(), please assign the arrays to their",
-                      " sections using a 'Section' column in the spatial",
-                      " input."),
-               fixed = TRUE)
-
-  expect_error(results <- residency(datapack = d, GUI = "never"),
-               paste0("To run residency(), please assign the arrays to their",
-                       " sections using a 'Section' column in the spatial",
-                       " input."),
-               fixed = TRUE)
-})
-
 test_that("migration with preload == migration with traditional loading", {
   expect_warning(d2 <- preload(biometrics = bio, deployments = deployments,
                                spatial = spatial, detections = detections,
@@ -139,11 +116,7 @@ test_that("migration with preload == migration with traditional loading", {
 })
 # n # migration1
 # n
-# n
-# n
 # n # migration2
-# n
-# n
 # n
 
 

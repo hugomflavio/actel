@@ -147,4 +147,26 @@ explore(tz = 'Europe/Copenhagen', datapack = NULL, max.interval = 60, minimum.de
 	file.remove("latest_actel_error_log.txt")
 })
 
+
+tests.home <- getwd()
+setwd(tempdir())
+exampleWorkspace("exampleWorkspace", force = TRUE)
+setwd("exampleWorkspace")
+write.csv(example.distances, "distances.csv")
+
+study.data <- suppressWarnings(loadStudyData(tz = "Europe/Copenhagen", start.time = NULL,
+	stop.time = NULL, exclude.tags = NULL))
+bio <- study.data$bio
+spatial <- study.data$spatial
+
+test_that("expFirstArray works as expected", {
+	expect_equal(expFirstArray("R64K-4451", bio, spatial), "A1")
+
+	xspatial <- spatial
+	xspatial$release.sites$Array <- "A1|A2"
+	expect_equal(expFirstArray("R64K-4451", bio, xspatial), c("A1", "A2"))
+})
+
+setwd("..")
+unlink("exampleWorkspace", recursive = TRUE)
 setwd(tests.home)

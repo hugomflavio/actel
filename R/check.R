@@ -47,7 +47,7 @@ checkArguments <- function(dp, tz, min.total.detections, min.per.event, max.inte
   speed.warning, speed.error, start.time, stop.time, report, auto.open, save.detections, jump.warning, jump.error,
   inactive.warning, inactive.error, exclude.tags, override, print.releases, detections.y.axis = c("auto", "stations", "arrays"),
   if.last.skip.section = NULL, replicates = NULL, section.warning, section.error, section.order = NULL, timestep = c("days", "hours"),
-  back.warning = c("all", "u", "none"), back.error = c("all", "u", "none")) {
+  back.warning = Inf, back.error = Inf) {
   event(type = "debug", "Running checkArguments.")
 
   # Note: Checks only relevant for migration() or residency() are listed at the bottom!
@@ -316,41 +316,41 @@ checkArguments <- function(dp, tz, min.total.detections, min.per.event, max.inte
           "'if.last.skip.section' must be logical.")
   }
 
-  if (!is.character(back.warning)) {
+  if (!is.numeric(back.warning)) {
     event(type = "stop",
-          "'back.warning' should be one of 'all',",
-          " 'u', or 'none'.")
+          "'back.warning' must be numeric.")
   }
-  back.warning <- match.arg(back.warning)
 
-  if (!is.character(back.error)) {
+  if (back.warning < 1) {
     event(type = "stop",
-          "'back.error' should be one of 'all',",
-          " 'u', or 'none'.")
-  }
-  back.error <- match.arg(back.error)
-
-  # warn error
-  # none none  fine
-  # none u     bad <-
-  # none all   bad <-
-  # u    none  fine
-  # u    u     fine
-  # u    all   bad <-
-  # all  none  fine
-  # all  u     fine
-  # all  all   fine
-
-  if (back.warning == "none" & back.error != "none") {
-    event(type = c("stop"),
-          "If back.warning is set to 'none',",
-          " back.error must be set to 'none' as well.")
+          "'back.warning' must not be lower than 1.")
   }
 
-  if (back.warning == "u" & back.error == "all") {
-    event(type = c("stop"),
-          "If back.warning is set to 'u',",
-          " back.error must be set to either 'u' or 'none'.")
+  if (!is.numeric(back.error)) {
+    event(type = "stop",
+          "'back.error' must be numeric.")
+  }
+
+  if (back.error < 1) {
+    event(type = "stop",
+          "'back.error' must not be lower than 1.")
+  }
+
+  if (back.error < back.warning) {
+    if (back.warning == 2) { # this happens if someone changed back error but didn't set back warning.
+      event(type = c("screen", "warning"),
+            "Adjusting default 'back.warning' to match set 'back.error'.")
+      back.warning <- back.error
+    } else {
+      if (back.error == 3) { # this happens if someone changed back warning but didn't change back error.
+        event(type = c("screen", "warning"),
+              "Adjusting default 'back.error' to match set 'back.warning'.")
+        back.error <- back.warning
+      } else { # this happens if someone set both jump warning and jump error. In this case, stop and let the user decide.
+        event(type = "stop",
+              "'back.error' must not be lower than 'back.warning'.")
+      }
+    }
   }
 
   if (!is.null(replicates) && !is.list(replicates)) {
@@ -748,7 +748,7 @@ checkInactiveness <- function(movements, tag, detections, n,
       the.detections <- detections[valid.rows, ]
       # find all stations
       the.stations <- as.character(sort(unique(the.detections$Standard.name)))
-      trigger.error <- FALSE
+      trigger_error <- FALSE
       # Trigger warning
       if (attributes(dist.mat)$valid) {
         aux <- dist.mat[the.stations, the.stations]
@@ -780,7 +780,7 @@ checkInactiveness <- function(movements, tag, detections, n,
           the_warning <- paste("Warning:", the_warning)
           continue <- FALSE
           if (days.spent >= inactive.error) {
-            trigger.error <- TRUE # nocov
+            trigger_error <- TRUE # nocov
           }
         }
       } else {
@@ -797,12 +797,12 @@ checkInactiveness <- function(movements, tag, detections, n,
           the_warning <- paste("Warning:", the_warning)
           continue <- FALSE
           if (days.spent >= inactive.error) {
-            trigger.error <- TRUE # nocov
+            trigger_error <- TRUE # nocov
           }
         }
       }
       # Trigger user interaction
-      if (trigger.error) { # nocov start
+      if (trigger_error) { # nocov start
         error_message <- paste0("M: Tag ", tag, " ", n,
                                 " has been inactive for more than ",
                                 inactive.error,
@@ -829,13 +829,15 @@ checkInactiveness <- function(movements, tag, detections, n,
 #'
 #' @keywords internal
 #'
-checkImpassables <- function(movements, tag, bio, spatial, detections, dotmat, GUI, save.tables.locally, n){
+checkImpassables <- function(movements, tag, bio, spatial, detections, 
+                             dot_list, GUI, save.tables.locally, n){
   event(type = "debug", "Running checkImpassables.")
   Valid <- NULL
 
-  release <- as.character(bio$Release.site[na.as.false(bio$Transmitter == tag)])
-  release <- unlist(strsplit(with(spatial, release.sites[release.sites$Standard.name == release, "Array"]), "|", fixed = TRUE))
+  # unpack array dotmat for simplicity
+  dotmat <- dot_list$array_info$dotmat
 
+  release_arrays <- expFirstArray(tag, bio, spatial)
   restart <- TRUE
   first.time <- TRUE
   while (restart) {
@@ -853,10 +855,13 @@ checkImpassables <- function(movements, tag, bio, spatial, detections, dotmat, G
     }
     # check release movement
     if (sum(movements$Valid) > 0) {
-      if(all(is.na(dotmat[as.character(release), as.character(valid.moves$Array[1])]))) {
+      rows <- as.character(release_arrays)
+      cols <- as.character(valid.moves$Array[1])
+      if(all(is.na(dotmat[rows, cols]))) {
         the_warning <- paste0("Tag ", tag, " ", n, " made an impassable",
                               " jump: It is not possible to go from",
-                              " release site ", as.character(release),
+                              " release site(s) ", 
+                              paste(release_arrays, collapse = ", "),
                               " to ", as.character(valid.moves$Array[1]),
                               ".\n         Please resolve this either by",
                               " invalidating events or by adjusting your",
@@ -974,7 +979,7 @@ checkSMovesN <- function(secmoves, tag, section.warning, section.error,
 #'
 #' @keywords internal
 #'
-checkLinearity <- function(secmoves, tag, spatial, arrays, GUI,
+checkLinearity <- function(secmoves, tag, spatial, dot_list, GUI,
                            save.tables.locally, n,
                            back.warning = "all", back.error = "all") {
   event(type = "debug", "Running checkLinearity.")
@@ -1014,121 +1019,133 @@ checkLinearity <- function(secmoves, tag, spatial, arrays, GUI,
   return(secmoves)
 }
 
-checkBackwards <- function(movements, tag, bio, detections, spatial, arrays,
-  backwards.warning, backwards.error, GUI, save.tables.locally, n) {
+checkBackwards <- function(movements, tag, bio, detections, spatial, dot_list,
+  back.warning, back.error, GUI, save.tables.locally, n) {
 
-  appendTo("debug", "Running checkBackwards.")
+  event(type = "debug", "Running checkBackwards.")
   # NOTE: The NULL variables below are actually column names used by data.table.
-  # This definition is just to prevent the package check from issuing a note due unknown variables.
+  # This definition is just to prevent the package check from issuing a note
+  # due unknown variables.
   Valid <- NULL
-  the.warning <- NULL
-  warning.counter <- 0
-  events.to.complain.about <- NULL
+  the_warning <- NULL
+  events_to_complain_about <- NULL
+  warning_counter <- 0
+  trigger_error <- FALSE
 
-  # release is handled by checkFirstDetBackFromRelease, 
+  # unpack array_info elements for simplicity
+  arrays <- dot_list$array_info$arrays
+  dotmat <- dot_list$array_info$dotmat
+  paths <- dot_list$array_info$paths
+
+  # release is handled by checkFirstMove,
   # so we don't have to worry about that here. 
 
-  if (any(movements$Valid)) {
-    # inspect only valid movements
-    vm <- movements[(Valid)]
-    # and remove consecutive movements at the same array
-    aux <- rle(vm$Array)$lengths
-    aux <- c(1, aux[-length(aux)])
-    vm <- vm[cumsum(aux), ]
+  if (!any(movements$Valid)) {
+    # nothing to check
+    return(movements)
+  }
 
-    if (nrow(vm) > 1) {
-      A <- vm$Array[-nrow(vm)]
-      B <- vm$Array[-1]
-      aux <- cbind(A, B)
-      move.is.forward <- apply(aux, 1, function(x) x[2] %in% c(x[1], arrays[[x[1]]]$all.after.and.par))
+  # inspect only valid movements
+  vm <- movements[(Valid)]
+  vm$Index <- 1:nrow(vm)
+  # and remove consecutive movements at the same array
+  aux <- rle(vm$Array)$lengths
+  aux <- c(1, aux[-length(aux)])
+  vm <- vm[cumsum(aux), ]
 
-      if (all(move.is.forward))
-        return(movements)
+  if (nrow(vm) == 1) {
+    # nothing to check
+    return(movements)
+  }
 
-      # otherwise, there are backwards movements
-      aux <- rle(move.is.forward)
-      x <- data.frame(Length = aux$length,
-                      Backwards = !aux$values)
-      x$cumLength <- cumsum(x$Length)
-      x$From <- A[c(1, x$cumLength[-nrow(x)]+1)]
-      x$To <- B[x$cumLength]
-      x$Distance <- sapply(1:nrow(x), function(i) {dotmat[x$From[i], x$To[i]]})
-  x      
-      backwards.lengths <- aux$lengths[!aux$values]
+  # make A-to-B table for easy comparison
+  A <- vm[-nrow(vm), c("Array", "Index")]
+  colnames(A) <- paste0("From", colnames(A))
+  B <- vm[-1, c("Array", "Index")]
+  colnames(B) <- paste0("To", colnames(B))
+  aux <- cbind(A, B)
+  # now check it
+  move.is.forward <- apply(aux, 1, function(x) {
+    aux <- dot_list$array_info$arrays[[x["FromArray"]]]
+    not_back <- c(x["FromArray"],
+                  aux$all.after.and.par)
+    x["ToArray"] %in% not_back
+  })
 
-      names(backwards.lengths) <- paste(A[!aux$values], "->", B[!aux$values])
+  if (all(move.is.forward)) {
+    # nothing to complain about
+    return(movements)
+  }
 
+  # otherwise, there are backwards movements
+  aux <- rle(move.is.forward)
+  aux <- data.frame(Length = aux$length,
+                    Backwards = !aux$values)
+  aux$cumLength <- cumsum(aux$Length)
+  aux$From <- A$FromArray[c(1, aux$cumLength[-nrow(aux)]+1)]
+  aux$From_i <- A$FromIndex[c(1, aux$cumLength[-nrow(aux)]+1)]
+  aux$To <- B$ToArray[aux$cumLength]
+  aux$To_i <- B$ToIndex[aux$cumLength]
+  aux$Distance <- sapply(1:nrow(aux), function(i) {
+    dotmat[aux$From[i], aux$To[i]]
+  })
+  back_moves <- aux[aux$Backwards, ]
 
-      if (any(is.na(move.steps)))
-        stopAndReport("There are unresolved impassable jumps in the movements (Found during moves).")
-
-      if (any(move.steps > 1)) {
-        # isolate troublesome events
-        steps.to.check <- which(move.steps > 1)
-        # confirm that arrays were active
-        for (i in steps.to.check) {
-          sub.paths <- paths[[paste0( vm$Array[i], "_to_", vm$Array[i + 1])]]
-          path.dist <- lapply(sub.paths, function(p) {
-            xarrays <- unlist(strsplit(p, " -> "))
-            xarrays <- sapply(xarrays, function(a) {
-              # if the movement ocurred before the start
-              v1 <- arrays[[a]]$live$Start > vm$Last.time[i] & 
-                    arrays[[a]]$live$Start > vm$First.time[i + 1]
-              # or after the stop
-              v2 <- arrays[[a]]$live$Stop < vm$Last.time[i] & 
-                    arrays[[a]]$live$Stop < vm$First.time[i + 1]
-              # then that period does not qualify
-              v3 <- !(v1 | v2)
-              # and if any period qualifies, then the array was up during the movememnt
-              any(v3)
-            })
-            return(list(n = sum(xarrays) + 1, names = names(xarrays)[xarrays]))
-            # +1 because the target array also counts as a step
-          })
-          names(path.dist) <- sub.paths
-          new.steps <- sapply(path.dist, function(x) x$n)
-          move.steps[i] <- min(new.steps)
-          say.at.least <- min(new.steps) != max(new.steps)
-          if (move.steps[i] > jump.warning) { # because ">", then if jump.warning = 1, actel only complains if steps = 2.
-            warning.counter <- warning.counter + 1
-            events.to.complain.about <- c(events.to.complain.about, i + 1)
-            if (warning.counter < 5) {
-              # Trigger warning
-              appendTo(c("Report", "Warning", "Screen"),
-                other.warning <- paste0("Tag ", tag, " ", n, " jumped through ",  
-                  ifelse(say.at.least, "at least ", ""), move.steps[i] - 1,
-                  ifelse(move.steps[i] > 2, " arrays ", " array "),
-                  "in valid events ", i, " -> ", i + 1, " (", names(move.steps)[i], ")."))
-              other.warning <- paste("Warning:", other.warning)
-              the.warning <- paste0(the.warning, "\n", other.warning)
-            } else {
-              final.warning <- paste0("Warning: Tag ", tag, " ", n, " jumped ", jump.warning, " or more arrays on ", warning.counter, " occasions (of which the first 4 are displayed above).")
-              message(paste0("\r", final.warning), appendLF = FALSE); flush.console()
-            }
-          }
-          rm(say.at.least)
-          if (move.steps[i] > jump.error) { # same as if above.
-            trigger.error <- TRUE # nocov
-          }
-        }
-        if (warning.counter >= 5) {
-          message("")
-          appendTo(c("Report", "Warning"), sub("Warning: ", "", final.warning))
-          link <- createEventRanges(events.to.complain.about)         
-          appendTo(c("Screen", "Report"), event.list <- paste0("         Events that raised warnings: ", paste(link, collapse = ", ")))
-          the.warning <- paste0(the.warning, "\n", final.warning, "\n", event.list)
-        }
+  for (i in 1:nrow(back_moves)) {
+    if (back_moves$Distance[i] >= back.warning) {
+      warning_counter <- warning_counter + 1
+      new_range <- back_moves$From_i[i]:back_moves$To_i[i]
+      events_to_complain_about <- c(events_to_complain_about, new_range)
+      if (warning_counter < 5) {
+        # Trigger warning
+        other_warning <- paste0("Tag ", tag, " ", n,
+                                " moved backwards ",
+                                back_moves$Distance[i],
+                                ifelse(back_moves$Distance[i] > 1,
+                                       " arrays ",
+                                       " array "),
+                                "in valid events ",
+                                back_moves$From_i[i], " -> ",
+                                back_moves$To_i[i],
+                                " (", 
+                                back_moves$From[i], " -> ",
+                                back_moves$To[i], ").")
+        event(type = c("screen", "report", "warning"),
+              other_warning)
+        other_warning <- paste("Warning:", other_warning)
+        the_warning <- paste0(the_warning, "\n", other_warning)
       }
     }
-    # Trigger user interaction
-    if (interactive() && trigger.error) { # nocov start
-      movements <- tableInteraction(moves = movements, tag = tag, detections = detections, 
-                                    trigger = the.warning, GUI = GUI, save.tables.locally = save.tables.locally)
-    } # nocov end
+    if (back_moves$Distance[i] >= back.error) {
+      trigger_error <- TRUE # nocov
+    }
   }
+  if (warning_counter >= 5) {
+    final_warning <- paste0("Tag ", tag, " ",
+                            n, " moved backwards up to ",
+                            max(back_moves$Distance),
+                            " arrays on ", warning_counter,
+                            " occasions (of which the first 4",
+                            " are displayed above).")
+    event(type = c("report", "warning", "screen"),
+          final_warning)
+    final_warning <- paste("Warning:", final_warning)
+    the_warning <- paste0(the_warning, "\n", final_warning)
+    
+    link <- createEventRanges(events_to_complain_about)
+    event_string <- paste0("Events that raised warnings: ",
+                         paste(link, collapse = ", "))
+    event(type = c("report", "screen"),
+          event_string)
+    the_warning <- paste0(the_warning, "\n", event_string)
+  }
+  # Trigger user interaction
+  if (interactive() && trigger_error) { # nocov start
+    movements <- tableInteraction(moves = movements, tag = tag, detections = detections, 
+                                  trigger = the_warning, GUI = GUI, save.tables.locally = save.tables.locally)
+  } # nocov end
   return(movements)
 }
-
 
 #' Check report compatibility
 #'
@@ -1140,7 +1157,7 @@ checkBackwards <- function(movements, tag, bio, detections, spatial, arrays,
 #'
 #' @keywords internal
 #'
-checkReport <- function(report){
+checkReport <- function(report) {
   event(type = "debug", "Running checkReport.")
   if (report) {
     event(type = "report",
@@ -1172,39 +1189,48 @@ checkReport <- function(report){
 #'
 #' @inheritParams check_args
 #'
-#' @return A data frame with the movements for the target tag with updated 'Valid' column.
+#' @return A data frame with the movements for the target tag with
+#'   updated 'Valid' column.
 #'
 #' @keywords internal
 #'
-checkFirstMove <- function(movements, tag, bio, detections, arrays, spatial, GUI, save.tables.locally, n) {
+checkFirstMove <- function(movements, tag, bio, detections, dot_list, 
+                           spatial, GUI, save.tables.locally, n) {
   event(type = "debug", "Running checkFirstMove.")
   # NOTE: The NULL variables below are actually column names used by data.table.
-  # This definition is just to prevent the package check from issuing a note due unknown variables.
+  # This definition is just to prevent the package check from issuing a note due
+  # top9 unknown variables.
   Valid <- NULL
   Array <- NULL
 
-  release <- as.character(bio$Release.site[na.as.false(bio$Transmitter == tag)])
-  release <- unlist(strsplit(with(spatial, release.sites[release.sites$Standard.name == release, "Array"]), "|", fixed = TRUE))
+  if (any(movements$Valid)) {
+    vm <- movements[(Valid)]
+  } else {
+    return(movements)
+  }
+
+  release_arrays <- expFirstArray(tag, bio, spatial)
 
   the_warning <- NULL
-  after.arrays <- unique(c(release, unlist(lapply(release, function(x) arrays[[x]]$all.after.and.par))))
+  aux <- lapply(release_arrays, function(x) {
+    dot_list$array_info$arrays[[x]]$all.after.and.par
+  })
+  after_arrays <- unique(c(release_arrays, unlist(aux)))
 
-  if (any(movements$Valid))
-    vm <- movements[(Valid)]
-  else
-    return(movements)
-
-  if (any(is.na(match(vm$Array, after.arrays)))) {
+  if (any(is.na(match(vm$Array, after_arrays)))) {
     the_warning <- paste0("Tag ", tag, " ", n, " was detected in an array",
                           " that is not after its release site! Opening",
                           " relevant data for inspection.",
-                          "\nExpected first array: ", release)
+                          "\nExpected first array(s): ",
+                          paste(release_arrays, collapse = ", "))
     event(type = c("screen", "report", "warning"),
           the_warning)
     the_warning <- paste("Warning:", the_warning)
     if (interactive()) { # nocov start
-      movements <- tableInteraction(moves = movements, tag = tag, detections = detections,
-                                    trigger = the_warning, GUI = GUI, save.tables.locally = save.tables.locally)
+      movements <- tableInteraction(moves = movements, tag = tag,
+                                    detections = detections,
+                                    trigger = the_warning, GUI = GUI,
+                                    save.tables.locally = save.tables.locally)
     } # nocov end
   }
   return(movements)
@@ -1227,8 +1253,9 @@ checkJumpDistance <- function(movements, tag, bio, detections, spatial,
   # due unknown variables.
   Valid <- NULL
   the_warning <- NULL
-  warning_counter <- 0
   events_to_complain_about <- NULL
+  warning_counter <- 0
+  trigger_error <- FALSE
 
   # unpack array_info elements for simplicity
   arrays <- dot_list$array_info$arrays
@@ -1318,9 +1345,7 @@ checkJumpDistance <- function(movements, tag, bio, detections, spatial,
     rm(say.at.least)
   }
   if (release.steps > jump.error) {
-    trigger.error <- TRUE # nocov
-  } else {
-    trigger.error <- FALSE
+    trigger_error <- TRUE # nocov
   }
 
   #########################
@@ -1391,7 +1416,7 @@ checkJumpDistance <- function(movements, tag, bio, detections, spatial,
         }
         rm(say.at.least)
         if (move.steps[i] > jump.error) { # same as if above.
-          trigger.error <- TRUE # nocov
+          trigger_error <- TRUE # nocov
         }
       }
       if (warning_counter >= 5) {
@@ -1415,7 +1440,7 @@ checkJumpDistance <- function(movements, tag, bio, detections, spatial,
     }
   }
   # Trigger user interaction
-  if (interactive() && trigger.error) { # nocov start
+  if (interactive() && trigger_error) { # nocov start
     movements <- tableInteraction(moves = movements, tag = tag,
                                   detections = detections,
                                   trigger = the_warning, GUI = GUI,

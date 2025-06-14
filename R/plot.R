@@ -40,18 +40,21 @@ plotLive <- function(input, arrays, show.stations = FALSE, array.size = 2, stati
   cbPalette <- c("#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7")
   names(cbPalette) <- c("Orange", "Blue", "Green", "Yellow", "Darkblue", "Darkorange", "Pink")
 
-  if (!inherits(input, "list"))
+  if (!inherits(input, "list")) {
     stop("Could not recognise the input as an actel results or preload object.", call. = FALSE)
+  }
 
-  if (is.null(input$spatial) | is.null(input$arrays) | is.null(input$deployments))
+  if (is.null(input$spatial) | is.null(input$dot_list) | is.null(input$deployments)) {
     stop("Could not recognise the input as an actel results or preload object.", call. = FALSE)
+  }
 
-  if (!missing(arrays) && any(is.na(match(arrays, unlist(input$spatial$array.order)))))
+  if (!missing(arrays) && any(is.na(match(arrays, unlist(input$spatial$array.order))))) {
     stop("'arrays' was set but not all contents match array names in the study area.", call. = FALSE)
+  }
 
   spatial <- input$spatial
   deployments <- input$deployments
-  study.arrays <- input$arrays
+  study.arrays <- input$dot_list$array_info$arrays
 
   if (!is.data.frame(deployments))
     xdep <- do.call(rbind, deployments)
@@ -359,8 +362,9 @@ plotArray <- function(input, arrays, title, xlab, ylab, lwd = 1, col, by.group =
   type <- match.arg(type)
   y.style <- match.arg(y.style)
 
-  if (!missing(ladder.type) & !cumulative)
+  if (!missing(ladder.type) & !cumulative) {
     warning("'ladder.type' was set, but cumulative = FALSE. Ignoring ladder.type.", immediate. = TRUE, call. = FALSE)
+  }
 
   ladder.type <- match.arg(ladder.type)
 
@@ -371,14 +375,18 @@ plotArray <- function(input, arrays, title, xlab, ylab, lwd = 1, col, by.group =
       type <- "bars"
   }
 
-  if (!inherits(input, "list"))
+  if (!inherits(input, "list")) {
     stop("Could not recognise the input as an actel results object.", call. = FALSE)
+  }
 
-  if (is.null(input$valid.movements) | is.null(input$spatial) | is.null(input$rsp.info))
+  if (is.null(input$valid.movements) | is.null(input$spatial) | is.null(input$rsp.info)) {
     stop("Could not recognise the input as an actel results object.", call. = FALSE)
+  }
 
-  if (any(link <- is.na(match(arrays, names(input$arrays)))))
+  link <- is.na(match(arrays, names(input$dot_list$array_info$arrays)))
+  if (any(link)) {
     stop("Could not find array(s) '", paste(arrays[link], collapse = "', '"), "' in the study area.", call. = FALSE)
+  }
 
   n.groups <- length(unique(input$status.df$Group))
 
