@@ -435,9 +435,6 @@ migration <- function(
     }
   }
 
-  # CHECK ISSUE 79
-  # checkIssue79(dot_list$array_info$arrays, spatial)
-
 # -------------------------------------
 
 # Discard early detections, if required
