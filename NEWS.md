@@ -24,7 +24,7 @@ Changes:
   * Column "Status" in object `status.df` now shows "Disap. between X and Y" when a tag is last heard at the edge of two sections. Shows "Disap. between X, Y, and Z" if it is a triple edge. Shows "Disap. between X and n other sections" for more complex edges.
   * Section "Section Survival" in the `migration()` report has been renamed to "Section Summary". The contents were adapted to reflect the possibility of parallel sections.
   * If the spatial input does not have a "Section" column, a column is generated with a warning. All arrays are assigned to section "All". Previous behaviour was to limit input usability to `explore()` only.
-  * built-in object `example.results` was updated to reflect latest changes in output format.
+  * Built-in object `example.results` was updated to reflect latest changes in output format.
 
 
 Enhancements:
@@ -34,7 +34,7 @@ Enhancements:
   * New `processInnovaseaFile()` function to handle updated innovasea detection file format (issue [#97](https://github.com/hugomflavio/actel/issues/97)).
   * New `convertLotekCDMAFile()` function to prepare lotek txt logs for further analyses (issue [#103](https://github.com/hugomflavio/actel/issues/103)).
   * New `plotDot()` function to help users inspect their spatial.txt files (issue [#55](https://github.com/hugomflavio/actel/issues/55)).
-  * Improved internal mechanisms for message/warning/debug/stop reporting. new internal function `event()` replaces the old `appendTo()`, `stopAndReport()`, and `emergencyBreak()` (issue [#135](https://github.com/hugomflavio/actel/issues/135)). Introduced a repetitive warning bug that was later found and fixed (introduced with 1.3.0.9015, corrected in 1.3.0.9022).
+  * Improved internal mechanisms for message/warning/debug/stop reporting. new internal function `event()` replaces the old `appendTo()`, `stopAndReport()`, and `emergencyBreak()` (issue [#135](https://github.com/hugomflavio/actel/issues/135)). Note: this introduced a repetitive warning bug that was later found and fixed (introduced with 1.3.0.9015, corrected in 1.3.0.9022).
   * Added the ability to use output of `loadSpatial()` as 'starters' for `distancesMatrix()` when 'actel' is 'TRUE'. This allows a user to input their spatial.csv if located in a separate working directory (issue [#133](https://github.com/hugomflavio/actel/issues/133))
   * Distance matrix is now retained in the output of `explore()`, `residency()`, and `migration()` analysis when invalid. Additionally, if the distance matrix is not available NA will be denoted in the output. (issue [#142](https://github.com/hugomflavio/actel/issues/142))
   * Improved the inner mechanics of `extractSignals()` and `extractCodeSpaces()` so they're much faster now.

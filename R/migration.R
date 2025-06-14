@@ -1773,7 +1773,7 @@ assembleTimetable <- function(secmoves, valid.moves, all.moves, spatial,
                                    " other sections.")
       }      
     } else {
-      recipient$Status <- paste0("Disap. in ", the.last.section)      
+      recipient$Status <- paste0("Disap. in ", the.last.section)
     }
 
     if(!is.na(match(the.last.array, success.arrays))) {
@@ -1948,8 +1948,6 @@ assembleSectionOverview <- function(status.df, secmoves, dot_list) {
   rownames(x) <- paste0(c("n_entered_", "times_entered_", "last_at_"),
                         rep(sections, each = 3))
   colnames(x) <- levels(status.df$Group)
-  x
-
   for (i in names(secmoves)) {
     col <- as.character(status.df$Group[status.df$Transmitter == i])
     times_entered <- secmoves[[i]]$Section

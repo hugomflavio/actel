@@ -5,7 +5,7 @@ Sys.setenv(TZ = 'UTC')
 # Note: these are two independent blocks of tests.
 # search "FORCE TWO RELEASE SITES WITH ONE GROUP!" to find the second block
 
-# ---- FORCE TWO RELEASE SITES 
+# ---- FORCE TWO RELEASE SITES
 
 tests.home <- getwd()
 setwd(tempdir())

@@ -332,16 +332,16 @@ checkArguments <- function(dp, tz, min.total.detections, min.per.event, max.inte
   }
 
   if (back.error < back.warning) {
-    if (back.warning == 2) { # this happens if someone changed back error but didn't set back warning.
+    if (back.warning == 2) { # this happens if someone changed back.error but didn't set back.warning.
       event(type = c("screen", "warning"),
             "Adjusting default 'back.warning' to match set 'back.error'.")
       back.warning <- back.error
     } else {
-      if (back.error == 3) { # this happens if someone changed back warning but didn't change back error.
+      if (back.error == 3) { # this happens if someone changed back.warning but didn't change back.error.
         event(type = c("screen", "warning"),
               "Adjusting default 'back.error' to match set 'back.warning'.")
         back.error <- back.warning
-      } else { # this happens if someone set both jump warning and jump error. In this case, stop and let the user decide.
+      } else { # this happens if someone set both back.warning and back.error. In this case, stop and let the user decide.
         event(type = "stop",
               "'back.error' must not be lower than 'back.warning'.")
       }
@@ -680,7 +680,7 @@ checkSpeeds <- function(movements, tag, detections, valid.movements,
       the_warning <- paste0(the_warning, "\n", final_warning)
       link <- createEventRanges(link)
       event_string <- paste0("Events that raised warnings: ",
-                           paste(link, collapse = ", "))
+                             paste(link, collapse = ", "))
       event(type = c("report", "screen"),
             event_string)
       the_warning <- paste0(the_warning, "\n", event_string)
@@ -899,7 +899,7 @@ checkImpassables <- function(movements, tag, bio, spatial, detections,
 
           link <- createEventRanges(which(is.na(distances)))
           event_string <- paste0("Events that raised warnings: ",
-                               paste(link, collapse = ", "))
+                                 paste(link, collapse = ", "))
           event(type = c("report", "screen"),
                 event_string)
           the_warning <- paste0(the_warning, "\n", event_string)
@@ -1194,7 +1194,7 @@ checkFirstMove <- function(movements, tag, bio, detections, dot_list,
   event(type = "debug", "Running checkFirstMove.")
   # NOTE: The NULL variables below are actually column names used by data.table.
   # This definition is just to prevent the package check from issuing a note due
-  # top9 unknown variables.
+  # to unknown variables.
   Valid <- NULL
   Array <- NULL
 
@@ -1245,7 +1245,7 @@ checkJumpDistance <- function(movements, tag, bio, detections, spatial,
   event(type = "debug", "Running checkJumpDistance.")
   # NOTE: The NULL variables below are actually column names used by data.table.
   # This definition is just to prevent the package check from issuing a note
-  # due unknown variables.
+  # due to unknown variables.
   Valid <- NULL
   the_warning <- NULL
   events_to_complain_about <- NULL

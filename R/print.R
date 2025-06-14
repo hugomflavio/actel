@@ -526,7 +526,6 @@ printSurvivalGraphics <- function(section.overview, status.df) {
   x <- section.overview[grep("last_at_", rownames(section.overview)), ] /
   section.overview[grep("n_entered_", rownames(section.overview)), ]
   x$Section <- sub("last_at_", "", rownames(x))
-  x
   pd <- reshape2::melt(x, id.vars = "Section")
   colnames(pd)[2] <- "Group"
 

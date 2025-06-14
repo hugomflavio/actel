@@ -228,7 +228,7 @@ breakMatricesByArray <- function(m, dot_list, type = c("peers", "all"),
       })
 
       # If all peers are 0, the CJS functions will crash.
-      #The same happens if the array is all 0's
+      # The same happens if the array is all 0's
       own.zero.check <- unlist(lapply(aux, function(x) sum(x[, 2]) == 0))
       peer.zero.check <- unlist(lapply(aux, function(x) sum(x$AnyPeer) == 0))
       zero.check <- all(own.zero.check) | all(peer.zero.check)
@@ -369,7 +369,7 @@ assembleMatrices <- function(spatial, movements, status.df, dot_list) {
     unique.release.arrays <- unique( # only keep each name once
                               unlist( # turn output into a string
                                 sapply(spatial$release.sites$Array, function(x) {
-                                  # break arrays by '|'
+                                    # break arrays by '|'
                                     unlist(strsplit(x, "|", fixed = TRUE))
                                   })
                                 )
