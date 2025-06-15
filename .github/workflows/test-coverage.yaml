@@ -52,9 +52,9 @@ jobs:
           find '${{ runner.temp }}/package' -name 'testthat.Rout*' -exec cat '{}' \; || true
         shell: bash
 
-      - name: Upload test results
-        if: failure()
-        uses: actions/upload-artifact@v4
-        with:
-          name: coverage-test-failures
-          path: ${{ runner.temp }}/package
+      # - name: Upload test results
+      #   if: failure()
+      #   uses: actions/upload-artifact@v4
+      #   with:
+      #     name: coverage-test-failures
+      #     path: ${{ runner.temp }}/package
