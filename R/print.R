@@ -638,7 +638,7 @@ printEfficiency <- function(CJS = NULL, efficiency = NULL, intra.CJS, type = c("
 
       efficiency.fragment <- paste0('
 Note:
-  : These efficiency calculations **do not account for** backwards movements. This implies that the total number of animals to have been **last seen** at a given array **may be lower** than the displayed below. Please refer to the [section survival overview](#section-survival) and [last seen arrays](#last-seen-arrays) to find out how many animals were considered to have disappeared per section.
+  : These efficiency calculations **do not account for** backwards movements. This implies that the total number of animals to have been **last seen** at a given array **may be lower** than the displayed below. Please refer to the [section summary](#section-summary) and [last seen arrays](#last-seen-arrays) to find out how many animals were considered to have disappeared per section.
   : The data used in the tables below are stored in the `overall.CJS` object. Auxiliary information can also be found in the `matrices` and `arrays` objects.
   : These efficiency values are estimated using the analytical equations provided in the paper "Using mark-recapture models to estimate survival from telemetry data" by [Perry et al. (2012)](<https://www.researchgate.net/publication/256443823_Using_mark-recapture_models_to_estimate_survival_from_telemetry_data>). In some situations, more advanced efficiency estimation methods may be required.
   : You can try running `advEfficiency(results$overall.CJS)` to obtain beta-drawn efficiency distributions (replace `results` with the name of the object where you saved the analysis).
