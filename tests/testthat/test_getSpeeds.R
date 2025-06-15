@@ -29,10 +29,11 @@ test_that("getSpeeds argument 'direct' is working.", {
 	expect_true(
 		all(
 			apply(x, 1, function(i) {
-				if (i[3] == "Release")
+				if (i[3] == "Release") {
 					i[5] == "A1"
-				else
-					i[5] %in% xresults$arrays[[i[3]]]$neighbours
+				} else {
+					i[5] %in% xresults$dot_list$array_info$arrays[[i[3]]]$neighbours
+				}
 				})))
 })
 
@@ -44,7 +45,7 @@ test_that("getSpeeds argument 'type' is working", {
 				if (i[3] == "Release")
 					TRUE # should be equal to A1 but I removed some events at the start, so just skip it
 				else
-					i[5] %in% xresults$arrays[[i[3]]]$all.after
+					i[5] %in% xresults$dot_list$array_info$arrays[[i[3]]]$all.after
 				})))
 
 	x <- getSpeeds(xresults, n.events = "all", type = "forward", direct = TRUE)
@@ -55,7 +56,7 @@ test_that("getSpeeds argument 'type' is working", {
 				if (i[3] == "Release")
 					TRUE # should be equal to A1 but I removed some events at the start, so just skip it
 				else
-					i[5] %in% xresults$arrays[[i[3]]]$after
+					i[5] %in% xresults$dot_list$array_info$arrays[[i[3]]]$after
 				})))
 
 	x <- getSpeeds(xresults, n.events = "all", type = "backward")
@@ -66,7 +67,7 @@ test_that("getSpeeds argument 'type' is working", {
 				if (i[3] == "Release")
 					TRUE # should be equal to A1 but I removed some events at the start, so just skip it
 				else
-					i[5] %in% xresults$arrays[[i[3]]]$all.before
+					i[5] %in% xresults$dot_list$array_info$arrays[[i[3]]]$all.before
 				})))
 })
 

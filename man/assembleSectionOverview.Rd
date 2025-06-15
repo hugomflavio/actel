@@ -4,10 +4,7 @@
 \alias{assembleSectionOverview}
 \title{Create section.overview}
 \usage{
-assembleSectionOverview(status.df, spatial)
-}
-\arguments{
-\item{spatial}{The spatial list.}
+assembleSectionOverview(status.df, secmoves, dot_list)
 }
 \value{
 A data frame containing the survival per group of animals present

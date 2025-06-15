@@ -2,7 +2,8 @@ skip_on_cran()
 oldtz <- Sys.getenv('TZ', unset = NA)
 Sys.setenv(TZ = 'UTC')
 
-# Note: these are two independent blocks of tests, the second starts at line 142
+# Note: these are two independent blocks of tests.
+# search "FORCE TWO RELEASE SITES WITH ONE GROUP!" to find the second block
 
 # ---- FORCE TWO RELEASE SITES
 
@@ -28,9 +29,7 @@ detections.list <- study.data$detections.list
 bio <- study.data$bio
 spatial <- study.data$spatial
 dist.mat <- study.data$dist.mat
-arrays <- study.data$arrays
-dotmat <- study.data$dotmat
-paths <- study.data$paths
+dot_list <- study.data$dot_list
 
 moves <- groupMovements(detections.list = detections.list, bio = bio, spatial = spatial,
     speed.method = "last to first", max.interval = 60, tz = "Europe/Copenhagen",
@@ -62,16 +61,16 @@ secmoves <- lapply(seq_along(vm), function(i) {
 names(secmoves) <- names(vm)
 
 timetable <- assembleTimetable(secmoves = secmoves, valid.moves = vm, all.moves = xmoves, spatial = spatial,
-  arrays = arrays, dist.mat = dist.mat, speed.method = "last to first",
-  if.last.skip.section = TRUE, success.arrays = "A9", bio = bio, tz = "Europe/Copenhagen")
+  dot_list = dot_list, dist.mat = dist.mat, speed.method = "last to first",
+  success.arrays = "A9", bio = bio, tz = "Europe/Copenhagen")
 
 status.df <- assembleOutput(timetable = timetable, bio = bio, spatial = spatial,
   dist.mat = dist.mat, tz = "Europe/Copenhagen")
 
 the.matrices <- assembleMatrices(spatial = spatial, movements = vm, status.df = status.df,
-    arrays = arrays, paths = paths, dotmat = dotmat)[[2]]
+    dot_list = dot_list)[[2]]
 
-expect_warning(m.by.array <- breakMatricesByArray(m = the.matrices, arrays = arrays, type = "all"),
+expect_warning(m.by.array <- breakMatricesByArray(m = the.matrices, dot_list = dot_list, type = "all"),
   "No tags passed through array A0. Skipping efficiency estimations for this array.", fixed = TRUE)
 
 CJS.list <- lapply(m.by.array, function(m) {
@@ -87,7 +86,7 @@ release_nodes$Array <- spatial$release.sites$Array[match(release_nodes$Release.s
 release_nodes$Combined <- paste(release_nodes[, 1], release_nodes[, 2], sep = ".")
 
 test_that("assembleArrayCJS can cope with midway releases", {
-  overall.CJS <- assembleArrayCJS(mat = the.matrices, CJS = CJS.list, arrays = arrays, releases = release_nodes)
+  overall.CJS <- assembleArrayCJS(mat = the.matrices, CJS = CJS.list, dot_list = dot_list, releases = release_nodes)
   expect_equal(overall.CJS$absolutes$A8[4], 44)
 })
 
@@ -96,7 +95,7 @@ test_that("assembleArrayCJS can cope with 0% efficiency", {
   xmatrices$A.RS1$A5 <- c(rep(0, 14), 1)
   xmatrices$B.RS1$A5 <- c(0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0)
 
-  expect_warning(m.by.array <- breakMatricesByArray(m = xmatrices, arrays = arrays, type = "all"),
+  expect_warning(m.by.array <- breakMatricesByArray(m = xmatrices, dot_list = dot_list, type = "all"),
     "No tags passed through array A0. Skipping efficiency estimations for this array.", fixed = TRUE)
 
   CJS.list <- lapply(m.by.array, function(m) {
@@ -106,11 +105,11 @@ test_that("assembleArrayCJS can cope with 0% efficiency", {
       combineCJS(m)
   })
 
-  overall.CJS <- assembleArrayCJS(mat = xmatrices, CJS = CJS.list, arrays = arrays, releases = release_nodes)
+  overall.CJS <- assembleArrayCJS(mat = xmatrices, CJS = CJS.list, dot_list = dot_list, releases = release_nodes)
   expect_equal(overall.CJS$absolutes$A5, c(3, 0, 25, 28, 28))
 })
 
-overall.CJS <- assembleArrayCJS(mat = the.matrices, CJS = CJS.list, arrays = arrays, releases = release_nodes)
+overall.CJS <- assembleArrayCJS(mat = the.matrices, CJS = CJS.list, dot_list = dot_list, releases = release_nodes)
 
 test_that("mbSplitCJS can deal with multiple release sites (one site per group)", {
   aux <- mbSplitCJS(mat = m.by.array, fixed.efficiency = overall.CJS$efficiency)
@@ -168,9 +167,7 @@ detections.list <- study.data$detections.list
 bio <- study.data$bio
 spatial <- study.data$spatial
 dist.mat <- study.data$dist.mat
-arrays <- study.data$arrays
-dotmat <- study.data$dotmat
-paths <- study.data$paths
+dot_list <- study.data$dot_list
 
 moves <- groupMovements(detections.list = detections.list, bio = bio, spatial = spatial,
     speed.method = "last to first", max.interval = 60, tz = "Europe/Copenhagen",
@@ -202,16 +199,16 @@ secmoves <- lapply(seq_along(vm), function(i) {
 names(secmoves) <- names(vm)
 
 timetable <- assembleTimetable(secmoves = secmoves, valid.moves = vm, all.moves = xmoves, spatial = spatial,
-  arrays = arrays, dist.mat = dist.mat, speed.method = "last to first",
-  if.last.skip.section = TRUE, success.arrays = "A9", bio = bio, tz = "Europe/Copenhagen")
+  dot_list = dot_list, dist.mat = dist.mat, speed.method = "last to first",
+  success.arrays = "A9", bio = bio, tz = "Europe/Copenhagen")
 
 status.df <- assembleOutput(timetable = timetable, bio = bio, spatial = spatial,
   dist.mat = dist.mat, tz = "Europe/Copenhagen")
 
 the.matrices <- assembleMatrices(spatial = spatial, movements = vm, status.df = status.df,
-    arrays = arrays, paths = paths, dotmat = dotmat)[[2]]
+    dot_list = dot_list)[[2]]
 
-expect_warning(m.by.array <- breakMatricesByArray(m = the.matrices, arrays = arrays, type = "all"),
+expect_warning(m.by.array <- breakMatricesByArray(m = the.matrices, dot_list = dot_list, type = "all"),
   "No tags passed through array A0. Skipping efficiency estimations for this array.", fixed = TRUE)
 
 CJS.list <- lapply(m.by.array, function(m) {
@@ -226,7 +223,7 @@ colnames(release_nodes) <- c("Group", "Release.site", "n")
 release_nodes$Array <- spatial$release.sites$Array[match(release_nodes$Release.site, spatial$release.sites$Standard.name)]
 release_nodes$Combined <- paste(release_nodes[, 1], release_nodes[, 2], sep = ".")
 
-overall.CJS <- assembleArrayCJS(mat = the.matrices, CJS = CJS.list, arrays = arrays, releases = release_nodes)
+overall.CJS <- assembleArrayCJS(mat = the.matrices, CJS = CJS.list, dot_list = dot_list, releases = release_nodes)
 
 test_that("mbSplitCJS can deal with multiple release sites (two sites, single group)", {
   aux <- mbSplitCJS(mat = m.by.array, fixed.efficiency = overall.CJS$efficiency)

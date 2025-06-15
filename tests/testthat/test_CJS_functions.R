@@ -14,9 +14,7 @@ detections.list <- study.data$detections.list
 bio <- study.data$bio
 spatial <- study.data$spatial
 dist.mat <- study.data$dist.mat
-arrays <- study.data$arrays
-dotmat <- study.data$dotmat
-paths <- study.data$paths
+dot_list <- study.data$dot_list
 
 moves <- groupMovements(detections.list = detections.list, bio = bio, spatial = spatial,
     speed.method = "last to first", max.interval = 60, tz = "Europe/Copenhagen",
@@ -44,8 +42,8 @@ secmoves <- lapply(seq_along(vm), function(i) {
 names(secmoves) <- names(vm)
 
 timetable <- assembleTimetable(secmoves = secmoves, valid.moves = vm, all.moves = xmoves, spatial = spatial,
-  arrays = arrays, dist.mat = dist.mat, speed.method = "last to first",
-  if.last.skip.section = TRUE, success.arrays = "A9", bio = bio, tz = "Europe/Copenhagen")
+  dot_list = dot_list, dist.mat = dist.mat, speed.method = "last to first",
+  success.arrays = "A9", bio = bio, tz = "Europe/Copenhagen")
 
 status.df <- assembleOutput(timetable = timetable, bio = bio, spatial = spatial,
   dist.mat = dist.mat, tz = "Europe/Copenhagen")
@@ -53,7 +51,7 @@ status.df <- assembleOutput(timetable = timetable, bio = bio, spatial = spatial,
 
 test_that("assembleMatrices works as expected", {
 	output <- assembleMatrices(spatial = spatial, movements = vm, status.df = status.df,
-    arrays = arrays, paths = paths, dotmat = dotmat) # extract only the minimum matrix
+    dot_list = dot_list) # extract only the minimum matrix
 	expect_equal(names(output), c("maxmat", "minmat"))
 	expect_equal(names(output[[1]]), c("A.RS1", "B.RS1"))
 
@@ -83,7 +81,7 @@ test_that("assembleMatrices works as expected", {
 })
 
 test_that("breakMatricesByArray works as expected.", {
-  expect_warning(output <- breakMatricesByArray(m = the.matrices, arrays = arrays, type = "peers"),
+  expect_warning(output <- breakMatricesByArray(m = the.matrices, dot_list = dot_list, type = "peers"),
   	"No tags passed through array A0. Skipping efficiency estimations for this array.", fixed = TRUE)
 
   m.by.array <<- output
@@ -109,22 +107,23 @@ test_that("breakMatricesByArray works as expected.", {
 		})
 	})
 
-  expect_warning(output <- breakMatricesByArray(m = the.matrices, arrays = arrays, type = "all"),
+  expect_warning(output <- breakMatricesByArray(m = the.matrices, dot_list = dot_list, type = "all"),
   	"No tags passed through array A0. Skipping efficiency estimations for this array.", fixed = TRUE)
 
   xmatrices <- the.matrices
   xmatrices[[1]][, "A9"] <- 0
 	xmatrices[[2]][, "A9"] <- 0
 
-	expect_warning(output <- breakMatricesByArray(m = xmatrices, arrays = arrays, type = "all"),
+	expect_warning(output <- breakMatricesByArray(m = xmatrices, dot_list = dot_list, type = "all"),
   	"No tags passed through any of the efficiency peers of array A8. Skipping efficiency estimations for this array.", fixed = TRUE)
 
-  xarrays <- lapply(arrays, function(x) {
+  xdot_list <- dot_list
+  xdot_list$array_info$arrays <- lapply(xdot_list$array_info$arrays, function(x) {
   	x$after.peers <- NULL
   	return(x)
   })
 
-  expect_warning(output <- breakMatricesByArray(m = the.matrices, arrays = xarrays, type = "peers"),
+  expect_warning(output <- breakMatricesByArray(m = the.matrices, dot_list = xdot_list, type = "peers"),
   	"None of the arrays has valid efficiency peers.", fixed = TRUE)
 })
 
@@ -276,7 +275,7 @@ test_that("assembleArrayCJS works as expected.",{
   release_nodes$Combined <- paste(release_nodes[, 1], release_nodes[, 2], sep = ".")
   release_nodes <<- release_nodes
 
-  output <- assembleArrayCJS(mat = the.matrices, CJS = CJS.list, arrays = arrays, releases = release_nodes)
+  output <- assembleArrayCJS(mat = the.matrices, CJS = CJS.list, dot_list = dot_list, releases = release_nodes)
 
 	check <- read.csv(text = ',A0,A1,A2,A3,A4,A5,A6,A7,A8,A9
 "detected",0,54,54,52,52,52,52,49,44,34
@@ -455,7 +454,7 @@ test_that("split CJS functions work as expected.", {
   expect_equal(round(output$A.RS1$A3$efficiency, 7), c(FakeStart = 1, A3 = 0.9615385, AnyPeer = NA))
 
   aux <- aux[names(the.matrices)]
-  split.CJS <- assembleSplitCJS(mat = the.matrices, CJS = aux, arrays = arrays, releases = release_nodes, intra.CJS = intra.array.CJS)
+  split.CJS <- assembleSplitCJS(mat = the.matrices, CJS = aux, dot_list = dot_list, releases = release_nodes, intra.CJS = intra.array.CJS)
 
   expect_equal(names(split.CJS), c("A.RS1", "B.RS1"))
 
@@ -493,7 +492,7 @@ test_that("group CJS functions work as expected.", {
   output <- mbGroupCJS(mat = m.by.array, status.df = status.df, fixed.efficiency = xefficiency)
   expect_equal(round(output$A$A3$efficiency, 7), c(FakeStart = 1, A3 = 0.9615385, AnyPeer = NA))
 
-  group.CJS <- assembleGroupCJS(mat = the.matrices, CJS = aux, arrays = arrays, releases = release_nodes, intra.CJS = intra.array.CJS)
+  group.CJS <- assembleGroupCJS(mat = the.matrices, CJS = aux, dot_list = dot_list, releases = release_nodes, intra.CJS = intra.array.CJS)
 
   expect_equal(names(group.CJS), c("A", "B"))
 

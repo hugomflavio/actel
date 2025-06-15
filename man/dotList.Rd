@@ -4,12 +4,14 @@
 \alias{dotList}
 \title{Break the dot data frame into a list}
 \usage{
-dotList(input, spatial)
+dotList(input, spatial, style = c("array", "section"))
 }
 \arguments{
 \item{input}{a dot data frame}
 
 \item{spatial}{The spatial data frame}
+
+\item{style}{one of array or section, depending on the type of list we want}
 }
 \value{
 A list containing detailed information on the arrays

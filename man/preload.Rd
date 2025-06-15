@@ -69,14 +69,10 @@ This dataset contains:
 argument sections (required to run residency and migration analyses)
 \item \code{deployments}: The deployment data
 \item \code{spatial}: The spatial data, split in stations and release sites.
-\item \code{dot}: A table of array connections.
-\item \code{arrays}: A list with the details of each array
-\item \code{dotmat}: A matrix of distances between arrays (in number of
-arrays).
+\item \code{dot_list}: A list containing detailed information on the
+study area configuration.
 \item \code{dist.mat}: The distances matrix.
 \item \code{detections.list}: A processed list of detections for each tag.
-\item \code{paths}: A list of the possible paths between each pair of
-arrays.
 \item \code{disregard.parallels}: Logical: Should parallel arrays invalidate
 efficiency peers? (required to run residency and migration analyses)
 \item \code{tz}: The time zone of the study area

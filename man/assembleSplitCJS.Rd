@@ -4,12 +4,10 @@
 \alias{assembleSplitCJS}
 \title{Assembles CJS tables for all group x release site combinations}
 \usage{
-assembleSplitCJS(mat, CJS, arrays, releases, intra.CJS = NULL)
+assembleSplitCJS(mat, CJS, dot_list, releases, intra.CJS = NULL)
 }
 \arguments{
 \item{CJS}{A list of CJS calculated for each group x release site x array combinations}
-
-\item{arrays}{a list of arrays}
 }
 \value{
 A list containing the CJS results for each group x release site combination.

@@ -10,9 +10,7 @@ checkJumpDistance(
   bio,
   detections,
   spatial,
-  arrays,
-  dotmat,
-  paths,
+  dot_list,
   jump.warning,
   jump.error,
   GUI,
@@ -30,10 +28,6 @@ checkJumpDistance(
 \item{detections}{The detections data.frame for a specific tag.}
 
 \item{spatial}{A list of spatial objects in the study area.}
-
-\item{arrays}{a list containing information for each array.}
-
-\item{dotmat}{The matrix of distances between arrays.}
 
 \item{jump.warning}{If a tag crosses a number of arrays equal or greater
 than \code{jump.warning} without being detected, a warning is issued. Defaults

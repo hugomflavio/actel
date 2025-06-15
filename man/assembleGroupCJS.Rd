@@ -4,12 +4,12 @@
 \alias{assembleGroupCJS}
 \title{Assembles CJS tables for all groups}
 \usage{
-assembleGroupCJS(mat, CJS, arrays, releases, intra.CJS = NULL)
+assembleGroupCJS(mat, CJS, dot_list, releases, intra.CJS = NULL)
 }
 \arguments{
 \item{CJS}{A list of CJS calculated for each group x array combinations}
 
-\item{arrays}{A list containing information for each array.}
+\item{dot_list}{A list containing information on the study area configuration.}
 }
 \value{
 A data frame containing the CJS results for each group

@@ -9,12 +9,11 @@ assembleTimetable(
   valid.moves,
   all.moves,
   spatial,
-  arrays,
+  dot_list,
   bio,
   tz,
   dist.mat,
   speed.method,
-  if.last.skip.section,
   success.arrays
 )
 }
@@ -27,7 +26,7 @@ assembleTimetable(
 
 \item{spatial}{The spatial list.}
 
-\item{arrays}{A list containing information for each array.}
+\item{dot_list}{A list containing information on the study area configuration.}
 
 \item{bio}{The biometrics table.}
 
@@ -43,9 +42,6 @@ If 'last to last', the last detection on the previous array is matched to the
 last detection on the target array to perform the calculations.
 If 'first to first', the first detection on the previous array is matched to the
 first detection on the target array to perform the calculations.}
-
-\item{if.last.skip.section}{Logical: Should a tag detected at the last array
-of a given section be considered to have disappeared in the next section?}
 
 \item{success.arrays}{The arrays that mark the end of the study area. If a
 tag crosses one of these arrays, the respective animal is considered to have

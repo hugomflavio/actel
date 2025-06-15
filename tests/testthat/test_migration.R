@@ -27,9 +27,6 @@ test_that("migration stops when any argument does not make sense", {
 			"Arrays '1', 'a' are listed in the 'success.arrays' argument, but these arrays are not part of the study arrays.", fixed = TRUE),
 	"No detections were found for receiver(s) 132907.", fixed = TRUE)
 
-	expect_error(migration(tz = 'Europe/Copenhagen', report = TRUE, GUI = "never", if.last.skip.section = "a"),
-		"'if.last.skip.section' must be logical.", fixed = TRUE)
-
 	expect_error(migration(tz = 'Europe/Copenhagen', report = TRUE, GUI = "never", replicates = "a"),
 		"'replicates' must be a list.", fixed = TRUE)
 
@@ -45,18 +42,24 @@ test_that("migration stops when any argument does not make sense", {
 	expect_error(migration(tz = 'Europe/Copenhagen', print.releases = "a", GUI = "never"),
 		"'print.releases' must be logical.", fixed = TRUE)
 
-	expect_error(migration(tz = 'Europe/Copenhagen', back.warning = "none", GUI = "never"),
-		"If back.warning is set to 'none', back.error must be set to 'none' as well.", fixed = TRUE)
-
-	expect_error(migration(tz = 'Europe/Copenhagen', back.warning = "u", GUI = "never"),
-		"If back.warning is set to 'u', back.error must be set to either 'u' or 'none'.", fixed = TRUE)
+	expect_error(migration(tz = "Europe/Copenhagen", back.warning = "a"),
+		"'back.warning' must be numeric.", fixed = TRUE)
+	
+	expect_error(migration(tz = "Europe/Copenhagen", back.warning = -1),
+		"'back.warning' must not be lower than 1.", fixed = TRUE)
+	
+	expect_error(migration(tz = "Europe/Copenhagen", back.error = "a"),
+		"'back.error' must be numeric.", fixed = TRUE)
+	
+	expect_error(migration(tz = "Europe/Copenhagen", back.error = -1),
+		"'back.error' must not be lower than 1.", fixed = TRUE)
 })
 
 test_that("migration results contains all the expected elements.", {
 	output <<- suppressWarnings(migration(tz = 'Europe/Copenhagen',
 		report = FALSE, GUI = "never", print.releases = FALSE))
 		
-	expect_false(any(is.na(match(names(output), c('arrays', 'deployments', 'detections', 'dist.mat',
+	expect_false(any(is.na(match(names(output), c('deployments', 'detections', 'dist.mat', "dot_list",
 		'group.overview', 'intra.array.CJS', 'intra.array.matrices','matrices', 'movements', 'overall.CJS',
 		'release.overview', 'rsp.info', 'section.movements', 'section.overview', 'spatial', 'status.df',
 		'times', 'valid.detections', 'valid.movements')))))
@@ -110,8 +113,6 @@ test_that("migration results contains all the expected elements.", {
 })
 # n
 # n
-# n
-# n
 
 test_that("advEfficiency can calculate efficiency from release and group overviews", {
 	skip_on_cran()
@@ -132,10 +133,12 @@ test_that("advEfficiency can calculate efficiency from release and group overvie
 
 test_that("migration is able to run speed and inactiveness checks.", {
 	skip_on_cran()
+	write.csv(example.distances, "distances.csv")
+	
 	output <- suppressWarnings(migration(tz = 'Europe/Copenhagen', report = TRUE, detections.y.axis = "arrays",
 		GUI = "never", speed.warning = 1000000, inactive.warning = 1000000, replicates = list(A9 = c("St.16", "St.17"))))
 		
-	expect_false(any(is.na(match(names(output), c('arrays', 'deployments', 'detections', 'dist.mat', 'group.overview',
+	expect_false(any(is.na(match(names(output), c('deployments', 'detections', 'dist.mat', 'dot_list', 'group.overview',
 		'intra.array.CJS', 'intra.array.matrices','matrices', 'movements', 'overall.CJS', 'release.overview',
 		'rsp.info', 'section.movements', 'section.overview', 'spatial', 'status.df', 'times', 'valid.detections',
 		'valid.movements')))))
@@ -146,14 +149,10 @@ test_that("migration is able to run speed and inactiveness checks.", {
 			GUI = "never", speed.error = 1000000, inactive.error = 1000000),
 		"Running inactiveness checks without a distance matrix. Performance may be limited.", fixed = TRUE)
 	
-	expect_false(any(is.na(match(names(output), c('arrays', 'deployments', 'detections', 'dist.mat', 'group.overview', 'intra.array.CJS',
+	expect_false(any(is.na(match(names(output), c('deployments', 'detections', 'dist.mat', 'dot_list', 'group.overview', 'intra.array.CJS',
 	 'intra.array.matrices','matrices', 'movements', 'overall.CJS', 'release.overview', 'rsp.info', 'section.movements',
 	  'section.overview', 'spatial', 'status.df', 'times', 'valid.detections', 'valid.movements')))))
 })
-# n
-# n
-# n
-# n
 # n
 # n
 
@@ -169,8 +168,6 @@ test_that("migration can handle multiple expected first arrays", {
 		report = TRUE, success.arrays = "A9", GUI = "never")),
 		"Multiple possible first arrays detected for release site 'RS1'.", fixed = TRUE)
 })
-# n
-# n
 # n
 
 # Throw in a fake results object just to test the number appending code
@@ -195,8 +192,6 @@ test_that("migration can handle multi-sensor data", {
 	write.csv(example.biometrics, "biometrics.csv", row.names = FALSE)
 	expect_true(TRUE) # dummy test just so it is not marked as empty.
 })
-# n
-# n
 # n
 # n
 # n

@@ -11,14 +11,14 @@ write.csv(example.biometrics, "biometrics.csv", row.names = FALSE)
 bio <- loadBio(input = "biometrics.csv", tz = "Europe/Copenhagen")
 file.remove("biometrics.csv")
 
-dot <- loadDot(string = paste(unique(spatial$Array), collapse = "--"), spatial = spatial, disregard.parallels = TRUE)
+dot_list <- loadDot(string = paste(unique(spatial$Array), collapse = "--"), spatial = spatial, disregard.parallels = TRUE)
 
 test_that("transformSpatial handles release site mismatches properly and stops when needed", {
 	xbio <- bio
 	xbio$Release.site <- "unspecified"
 
 	expect_warning(
-		expect_error(transformSpatial(spatial = spatial, bio = xbio, arrays = dot$arrays),
+		expect_error(transformSpatial(spatial = spatial, bio = xbio, dot_list = dot_list),
 			"There is more than one top level array in the study area. Please specify release site(s) in the 'spatial.csv' file and in the 'biometrics.csv' file.", fixed = TRUE),
 	"At least one release site has been indicated in the spatial.csv file, but no release sites were specified in the biometrics file.\n         Discarding release site information and assuming all animals were released at the top level array to avoid function failure.\n         Please double-check your data.", fixed = TRUE)
 
@@ -26,12 +26,12 @@ test_that("transformSpatial handles release site mismatches properly and stops w
 	levels(xbio$Release.site) <- c("RS1", "test")
 	xbio$Release.site[2] <- "test"
 	
-	expect_error(transformSpatial(spatial = spatial, bio = xbio, arrays = dot$arrays, first.array = NULL),
+	expect_error(transformSpatial(spatial = spatial, bio = xbio, dot_list = dot_list, first.array = NULL),
 		"The following release sites were listed in the biometrics.csv file but are not part of the release sites listed in the spatial.csv file: test\nPlease include the missing release sites in the spatial.csv file.", fixed = TRUE)
 
 	xspatial <- spatial[-18, ]
 	expect_warning(
-		expect_error(transformSpatial(spatial = xspatial, bio = bio, arrays = dot$arrays, first.array = NULL),
+		expect_error(transformSpatial(spatial = xspatial, bio = bio, dot_list = dot_list, first.array = NULL),
 			"There is more than one top level array in the study area. Please specify release site(s) in the spatial.csv file and in the biometrics.csv file.", fixed = TRUE),
 		"Release sites were not specified in the spatial.csv file. Attempting to assume all released animals start at the top level array.", fixed = TRUE)
 })
@@ -40,7 +40,7 @@ test_that("transformSpatial handles release site mismatches properly and deliver
 	xbio <- bio
 	xbio$Release.site <- "unspecified"
 
-	expect_warning(output <- transformSpatial(spatial = spatial, bio = xbio, arrays = dot$arrays, first.array = "A1"),
+	expect_warning(output <- transformSpatial(spatial = spatial, bio = xbio, dot_list = dot_list, first.array = "A1"),
 		"At least one release site has been indicated in the spatial.csv file, but no release sites were specified in the biometrics file.\n         Discarding release site information and assuming all animals were released at the top level array to avoid function failure.\n         Please double-check your data.", fixed = TRUE)
 
 	expect_equal(as.character(output$release.sites$Station.name), "unspecified")
@@ -53,7 +53,7 @@ test_that("transformSpatial handles release site mismatches properly and deliver
 
 	
 	xspatial <- spatial[-18, ]
-	expect_warning(output <- transformSpatial(spatial = xspatial, bio = bio, arrays = dot$arrays, first.array = "A1"),
+	expect_warning(output <- transformSpatial(spatial = xspatial, bio = bio, dot_list = dot_list, first.array = "A1"),
 	"Release sites were not specified in the spatial.csv file. Attempting to assume all released animals start at the top level array.", fixed = TRUE)
 	expect_equal(as.character(output$release.sites$Station.name), "RS1")
 	expect_equal(as.character(output$release.sites$Array), "A1")
@@ -68,27 +68,26 @@ test_that("transformSpatial handles sections properly", {
 	xspatial$Section <- as.character(xspatial$Section)
 	xspatial$Section[1:(nrow(xspatial) - 1)] <- "all"
 	xspatial$Section <- as.factor(xspatial$Section)
-	output <- transformSpatial(spatial = xspatial, bio = bio, arrays = dot$arrays)
+	output <- transformSpatial(spatial = xspatial, bio = bio, dot_list = dot_list)
 	expect_equal(names(output$array.order), "all")
 	expect_equal(output$array.order$all, c('A0', 'A1', 'A2', 'A3', 'A4', 'A5', 'A6', 'A7', 'A8', 'A9'))
 	expect_equal(output$sections, NULL)
 
-	output <- transformSpatial(spatial = spatial, bio = bio, arrays = dot$arrays)
+	output <- transformSpatial(spatial = spatial, bio = bio, dot_list = dot_list)
 	expect_equal(names(output$array.order), c("River", "Fjord", "Sea"))
 	expect_equal(output$array.order$River, c('A0', 'A1', 'A2', 'A3', 'A4', 'A5', 'A6'))
 	expect_equal(output$array.order$Fjord, c('A7', 'A8'))
 	expect_equal(output$array.order$Sea, c('A9'))
 })
-# y
 
 test_that("transformSpatial handles multiple expected first arrays correctly", {
 	xspatial <- spatial
 	xspatial$Array[18] <- "A1|A2"
-	expect_message(output <- transformSpatial(spatial = xspatial, bio = bio, dotmat = dot$dotmat, arrays = dot$arrays),
+	expect_message(output <- transformSpatial(spatial = xspatial, bio = bio, dot_list = dot_list),
 		"M: Multiple possible first arrays detected for release site 'RS1'.", fixed = TRUE)
 
 	xspatial$Array[18] <- "A1|A9"
-	expect_warning(output <- transformSpatial(spatial = xspatial, bio = bio, dotmat = dot$dotmat, arrays = dot$arrays),
+	expect_warning(output <- transformSpatial(spatial = xspatial, bio = bio, dot_list = dot_list),
 		"Release site RS1 has multiple possible first arrays (A1, A9), but not all of these arrays appear to be directly connected with each other. Could there be a mistake in the input?", fixed = TRUE)
 
 	xspatial$Array[18] <- "A1|A2"
@@ -100,7 +99,7 @@ test_that("transformSpatial handles multiple expected first arrays correctly", {
 	xspatial$Station.name[19:25] <- paste0("RS", 2:8)
 
 	expect_message(
-		expect_warning(output <- transformSpatial(spatial = xspatial, bio = bio, dotmat = dot$dotmat, arrays = dot$arrays),
+		expect_warning(output <- transformSpatial(spatial = xspatial, bio = bio, dot_list = dot_list),
 			"Release site RS8 has multiple possible first arrays (A1, A9), but not all of these arrays appear to be directly connected with each other. Could there be a mistake in the input?", fixed = TRUE),
 		"Multiple possible first arrays detected for more than five release sites.", fixed = TRUE)
 })

@@ -4,7 +4,7 @@
 \alias{firstArrayFailure}
 \title{Determine if the first array after release has failed}
 \usage{
-firstArrayFailure(tag, bio, spatial, first.array, paths, dotmat)
+firstArrayFailure(tag, bio, spatial, first.array, dot_list)
 }
 \arguments{
 \item{tag}{The tag being analysed}
@@ -14,8 +14,6 @@ firstArrayFailure(tag, bio, spatial, first.array, paths, dotmat)
 \item{spatial}{A list of spatial objects in the study area}
 
 \item{first.array}{The array of the first valid movement}
-
-\item{paths}{a list containing the shortest paths between arrays with distance > 1}
 }
 \value{
 NULL if no arrays failed, or a list of arrays that failed.

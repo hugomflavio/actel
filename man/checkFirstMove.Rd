@@ -9,7 +9,7 @@ checkFirstMove(
   tag,
   bio,
   detections,
-  arrays,
+  dot_list,
   spatial,
   GUI,
   save.tables.locally,
@@ -25,8 +25,6 @@ checkFirstMove(
 
 \item{detections}{The detections data.frame for a specific tag.}
 
-\item{arrays}{a list containing information for each array.}
-
 \item{spatial}{A list of spatial objects in the study area.}
 
 \item{GUI}{One of "needed", "always" or "never". If "needed", a new window is
@@ -40,7 +38,8 @@ prompted to open and examine that file. Defaults to "needed".}
 \item{n}{A string indicating the overall progress.}
 }
 \value{
-A data frame with the movements for the target tag with updated 'Valid' column.
+A data frame with the movements for the target tag with
+updated 'Valid' column.
 }
 \description{
 Check for movements upstream of the release site.

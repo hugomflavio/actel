@@ -435,58 +435,154 @@ printDotplots <- function(status.df, valid.dist) {
   p <- p + ggplot2::facet_grid(. ~ variable, scales = "free_x")
   p <- p + ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 45, vjust = 1, hjust = 1))
   p <- p + ggplot2::labs(x = "", y = "")
-  ggplot2::ggsave(paste0(tempdir(), "/actel_report_auxiliary_files/dotplots.png"), width = 6, height = (1.3 + 0.115 * (nrow(t2) - 1)), limitsize = FALSE)
+
+  path <- paste0(tempdir(), "/actel_report_auxiliary_files/dotplots.png")
+  e <- tryCatch(ggplot2::ggsave(path, width = 6,
+                                height = (1.3 + 0.115 * (nrow(t2) - 1)),
+                                limitsize = FALSE),
+                error = function(e) as.character(e))
+ 
+  # failsafe in case printing fails
+  if (!file.exists(path)) {
+     event(type = c("warning", "report", "screen"),
+           "Could not print dotplot. Reason:", e,
+           ". Proceeding without dotplot.")
+    {
+      grDevices::png(path, width = 500, height = 100)
+      par(mar = c(1, 1, 1, 1))
+      plot(NA, xlim = 0:1, ylim = 0:1, xaxt = "n", yaxt = "n", ann = FALSE)
+      text(x = 0.5, y = 0.5, "Could not save graphic.\nMore info in report log.")
+      grDevices::dev.off()
+    }
+  }
 }
 
 #' Print survival graphic
 #'
 #' Prints survival graphics per animal group.
 #'
-#' @param section.overview A data frame containing the survival per animal group present in the biometrics. Supplied by assembleOverview.
+#' @param section.overview A data frame containing the survival per animal
+#'   group present in the biometrics. Supplied by assembleOverview.
 #'
 #' @return No return value, called to plot and save graphic.
 #'
 #' @keywords internal
 #'
-printSurvivalGraphic <- function(section.overview) {
-  event(type = "debug", "Running printSurvivalGraphic.")
-  section <- NULL
+printSurvivalGraphics <- function(section.overview, status.df) {
+  event(type = "debug", "Running printSurvivalGraphics.")
+  Area <- NULL
+  Group <- NULL
+  Section <- NULL
   value <- NULL
-  cbPalette <- c("#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7", "#999999")
-  names(cbPalette) <- c("Orange", "Blue", "Green", "Yellow", "Darkblue", "Darkorange", "Pink", "Grey")
-  survival <- data.frame(group = character(), section = character(), value = vector(), stringsAsFactors = FALSE)
-  i = 2
-  while (i <= ncol(section.overview)) {
-    for (j in 1:nrow(section.overview)) {
-      active.row <- nrow(survival) + 1
-      survival[active.row, ] <- NA
-      survival$group[active.row] <- rownames(section.overview)[j]
-      survival$section[active.row] <- tail(strsplit(colnames(section.overview)[i], "[.]")[[1]], 1)
-      if (section.overview[j, i - 1] > 0) {
-        survival$value[active.row] <- 1 - section.overview[j, i]/section.overview[j, i - 1]
-      } else {
-        survival$value[active.row] <- 0
-      }
-    }
-    rm(active.row, j)
-    i = i + 2
+  prop <- NULL
+
+  cbPalette <- c("#E69F00", "#56B4E9", "#009E73", "#F0E442",
+                 "#0072B2", "#D55E00", "#CC79A7", "#999999")
+  names(cbPalette) <- c("Orange", "Blue", "Green", "Yellow",
+                        "Darkblue", "Darkorange", "Pink", "Grey")
+
+  if (length(levels(status.df$Group)) <= 8) {
+      the.colours <- as.vector(cbPalette)[1:length(levels(status.df$Group))]
+  } else {
+      the.colours <- gg_colour_hue(length(levels(status.df$Group)))
   }
-  for (j in 1:nrow(section.overview)) {
-    active.row <- nrow(survival) + 1
-    survival[active.row, ] <- NA
-    survival$group[active.row] <- rownames(section.overview)[j]
-    survival$section[active.row] <- "Overall"
-    survival$value[active.row] <- section.overview[j, ncol(section.overview)]/section.overview[j, 1]
-  }
-  survival$section <- factor(survival$section, levels = unique(survival$section))
-  p <- ggplot2::ggplot(survival, ggplot2::aes(x = section, y = value))
-  p <- p + ggplot2::geom_bar(stat = "identity", fill = cbPalette[[2]], colour = cbPalette[[2]])
-  p <- p + ggplot2::facet_grid(. ~ group)
+
+  survival <- data.frame(group = character(),
+                         section = character(),
+                         value = vector(),
+                         stringsAsFactors = FALSE)
+
+  x <- apply(section.overview[grep("n_entered_", rownames(section.overview)), ],
+             1, function(x) x / section.overview["n_total", , drop = FALSE])
+  x <- do.call(rbind, x)
+  x$Section <- sub("n_entered_", "", rownames(x))
+
+  pd <- reshape2::melt(x, id.vars = "Section")
+  colnames(pd)[2] <- "Group"
+
+  p <- ggplot2::ggplot(data = pd)
+  p <- p + ggplot2::aes(x = Section, y = value, fill = Group, colour = Group)
+  p <- p + ggplot2::geom_bar(stat = "identity",
+                             width = 0.5,
+                             position = ggplot2::position_dodge2(
+                                              preserve = "single", padding = 0))
+  p <- p + ggplot2::scale_fill_manual(values = the.colours, drop = FALSE)
+  p <- p + ggplot2::scale_colour_manual(values = the.colours, drop = FALSE)
+  p <- p + ggplot2::scale_x_discrete(drop = FALSE)
+  p <- p + ggplot2::scale_y_continuous(limits = c(0, 1))
   p <- p + ggplot2::theme_bw()
-  p <- p + ggplot2::scale_y_continuous(limits = c(0, 1), expand = c(0, 0, 0.05, 0))
-  p <- p + ggplot2::labs(x = "", y = "Survival")
-  the.width <- max(2, sum(grepl("Disap\\.", colnames(section.overview))) * nrow(section.overview))
-  ggplot2::ggsave(paste0(tempdir(), "/actel_report_auxiliary_files/survival.png"), width = the.width, height = 4, limitsize = FALSE)
+  p <- p + ggplot2::labs(x = "Section", y = "n that entered / n released",
+                         title = "Arrivals")
+  p <- p + ggplot2::coord_flip()
+  p <- p + ggplot2::guides(fill = ggplot2::guide_legend(reverse = TRUE),
+                           colour = ggplot2::guide_legend(reverse = TRUE))
+  
+  ggplot2::ggsave(paste0(tempdir(),
+                         "/actel_report_auxiliary_files/survival1.png"),
+                  width = 8, 
+                  height = max(4, ((nrow(x) - 1) * 0.5)),
+                  limitsize = FALSE)
+
+  x <- section.overview[grep("last_at_", rownames(section.overview)), ] /
+  section.overview[grep("n_entered_", rownames(section.overview)), ]
+  x$Section <- sub("last_at_", "", rownames(x))
+  pd <- reshape2::melt(x, id.vars = "Section")
+  colnames(pd)[2] <- "Group"
+
+  p <- ggplot2::ggplot(data = pd)
+  p <- p + ggplot2::aes(x = Section, y = value, fill = Group, colour = Group)
+  p <- p + ggplot2::geom_bar(stat = "identity",
+                             width = 0.5,
+                             position = ggplot2::position_dodge2(
+                                              preserve = "single", padding = 0))
+  p <- p + ggplot2::scale_fill_manual(values = the.colours, drop = FALSE)
+  p <- p + ggplot2::scale_colour_manual(values = the.colours, drop = FALSE)
+  p <- p + ggplot2::scale_x_discrete(drop = FALSE)
+  p <- p + ggplot2::scale_y_continuous(limits = c(0, 1))
+  p <- p + ggplot2::theme_bw()
+  p <- p + ggplot2::labs(x = "Section", y = "n that left / n that entered",
+                         title = "Departures")
+  p <- p + ggplot2::coord_flip()
+  p <- p + ggplot2::guides(fill = ggplot2::guide_legend(reverse = TRUE),
+                           colour = ggplot2::guide_legend(reverse = TRUE))
+
+  suppressWarnings( # silence NaN warnings when no one entered a section
+    ggplot2::ggsave(paste0(tempdir(),
+                           "/actel_report_auxiliary_files/survival2.png"),
+                    width = 8, 
+                    height = max(4, ((nrow(x) - 1) * 0.5)),
+                    limitsize = FALSE)
+  )
+
+  pd <- as.data.frame(table(status.df$Status, status.df$Group))
+  colnames(pd) <- c("Area", "Group", "n")
+  aux <- table(status.df$Group)
+  link <- match(pd$Group, names(aux))
+  pd$prop <- pd$n / aux[link]
+
+  p <- ggplot2::ggplot(data = pd)
+  p <- p + ggplot2::aes(x = Area, y = prop, fill = Group, colour = Group)
+  p <- p + ggplot2::geom_bar(stat = "identity",
+                             width = 0.5,
+                             position = ggplot2::position_dodge2(
+                                              preserve = "single", padding = 0))
+  p <- p + ggplot2::scale_fill_manual(values = the.colours, drop = FALSE)
+  p <- p + ggplot2::scale_colour_manual(values = the.colours, drop = FALSE)
+  p <- p + ggplot2::scale_x_discrete(drop = FALSE)
+  p <- p + ggplot2::scale_y_continuous(limits = c(0, 1))
+  p <- p + ggplot2::theme_bw()
+  p <- p + ggplot2::labs(x = "", y = "n / total released",
+                         title = "Assigned fates")
+  p <- p + ggplot2::coord_flip()
+  p <- p + ggplot2::guides(fill = ggplot2::guide_legend(reverse = TRUE),
+                           colour = ggplot2::guide_legend(reverse = TRUE))
+
+  ggplot2::ggsave(paste0(tempdir(),
+                         "/actel_report_auxiliary_files/survival3.png"),
+                  width = 8, 
+                  height = max(4, ((length(unique(status.df$Status)) - 1) * 0.5)),
+                  limitsize = FALSE)
+
 }
 
 
@@ -542,7 +638,7 @@ printEfficiency <- function(CJS = NULL, efficiency = NULL, intra.CJS, type = c("
 
       efficiency.fragment <- paste0('
 Note:
-  : These efficiency calculations **do not account for** backwards movements. This implies that the total number of animals to have been **last seen** at a given array **may be lower** than the displayed below. Please refer to the [section survival overview](#section-survival) and [last seen arrays](#last-seen-arrays) to find out how many animals were considered to have disappeared per section.
+  : These efficiency calculations **do not account for** backwards movements. This implies that the total number of animals to have been **last seen** at a given array **may be lower** than the displayed below. Please refer to the [section summary](#section-summary) and [last seen arrays](#last-seen-arrays) to find out how many animals were considered to have disappeared per section.
   : The data used in the tables below are stored in the `overall.CJS` object. Auxiliary information can also be found in the `matrices` and `arrays` objects.
   : These efficiency values are estimated using the analytical equations provided in the paper "Using mark-recapture models to estimate survival from telemetry data" by [Perry et al. (2012)](<https://www.researchgate.net/publication/256443823_Using_mark-recapture_models_to_estimate_survival_from_telemetry_data>). In some situations, more advanced efficiency estimation methods may be required.
   : You can try running `advEfficiency(results$overall.CJS)` to obtain beta-drawn efficiency distributions (replace `results` with the name of the object where you saved the analysis).

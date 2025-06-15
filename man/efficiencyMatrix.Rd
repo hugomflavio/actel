@@ -4,14 +4,10 @@
 \alias{efficiencyMatrix}
 \title{Compile inter-array detection matrix}
 \usage{
-efficiencyMatrix(movements, arrays, paths, dotmat)
+efficiencyMatrix(movements, dot_list)
 }
 \arguments{
-\item{arrays}{A list containing information for each array.}
-
-\item{paths}{A list containing the shortest paths between arrays with distance > 1.}
-
-\item{dotmat}{The matrix of distances between arrays.}
+\item{dot_list}{A list containing information on the study area configuration.}
 }
 \value{
 A matrix of detection histories per tag.

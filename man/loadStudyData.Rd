@@ -57,16 +57,12 @@ A list containing:
 case of the \code{explore} function)
 \item \code{deployments}: A list corresponding to 'deployments.csv'
 \item \code{spatial}: A list corresponding to 'spatial.csv'
-\item \code{dot}: A data frame containing the connections between arrays
-\item \code{arrays}: A list containing detailed information on the arrays
-\item \code{dotmat}: A matrix of the distance (in number of arrays) between
-pairs of arrays
+\item \code{dot_list}: A list containing detailed information on the
+study area configuration.
 \item \code{dist.mat}: A matrix of the distances (in metres) between
 stations (if a 'distances.csv' is present)
 \item \code{detections.list}: A list containing the detection data
 for each tag
-\item \code{paths}: A list of the all array paths between each pair
-of arrays.
 }
 }
 \description{

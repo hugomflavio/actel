@@ -14,7 +14,7 @@ detections.list <- study.data$detections.list
 bio <- study.data$bio
 spatial <- study.data$spatial
 dist.mat <- study.data$dist.mat
-arrays <- study.data$arrays
+dot_list <- study.data$dot_list
 
 moves <- groupMovements(detections.list = detections.list[1:2], bio = bio, spatial = spatial,
     speed.method = "last to first", max.interval = 60, tz = "Europe/Copenhagen", dist.mat = dist.mat)
@@ -61,20 +61,20 @@ test_that("sectionMovements returns NULL if all events are invalid", {
 test_that("checkLinearity throws warning only if movements are not ordered", {
 	aux <- sectionMovements(movements = moves[[1]], spatial = spatial, valid.dist = attributes(dist.mat)$valid)
 
-  tryCatch(checkLinearity(secmoves = aux, tag = "test", spatial = spatial, arrays = arrays, GUI = "never"),
+  tryCatch(checkLinearity(secmoves = aux, tag = "test", spatial = spatial, dot_list = dot_list, GUI = "never"),
     warning = function(w) stop("A warning was issued where it should not have been."))
 
   xspatial <- spatial
   xspatial$array.order <- spatial$array.order[3:1]
   aux <- sectionMovements(movements = moves[[1]], spatial = xspatial, valid.dist = attributes(dist.mat)$valid)
 
-	expect_warning(checkLinearity(secmoves = aux, tag = "test", spatial = xspatial, arrays = arrays, GUI = "never", n = "(1/1)"),
+	expect_warning(checkLinearity(secmoves = aux, tag = "test", spatial = xspatial, dot_list = dot_list, GUI = "never", n = "(1/1)"),
 		"Inter-section backwards movements were detected for tag test (1/1) and the last events are not ordered!", fixed = TRUE)
 
 	xmoves <- moves[[1]]
 	xmoves$Array[4] <- "A9"
 	aux <- sectionMovements(movements = xmoves, spatial = spatial, valid.dist = FALSE)
-	expect_warning(output <- checkLinearity(secmoves = aux, tag = "test", spatial = spatial, arrays = arrays, GUI = "never", n = "(1/1)"),
+	expect_warning(output <- checkLinearity(secmoves = aux, tag = "test", spatial = spatial, dot_list = dot_list, GUI = "never", n = "(1/1)"),
 		"Inter-section backwards movements were detected for tag test (1/1).", fixed = TRUE)
 	expect_equal(output$Valid, c(TRUE, TRUE, TRUE, TRUE, TRUE))
 })

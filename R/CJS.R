@@ -4,13 +4,11 @@
 #' @param detections.list A list of the detections split by each target tag.
 #' @param spatial The spatial data frame.
 #' @param efficiency The efficiency results.
-#' @param arrays A list containing information for each array.
+#' @param dot_list A list containing information on the study area configuration.
 #' @param mat,m The presence/absence matrices.
 #' @param input A presence/absence matrix.
 #' @param movements,moves The movements table.
 #' @param status.df The main results table.
-#' @param dotmat The matrix of distances between arrays.
-#' @param paths A list containing the shortest paths between arrays with distance > 1.
 #' @param estimate An estimate of the last array's efficiency, between 0 and 1.
 #' @param fixed.efficiency A vector of fixed efficiency estimates \[0, 1\]. `length(fixed.efficiency)` must match `ncol(input)`.
 #' @param silent Logical: Should messages be printed? This argument is mainly intended for function calls running within actel's analyses.
@@ -105,20 +103,22 @@ includeIntraArrayEstimates <- function(m, efficiency = NULL, CJS = NULL) {
 #' Assembles CJS tables for all group x release site combinations
 #'
 #' @param CJS A list of CJS calculated for each group x release site x array combinations
-#' @param arrays a list of arrays
 #'
 #' @return A list containing the CJS results for each group x release site combination.
 #'
 #' @keywords internal
 #'
-assembleSplitCJS <- function(mat, CJS, arrays, releases, intra.CJS = NULL) {
+assembleSplitCJS <- function(mat, CJS, dot_list, releases, intra.CJS = NULL) {
   event(type = "debug", "Running assembleSplitCJS.")
+
   recipient <- lapply(names(CJS), function(i) {
     aux <- releases[releases$Combined == i, ]
-    output <- assembleArrayCJS(mat = mat[i], CJS = CJS[[i]], arrays = arrays, releases = aux)[[1]]
+    output <- assembleArrayCJS(mat = mat[i], CJS = CJS[[i]], 
+                               dot_list = dot_list, releases = aux)[[1]]
     if (!is.null(intra.CJS)) {
       for (i in names(intra.CJS)) {
-        output["estimated", i] <- round(output["detected", i] / intra.CJS[[i]]$combined.efficiency, 0)
+        output["estimated", i] <- round(output["detected", i] / 
+                                        intra.CJS[[i]]$combined.efficiency, 0)
       }
     }
     output["difference", ] <- output["estimated", ] - output["known", ]
@@ -137,15 +137,17 @@ assembleSplitCJS <- function(mat, CJS, arrays, releases, intra.CJS = NULL) {
 #'
 #' @keywords internal
 #'
-assembleGroupCJS <- function(mat, CJS, arrays, releases, intra.CJS = NULL) {
+assembleGroupCJS <- function(mat, CJS, dot_list, releases, intra.CJS = NULL) {
   event(type = "debug", "Running assembleGroupCJS.")
   recipient <- lapply(names(CJS), function(i) {
     link <- grepl(paste0("^", i), names(mat))
     aux <- releases[releases$Group == i, ]
-    output <- assembleArrayCJS(mat = mat[link], CJS = CJS[[i]], arrays = arrays, releases = aux)[[1]]
+    output <- assembleArrayCJS(mat = mat[link], CJS = CJS[[i]],
+                               dot_list = dot_list, releases = aux)[[1]]
     if (!is.null(intra.CJS)) {
       for (i in names(intra.CJS)) {
-        output["estimated", i] <- round(output["detected", i] / intra.CJS[[i]]$combined.efficiency, 0)
+        output["estimated", i] <- round(output["detected", i] / 
+                                        intra.CJS[[i]]$combined.efficiency, 0)
       }
     }
     output["difference", ] <- output["estimated", ] - output["known", ]
@@ -165,24 +167,38 @@ assembleGroupCJS <- function(mat, CJS, arrays, releases, intra.CJS = NULL) {
 #'
 #' @keywords internal
 #'
-breakMatricesByArray <- function(m, arrays, type = c("peers", "all"), verbose = TRUE) {
+breakMatricesByArray <- function(m, dot_list, type = c("peers", "all"), 
+                                 verbose = TRUE) {
   event(type = "debug", "Running breakMatricesByArray.")
+
+  # unpack arrays
+  arrays <- dot_list$array_info$arrays
+
   type <- match.arg(type)
   recipient <- list()
   for (i in 1:length(arrays)) {
-    if ((type == "peers" & !is.null(arrays[[i]]$after.peers)) | (type == "all" & !is.null(arrays[[i]]$all.after))) {
+    check1 <- !is.null(arrays[[i]]$after.peers)
+    check2 <- !is.null(arrays[[i]]$all.after)
+    if ((type == "peers" & check2) | (type == "all" & check2)) {
 
       # find out relevant arrays
-      if (type == "peers")
-        a.regex <- paste0("^", c(names(arrays)[i], arrays[[i]]$after.peers), "$", collapse = "|")
-      else
-        a.regex <- paste0("^", c(names(arrays)[i], arrays[[i]]$all.after), "$", collapse = "|")
+      if (type == "peers") {
+        a.regex <- paste0("^", c(names(arrays)[i], arrays[[i]]$after.peers),
+                          "$", collapse = "|")
+      } else {
+        a.regex <- paste0("^", c(names(arrays)[i], arrays[[i]]$all.after),
+                          "$", collapse = "|")
+      }
 
       # grab only relevant arrays
-      aux  <- lapply(m, function(m_i) m_i[, which(grepl(a.regex, colnames(m_i))), drop = FALSE])
+      aux  <- lapply(m, function(m_i) {
+        m_i[, which(grepl(a.regex, colnames(m_i))), drop = FALSE]
+      })
 
       # Failsafe in case some tags are released at one of the peers
-      keep <- unlist(lapply(m, function(m_i) any(grepl(paste0("^", names(arrays)[i], "$"), colnames(m_i)))))
+      keep <- unlist(lapply(m, function(m_i) {
+        any(grepl(paste0("^", names(arrays)[i], "$"), colnames(m_i)))
+      }))
       aux  <- aux[keep]
 
       # Failsafe in case there is only one column left
@@ -191,7 +207,8 @@ breakMatricesByArray <- function(m, arrays, type = c("peers", "all"), verbose = 
 
       # reorder columns if necessary
       aux <- lapply(aux, function(x) {
-        peer.cols <- colnames(x)[!grepl(paste0("^", names(arrays)[i], "$"), colnames(x))]
+        link <- !grepl(paste0("^", names(arrays)[i], "$"), colnames(x))
+        peer.cols <- colnames(x)[link]
         return(x[, c(names(arrays)[i], peer.cols)])
       })
 
@@ -204,12 +221,14 @@ breakMatricesByArray <- function(m, arrays, type = c("peers", "all"), verbose = 
           colnames(m)[2] <- "AnyPeer"
         }
 
-        # The fake start prevents the CJS functions from breaking if the efficiency of the array is 0
+        # The fake start prevents the CJS functions from breaking if
+        # the efficiency of the array is 0
         m$FakeStart <- rep(1, nrow(m))
         return(m[, c(ncol(m), 1, (ncol(m) - 1))])
       })
 
-      # If all peers are 0, the CJS functions will crash. The same happens if the array is all 0's
+      # If all peers are 0, the CJS functions will crash.
+      # The same happens if the array is all 0's
       own.zero.check <- unlist(lapply(aux, function(x) sum(x[, 2]) == 0))
       peer.zero.check <- unlist(lapply(aux, function(x) sum(x$AnyPeer) == 0))
       zero.check <- all(own.zero.check) | all(peer.zero.check)
@@ -250,8 +269,11 @@ breakMatricesByArray <- function(m, arrays, type = c("peers", "all"), verbose = 
 #'
 #' @keywords internal
 #'
-assembleArrayCJS <- function(mat, CJS, arrays, releases, silent = TRUE) {
+assembleArrayCJS <- function(mat, CJS, dot_list, releases, silent = TRUE) {
   event(type = "debug", "Running assembleArrayCJS.")
+  # unpack arrays
+  arrays <- dot_list$array_info$arrays
+
   # Compile final objects
   absolutes <- matrix(nrow = 5, ncol = length(arrays))
   colnames(absolutes) <- names(arrays)
@@ -313,19 +335,23 @@ assembleArrayCJS <- function(mat, CJS, arrays, releases, silent = TRUE) {
 #'
 #' @inheritParams cjs_args
 #'
-#' @return A list containing the detection matrices split by groups and release sites
+#' @return A list containing the detection matrices split by groups and
+#'  release sites
 #'
 #' @keywords internal
 #'
-assembleMatrices <- function(spatial, movements, status.df, arrays, paths, dotmat) {
+assembleMatrices <- function(spatial, movements, status.df, dot_list) {
   event(type = "debug", "Running assembleMatrices.")
-  temp <- efficiencyMatrix(movements = movements, arrays = arrays, paths = paths, dotmat = dotmat)
+  temp <- efficiencyMatrix(movements = movements, dot_list = dot_list)
   output <- lapply(temp, function(x) {
     # include transmitters that were never detected
     x <- includeMissing(x = x, status.df = status.df)
 
-    # sort the rows by the same order as status.df (I think these two lines are not needed, but leaving them in just in case)
-    link <- sapply(status.df$Transmitter, function(i) grep(paste0("^", i, "$"), rownames(x)))
+    # sort the rows by the same order as status.df (I think these two lines
+    # are not needed, but leaving them in just in case)
+    link <- sapply(status.df$Transmitter, function(i) {
+      grep(paste0("^", i, "$"), rownames(x))
+    })
     x <- x[link, ]
 
     # split by group*release site combinations
@@ -334,30 +360,42 @@ assembleMatrices <- function(spatial, movements, status.df, arrays, paths, dotma
     # Re-order
     the.order <- c()
     for (i in unique(status.df$Group)) {
-      the.order <- c(the.order, paste0(i, ".", unique(spatial$release.sites$Standard.name)))
+      the.order <- c(the.order,
+                     paste0(i, ".",
+                            unique(spatial$release.sites$Standard.name)))
     }
     aux <- aux[order(match(names(aux), the.order))]
 
     unique.release.arrays <- unique( # only keep each name once
                               unlist( # turn output into a string
                                 sapply(spatial$release.sites$Array, function(x) {
-                                    unlist(strsplit(x, "|", fixed = TRUE)) # break arrays by '|'
+                                    # break arrays by '|'
+                                    unlist(strsplit(x, "|", fixed = TRUE))
                                   })
                                 )
                               )
 
-    # If the release sites start in different arrays, trim the matrices as needed
+    # If the release sites start in different arrays,
+    # trim the matrices as needed
     if (length(unique.release.arrays) > 1) {
-      for(i in 1:length(aux)){ # for each matrix, find the corresponding release site.
-        the_release_site <- sapply(spatial$release.sites$Standard.name, function(x) grepl(paste0("\\.", x, "$"), names(aux)[i]))
-        if(sum(the_release_site) > 1) { # if there is more than one matching release site, stop.
+      # for each matrix, find the corresponding release site.
+      for(i in 1:length(aux)){
+        the_release_site <- sapply(spatial$release.sites$Standard.name, 
+                                   function(x) {
+                                     grepl(paste0("\\.", x, "$"), names(aux)[i])
+                                   })
+        # if there is more than one matching release site, stop.
+        if(sum(the_release_site) > 1) {
           event(type = "stop",
                 "Multiple release sites match the matrix name.",
                 " Make sure that the release sites' names are not contained",
                 " within the animal groups or within themselves.\n")
         }
-        # else, find which is the first column to keep. This is tricky for multi-branch sites...
-        the.col <- min(which(grepl(spatial$release.sites$Array[the_release_site], colnames(aux[[i]]))))
+        # else, find which is the first column to keep.
+        # This is tricky for multi-branch sites...
+        candidates <- grepl(spatial$release.sites$Array[the_release_site],
+                            colnames(aux[[i]]))
+        the.col <- min(which(candidates))
         # then keep only the relevant columns
         aux[[i]] <- aux[[i]][, c(1, the.col:ncol(aux[[i]]))]
       }
@@ -658,9 +696,15 @@ mbGroupCJS <- function(mat, status.df, fixed.efficiency = NULL) {
 #'
 #' @keywords internal
 #'
-efficiencyMatrix <- function(movements, arrays, paths, dotmat) {
+efficiencyMatrix <- function(movements, dot_list) {
   event(type = "debug", "Running efficiencyMatrix.")
-  max.ef <- as.data.frame(matrix(ncol = length(arrays) + 1, nrow = length(movements)))
+  # unpack dot_lits elements for simplicity
+  arrays <- dot_list$array_info$arrays
+  paths <- dot_list$array_info$paths
+  dotmat <- dot_list$array_info$dotmat
+  
+  max.ef <- as.data.frame(matrix(ncol = length(arrays) + 1,
+                                 nrow = length(movements)))
   colnames(max.ef) <- c("Release", names(arrays))
   rownames(max.ef) <- names(movements)
   max.ef[is.na(max.ef)] = 0
@@ -675,7 +719,7 @@ efficiencyMatrix <- function(movements, arrays, paths, dotmat) {
       max.aux[match(one.way$Array, names(max.aux))] <- 1
       min.aux <- max.aux
       if (nrow(one.way) > 1) {
-        aux <- countArrayFailures(moves = one.way, paths = paths, dotmat = dotmat)
+        aux <- countArrayFailures(moves = one.way, dot_list = dot_list)
         aux <- unique(aux[grepl("unsure", names(aux))])
         if (!is.null(aux))
           max.aux[match(aux, names(max.aux))] <- 1
@@ -699,7 +743,8 @@ oneWayMoves <- function(movements, arrays) {
   event(type = "debug", "Running oneWayMoves.")
   if (nrow(movements) > 1) {
     while (TRUE) {
-      aux <- data.frame(from = movements$Array[-nrow(movements)], to = movements$Array[-1])
+      aux <- data.frame(from = movements$Array[-nrow(movements)],
+                        to = movements$Array[-1])
       link <- apply(aux, 1, function(x) x[2] %in% arrays[[x[1]]]$all.after)
       if (any(link)) {
         if (all(link))
@@ -725,15 +770,16 @@ oneWayMoves <- function(movements, arrays) {
 #'
 #' @keywords internal
 #'
-countArrayFailures <- function(moves, paths, dotmat) {
+countArrayFailures <- function(moves, dot_list) {
   event(type = "debug", "Running countArrayFailures.")
   x <- lapply(1:(nrow(moves) - 1), function(i) {
     A <- moves$Array[i]
     B <- moves$Array[i + 1]
-    if (A != B & dotmat[A, B] != 1)
-      blameArrays(from = A, to = B, paths = paths)
-    else
+    if (A != B & dot_list$array_info$dotmat[A, B] != 1) {
+      blameArrays(from = A, to = B, paths = dot_list$array_info$paths)
+    } else {
       NULL
+    }
   })
   return(unlist(x))
 }

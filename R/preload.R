@@ -42,14 +42,10 @@
 #'    argument sections (required to run residency and migration analyses)
 #'  \item \code{deployments}: The deployment data
 #'  \item \code{spatial}: The spatial data, split in stations and release sites.
-#'  \item \code{dot}: A table of array connections.
-#'  \item \code{arrays}: A list with the details of each array
-#'  \item \code{dotmat}: A matrix of distances between arrays (in number of
-#'    arrays).
+#'  \item \code{dot_list}: A list containing detailed information on the
+#'   study area configuration.
 #'  \item \code{dist.mat}: The distances matrix.
 #'  \item \code{detections.list}: A processed list of detections for each tag.
-#'  \item \code{paths}: A list of the possible paths between each pair of
-#'    arrays.
 #'  \item \code{disregard.parallels}: Logical: Should parallel arrays invalidate
 #'    efficiency peers? (required to run residency and migration analyses)
 #'  \item \code{tz}: The time zone of the study area
@@ -191,9 +187,9 @@ preload <- function(biometrics, spatial, deployments, detections, dot = NULL,
       aux <- unique(spatial$Array[spatial$Type == "Hydrophone"])
       fakedot <- paste(aux, "--", aux)
     }
-    recipient <- loadDot(string = fakedot, spatial = spatial,
-                          disregard.parallels = disregard.parallels,
-                          preloading = TRUE)
+    dot_list <- loadDot(string = fakedot, spatial = spatial,
+                        disregard.parallels = disregard.parallels,
+                        preloading = TRUE)
   } else {
     if (!is.character(dot)) {
       event(type = "stop",
@@ -201,35 +197,24 @@ preload <- function(biometrics, spatial, deployments, detections, dot = NULL,
             "Please prepare a dot string and include it in the dot argument.\n",
             "You can use readDot to check the quality of your dot string.")
     } else {
-      recipient <- loadDot(string = dot, spatial = spatial,
-                           disregard.parallels = disregard.parallels,
-                           preloading = TRUE)
+      dot_list <- loadDot(string = dot, spatial = spatial,
+                          disregard.parallels = disregard.parallels,
+                          preloading = TRUE)
     }
   }
-  dot <- recipient$dot
-  arrays <- recipient$arrays
-  dotmat <- recipient$dotmat
-  paths <- recipient$paths
-  if (is.null(dot) | is.null(arrays) | is.null(dotmat) | is.null(paths)) {
-    event(type = "stop",
-          "Something went wrong when assigning recipient objects (loadDot).",
-          " If this error persists, contact the developer.") # nocov
-  }
 
-  rm(recipient)
-
-  # Check if there is a logical first array in the study area,
-  # should a replacement release site need to be created.
-  if (sum(unlist(lapply(arrays, function(a) is.null(a$before)))) == 1) {
-    link <- unlist(lapply(arrays, function(a) is.null(a$before)))
-    first.array <- names(arrays)[link]
+  # Check if there is a logical first array in the study area, should a
+  # replacement release site need to be created.
+  link <- sapply(dot_list$array_info$arrays, function(a) is.null(a$before))
+  if (sum(link) == 1) {
+    first.array <- names(dot_list$array_info$arrays)[link]
   } else {
     first.array <- NULL
   }
 
   # Finish structuring the spatial file
-  spatial <- transformSpatial(spatial = spatial, bio = bio, arrays = arrays,
-                              dotmat = dotmat, first.array = first.array)
+  spatial <- transformSpatial(spatial = spatial, bio = bio,
+                              dot_list = dot_list, first.array = first.array)
 
   # get standardized station and receiver names,
   # check for receivers with no detections
@@ -243,12 +228,14 @@ preload <- function(biometrics, spatial, deployments, detections, dot = NULL,
   # Check if there are detections from unknown receivers
   checkUnknownReceivers(input = detections)
 
-  arrays <- liveArrayTimes(arrays = arrays, deployments = deployments,
-                           spatial = spatial)
+  dot_list$array_info$arrays <- liveArrayTimes(
+    arrays = dot_list$array_info$arrays,
+    deployments = deployments,
+    spatial = spatial)
 
   # Reorder arrays by spatial order
-  link <- match(unlist(spatial$array.order), names(arrays))
-  arrays <- arrays[link]
+  link <- match(unlist(spatial$array.order), names(dot_list$array_info$arrays))
+  dot_list$array_info$arrays <- dot_list$array_info$arrays[link]
   rm(link)
 
   if (is.null(distances)) {
@@ -293,9 +280,9 @@ preload <- function(biometrics, spatial, deployments, detections, dot = NULL,
         "M: Data successfully imported!")
 
   output <- list(bio = bio, deployments = deployments, spatial = spatial,
-    dot = dot, arrays = arrays, dotmat = dotmat, dist.mat = dist.mat,
-    detections.list = detections.list, paths = paths,
-    disregard.parallels = disregard.parallels, tz = tz)
+                 dot_list = dot_list, dist.mat = dist.mat,
+                 detections.list = detections.list,
+                 disregard.parallels = disregard.parallels, tz = tz)
 
   # create actel token
   actel.token <- stringi::stri_rand_strings(1, 10)

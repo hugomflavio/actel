@@ -170,7 +170,7 @@ test_that("explore stops when any argument does not make sense", {
 
 test_that("explore results contains all the expected elements.", {
 	output <- suppressWarnings(explore(tz = 'Europe/Copenhagen', report = FALSE, GUI = "never"))
-	expect_equal(names(output), c('bio', 'detections', 'valid.detections', 'spatial', 'deployments', 'arrays',
+	expect_equal(names(output), c('bio', 'detections', 'valid.detections', 'spatial', 'deployments', 'dot_list',
     'movements', 'valid.movements', 'times', 'rsp.info', 'dist.mat'))
 	# all the contents of each object have been tested in their respective function tests, appart from rsp.info
 	expect_equal(names(output$rsp.info), c('analysis.type', 'analysis.time', 'bio', 'tz', 'actel.version'))
@@ -182,11 +182,11 @@ test_that("explore results contains all the expected elements.", {
 
 test_that("explore is able to run speed and inactiveness checks.", {
 	output <- suppressWarnings(explore(tz = 'Europe/Copenhagen', report = FALSE, GUI = "never", speed.error = 1000000, inactive.error = 1000000))
-	expect_false(any(is.na(match(names(output), c('bio', 'detections', 'valid.detections', 'spatial', 'deployments', 'arrays',
+	expect_false(any(is.na(match(names(output), c('bio', 'detections', 'valid.detections', 'spatial', 'deployments', 'dot_list',
     'movements', 'valid.movements', 'times', 'rsp.info', 'dist.mat')))))
 	file.remove("distances.csv")
 	output <- suppressWarnings(explore(tz = 'Europe/Copenhagen', report = TRUE, GUI = "never", speed.warning = 1000000, inactive.warning = 1000000))
-	expect_false(any(is.na(match(names(output), c('bio', 'detections', 'valid.detections', 'spatial', 'deployments', 'arrays',
+	expect_false(any(is.na(match(names(output), c('bio', 'detections', 'valid.detections', 'spatial', 'deployments', 'dot_list',
     'movements', 'valid.movements', 'times', 'rsp.info', 'dist.mat')))))
 })
 # n

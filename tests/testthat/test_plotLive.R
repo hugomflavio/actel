@@ -15,6 +15,7 @@ test_that("plotLive works with preload datasets", {
 	suppressWarnings(x <- preload(biometrics = example.biometrics, spatial = example.spatial, deployments = example.deployments,
 							 									detections = example.detections, tz = "Europe/Copenhagen"))
 	tryCatch(plotLive(x), warning = function(w) stop("a warning was issued where it should not had been!"))
+	expect_is("The real test is above, this is just to prevent test_that from complaining", "character")
 })
 
 test_that("plotLive works with unknown receivers", {

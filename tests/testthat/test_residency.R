@@ -17,10 +17,10 @@ test_that("residency stops when any argument does not make sense", {
 test_that("residency results contains all the expected elements.", {
 	output <- suppressWarnings(residency(tz = 'Europe/Copenhagen', report = FALSE, GUI = "never"))
 
-	expect_false(any(is.na(match(names(output), c('array.times', 'arrays', 'time.positions', 'time.ratios', 'deployments',
-		'detections', 'dist.mat', 'efficiency', 'global.ratios', 'group.ratios', 'intra.array.CJS', 'intra.array.matrices',
+	expect_false(any(is.na(match(names(output), c('array.times', 'deployments',
+		'detections', 'dist.mat', 'dot_list', 'efficiency', 'global.ratios', 'group.ratios', 'intra.array.CJS', 'intra.array.matrices',
 		'last.seen', 'movements', 'residency.list', 'rsp.info', 'section.movements', 'section.times',
-		'spatial', 'status.df', 'valid.detections', 'valid.movements')))))
+		'spatial', 'status.df', 'time.positions', 'time.ratios', 'valid.detections', 'valid.movements')))))
 
 	# all the contents of each object have been tested in their respective function tests, apart from rsp.info and last.seen
 	expect_equal(names(output$rsp.info), c('analysis.type', 'analysis.time', 'bio', 'tz', 'actel.version'))
@@ -42,18 +42,18 @@ test_that("residency is able to run speed and inactiveness checks.", {
 	skip_on_cran()
 	output <- suppressWarnings(residency(tz = 'Europe/Copenhagen',
 		report = FALSE, GUI = "never", speed.warning = 1000000, inactive.warning = 1000000, replicates = list(A9 = c("St.16", "St.17"))))
-	expect_false(any(is.na(match(names(output), c('array.times', 'arrays', 'time.positions', 'time.ratios',
-		'deployments', 'detections', 'dist.mat', 'efficiency', 'global.ratios', 'group.ratios', 'intra.array.CJS',
-		'intra.array.matrices','last.seen', 'movements', 'residency.list', 'rsp.info', 'section.movements',
-		'section.times', 'spatial', 'status.df', 'valid.detections', 'valid.movements')))))
+	expect_false(any(is.na(match(names(output), c('array.times', 'deployments',
+		'detections', 'dist.mat', 'dot_list', 'efficiency', 'global.ratios', 'group.ratios', 'intra.array.CJS', 'intra.array.matrices',
+		'last.seen', 'movements', 'residency.list', 'rsp.info', 'section.movements', 'section.times',
+		'spatial', 'status.df', 'time.positions', 'time.ratios', 'valid.detections', 'valid.movements')))))
 	file.remove("distances.csv")
 	expect_warning(output <- residency(tz = 'Europe/Copenhagen', report = TRUE,
 			GUI = "never", speed.error = 1000000, inactive.error = 1000000),
 		"Running inactiveness checks without a distance matrix. Performance may be limited.", fixed = TRUE)
-	expect_false(any(is.na(match(names(output), c('array.times', 'arrays', 'time.positions', 'time.ratios',
-		'deployments', 'detections', 'dist.mat', 'efficiency', 'global.ratios', 'group.ratios', 'intra.array.CJS', 'intra.array.matrices',
+	expect_false(any(is.na(match(names(output), c('array.times', 'deployments',
+		'detections', 'dist.mat', 'dot_list', 'efficiency', 'global.ratios', 'group.ratios', 'intra.array.CJS', 'intra.array.matrices',
 		'last.seen', 'movements', 'residency.list', 'rsp.info', 'section.movements', 'section.times',
-		'spatial', 'status.df', 'valid.detections', 'valid.movements')))))
+		'spatial', 'status.df', 'time.positions', 'time.ratios', 'valid.detections', 'valid.movements')))))
 })
 # n
 # n
@@ -154,10 +154,10 @@ test_that("the discard.first argument is working properly", {
 test_that("timestep = 'hours' is working too", {
 	skip_on_cran()
 	output <- suppressWarnings(residency(tz = 'Europe/Copenhagen', report = TRUE, GUI = "never", timestep = "hours"))
-	expect_false(any(is.na(match(names(output), c('array.times', 'arrays', 'time.positions', 'time.ratios',
-		'deployments', 'detections', 'dist.mat', 'efficiency', 'global.ratios', 'group.ratios', 'intra.array.CJS',
-		'intra.array.matrices','last.seen', 'movements', 'residency.list', 'rsp.info', 'section.movements',
-		'section.times', 'spatial', 'status.df', 'valid.detections', 'valid.movements')))))
+	expect_false(any(is.na(match(names(output), c('array.times', 'deployments',
+		'detections', 'dist.mat', 'dot_list', 'efficiency', 'global.ratios', 'group.ratios', 'intra.array.CJS', 'intra.array.matrices',
+		'last.seen', 'movements', 'residency.list', 'rsp.info', 'section.movements', 'section.times',
+		'spatial', 'status.df', 'time.positions', 'time.ratios', 'valid.detections', 'valid.movements')))))
 })
 # n
 # n

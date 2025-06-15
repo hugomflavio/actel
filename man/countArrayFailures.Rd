@@ -4,12 +4,10 @@
 \alias{countArrayFailures}
 \title{Find and list arrays which failed during the movements of the tags}
 \usage{
-countArrayFailures(moves, paths, dotmat)
+countArrayFailures(moves, dot_list)
 }
 \arguments{
 \item{moves}{the valid array movements}
-
-\item{paths}{a list containing the shortest paths between arrays with distance > 1}
 }
 \value{
 NULL if no arrays failed, or a list containing information on the arrays that failed

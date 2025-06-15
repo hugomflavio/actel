@@ -7,7 +7,6 @@
 #' and other residency-focused variables, this is the analysis you are looking
 #' for!
 #'
-#' @param section.minimum DEPRECATED: Please use section.warning and section.error instead.
 #' @param section.error If a tag has section movement events with less or equal to
 #'  \code{section.error} detections, user intervention is suggested.
 #'  Defaults to 1. To disable user intervention suggestions, set to 0.
@@ -115,7 +114,6 @@ residency <- function(
   section.order = NULL,
   datapack = NULL,
   max.interval = 60,
-  minimum.detections,
   min.total.detections = 2,
   min.per.event = 1,
   start.time = NULL,
@@ -136,7 +134,6 @@ residency <- function(
   save.detections = FALSE,
   section.warning = 1,
   section.error = 1,
-  section.minimum,
   timestep = c("days", "hours"),
   replicates = NULL,
   GUI = c("needed", "always", "never"),
@@ -144,18 +141,6 @@ residency <- function(
   print.releases = TRUE,
   detections.y.axis = c("auto", "stations", "arrays"))
 {
-
-# check deprecated argument
-  if (!missing(minimum.detections)) {
-    event(type = "stop",
-          "'minimum.detections' has been deprecated.",
-          " Please use 'min.total.detections' and 'min.per.event' instead.")
-  }
-  if (!missing(section.minimum)) {
-    event(type = "stop",
-          "'section.minimum' has been deprecated.",
-          " Please use 'section.warning' and 'section.error' instead.")
-  }
 
 # clean up any lost helpers
   deleteHelpers()
@@ -320,26 +305,18 @@ residency <- function(
   bio <- study.data$bio
   deployments <- study.data$deployments
   spatial <- study.data$spatial
-  dot <- study.data$dot
-  arrays <- study.data$arrays
-  dotmat <- study.data$dotmat
-  paths <- study.data$paths
+  dot_list <- study.data$dot_list
   dist.mat <- study.data$dist.mat
   attributes(dist.mat)$speed.method <- speed.method
   detections.list <- study.data$detections.list
 # -------------------------------------
 
 # Final quality checks
-  # Verify the existance of sections
-  if (all(!grepl("^Section$", colnames(spatial$stations)))) {
-    event(type = "stop",
-          "To run residency(), please assign the arrays to their sections",
-          " using a 'Section' column in the spatial input.")
-  }
 
   # Verify that replicate information is valid
   not_null <- !is.null(replicates)
-  any_mismatch <- not_null && any(is.na(match(names(replicates), names(arrays))))
+  any_mismatch <- not_null && any(is.na(match(names(replicates), 
+                                              names(dot_list$array_info$arrays))))
   if (any_mismatch) {
     event(type = "stop",
           "Some of the array names listed in the 'replicates' argument",
@@ -452,9 +429,9 @@ residency <- function(
                                min.per.event = min.per.event[1], n = counter)
 
       output <- checkImpassables(movements = output, tag = tag, bio = bio, detections = detections.list[[tag]], n = counter,
-                                 spatial = spatial, dotmat = dotmat, GUI = GUI, save.tables.locally = save.tables.locally)
+                                 spatial = spatial, dot_list = dot_list, GUI = GUI, save.tables.locally = save.tables.locally)
 
-      output <- checkJumpDistance(movements = output, bio = bio, tag = tag, dotmat = dotmat, paths = paths, arrays = arrays,
+      output <- checkJumpDistance(movements = output, bio = bio, tag = tag, dot_list = dot_list,
                                   spatial = spatial, jump.warning = jump.warning, jump.error = jump.error, GUI = GUI,
                                   detections = detections.list[[tag]], save.tables.locally = save.tables.locally, n = counter)
 
@@ -598,7 +575,7 @@ residency <- function(
 # ---------------
 
 # Efficiency
-  if (length(arrays) == 0) {
+  if (length(dot_list$array_info$arrays) == 1) {
     event(type = c("warning", "screen", "report"),
           "Cannot calculate inter-array efficiency when there is only",
           " one array (will limit the report's output).")
@@ -606,7 +583,7 @@ residency <- function(
   } else {
     event(type = c("screen", "report"),
           "M: Calculating inter-array efficiency.")
-    efficiency <- res_efficiency(arrmoves = valid.movements, bio = bio, spatial = spatial, arrays = arrays, paths = paths, dotmat = dotmat)
+    efficiency <- res_efficiency(arrmoves = valid.movements, bio = bio, spatial = spatial, dot_list = dot_list)
   }
   if (!is.null(replicates)) {
     event(type = c("screen", "report"),
@@ -660,7 +637,7 @@ residency <- function(
   if (decision == "y") {
     event(type = c("screen", "report"),
           "M: Saving results as '", resultsname, "'.")
-    save(detections, valid.detections, spatial, deployments, arrays, movements, valid.movements,
+    save(detections, valid.detections, spatial, deployments, dot_list, movements, valid.movements,
          section.movements, status.df, last.seen, array.times, section.times, intra.array.matrices,
          residency.list, time.ratios, time.positions, global.ratios, group.ratios, efficiency,
          intra.array.CJS, rsp.info, dist.mat, file = resultsname)
@@ -694,7 +671,7 @@ residency <- function(
 
     biometric.fragment <- printBiometrics(bio = bio)
 
-    printDot(dot = dot,
+    printDot(dot = dot_list$dot,
              spatial = spatial,
              print.releases = print.releases)
 
@@ -863,7 +840,7 @@ residency <- function(
                  valid.detections = valid.detections,
                  spatial = spatial,
                  deployments = deployments,
-                 arrays = arrays,
+                 dot_list = dot_list,
                  movements = movements,
                  valid.movements = valid.movements,
                  section.movements = section.movements,
@@ -1431,8 +1408,6 @@ res_assembleOutput <- function(res.df, bio, spatial, tz) {
 #' @inheritParams updateValidity
 #' @inheritParams splitDetections
 #' @inheritParams createStandards
-#' @param arrays a list containing information for each array
-#' @param paths a list containing the shortest paths between arrays with distance > 1
 #' @inheritParams dotPaths
 #'
 #' @return A list containing:
@@ -1445,13 +1420,16 @@ res_assembleOutput <- function(res.df, bio, spatial, tz) {
 #'
 #' @keywords internal
 #'
-res_efficiency <- function(arrmoves, bio, spatial, arrays, paths, dotmat) {
+res_efficiency <- function(arrmoves, bio, spatial, dot_list) {
   event(type = "debug", "Running res_efficiency.")
+  # unpack arrays for simplicity
+  arrays <- dot_list$array_info$arrays
+
   values.per.tag <- lapply(names(arrmoves), function(tag) {
     # cat(tag, "\n")
-      first.array <- firstArrayFailure(tag = tag, bio = bio, spatial = spatial, first.array = arrmoves[[tag]]$Array[1], paths = paths, dotmat = dotmat)
+      first.array <- firstArrayFailure(tag = tag, bio = bio, spatial = spatial, first.array = arrmoves[[tag]]$Array[1], dot_list = dot_list)
       if (nrow(arrmoves[[tag]]) > 1)
-        subsequent <- countArrayFailures(moves = arrmoves[[tag]], paths = paths, dotmat = dotmat)
+        subsequent <- countArrayFailures(moves = arrmoves[[tag]], dot_list = dot_list)
       else
         subsequent <- NULL
       return(c(first.array, subsequent))
@@ -1505,8 +1483,12 @@ res_efficiency <- function(arrmoves, bio, spatial, arrays, paths, dotmat) {
 #'
 #' @keywords internal
 #'
-firstArrayFailure <- function(tag, bio, spatial, first.array, paths, dotmat) {
+firstArrayFailure <- function(tag, bio, spatial, first.array, dot_list) {
   event(type = "debug", "Running firstArrayFailure.")
+  # unpack dot_list for simplicity
+  dotmat <- dot_list$array_info$dotmat
+  paths <- dot_list$array_info$paths
+
   release <- as.character(bio$Release.site[na.as.false(bio$Transmitter == tag)])
   aux <- as.character(with(spatial, release.sites[release.sites$Standard.name == release, "Array"]))
   release.arrays <- unlist(strsplit(aux, "|", fixed = TRUE))

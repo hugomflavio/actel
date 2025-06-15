@@ -19,13 +19,11 @@ file.remove("spatial.csv")
 
 fakedot <- paste(unique(spatial$Array[spatial$Type == "Hydrophone"]), collapse = "--")
 recipient <- loadDot(string = fakedot, spatial = spatial, disregard.parallels = TRUE)
-dot <- recipient$dot
-arrays <- recipient$arrays
-dotmat <- recipient$dotmat
-paths <- recipient$paths
+dot_list <- recipient$dot_list
 
-first.array <- names(arrays)[unlist(lapply(arrays, function(a) is.null(a$before)))]
-spatial <- transformSpatial(spatial = spatial, bio = example.biometrics, arrays = arrays, dotmat = dotmat, first.array = first.array) # Finish structuring the spatial file
+link <- unlist(lapply(dot_list$array_info$arrays, function(a) is.null(a$before)))
+first.array <- names(dot_list$array_info$arrays)[link]
+spatial <- transformSpatial(spatial = spatial, bio = example.biometrics, dot_list = dot_list, first.array = first.array) # Finish structuring the spatial file
 
 write.csv(example.deployments, "deployments.csv", row.names = FALSE)
 dep <- loadDeployments(input = "deployments.csv", tz = "Europe/Copenhagen")
