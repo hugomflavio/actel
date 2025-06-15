@@ -6,7 +6,7 @@ Jump to [**installation instructions**](#installing-actel)
 [![CRAN\_Status\_Badge](https://www.r-pkg.org/badges/version/actel)](https://cran.r-project.org/package=actel)
 [![CRAN RStudio mirror downloads](https://cranlogs.r-pkg.org/badges/actel)](https://cran.r-project.org/package=actel)
 
-[![codecov](https://codecov.io/github/hugomflavio/actel/branch/master/graphs/badge.svg)](https://app.codecov.io/github/hugomflavio/actel)<sup> of non-interactive code*</sup>
+[![codecov](https://codecov.io/github/hugomflavio/actel/graph/badge.svg?token=AHkDCsCw6V)](https://codecov.io/github/hugomflavio/actel)<sup> of non-interactive code\*</sup>
 
 Read the [latest news here!](https://github.com/hugomflavio/actel/blob/master/NEWS.md#news)
 
