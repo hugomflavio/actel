@@ -2085,7 +2085,8 @@ compileDetections <- function(path = "detections", start.time = NULL,
     if (file_type == "innovasea") {
       event(type = "debug", "File '", i, "' matches an Innovasea log.")
       output <- tryCatch(
-        processInnovaseaFile(input = aux), error = function(e) {
+        processInnovaseaFile(input = aux, file_type = file_type),
+        error = function(e) {
           event(type = "stop",
                 "Something went wrong when processing file '", i,
                 "'. If you are absolutely sure this file is ok, contact the ",
@@ -2096,7 +2097,8 @@ compileDetections <- function(path = "detections", start.time = NULL,
     if (file_type == "vdat") {
       event(type = "debug", "File '", i, "' matches a VDAT log.")
       output <- tryCatch(
-        processVdatFile(input = aux), error = function(e) {
+        processInnovaseaFile(input = aux, file_type = file_type), 
+        error = function(e) {
           event(type = "stop",
                 "Something went wrong when processing file '", i,
                 "'. If you are absolutely sure this file is ok, contact the ",
@@ -2400,7 +2402,7 @@ processVemcoFile <- function(input) {
 #'
 #' @keywords internal
 #'
-processInnovaseaFile <- function(input) {
+processInnovaseaFile <- function(input, file_type) {
   event(type = "debug", "Running processInnovaseaFile.")
   # NOTE: This function uses stop() instead of event(),
   # because these stop calls are caught by a trycatch.
@@ -2409,12 +2411,13 @@ processInnovaseaFile <- function(input) {
 
   transmitter_aux <- strsplit(input$Full.ID, "-", fixed = TRUE)
   input$CodeSpace <- extractCodeSpaces(input$Full.ID)
-  input$Signal <- extractSignals(input$Full.ID)
+  input$Signal <- ifelse(file_type == "vdat", input$Full.ID,
+                         extractSignals(input$Full.ID))
 
-  input <- data.table::setnames(input,
-                                c("Serial.Number", "Receiver"),
-                                c("Device.Time.(UTC)", "Timestamp"),
-                                c("Raw.Data", "Sensor.Value"))
+  data.table::setnames(input,
+                       c("Serial.Number", "Device.Time.(UTC)", "Raw.Data"),
+                       c("Receiver", "Timestamp", "Sensor.Value"))
+  
 
   input$Sensor.Unit <- rep(NA_character_, nrow(input))
 
@@ -2440,7 +2443,6 @@ processInnovaseaFile <- function(input) {
   }
   return(input)
 }
-
 
 #' Convert code spaces
 #'
