@@ -2006,14 +2006,36 @@ compileDetections <- function(path = "detections", start.time = NULL,
 
     # preliminary load and check of CSV logs
     if (file_type %in%
-      c("std", "thelma_new", "thelma_old", "vemco", "innovasea")) {
-      aux <- data.table::fread(i, fill = TRUE, sep = ",", showProgress = FALSE)
+        c("std", "thelma_new", "thelma_old", "vemco", "innovasea", "vdat")) {
+      if (file_type == "vdat") {
+        aux <- {
+          search_fun <- ifelse(.Platform$OS.type == "windows", "FINDSTR", "grep")
+          
+          data.table::fread(
+            cmd = paste(
+              search_fun, " DET", i
+            ),
+            header = F,
+            col.names = {
+              data.table::fread(cmd = paste(
+                search_fun, " DET_DESC", i
+              ),
+              header = F) |> 
+                as.character()
+            },
+            showProgress = FALSE
+          )
+        }
+      } else {
+        aux <- data.table::fread(i, fill = TRUE, sep = ",", showProgress = FALSE)
+      }
       if(nrow(aux) == 0){
         event(type = c("screen", "report"),
               "File '", i, "' is empty, skipping processing.")
         return(NULL) # File is empty, skip to next file
       }
     }
+    
     if (file_type == "std") {
       event(type = "debug", "File '", i, "' matches a Standard log.")
       output <- tryCatch(
@@ -2064,6 +2086,17 @@ compileDetections <- function(path = "detections", start.time = NULL,
       event(type = "debug", "File '", i, "' matches an Innovasea log.")
       output <- tryCatch(
         processInnovaseaFile(input = aux), error = function(e) {
+          event(type = "stop",
+                "Something went wrong when processing file '", i,
+                "'. If you are absolutely sure this file is ok, contact the ",
+                "developer.\nOriginal error:", sub("^Error:", "", e))
+        })
+      unknown.file <- FALSE
+    }
+    if (file_type == "vdat") {
+      event(type = "debug", "File '", i, "' matches a VDAT log.")
+      output <- tryCatch(
+        processVdatFile(input = aux), error = function(e) {
           event(type = "stop",
                 "Something went wrong when processing file '", i,
                 "'. If you are absolutely sure this file is ok, contact the ",
