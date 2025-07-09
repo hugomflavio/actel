@@ -2397,6 +2397,7 @@ processVemcoFile <- function(input) {
 #' Processes Innovasea ALS files
 #'
 #' @param input the detections data frame.
+#' @param file_type the detected file type.
 #'
 #' @return A data frame of standardized detections from the input file.
 #'
