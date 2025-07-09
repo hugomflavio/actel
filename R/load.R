@@ -1946,7 +1946,7 @@ compileDetections <- function(path = "detections", start.time = NULL,
   data.files <- lapply(file.list, function(i) {
     event(type = "debug", paste0("Importing file '", i, "'."))
 
-    file_extension <- stringr::str_extract(i, "(?<=\\.).*$")
+    file_extension <- tools::file_ext(i)
 
     if (grepl("[vV][rR][lL]", file_extension)) {
       event(type = c("warning", "screen", "report"),
