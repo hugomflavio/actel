@@ -1910,7 +1910,7 @@ compileDetections <- function(path = "detections", start.time = NULL,
   # Find the detection files
   if (file_test("-d", path)) {
     file.list <- list.files(path = path,
-      pattern = "*(\\.[cC][sS][vV]|\\.[vV][rR][lL])",
+      pattern = "*(\\.[cC][sS][vV]|\\.[vV][rR][lL]|\\.[vV][dD][aA][tT])",
       full.names = TRUE)
     if (length(file.list) == 0) {
       event(type = "stop",
@@ -1938,7 +1938,9 @@ compileDetections <- function(path = "detections", start.time = NULL,
     thelma_old = c("CodeType", "TBR Serial Number", "Id"),
     thelma_new = c("Protocol", "Receiver", "ID"),
     vemco = c("Transmitter", "Receiver", "Date.and.Time"),
-    innovasea = c("Device Time (UTC)", "Full ID", "Serial Number"))
+    innovasea = c("Device Time (UTC)", "Full ID", "Serial Number"),
+    vdat = c("VEMCO DATA LOG")
+  )
 
   # Prepare the detection files
   data.files <- lapply(file.list, function(i) {
@@ -1953,6 +1955,16 @@ compileDetections <- function(path = "detections", start.time = NULL,
             "analyses, you must convert it to CSV format. That can be done ",
             "using Innovasea's software, or the vrl2csv() function of the ",
             "glatos package.")
+      return(NULL)
+    }
+    if (grepl("[vV][dD][aA][tT]", file_extension)) {
+      event(type = c("warning", "screen", "report"),
+            "File '", i, "' is in VDAT (Vemco Data) format, which ",
+            "actel can't currently process. To include this file in your ",
+            "analyses, you must convert it to CSV format. That can be done ",
+            "using Innovasea's Fathom software, the write_vdat_csv() function ",
+            "of the glatos package, or the vdat_to_csv() function of the ",
+            "rvdat package.")
       return(NULL)
     }
 
