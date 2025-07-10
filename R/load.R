@@ -2017,11 +2017,12 @@ compileDetections <- function(path = "detections", start.time = NULL,
             ),
             header = F,
             col.names = {
-              data.table::fread(cmd = paste(
-                search_fun, " DET_DESC", i
-              ),
-              header = F) |> 
-                as.character()
+              as.character(
+                data.table::fread(cmd = paste(
+                  search_fun, " DET_DESC", i
+                ),
+                header = F)
+              )
             },
             showProgress = FALSE
           )
