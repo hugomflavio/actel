@@ -40,6 +40,7 @@ Enhancements:
   * Improved the inner mechanics of `extractSignals()` and `extractCodeSpaces()` so they're much faster now.
   * New arguments `back.warning` and `back.error` included to `migration()` to give users more control over warnings and user interaction prompts.
   * New column "Last.section" in `status.df`.
+  * New argument `y.order` for function `plotDetections()` following user request (issue [#183](https://github.com/hugomflavio/actel/issues/183)).
 
 ## actel 1.3.0
 
