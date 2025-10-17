@@ -542,9 +542,9 @@ event <- function(..., type, tag) {
   }
   type <- tolower(type)
 
-  if ("warning" %in% type & "error" %in% type) { # nocov start
+  if ("warning" %in% type & "stop" %in% type) { # nocov start
     # this should never happen, this is a dev error
-    stop("event() was called with both warning and error flags.",
+    stop("event() was called with both warning and stop flags.",
          call. = FALSE)
   } # nocov end
 

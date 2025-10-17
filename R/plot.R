@@ -776,6 +776,7 @@ plotMoves <- function(input, tags, title, xlab, ylab, col, array.alias, show.rel
 #' @param tag The transmitter to be plotted.
 #' @param type DEPRECATED. Please use the argument y.axis instead.
 #' @param y.axis The type of y axis desired. One of "stations" (default) or "arrays".
+#' @param y.order A vector with the desired order for the y-axis values.
 #' @param title An optional title for the plot. If left empty, a default title will be added.
 #' @param xlab,ylab Optional axis names for the plot. If left empty, default axis names will be added.
 #' @param col An optional colour scheme for the detections. If left empty, default colours will be added.
@@ -810,8 +811,8 @@ plotMoves <- function(input, tags, title, xlab, ylab, col, array.alias, show.rel
 #' @export
 #'
 plotDetections <- function(input, tag, type,
-                           y.axis = c("auto", "stations", "arrays"), title,
-                           xlab, ylab, col, array.alias, section.alias,
+                           y.axis = c("auto", "stations", "arrays"), y.order,
+                           title, xlab, ylab, col, array.alias, section.alias,
                            frame.warning = TRUE, x.label.format,
                            only.valid = FALSE, like.migration = TRUE) {
   # NOTE: The NULL variables below are actually column names used by ggplot.
@@ -975,12 +976,30 @@ plotDetections <- function(input, tag, type,
     names(link) <- 1:length(link)
     link <- sort(link)
     link <- as.numeric(names(link))
-    y.order <- spatial$stations$Standard.name[link]
+    tmp.y.order <- spatial$stations$Standard.name[link]
   } else {
     if (any(detections$Array == "Unknown")) {
-      y.order <- c(array.order$Array, "Unknown")
+      tmp.y.order <- c(array.order$Array, "Unknown")
     } else {
-      y.order <- array.order$Array
+      tmp.y.order <- array.order$Array
+    }
+  }
+
+  if (missing("y.order")) {
+    y.order <- tmp.y.order
+  } else {
+    check <- !tmp.y.order %in% y.order
+    if (any(check)) {
+      stop("y.order argument is missing the following required values: ",
+           paste(tmp.y.order[check], collapse = ", "),
+           call. = FALSE)
+    }
+    check <- !y.order %in% tmp.y.order
+    if (any(check)) {
+      warning("y.order argument has values that will not be used: ",
+           paste(y.order[check], collapse = ", "),
+           call. = FALSE, immediate. = TRUE)
+      y.order <- y.order[!check]
     }
   }
 

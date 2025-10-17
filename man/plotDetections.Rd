@@ -9,6 +9,7 @@ plotDetections(
   tag,
   type,
   y.axis = c("auto", "stations", "arrays"),
+  y.order,
   title,
   xlab,
   ylab,
@@ -29,6 +30,8 @@ plotDetections(
 \item{type}{DEPRECATED. Please use the argument y.axis instead.}
 
 \item{y.axis}{The type of y axis desired. One of "stations" (default) or "arrays".}
+
+\item{y.order}{A vector with the desired order for the y-axis values.}
 
 \item{title}{An optional title for the plot. If left empty, a default title will be added.}
 
