@@ -4,10 +4,12 @@
 \alias{processInnovaseaFile}
 \title{Innovasea files}
 \usage{
-processInnovaseaFile(input)
+processInnovaseaFile(input, file_type)
 }
 \arguments{
 \item{input}{the detections data frame.}
+
+\item{file_type}{the detected file type.}
 }
 \value{
 A data frame of standardized detections from the input file.

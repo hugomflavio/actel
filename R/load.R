@@ -1910,7 +1910,7 @@ compileDetections <- function(path = "detections", start.time = NULL,
   # Find the detection files
   if (file_test("-d", path)) {
     file.list <- list.files(path = path,
-      pattern = "*(\\.[cC][sS][vV]|\\.[vV][rR][lL])",
+      pattern = "*(\\.[cC][sS][vV]|\\.[vV][rR][lL]|\\.[vV][dD][aA][tT])",
       full.names = TRUE)
     if (length(file.list) == 0) {
       event(type = "stop",
@@ -1938,13 +1938,15 @@ compileDetections <- function(path = "detections", start.time = NULL,
     thelma_old = c("CodeType", "TBR Serial Number", "Id"),
     thelma_new = c("Protocol", "Receiver", "ID"),
     vemco = c("Transmitter", "Receiver", "Date.and.Time"),
-    innovasea = c("Device Time (UTC)", "Full ID", "Serial Number"))
+    innovasea = c("Device Time (UTC)", "Full ID", "Serial Number"),
+    vdat = c("VEMCO DATA LOG")
+  )
 
   # Prepare the detection files
   data.files <- lapply(file.list, function(i) {
     event(type = "debug", paste0("Importing file '", i, "'."))
 
-    file_extension <- stringr::str_extract(i, "(?<=\\.).*$")
+    file_extension <- tools::file_ext(i)
 
     if (grepl("[vV][rR][lL]", file_extension)) {
       event(type = c("warning", "screen", "report"),
@@ -1953,6 +1955,16 @@ compileDetections <- function(path = "detections", start.time = NULL,
             "analyses, you must convert it to CSV format. That can be done ",
             "using Innovasea's software, or the vrl2csv() function of the ",
             "glatos package.")
+      return(NULL)
+    }
+    if (grepl("[vV][dD][aA][tT]", file_extension)) {
+      event(type = c("warning", "screen", "report"),
+            "File '", i, "' is in VDAT (Vemco Data) format, which ",
+            "actel can't currently process. To include this file in your ",
+            "analyses, you must convert it to CSV format. That can be done ",
+            "using Innovasea's Fathom software, the write_vdat_csv() function ",
+            "of the glatos package, or the vdat_to_csv() function of the ",
+            "rvdat package.")
       return(NULL)
     }
 
@@ -1994,8 +2006,30 @@ compileDetections <- function(path = "detections", start.time = NULL,
 
     # preliminary load and check of CSV logs
     if (file_type %in%
-      c("std", "thelma_new", "thelma_old", "vemco", "innovasea")) {
-      aux <- data.table::fread(i, fill = TRUE, sep = ",", showProgress = FALSE)
+        c("std", "thelma_new", "thelma_old", "vemco", "innovasea", "vdat")) {
+      if (file_type == "vdat") {
+        aux <- {
+          search_fun <- ifelse(.Platform$OS.type == "windows", "FINDSTR", "grep")
+          
+          data.table::fread(
+            cmd = paste(
+              search_fun, " DET", shQuote(i)
+            ),
+            header = F,
+            col.names = {
+              as.character(
+                data.table::fread(cmd = paste(
+                  search_fun, " DET_DESC", shQuote(i)
+                ),
+                header = F)
+              )
+            },
+            showProgress = FALSE
+          )
+        }
+      } else {
+        aux <- data.table::fread(i, fill = TRUE, sep = ",", showProgress = FALSE)
+      }
       if(nrow(aux) == 0){
         event(type = c("screen", "report"),
               "File '", i, "' is empty, skipping processing.")
@@ -2009,6 +2043,7 @@ compileDetections <- function(path = "detections", start.time = NULL,
         return(NULL)
       }
     }
+    
     if (file_type == "std") {
       event(type = "debug", "File '", i, "' matches a Standard log.")
       output <- tryCatch(
@@ -2058,7 +2093,20 @@ compileDetections <- function(path = "detections", start.time = NULL,
     if (file_type == "innovasea") {
       event(type = "debug", "File '", i, "' matches an Innovasea log.")
       output <- tryCatch(
-        processInnovaseaFile(input = aux), error = function(e) {
+        processInnovaseaFile(input = aux, file_type = file_type),
+        error = function(e) {
+          event(type = "stop",
+                "Something went wrong when processing file '", i,
+                "'. If you are absolutely sure this file is ok, contact the ",
+                "developer.\nOriginal error:", sub("^Error:", "", e))
+        })
+      unknown.file <- FALSE
+    }
+    if (file_type == "vdat") {
+      event(type = "debug", "File '", i, "' matches a VDAT log.")
+      output <- tryCatch(
+        processInnovaseaFile(input = aux, file_type = file_type), 
+        error = function(e) {
           event(type = "stop",
                 "Something went wrong when processing file '", i,
                 "'. If you are absolutely sure this file is ok, contact the ",
@@ -2357,12 +2405,13 @@ processVemcoFile <- function(input) {
 #' Processes Innovasea ALS files
 #'
 #' @param input the detections data frame.
+#' @param file_type the detected file type.
 #'
 #' @return A data frame of standardized detections from the input file.
 #'
 #' @keywords internal
 #'
-processInnovaseaFile <- function(input) {
+processInnovaseaFile <- function(input, file_type) {
   event(type = "debug", "Running processInnovaseaFile.")
   # NOTE: This function uses stop() instead of event(),
   # because these stop calls are caught by a trycatch.
@@ -2371,12 +2420,13 @@ processInnovaseaFile <- function(input) {
 
   transmitter_aux <- strsplit(input$Full.ID, "-", fixed = TRUE)
   input$CodeSpace <- extractCodeSpaces(input$Full.ID)
-  input$Signal <- extractSignals(input$Full.ID)
+  input$Signal <- ifelse(file_type == "vdat", input$Full.ID,
+                         extractSignals(input$Full.ID))
 
-  input <- data.table::setnames(input,
-                                c("Serial.Number", "Receiver"),
-                                c("Device.Time.(UTC)", "Timestamp"),
-                                c("Raw.Data", "Sensor.Value"))
+  data.table::setnames(input,
+                       c("Serial.Number", "Device.Time.(UTC)", "Raw.Data"),
+                       c("Receiver", "Timestamp", "Sensor.Value"))
+  
 
   input$Sensor.Unit <- rep(NA_character_, nrow(input))
 
@@ -2402,7 +2452,6 @@ processInnovaseaFile <- function(input) {
   }
   return(input)
 }
-
 
 #' Convert code spaces
 #'
