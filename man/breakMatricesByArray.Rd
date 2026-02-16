@@ -11,7 +11,7 @@ breakMatricesByArray(m, dot_list, type = c("peers", "all"), verbose = TRUE)
 
 \item{type}{The type of arrays to be matched}
 
-\item{verbose}{Logical: Should \code{\link[=event]{event()}} be used to show and log messages?}
+\item{verbose}{Logical: Should \code{\link{event}} be used to show and log messages?}
 }
 \value{
 A list containing the split matrices for each array

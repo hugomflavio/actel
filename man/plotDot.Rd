@@ -18,7 +18,7 @@ plotDot(
 }
 \arguments{
 \item{dot}{a dot data frame, or a string of text that can be converted
-to a dot data frame using \code{\link[=readDot]{readDot()}}.}
+to a dot data frame using \code{\link{readDot}}.}
 
 \item{spatial}{a data frame containing stations and respective coordinates.
 Note: The mean coordinates for the stations of any given array will be used.}
@@ -49,7 +49,7 @@ No return value, called to either plot or save graphic.
 }
 \description{
 This function is useful for quickly checking if your spatial.txt file is
-properly set up. The spatial.txt file can be imported using \code{\link[=readDot]{readDot()}}
+properly set up. The spatial.txt file can be imported using \code{\link{readDot}}
 }
 \examples{
 # create dummy dot string

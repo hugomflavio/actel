@@ -160,7 +160,7 @@ assembleGroupCJS <- function(mat, CJS, dot_list, releases, intra.CJS = NULL) {
 #' Break the detection matrices per array
 #'
 #' @param type The type of arrays to be matched
-#' @param verbose Logical: Should [event()] be used to show and log messages?
+#' @param verbose Logical: Should \code{\link{event}} be used to show and log messages?
 #' @inheritParams cjs_args
 #'
 #' @return A list containing the split matrices for each array

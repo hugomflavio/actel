@@ -2214,10 +2214,10 @@ plotRatios <- function(input, groups, sections,
 #' Plot DOT diagram
 #'
 #' This function is useful for quickly checking if your spatial.txt file is
-#' properly set up. The spatial.txt file can be imported using [readDot()]
+#' properly set up. The spatial.txt file can be imported using \code{\link{readDot}}
 #'
 #' @param dot a dot data frame, or a string of text that can be converted
-#'  to a dot data frame using [readDot()].
+#'  to a dot data frame using \code{\link{readDot}}.
 #' @param spatial a data frame containing stations and respective coordinates.
 #'  Note: The mean coordinates for the stations of any given array will be used.
 #' @param coord.x,coord.y The names of the columns containing the x and y
