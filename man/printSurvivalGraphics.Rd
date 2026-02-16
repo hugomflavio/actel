@@ -4,7 +4,7 @@
 \alias{printSurvivalGraphics}
 \title{Print survival graphic}
 \usage{
-printSurvivalGraphics(section.overview, status.df)
+printSurvivalGraphics(section.overview, status.df, section.order)
 }
 \arguments{
 \item{section.overview}{A data frame containing the survival per animal

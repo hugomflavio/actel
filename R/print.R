@@ -468,7 +468,7 @@ printDotplots <- function(status.df, valid.dist) {
 #'
 #' @keywords internal
 #'
-printSurvivalGraphics <- function(section.overview, status.df) {
+printSurvivalGraphics <- function(section.overview, status.df, section.order) {
   event(type = "debug", "Running printSurvivalGraphics.")
   Area <- NULL
   Group <- NULL
@@ -496,8 +496,10 @@ printSurvivalGraphics <- function(section.overview, status.df) {
              1, function(x) x / section.overview["n_total", , drop = FALSE])
   x <- do.call(rbind, x)
   x$Section <- sub("n_entered_", "", rownames(x))
-
   pd <- reshape2::melt(x, id.vars = "Section")
+  if (!is.null(section.order)) {
+    pd$Section <- factor(pd$Section, levels = section.order)
+  }
   colnames(pd)[2] <- "Group"
 
   p <- ggplot2::ggplot(data = pd)
@@ -527,6 +529,9 @@ printSurvivalGraphics <- function(section.overview, status.df) {
   section.overview[grep("n_entered_", rownames(section.overview)), ]
   x$Section <- sub("last_at_", "", rownames(x))
   pd <- reshape2::melt(x, id.vars = "Section")
+  if (!is.null(section.order)) {
+    pd$Section <- factor(pd$Section, levels = section.order)
+  }
   colnames(pd)[2] <- "Group"
 
   p <- ggplot2::ggplot(data = pd)

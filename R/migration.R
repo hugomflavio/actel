@@ -353,6 +353,7 @@ migration <- function(
   bio <- study.data$bio
   deployments <- study.data$deployments
   spatial <- study.data$spatial
+  section.order <- levels(spatial$stations$Section)
   dot_list <- study.data$dot_list
   paths <- study.data$paths
   dist.mat <- study.data$dist.mat
@@ -886,7 +887,8 @@ migration <- function(
                   valid.dist = attributes(dist.mat)$valid)
 
     printSurvivalGraphics(section.overview = section.overview,
-                          status.df = status.df)
+                          status.df = status.df,
+                          section.order = section.order)
 
     printLastArray(status.df = status.df)
 
