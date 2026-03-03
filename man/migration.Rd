@@ -73,7 +73,7 @@ the analysis.}
 \code{stop.time} (in YYYY-MM-DD HH:MM:SS format) is not considered during
 the analysis.}
 
-\item{speed.method}{Can take two forms: 'last to first' or 'last to last'.
+\item{speed.method}{Can take three forms: 'last to first', 'last to last', or 'first to first'.
 If 'last to first' (default), the last detection on the previous array is matched
 to the first detection on the target array to perform the calculations.
 If 'last to last', the last detection on the previous array is matched to the
@@ -199,11 +199,9 @@ tag, including the following columns:
 recorded entering a given section.
 \item \emph{Average.time.until.[section]}: Time spent between release
 or leaving another section and reaching at the given section.
-\item \emph{Average.speed.to.[section]}: Average speed from release or
-leaving one section and reaching the given section (if
-speed.method = "last to first"), or from release/leaving one
-section and leaving the given section
-(if speed.method = "last to last").
+\item \emph{Average.speed.to.[section]}: Average speed from one
+section to another. See documentation on speed.method for more
+details on calculation methods.
 \item \emph{First.array.[section]}: Array in which the tag was
 first detected in a given section
 \item \emph{First.station.[section]}: Standard name of the first

@@ -77,11 +77,9 @@
 #'            recorded entering a given section.
 #'      \item \emph{Average.time.until.\[section\]}: Time spent between release
 #'            or leaving another section and reaching at the given section.
-#'      \item \emph{Average.speed.to.\[section\]}: Average speed from release or
-#'            leaving one section and reaching the given section (if
-#'            speed.method = "last to first"), or from release/leaving one
-#'            section and leaving the given section
-#'            (if speed.method = "last to last").
+#'      \item \emph{Average.speed.to.\[section\]}: Average speed from one
+#'            section to another. See documentation on speed.method for more
+#'            details on calculation methods.
 #'      \item \emph{First.array.\[section\]}: Array in which the tag was
 #'            first detected in a given section
 #'      \item \emph{First.station.\[section\]}: Standard name of the first
@@ -1647,7 +1645,7 @@ assembleTimetable <- function(secmoves, valid.moves, all.moves, spatial,
                  "Invalid.events", "Backwards.movements",
                  "Max.cons.back.moves", "P.type")
 
-  if (attributes(dist.mat)$valid && speed.method == "last to last") {
+  if (attributes(dist.mat)$valid && speed.method != "last to first") {
     recipient <- recipient[!grepl("Average\\.speed\\.in", recipient)]
   }
 

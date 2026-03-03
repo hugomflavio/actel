@@ -70,7 +70,7 @@
 #' @param speed.error If a tag moves at a speed equal or greater than
 #'  \code{speed.error} (in metres per second), user intervention is suggested.
 #'  If left NULL (default), user intervention is never suggested.
-#' @param speed.method Can take two forms: 'last to first' or 'last to last'.
+#' @param speed.method Can take three forms: 'last to first', 'last to last', or 'first to first'.
 #'  If 'last to first' (default), the last detection on the previous array is matched
 #'  to the first detection on the target array to perform the calculations.
 #'  If 'last to last', the last detection on the previous array is matched to the

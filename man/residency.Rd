@@ -67,7 +67,7 @@ the analysis.}
 \code{stop.time} (in YYYY-MM-DD HH:MM:SS format) is not considered during
 the analysis.}
 
-\item{speed.method}{Can take two forms: 'last to first' or 'last to last'.
+\item{speed.method}{Can take three forms: 'last to first', 'last to last', or 'first to first'.
 If 'last to first' (default), the last detection on the previous array is matched
 to the first detection on the target array to perform the calculations.
 If 'last to last', the last detection on the previous array is matched to the
