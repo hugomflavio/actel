@@ -223,8 +223,7 @@ tag spent the most time per day;
 calculations (see vignettes for more details);
 \item \code{intra.array.CJS}: A list containing the results of the intra-array CJS calculations;
 \item \code{rsp.info}: A list containing appendix information for the RSP package;
-\item \code{dist.mat}: The distance matrix used in the analysis (if a valid
-distance matrix was supplied)
+\item \code{dist.mat}: A matrix containing the distances between receivers (if supplied)
 }
 }
 \description{
