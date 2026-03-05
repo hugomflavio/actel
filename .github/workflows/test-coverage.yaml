@@ -3,6 +3,7 @@ on:
     branches: [main, master]
   pull_request:
     branches: [main, master]
+  workflow-dispatch
 
 name: test-coverage.yaml
 
