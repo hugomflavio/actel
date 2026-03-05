@@ -77,11 +77,9 @@
 #'            recorded entering a given section.
 #'      \item \emph{Average.time.until.\[section\]}: Time spent between release
 #'            or leaving another section and reaching at the given section.
-#'      \item \emph{Average.speed.to.\[section\]}: Average speed from release or
-#'            leaving one section and reaching the given section (if
-#'            speed.method = "last to first"), or from release/leaving one
-#'            section and leaving the given section
-#'            (if speed.method = "last to last").
+#'      \item \emph{Average.speed.to.\[section\]}: Average speed from one
+#'            section to another. See documentation on speed.method for more
+#'            details on calculation methods.
 #'      \item \emph{First.array.\[section\]}: Array in which the tag was
 #'            first detected in a given section
 #'      \item \emph{First.station.\[section\]}: Standard name of the first
@@ -135,8 +133,8 @@
 #'        each array;
 #'  \item \code{rsp.info}: A list containing appendix information for the RSP
 #'        package;
-#'  \item \code{dist.mat}: The distance matrix used in the analysis (if a valid
-#'        distance matrix was supplied)
+#'  \item \code{dist.mat}: A matrix containing the distances between receivers
+#'        (if supplied)
 #' }
 #'
 #' @seealso \code{\link{explore}}, \code{\link{residency}}
@@ -353,6 +351,7 @@ migration <- function(
   bio <- study.data$bio
   deployments <- study.data$deployments
   spatial <- study.data$spatial
+  section.order <- levels(spatial$stations$Section)
   dot_list <- study.data$dot_list
   paths <- study.data$paths
   dist.mat <- study.data$dist.mat
@@ -886,7 +885,8 @@ migration <- function(
                   valid.dist = attributes(dist.mat)$valid)
 
     printSurvivalGraphics(section.overview = section.overview,
-                          status.df = status.df)
+                          status.df = status.df,
+                          section.order = section.order)
 
     printLastArray(status.df = status.df)
 
@@ -1645,7 +1645,7 @@ assembleTimetable <- function(secmoves, valid.moves, all.moves, spatial,
                  "Invalid.events", "Backwards.movements",
                  "Max.cons.back.moves", "P.type")
 
-  if (attributes(dist.mat)$valid && speed.method == "last to last") {
+  if (attributes(dist.mat)$valid && speed.method != "last to first") {
     recipient <- recipient[!grepl("Average\\.speed\\.in", recipient)]
   }
 

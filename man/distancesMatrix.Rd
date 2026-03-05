@@ -48,7 +48,7 @@ matrix as 'distances.csv' in the current directory.
 \details{
 It is highly recommended to read the manual page regarding distances matrices
 before running this function. You can find it here:
-\url{https://hugomflavio.github.io/actel-website/manual-distances.html}
+\url{http://actel.trackyverse.org/manual-distances.html}
 }
 \examples{
 \donttest{

@@ -59,7 +59,7 @@ the analysis.}
 \code{stop.time} (in YYYY-MM-DD HH:MM:SS format) is not considered during
 the analysis.}
 
-\item{speed.method}{Can take two forms: 'last to first' or 'last to last'.
+\item{speed.method}{Can take three forms: 'last to first', 'last to last', or 'first to first'.
 If 'last to first' (default), the last detection on the previous array is matched
 to the first detection on the target array to perform the calculations.
 If 'last to last', the last detection on the previous array is matched to the
@@ -154,8 +154,7 @@ A list containing:
 \item \code{valid.movements}: A list containing the valid movement events for each target tag;
 \item \code{times}: A data frame containing all arrival times (per tag) at each array;
 \item \code{rsp.info}: A list containing containing appendix information for the RSP package;
-\item \code{dist.mat}: A matrix containing the distance matrix used in the analysis (if a valid
-distance matrix was supplied)
+\item \code{dist.mat}: A matrix containing the distances between receivers (if supplied)
 }
 }
 \description{

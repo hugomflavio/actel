@@ -4,11 +4,16 @@
 \alias{printSurvivalGraphics}
 \title{Print survival graphic}
 \usage{
-printSurvivalGraphics(section.overview, status.df)
+printSurvivalGraphics(section.overview, status.df, section.order)
 }
 \arguments{
 \item{section.overview}{A data frame containing the survival per animal
 group present in the biometrics. Supplied by assembleOverview.}
+
+\item{status.df}{A data frame with the final results.}
+
+\item{section.order}{A vector containing the order by which sections should
+be aligned in the results.}
 }
 \value{
 No return value, called to plot and save graphic.

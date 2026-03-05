@@ -14,6 +14,6 @@ A string showing the list as it would have been
 inputted into the R console.
 }
 \description{
-Used inside \code{\link[=parse_arg]{parse_arg()}} to properly parse list arguments
+Used inside \code{\link{parse_arg}} to properly parse list arguments
 }
 \keyword{internal}

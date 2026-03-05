@@ -43,7 +43,7 @@ parse_arg <- function(arg,  arg_val) {
 
 #' Helper to parse list arguments
 #' 
-#' Used inside [parse_arg()] to properly parse list arguments
+#' Used inside \code{\link{parse_arg}} to properly parse list arguments
 #' 
 #' @inheritParams parse_arg
 #' 
