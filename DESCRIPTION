@@ -52,5 +52,5 @@ Suggests:
     testthat
 VignetteBuilder: knitr
 URL: https://github.com/hugomflavio/actel,
-    https://hugomflavio.github.io/actel-website/
+     http://actel.trackyverse.org/
 BugReports: https://github.com/hugomflavio/actel/issues

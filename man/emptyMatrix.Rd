@@ -21,7 +21,7 @@ Creates an empty matrix based on the local 'spatial.csv' file and saves it to
 \details{
 It is highly recommended to read the manual page regarding distances matrices
 before running this function. You can find it here:
-\url{https://hugomflavio.github.io/actel-website/manual-distances.html}
+\url{http://actel.trackyverse.org/manual-distances.html}
 }
 \examples{
 # This function requires a file with spatial information

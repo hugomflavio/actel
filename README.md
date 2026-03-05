@@ -6,11 +6,11 @@ Jump to [**installation instructions**](#installing-actel)
 [![CRAN\_Status\_Badge](https://www.r-pkg.org/badges/version/actel)](https://cran.r-project.org/package=actel)
 [![CRAN RStudio mirror downloads](https://cranlogs.r-pkg.org/badges/actel)](https://cran.r-project.org/package=actel)
 
-[![codecov](https://codecov.io/github/hugomflavio/actel/graph/badge.svg?token=AHkDCsCw6V)](https://codecov.io/github/hugomflavio/actel)<sup> of non-interactive code\*</sup>
+[![codecov](https://codecov.io/github/hugomflavio/actel/graph/badge.svg?token=AHkDCsCw6V)](https://app.codecov.io/github/hugomflavio/actel)<sup> of non-interactive code\*</sup>
 
 Read the [latest news here!](https://github.com/hugomflavio/actel/blob/master/NEWS.md#news)
 
-NOTE: actel now has a dedicated [website!](https://hugomflavio.github.io/actel-website/)
+NOTE: actel now has a dedicated [website!](http://actel.trackyverse.org/)
 
 ## Overview
 
@@ -88,7 +88,7 @@ If you would like to install the [latest updates](https://github.com/hugomflavio
 
 **Have a look at the manual:**
 
-After installing, you should read the manual, which can now be found in [actel's website](https://hugomflavio.github.io/actel-website/index.html).
+After installing, you should read the manual, which can now be found in [actel's website](http://actel.trackyverse.org/).
 
 **Note:**
 
@@ -101,79 +101,4 @@ After installing, you should read the manual, which can now be found in [actel's
 
 ## Works using or relating to actel
 
-**2024** (1)
-
-- Waters, C., Cotter, D., O’Neill, R., Drumm, A., Cooney, J., Bond, N., Rogan, G., & Maoiléidigh, N. Ó. (2024). The use of predator tags to explain reversal movement patterns in Atlantic salmon smolts (_Salmo salar_ L.). Journal of Fish Biology. https://doi.org/10.1111/jfb.15658
-
-
-**2023** (15)
-
-- Becker, A., Fielder, D. S., Lowry, M. B., & Taylor, M. D. (2023). Suitability of saltmarsh creeks as release locations for stocked Mulloway (Argyrosomus japonicus). Estuarine, Coastal and Shelf Science, 108455. https://doi.org/10.1016/j.ecss.2023.108455
-
-- Davey, J., Clarke, T. M., Niella, Y., Dennis, J. D., & Huveneers, C. (2023). Seasonal variation in space use and residency of the southern eagle ray _Myliobatis tenuicaudatus_ in a temperate ecosystem. Marine Ecology Progress Series, 705, 77–94. https://doi.org/10.3354/meps14232
-
-- Davies, P., Britton, J. R., Castro-Santos, T., Crundwell, C., Dodd, J. R., Nunn, A. D., Velterop, R., & Bolland, J. D. (2023). Tracking anadromous fish over successive freshwater migrations reveals the influence of tagging effect, previous success and abiotic factors on upstream passage over barriers. Canadian Journal of Fisheries and Aquatic Sciences. https://doi.org/10.1139/cjfas-2022-0196
-
-- Dhellemmes, F., Aspillaga, E., Rittweg, T., Alós, J., Möller, P., & Arlinghaus, R. (2023). Body size scaling of space use in coastal pike (_Esox lucius_) in brackish lagoons of the southern Baltic Sea. Fisheries Research, 260, 106560. https://doi.org/10.1016/j.fishres.2022.106560
-
-- Dhellemmes, F., Aspillaga, E., & Monk, C. T. (2023). ATfiltR: A solution for managing and filtering detections from passive acoustic telemetry data. MethodsX, 10, 102222. https://doi.org/10.1016/j.mex.2023.102222
-
-- English, G., Wilson, B. M., Lawrence, M. J., Black, M., Hawkes, J. P., Hardie, D. C., Daniels, J. M., Carr, J. W., Rycroft, C., Crossin, G. T., Whoriskey, F., den Heyer, C. E., Bordeleau, X., McKindsey, C. W., & Trudel, M. (2023). Determining early marine survival and predation by endothermic predators on acoustically-tagged Atlantic salmon (<i>Salmo salar</i>) post-smolts. Canadian Journal of Fisheries and Aquatic Sciences. https://doi.org/10.1139/cjfas-2023-0206
-
-- Flink, H., Tibblin, P., Hall, M., Hellström, G., & Nordahl, O. (2023). Variation among bays in spatiotemporal aggregation of Baltic Sea pike highlights management complexity. Fisheries Research, 259, 106579. https://doi.org/10.1016/j.fishres.2022.106579
-
-- Höhne, L., Freese, M., Pohlmann, J.-D., Diekmann, M., Fladung, E., Huisman, J. B. J., Hanel, R., & Marohn, L. (2023). Overestimating management progress—Modelled vs. Monitored silver eel escapement in a North Sea draining river. ICES Journal of Marine Science, fsad122. https://doi.org/10.1093/icesjms/fsad122
-
-- Huisman, J. B. J., Höhne, L., Hanel, R., Kuipers, H., Schollema, P. P., & Nagelkerke, L. (2023). Factors influencing the downstream passage of European silver eels (_Anguilla anguilla_) through a tidal sluice. Journal of Fish Biology, (in press). https://doi.org/10.1111/jfb.15398
-
-- Kraft, S., Gandra, M., Lennox, R. J., Mourier, J., Winkler, A. C., & Abecasis, D. (2023). Residency and space use estimation methods based on passive acoustic telemetry data. Movement Ecology, 11(1), 12. https://doi.org/10.1186/s40462-022-00364-z
-
-- Kressler, M. M., Dall, S. R. X., & Sherley, R. B. (2023). A framework for studying ecological energy in the contemporary marine environment. ICES Journal of Marine Science, 80(6), 1580–1593. https://doi.org/10.1093/icesjms/fsad082
-
-- Nordli, E., Strøm, J., Bøhn, T., Thorstad, E., Serra-Llinares, R., Nilsen, R., & Bjørn, P. (2023). Behaviour and habitat use of first-time migrant Arctic charr: Novel insights from a subarctic marine area. Marine Ecology Progress Series, 709, 77–90. https://doi.org/10.3354/meps14279
-
-- O’Connor, B. (2023). Linking spatial stream network modeling and telemetry data to investigate thermal habitat use by adult arctic grayling [Master of Science, University of Northern British Columbia]. https://doi.org/10.24124/2023/59378
-
-- Stoot, L. J., Butler, G. L., Niella, Y., Doran, G. S., Thiem, J. D., Taylor, M. D., & Baumgartner, L. J. (2023). Environmental Effects on the Seasonal Distribution of an Estuarine Species _Neoarius graeffei_ in Northern New South Wales, Australia. Estuaries and Coasts. https://doi.org/10.1007/s12237-023-01269-9
-
-- van Leeuwen, C. H. A., de Leeuw, J. J., van Keeken, O. A., Volwater, J. J. J., Seljee, F., van Aalderen, R., van Emmerik, W. A. M., & Bakker, E. S. (2023). Multispecies fish tracking across newly created shallow and deep habitats in a forward-restored lake. Movement Ecology, 11(1), 43. https://doi.org/10.1186/s40462-023-00405-1
-
-
-**2022** (5)
-
-- Edwards, M. L., McCallister, M., Brewster, L. R., Bangley, C. W., Curtis, T. H., Ogburn, M. B., & Ajemian, M. J. (2022). Multi-year assessment of immature bull shark <i>Carcharhinus leucas</i> residency and activity spaces in an expansive estuarine nursery. Marine Ecology Progress Series, 695, 125–138. https://doi.org/10.3354/meps14113
-
-- Hewitt, D. E., Niella, Y., Johnson, D. D., Suthers, I. M., & Taylor, M. D. (2022). Crabs Go With the Flow: Declining Conductivity and Cooler Temperatures Trigger Spawning Migrations for Female Giant Mud Crabs (<i>Scylla serrata</i>) in Subtropical Estuaries. Estuaries and Coasts. https://doi.org/10.1007/s12237-022-01061-1
-
-- Hollins, J., Pettitt-Wade, H., Gallagher, C. P., Lea, E. V., Loseto, L. L., & Hussey, N. E. (2022). Distinct freshwater migratory pathways in Arctic char (<i>Salvelinus alpinus</i>) coincide with separate patterns of marine spatial habitat-use across a large coastal landscape. Canadian Journal of Fisheries and Aquatic Sciences. https://doi.org/10.1139/cjfas-2021-0291
-
-- Thorkildsen, T. B. (2022). Anadromous Arctic charr: Mapping of migration and habitat use in Isfjorden, Svalbard [Master thesis, Norwegian University of Life Sciences, Ås]. https://nmbu.brage.unit.no/nmbu-xmlui/handle/11250/3018496
-
-- Thorstensen, M. J., Vandervelde, C. A., Bugg, W. S., Michaleski, S., Vo, L., Mackey, T. E., Lawrence, M. J., & Jeffries, K. M. (2022). Non-Lethal Sampling Supports Integrative Movement Research in Freshwater Fish. Frontiers in Genetics, 13. https://www.frontiersin.org/articles/10.3389/fgene.2022.795355
-
-
-**2021** (7)
-
-- Flávio, H., & Baktoft, H. (2021). actel: Standardised analysis of acoustic telemetry data from animals moving through receiver arrays. Methods in Ecology and Evolution, 12(1), 196–203. https://doi.org/10.1111/2041-210X.13503
-
-- Flávio, H., Caballero, P., Jepsen, N., & Aarestrup, K. (2021). Atlantic salmon living on the edge: Smolt behaviour and survival during seaward migration in River Minho. Ecology of Freshwater Fish, 30(1), 61–72. https://doi.org/10.1111/eff.12564
-
-- Niella, Y., Smoothey, A. F., Taylor, M. D., Peddemors, V. M., & Harcourt, R. (2021). Environmental Drivers of Fine-Scale Predator and Prey Spatial Dynamics in Sydney Harbour, Australia, and Adjacent Coastal Waters. Estuaries and Coasts. https://doi.org/10.1007/s12237-021-01020-2
-
-- Nordli, E. (2021). The behaviour of anadromous Arctic charr during their first marine migration [Master thesis, Arctic University of Norway]. https://munin.uit.no/handle/10037/21752
-
-- Winter, E. R. (2021). The movement ecology of common bream _Abramis brama_ in a highly connected wetland using acoustic telemetry. [Doctoral thesis, Bournemouth University]. http://eprints.bournemouth.ac.uk/35141/
-
-- Winter, E. R., Hindes, A. M., Lane, S., & Britton, J. R. (2021a). Movements of common bream _Abramis brama_ in a highly connected, lowland wetland reveal sub-populations with diverse migration strategies. Freshwater Biology, 66(7), 1410–1422. https://doi.org/10.1111/fwb.13726
-
-- Winter, E. R., Hindes, A. M., Lane, S., & Britton, J. R. (2021b). Acoustic telemetry reveals strong spatial preferences and mixing during successive spawning periods in a partially migratory common bream population. Aquatic Sciences, 83(3), 52. https://doi.org/10.1007/s00027-021-00804-9
-
-
-**2020** (2)
-
-- Flávio, H., Kennedy, R., Ensing, D., Jepsen, N., & Aarestrup, K. (2020). Marine mortality in the river? Atlantic salmon smolts under high predation pressure in the last kilometres of a river monitored for stock assessment. Fisheries Management and Ecology, 27(1), 92–101. https://doi.org/10.1111/fme.12405
-
-- Niella, Y., Flávio, H., Smoothey, A. F., Aarestrup, K., Taylor, M. D., Peddemors, V. M., & Harcourt, R. (2020). Refined Shortest Paths (RSP): Incorporation of topography in space use estimation from node-based telemetry data. Methods in Ecology and Evolution, 11(12), 1733–1742. https://doi.org/10.1111/2041-210X.13484
-
-
-Is your paper not here? Let me know!
+As of March 5<sup>th</sup>, 2026, actel has been cited in scientific literature 71 times according to [Google Scholar](https://scholar.google.com/citations?view_op=view_citation&hl=en&user=TnfYOkUAAAAJ&citation_for_view=TnfYOkUAAAAJ:KlAtU1dfN6UC). To see all works that cite actel (either the paper or the package), have a look at this [google scholar search](https://scholar.google.com/scholar?oi=bibs&hl=en&cites=8680923190044458213,4986113874259823751,9029600445317814486&as_sdt=5).
