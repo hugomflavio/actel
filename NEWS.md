@@ -2,7 +2,7 @@
 
 Find out the main highlights of each update.
 
-## Development
+## actel 1.4.0
 
 Fixes:
   * Fix warning bug when reporting duplicated signals in the presence of dual-signal tags.
@@ -31,8 +31,8 @@ Enhancements:
   * Improve timestamp handling when importing data through `preload()` (issue [#94](https://github.com/hugomflavio/actel/issues/94)).
   * Improve column name checks to avoid accidentally matching anything to the dot wildcard.
   * Add new "first to first" method to speed calculations (issue [#96](https://github.com/hugomflavio/actel/issues/96))
-  * New `processInnovaseaFile()` function to handle updated innovasea detection file format (issue [#97](https://github.com/hugomflavio/actel/issues/97)).
-  * New `convertLotekCDMAFile()` function to prepare lotek txt logs for further analyses (issue [#103](https://github.com/hugomflavio/actel/issues/103)).
+  * New `processInnovaseaFile()` function to handle updated Innovasea detection file format (issue [#97](https://github.com/hugomflavio/actel/issues/97)).
+  * New `convertLotekCDMAFile()` function to prepare Lotek txt logs for further analyses (issue [#103](https://github.com/hugomflavio/actel/issues/103)).
   * New `plotDot()` function to help users inspect their spatial.txt files (issue [#55](https://github.com/hugomflavio/actel/issues/55)).
   * Improved internal mechanisms for message/warning/debug/stop reporting. new internal function `event()` replaces the old `appendTo()`, `stopAndReport()`, and `emergencyBreak()` (issue [#135](https://github.com/hugomflavio/actel/issues/135)). Note: this introduced a repetitive warning bug that was later found and fixed (introduced with 1.3.0.9015, corrected in 1.3.0.9022).
   * Added the ability to use output of `loadSpatial()` as 'starters' for `distancesMatrix()` when 'actel' is 'TRUE'. This allows a user to input their spatial.csv if located in a separate working directory (issue [#133](https://github.com/hugomflavio/actel/issues/133))
@@ -57,7 +57,7 @@ Fixes:
   * Fix bug in `plotRatios()` brought up in issue [#77](https://github.com/hugomflavio/actel/issues/77) which would occur when the user specified a section for which not all groups were detected.
   * Prevent crashes in `residency()` when the data has an unusually high percentage of exact-time detections (e.g. midnight).
   * Prevent crash if only some tags have multiple sensors and Sensor.unit is only included for those tags.
-  * Prevent crash if the study area/population is so large that it clashes with ggplot's size limit failsafes.
+  * Prevent crash if the study area/population is so large that it clashes with ggplot's size limit failsafe.
   * Fix message overflow reported in issue [#78](https://github.com/hugomflavio/actel/issues/78).
 
 Changes:

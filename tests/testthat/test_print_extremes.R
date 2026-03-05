@@ -126,9 +126,11 @@ test_that("printBiometrics works for more than two variables", {
 
 test_that("printSurvivalGraphics can handle sections with 0 survivors", {
 	x <- example.results$section.overview
+  section.order <- levels(example.results$spatial$stations$Section)
 	x[5:7, 1] <- 0
 	x[11, 1] <- 0
-	tryCatch(printSurvivalGraphics(x, example.results$status.df), warning = function(w) stop("Warning in printSurvivalGraphic:", w))
+	tryCatch(printSurvivalGraphics(x, example.results$status.df, section.order),
+	         warning = function(w) stop("Warning in printSurvivalGraphic:", w))
 	expect_is("The real test is above, this is just to prevent test_that from complaining", "character")
 })
 

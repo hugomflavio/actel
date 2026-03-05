@@ -463,6 +463,9 @@ printDotplots <- function(status.df, valid.dist) {
 #'
 #' @param section.overview A data frame containing the survival per animal
 #'   group present in the biometrics. Supplied by assembleOverview.
+#' @param status.df A data frame with the final results.
+#' @param section.order A vector containing the order by which sections should
+#' be aligned in the results.
 #'
 #' @return No return value, called to plot and save graphic.
 #'
