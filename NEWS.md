@@ -6,6 +6,7 @@ Find out the main highlights of each update.
 
 Fixes:
   * Fix orphan detections warning not displaying table correctly (issue [#187](https://github.com/hugomflavio/actel/issues/187)).
+  * Fix yellow and red-border detection plots not showing up with the same font size as the remaining in sessions using enlarged ggplot fonts by default (issue [#188](https://github.com/hugomflavio/actel/issues/188)).
 
 ## actel 1.4.0
 

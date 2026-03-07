@@ -1174,7 +1174,8 @@ plotDetections <- function(input, tag, type,
   p <- p + ggplot2::aes(x = Timestamp, y = plot.y, colour = Colour)
 
   # Choose background
-  default.cols <- TRUE
+  p <- p + ggplot2::theme_bw()
+
   if ((frame.warning & add.movements) &&
       attributes(movements)$p.type == "Overridden") {
     p <- p + ggplot2::theme(
@@ -1189,11 +1190,11 @@ plotDetections <- function(input, tag, type,
                                                colour = "#ffd8d6"),
       legend.key = ggplot2::element_rect(fill = "white", colour = "white"),
       )
-    default.cols <- FALSE
   }
+
   if ((frame.warning & add.movements) &&
       attributes(movements)$p.type == "Manual") {
-     p <- p + ggplot2::theme(
+    p <- p + ggplot2::theme(
       panel.background = ggplot2::element_rect(fill = "white"),
       panel.border = ggplot2::element_rect(fill = NA, colour = "#ffd016",
                                            linewidth = 2),
@@ -1205,11 +1206,8 @@ plotDetections <- function(input, tag, type,
                                                colour = "#f2e4b8"),
       legend.key = ggplot2::element_rect(fill = "white", colour = "white"),
       )
-    default.cols <- FALSE
   }
-  if (default.cols) {
-    p <- p + ggplot2::theme_bw()
-  }
+
   # Plot starting line
   p <- p + ggplot2::geom_vline(xintercept = start.line, linetype = "dashed")
   # Plot entry/exit lines
