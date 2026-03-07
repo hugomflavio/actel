@@ -1,6 +1,6 @@
 Package: actel
 Title: Acoustic Telemetry Data Analysis
-Version: 1.4.0
+Version: 1.4.0.9001
 Authors@R: c(
     person("Hugo", "Flávio", role = c("aut", "cre"),
            email = "hflavio@dal.ca", comment = c(ORCID = "0000-0002-5174-1197")),

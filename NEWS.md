@@ -2,6 +2,11 @@
 
 Find out the main highlights of each update.
 
+## Development
+
+Fixes:
+  * Fix orphan detections warning not displaying table correctly (issue [#187](https://github.com/hugomflavio/actel/issues/187)).
+
 ## actel 1.4.0
 
 Fixes:

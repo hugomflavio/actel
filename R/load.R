@@ -2841,9 +2841,12 @@ createStandards <- function(detections, spatial, deployments,
         }
         if (!discard.orphans) {
           event(type = c("screen", "report"),
-                "Error: ", sum(orphans), " detections for receiver ",
+                "Error: ", sum(orphans),
+                ifelse(sum(orphans) > 1, " detections", " detection"),
+                " for receiver ",
                 names(deployments)[i],
-                " do not fall within deployment periods.")
+                ifelse(sum(orphans) > 1, " do", " does"),
+                " not fall within deployment periods.")
           event(type = "screen", "")
 
           cols_to_hide <- c("Transmitter", "Valid",
@@ -2853,11 +2856,12 @@ createStandards <- function(detections, spatial, deployments,
             cols_to_hide <- c(cols_to_hide, "Source.file")
           }
           to_show <- detections[link_r, ][orphans, ]
-          to_show <- to_show[, !(colnames(to_show) %in% cols_to_hide)]
+          cols_to_show <- !(colnames(to_show) %in% cols_to_hide)
+          to_show <- to_show[, cols_to_show, with = FALSE]
 
           event(type = "screen",
                 paste0(capture.output(print(to_show)), collapse = "\n"),
-                 "\nPossible options:\n",
+                 "\n\nPossible options:\n",
                 "   a) Stop and double-check the data (recommended)\n",
                 "   b) Discard orphan detections in this instance.\n",
                 "   c) Discard orphan detections for all instances.\n",
