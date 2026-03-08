@@ -540,14 +540,12 @@ distancesMatrix <- function(t.layer, starters = NULL, targets = NULL,
     
     if (!is.null(starters) & !is.null(targets)) {
       message("M: 'starters' and 'targets' were specified.",
-              " Using 'starters' and 'targets' for distances.", 
-              call. = FALSE, immediate. = TRUE) 
+              " Using 'starters' and 'targets' for distances.") 
     }
     
     if (!is.null(starters) & is.null(targets)) {
         message("M: 'starters' were specified but 'targets' were not.",
-                " Using 'starters' for 'targets'.", 
-              call. = FALSE, immediate. = TRUE) 
+                " Using 'starters' for 'targets'.") 
       
         targets <- starters
         }
@@ -555,7 +553,7 @@ distancesMatrix <- function(t.layer, starters = NULL, targets = NULL,
     if (is.null(starters) & is.null(targets)) {
         message("M: 'starters' and 'targets' were not specified.",
               " Creating 'starters' and 'targets' from 'spatial.csv' ",
-              " in working directory." , call. = FALSE, immediate. = TRUE)
+              " in working directory." )
         starters <- targets <- loadSpatial() 
         }
     
@@ -573,8 +571,7 @@ distancesMatrix <- function(t.layer, starters = NULL, targets = NULL,
     if (is.null(targets)) {
       targets <- starters
         message("M: 'starters' were specified but 'targets' were not.",
-                " Using 'starters' for 'targets'.", 
-                call. = FALSE, immediate. = TRUE) 
+                " Using 'starters' for 'targets'.") 
       }
     }
 
