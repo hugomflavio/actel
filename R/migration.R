@@ -270,6 +270,7 @@ migration <- function(
     parse_arg(max.interval), ", ",
     parse_arg(min.total.detections), ", ",
     parse_arg(min.per.event), ", ",
+    parse_arg(start.time), ", ",
     parse_arg(stop.time), ", ",
     parse_arg(speed.method), ", ",
     parse_arg(speed.warning), ", ",
