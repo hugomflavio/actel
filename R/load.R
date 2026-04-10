@@ -344,11 +344,12 @@ loadDot <- function(string = NULL, input = NULL, spatial,
   # section connections
   # use array dot to make section connections
   sdot <- dot
+  stations <- spatial[spatial$Type == "Hydrophone", ]
   # swap array names with section names
-  link <- match(dot$A, spatial$Array)
-  sdot$A <- spatial$Section[link]
-  link <- match(dot$B, spatial$Array)
-  sdot$B <- spatial$Section[link]
+  link <- match(dot$A, stations$Array)
+  sdot$A <- stations$Section[link]
+  link <- match(dot$B, stations$Array)
+  sdot$B <- stations$Section[link]
   # no support for one-way section connections
   sdot$to <- "--"
   # remove repeated rows
@@ -2950,8 +2951,8 @@ createStandards <- function(detections, spatial, deployments,
         } else {
           event(type = c("warning", "screen", "report"),
                 sum(orphans), " detections for receiver ",
-                names(deployments)[i], "
-                do not fall within deployment periods.",
+                names(deployments)[i],
+                " do not fall within deployment periods.",
                 " Discarding orphan detections.")
           detections <- detections[-rows.to.remove]
         }

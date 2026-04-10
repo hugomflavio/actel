@@ -216,6 +216,16 @@ test_that("explore can handle multi-sensor data", {
 
 write.csv(example.distances, "distances.csv")
 
+test_that("inverted spatial does not cause trouble", {
+	# Introduced when issue #192 was revealed and corrected
+	write.csv(example.spatial[nrow(example.spatial):1, ],
+	          "spatial.csv", row.names = FALSE)
+	output <- suppressWarnings(explore(tz = 'Europe/Copenhagen', GUI = "never"))
+	expect_true(TRUE) # Dummy test just so it is not considered skipped
+})
+
+write.csv(example.spatial, "spatial.csv", row.names = FALSE)
+
 # Throw in a fake results object just to test the number appending code
 a = 1
 save(a, file = "actel_explore_results.RData")

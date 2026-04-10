@@ -8,6 +8,7 @@ Fixes:
   * Fix orphan detections warning not displaying table correctly (issue [#187](https://github.com/hugomflavio/actel/issues/187)).
   * Fix yellow and red-border detection plots not showing up with the same font size as the remaining in sessions using enlarged ggplot fonts by default (issue [#188](https://github.com/hugomflavio/actel/issues/188)).
   * Fix accidentally leftover "TRUEFALSE" strings in `distancesMatrix()` messages (issue [#190](https://github.com/hugomflavio/actel/issues/190)).
+  * Fix bug where loadDot failed if release sites were listed before hydrophones in the spatial input (issue [#192](https://github.com/hugomflavio/actel/issues/192)).
 
 ## actel 1.4.0
 
