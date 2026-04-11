@@ -47,6 +47,7 @@ test_that("basic preload works as expected", {
     fixed = TRUE)
 })
 
+
 test_that("checkArguments complains if preload is used together with tz", {
   expect_warning(explore(datapack = d, tz = "Europe/Copenhagen"),
                  paste0("Argument 'tz' was set but a datapack was provided.",
@@ -433,6 +434,16 @@ test_that("preload works even if Sensor.Value/Sensor.Unit is missing", {
                  paste0("Could not find a 'Sensor.Unit' column in the",
                         " detections. Filling one with NA."),
                  fixed = TRUE)
+})
+
+test_that("inverted spatial does not cause trouble", {
+  # Introduced when issue #192 was revealed and corrected
+  expect_warning(preload(biometrics = bio, deployments = deployments,
+                               spatial = spatial[nrow(spatial):1, ],
+                               detections = detections,
+                               dot = dot, tz = "Europe/Copenhagen"),
+    "No detections were found for receiver(s) 132907",
+    fixed = TRUE)
 })
 
 setwd("..")
