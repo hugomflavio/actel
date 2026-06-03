@@ -10,14 +10,14 @@ test_that("plotTimes fail-safes kick in when needed", {
 	expect_error(plotTimes(times = 1),
 		"'times' must be a list.", fixed = TRUE)
 
-	expect_error(plotTimes(times = times, night = 1:3),
-		"'night' must have two values.", fixed = TRUE)
+	expect_error(plotTimes(times = times, shaded_area = list(1:3)),
+		"Element 1 of shaded_area does not have four values.", fixed = TRUE)
 
-	expect_error(plotTimes(times = times, night = c("20:00", "6:00")),
-		"'night' values must be either numeric (between 0 and 24) or in a HH:MM format.", fixed = TRUE)
+	expect_error(plotTimes(times = times, shaded_area = list(list("20:00", "6:00", "grey", 0.3))),
+		"from/to values of element 1 of shaded_area not recognized. Must be either numeric (between 0 and 24) or in a HH:MM format.", fixed = TRUE)
 
-	expect_error(plotTimes(times = times, night = c(25, 1)),
-		"'night' values must be either numeric (between 0 and 24) or in a HH:MM format.", fixed = TRUE)
+	expect_error(plotTimes(times = times, shaded_area = list(list(25, 1, "grey", 0.3))),
+		"from/to values of element 1 of shaded_area not recognized. Must be either numeric (between 0 and 24) or in a HH:MM format.", fixed = TRUE)
 
 	expect_error(plotTimes(times = times, title = c(25, 1)),
 		"Please provide only one 'title'.", fixed = TRUE)
@@ -59,17 +59,17 @@ test_that("plotTimes can handle lots of datasets", {
 })
 
 test_that("plotTimes returns no errors on actual data, plus saves files", {
-	tryCatch(plotTimes(times = times, night = c("20:00", "06:00"), col = c("blue", "red"), title = "This is a test!"),
+	tryCatch(plotTimes(times = times, shaded_area = list(list("20:00", "06:00", "grey", 0.3)), col = c("blue", "red"), title = "This is a test!"),
 		warning = function(w) stop("A warning was issued where it should not have been."))
 
-	tryCatch(plotTimes(times = times, night = c("20:00", "06:00"), col = c("blue", "red"), circular.scale = "linear", title = "This is a test!"),
+	tryCatch(plotTimes(times = times, shaded_area = list(list("20:00", "06:00", "grey", 0.3)), col = c("blue", "red"), circular.scale = "linear", title = "This is a test!"),
 		warning = function(w) stop("A warning was issued where it should not have been."))
 
-	tryCatch(plotTimes(times = times, night = c("20:00", "06:00"), title = "This is a test!"),
+	tryCatch(plotTimes(times = times, shaded_area = list(list("20:00", "06:00", "grey", 0.3)), title = "This is a test!"),
 		warning = function(w) stop("A warning was issued where it should not have been."))
 
 	xtimes <- list(a = times[[1]], b = times[[2]], c = times[[1]])
-	tryCatch(plotTimes(times = xtimes, night = c(20, 6), title = "This is a test!"),
+	tryCatch(plotTimes(times = xtimes, shaded_area = list(list(20, 6, "grey", 0.3)), title = "This is a test!"),
 		warning = function(w) stop("A warning was issued where it should not have been."))
 
 	expect_message(plotTimes(times = times, file = "test_plotTimes_output.svg"),

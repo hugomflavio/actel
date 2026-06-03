@@ -7,6 +7,7 @@
 plotTimes(
   times,
   night = NULL,
+  shaded_area = NULL,
   circular.scale = c("area", "linear"),
   col,
   alpha = 0.8,
@@ -31,7 +32,11 @@ plotTimes(
 \arguments{
 \item{times}{A list of of time vectors (each vector will be plotted as a series).}
 
-\item{night}{A vector of two times defining the start and stop of the night period (in HH:MM format).}
+\item{night}{DEPRECATED. Use shaded_area instead.}
+
+\item{shaded_area}{A list containing information to shade portions of the plot.
+Each element should itself be a list containing for elements: from, to, colour, and alpha.
+from and to should be numeric or in HH:MM format. Colour must match a value present in colors(). alpha must be between 0 and 1.}
 
 \item{circular.scale}{Allows the user to decide between using an area-adjusted scale ("area"), or a linear scale ("linear").
 Defaults to "area", which better represents the proportion differences in the dataset.}
@@ -95,7 +100,7 @@ times <- timesToCircular(x)
 # plot times
 plotTimes(times)
 
-# A night period can be added with 'night'
-plotTimes(times, night = c("20:00", "06:00"))
+# A night period can be added with 'shaded_area'
+plotTimes(times, shaded_area = list(list("20:00", "06:00", "grey", 0.3)))
 
 }

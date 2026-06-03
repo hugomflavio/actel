@@ -1272,7 +1272,10 @@ plotDetections <- function(input, tag, type,
 #' For more details about the original functions, visit the circular package homepage at \url{https://github.com/cran/circular}
 #'
 #' @param times A list of of time vectors (each vector will be plotted as a series).
-#' @param night A vector of two times defining the start and stop of the night period (in HH:MM format).
+#' @param night DEPRECATED. Use shaded_area instead.
+#' @param shaded_area A list containing information to shade portions of the plot.
+#'  Each element should itself be a list containing for elements: from, to, colour, and alpha.
+#'  from and to should be numeric or in HH:MM format. Colour must match a value present in colors(). alpha must be between 0 and 1.
 #' @param circular.scale Allows the user to decide between using an area-adjusted scale ("area"), or a linear scale ("linear").
 #'  Defaults to "area", which better represents the proportion differences in the dataset.
 #' @param col A vector of colour names to paint each time series (colours will be added transparency).
@@ -1309,18 +1312,62 @@ plotDetections <- function(input, tag, type,
 #' # plot times
 #' plotTimes(times)
 #'
-#' # A night period can be added with 'night'
-#' plotTimes(times, night = c("20:00", "06:00"))
+#' # A night period can be added with 'shaded_area'
+#' plotTimes(times, shaded_area = list(list("20:00", "06:00", "grey", 0.3)))
 #'
 #' @return A circular plot
 #'
 #' @export
 #'
-plotTimes <- function(times, night = NULL, circular.scale = c("area", "linear"), col, alpha = 0.8, title = "", mean.dash = TRUE,
-  mean.range = TRUE, mean.range.darken.factor = 1.4, rings = TRUE, file, width, height, bg = "transparent", ncol,
-  legend.pos = c("auto", "corner", "bottom"), ylegend, xlegend, xjust = c("auto", "centre", "left", "right"),
-  expand = 0.95, cex = 1){
+plotTimes <- function(
+  times,
+  night = NULL,
+  shaded_area = NULL,
+  circular.scale = c("area", "linear"),
+  col,
+  alpha = 0.8,
+  title = "",
+  mean.dash = TRUE,
+  mean.range = TRUE,
+  mean.range.darken.factor = 1.4,
+  rings = TRUE,
+  file,
+  width,
+  height,
+  bg = "transparent",
+  ncol,
+  legend.pos = c("auto", "corner", "bottom"),
+  ylegend,
+  xlegend,
+  xjust = c("auto", "centre", "left", "right"),
+  expand = 0.95,
+  cex = 1
+){
 
+  if (!is.null(night)) {
+    if (is.null(shaded_area)) {
+      warning(
+        "Argument 'night' is deprecated, please use 'shaded_area' instead.",
+        " Transferring the contents of 'night' to 'shaded_area'.",
+        " In future versions this will be an error.",
+        immediate. = TRUE, call. = FALSE)
+      shaded_area <- list(
+        A = list(
+          from = night[1],
+          to = night[2],
+          colour = "grey",
+          alpha = 0.3
+        )
+      )
+      night <- NULL
+    } else {
+      stop(
+        "Argument 'night' is deprecated. both 'night' and 'shaded_area' were set.",
+        " Please unset argument 'night'.",
+        call. = FALSE
+      )
+    }
+  }
   legend.pos <- match.arg(legend.pos)
   xjust <- match.arg(xjust)
   circular.scale <- match.arg(circular.scale)
@@ -1340,14 +1387,49 @@ plotTimes <- function(times, night = NULL, circular.scale = c("area", "linear"),
          ifelse(sum(link) > 1, "are not ", "is not a "), "circular ",
          ifelse(sum(link) > 1, "objects.", "object."), call. = FALSE)
 
-  if (!is.null(night) && length(night) != 2)
-    stop("'night' must have two values.", call. = FALSE)
-
-  if (!is.null(night) && is.character(night) && any(!grepl("[0-2][0-9]:[0-5][0-9]", night)))
-    stop("'night' values must be either numeric (between 0 and 24) or in a HH:MM format.", call. = FALSE)
-
-  if (!is.null(night) && is.numeric(night) && (any(night > 24) | any(night < 0)))
-    stop("'night' values must be either numeric (between 0 and 24) or in a HH:MM format.", call. = FALSE)
+  if (!is.null(shaded_area)) {
+    for (i in 1:length(shaded_area)) {
+      if (length(shaded_area[[i]]) != 4) {
+        stop(
+          "Element ", 
+          i, 
+          " of shaded_area does not have four values.",
+          " Each shaded_area needs a from, to, colour, and alpha.",
+          call. = FALSE
+        )
+      }
+      check1 <- is.character(unlist(shaded_area[[i]][1:2])) &&
+                any(!grepl("[0-2][0-9]:[0-5][0-9]", unlist(shaded_area[[i]][1:2])))
+      check2 <- is.numeric(unlist(shaded_area[[i]][1:2])) &&
+                (any(unlist(shaded_area[[i]][1:2]) > 24) | any(unlist(shaded_area[[i]][1:2]) < 0))
+      if (check1 | check2) {
+        stop(
+          "from/to values of element ", 
+          i, 
+          " of shaded_area not recognized.",
+          " Must be either numeric (between 0 and 24) or in a HH:MM format.",
+          call. = FALSE
+        )
+      }
+      if (!shaded_area[[i]][[3]] %in% colors()) {
+        stop(
+          "colour value of element ", 
+          i, 
+          " of shaded_area not recognized. See colors() for full list.",
+          call. = FALSE
+        )
+      }
+      if (!is.numeric(shaded_area[[i]][[4]]) ||
+          shaded_area[[i]][[4]] > 1 | shaded_area[[i]][[4]] < 0) {
+        stop(
+          "alpha value of element ", 
+          i, 
+          " of shaded_area not recognized. Must be between 0 and 1.",
+          call. = FALSE
+        )
+      }
+    }
+  }
 
   if (length(title) > 1)
     stop("Please provide only one 'title'.", call. = FALSE)
@@ -1514,10 +1596,18 @@ plotTimes <- function(times, night = NULL, circular.scale = c("area", "linear"),
 
   copyOfCirclePlotRad(main = title, shrink = 1 - (expand - 1), xlab = "", ylab = "")
 
-  if (!is.null(night)) {
-    circularSection(from = night[1],
-      to = night[2], units = "hours", template = "clock24",
-      limits = c(1, 0), fill = scales::alpha("grey", 0.3), border = "transparent")
+  if (!is.null(shaded_area)) {
+    for (x in shaded_area) {
+      circularSection(
+        from = x[[1]],
+        to = x[[2]],
+        units = "hours",
+        template = "clock24",
+        limits = c(1, 0),
+        fill = scales::alpha(x[[3]], x[[4]]),
+        border = "transparent"
+      )
+    }
   }
 
   params <- myRoseDiag(times, bins = 24, radii.scale = radii.scale,

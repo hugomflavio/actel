@@ -10,6 +10,9 @@ Fixes:
   * Fix accidentally leftover "TRUEFALSE" strings in `distancesMatrix()` messages (issue [#190](https://github.com/hugomflavio/actel/issues/190)).
   * Fix bug where loadDot failed if release sites were listed before hydrophones in the spatial input (issue [#192](https://github.com/hugomflavio/actel/issues/192)).
 
+Changes:
+  * Argument `night` in `plotTimes()` is now deprecated. New argument `shaded_area` allows creating multiple shaded areas of different colours/transparency levels.
+
 ## actel 1.4.0
 
 Fixes:
