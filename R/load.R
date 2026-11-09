@@ -508,10 +508,11 @@ dotMatrix <- function(input) {
   nodes <- unique(unlist(input[, c(1, 3)]))
   graph <- matrix(0, length(nodes), length(nodes),
                   dimnames = list(nodes, nodes))
-  if (any(input$to != "--" & input$to != "<-" & input$to != "->"))
+  if (any(input$to != "--" & input$to != "<-" & input$to != "->")) {
     event(type = "stop",
           "Unrecognized connectors. Only use '--', '->' or",
           " '<-' to connect nodes.\n")
+  }
   for (i in 1:nrow(input)) {
     if (input$to[i] == "--") {
       graph[input$A[i], input$B[i]] <- 1
